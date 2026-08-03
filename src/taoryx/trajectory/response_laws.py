@@ -22,6 +22,32 @@ class AxisResponseState:
     ####
 
 
+def bounded_axis_acceleration(
+    profile: AxisResponseProfile,
+    state: AxisResponseState,
+    command_angle_rad: float,
+) -> float:
+    """Return the continuous bounded angular acceleration for one response axis.
+
+    The discrete helper below advances this same law with a semi-implicit
+    Euler step.  Exposing its continuous right-hand side lets the common
+    lower-tier adapter linearize the exact named response law rather than a
+    separately invented approximation.
+    """
+
+    desired_rate = _clamp(
+        (command_angle_rad - state.angle_rad) / profile.time_constant_s,
+        -profile.maximum_rate_rad_s,
+        profile.maximum_rate_rad_s,
+    )
+    return _clamp(
+        (desired_rate - state.rate_rad_s) * profile.damping_ratio / profile.time_constant_s,
+        -profile.maximum_acceleration_rad_s2,
+        profile.maximum_acceleration_rad_s2,
+    )
+    ####
+
+
 def step_bounded_axis_response(
     profile: AxisResponseProfile,
     state: AxisResponseState,
@@ -38,16 +64,7 @@ def step_bounded_axis_response(
 
     if dt_s <= 0.0:
         raise ValueError("response-law step must be positive")
-    desired_rate = _clamp(
-        (command_angle_rad - state.angle_rad) / profile.time_constant_s,
-        -profile.maximum_rate_rad_s,
-        profile.maximum_rate_rad_s,
-    )
-    acceleration = _clamp(
-        (desired_rate - state.rate_rad_s) * profile.damping_ratio / profile.time_constant_s,
-        -profile.maximum_acceleration_rad_s2,
-        profile.maximum_acceleration_rad_s2,
-    )
+    acceleration = bounded_axis_acceleration(profile, state, command_angle_rad)
     rate = _clamp(
         state.rate_rad_s + acceleration * dt_s,
         -profile.maximum_rate_rad_s,
@@ -76,4 +93,4 @@ def bounded_axis_rate_command(profile: AxisResponseProfile, angle_error_rad: flo
     ####
 
 
-__all__ = ["AxisResponseState", "bounded_axis_rate_command", "step_bounded_axis_response"]
+__all__ = ["AxisResponseState", "bounded_axis_acceleration", "bounded_axis_rate_command", "step_bounded_axis_response"]

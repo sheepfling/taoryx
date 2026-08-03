@@ -22,7 +22,12 @@ from taoryx.showcase import (
     StartContract,
     TerminalContract,
     VehicleShowcaseBinding,
+    build_showcase_run_artifact,
+    build_showcase_run_artifact_for_composition,
+    validate_showcase_run_artifact_boundary,
 )
+from taoryx.vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
+from taoryx.vehicle_interface import resolve_vehicle_interface_contract
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -81,6 +86,143 @@ def test_showcase_run_artifact_requires_hashed_manifest_and_declares_fidelity() 
     assert artifact.files[0].path == "manifest.json"
 
 
+def test_showcase_artifact_factory_retains_resolved_realization() -> None:
+    digest = hashlib.sha256(b"manifest").hexdigest()
+    realization = FidelityShowcaseRealization(
+        fidelity="rigid_body_6dof_direct_wrench",
+        control_realization="direct_wrench",
+        realization_id="synthetic-direct-v1",
+        state_schema=("position_m",),
+        claim="Direct-wrench evidence only.",
+        nonclaims=("physical effectors",),
+        evidence_grade="derived",
+    )
+
+    artifact = build_showcase_run_artifact(
+        realization=realization,
+        run_id="run-factory-001",
+        showcase_id="synthetic-showcase",
+        vehicle_binding_id="synthetic-v1",
+        scenario_contract_sha256=digest,
+        outcome="completed",
+        files=(ArtifactFile(path="manifest.json", sha256=digest, media_type="application/json"),),
+        board=EvidenceBoardSpec(profile="evidence-board-v1", modules=("mission_geometry",)),
+    )
+
+    assert artifact.realization == realization
+    assert artifact.fidelity == "rigid_body_6dof_direct_wrench"
+    assert artifact.control_realization == "direct_wrench"
+    assert artifact.nonclaims == ("physical effectors",)
+    assert validate_showcase_run_artifact_boundary(artifact) == artifact
+
+
+def test_showcase_artifact_can_retain_the_exact_vehicle_interface_contract() -> None:
+    digest = hashlib.sha256(b"manifest").hexdigest()
+    interface = resolve_vehicle_interface_contract("skywalker_x8", "pseudo_6dof")
+    realization = FidelityShowcaseRealization(
+        fidelity="pseudo_6dof",
+        control_realization="response_law",
+        realization_id="x8-route-lag-v1",
+        state_schema=("position_m", "velocity_m_s", "attitude_response"),
+        claim="Pseudo-6DOF route-lag response evidence only.",
+        nonclaims=("physical elevon allocation",),
+        evidence_grade="derived",
+    )
+
+    artifact = build_showcase_run_artifact(
+        realization=realization,
+        run_id="x8-interface-board",
+        showcase_id="org.taoryx.showcase.x8",
+        vehicle_binding_id="skywalker-x8-v1",
+        scenario_contract_sha256=digest,
+        outcome="completed",
+        files=(ArtifactFile(path="manifest.json", sha256=digest, media_type="application/json"),),
+        board=EvidenceBoardSpec(profile="evidence-board-v1", modules=("trajectory_3d",)),
+        vehicle_interface_contract=interface,
+    )
+
+    assert artifact.vehicle_interface is not None
+    assert artifact.vehicle_interface.interface_id == interface.id
+    assert artifact.vehicle_interface.fingerprint_sha256 == interface.fingerprint
+    assert artifact.vehicle_interface.available_authority_profiles == ("native_control_bridge",)
+    assert validate_showcase_run_artifact_boundary(artifact) == artifact
+
+
+def test_composition_showcase_artifact_retains_the_selected_sensor_profile() -> None:
+    digest = hashlib.sha256(b"sensor-manifest").hexdigest()
+    composition = compile_vehicle_composition(
+        load_vehicle_composition_request(
+            ROOT / "examples/vehicle_composition/x8_racetrack_sensor_episode_3dof_compose.yaml"
+        )
+    )
+    realization = FidelityShowcaseRealization(
+        fidelity="point_mass_3dof",
+        control_realization="force_model",
+        realization_id="x8-point-mass-sensor-v1",
+        state_schema=("position_velocity_mass",),
+        claim="Point-mass route evidence with declared delayed observations.",
+        nonclaims=("physical elevon allocation", "sensor noise or estimator validation"),
+        evidence_grade="derived",
+    )
+
+    common = {
+        "composition": composition,
+        "realization": realization,
+        "run_id": "x8-sensor-board",
+        "showcase_id": "org.taoryx.showcase.x8.sensor",
+        "vehicle_binding_id": "skywalker-x8-point-mass-v1",
+        "scenario_contract_sha256": digest,
+        "outcome": "completed",
+        "board": EvidenceBoardSpec(profile="evidence-board-v1", modules=("trajectory_3d",)),
+    }
+    with pytest.raises(ValueError, match="status_trace.json"):
+        build_showcase_run_artifact_for_composition(
+            **common,
+            files=(ArtifactFile(path="manifest.json", sha256=digest, media_type="application/json"),),
+        )
+
+    with pytest.raises(ValueError, match="sensor_observations.json"):
+        build_showcase_run_artifact_for_composition(
+            **common,
+            files=(
+                ArtifactFile(path="manifest.json", sha256=digest, media_type="application/json"),
+                ArtifactFile(path="status_trace.json", sha256=digest, media_type="application/json"),
+            ),
+        )
+
+    artifact = build_showcase_run_artifact_for_composition(
+        **common,
+        files=(
+            ArtifactFile(path="manifest.json", sha256=digest, media_type="application/json"),
+            ArtifactFile(path="status_trace.json", sha256=digest, media_type="application/json"),
+            ArtifactFile(path="sensor_observations.json", sha256=digest, media_type="application/json"),
+        ),
+    )
+
+    assert artifact.vehicle_interface is not None
+    assert artifact.vehicle_interface.selected_observation_profile == "declared_sensor"
+    assert "declared_sensor" in artifact.vehicle_interface.available_observation_profiles
+    assert validate_showcase_run_artifact_boundary(artifact) == artifact
+
+
+def test_showcase_boundary_rejects_legacy_artifact_without_realization() -> None:
+    digest = hashlib.sha256(b"manifest").hexdigest()
+    artifact = ShowcaseRunArtifact(
+        run_id="run-legacy-boundary",
+        showcase_id="synthetic-showcase",
+        vehicle_binding_id="synthetic-v1",
+        fidelity="pseudo_6dof",
+        scenario_contract_sha256=digest,
+        outcome="completed",
+        claim="legacy artifact",
+        files=(ArtifactFile(path="manifest.json", sha256=digest, media_type="application/json"),),
+        board=EvidenceBoardSpec(profile="evidence-board-v1", modules=("mission_geometry",)),
+    )
+
+    with pytest.raises(ValueError, match="realization_missing"):
+        validate_showcase_run_artifact_boundary(artifact)
+
+
 def test_showcase_binding_and_realization_preserve_claim_boundary() -> None:
     binding = VehicleShowcaseBinding(
         id="synthetic-v1",
@@ -107,6 +249,7 @@ def test_showcase_binding_and_realization_preserve_claim_boundary() -> None:
     assert binding.evidence_grade == "synthetic"
     assert "flight qualification" in realization.nonclaims
     assert isinstance(realization.control_realization, str)
+    assert realization.fidelity == "rigid_body_6dof_surface_allocated"
 
 
 def test_showcase_control_realization_rejects_hidden_effector_claims() -> None:
@@ -130,6 +273,49 @@ def test_showcase_control_realization_rejects_hidden_effector_claims() -> None:
             claim="surface allocation",
             evidence_grade="derived",
         )
+
+
+def test_showcase_rejects_ambiguous_legacy_rigid_body_fidelity() -> None:
+    with pytest.raises(ValueError, match="legacy 'rigid_body_6dof' is ambiguous"):
+        FidelityShowcaseRealization(
+            fidelity="rigid_body_6dof",
+            realization_id="ambiguous-rigid-v1",
+            state_schema=("position_m",),
+            claim="ambiguous rigid-body record",
+            evidence_grade="derived",
+        )
+
+    digest = hashlib.sha256(b"manifest").hexdigest()
+    with pytest.raises(ValueError, match="legacy 'rigid_body_6dof' is ambiguous"):
+        ShowcaseRunArtifact(
+            run_id="run-ambiguous-rigid",
+            showcase_id="org.taoryx.showcase.synthetic.route",
+            vehicle_binding_id="synthetic-v1",
+            fidelity="rigid_body_6dof",
+            scenario_contract_sha256=digest,
+            outcome="completed",
+            claim="ambiguous rigid-body record",
+            files=(ArtifactFile(path="manifest.json", sha256=digest, media_type="application/json"),),
+            board=EvidenceBoardSpec(profile="evidence-board-v1", modules=("trajectory_3d",)),
+        )
+
+
+def test_showcase_artifact_normalizes_legacy_surface_fidelity() -> None:
+    digest = hashlib.sha256(b"manifest").hexdigest()
+    artifact = ShowcaseRunArtifact(
+        run_id="run-surface-legacy",
+        showcase_id="org.taoryx.showcase.synthetic.route",
+        vehicle_binding_id="synthetic-v1",
+        fidelity="rigid_body_6dof",
+        control_realization="surface_allocated",
+        scenario_contract_sha256=digest,
+        outcome="completed",
+        claim="surface-allocated rigid-body record",
+        files=(ArtifactFile(path="manifest.json", sha256=digest, media_type="application/json"),),
+        board=EvidenceBoardSpec(profile="evidence-board-v1", modules=("trajectory_3d",)),
+    )
+
+    assert artifact.fidelity == "rigid_body_6dof_surface_allocated"
 
 
 def test_showcase_archetype_catalog_requires_common_proof_products() -> None:

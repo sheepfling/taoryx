@@ -38,6 +38,22 @@ def _latest_b747_packet() -> Path | None:
 
 
 def _b747_record() -> tuple[dict[str, Any], Path | None]:
+    canonical_packet = ROOT / "artifacts/showcases/alpha2/b747-racetrack-altitude-turns-3dof-v1"
+    if canonical_packet.is_dir() and (canonical_packet / "manifest.json").is_file():
+        summary = json.loads((canonical_packet / "summary.json").read_text(encoding="utf-8"))
+        return (
+            {
+                "id": "b747-transport",
+                "vehicle": "B747-100 research surrogate",
+                "status": str(summary.get("status", "nominal_integration_evidence_family_qualification_pending")),
+                "mission_pass": bool(summary.get("mission_pass", False)),
+                "claim": str(summary.get("claim", "Canonical B747 point-mass racetrack evidence.")),
+                "nonclaims": list(summary.get("nonclaims", ()))
+                + ["runway takeoff or landing", "global transport envelope", "fuel-range qualification"],
+                "source": str(canonical_packet.relative_to(ROOT)),
+            },
+            canonical_packet,
+        )
     packet = _latest_b747_packet()
     if packet is None:
         return ({
@@ -102,7 +118,9 @@ def build(output: Path) -> Path:
     records: list[dict[str, Any]] = []
     source_images: list[tuple[str, Path]] = []
 
-    x8_source = ROOT / "artifacts/showcases/x8_working/x8-racetrack-altitude-turns-v1"
+    x8_source = ROOT / "artifacts/showcases/alpha2/x8-racetrack-altitude-turns-v1"
+    if not x8_source.is_dir():
+        x8_source = ROOT / "artifacts/showcases/x8_working/x8-racetrack-altitude-turns-v1"
     x8_target = packs / "x8-racetrack-altitude-turns-v1"
     if x8_target.exists():
         shutil.rmtree(x8_target)

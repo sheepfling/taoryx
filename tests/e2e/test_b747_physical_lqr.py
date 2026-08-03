@@ -38,6 +38,10 @@ def test_b747_condition3_physical_surface_lqr_closes_the_local_chain(tmp_path: P
     assert payload["claim"]["direct_body_moment_injection"] is False
     assert payload["linearization"]["provenance"]["derivative_consistent"]
     assert payload["trim"]["success"]
+    assert payload["authority_preflight"]["status"] == "passed"
+    assert payload["authority_preflight"]["metrics"]["controllability_rank"] == 9.0
+    assert payload["authority_preflight"]["metrics"]["required_state_count"] == 9.0
+    assert payload["authority_preflight"]["blockers"] == []
     assert tuple(payload["linearization"]["control_names"]) == (
         "elevator-deg",
         "aileron-deg",

@@ -3,9 +3,11 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from taoryx.integration import rkf45_step
 from taoryx.runtime import RuntimeProblem, RuntimeState, RuntimeVehicle, SensorBinding, SensorBus, SensorClockSpec
 from taoryx.runtime.engine import compute_trajectories
 from taoryx.sensors import ImuErrorModelAdapter, TruthPoint
+from taoryx.simulation.contracts import SimulationState
 
 
 def _truth(state: RuntimeState) -> TruthPoint:
@@ -88,3 +90,75 @@ def test_sensor_drop_is_accounted_for_without_delivery() -> None:
     assert binding.samples_emitted == 3
     assert binding.dropped_samples == 1
     assert [packet.sampled_at_s for packet in bus.packets("imu")] == pytest.approx([0.0, 0.1])
+
+
+def test_instantaneous_and_interval_imus_ignore_adaptive_rejected_trial_states() -> None:
+    """A forced RKF45 rejection must not manufacture a sensor truth sample."""
+
+    trial = rkf45_step(
+        lambda state: (10.0 * state.values[0],),
+        SimulationState(0.0, (1.0,), "ECFC"),
+        0.05,
+        1.0e-10,
+        1.0e-10,
+    )
+    assert trial.rejected_steps > 0
+
+    truth_times: list[float] = []
+
+    def adaptive_truth(state: RuntimeState) -> TruthPoint:
+        truth_times.append(state.time)
+        return _truth(state)
+        ####
+
+    vehicle = RuntimeVehicle(
+        "vehicle",
+        RuntimeState(0.0, (1.0,)),
+        lambda state: (10.0 * state.values[0],),
+        step_size=0.1,
+        integrator="rkf45",
+        absolute_tolerance=1.0e-10,
+        relative_tolerance=1.0e-10,
+        truth_provider=adaptive_truth,
+    )
+    problem = RuntimeProblem({vehicle.name: vehicle}, final_time=0.2)
+    bus = SensorBus()
+    bus.register(
+        SensorBinding(
+            "instantaneous",
+            vehicle.name,
+            SensorClockSpec("instantaneous", "imu", cadence_s=0.05),
+            ImuErrorModelAdapter.from_config(seed=21),
+        )
+    )
+    bus.register(
+        SensorBinding(
+            "interval",
+            vehicle.name,
+            SensorClockSpec(
+                "interval",
+                "imu",
+                cadence_s=0.05,
+                sample_mode="interval",
+                truth_policy="accepted-segment",
+                rate_policy="accumulate",
+            ),
+            ImuErrorModelAdapter.from_config(seed=22),
+        )
+    )
+    bus.attach(problem)
+
+    result = compute_trajectories(problem, max_steps=10000)
+
+    assert result.completed
+    assert [packet.sampled_at_s for packet in bus.packets("instantaneous")] == pytest.approx(
+        [0.0, 0.05, 0.10, 0.15, 0.20]
+    )
+    assert [packet.sampled_at_s for packet in bus.packets("interval")] == pytest.approx([0.05, 0.10, 0.15, 0.20])
+    accepted_times = [state.time for state in vehicle.history]
+    assert all(any(sampled_at == pytest.approx(accepted) for accepted in accepted_times) for sampled_at in truth_times)
+    assert all(
+        packet.interval_start_s is not None and packet.interval_start_s < packet.sampled_at_s
+        for packet in bus.packets("interval")
+    )
+    ####

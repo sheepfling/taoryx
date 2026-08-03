@@ -14,7 +14,7 @@ The advertised dynamics tiers are explicit:
 | Tier | Runtime mode | What the packet proves | What it does not prove |
 |---|---|---|---|
 | 3DOF | `point-mass` | Translational route, altitude, speed, and terminal gate | Attitude, moments, or surfaces |
-| pseudo-6DOF | `kinematic-6dof` | The same translation plus a named prescribed-attitude lag/rate sidecar | Moment-derived attitude or physical surface allocation |
+| pseudo-6DOF | `kinematic-6dof` | The same translation plus a named route-lag attitude/rate response sidecar | Moment-derived attitude or physical surface allocation |
 | rigid 6DOF — direct/induced wrench | `rigid-body-6dof` | Coupled translation/rotation, source loads, and a declared direct body force/moment controller | Physical surface/rotor allocation |
 | rigid 6DOF — surface allocated | `rigid-body-6dof` | Coupled translation/rotation with declared effectors producing the control moment | More actuator fidelity than the binding declares |
 
@@ -82,6 +82,25 @@ cadence.  Its table has an explicitly estimated +/-0.12-radian extension only
 for intermediate integrator queries.  It remains a nominal-case result rather
 than a source-qualified transport controller, and the surface tier is not
 represented by a direct-moment substitute.
+
+## Compile a capability-scaled first mission
+
+The checked-in qualification bindings above are preserved historical/current
+baselines.  For a new airbreathing vehicle — or when reviewing whether a route
+was sized from capability rather than iteration — compile the planning profiles:
+
+```bash
+PYTHONPATH=src python3 tools/compile_powered_fixed_wing_missions.py
+PYTHONPATH=src python3 tools/validate_powered_fixed_wing_mission_proposals.py --check
+```
+
+The profile catalog covers X8, B747, A320, and F-16.  It derives conservative
+turn radius, straight-leg length, level dwell, gates, and horizon from declared
+speed, bank, and vertical-rate capability.  It also compares the proposal with
+the existing binding, reporting a review item when an older hand-selected route
+does not contain the requested dwell or is tighter than the selected planning
+limit.  This is preflight evidence only: it does not replace a truth-evaluated
+mission or promote a controller/effector tier.
 
 ## Inspect a packet
 

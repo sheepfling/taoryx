@@ -1,0 +1,279 @@
+{
+  "claim_boundary": "independent truth-evaluated family qualification; integration baselines remain nonqualified",
+  "fidelity_tier": "pseudo_6dof",
+  "files": {
+    "README.md": "2defbc0bbf758a0f932305c30503bd811e0aecf0b1f19e970a72d6e3fcf86923",
+    "candidate_execution.json": "c8ebf4c6e4ac43135bfe4fcf57402c24a7bc756a039c576f0904bea3202875e7",
+    "candidate_proposal.json": "fc61e2f9229e8fd344979f10ea659ecbe749aae690c86697018e80e8f6220820",
+    "claim.json": "56aa7888d4600f0de00c30a6e489dbc6fe94df074336c5c70fbbdfeee57aa025",
+    "controller_transitions.json": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc",
+    "envelope_report.json": "4084bf7d5be3c353545476a4294fefb9dfc78a511856107984a1eea11568a528",
+    "events.json": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c",
+    "inputs/b747-racetrack-altitude-turns-pseudo-6dof-v1-candidate.prb": "468a0f1175f70a9da517e96b98045ce75929e5dc89c7fd9f4850c6f3579eb0fa",
+    "inputs/b747_jt9d_thrust.tbl": "555052738e548108fb39efba3df1617fb5d8ca3ff23cdd79c8261efe97d2c5d3",
+    "inputs/b747_nominal_static_6axis.tbl": "6e6590bce179b9aa62aab919a8fe149d733e0bb4732635738f5132e18c4a530e",
+    "inputs/family_qualification_missions.yaml": "f8a3318684e7a2b32acad54ad6cd6bd3bac8b681ac51bbc2cde10add81805d73",
+    "inputs/racetrack_templates.yaml": "29a617eb80fd1dc711a4077c927e968afa293853121d693452cb11b55f71a573",
+    "mission.yaml": "a76644d2f18fa833a2fb43b24f7558d2a473fc3b1436ea5e53b2b77ad43abfe2",
+    "mission_sequence.png": "993750c5ddf75b79e9191d79e0486b6e8773d5bb4811bd0a24fbf31267c46381",
+    "objective_report.json": "e32b89b911c6a972a29cfa65338ff8b0b49bdc8624355115952ca43690947c48",
+    "plots/plot-manifest.json": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa",
+    "preflight_timing_estimate.json": "da9e83e39d24ef5ea9eaf73be7bf423689f20b457c165349c005d0af5bddb42f",
+    "qualification_board.png": "24a853d26c348f195c2a80a2f2676b9ff51377112038a8e9fc0d8ebc385f3960",
+    "realized_fidelity.json": "c8bdf518d9f19657e945433078d1bcec80db1460437b94aaa970d725f2e6e777",
+    "reproduction.txt": "0fb6beff6b9362aa96397ee95e2c4a516c9321b84e3bbd0da42ebb94026524d7",
+    "resolved_racetrack.json": "c6c4afc7b24780f24a069e1469644a35a9b9a3fa633783fba82de1c9efaa5be5",
+    "run/1.print": "648835a413a6e32920c7e0126baef52f67a4282c5d92bbf630a4849a65c284bd",
+    "runtime_diagnostics.json": "541cf9e6a3f7c7844552f7b2f8f1bf84211a7327c2615b90ff3f8330d4f18efa",
+    "summary.json": "33a372de4f012f9b55f48d569559341ade2821a23dbaf18d42e48b5991581871",
+    "truth_telemetry.csv": "9b05f488ac9fdbcb5a47d0299b13ee00534f5703bfe1f3ab2ef7a602daaf1e80"
+  },
+  "mission_id": "b747-racetrack-altitude-turns-pseudo-6dof-v1-candidate",
+  "realization": {
+    "actuator_realization": "prescribed_attitude_lag_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_kinematic_bridge",
+    "note": "The bridge supplies quaternion and body-rate response independently of the point-mass translation. It is a named pseudo-6DOF realization, not a physical B747 surface or moment qualification.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant",
+    "response_law": "first-order-rate-limited-v1",
+    "response_profile_id": "b747.attitude_response_p6dof.v1"
+  },
+  "run_artifacts": [
+    {
+      "archetypes": [
+        "mission_geometry",
+        "mission_timeline",
+        "dynamics_and_resources",
+        "envelope_and_qualification"
+      ],
+      "board": {
+        "event_marker_policy": "family_local",
+        "missing_channel_policy": "unavailable",
+        "modules": [
+          "mission_geometry",
+          "mission_timeline",
+          "dynamics_and_resources",
+          "envelope_and_qualification"
+        ],
+        "profile": "family-evidence-board-v1",
+        "units_required": true
+      },
+      "claim": "The B747 public-research kinematic bridge completes the transport-scale powered fixed-wing racetrack with truth-evaluated altitude, speed, route, and terminal gates while exposing a named attitude-response sidecar.",
+      "control_realization": "response_law",
+      "fidelity": "pseudo_6dof",
+      "files": [
+        {
+          "media_type": "application/json",
+          "path": "manifest.json",
+          "required": true,
+          "sha256": "9397b9ac8427c74eb0cf9262201dec6b8bb468af2463184762326bc62ad88e10"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "README.md",
+          "required": true,
+          "sha256": "2defbc0bbf758a0f932305c30503bd811e0aecf0b1f19e970a72d6e3fcf86923"
+        },
+        {
+          "media_type": "application/json",
+          "path": "candidate_execution.json",
+          "required": true,
+          "sha256": "c8ebf4c6e4ac43135bfe4fcf57402c24a7bc756a039c576f0904bea3202875e7"
+        },
+        {
+          "media_type": "application/json",
+          "path": "candidate_proposal.json",
+          "required": true,
+          "sha256": "fc61e2f9229e8fd344979f10ea659ecbe749aae690c86697018e80e8f6220820"
+        },
+        {
+          "media_type": "application/json",
+          "path": "claim.json",
+          "required": true,
+          "sha256": "56aa7888d4600f0de00c30a6e489dbc6fe94df074336c5c70fbbdfeee57aa025"
+        },
+        {
+          "media_type": "application/json",
+          "path": "controller_transitions.json",
+          "required": true,
+          "sha256": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc"
+        },
+        {
+          "media_type": "application/json",
+          "path": "envelope_report.json",
+          "required": true,
+          "sha256": "4084bf7d5be3c353545476a4294fefb9dfc78a511856107984a1eea11568a528"
+        },
+        {
+          "media_type": "application/json",
+          "path": "events.json",
+          "required": true,
+          "sha256": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/b747-racetrack-altitude-turns-pseudo-6dof-v1-candidate.prb",
+          "required": true,
+          "sha256": "468a0f1175f70a9da517e96b98045ce75929e5dc89c7fd9f4850c6f3579eb0fa"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/b747_jt9d_thrust.tbl",
+          "required": true,
+          "sha256": "555052738e548108fb39efba3df1617fb5d8ca3ff23cdd79c8261efe97d2c5d3"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/b747_nominal_static_6axis.tbl",
+          "required": true,
+          "sha256": "6e6590bce179b9aa62aab919a8fe149d733e0bb4732635738f5132e18c4a530e"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/family_qualification_missions.yaml",
+          "required": true,
+          "sha256": "f8a3318684e7a2b32acad54ad6cd6bd3bac8b681ac51bbc2cde10add81805d73"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/racetrack_templates.yaml",
+          "required": true,
+          "sha256": "29a617eb80fd1dc711a4077c927e968afa293853121d693452cb11b55f71a573"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "mission.yaml",
+          "required": true,
+          "sha256": "a76644d2f18fa833a2fb43b24f7558d2a473fc3b1436ea5e53b2b77ad43abfe2"
+        },
+        {
+          "media_type": "image/png",
+          "path": "mission_sequence.png",
+          "required": true,
+          "sha256": "993750c5ddf75b79e9191d79e0486b6e8773d5bb4811bd0a24fbf31267c46381"
+        },
+        {
+          "media_type": "application/json",
+          "path": "objective_report.json",
+          "required": true,
+          "sha256": "e32b89b911c6a972a29cfa65338ff8b0b49bdc8624355115952ca43690947c48"
+        },
+        {
+          "media_type": "application/json",
+          "path": "plots/plot-manifest.json",
+          "required": true,
+          "sha256": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa"
+        },
+        {
+          "media_type": "application/json",
+          "path": "preflight_timing_estimate.json",
+          "required": true,
+          "sha256": "da9e83e39d24ef5ea9eaf73be7bf423689f20b457c165349c005d0af5bddb42f"
+        },
+        {
+          "media_type": "image/png",
+          "path": "qualification_board.png",
+          "required": true,
+          "sha256": "24a853d26c348f195c2a80a2f2676b9ff51377112038a8e9fc0d8ebc385f3960"
+        },
+        {
+          "media_type": "application/json",
+          "path": "realized_fidelity.json",
+          "required": true,
+          "sha256": "c8bdf518d9f19657e945433078d1bcec80db1460437b94aaa970d725f2e6e777"
+        },
+        {
+          "media_type": "text/plain",
+          "path": "reproduction.txt",
+          "required": true,
+          "sha256": "0fb6beff6b9362aa96397ee95e2c4a516c9321b84e3bbd0da42ebb94026524d7"
+        },
+        {
+          "media_type": "application/json",
+          "path": "resolved_racetrack.json",
+          "required": true,
+          "sha256": "c6c4afc7b24780f24a069e1469644a35a9b9a3fa633783fba82de1c9efaa5be5"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "run/1.print",
+          "required": true,
+          "sha256": "648835a413a6e32920c7e0126baef52f67a4282c5d92bbf630a4849a65c284bd"
+        },
+        {
+          "media_type": "application/json",
+          "path": "runtime_diagnostics.json",
+          "required": true,
+          "sha256": "541cf9e6a3f7c7844552f7b2f8f1bf84211a7327c2615b90ff3f8330d4f18efa"
+        },
+        {
+          "media_type": "application/json",
+          "path": "summary.json",
+          "required": true,
+          "sha256": "33a372de4f012f9b55f48d569559341ade2821a23dbaf18d42e48b5991581871"
+        },
+        {
+          "media_type": "text/csv",
+          "path": "truth_telemetry.csv",
+          "required": true,
+          "sha256": "9b05f488ac9fdbcb5a47d0299b13ee00534f5703bfe1f3ab2ef7a602daaf1e80"
+        }
+      ],
+      "nonclaims": [
+        "physical transport moments or surface allocation",
+        "source-validated flight-control law",
+        "fuel depletion or certified JT9D performance",
+        "takeoff, landing, wind robustness, or manufacturer fidelity",
+        "realization boundary: The bridge supplies quaternion and body-rate response independently of the point-mass translation. It is a named pseudo-6DOF realization, not a physical B747 surface or moment qualification."
+      ],
+      "object_lineage": null,
+      "outcome": "completed",
+      "realization": {
+        "available_physics": [
+          "force_source=source_table",
+          "moment_source=not_applicable_kinematic_bridge",
+          "actuator_realization=prescribed_attitude_lag_no_surface_claim",
+          "response_profile_id=b747.attitude_response_p6dof.v1",
+          "response_law=first-order-rate-limited-v1",
+          "propulsion_model=source_table_thrust",
+          "resource_model=fixed_mass_zero_propellant"
+        ],
+        "claim": "The B747 public-research kinematic bridge completes the transport-scale powered fixed-wing racetrack with truth-evaluated altitude, speed, route, and terminal gates while exposing a named attitude-response sidecar.",
+        "control_realization": "response_law",
+        "evidence_grade": "mixed",
+        "fidelity": "pseudo_6dof",
+        "nonclaims": [
+          "physical transport moments or surface allocation",
+          "source-validated flight-control law",
+          "fuel depletion or certified JT9D performance",
+          "takeoff, landing, wind robustness, or manufacturer fidelity",
+          "realization boundary: The bridge supplies quaternion and body-rate response independently of the point-mass translation. It is a named pseudo-6DOF realization, not a physical B747 surface or moment qualification."
+        ],
+        "physical_effectors": [],
+        "realization_id": "b747-racetrack-altitude-turns-pseudo-6dof-v1-candidate.pseudo_6dof.v1",
+        "semantic_command_mapping": {
+          "route.altitude": "shared_racetrack.altitude_command",
+          "route.bank": "shared_racetrack.bank_command",
+          "route.heading": "shared_racetrack.heading_command",
+          "route.speed": "shared_racetrack.speed_command"
+        },
+        "state_schema": [
+          "north_m",
+          "east_m",
+          "altitude_m",
+          "speed_m_s",
+          "heading_deg"
+        ]
+      },
+      "run_id": "b747-racetrack-altitude-turns-pseudo-6dof-v1-candidate-pseudo_6dof",
+      "scenario_contract_sha256": "9397b9ac8427c74eb0cf9262201dec6b8bb468af2463184762326bc62ad88e10",
+      "schema_version": "taoryx.showcase/v1alpha1",
+      "showcase_id": "org.taoryx.showcase.b747-racetrack-altitude-turns-pseudo-6dof-v1-candidate",
+      "vehicle_binding_id": "b747.qualification-v1"
+    }
+  ],
+  "schema_version": 1,
+  "summary": "summary.json",
+  "truth_telemetry": "truth_telemetry.csv"
+}

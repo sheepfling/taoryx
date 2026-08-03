@@ -354,6 +354,9 @@ def test_x8_racetrack_allocates_bank_pitch_through_elevons(tmp_path: Path) -> No
     history = tuple({"time_s": state.time, **dict(state.named)} for state in report.results[0].states["1"])
     assert history[-1]["time_s"] == pytest.approx(5.0, abs=1.0e-10)
     assert {int(sample["surface_allocation_active_surface_count"]) for sample in history} == {2}
+    assert {int(sample["surface_allocation_effectiveness_rank"]) for sample in history} == {2}
+    assert {int(sample["surface_allocation_controlled_axis_count"]) for sample in history} == {2}
+    assert {int(sample["surface_allocation_uncontrolled_axis_count"]) for sample in history} == {1}
     assert max(abs(sample["propulsion_moment_body_z_nm"]) for sample in history) < 1.0e-12
     assert max(abs(sample["aero_moment_body_z_nm"]) for sample in history) > 1.0e-4
     assert max(abs(sample["surface_allocation_requested_moment_x_nm"]) for sample in history) > 1.0e-4

@@ -1563,7 +1563,13 @@ def _rigid_parent_rk4_step(
     return RigidBody6DofReachabilityState(next_state, vehicle.phase_at(next_state.time))
 
 
-def _rigid_body_rk4_step(vehicle: RocketGlideVehicle, state: RigidBody6DofReachabilityState, step_size_s: float) -> RigidBody6DofReachabilityState:
+def _rigid_body_rk4_step(
+    vehicle: RocketGlideVehicle,
+    state: RigidBody6DofReachabilityState,
+    step_size_s: float,
+    *,
+    body: DetachedBodyDefinition | None = None,
+) -> RigidBody6DofReachabilityState:
     """Advance a spawned body through the native rigid-body derivative."""
 
     if step_size_s > 0.05:
@@ -1571,13 +1577,13 @@ def _rigid_body_rk4_step(vehicle: RocketGlideVehicle, state: RigidBody6DofReacha
         remaining = step_size_s
         while remaining > 1.0e-12:
             substep = min(0.05, remaining)
-            current = _rigid_body_rk4_step(vehicle, current, substep)
+            current = _rigid_body_rk4_step(vehicle, current, substep, body=body)
             remaining -= substep
         return current
-    body = vehicle.booster_detached_body
-    if body is None:
+    selected_body = body or vehicle.booster_detached_body
+    if selected_body is None:
         raise ValueError("rigid-body propagation requires a detached body")
-    model = _rigid_body_model(vehicle, body)
+    model = _rigid_body_model(vehicle, selected_body)
     values = state.native.to_values()
 
     def derivative(time: float, current: tuple[float, ...]) -> tuple[float, ...]:
@@ -1622,18 +1628,23 @@ def _tumble_rate_acceleration(body: DetachedBodyDefinition, state: Pseudo6DofSta
     ####
 
 
-def _ballistic_derivative(vehicle: RocketGlideVehicle, state: State) -> _Derivative:
+def _ballistic_derivative(
+    vehicle: RocketGlideVehicle,
+    state: State,
+    *,
+    body: DetachedBodyDefinition | None = None,
+) -> _Derivative:
     """Evaluate reduced drag, gravity, and detached-body attitude dynamics."""
 
-    body = vehicle.booster_detached_body
-    if body is None:
+    selected_body = body or vehicle.booster_detached_body
+    if selected_body is None:
         raise ValueError("detached-body derivative requires a body definition")
     air_velocity = ContractVector3(*state.velocity_m_s) - vehicle.wind_velocity_m_s
     speed = air_velocity.norm()
     velocity_unit = _unit((air_velocity.x, air_velocity.y, air_velocity.z), fallback=(1.0, 0.0, 0.0))
     density = _atmosphere(vehicle, state.position_m[2])
     dynamic_pressure = 0.5 * density * speed * speed
-    area = _projected_area(body, state, velocity_m_s=(air_velocity.x, air_velocity.y, air_velocity.z))
+    area = _projected_area(selected_body, state, velocity_m_s=(air_velocity.x, air_velocity.y, air_velocity.z))
     drag = _scale(velocity_unit, -dynamic_pressure * area * vehicle.drag_coefficient)
     gravity = (0.0, 0.0, -vehicle.gravity_m_s2 * state.mass_kg)
     acceleration = _scale(_add(drag, gravity), 1.0 / state.mass_kg)
@@ -1643,22 +1654,28 @@ def _ballistic_derivative(vehicle: RocketGlideVehicle, state: State) -> _Derivat
             acceleration,
             0.0,
             state.attitude_rate_rad_s,
-            _tumble_rate_acceleration(body, state),
+            _tumble_rate_acceleration(selected_body, state),
         )
     return _Derivative(state.velocity_m_s, acceleration, 0.0)
     ####
 
 
-def _ballistic_rk4_step(vehicle: RocketGlideVehicle, state: State, step_size_s: float) -> State:
+def _ballistic_rk4_step(
+    vehicle: RocketGlideVehicle,
+    state: State,
+    step_size_s: float,
+    *,
+    body: DetachedBodyDefinition | None = None,
+) -> State:
     """Advance one detached body with the same reduced RK4 convention."""
 
     if isinstance(state, RigidBody6DofReachabilityState):
-        return _rigid_body_rk4_step(vehicle, state, step_size_s)
+        return _rigid_body_rk4_step(vehicle, state, step_size_s, body=body)
     reduced_state = state
-    first = _ballistic_derivative(vehicle, reduced_state)
-    second = _ballistic_derivative(vehicle, _state_with_delta(reduced_state, first, 0.5 * step_size_s))
-    third = _ballistic_derivative(vehicle, _state_with_delta(reduced_state, second, 0.5 * step_size_s))
-    fourth = _ballistic_derivative(vehicle, _state_with_delta(reduced_state, third, step_size_s))
+    first = _ballistic_derivative(vehicle, reduced_state, body=body)
+    second = _ballistic_derivative(vehicle, _state_with_delta(reduced_state, first, 0.5 * step_size_s), body=body)
+    third = _ballistic_derivative(vehicle, _state_with_delta(reduced_state, second, 0.5 * step_size_s), body=body)
+    fourth = _ballistic_derivative(vehicle, _state_with_delta(reduced_state, third, step_size_s), body=body)
     position_rate = tuple(
         (first.position_m_s[index] + 2.0 * second.position_m_s[index] + 2.0 * third.position_m_s[index] + fourth.position_m_s[index]) / 6.0
         for index in range(3)
@@ -2003,6 +2020,66 @@ def _simulate_detached_body(
         body.shape.value,
         "booster-release",
         parent.time_s,
+        realized_fidelity,
+        tuple(states),
+        termination,
+        tuple(telemetry),
+        fidelity,
+    )
+    ####
+
+
+def simulate_passive_body_release(
+    vehicle: RocketGlideVehicle,
+    body: DetachedBodyDefinition,
+    command: LaunchCommand,
+    *,
+    fidelity: ReachabilityFidelity = ReachabilityFidelity.POINT_MASS_3DOF,
+    step_size_s: float = 0.25,
+    horizon_s: float = 120.0,
+) -> DetachedBodyTrajectory:
+    """Propagate one passive body directly from a declared atmospheric release.
+
+    This is intentionally distinct from a staged-parent deployment.  The
+    release state is constructed from the supplied altitude, speed, and launch
+    direction, then the detached body alone is advanced through the same
+    reduced or native-rigid ballistic equations used after a stage release.
+    No booster, control action, or separation impulse is synthesized.
+
+    A passive pseudo-6DOF request with a tumbling policy reuses the native
+    rigid-body body equations, as declared by the passive-family profile.  It
+    therefore has no response-law controller or allocation path.
+    """
+
+    if step_size_s <= 0.0 or horizon_s <= 0.0:
+        raise ValueError("step_size_s and horizon_s must be positive")
+    parent = _launch_state(vehicle, command, fidelity)
+    state = _detached_initial_state(body, parent, fidelity, vehicle)
+    realized_fidelity = (
+        ReachabilityFidelity.RIGID_BODY_6DOF
+        if fidelity is ReachabilityFidelity.PSEUDO_6DOF and body.tumbling_policy is not TumblingPolicy.FIXED_ATTITUDE
+        else fidelity
+    )
+    states: list[State] = [state]
+    termination = EnvelopeTermination.HORIZON
+    while state.time_s < horizon_s - 1.0e-12:
+        step = min(step_size_s, horizon_s - state.time_s)
+        state = _ballistic_rk4_step(vehicle, state, step, body=body)
+        states.append(state)
+        if state.time_s > 0.0 and state.position_m[2] <= 0.0:
+            termination = EnvelopeTermination.GROUND_CONTACT
+            break
+        if not all(math.isfinite(value) for value in (*state.position_m, *state.velocity_m_s, state.mass_kg)):
+            termination = EnvelopeTermination.INVALID
+            break
+    telemetry = [_body_telemetry(vehicle, body, accepted, requested_fidelity=fidelity) for accepted in states]
+    if telemetry:
+        telemetry[-1]["termination"] = termination.value
+    return DetachedBodyTrajectory(
+        body.body_id,
+        body.shape.value,
+        "atmospheric-release",
+        0.0,
         realized_fidelity,
         tuple(states),
         termination,
@@ -2764,6 +2841,7 @@ __all__ = [
     "rerun_timed_out_artifact",
     "rerun_timed_out_envelope",
     "run_reachability_envelope",
+    "simulate_passive_body_release",
     "simulate_rocket_glide",
     "timed_out_commands_from_artifact",
 ]

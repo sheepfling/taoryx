@@ -6,6 +6,11 @@ from dataclasses import replace
 from pathlib import Path
 
 from taoryx.mission_objectives import TruthObjectiveSpec, evaluate_truth_objectives
+from taoryx.mission_promotion import assess_mission_promotion, mission_proposal_fingerprint
+from taoryx.powered_fixed_wing_mission_compiler import (
+    compile_powered_fixed_wing_racetrack,
+    load_powered_fixed_wing_mission_profiles,
+)
 from taoryx.racetrack_template import load_racetrack_template_catalog
 from taoryx.trajectory import (
     A320OpenAPModel,
@@ -14,6 +19,7 @@ from taoryx.trajectory import (
     A320RacetrackRunner,
 )
 from taoryx.trajectory.pseudo6dof_profiles import load_pseudo6dof_catalog
+from tools.validate_a320_racetrack import run_case
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -100,4 +106,29 @@ def test_a320_truth_gate_negative_control_cannot_be_rescued_by_nominal_telemetry
 
     assert report["mission_pass"] is False
     assert report["results"][0]["status"] == "fail"
+    ####
+
+
+def test_a320_candidate_route_is_truth_evaluated_against_its_fingerprint() -> None:
+    """A capability-scaled route must execute before it is promotion-eligible."""
+
+    profiles = load_powered_fixed_wing_mission_profiles(
+        ROOT / "verification/powered_fixed_wing_mission_profiles.yaml"
+    )
+    proposal = compile_powered_fixed_wing_racetrack(
+        *profiles["a320-cruise"],
+        binding_id="a320-cruise-pseudo_6dof_kinematic_bridge-candidate",
+        fidelity="pseudo_6dof_kinematic_bridge",
+    )
+    fingerprint = mission_proposal_fingerprint(proposal)
+    packet, _ = run_case(
+        "pseudo_6dof_kinematic_bridge",
+        1.0,
+        route_override=proposal.route,
+        mission_proposal_fingerprint=fingerprint,
+    )
+
+    assert packet["evaluation"]["mission_pass"] is True
+    assert packet["mission_proposal_fingerprint"] == fingerprint
+    assert assess_mission_promotion(proposal, packet).status == "promotion_eligible"
     ####

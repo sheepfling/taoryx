@@ -10,7 +10,7 @@
   "direct_wrench_contract": {
     "path": "verification/alpha3_direct_wrench_contract/manifest.json",
     "record_count": 9,
-    "sha256": "62baeb055510bf9cbb3ef17a32254a7a35a947a5a9f584171e46aacb12681896",
+    "sha256": "bb180fc53716a171fab51effdc30c33e06566bed6a71959f3672ad85395e82b0",
     "status": "contract_verified"
   },
   "failures": [],
@@ -116,7 +116,7 @@
       "supplemental_evidence": [
         {
           "path": "verification/alpha3_a320_direct_wrench/manifest.json",
-          "sha256": "81328e064f626517e0ce67257abf79f1145c3bb16ad6c02058a23642009a744d"
+          "sha256": "48cb8bc15b99130d17c68ea32a1692cfd7bf09f2c47ce793d87fbf751f6d99f1"
         }
       ]
     },
@@ -135,7 +135,7 @@
           {
             "artifact": "verification/f16_racetrack/point_mass_3dof_evidence.json",
             "fidelity": "point_mass_3dof",
-            "sha256": "a39343fa39c076f1f102267a9bd3e48d1720d67d647d62621a03cb992e1c976b"
+            "sha256": "49767b95d62a26da9643f6a87b58cafb54c8d6012371e4204364a108e274a971"
           },
           {
             "artifact": "verification/f16_racetrack/pseudo_6dof_kinematic_bridge_evidence.json",
@@ -151,7 +151,7 @@
       "supplemental_evidence": [
         {
           "path": "verification/alpha3_f16_direct_wrench/manifest.json",
-          "sha256": "8cbbc56432f858d677f7cacf9b25622a9e37e811d499f5b8a5a7d6ed6aef5033"
+          "sha256": "fa3c8f35cf6263a41be80afbccc8b103fbaa3641df4441c424a949f6d4f51d4a"
         },
         {
           "path": "artifacts/showcases/f16-s119-racetrack-fidelity-ladder/6dof-direct-wrench/evidence.json",
@@ -190,11 +190,11 @@
       "supplemental_evidence": [
         {
           "path": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
-          "sha256": "a158accdf9f423ebebe7cedec6d668c60a6d4f2ecd82b9ee3582a99d479e695c"
+          "sha256": "8e4a5f3b198d65057921cfdb3291ed65ec524a16255a0d3c066b423304907d31"
         },
         {
           "path": "verification/alpha3_x15_direct_wrench/manifest.json",
-          "sha256": "6529095ed2e083f9ad0b328e4d85839ad0fdba7f7fb67b54b92e145181f06545"
+          "sha256": "6e8a6f10393017945f2ae52470c0d1f6912a37c82a84be1702e22149c8a53d83"
         }
       ]
     },
@@ -244,7 +244,7 @@
         },
         {
           "path": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
-          "sha256": "a158accdf9f423ebebe7cedec6d668c60a6d4f2ecd82b9ee3582a99d479e695c"
+          "sha256": "8e4a5f3b198d65057921cfdb3291ed65ec524a16255a0d3c066b423304907d31"
         }
       ]
     },
@@ -279,7 +279,7 @@
       "supplemental_evidence": [
         {
           "path": "verification/alpha3_hl20_direct_wrench/manifest.json",
-          "sha256": "0c8ee4fd54abc44b54870b0058f05cabb2a9a0fb1f9345676d6dc566e5ab9919"
+          "sha256": "166b2b5b532675a98d44f40ccf09b9810ec27bb37b259b37c80a09450b0c4a1f"
         },
         {
           "path": "verification/alpha3_hl20_source_allocation/manifest.json",
@@ -291,7 +291,7 @@
         },
         {
           "path": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
-          "sha256": "a158accdf9f423ebebe7cedec6d668c60a6d4f2ecd82b9ee3582a99d479e695c"
+          "sha256": "8e4a5f3b198d65057921cfdb3291ed65ec524a16255a0d3c066b423304907d31"
         }
       ]
     },
@@ -326,11 +326,11 @@
       "supplemental_evidence": [
         {
           "path": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
-          "sha256": "a158accdf9f423ebebe7cedec6d668c60a6d4f2ecd82b9ee3582a99d479e695c"
+          "sha256": "8e4a5f3b198d65057921cfdb3291ed65ec524a16255a0d3c066b423304907d31"
         },
         {
           "path": "verification/alpha3_nesc_direct_wrench/manifest.json",
-          "sha256": "47310b73dc990b6bef8c580f7ab5eff96603b851680c49822973a065c97a8276"
+          "sha256": "3880230bc1ce5f9e84a8ce3950356562ca6d4b577dad9f7168b10c48d957caba"
         }
       ]
     },

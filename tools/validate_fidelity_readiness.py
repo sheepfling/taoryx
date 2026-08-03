@@ -10,15 +10,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from taoryx.fidelity_readiness import FidelityReadinessReport, validate_all_fidelity_readiness
+from taoryx.fidelity_contracts import CANONICAL_FIDELITY_TIERS
+from taoryx.fidelity_readiness import FidelityReadinessReport, canonical_readiness_tier, validate_all_fidelity_readiness
 from taoryx.vehicle_registry import load_vehicle_registry
 
-TIERS = (
-    "point_mass_3dof",
-    "pseudo_6dof_kinematic_bridge",
-    "rigid_body_6dof_direct_wrench",
-    "rigid_body_6dof_surface_allocated",
-)
+TIERS = CANONICAL_FIDELITY_TIERS
+LEGACY_TIERS = ("pseudo_6dof_kinematic_bridge",)
 
 
 def _render(report: FidelityReadinessReport) -> str:
@@ -40,18 +37,19 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--vehicle", default="all", help="registered vehicle ID or 'all' (default: all)")
     tier_group = parser.add_mutually_exclusive_group()
-    tier_group.add_argument("--tier", choices=TIERS + ("all",), default="all")
+    tier_group.add_argument("--tier", choices=TIERS + LEGACY_TIERS + ("all",), default="all")
     tier_group.add_argument(
         "--through-tier",
-        choices=TIERS,
+        choices=TIERS + LEGACY_TIERS,
         help="evaluate the ordered prerequisites from point-mass through this tier",
     )
     parser.add_argument("--json", type=Path, help="write the machine-readable report")
     args = parser.parse_args(argv)
     if args.through_tier:
-        tiers = TIERS[: TIERS.index(args.through_tier) + 1]
+        through_tier = canonical_readiness_tier(args.through_tier)
+        tiers = TIERS[: TIERS.index(through_tier) + 1]
     else:
-        tiers = TIERS if args.tier == "all" else (args.tier,)
+        tiers = TIERS if args.tier == "all" else (canonical_readiness_tier(args.tier),)
     vehicle_ids = tuple(load_vehicle_registry()) if args.vehicle == "all" else (args.vehicle,)
     reports = tuple(report for vehicle_id in vehicle_ids for report in validate_all_fidelity_readiness(vehicle_id, tiers))
     for report in reports:
@@ -72,7 +70,7 @@ def main(argv: list[str] | None = None) -> int:
         payload = {
             "schema_version": 1,
             "vehicle": args.vehicle,
-            "requested_tier": args.through_tier or args.tier,
+            "requested_tier": canonical_readiness_tier(args.through_tier) if args.through_tier else args.tier,
             "ordered": bool(args.through_tier),
             "ordered_blockers": ordered_blockers,
             "reports": [report.as_dict() for report in reports],

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import math
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from taoryx.language.semantic_validation import validate_problem
 from taoryx.language.table_parser import parse_table_file
 from taoryx.runtime.lowering import lower_tables
 from taoryx.runtime.runner import run_files
+from taoryx.showcase.artifact_binding import validate_showcase_run_artifact_boundary
 from taoryx.vehicle import AeroQueryContext, PreparedAerodynamicCoefficients
 
 pytestmark = [pytest.mark.artifact, pytest.mark.slow]
@@ -144,4 +146,10 @@ def test_california_to_hawaii_artifact_rerun_writes_all_plot_views(tmp_path: Pat
     assert (output / "run.json").is_file()
     assert (output / "run.sqlite").is_file()
     assert (output / "summary.txt").is_file()
+    manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["run_artifacts"][0]["fidelity"] == "rigid_body_6dof_direct_wrench"
+    assert manifest["run_artifacts"][0]["control_realization"] == "direct_wrench"
+    artifact = validate_showcase_run_artifact_boundary(manifest["run_artifacts"][0])
+    assert artifact.realization is not None
+    assert artifact.realization.physical_effectors == ()
     ####

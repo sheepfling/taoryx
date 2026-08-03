@@ -33,7 +33,7 @@
   "vehicles": {
     "b747": {
       "artifact": "verification/generated/b747_condition3_physical_surface_lqr.json",
-      "artifact_sha256": "4538f76cc98a97b754f46f98d4a59269d00a5b79c01468a38232d19bffff852a",
+      "artifact_sha256": "68c80c66c2285ccc88f5298617711afd9f0ac77a227e0c47649fbb4030e2dfe3",
       "direct_body_moment_injection": false,
       "evidence_tier": "T5_nonlinearly_validated",
       "nonclaims": [
@@ -65,7 +65,7 @@
     },
     "skywalker_x8": {
       "artifact": "verification/generated/x8_table_coordinate_physical_lqr.json",
-      "artifact_sha256": "d6d61322275bdfffda8bfbb764fcf029d7ffbc769f74a06da16477548a798305",
+      "artifact_sha256": "788c558a65eaea1250d6ddad171e5ac333ab357e01e214e9eb96bd04345f1c99",
       "direct_body_moment_injection": false,
       "evidence_tier": "T4_physically_allocated_source_coordinate",
       "nonclaims": [

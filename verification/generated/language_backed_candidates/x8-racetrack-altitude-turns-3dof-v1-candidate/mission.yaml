@@ -1,0 +1,87 @@
+id: x8-racetrack-altitude-turns-3dof-v1-candidate
+family: skywalker_x8
+fidelity_tier: point_mass_3dof
+display_name: Skywalker X8 racetrack point-mass 3DOF
+evidence_level: nominal_case_pass_overall_qualification_pending
+claim: The source-table X8 point-mass reduction completes the shared powered fixed-wing
+  racetrack geometry with independent truth-based altitude, speed, route, and terminal
+  gates.
+nonclaims:
+- attitude or body-rate dynamics
+- physical elevon, moment, or actuator authority
+- flight-test or manufacturer fidelity
+- wind robustness, takeoff, or landing
+realization:
+  force_source: source_table
+  moment_source: not_applicable_point_mass_3dof
+  actuator_realization: kinematic_route_command_no_surface_claim
+  propulsion_model: source_table_thrust
+  resource_model: fixed_mass_zero_propellant
+  note: The point-mass adapter integrates translational motion and resolves speed,
+    heading, and flight-path commands from the shared racetrack. No attitude, moment,
+    or individual surface signal is used to pass the mission.
+problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_3dof.prb
+racetrack_binding: x8-cruise-point_mass_3dof-candidate
+tables:
+- tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+- tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+- tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+- tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+max_steps: 5000
+envelope:
+- channel: speed_m_s
+  minimum: 2.0
+  maximum: 27.0
+- channel: altitude_m
+  minimum: 150.0
+  maximum: 215.0
+terminal:
+  required: true
+  objective_type: fly_by_gate
+  racetrack_gate_id: terminal-start-finish-gate
+  dwell_s: 0.0
+  window_start_s: 135.5049077977246
+  window_end_s: 203.27797202003018
+  tolerance:
+    corridor_m: 220.0
+    altitude_m: 15.0
+    speed_m_s: 4.0
+  crossing_direction: 1
+objectives:
+- id: high-altitude-level-gate
+  objective_type: fly_by_gate
+  racetrack_gate_id: high-altitude-level-gate
+  tolerance:
+    corridor_m: 220.0
+    altitude_m: 15.0
+    speed_m_s: 4.0
+  crossing_direction: 1
+  window_start_s: 8.0
+  window_end_s: 67.86592178770951
+- id: left-turn-exit-gate
+  objective_type: fly_by_gate
+  racetrack_gate_id: left-turn-exit-gate
+  tolerance:
+    corridor_m: 220.0
+    altitude_m: 15.0
+    speed_m_s: 4.0
+  crossing_direction: 1
+  window_start_s: 43.8659217877095
+  window_end_s: 103.63898601001509
+- id: low-altitude-level-gate
+  objective_type: fly_by_gate
+  racetrack_gate_id: low-altitude-level-gate
+  tolerance:
+    corridor_m: 220.0
+    altitude_m: 15.0
+    speed_m_s: 4.0
+  crossing_direction: 1
+  window_start_s: 112.97231934334843
+  window_end_s: 159.5049077977246
+timing_estimate:
+  straight_length_m: 1000.0
+  turn_radius_m: 203.8258680187507
+  speed_m_s: 17.9
+  altitude_delta_m: 10.0
+  climb_rate_m_s: 0.5
+  descent_rate_m_s: 0.3

@@ -1,0 +1,19 @@
+{
+  "candidate_binding_id": "b747-cruise-point_mass_3dof-candidate",
+  "checks": {
+    "candidate_binding_matches": true,
+    "execution_artifact_present": true,
+    "fidelity_matches": true,
+    "hard_gates_pass": true,
+    "numerical_valid": true,
+    "proposal_fingerprint_matches": true,
+    "proposal_is_capability_feasible": true,
+    "truth_objectives_pass": true
+  },
+  "claim_boundary": "Promotion eligibility only. This record does not replace a family evidence tier, robustness qualification, or physical-effector claim.",
+  "fidelity": "point_mass_3dof",
+  "findings": [],
+  "proposal_fingerprint": "4603d64050251b4af6db0fc96da1d066ad7fe880a0251c47f055a5983e3f7aa5",
+  "schema_version": "taoryx.mission-promotion/v1",
+  "status": "promotion_eligible"
+}

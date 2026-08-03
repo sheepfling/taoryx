@@ -13,7 +13,11 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from taoryx.trajectory.contracts import FidelityProfile
+from taoryx.fidelity_contracts import (
+    ControlRealization,
+    LegacyFidelityTier,
+    canonicalize_fidelity,
+)
 
 EvidenceGrade = Literal[
     "source",
@@ -24,19 +28,22 @@ EvidenceGrade = Literal[
     "mixed",
     "unavailable",
 ]
+ShowcaseOutcome = Literal[
+    "completed",
+    "completed_degraded",
+    "partial",
+    "resource_limited",
+    "envelope_limited",
+    "time_limited",
+    "aborted",
+    "numerical_failure",
+]
 ShowcaseArchetype = Literal[
     "mission_geometry",
     "mission_timeline",
     "dynamics_and_resources",
     "envelope_and_qualification",
     "object_lineage",
-]
-ControlRealization = Literal[
-    "unspecified",
-    "force_model",
-    "response_law",
-    "direct_wrench",
-    "surface_allocated",
 ]
 LineageEventType = Literal["spawn", "release", "separation", "terminal", "death"]
 StartContractType = Literal[
@@ -319,7 +326,7 @@ class FidelityShowcaseRealization(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    fidelity: FidelityProfile
+    fidelity: LegacyFidelityTier
     control_realization: ControlRealization = "unspecified"
     realization_id: str = Field(min_length=1)
     state_schema: tuple[str, ...] = Field(min_length=1)
@@ -329,6 +336,18 @@ class FidelityShowcaseRealization(BaseModel):
     claim: str = Field(min_length=1)
     nonclaims: tuple[str, ...] = ()
     evidence_grade: EvidenceGrade
+
+    @model_validator(mode="after")
+    def normalize_fidelity(self) -> FidelityShowcaseRealization:
+        """Require explicit semantics for the legacy rigid-body label."""
+
+        normalized = canonicalize_fidelity(
+            self.fidelity,
+            control_realization=self.control_realization,
+        )
+        if normalized != self.fidelity:
+            object.__setattr__(self, "fidelity", normalized)
+        return self
 
     @model_validator(mode="after")
     def validate_control_boundary(self) -> FidelityShowcaseRealization:
@@ -367,6 +386,42 @@ class EvidenceBoardSpec(BaseModel):
 ####
 
 
+class VehicleInterfaceEvidence(BaseModel):
+    """Exact caller-facing interface retained by a composition-backed board."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    interface_id: str = Field(min_length=1)
+    fingerprint_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    fidelity: LegacyFidelityTier
+    control_realization: ControlRealization
+    evidence_status: str = Field(min_length=1)
+    available_authority_profiles: tuple[str, ...] = ()
+    available_observation_profiles: tuple[str, ...] = ()
+    selected_observation_profile: str | None = None
+    claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def normalize_fidelity(self) -> VehicleInterfaceEvidence:
+        """Keep the recorded interface on one unambiguous fidelity tier."""
+
+        normalized = canonicalize_fidelity(
+            self.fidelity,
+            control_realization=self.control_realization,
+        )
+        if normalized != self.fidelity:
+            object.__setattr__(self, "fidelity", normalized)
+        if (
+            self.selected_observation_profile is not None
+            and self.selected_observation_profile not in self.available_observation_profiles
+        ):
+            raise ValueError("showcase-selected observation profile is not available from the retained interface")
+        return self
+        ####
+    ####
+####
+
+
 class ShowcaseRunArtifact(BaseModel):
     """Manifest for a replayable, evaluator-backed showcase run."""
 
@@ -376,25 +431,30 @@ class ShowcaseRunArtifact(BaseModel):
     run_id: str = Field(min_length=1)
     showcase_id: str = Field(min_length=1)
     vehicle_binding_id: str = Field(min_length=1)
-    fidelity: FidelityProfile
+    fidelity: LegacyFidelityTier
     control_realization: ControlRealization = "unspecified"
+    realization: FidelityShowcaseRealization | None = None
     scenario_contract_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    outcome: Literal[
-        "completed",
-        "completed_degraded",
-        "partial",
-        "resource_limited",
-        "envelope_limited",
-        "time_limited",
-        "aborted",
-        "numerical_failure",
-    ]
+    outcome: ShowcaseOutcome
     claim: str = Field(min_length=1)
     nonclaims: tuple[str, ...] = ()
     files: tuple[ArtifactFile, ...] = Field(min_length=1)
     board: EvidenceBoardSpec
     archetypes: tuple[ShowcaseArchetype, ...] = ()
     object_lineage: ObjectLineage | None = None
+    vehicle_interface: VehicleInterfaceEvidence | None = None
+
+    @model_validator(mode="after")
+    def normalize_fidelity(self) -> ShowcaseRunArtifact:
+        """Require explicit semantics for the legacy rigid-body label."""
+
+        normalized = canonicalize_fidelity(
+            self.fidelity,
+            control_realization=self.control_realization,
+        )
+        if normalized != self.fidelity:
+            object.__setattr__(self, "fidelity", normalized)
+        return self
 
     @model_validator(mode="after")
     def validate_artifacts(self) -> ShowcaseRunArtifact:
@@ -406,6 +466,27 @@ class ShowcaseRunArtifact(BaseModel):
             raise ValueError("showcase artifact must include a required manifest.json")
         if "object_lineage" in self.archetypes and self.object_lineage is None:
             raise ValueError("object_lineage archetype requires a lineage artifact")
+        return self
+        ####
+
+    @model_validator(mode="after")
+    def validate_realization_boundary(self) -> ShowcaseRunArtifact:
+        """Ensure retained realization metadata matches legacy summary fields."""
+
+        if self.realization is not None:
+            if self.realization.fidelity != self.fidelity:
+                raise ValueError("showcase artifact fidelity disagrees with its realization")
+            if self.realization.control_realization != self.control_realization:
+                raise ValueError("showcase artifact control realization disagrees with its realization")
+            if self.realization.claim != self.claim:
+                raise ValueError("showcase artifact claim disagrees with its realization")
+            if self.realization.nonclaims != self.nonclaims:
+                raise ValueError("showcase artifact nonclaims disagree with its realization")
+        if self.vehicle_interface is not None:
+            if self.vehicle_interface.fidelity != self.fidelity:
+                raise ValueError("showcase artifact fidelity disagrees with its vehicle interface")
+            if self.vehicle_interface.control_realization != self.control_realization:
+                raise ValueError("showcase artifact control realization disagrees with its vehicle interface")
         return self
         ####
     ####
@@ -428,8 +509,10 @@ __all__ = [
     "ShowcaseArchetypeSpec",
     "ShowcaseRecipe",
     "ShowcaseRunArtifact",
+    "ShowcaseOutcome",
     "StartContract",
     "TerminalContract",
     "VehicleShowcaseBinding",
+    "VehicleInterfaceEvidence",
 ]
 ####

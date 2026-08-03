@@ -302,6 +302,7 @@ class LoadedProgram:
         for item in selected:
             assert item is not None
             item.control_values = {**item.control_values, name.casefold(): applied}
+            item.control_values_time_s = item.state.time
             refreshed = item.state.with_values(item.state.values)
             item.state = RuntimeState(
                 refreshed.time,
@@ -373,6 +374,9 @@ class LoadedProgram:
         """
 
         problem = self.case(index)
+        from .sensor_scenario import sensor_scenario_checkpoint_payload
+
+        sensor_scenario_checkpoint = sensor_scenario_checkpoint_payload(problem)
         payload = {
             "schema_version": 2,
             "problem_path": self.problem_path,
@@ -391,13 +395,24 @@ class LoadedProgram:
                 "required_truth_times": list(problem.required_truth_times),
                 "sensor_clocks": [clock.to_metadata() for clock in problem.sensor_clocks],
                 "final_time": problem.final_time,
-                "metadata": _json_safe({key: value for key, value in problem.metadata.items() if key != "tables"}),
+                "metadata": _json_safe(
+                    {
+                        key: value
+                        for key, value in problem.metadata.items()
+                        if key not in {"tables", "_sensor_scenario_runtime"}
+                    }
+                ),
                 "event_history": _json_safe(problem.event_history),
                 "transition_history": [item.to_metadata() for item in problem.transition_history],
                 "sensor_bus": None if problem.sensor_bus is None else problem.sensor_bus.to_metadata(),
+                "sensor_scenario_checkpoint": sensor_scenario_checkpoint,
                 "sensor_rebind": {
-                    "required": problem.sensor_bus is not None,
-                    "reason": "external sensor providers and estimator subscribers are intentionally not serialized",
+                    "required": problem.sensor_bus is not None and sensor_scenario_checkpoint is None,
+                    "reason": (
+                        "sensor bus is not a registered declared-scenario checkpoint"
+                        if sensor_scenario_checkpoint is None
+                        else "declared sensor scenario is restored from checkpoint"
+                    ),
                 },
                 "vehicles": {
                     name: {
@@ -408,6 +423,7 @@ class LoadedProgram:
                         "segment_number": vehicle.segment_number,
                         "fired_events": sorted(vehicle.fired_events),
                         "control_values": _json_safe(vehicle.control_values),
+                        "control_values_time_s": vehicle.control_values_time_s,
                         "parameters": _json_safe(vehicle.parameters),
                         "step_size": vehicle.step_size,
                         "integrator": vehicle.integrator,
@@ -472,7 +488,7 @@ class LoadedProgram:
             for item in saved.get("transition_history", ())
             if isinstance(item, Mapping)
         ]
-        if saved.get("sensor_bus") is not None:
+        if saved.get("sensor_bus") is not None and saved.get("sensor_scenario_checkpoint") is None:
             case.metadata["checkpoint_sensor_bus"] = saved["sensor_bus"]
             case.metadata["checkpoint_sensor_rebind"] = saved.get(
                 "sensor_rebind",
@@ -490,6 +506,7 @@ class LoadedProgram:
             vehicle.segment_number = int(vehicle_payload["segment_number"])
             vehicle.fired_events = set(vehicle_payload.get("fired_events", ()))
             vehicle.control_values = {str(key): float(value) for key, value in vehicle_payload.get("control_values", {}).items()}
+            vehicle.control_values_time_s = float(vehicle_payload.get("control_values_time_s", vehicle.state.time))
             vehicle.parameters = {str(key): float(value) for key, value in vehicle_payload.get("parameters", {}).items()}
             vehicle.step_size = float(vehicle_payload["step_size"])
             vehicle.integrator = str(vehicle_payload["integrator"])
@@ -507,6 +524,13 @@ class LoadedProgram:
                 vehicle.kinematic_state = _kinematic_state_from_payload(cast(Mapping[str, object], saved_kinematic))
             elif vehicle.kinematic_state is not None:
                 raise ValueError(f"checkpoint is missing the kinematic sidecar for vehicle {name!r}")
+        raw_sensor_checkpoint = saved.get("sensor_scenario_checkpoint")
+        if raw_sensor_checkpoint is not None:
+            if not isinstance(raw_sensor_checkpoint, Mapping):
+                raise ValueError("checkpoint sensor_scenario_checkpoint must be a mapping")
+            from .sensor_scenario import restore_sensor_scenario_checkpoint
+
+            restore_sensor_scenario_checkpoint(case, raw_sensor_checkpoint)
         return program
     ####
 ####

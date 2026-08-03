@@ -1,5 +1,14 @@
 """Provider-neutral family showcase contracts and evidence metadata."""
 
+from .adapter_binding import build_showcase_realization_from_adapter
+from .artifact_binding import (
+    ShowcaseArtifactBoundaryFinding,
+    build_showcase_run_artifact,
+    build_showcase_run_artifact_for_composition,
+    inspect_showcase_run_artifact,
+    interface_evidence_for_showcase,
+    validate_showcase_run_artifact_boundary,
+)
 from .contracts import (
     ArtifactFile,
     ControlRealization,
@@ -15,15 +24,22 @@ from .contracts import (
     ShowcaseArchetype,
     ShowcaseArchetypeCatalog,
     ShowcaseArchetypeSpec,
+    ShowcaseOutcome,
     ShowcaseRecipe,
     ShowcaseRunArtifact,
     StartContract,
     TerminalContract,
+    VehicleInterfaceEvidence,
     VehicleShowcaseBinding,
 )
 
 __all__ = [
     "ArtifactFile",
+    "ShowcaseArtifactBoundaryFinding",
+    "build_showcase_realization_from_adapter",
+    "build_showcase_run_artifact",
+    "build_showcase_run_artifact_for_composition",
+    "interface_evidence_for_showcase",
     "ControlRealization",
     "EvidenceBoardSpec",
     "FailureCode",
@@ -39,8 +55,12 @@ __all__ = [
     "ShowcaseArchetypeSpec",
     "ShowcaseRecipe",
     "ShowcaseRunArtifact",
+    "ShowcaseOutcome",
     "StartContract",
     "TerminalContract",
     "VehicleShowcaseBinding",
+    "VehicleInterfaceEvidence",
+    "inspect_showcase_run_artifact",
+    "validate_showcase_run_artifact_boundary",
 ]
 ####

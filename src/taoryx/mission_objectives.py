@@ -255,6 +255,9 @@ def _residual(row: Mapping[str, object], spec: TruthObjectiveSpec) -> tuple[bool
 def _dwell(rows: Sequence[Mapping[str, object]], flags: Sequence[bool], required_s: float) -> tuple[float, int | None]:
     if not rows:
         return 0.0, None
+    if required_s == 0.0:
+        first_in_band = next((index for index, in_band in enumerate(flags) if in_band), None)
+        return (0.0, first_in_band)
     best = 0.0
     best_index: int | None = None
     start_index: int | None = None

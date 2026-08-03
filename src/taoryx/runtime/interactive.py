@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, cast
 from taoryx.control import SegmentController, VehicleObservation
 
 from .common import Derivative, RuntimeProblem, RuntimeState
-from .engine import integrate_active_vehicles
+from .engine import get_next_time_step, integrate_active_vehicles
 
 if TYPE_CHECKING:
     from taoryx.outputs import RunArtifact
@@ -352,45 +352,65 @@ class InteractiveSession:
                 controller_diagnostics.append(f"controller-saturated:{vehicle_name}:{','.join(generated.saturated)}")
         requested_commands = {**controller_commands, **(commands or {})}
         applied = self._normalize_commands(requested_commands, duration)
+        for vehicle in self.problem.vehicles.values():
+            vehicle.control_values = {**vehicle.control_values, **self._last_commands}
+            vehicle.control_values_time_s = start
         self.status = InteractiveStatus.RUNNING
+        events: list[str] = []
+        runtime_events: list[RuntimeEvent] = []
         try:
-            previous_states = {vehicle.name: vehicle.state for vehicle in self.problem.active_vehicles()}
-            integrate_active_vehicles(self.problem, duration)
-            if self.problem.sensor_bus is not None:
-                self.problem.sensor_bus.accepted_step(self.problem, previous_states)
-            events: list[str] = []
-            for vehicle in self.problem.active_vehicles():
-                for event in vehicle.events:
-                    if event.predicate is not None and event.predicate(vehicle.state):
-                        events.append(f"{vehicle.name}:{event.name}")
-                        if event.action == "stop":
+            requested_end = start + duration
+            final_time = self.problem.final_time
+            target_end = requested_end if final_time is None else min(requested_end, final_time)
+            while self.time < target_end - 1.0e-12:
+                active = self.problem.active_vehicles()
+                if not active:
+                    self.status = InteractiveStatus.COMPLETED
+                    break
+                candidate_step = min(vehicle.step_size for vehicle in active)
+                remaining = target_end - self.time
+                accepted_step = min(get_next_time_step(self.problem, candidate_step, now=self.time), remaining)
+                if accepted_step <= 1.0e-15:
+                    raise RuntimeError("interactive session stalled before its requested accepted-truth boundary")
+                previous_states = {vehicle.name: vehicle.state for vehicle in active}
+                before_step = self.time
+                integrate_active_vehicles(self.problem, accepted_step)
+                if self.time <= before_step + 1.0e-15:
+                    raise RuntimeError("interactive session integration produced no accepted time advance")
+                if self.problem.sensor_bus is not None:
+                    self.problem.sensor_bus.accepted_step(self.problem, previous_states)
+                for vehicle in self.problem.active_vehicles():
+                    for event in vehicle.events:
+                        if event.predicate is not None and event.predicate(vehicle.state):
+                            events.append(f"{vehicle.name}:{event.name}")
+                            if event.action == "stop":
+                                vehicle.active = False
+                for vehicle in self.problem.vehicles.values():
+                    for spec in self.event_specs:
+                        key = (vehicle.name, spec.name)
+                        if spec.once and key in self._fired_events:
+                            continue
+                        if not spec.predicate(vehicle.state):
+                            continue
+                        runtime_event = RuntimeEvent(
+                            spec.name,
+                            vehicle.name,
+                            vehicle.state.time,
+                            spec.action,
+                            spec.signal or spec.name,
+                            spec.source,
+                            vehicle.segment_number,
+                            vehicle.segment_number,
+                        )
+                        runtime_events.append(runtime_event)
+                        self.event_history.append(runtime_event)
+                        self._fired_events.add(key)
+                        if spec.action is EventAction.STOP:
                             vehicle.active = False
-            runtime_events: list[RuntimeEvent] = []
-            for vehicle in self.problem.vehicles.values():
-                for spec in self.event_specs:
-                    key = (vehicle.name, spec.name)
-                    if spec.once and key in self._fired_events:
-                        continue
-                    if not spec.predicate(vehicle.state):
-                        continue
-                    runtime_event = RuntimeEvent(
-                        spec.name,
-                        vehicle.name,
-                        vehicle.state.time,
-                        spec.action,
-                        spec.signal or spec.name,
-                        spec.source,
-                        vehicle.segment_number,
-                        vehicle.segment_number,
-                    )
-                    runtime_events.append(runtime_event)
-                    self.event_history.append(runtime_event)
-                    self._fired_events.add(key)
-                    if spec.action is EventAction.STOP:
-                        vehicle.active = False
-            if events:
-                self.status = InteractiveStatus.COMPLETED
-            if any(event.action is EventAction.STOP for event in runtime_events):
+                if events or any(event.action is EventAction.STOP for event in runtime_events):
+                    self.status = InteractiveStatus.COMPLETED
+                    break
+            if final_time is not None and self.time >= final_time - 1.0e-12:
                 self.status = InteractiveStatus.COMPLETED
         except Exception:
             self.status = InteractiveStatus.FAILED
@@ -635,6 +655,9 @@ def _interactive_problem_payload(problem: RuntimeProblem) -> dict[str, object]:
     """Serialize mutable runtime state while leaving executable callbacks out."""
 
     from .program import _kinematic_state_payload, _state_payload
+    from .sensor_scenario import sensor_scenario_checkpoint_payload
+
+    sensor_scenario_checkpoint = sensor_scenario_checkpoint_payload(problem)
 
     return {
         "print_times": list(problem.print_times),
@@ -642,13 +665,24 @@ def _interactive_problem_payload(problem: RuntimeProblem) -> dict[str, object]:
         "required_truth_times": list(problem.required_truth_times),
         "sensor_clocks": [clock.to_metadata() for clock in problem.sensor_clocks],
         "final_time": problem.final_time,
-        "metadata": _json_safe(problem.metadata),
+        "metadata": _json_safe(
+            {
+                key: value
+                for key, value in problem.metadata.items()
+                if key != "_sensor_scenario_runtime"
+            }
+        ),
         "event_history": _json_safe(problem.event_history),
         "transition_history": [item.to_metadata() for item in problem.transition_history],
         "sensor_bus": None if problem.sensor_bus is None else problem.sensor_bus.to_metadata(),
+        "sensor_scenario_checkpoint": sensor_scenario_checkpoint,
         "sensor_rebind": {
-            "required": problem.sensor_bus is not None,
-            "reason": "external sensor providers and estimator subscribers are intentionally not serialized",
+            "required": problem.sensor_bus is not None and sensor_scenario_checkpoint is None,
+            "reason": (
+                "sensor bus is not a registered declared-scenario checkpoint"
+                if sensor_scenario_checkpoint is None
+                else "declared sensor scenario is restored from checkpoint"
+            ),
         },
         "vehicles": {
             name: {
@@ -659,6 +693,7 @@ def _interactive_problem_payload(problem: RuntimeProblem) -> dict[str, object]:
                 "segment_number": vehicle.segment_number,
                 "fired_events": sorted(vehicle.fired_events),
                 "control_values": _json_safe(vehicle.control_values),
+                "control_values_time_s": vehicle.control_values_time_s,
                 "parameters": _json_safe(vehicle.parameters),
                 "step_size": vehicle.step_size,
                 "integrator": vehicle.integrator,
@@ -693,7 +728,7 @@ def _restore_interactive_problem(problem: RuntimeProblem, payload: Mapping[str, 
         _transition_pair_from_payload(cast(Mapping[str, object], item))
         for item in cast(Sequence[object], payload.get("transition_history", ()))
     ]
-    if payload.get("sensor_bus") is not None:
+    if payload.get("sensor_bus") is not None and payload.get("sensor_scenario_checkpoint") is None:
         problem.metadata["checkpoint_sensor_rebind"] = payload.get(
             "sensor_rebind",
             {
@@ -714,6 +749,7 @@ def _restore_interactive_problem(problem: RuntimeProblem, payload: Mapping[str, 
         vehicle.segment_number = int(cast(int | str, vehicle_payload["segment_number"]))
         vehicle.fired_events = {str(value) for value in cast(Sequence[object], vehicle_payload.get("fired_events", ())) }
         vehicle.control_values = {str(key): _as_float(value) for key, value in cast(Mapping[str, object], vehicle_payload.get("control_values", {})).items()}
+        vehicle.control_values_time_s = _as_float(vehicle_payload.get("control_values_time_s", vehicle.state.time))
         vehicle.parameters = {str(key): _as_float(value) for key, value in cast(Mapping[str, object], vehicle_payload.get("parameters", {})).items()}
         vehicle.step_size = float(cast(float | int | str, vehicle_payload["step_size"]))
         vehicle.integrator = str(vehicle_payload["integrator"])
@@ -728,6 +764,13 @@ def _restore_interactive_problem(problem: RuntimeProblem, payload: Mapping[str, 
             vehicle.kinematic_state = _kinematic_state_from_payload(cast(Mapping[str, object], sidecar))
         elif vehicle.kinematic_state is not None:
             raise ValueError(f"interactive checkpoint is missing the kinematic sidecar for vehicle {name!r}")
+    raw_sensor_checkpoint = payload.get("sensor_scenario_checkpoint")
+    if raw_sensor_checkpoint is not None:
+        if not isinstance(raw_sensor_checkpoint, Mapping):
+            raise ValueError("interactive checkpoint sensor_scenario_checkpoint must be a mapping")
+        from .sensor_scenario import restore_sensor_scenario_checkpoint
+
+        restore_sensor_scenario_checkpoint(problem, raw_sensor_checkpoint)
     ####
 
 

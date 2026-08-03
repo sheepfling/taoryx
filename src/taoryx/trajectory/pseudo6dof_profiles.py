@@ -13,15 +13,23 @@ real effectors produced that command.
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from ..fidelity_contracts import (
+    CANONICAL_FIDELITY_TIERS,
+    QUALIFIED_FIDELITY_STATUSES,
+    FidelityTier,
+    LegacyFidelityTier,
+)
+from ..fidelity_lowering import LoweringCandidate, select_canonical_lowering
+from ..fidelity_lowering import LoweringStatus as SharedLoweringStatus
 from ..vehicle_registry import ROOT
 
 Pseudo6DOFModelKind = Literal[
@@ -33,21 +41,10 @@ Pseudo6DOFModelKind = Literal[
 ]
 ProfileStatus = Literal["planned", "development", "nominal_case_pass", "promoted"]
 AreaPolicy = Literal["not_applicable", "average_projected_area", "steady_stage_cross_section", "geometry_schedule"]
-ProfileControlRealization = Literal["response_law", "surface_allocated", "rigid_body_6dof"]
+ProfileControlRealization = Literal["response_law", "surface_allocated", "uncontrolled"]
 DirectWrenchControlRealization = Literal["direct_wrench"]
-FidelityName = Literal["point_mass_3dof", "pseudo_6dof", "rigid_body_6dof_direct_wrench", "rigid_body_6dof"]
-LoweringStatus = Literal["eligible", "blocked", "unavailable"]
-QUALIFIED_EVIDENCE_STATUSES = frozenset(
-    {
-        "equivalence_passed",
-        "multi_fidelity_qualified",
-        "qualified",
-        "runtime_replay_qualification_passed",
-        "nominal_case_pass",
-        "debug_comparator_pass",
-        "promoted",
-    }
-)
+FidelityName = FidelityTier
+QUALIFIED_EVIDENCE_STATUSES = QUALIFIED_FIDELITY_STATUSES
 
 
 class AxisResponseProfile(BaseModel):
@@ -87,8 +84,8 @@ class Pseudo6DOFProfile(BaseModel):
         if self.model_kind == "rigid_body_reuse":
             if axes:
                 raise ValueError("rigid_body_reuse profiles must not declare surrogate response axes")
-            if self.control_realization != "rigid_body_6dof":
-                raise ValueError("rigid_body_reuse profiles must declare rigid_body_6dof realization")
+            if self.control_realization != "uncontrolled":
+                raise ValueError("rigid_body_reuse profiles must declare uncontrolled realization")
         elif axes != {"roll", "pitch", "yaw"}:
             raise ValueError("pseudo-6DOF response profiles must declare roll, pitch, and yaw")
         for phase, phase_axes in self.phase_response.items():
@@ -96,8 +93,8 @@ class Pseudo6DOFProfile(BaseModel):
                 raise ValueError("pseudo-6DOF response schedule phase names must not be empty")
             if set(phase_axes) != {"roll", "pitch", "yaw"}:
                 raise ValueError(f"pseudo-6DOF response schedule for {phase!r} must declare roll, pitch, and yaw")
-        if self.model_kind != "rigid_body_reuse" and self.control_realization == "rigid_body_6dof":
-            raise ValueError("surrogate pseudo-6DOF profiles cannot claim rigid_body_6dof realization")
+        if self.model_kind != "rigid_body_reuse" and self.control_realization == "uncontrolled":
+            raise ValueError("only rigid_body_reuse profiles may declare uncontrolled realization")
         if self.area_policy == "not_applicable" and self.area_source is not None:
             raise ValueError("area_source requires an applicable area_policy")
         if self.area_policy != "not_applicable" and not self.area_source:
@@ -154,6 +151,23 @@ class DirectWrenchProfile(BaseModel):
     ####
 
 
+class SurfaceAllocationProfile(BaseModel):
+    """A declared physical-effector realization, qualified independently."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    family_id: str = Field(min_length=1)
+    parent_direct_wrench_profile_id: str = Field(min_length=1)
+    control_realization: Literal["surface_allocated"] = "surface_allocated"
+    status: Literal["planned", "development", "nominal_case_pass", "promoted", "not_applicable"]
+    evidence_grade: str = Field(min_length=1)
+    allocator_id: str = Field(min_length=1)
+    effector_channels: tuple[str, ...] = ()
+    required_channels: tuple[str, ...] = ()
+    unsupported_claims: tuple[str, ...] = Field(min_length=1)
+
+
 class FidelityBinding(BaseModel):
     """Pair a family point-mass identity with its pseudo realization."""
 
@@ -163,6 +177,7 @@ class FidelityBinding(BaseModel):
     point_mass_profile_id: str = Field(min_length=1)
     pseudo_profile_id: str = Field(min_length=1)
     direct_wrench_profile_id: str | None = None
+    surface_allocation_profile_id: str | None = None
     automatic_lowering: bool
     lowering_note: str = Field(min_length=1)
 
@@ -171,13 +186,15 @@ class FidelityBinding(BaseModel):
 class AutomaticLoweringStep:
     """One auditable candidate considered by automatic fidelity lowering."""
 
-    fidelity: FidelityName
+    fidelity: LegacyFidelityTier
     profile_id: str | None
-    status: LoweringStatus
+    status: SharedLoweringStatus
     prerequisite: str
     reason: str
+    required_operations: tuple[str, ...] = ()
+    missing_operations: tuple[str, ...] = ()
 
-    def as_dict(self) -> dict[str, str | None]:
+    def as_dict(self) -> dict[str, object]:
         """Return a stable machine-readable step record."""
 
         return {
@@ -186,6 +203,8 @@ class AutomaticLoweringStep:
             "status": self.status,
             "prerequisite": self.prerequisite,
             "reason": self.reason,
+            "required_operations": list(self.required_operations),
+            "missing_operations": list(self.missing_operations),
         }
         ####
     ####
@@ -286,8 +305,8 @@ class AutomaticLoweringReport:
     """Result of resolving the highest evidenced tier without silent fallback."""
 
     family_id: str
-    requested: FidelityName
-    selected: FidelityName | None
+    requested: LegacyFidelityTier
+    selected: LegacyFidelityTier | None
     first_blocker: str | None
     steps: tuple[AutomaticLoweringStep, ...]
 
@@ -322,16 +341,20 @@ class Pseudo6DOFCatalog(BaseModel):
     schema_id: str = Field(alias="schema", min_length=1)
     profiles: tuple[Pseudo6DOFProfile, ...] = Field(min_length=1)
     direct_wrench_profiles: tuple[DirectWrenchProfile, ...] = ()
+    surface_allocation_profiles: tuple[SurfaceAllocationProfile, ...] = ()
     bindings: tuple[FidelityBinding, ...] = Field(min_length=1)
 
     @model_validator(mode="after")
     def validate_references(self) -> Pseudo6DOFCatalog:
         profile_ids = {profile.id for profile in self.profiles}
         direct_ids = {profile.id for profile in self.direct_wrench_profiles}
-        if len(profile_ids) != len(self.profiles) or len(direct_ids) != len(self.direct_wrench_profiles):
+        surface_ids = {profile.id for profile in self.surface_allocation_profiles}
+        if len(profile_ids) != len(self.profiles) or len(direct_ids) != len(self.direct_wrench_profiles) or len(surface_ids) != len(self.surface_allocation_profiles):
             raise ValueError("fidelity profile IDs must be unique within each profile class")
-        if profile_ids & direct_ids:
-            raise ValueError("pseudo and direct-wrench profile IDs must be globally unique")
+        if (profile_ids & direct_ids) or (profile_ids & surface_ids) or (direct_ids & surface_ids):
+            raise ValueError("fidelity profile IDs must be globally unique")
+        direct_by_id = {profile.id: profile for profile in self.direct_wrench_profiles}
+        surface_by_id = {profile.id: profile for profile in self.surface_allocation_profiles}
         families = {binding.family_id for binding in self.bindings}
         if len(families) != len(self.bindings):
             raise ValueError("pseudo-6DOF bindings must contain one entry per family")
@@ -347,6 +370,18 @@ class Pseudo6DOFCatalog(BaseModel):
                     raise ValueError(f"unknown direct-wrench profile: {binding.direct_wrench_profile_id}")
                 if direct.family_id != binding.family_id:
                     raise ValueError(f"direct-wrench profile family mismatch for {binding.family_id}")
+            if binding.surface_allocation_profile_id is not None:
+                surface = surface_by_id.get(binding.surface_allocation_profile_id)
+                if surface is None:
+                    raise ValueError(f"unknown surface-allocation profile: {binding.surface_allocation_profile_id}")
+                if surface.family_id != binding.family_id:
+                    raise ValueError(f"surface-allocation profile family mismatch for {binding.family_id}")
+                if surface.parent_direct_wrench_profile_id not in direct_by_id:
+                    raise ValueError(
+                        f"surface-allocation profile {surface.id} must reference a direct-wrench profile"
+                    )
+                if direct_by_id[surface.parent_direct_wrench_profile_id].family_id != binding.family_id:
+                    raise ValueError(f"surface-allocation parent family mismatch for {binding.family_id}")
         return self
         ####
 
@@ -371,6 +406,18 @@ class Pseudo6DOFCatalog(BaseModel):
         profile = next(item for item in self.direct_wrench_profiles if item.id == binding.direct_wrench_profile_id)
         return binding, profile
         ####
+
+    def for_family_surface_allocated(self, family_id: str) -> tuple[FidelityBinding, SurfaceAllocationProfile]:
+        """Resolve the declared physical-effector path for one family."""
+
+        binding = next((item for item in self.bindings if item.family_id == family_id), None)
+        if binding is None:
+            raise KeyError(f"no fidelity binding for family {family_id}")
+        if binding.surface_allocation_profile_id is None:
+            raise KeyError(f"no surface-allocation profile for family {family_id}")
+        profile = next(item for item in self.surface_allocation_profiles if item.id == binding.surface_allocation_profile_id)
+        return binding, profile
+        ####
     ####
 
 
@@ -386,12 +433,33 @@ def load_pseudo6dof_catalog(path: str | Path | None = None) -> Pseudo6DOFCatalog
     ####
 
 
+def _automatic_lowering_step_from_record(record: Mapping[str, object]) -> AutomaticLoweringStep:
+    """Convert one shared-lowerer record while preserving operation diagnostics."""
+
+    required = record.get("required_operations", ())
+    missing = record.get("missing_operations", ())
+    required_operations = tuple(str(item) for item in required) if isinstance(required, (list, tuple)) else ()
+    missing_operations = tuple(str(item) for item in missing) if isinstance(missing, (list, tuple)) else ()
+    return AutomaticLoweringStep(
+        cast(LegacyFidelityTier, record["fidelity"]),
+        record["profile_id"] if isinstance(record["profile_id"], str) else None,
+        cast(SharedLoweringStatus, record["status"]),
+        str(record["prerequisite"]),
+        str(record["reason"]),
+        required_operations,
+        missing_operations,
+    )
+    ####
+
+
 def build_automatic_lowering_report(
     family_id: str,
-    requested: FidelityName,
+    requested: LegacyFidelityTier,
     evidence: Mapping[str, Mapping[str, object]] | None = None,
     *,
     catalog: Pseudo6DOFCatalog | None = None,
+    required_operations: Mapping[FidelityTier, Sequence[str]] | None = None,
+    operation_status: Mapping[FidelityTier, Mapping[str, str]] | None = None,
 ) -> AutomaticLoweringReport:
     """Resolve a family tier using only explicit qualification evidence.
 
@@ -399,19 +467,80 @@ def build_automatic_lowering_report(
     reduction is safe to select.  ``evidence`` is keyed by profile ID and
     must contain one of :data:`QUALIFIED_EVIDENCE_STATUSES`.  Missing evidence,
     a development-only profile, a disabled binding, or a missing native rigid
-    profile all produce a visible blocked step.  No fallback is implicit.
+    profile all produce a visible blocked step.  No fallback is implicit.  When
+    operation requirements and statuses are supplied, a profile is also
+    ineligible unless its adapter operations are explicitly available.  This
+    keeps profile evidence and executable adapter capability in one lowering
+    decision.
     """
 
     resolved_catalog = catalog or load_pseudo6dof_catalog()
     binding, pseudo_profile = resolved_catalog.for_family(family_id)
     records = evidence if evidence is not None else load_qualified_fidelity_evidence()
+    if requested in CANONICAL_FIDELITY_TIERS:
+        canonical_requested = cast(FidelityTier, requested)
+        declared_operations = required_operations or {}
+        candidates: dict[FidelityTier, LoweringCandidate] = {
+            "point_mass_3dof": LoweringCandidate(
+                "point_mass_3dof",
+                binding.point_mass_profile_id,
+                prerequisite="qualified point-mass parent evidence",
+                required_operations=tuple(declared_operations.get("point_mass_3dof", ())),
+            ),
+            "pseudo_6dof": LoweringCandidate(
+                "pseudo_6dof",
+                pseudo_profile.id,
+                (binding.point_mass_profile_id,),
+                "qualified pseudo-6DOF profile and parent 3-DOF evidence",
+                tuple(declared_operations.get("pseudo_6dof", ())),
+            ),
+            "rigid_body_6dof_direct_wrench": LoweringCandidate(
+                "rigid_body_6dof_direct_wrench",
+                binding.direct_wrench_profile_id,
+                tuple(
+                    profile.parent_3dof_profile_id
+                    for profile in resolved_catalog.direct_wrench_profiles
+                    if profile.id == binding.direct_wrench_profile_id
+                ),
+                "qualified direct-wrench bridge and parent 3DOF evidence",
+                tuple(declared_operations.get("rigid_body_6dof_direct_wrench", ())),
+            ),
+            "rigid_body_6dof_surface_allocated": LoweringCandidate(
+                "rigid_body_6dof_surface_allocated",
+                binding.surface_allocation_profile_id,
+                tuple(
+                    profile.parent_direct_wrench_profile_id
+                    for profile in resolved_catalog.surface_allocation_profiles
+                    if profile.id == binding.surface_allocation_profile_id
+                ),
+                "qualified surface-allocation profile and direct-wrench parent evidence",
+                tuple(declared_operations.get("rigid_body_6dof_surface_allocated", ())),
+            ),
+        }
+        decision = select_canonical_lowering(
+            candidates,
+            canonical_requested,
+            records,
+            allow_lowering=binding.automatic_lowering,
+            operation_status=operation_status,
+        )
+        return AutomaticLoweringReport(
+            family_id,
+            requested,
+            decision.selected,
+            decision.first_blocker,
+            tuple(
+                _automatic_lowering_step_from_record(item)
+                for item in decision.considered
+            ),
+        )
     steps: list[AutomaticLoweringStep] = []
     first_blocker: str | None = None
 
     def add_step(
-        fidelity: FidelityName,
+        fidelity: LegacyFidelityTier,
         profile_id: str | None,
-        status: LoweringStatus,
+        status: SharedLoweringStatus,
         prerequisite: str,
         reason: str,
     ) -> bool:
@@ -422,14 +551,12 @@ def build_automatic_lowering_report(
         return status == "eligible"
         ####
 
-    def qualified(profile_id: str, declared_status: str | None = None) -> tuple[bool, str]:
+    def qualified(profile_id: str) -> tuple[bool, str]:
         record = records.get(profile_id, {})
         evidence_status = str(record.get("status", "missing")) if isinstance(record, Mapping) else "invalid"
         if evidence_status in QUALIFIED_EVIDENCE_STATUSES:
             return True, f"evidence status {evidence_status!r} is qualified"
-        if declared_status in QUALIFIED_EVIDENCE_STATUSES:
-            return True, f"catalog status {declared_status!r} is qualified"
-        return False, f"no qualified evidence for {profile_id!r} (evidence status {evidence_status!r}; catalog status {declared_status!r})"
+        return False, f"no qualified evidence for {profile_id!r} (evidence status {evidence_status!r})"
         ####
 
     def qualified_pair(profile_id: str, declared_status: str | None = None) -> tuple[bool, str]:
@@ -441,7 +568,7 @@ def build_automatic_lowering_report(
         has a nominal result.
         """
 
-        pseudo_ok, pseudo_reason = qualified(profile_id, declared_status)
+        pseudo_ok, pseudo_reason = qualified(profile_id)
         parent_id = pseudo_profile.parent_3dof_profile_id
         parent_ok, parent_reason = qualified(parent_id)
         if pseudo_ok and parent_ok:
@@ -451,22 +578,55 @@ def build_automatic_lowering_report(
         return False, f"qualified pseudo profile but parent 3-DOF evidence is missing: {parent_reason}"
         ####
 
-    if requested == "rigid_body_6dof":
-        rigid_id = f"{family_id}.rigid_body_6dof"
-        rigid_record = records.get(rigid_id, {})
-        rigid_status = str(rigid_record.get("status", "missing")) if isinstance(rigid_record, Mapping) else "invalid"
-        rigid_ok = rigid_status in QUALIFIED_EVIDENCE_STATUSES
-        if add_step(
-            "rigid_body_6dof",
-            rigid_id,
-            "eligible" if rigid_ok else "unavailable",
-            "native rigid-body qualification artifact",
-            f"evidence status {rigid_status!r} for {rigid_id!r}" if rigid_ok else "no native rigid-body qualification profile was supplied",
-        ):
-            return AutomaticLoweringReport(family_id, requested, "rigid_body_6dof", first_blocker, tuple(steps))
+    legacy_requested = requested == "rigid_body_6dof"
+    if requested in {"rigid_body_6dof", "rigid_body_6dof_surface_allocated"}:
+        surface_id = binding.surface_allocation_profile_id
+        if requested == "rigid_body_6dof_surface_allocated" and surface_id is not None:
+            surface_profile = next(profile for profile in resolved_catalog.surface_allocation_profiles if profile.id == surface_id)
+            surface_ok, surface_reason = qualified(surface_profile.id)
+            direct_ok, direct_reason = qualified(surface_profile.parent_direct_wrench_profile_id)
+            if surface_ok and not direct_ok:
+                surface_ok = False
+                surface_reason = f"surface profile is checked but its direct-wrench parent is not: {direct_reason}"
+            add_step(
+                "rigid_body_6dof_surface_allocated",
+                surface_id,
+                "eligible" if surface_ok else "blocked",
+                "qualified surface-allocation profile and direct-wrench parent evidence",
+                surface_reason,
+            )
+            if surface_ok:
+                return AutomaticLoweringReport(family_id, requested, "rigid_body_6dof_surface_allocated", None, tuple(steps))
+        elif requested == "rigid_body_6dof_surface_allocated":
+            add_step(
+                "rigid_body_6dof_surface_allocated",
+                None,
+                "unavailable",
+                "declared surface-allocation profile",
+                "no surface-allocation profile was supplied for this family",
+            )
+        if requested == "rigid_body_6dof_surface_allocated" and not binding.automatic_lowering:
+            return AutomaticLoweringReport(family_id, requested, None, first_blocker, tuple(steps))
+        if legacy_requested:
+            rigid_id = f"{family_id}.rigid_body_6dof"
+            rigid_record = records.get(rigid_id, {})
+            rigid_status = str(rigid_record.get("status", "missing")) if isinstance(rigid_record, Mapping) else "invalid"
+            rigid_ok = rigid_status in QUALIFIED_EVIDENCE_STATUSES
+            if add_step(
+                "rigid_body_6dof",
+                rigid_id,
+                "eligible" if rigid_ok else "unavailable",
+                "legacy native rigid-body qualification artifact",
+                f"evidence status {rigid_status!r} for {rigid_id!r}" if rigid_ok else "no native rigid-body qualification profile was supplied (legacy compatibility path)",
+            ):
+                return AutomaticLoweringReport(family_id, requested, "rigid_body_6dof", first_blocker, tuple(steps))
 
     direct_id = binding.direct_wrench_profile_id
-    if direct_id is not None and requested in {"rigid_body_6dof", "rigid_body_6dof_direct_wrench"}:
+    if direct_id is not None and requested in {
+        "rigid_body_6dof",
+        "rigid_body_6dof_direct_wrench",
+        "rigid_body_6dof_surface_allocated",
+    }:
         direct_profile = next(profile for profile in resolved_catalog.direct_wrench_profiles if profile.id == direct_id)
         # Unlike a response profile, a direct bridge is executable only when
         # its referenced artifact was checked.  Catalog status alone must not
@@ -559,6 +719,7 @@ __all__ = [
     "Pseudo6DOFCatalog",
     "Pseudo6DOFModelKind",
     "Pseudo6DOFProfile",
+    "SurfaceAllocationProfile",
     "ProfileControlRealization",
     "QUALIFIED_EVIDENCE_STATUSES",
     "build_automatic_lowering_report",

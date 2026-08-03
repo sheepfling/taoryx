@@ -18,6 +18,7 @@ from typing import Any
 from taoryx.airbreathing_control_mapping import x8_mapping_hypotheses, x8_source_mapping
 from taoryx.contracts import Vector3
 from taoryx.control_allocation import EffectorLimits
+from taoryx.generic_tuning import LinearAuthorityRequirement, linear_authority_preflight
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.physical_lqr import (
     design_physical_wrench_lqr,
@@ -117,6 +118,20 @@ def build_artifact() -> dict[str, Any]:
         wrench_names=("moment_x_nm", "moment_y_nm"),
         effector_names=("differential-elevon-deg", "collective-elevon-deg"),
     )
+    authority_preflight = linear_authority_preflight(
+        LinearAuthorityRequirement(
+            "x8-roll-pitch-source-coordinate-authority",
+            ("roll_error_rad", "pitch_error_rad", "p_rad_s", "q_rad_s"),
+        ),
+        state_names=projection.state_names,
+        a_matrix=projection.a_matrix,
+        b_matrix=projection.b_matrix,
+    )
+    if authority_preflight.status != "passed":
+        raise RuntimeError(
+            "X8 source-coordinate authority preflight blocked roll/pitch LQR synthesis: "
+            + json.dumps(authority_preflight.as_dict(), sort_keys=True)
+        )
     design = design_physical_wrench_lqr(
         "skywalker-x8-source-trim-roll-pitch-wrench-lqr-v1",
         projection,
@@ -222,6 +237,7 @@ def build_artifact() -> dict[str, Any]:
             **acceptance,
             "observed_final_feedback_error_fraction": final_error_fraction,
         },
+        "authority_preflight": authority_preflight.as_dict(),
         "trim": trim.as_dict(),
         "linearization": {
             "state_names": list(linearization.primary.state_names),

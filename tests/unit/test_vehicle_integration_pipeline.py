@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from taoryx.vehicle_integration_pipeline import (
     STAGE_ORDER,
     validate_all_vehicle_integration_pipelines,
@@ -28,14 +30,16 @@ def test_f16_pipeline_separates_verified_plant_from_development_overlays() -> No
     assert stages["trim"].status == "passed"
     assert stages["operating_points"].metrics["work_item_count"] == 7
     assert stages["controller"].status == "development"
-    assert stages["mission"].metrics["estimated_duration_s_min"] == 1408.1865661383833
+    controller_authority = stages["controller"].metrics["authority_preflights"]
+    assert all(item["status"] == "passed" for item in controller_authority.values())
+    assert stages["mission"].metrics["estimated_duration_s_min"] == pytest.approx(1308.1865661383836)
     assert not report.promotion_eligible
     assert report.blockers == ()
     ####
 
 
-def test_hl20_pipeline_fails_closed_for_missing_expected_direct_profile() -> None:
-    """HL-20 does not inherit a missing direct-wrench profile by association."""
+def test_hl20_pipeline_fails_closed_for_missing_mission_binding() -> None:
+    """HL-20 resolves its direct tier and still blocks on the missing mission binding."""
 
     report = validate_vehicle_integration_pipeline("reference_hl20_mod_k")
     stages = {stage.stage_id: stage for stage in report.stages}
@@ -49,7 +53,7 @@ def test_hl20_pipeline_fails_closed_for_missing_expected_direct_profile() -> Non
     assert stages["controller"].status == "not_applicable"
     assert stages["mission"].status == "blocked"
     assert any(item.code == "mission-binding-missing" for item in report.blockers)
-    assert any(item.code == "profile-not-declared" for item in report.blockers)
+    assert not any(item.code == "profile-not-declared" for item in report.blockers)
     ####
 
 

@@ -1,0 +1,118 @@
+schema: taoryx.horizontal-fidelity-registry/v1alpha1
+version: 1
+description: >-
+  The horizontal integration manifest for the current Alpha 3 family catalog.
+  Profile IDs are resolved against verification/pseudo6dof_profiles.yaml; this
+  file owns the physical-family overlay, adapter seam, and four-tier declaration.
+families:
+  - family_id: skywalker_x8
+    physical_family: powered_fixed_wing
+    strategy_id: powered_fixed_wing.v1
+    mission_overlay: fixed_wing_racetrack
+    adapter_id: taoryx.fixed_wing.source_table.v1
+    automatic_lowering: true
+    vehicle_registry_id: skywalker_x8
+    tiers:
+      point_mass_3dof: {profile_id: skywalker_x8.point_mass_3dof.v1, promotion_status: development, blockers: [family_flagship_mission]}
+      pseudo_6dof: {profile_id: skywalker_x8.attitude_response_p6dof.v1, promotion_status: development, blockers: [family_flagship_mission]}
+      rigid_body_6dof_direct_wrench: {profile_id: skywalker_x8.direct_wrench_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize], blockers: [nonlinear_direct_wrench_mission]}
+      rigid_body_6dof_surface_allocated: {profile_id: skywalker_x8.surface_allocated_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize, effectiveness, allocate], blockers: [end_to_end_surface_allocated_racetrack]}
+  - family_id: b747
+    physical_family: powered_fixed_wing
+    strategy_id: powered_fixed_wing.v1
+    mission_overlay: heavy_transport_racetrack
+    adapter_id: taoryx.fixed_wing.source_table.v1
+    automatic_lowering: true
+    vehicle_registry_id: b747
+    tiers:
+      point_mass_3dof: {profile_id: b747.point_mass_3dof.v1, promotion_status: development, blockers: [family_flagship_mission]}
+      pseudo_6dof: {profile_id: b747.attitude_response_p6dof.v1, promotion_status: development, blockers: [family_flagship_mission]}
+      rigid_body_6dof_direct_wrench: {profile_id: b747.direct_wrench_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize], blockers: [nonlinear_direct_wrench_mission]}
+      rigid_body_6dof_surface_allocated: {profile_id: b747.surface_allocated_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize, effectiveness, allocate], blockers: [end_to_end_surface_allocated_racetrack]}
+  - family_id: a320_openap_3dof
+    physical_family: powered_fixed_wing
+    strategy_id: powered_fixed_wing.v1
+    mission_overlay: transport_racetrack
+    adapter_id: taoryx.fixed_wing.openap.v1
+    automatic_lowering: true
+    vehicle_registry_id: null
+    tiers:
+      point_mass_3dof: {profile_id: a320_openap_3dof.point_mass_3dof.v1, promotion_status: development, blockers: [broader_operating_point_matrix]}
+      pseudo_6dof: {profile_id: a320.attitude_response_p6dof.v1, promotion_status: development, blockers: [calibrated_response_model_and_operating_points]}
+      rigid_body_6dof_direct_wrench: {profile_id: a320.direct_wrench_6dof.v1, promotion_status: planned, blockers: [participating_rigid_body_plant, physical_surface_effectivity]}
+      rigid_body_6dof_surface_allocated: {profile_id: a320.surface_allocated_6dof.v1, promotion_status: planned, blockers: [participating_rigid_body_plant, physical_surface_effectivity]}
+  - family_id: f16_s119
+    physical_family: powered_fixed_wing
+    strategy_id: powered_fixed_wing.v1
+    mission_overlay: fighter_energy_maneuver
+    adapter_id: taoryx.fixed_wing.daveml.v1
+    automatic_lowering: true
+    source_manifest: families/reference_f16_s119/family.yaml
+    source_family_id: reference_f16_s119
+    tiers:
+      point_mass_3dof: {profile_id: f16_s119.point_mass_3dof.v1, promotion_status: development, blockers: [multi_regime_energy_mission]}
+      pseudo_6dof: {profile_id: f16_s119.attitude_response_p6dof.v1, promotion_status: development, blockers: [high_rate_alpha_beta_load_factor_envelope]}
+      rigid_body_6dof_direct_wrench: {profile_id: f16_s119.direct_wrench_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize], blockers: [nonlinear_energy_maneuver_mission]}
+      rigid_body_6dof_surface_allocated: {profile_id: f16_s119.surface_allocated_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize, effectiveness, allocate], blockers: [scheduled_surface_qualification]}
+  - family_id: x15
+    physical_family: powered_fixed_wing
+    strategy_id: rocket_aircraft_high_energy.v1
+    mission_overlay: rocket_aircraft_high_energy
+    adapter_id: taoryx.high_energy.fixed_wing.v1
+    automatic_lowering: true
+    vehicle_registry_id: x15
+    tiers:
+      point_mass_3dof: {profile_id: x15.point_mass_3dof.v1, promotion_status: development, blockers: [release_burn_coast_terminal_handoff]}
+      pseudo_6dof: {profile_id: x15.attitude_response_p6dof.v1, promotion_status: development, blockers: [powered_coast_atmospheric_schedule]}
+      rigid_body_6dof_direct_wrench: {profile_id: x15.direct_wrench_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize], blockers: [full_source_physical_effector_trim, powered_coast_atmospheric_schedule]}
+      rigid_body_6dof_surface_allocated: {profile_id: x15.surface_allocated_6dof.v1, promotion_status: planned, required_operations: [state_derivative, trim, linearize, effectiveness, allocate], blockers: [source_trim_acceptance, stabilator_rudder_rcs_propulsion_effectivity]}
+  - family_id: hummingbird
+    physical_family: multirotor
+    strategy_id: multirotor_hover_translation.v1
+    mission_overlay: pad_to_pad_hover_translation
+    adapter_id: taoryx.multirotor.native_quad_x.v1
+    automatic_lowering: true
+    vehicle_registry_id: hummingbird
+    tiers:
+      point_mass_3dof: {profile_id: hummingbird.point_mass_3dof.v1, promotion_status: development, blockers: [translated_yaw_disturbance_landing_mission]}
+      pseudo_6dof: {profile_id: hummingbird.attitude_response_p6dof.v1, promotion_status: development, blockers: [rotor_response_and_yaw_authority_envelope]}
+      rigid_body_6dof_direct_wrench: {profile_id: hummingbird.direct_wrench_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize], blockers: [direct_wrench_is_debug_comparator]}
+      rigid_body_6dof_surface_allocated: {profile_id: hummingbird.surface_allocated_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize, effectiveness, allocate], blockers: [battery_voltage_contact_and_full_envelope]}
+  - family_id: hl20_mod_k
+    physical_family: lifting_body
+    strategy_id: lifting_body_glide.v1
+    mission_overlay: glide_energy_management
+    adapter_id: taoryx.lifting_body.daveml.v1
+    automatic_lowering: true
+    source_manifest: families/reference_hl20_mod_k/family.yaml
+    source_family_id: reference_hl20_mod_k
+    tiers:
+      point_mass_3dof: {profile_id: hl20_mod_k.point_mass_3dof.v1, promotion_status: development, blockers: [glide_energy_management_mission]}
+      pseudo_6dof: {profile_id: hl20.attitude_response_p6dof.v1, promotion_status: development, blockers: [bank_reversal_alpha_limit_energy_coupling]}
+      rigid_body_6dof_direct_wrench: {profile_id: hl20.direct_wrench_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim_fragment], blockers: [source_trim_acceptance]}
+      rigid_body_6dof_surface_allocated: {profile_id: hl20.surface_allocated_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim_fragment, effectiveness, allocate], blockers: [full_state_trim, closed_loop_glide_qualification]}
+  - family_id: reference_nesc_two_stage_rocket
+    physical_family: mass_depleting_rocket
+    strategy_id: staged_rocket_replay.v1
+    mission_overlay: staged_launch_target_state
+    adapter_id: taoryx.rocket.variable_mass_nesc.v1
+    automatic_lowering: true
+    source_manifest: families/reference_nesc_two_stage_rocket/family.yaml
+    source_family_id: reference_nesc_two_stage_rocket
+    tiers:
+      point_mass_3dof: {profile_id: nesc_rocket.performance_3dof.v1, promotion_status: development, blockers: [source_replay_not_participating_plant]}
+      pseudo_6dof: {profile_id: nesc_rocket.attitude_response_p6dof.v1, promotion_status: development, blockers: [source_replay_not_participating_attitude]}
+      rigid_body_6dof_direct_wrench: {profile_id: nesc_rocket.direct_wrench_6dof.v1, promotion_status: planned, required_operations: [state_derivative, trim, linearize], blockers: [time_aligned_attitude_gimbal_effectivity]}
+      rigid_body_6dof_surface_allocated: {profile_id: nesc_rocket.surface_allocated_6dof.v1, promotion_status: planned, required_operations: [state_derivative, trim, linearize, effectiveness, allocate], blockers: [time_aligned_attitude_gimbal_effectivity]}
+  - family_id: tumbling_body
+    physical_family: passive_ballistic_tumbling_body
+    strategy_id: passive_ballistic_tumbling.v1
+    mission_overlay: release_damping_impact
+    adapter_id: taoryx.passive_body.rigid_aero.v1
+    automatic_lowering: false
+    vehicle_registry_id: null
+    tiers:
+      point_mass_3dof: {profile_id: tumbling_body.average_area_3dof.v1, promotion_status: development, blockers: [orientation_averaged_area_is_not_tumble_proof]}
+      pseudo_6dof: {profile_id: tumbling_body.rigid_body_reuse_p6dof.v1, promotion_status: development, blockers: [passive_uncontrolled_rotation_evidence]}
+      rigid_body_6dof_direct_wrench: {profile_id: null, promotion_status: not_applicable}
+      rigid_body_6dof_surface_allocated: {profile_id: null, promotion_status: not_applicable}

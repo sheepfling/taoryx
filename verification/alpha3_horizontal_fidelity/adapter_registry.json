@@ -1,0 +1,3896 @@
+{
+  "alignment": {
+    "missing_manifest_families": [],
+    "status": "pass",
+    "unexpected_registered_families": []
+  },
+  "claim_boundary": "This is adapter-contract conformance evidence; it is not a vehicle-family qualification or a claim that every advertised tier is implemented.",
+  "declared_tier_check_count": 20,
+  "executable_witness_count": 9,
+  "horizontal_lowering": {
+    "catalog": "verification/pseudo6dof_profiles.yaml",
+    "error_count": 0,
+    "families": [
+      {
+        "adapter_id": "taoryx.fixed_wing.source_table.v1",
+        "family_id": "skywalker_x8",
+        "lowering": {
+          "accepted": true,
+          "family_id": "skywalker_x8",
+          "first_blocker": null,
+          "requested": "rigid_body_6dof_surface_allocated",
+          "selected": "rigid_body_6dof_direct_wrench",
+          "steps": [
+            {
+              "fidelity": "rigid_body_6dof_surface_allocated",
+              "missing_operations": [],
+              "prerequisite": "qualified surface-allocation profile and direct-wrench parent evidence",
+              "profile_id": "skywalker_x8.surface_allocated_6dof.v1",
+              "reason": "no qualified evidence for 'skywalker_x8.surface_allocated_6dof.v1' (evidence status 'missing')",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize",
+                "effectiveness",
+                "allocate"
+              ],
+              "status": "blocked"
+            },
+            {
+              "fidelity": "rigid_body_6dof_direct_wrench",
+              "missing_operations": [],
+              "prerequisite": "qualified direct-wrench bridge and parent 3DOF evidence",
+              "profile_id": "skywalker_x8.direct_wrench_6dof.v1",
+              "reason": "evidence status 'nominal_case_pass' for 'skywalker_x8.direct_wrench_6dof.v1' is qualified",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize"
+              ],
+              "status": "eligible"
+            }
+          ]
+        },
+        "physical_family": "powered_fixed_wing",
+        "promotion": {
+          "point_mass_3dof": {
+            "blockers": [
+              "family_flagship_mission"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "pseudo_6dof": {
+            "blockers": [
+              "family_flagship_mission"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "rigid_body_6dof_direct_wrench": {
+            "blockers": [
+              "nonlinear_direct_wrench_mission"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize"
+            ]
+          },
+          "rigid_body_6dof_surface_allocated": {
+            "blockers": [
+              "end_to_end_surface_allocated_racetrack"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize",
+              "effectiveness",
+              "allocate"
+            ]
+          }
+        },
+        "tiers": {
+          "point_mass_3dof": "skywalker_x8.point_mass_3dof.v1",
+          "pseudo_6dof": "skywalker_x8.attitude_response_p6dof.v1",
+          "rigid_body_6dof_direct_wrench": "skywalker_x8.direct_wrench_6dof.v1",
+          "rigid_body_6dof_surface_allocated": "skywalker_x8.surface_allocated_6dof.v1"
+        }
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.source_table.v1",
+        "family_id": "b747",
+        "lowering": {
+          "accepted": true,
+          "family_id": "b747",
+          "first_blocker": null,
+          "requested": "rigid_body_6dof_surface_allocated",
+          "selected": "rigid_body_6dof_direct_wrench",
+          "steps": [
+            {
+              "fidelity": "rigid_body_6dof_surface_allocated",
+              "missing_operations": [],
+              "prerequisite": "qualified surface-allocation profile and direct-wrench parent evidence",
+              "profile_id": "b747.surface_allocated_6dof.v1",
+              "reason": "no qualified evidence for 'b747.surface_allocated_6dof.v1' (evidence status 'missing')",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize",
+                "effectiveness",
+                "allocate"
+              ],
+              "status": "blocked"
+            },
+            {
+              "fidelity": "rigid_body_6dof_direct_wrench",
+              "missing_operations": [],
+              "prerequisite": "qualified direct-wrench bridge and parent 3DOF evidence",
+              "profile_id": "b747.direct_wrench_6dof.v1",
+              "reason": "evidence status 'nominal_case_pass' for 'b747.direct_wrench_6dof.v1' is qualified",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize"
+              ],
+              "status": "eligible"
+            }
+          ]
+        },
+        "physical_family": "powered_fixed_wing",
+        "promotion": {
+          "point_mass_3dof": {
+            "blockers": [
+              "family_flagship_mission"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "pseudo_6dof": {
+            "blockers": [
+              "family_flagship_mission"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "rigid_body_6dof_direct_wrench": {
+            "blockers": [
+              "nonlinear_direct_wrench_mission"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize"
+            ]
+          },
+          "rigid_body_6dof_surface_allocated": {
+            "blockers": [
+              "end_to_end_surface_allocated_racetrack"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize",
+              "effectiveness",
+              "allocate"
+            ]
+          }
+        },
+        "tiers": {
+          "point_mass_3dof": "b747.point_mass_3dof.v1",
+          "pseudo_6dof": "b747.attitude_response_p6dof.v1",
+          "rigid_body_6dof_direct_wrench": "b747.direct_wrench_6dof.v1",
+          "rigid_body_6dof_surface_allocated": "b747.surface_allocated_6dof.v1"
+        }
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.openap.v1",
+        "family_id": "a320_openap_3dof",
+        "lowering": {
+          "accepted": true,
+          "family_id": "a320_openap_3dof",
+          "first_blocker": null,
+          "requested": "rigid_body_6dof_surface_allocated",
+          "selected": "rigid_body_6dof_direct_wrench",
+          "steps": [
+            {
+              "fidelity": "rigid_body_6dof_surface_allocated",
+              "missing_operations": [],
+              "prerequisite": "qualified surface-allocation profile and direct-wrench parent evidence",
+              "profile_id": "a320.surface_allocated_6dof.v1",
+              "reason": "no qualified evidence for 'a320.surface_allocated_6dof.v1' (evidence status 'missing')",
+              "required_operations": [],
+              "status": "blocked"
+            },
+            {
+              "fidelity": "rigid_body_6dof_direct_wrench",
+              "missing_operations": [],
+              "prerequisite": "qualified direct-wrench bridge and parent 3DOF evidence",
+              "profile_id": "a320.direct_wrench_6dof.v1",
+              "reason": "evidence status 'nominal_case_pass' for 'a320.direct_wrench_6dof.v1' is qualified",
+              "required_operations": [],
+              "status": "eligible"
+            }
+          ]
+        },
+        "physical_family": "powered_fixed_wing",
+        "promotion": {
+          "point_mass_3dof": {
+            "blockers": [
+              "broader_operating_point_matrix"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "pseudo_6dof": {
+            "blockers": [
+              "calibrated_response_model_and_operating_points"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "rigid_body_6dof_direct_wrench": {
+            "blockers": [
+              "participating_rigid_body_plant",
+              "physical_surface_effectivity"
+            ],
+            "declared_status": "planned",
+            "required_operations": []
+          },
+          "rigid_body_6dof_surface_allocated": {
+            "blockers": [
+              "participating_rigid_body_plant",
+              "physical_surface_effectivity"
+            ],
+            "declared_status": "planned",
+            "required_operations": []
+          }
+        },
+        "tiers": {
+          "point_mass_3dof": "a320_openap_3dof.point_mass_3dof.v1",
+          "pseudo_6dof": "a320.attitude_response_p6dof.v1",
+          "rigid_body_6dof_direct_wrench": "a320.direct_wrench_6dof.v1",
+          "rigid_body_6dof_surface_allocated": "a320.surface_allocated_6dof.v1"
+        }
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.daveml.v1",
+        "family_id": "f16_s119",
+        "lowering": {
+          "accepted": true,
+          "family_id": "f16_s119",
+          "first_blocker": null,
+          "requested": "rigid_body_6dof_surface_allocated",
+          "selected": "rigid_body_6dof_direct_wrench",
+          "steps": [
+            {
+              "fidelity": "rigid_body_6dof_surface_allocated",
+              "missing_operations": [],
+              "prerequisite": "qualified surface-allocation profile and direct-wrench parent evidence",
+              "profile_id": "f16_s119.surface_allocated_6dof.v1",
+              "reason": "no qualified evidence for 'f16_s119.surface_allocated_6dof.v1' (evidence status 'missing')",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize",
+                "effectiveness",
+                "allocate"
+              ],
+              "status": "blocked"
+            },
+            {
+              "fidelity": "rigid_body_6dof_direct_wrench",
+              "missing_operations": [],
+              "prerequisite": "qualified direct-wrench bridge and parent 3DOF evidence",
+              "profile_id": "f16_s119.direct_wrench_6dof.v1",
+              "reason": "evidence status 'nominal_case_pass' for 'f16_s119.direct_wrench_6dof.v1' is qualified",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize"
+              ],
+              "status": "eligible"
+            }
+          ]
+        },
+        "physical_family": "powered_fixed_wing",
+        "promotion": {
+          "point_mass_3dof": {
+            "blockers": [
+              "multi_regime_energy_mission"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "pseudo_6dof": {
+            "blockers": [
+              "high_rate_alpha_beta_load_factor_envelope"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "rigid_body_6dof_direct_wrench": {
+            "blockers": [
+              "nonlinear_energy_maneuver_mission"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize"
+            ]
+          },
+          "rigid_body_6dof_surface_allocated": {
+            "blockers": [
+              "scheduled_surface_qualification"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize",
+              "effectiveness",
+              "allocate"
+            ]
+          }
+        },
+        "tiers": {
+          "point_mass_3dof": "f16_s119.point_mass_3dof.v1",
+          "pseudo_6dof": "f16_s119.attitude_response_p6dof.v1",
+          "rigid_body_6dof_direct_wrench": "f16_s119.direct_wrench_6dof.v1",
+          "rigid_body_6dof_surface_allocated": "f16_s119.surface_allocated_6dof.v1"
+        }
+      },
+      {
+        "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+        "family_id": "x15",
+        "lowering": {
+          "accepted": true,
+          "family_id": "x15",
+          "first_blocker": null,
+          "requested": "rigid_body_6dof_surface_allocated",
+          "selected": "rigid_body_6dof_direct_wrench",
+          "steps": [
+            {
+              "fidelity": "rigid_body_6dof_surface_allocated",
+              "missing_operations": [],
+              "prerequisite": "qualified surface-allocation profile and direct-wrench parent evidence",
+              "profile_id": "x15.surface_allocated_6dof.v1",
+              "reason": "no qualified evidence for 'x15.surface_allocated_6dof.v1' (evidence status 'missing')",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize",
+                "effectiveness",
+                "allocate"
+              ],
+              "status": "blocked"
+            },
+            {
+              "fidelity": "rigid_body_6dof_direct_wrench",
+              "missing_operations": [],
+              "prerequisite": "qualified direct-wrench bridge and parent 3DOF evidence",
+              "profile_id": "x15.direct_wrench_6dof.v1",
+              "reason": "evidence status 'nominal_case_pass' for 'x15.direct_wrench_6dof.v1' is qualified",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize"
+              ],
+              "status": "eligible"
+            }
+          ]
+        },
+        "physical_family": "powered_fixed_wing",
+        "promotion": {
+          "point_mass_3dof": {
+            "blockers": [
+              "release_burn_coast_terminal_handoff"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "pseudo_6dof": {
+            "blockers": [
+              "powered_coast_atmospheric_schedule"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "rigid_body_6dof_direct_wrench": {
+            "blockers": [
+              "full_source_physical_effector_trim",
+              "powered_coast_atmospheric_schedule"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize"
+            ]
+          },
+          "rigid_body_6dof_surface_allocated": {
+            "blockers": [
+              "source_trim_acceptance",
+              "stabilator_rudder_rcs_propulsion_effectivity"
+            ],
+            "declared_status": "planned",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize",
+              "effectiveness",
+              "allocate"
+            ]
+          }
+        },
+        "tiers": {
+          "point_mass_3dof": "x15.point_mass_3dof.v1",
+          "pseudo_6dof": "x15.attitude_response_p6dof.v1",
+          "rigid_body_6dof_direct_wrench": "x15.direct_wrench_6dof.v1",
+          "rigid_body_6dof_surface_allocated": "x15.surface_allocated_6dof.v1"
+        }
+      },
+      {
+        "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+        "family_id": "hummingbird",
+        "lowering": {
+          "accepted": true,
+          "family_id": "hummingbird",
+          "first_blocker": null,
+          "requested": "rigid_body_6dof_surface_allocated",
+          "selected": "rigid_body_6dof_direct_wrench",
+          "steps": [
+            {
+              "fidelity": "rigid_body_6dof_surface_allocated",
+              "missing_operations": [],
+              "prerequisite": "qualified surface-allocation profile and direct-wrench parent evidence",
+              "profile_id": "hummingbird.surface_allocated_6dof.v1",
+              "reason": "no qualified evidence for 'hummingbird.surface_allocated_6dof.v1' (evidence status 'missing')",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize",
+                "effectiveness",
+                "allocate"
+              ],
+              "status": "blocked"
+            },
+            {
+              "fidelity": "rigid_body_6dof_direct_wrench",
+              "missing_operations": [],
+              "prerequisite": "qualified direct-wrench bridge and parent 3DOF evidence",
+              "profile_id": "hummingbird.direct_wrench_6dof.v1",
+              "reason": "evidence status 'debug_comparator_pass' for 'hummingbird.direct_wrench_6dof.v1' is qualified",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize"
+              ],
+              "status": "eligible"
+            }
+          ]
+        },
+        "physical_family": "multirotor",
+        "promotion": {
+          "point_mass_3dof": {
+            "blockers": [
+              "translated_yaw_disturbance_landing_mission"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "pseudo_6dof": {
+            "blockers": [
+              "rotor_response_and_yaw_authority_envelope"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "rigid_body_6dof_direct_wrench": {
+            "blockers": [
+              "direct_wrench_is_debug_comparator"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize"
+            ]
+          },
+          "rigid_body_6dof_surface_allocated": {
+            "blockers": [
+              "battery_voltage_contact_and_full_envelope"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize",
+              "effectiveness",
+              "allocate"
+            ]
+          }
+        },
+        "tiers": {
+          "point_mass_3dof": "hummingbird.point_mass_3dof.v1",
+          "pseudo_6dof": "hummingbird.attitude_response_p6dof.v1",
+          "rigid_body_6dof_direct_wrench": "hummingbird.direct_wrench_6dof.v1",
+          "rigid_body_6dof_surface_allocated": "hummingbird.surface_allocated_6dof.v1"
+        }
+      },
+      {
+        "adapter_id": "taoryx.lifting_body.daveml.v1",
+        "family_id": "hl20_mod_k",
+        "lowering": {
+          "accepted": true,
+          "family_id": "hl20_mod_k",
+          "first_blocker": null,
+          "requested": "rigid_body_6dof_surface_allocated",
+          "selected": "rigid_body_6dof_direct_wrench",
+          "steps": [
+            {
+              "fidelity": "rigid_body_6dof_surface_allocated",
+              "missing_operations": [],
+              "prerequisite": "qualified surface-allocation profile and direct-wrench parent evidence",
+              "profile_id": "hl20.surface_allocated_6dof.v1",
+              "reason": "no qualified evidence for 'hl20.surface_allocated_6dof.v1' (evidence status 'missing')",
+              "required_operations": [
+                "state_derivative",
+                "trim_fragment",
+                "effectiveness",
+                "allocate"
+              ],
+              "status": "blocked"
+            },
+            {
+              "fidelity": "rigid_body_6dof_direct_wrench",
+              "missing_operations": [],
+              "prerequisite": "qualified direct-wrench bridge and parent 3DOF evidence",
+              "profile_id": "hl20.direct_wrench_6dof.v1",
+              "reason": "evidence status 'nominal_case_pass' for 'hl20.direct_wrench_6dof.v1' is qualified",
+              "required_operations": [
+                "state_derivative",
+                "trim_fragment"
+              ],
+              "status": "eligible"
+            }
+          ]
+        },
+        "physical_family": "lifting_body",
+        "promotion": {
+          "point_mass_3dof": {
+            "blockers": [
+              "glide_energy_management_mission"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "pseudo_6dof": {
+            "blockers": [
+              "bank_reversal_alpha_limit_energy_coupling"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "rigid_body_6dof_direct_wrench": {
+            "blockers": [
+              "source_trim_acceptance"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim_fragment"
+            ]
+          },
+          "rigid_body_6dof_surface_allocated": {
+            "blockers": [
+              "full_state_trim",
+              "closed_loop_glide_qualification"
+            ],
+            "declared_status": "development",
+            "required_operations": [
+              "state_derivative",
+              "trim_fragment",
+              "effectiveness",
+              "allocate"
+            ]
+          }
+        },
+        "tiers": {
+          "point_mass_3dof": "hl20_mod_k.point_mass_3dof.v1",
+          "pseudo_6dof": "hl20.attitude_response_p6dof.v1",
+          "rigid_body_6dof_direct_wrench": "hl20.direct_wrench_6dof.v1",
+          "rigid_body_6dof_surface_allocated": "hl20.surface_allocated_6dof.v1"
+        }
+      },
+      {
+        "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+        "family_id": "reference_nesc_two_stage_rocket",
+        "lowering": {
+          "accepted": true,
+          "family_id": "reference_nesc_two_stage_rocket",
+          "first_blocker": null,
+          "requested": "rigid_body_6dof_surface_allocated",
+          "selected": "pseudo_6dof",
+          "steps": [
+            {
+              "fidelity": "rigid_body_6dof_surface_allocated",
+              "missing_operations": [],
+              "prerequisite": "qualified surface-allocation profile and direct-wrench parent evidence",
+              "profile_id": "nesc_rocket.surface_allocated_6dof.v1",
+              "reason": "no qualified evidence for 'nesc_rocket.surface_allocated_6dof.v1' (evidence status 'missing')",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize",
+                "effectiveness",
+                "allocate"
+              ],
+              "status": "blocked"
+            },
+            {
+              "fidelity": "rigid_body_6dof_direct_wrench",
+              "missing_operations": [
+                "state_derivative",
+                "trim",
+                "linearize"
+              ],
+              "prerequisite": "qualified direct-wrench bridge and parent 3DOF evidence",
+              "profile_id": "nesc_rocket.direct_wrench_6dof.v1",
+              "reason": "adapter operation status was not supplied for required operations: state_derivative, trim, linearize",
+              "required_operations": [
+                "state_derivative",
+                "trim",
+                "linearize"
+              ],
+              "status": "blocked"
+            },
+            {
+              "fidelity": "pseudo_6dof",
+              "missing_operations": [],
+              "prerequisite": "qualified pseudo-6DOF profile and parent 3-DOF evidence",
+              "profile_id": "nesc_rocket.attitude_response_p6dof.v1",
+              "reason": "evidence status 'nominal_case_pass' for 'nesc_rocket.attitude_response_p6dof.v1' is qualified",
+              "required_operations": [],
+              "status": "eligible"
+            }
+          ]
+        },
+        "physical_family": "mass_depleting_rocket",
+        "promotion": {
+          "point_mass_3dof": {
+            "blockers": [
+              "source_replay_not_participating_plant"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "pseudo_6dof": {
+            "blockers": [
+              "source_replay_not_participating_attitude"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "rigid_body_6dof_direct_wrench": {
+            "blockers": [
+              "time_aligned_attitude_gimbal_effectivity"
+            ],
+            "declared_status": "planned",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize"
+            ]
+          },
+          "rigid_body_6dof_surface_allocated": {
+            "blockers": [
+              "time_aligned_attitude_gimbal_effectivity"
+            ],
+            "declared_status": "planned",
+            "required_operations": [
+              "state_derivative",
+              "trim",
+              "linearize",
+              "effectiveness",
+              "allocate"
+            ]
+          }
+        },
+        "tiers": {
+          "point_mass_3dof": "nesc_rocket.performance_3dof.v1",
+          "pseudo_6dof": "nesc_rocket.attitude_response_p6dof.v1",
+          "rigid_body_6dof_direct_wrench": "nesc_rocket.direct_wrench_6dof.v1",
+          "rigid_body_6dof_surface_allocated": "nesc_rocket.surface_allocated_6dof.v1"
+        }
+      },
+      {
+        "adapter_id": "taoryx.passive_body.rigid_aero.v1",
+        "family_id": "tumbling_body",
+        "lowering": {
+          "accepted": false,
+          "family_id": "tumbling_body",
+          "first_blocker": "no profile was supplied for this fidelity tier",
+          "requested": "rigid_body_6dof_surface_allocated",
+          "selected": null,
+          "steps": [
+            {
+              "fidelity": "rigid_body_6dof_surface_allocated",
+              "missing_operations": [],
+              "prerequisite": "qualified surface-allocation profile and direct-wrench parent evidence",
+              "profile_id": null,
+              "reason": "no profile was supplied for this fidelity tier",
+              "required_operations": [],
+              "status": "unavailable"
+            }
+          ]
+        },
+        "physical_family": "passive_ballistic_tumbling_body",
+        "promotion": {
+          "point_mass_3dof": {
+            "blockers": [
+              "orientation_averaged_area_is_not_tumble_proof"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "pseudo_6dof": {
+            "blockers": [
+              "passive_uncontrolled_rotation_evidence"
+            ],
+            "declared_status": "development",
+            "required_operations": []
+          },
+          "rigid_body_6dof_direct_wrench": {
+            "blockers": [],
+            "declared_status": "not_applicable",
+            "required_operations": []
+          },
+          "rigid_body_6dof_surface_allocated": {
+            "blockers": [],
+            "declared_status": "not_applicable",
+            "required_operations": []
+          }
+        },
+        "tiers": {
+          "point_mass_3dof": "tumbling_body.average_area_3dof.v1",
+          "pseudo_6dof": "tumbling_body.rigid_body_reuse_p6dof.v1",
+          "rigid_body_6dof_direct_wrench": null,
+          "rigid_body_6dof_surface_allocated": null
+        }
+      }
+    ],
+    "family_count": 9,
+    "findings": [],
+    "registry": "verification/horizontal_fidelity_registry.yaml",
+    "schema": "taoryx.horizontal-fidelity-conformance/v1alpha1",
+    "status": "pass"
+  },
+  "manifest": "verification/horizontal_fidelity_registry.yaml",
+  "planned_family_count": 0,
+  "promotion_matrix": {
+    "declared_status_counts": {
+      "development": 29,
+      "not_applicable": 2,
+      "planned": 5
+    },
+    "entries": [
+      {
+        "blockers": [
+          "family_flagship_mission"
+        ],
+        "declared_status": "development",
+        "family_id": "skywalker_x8",
+        "operation_status": {},
+        "profile_id": "skywalker_x8.point_mass_3dof.v1",
+        "required_operations": [],
+        "tier": "point_mass_3dof",
+        "validation_status": "not_checked"
+      },
+      {
+        "blockers": [
+          "family_flagship_mission"
+        ],
+        "declared_status": "development",
+        "family_id": "skywalker_x8",
+        "operation_status": {},
+        "profile_id": "skywalker_x8.attitude_response_p6dof.v1",
+        "required_operations": [],
+        "tier": "pseudo_6dof",
+        "validation_status": "not_checked"
+      },
+      {
+        "blockers": [
+          "nonlinear_direct_wrench_mission"
+        ],
+        "declared_status": "development",
+        "family_id": "skywalker_x8",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "skywalker_x8.direct_wrench_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize"
+        ],
+        "tier": "rigid_body_6dof_direct_wrench",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "end_to_end_surface_allocated_racetrack"
+        ],
+        "declared_status": "development",
+        "family_id": "skywalker_x8",
+        "operation_status": {
+          "allocate": "pass",
+          "effectiveness": "pass",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "skywalker_x8.surface_allocated_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize",
+          "effectiveness",
+          "allocate"
+        ],
+        "tier": "rigid_body_6dof_surface_allocated",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "family_flagship_mission"
+        ],
+        "declared_status": "development",
+        "family_id": "b747",
+        "operation_status": {},
+        "profile_id": "b747.point_mass_3dof.v1",
+        "required_operations": [],
+        "tier": "point_mass_3dof",
+        "validation_status": "not_checked"
+      },
+      {
+        "blockers": [
+          "family_flagship_mission"
+        ],
+        "declared_status": "development",
+        "family_id": "b747",
+        "operation_status": {},
+        "profile_id": "b747.attitude_response_p6dof.v1",
+        "required_operations": [],
+        "tier": "pseudo_6dof",
+        "validation_status": "not_checked"
+      },
+      {
+        "blockers": [
+          "nonlinear_direct_wrench_mission"
+        ],
+        "declared_status": "development",
+        "family_id": "b747",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "b747.direct_wrench_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize"
+        ],
+        "tier": "rigid_body_6dof_direct_wrench",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "end_to_end_surface_allocated_racetrack"
+        ],
+        "declared_status": "development",
+        "family_id": "b747",
+        "operation_status": {
+          "allocate": "pass",
+          "effectiveness": "pass",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "b747.surface_allocated_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize",
+          "effectiveness",
+          "allocate"
+        ],
+        "tier": "rigid_body_6dof_surface_allocated",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "broader_operating_point_matrix"
+        ],
+        "declared_status": "development",
+        "family_id": "a320_openap_3dof",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "a320_openap_3dof.point_mass_3dof.v1",
+        "required_operations": [],
+        "tier": "point_mass_3dof",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "calibrated_response_model_and_operating_points"
+        ],
+        "declared_status": "development",
+        "family_id": "a320_openap_3dof",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "a320.attitude_response_p6dof.v1",
+        "required_operations": [],
+        "tier": "pseudo_6dof",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "participating_rigid_body_plant",
+          "physical_surface_effectivity"
+        ],
+        "declared_status": "planned",
+        "family_id": "a320_openap_3dof",
+        "operation_status": {},
+        "profile_id": "a320.direct_wrench_6dof.v1",
+        "required_operations": [],
+        "tier": "rigid_body_6dof_direct_wrench",
+        "validation_status": "planned"
+      },
+      {
+        "blockers": [
+          "participating_rigid_body_plant",
+          "physical_surface_effectivity"
+        ],
+        "declared_status": "planned",
+        "family_id": "a320_openap_3dof",
+        "operation_status": {},
+        "profile_id": "a320.surface_allocated_6dof.v1",
+        "required_operations": [],
+        "tier": "rigid_body_6dof_surface_allocated",
+        "validation_status": "planned"
+      },
+      {
+        "blockers": [
+          "multi_regime_energy_mission"
+        ],
+        "declared_status": "development",
+        "family_id": "f16_s119",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "f16_s119.point_mass_3dof.v1",
+        "required_operations": [],
+        "tier": "point_mass_3dof",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "high_rate_alpha_beta_load_factor_envelope"
+        ],
+        "declared_status": "development",
+        "family_id": "f16_s119",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "f16_s119.attitude_response_p6dof.v1",
+        "required_operations": [],
+        "tier": "pseudo_6dof",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "nonlinear_energy_maneuver_mission"
+        ],
+        "declared_status": "development",
+        "family_id": "f16_s119",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "f16_s119.direct_wrench_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize"
+        ],
+        "tier": "rigid_body_6dof_direct_wrench",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "scheduled_surface_qualification"
+        ],
+        "declared_status": "development",
+        "family_id": "f16_s119",
+        "operation_status": {
+          "allocate": "pass",
+          "effectiveness": "pass",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "f16_s119.surface_allocated_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize",
+          "effectiveness",
+          "allocate"
+        ],
+        "tier": "rigid_body_6dof_surface_allocated",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "release_burn_coast_terminal_handoff"
+        ],
+        "declared_status": "development",
+        "family_id": "x15",
+        "operation_status": {},
+        "profile_id": "x15.point_mass_3dof.v1",
+        "required_operations": [],
+        "tier": "point_mass_3dof",
+        "validation_status": "not_checked"
+      },
+      {
+        "blockers": [
+          "powered_coast_atmospheric_schedule"
+        ],
+        "declared_status": "development",
+        "family_id": "x15",
+        "operation_status": {},
+        "profile_id": "x15.attitude_response_p6dof.v1",
+        "required_operations": [],
+        "tier": "pseudo_6dof",
+        "validation_status": "not_checked"
+      },
+      {
+        "blockers": [
+          "full_source_physical_effector_trim",
+          "powered_coast_atmospheric_schedule"
+        ],
+        "declared_status": "development",
+        "family_id": "x15",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "x15.direct_wrench_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize"
+        ],
+        "tier": "rigid_body_6dof_direct_wrench",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "source_trim_acceptance",
+          "stabilator_rudder_rcs_propulsion_effectivity",
+          "operation_state_derivative_not_passed",
+          "operation_trim_not_passed",
+          "operation_linearize_not_passed",
+          "operation_effectiveness_not_passed",
+          "operation_allocate_not_passed"
+        ],
+        "declared_status": "planned",
+        "family_id": "x15",
+        "operation_status": {},
+        "profile_id": "x15.surface_allocated_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize",
+          "effectiveness",
+          "allocate"
+        ],
+        "tier": "rigid_body_6dof_surface_allocated",
+        "validation_status": "planned"
+      },
+      {
+        "blockers": [
+          "translated_yaw_disturbance_landing_mission"
+        ],
+        "declared_status": "development",
+        "family_id": "hummingbird",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "hummingbird.point_mass_3dof.v1",
+        "required_operations": [],
+        "tier": "point_mass_3dof",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "rotor_response_and_yaw_authority_envelope"
+        ],
+        "declared_status": "development",
+        "family_id": "hummingbird",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "hummingbird.attitude_response_p6dof.v1",
+        "required_operations": [],
+        "tier": "pseudo_6dof",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "direct_wrench_is_debug_comparator"
+        ],
+        "declared_status": "development",
+        "family_id": "hummingbird",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "hummingbird.direct_wrench_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize"
+        ],
+        "tier": "rigid_body_6dof_direct_wrench",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "battery_voltage_contact_and_full_envelope"
+        ],
+        "declared_status": "development",
+        "family_id": "hummingbird",
+        "operation_status": {
+          "allocate": "pass",
+          "effectiveness": "pass",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "hummingbird.surface_allocated_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize",
+          "effectiveness",
+          "allocate"
+        ],
+        "tier": "rigid_body_6dof_surface_allocated",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "glide_energy_management_mission"
+        ],
+        "declared_status": "development",
+        "family_id": "hl20_mod_k",
+        "operation_status": {},
+        "profile_id": "hl20_mod_k.point_mass_3dof.v1",
+        "required_operations": [],
+        "tier": "point_mass_3dof",
+        "validation_status": "not_checked"
+      },
+      {
+        "blockers": [
+          "bank_reversal_alpha_limit_energy_coupling"
+        ],
+        "declared_status": "development",
+        "family_id": "hl20_mod_k",
+        "operation_status": {},
+        "profile_id": "hl20.attitude_response_p6dof.v1",
+        "required_operations": [],
+        "tier": "pseudo_6dof",
+        "validation_status": "not_checked"
+      },
+      {
+        "blockers": [
+          "source_trim_acceptance"
+        ],
+        "declared_status": "development",
+        "family_id": "hl20_mod_k",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "not_applicable",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "not_applicable",
+          "trim_fragment": "pass"
+        },
+        "profile_id": "hl20.direct_wrench_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim_fragment"
+        ],
+        "tier": "rigid_body_6dof_direct_wrench",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "full_state_trim",
+          "closed_loop_glide_qualification"
+        ],
+        "declared_status": "development",
+        "family_id": "hl20_mod_k",
+        "operation_status": {
+          "allocate": "pass",
+          "effectiveness": "pass",
+          "linearize": "not_applicable",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "not_applicable",
+          "trim_fragment": "pass"
+        },
+        "profile_id": "hl20.surface_allocated_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim_fragment",
+          "effectiveness",
+          "allocate"
+        ],
+        "tier": "rigid_body_6dof_surface_allocated",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "source_replay_not_participating_plant"
+        ],
+        "declared_status": "development",
+        "family_id": "reference_nesc_two_stage_rocket",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "not_applicable",
+          "observe": "not_applicable",
+          "replay": "pass",
+          "resource_rates": "not_applicable",
+          "state_derivative": "not_applicable",
+          "trim": "not_applicable",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "nesc_rocket.performance_3dof.v1",
+        "required_operations": [],
+        "tier": "point_mass_3dof",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "source_replay_not_participating_attitude"
+        ],
+        "declared_status": "development",
+        "family_id": "reference_nesc_two_stage_rocket",
+        "operation_status": {
+          "allocate": "not_applicable",
+          "effectiveness": "not_applicable",
+          "linearize": "not_applicable",
+          "observe": "not_applicable",
+          "replay": "pass",
+          "resource_rates": "not_applicable",
+          "state_derivative": "not_applicable",
+          "trim": "not_applicable",
+          "trim_fragment": "not_applicable"
+        },
+        "profile_id": "nesc_rocket.attitude_response_p6dof.v1",
+        "required_operations": [],
+        "tier": "pseudo_6dof",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [
+          "time_aligned_attitude_gimbal_effectivity",
+          "operation_state_derivative_not_passed",
+          "operation_trim_not_passed",
+          "operation_linearize_not_passed"
+        ],
+        "declared_status": "planned",
+        "family_id": "reference_nesc_two_stage_rocket",
+        "operation_status": {},
+        "profile_id": "nesc_rocket.direct_wrench_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize"
+        ],
+        "tier": "rigid_body_6dof_direct_wrench",
+        "validation_status": "planned"
+      },
+      {
+        "blockers": [
+          "time_aligned_attitude_gimbal_effectivity",
+          "operation_state_derivative_not_passed",
+          "operation_trim_not_passed",
+          "operation_linearize_not_passed",
+          "operation_effectiveness_not_passed",
+          "operation_allocate_not_passed"
+        ],
+        "declared_status": "planned",
+        "family_id": "reference_nesc_two_stage_rocket",
+        "operation_status": {},
+        "profile_id": "nesc_rocket.surface_allocated_6dof.v1",
+        "required_operations": [
+          "state_derivative",
+          "trim",
+          "linearize",
+          "effectiveness",
+          "allocate"
+        ],
+        "tier": "rigid_body_6dof_surface_allocated",
+        "validation_status": "planned"
+      },
+      {
+        "blockers": [
+          "orientation_averaged_area_is_not_tumble_proof"
+        ],
+        "declared_status": "development",
+        "family_id": "tumbling_body",
+        "operation_status": {},
+        "profile_id": "tumbling_body.average_area_3dof.v1",
+        "required_operations": [],
+        "tier": "point_mass_3dof",
+        "validation_status": "not_checked"
+      },
+      {
+        "blockers": [
+          "passive_uncontrolled_rotation_evidence"
+        ],
+        "declared_status": "development",
+        "family_id": "tumbling_body",
+        "operation_status": {},
+        "profile_id": "tumbling_body.rigid_body_reuse_p6dof.v1",
+        "required_operations": [],
+        "tier": "pseudo_6dof",
+        "validation_status": "pass"
+      },
+      {
+        "blockers": [],
+        "declared_status": "not_applicable",
+        "family_id": "tumbling_body",
+        "operation_status": {},
+        "profile_id": null,
+        "required_operations": [],
+        "tier": "rigid_body_6dof_direct_wrench",
+        "validation_status": "not_applicable"
+      },
+      {
+        "blockers": [],
+        "declared_status": "not_applicable",
+        "family_id": "tumbling_body",
+        "operation_status": {},
+        "profile_id": null,
+        "required_operations": [],
+        "tier": "rigid_body_6dof_surface_allocated",
+        "validation_status": "not_applicable"
+      }
+    ],
+    "qualified_failures": [],
+    "schema": "taoryx.family-tier-promotion/v1alpha1",
+    "status": "development",
+    "validation_status_counts": {
+      "not_applicable": 2,
+      "not_checked": 9,
+      "pass": 20,
+      "planned": 5
+    }
+  },
+  "registry": {
+    "checks": [
+      {
+        "adapter_id": "taoryx.fixed_wing.source_table.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "family_id": "skywalker_x8",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "skywalker_x8",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "blocked_count": 0,
+          "family_id": "skywalker_x8",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 9
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 3,
+                "state_dimension": 9
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "effector_channels": 3,
+                "wrench_channels": 3
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.source_table.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "family_id": "b747",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "b747",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "blocked_count": 0,
+          "family_id": "b747",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 9
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 9
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "effector_channels": 4,
+                "wrench_channels": 3
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
+        "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+        "conformance": {
+          "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+          "family_id": "hummingbird",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "hummingbird",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+          "blocked_count": 0,
+          "family_id": "hummingbird",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 9
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 9
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "effector_channels": 4,
+                "wrench_channels": 3
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
+        "adapter_id": "taoryx.passive_body.rigid_aero.v1",
+        "conformance": {
+          "adapter_id": "taoryx.passive_body.rigid_aero.v1",
+          "family_id": "tumbling_body",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "family_id": "tumbling_body",
+        "message": "conformance passed",
+        "probe": null,
+        "status": "pass",
+        "tier": "pseudo_6dof"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.openap.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.openap.v1",
+          "family_id": "a320_openap_3dof",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "family_id": "a320_openap_3dof",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.openap.v1",
+          "blocked_count": 0,
+          "family_id": "a320_openap_3dof",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 10
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 5,
+                "state_dimension": 10
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "response_law tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "response_law tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "status": "pass",
+        "tier": "pseudo_6dof"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.daveml.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.daveml.v1",
+          "family_id": "f16_s119",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "f16_s119",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.daveml.v1",
+          "blocked_count": 0,
+          "family_id": "f16_s119",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 6
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 6
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "effector_channels": 4,
+                "wrench_channels": 4
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
+        "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+        "conformance": {
+          "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+          "family_id": "x15",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "family_id": "x15",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+          "blocked_count": 0,
+          "family_id": "x15",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 6
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 6,
+                "state_dimension": 6
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_direct_wrench"
+      },
+      {
+        "adapter_id": "taoryx.lifting_body.daveml.v1",
+        "conformance": {
+          "adapter_id": "taoryx.lifting_body.daveml.v1",
+          "family_id": "hl20_mod_k",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "hl20_mod_k",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.lifting_body.daveml.v1",
+          "blocked_count": 0,
+          "family_id": "hl20_mod_k",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 7
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "trim",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "claim_boundary": "source-bounded pitch-channel trim; not full 6-DOF equilibrium",
+                "fragment_id": "hl20_source_pitch_channel_trim",
+                "max_residual": 1.1578411840407199e-14,
+                "status": "verified"
+              },
+              "message": "source-backed trim fragment returned",
+              "operation": "trim_fragment",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "linearize",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "effector_channels": 7,
+                "wrench_channels": 6
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "state-derivative adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
+        "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+        "conformance": {
+          "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+          "family_id": "reference_nesc_two_stage_rocket",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "family_id": "reference_nesc_two_stage_rocket",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+          "blocked_count": 0,
+          "family_id": "reference_nesc_two_stage_rocket",
+          "operations": [
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "state_derivative",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "trim",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "linearize",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "keys": [
+                  "checks",
+                  "claim_boundary",
+                  "control_realization",
+                  "family_id",
+                  "fidelity",
+                  "initial_attitude_rad",
+                  "profile_id",
+                  "response_time_scale",
+                  "rows",
+                  "schema",
+                  "source_artifact",
+                  "status"
+                ],
+                "row_count": 202
+              },
+              "message": "source replay returned a non-empty artifact",
+              "operation": "replay",
+              "status": "pass"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "status": "pass",
+        "tier": "pseudo_6dof"
+      }
+    ],
+    "schema": "taoryx.family-adapter-registry/v1alpha1",
+    "status": "pass"
+  },
+  "reproduction": "PYTHONPATH=src python3 tools/validate_family_adapter_registry.py --check",
+  "schema": "taoryx.family-adapter-registry/v1alpha1",
+  "status": "development",
+  "tier_matrix": {
+    "checks": [
+      {
+        "adapter_id": "taoryx.fixed_wing.source_table.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "family_id": "skywalker_x8",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "family_id": "skywalker_x8",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "blocked_count": 0,
+          "family_id": "skywalker_x8",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 9
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 3,
+                "state_dimension": 9
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_direct_wrench"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.source_table.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "family_id": "skywalker_x8",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "skywalker_x8",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "blocked_count": 0,
+          "family_id": "skywalker_x8",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 9
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 3,
+                "state_dimension": 9
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "effector_channels": 3,
+                "wrench_channels": 3
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.source_table.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "family_id": "b747",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "family_id": "b747",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "blocked_count": 0,
+          "family_id": "b747",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 9
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 9
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_direct_wrench"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.source_table.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "family_id": "b747",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "b747",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.source_table.v1",
+          "blocked_count": 0,
+          "family_id": "b747",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 9
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 9
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "effector_channels": 4,
+                "wrench_channels": 3
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
+        "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+        "conformance": {
+          "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+          "family_id": "hummingbird",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "point_mass_3dof"
+        },
+        "family_id": "hummingbird",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+          "blocked_count": 0,
+          "family_id": "hummingbird",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 7
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 3,
+                "state_dimension": 7
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "force_model tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "force_model tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "point_mass_3dof"
+        },
+        "status": "pass",
+        "tier": "point_mass_3dof"
+      },
+      {
+        "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+        "conformance": {
+          "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+          "family_id": "hummingbird",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "family_id": "hummingbird",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+          "blocked_count": 0,
+          "family_id": "hummingbird",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 13
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 13
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "response_law tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "response_law tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "status": "pass",
+        "tier": "pseudo_6dof"
+      },
+      {
+        "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+        "conformance": {
+          "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+          "family_id": "hummingbird",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "family_id": "hummingbird",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+          "blocked_count": 0,
+          "family_id": "hummingbird",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 9
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 9
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_direct_wrench"
+      },
+      {
+        "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+        "conformance": {
+          "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+          "family_id": "hummingbird",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "hummingbird",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+          "blocked_count": 0,
+          "family_id": "hummingbird",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 9
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 9
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "effector_channels": 4,
+                "wrench_channels": 3
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
+        "adapter_id": "taoryx.passive_body.rigid_aero.v1",
+        "conformance": {
+          "adapter_id": "taoryx.passive_body.rigid_aero.v1",
+          "family_id": "tumbling_body",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "family_id": "tumbling_body",
+        "message": "conformance passed",
+        "probe": null,
+        "status": "pass",
+        "tier": "pseudo_6dof"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.openap.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.openap.v1",
+          "family_id": "a320_openap_3dof",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "point_mass_3dof"
+        },
+        "family_id": "a320_openap_3dof",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.openap.v1",
+          "blocked_count": 0,
+          "family_id": "a320_openap_3dof",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 4
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 2,
+                "state_dimension": 4
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "force_model tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "force_model tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "point_mass_3dof"
+        },
+        "status": "pass",
+        "tier": "point_mass_3dof"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.openap.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.openap.v1",
+          "family_id": "a320_openap_3dof",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "family_id": "a320_openap_3dof",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.openap.v1",
+          "blocked_count": 0,
+          "family_id": "a320_openap_3dof",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 10
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 5,
+                "state_dimension": 10
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "response_law tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "response_law tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "status": "pass",
+        "tier": "pseudo_6dof"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.daveml.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.daveml.v1",
+          "family_id": "f16_s119",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "point_mass_3dof"
+        },
+        "family_id": "f16_s119",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.daveml.v1",
+          "blocked_count": 0,
+          "family_id": "f16_s119",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 3
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 3
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "force_model tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "force_model tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "point_mass_3dof"
+        },
+        "status": "pass",
+        "tier": "point_mass_3dof"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.daveml.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.daveml.v1",
+          "family_id": "f16_s119",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "family_id": "f16_s119",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.daveml.v1",
+          "blocked_count": 0,
+          "family_id": "f16_s119",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 9
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 9
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "response_law tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "response_law tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "status": "pass",
+        "tier": "pseudo_6dof"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.daveml.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.daveml.v1",
+          "family_id": "f16_s119",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "family_id": "f16_s119",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.daveml.v1",
+          "blocked_count": 0,
+          "family_id": "f16_s119",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 6
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 6
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_direct_wrench"
+      },
+      {
+        "adapter_id": "taoryx.fixed_wing.daveml.v1",
+        "conformance": {
+          "adapter_id": "taoryx.fixed_wing.daveml.v1",
+          "family_id": "f16_s119",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "f16_s119",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.fixed_wing.daveml.v1",
+          "blocked_count": 0,
+          "family_id": "f16_s119",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 6
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 4,
+                "state_dimension": 6
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "effector_channels": 4,
+                "wrench_channels": 4
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
+        "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+        "conformance": {
+          "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+          "family_id": "x15",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "family_id": "x15",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+          "blocked_count": 0,
+          "family_id": "x15",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 6
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 6,
+                "state_dimension": 6
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "direct_wrench tier does not claim physical effector allocation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_direct_wrench"
+      },
+      {
+        "adapter_id": "taoryx.lifting_body.daveml.v1",
+        "conformance": {
+          "adapter_id": "taoryx.lifting_body.daveml.v1",
+          "family_id": "hl20_mod_k",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "family_id": "hl20_mod_k",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.lifting_body.daveml.v1",
+          "blocked_count": 0,
+          "family_id": "hl20_mod_k",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 7
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "trim",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "claim_boundary": "source-bounded pitch-channel trim; not full 6-DOF equilibrium",
+                "fragment_id": "hl20_source_pitch_channel_trim",
+                "max_residual": 1.1578411840407199e-14,
+                "status": "verified"
+              },
+              "message": "source-backed trim fragment returned",
+              "operation": "trim_fragment",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "linearize",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "state-derivative adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_direct_wrench"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_direct_wrench"
+      },
+      {
+        "adapter_id": "taoryx.lifting_body.daveml.v1",
+        "conformance": {
+          "adapter_id": "taoryx.lifting_body.daveml.v1",
+          "family_id": "hl20_mod_k",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "hl20_mod_k",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.lifting_body.daveml.v1",
+          "blocked_count": 0,
+          "family_id": "hl20_mod_k",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 7
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "trim",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "claim_boundary": "source-bounded pitch-channel trim; not full 6-DOF equilibrium",
+                "fragment_id": "hl20_source_pitch_channel_trim",
+                "max_residual": 1.1578411840407199e-14,
+                "status": "verified"
+              },
+              "message": "source-backed trim fragment returned",
+              "operation": "trim_fragment",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "linearize",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "effector_channels": 7,
+                "wrench_channels": 6
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "open-loop or passive adapter has no declared operation",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "state-derivative adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
+        "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+        "conformance": {
+          "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+          "family_id": "reference_nesc_two_stage_rocket",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "point_mass_3dof"
+        },
+        "family_id": "reference_nesc_two_stage_rocket",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+          "blocked_count": 0,
+          "family_id": "reference_nesc_two_stage_rocket",
+          "operations": [
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "state_derivative",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "trim",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "linearize",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "keys": [
+                  "claim_boundary",
+                  "family_id",
+                  "fidelity",
+                  "rows",
+                  "schema",
+                  "source_artifact"
+                ],
+                "row_count": 202
+              },
+              "message": "source replay returned a non-empty artifact",
+              "operation": "replay",
+              "status": "pass"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "point_mass_3dof"
+        },
+        "status": "pass",
+        "tier": "point_mass_3dof"
+      },
+      {
+        "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+        "conformance": {
+          "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+          "family_id": "reference_nesc_two_stage_rocket",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "family_id": "reference_nesc_two_stage_rocket",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+          "blocked_count": 0,
+          "family_id": "reference_nesc_two_stage_rocket",
+          "operations": [
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "state_derivative",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "trim",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "linearize",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "effectiveness",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "allocate",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "source-replay adapter has no participating operation",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "keys": [
+                  "checks",
+                  "claim_boundary",
+                  "control_realization",
+                  "family_id",
+                  "fidelity",
+                  "initial_attitude_rad",
+                  "profile_id",
+                  "response_time_scale",
+                  "rows",
+                  "schema",
+                  "source_artifact",
+                  "status"
+                ],
+                "row_count": 202
+              },
+              "message": "source replay returned a non-empty artifact",
+              "operation": "replay",
+              "status": "pass"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "pseudo_6dof"
+        },
+        "status": "pass",
+        "tier": "pseudo_6dof"
+      }
+    ],
+    "schema": "taoryx.family-adapter-registry/v1alpha1",
+    "status": "pass"
+  }
+}

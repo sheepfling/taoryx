@@ -1,0 +1,1683 @@
+{
+  "campaign_count": 2,
+  "campaigns": [
+    {
+      "campaign": {
+        "campaign_id": "hummingbird-pseudo-hover-attitude-v1",
+        "family_id": "hummingbird",
+        "nodes": [
+          {
+            "authority_requirement": {
+              "id": "hummingbird-pseudo-hover-attitude",
+              "maximum_controllability_condition": null,
+              "maximum_uncontrolled_fraction": 1e-08,
+              "minimum_controllability_rank": null,
+              "required_state_names": [
+                "roll_rad",
+                "pitch_rad",
+                "yaw_rad",
+                "roll_rate_rad_s",
+                "pitch_rate_rad_s",
+                "yaw_rate_rad_s"
+              ]
+            },
+            "control_scales": [
+              0.3,
+              0.3,
+              0.5
+            ],
+            "design_control_names": [
+              "roll_command_rad",
+              "pitch_command_rad",
+              "yaw_command_rad"
+            ],
+            "design_state_names": [
+              "roll_rad",
+              "pitch_rad",
+              "yaw_rad",
+              "roll_rate_rad_s",
+              "pitch_rate_rad_s",
+              "yaw_rate_rad_s"
+            ],
+            "linearization_options": {},
+            "maximum_omitted_state_coupling": 1e-08,
+            "node_id": "hover-attitude-inner-loop",
+            "profile_grid": {
+              "control_base_weights": [],
+              "control_effort_multipliers": [
+                2.0,
+                1.0,
+                0.25
+              ],
+              "id_prefix": "hummingbird-pseudo-hover",
+              "state_base_weights": [],
+              "state_weight_multipliers": [
+                0.25,
+                1.0,
+                4.0
+              ]
+            },
+            "profiles": [],
+            "state_scales": [
+              0.3,
+              0.3,
+              0.5,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "trim_initial_guess": {},
+            "trim_target": {}
+          }
+        ],
+        "strategy_id": "multirotor_hover_translation.v1",
+        "tier": "pseudo_6dof"
+      },
+      "claim_boundary": "Candidate-design evidence only: passing nodes have trim, derivative, and authority evidence plus an LQR candidate, not nonlinear mission or physical-effector qualification.",
+      "nodes": [
+        {
+          "authority_preflight": {
+            "blockers": [],
+            "metrics": {
+              "control_dimension": 3.0,
+              "controllability_condition_number": 26.309408939825328,
+              "controllability_rank": 6.0,
+              "required_controllability_rank": 6.0,
+              "required_state_count": 6.0,
+              "state_dimension": 6.0,
+              "uncontrolled_fraction.pitch_rad": 0.0,
+              "uncontrolled_fraction.pitch_rate_rad_s": 0.0,
+              "uncontrolled_fraction.roll_rad": 2.2887833992611187e-16,
+              "uncontrolled_fraction.roll_rate_rad_s": 2.2887833992611187e-16,
+              "uncontrolled_fraction.yaw_rad": 2.2887833992611187e-16,
+              "uncontrolled_fraction.yaw_rate_rad_s": 5.551115123125783e-17
+            },
+            "reason": "hummingbird-pseudo-hover-attitude found every declared required state controllable before gain synthesis",
+            "status": "passed"
+          },
+          "blockers": [],
+          "derivative_consistent": true,
+          "derivative_metrics": {
+            "control_step": 0.0001,
+            "maximum_absolute_difference": 1.2258313475399518e-08,
+            "maximum_omitted_state_coupling": 0.0,
+            "maximum_relative_difference": 1.2500000999839035e-09,
+            "state_step": 0.0001
+          },
+          "lqr": {
+            "best_profile_id": "hummingbird-pseudo-hover.tracking-0.25.effort-2",
+            "candidates": [
+              {
+                "closed_loop_eigenvalues": [
+                  [
+                    -2.7206323263479137,
+                    4.334431887661513
+                  ],
+                  [
+                    -2.7206323263479137,
+                    -4.334431887661513
+                  ],
+                  [
+                    -2.0562648417436056,
+                    3.057486729225632
+                  ],
+                  [
+                    -2.0562648417436056,
+                    -3.057486729225632
+                  ],
+                  [
+                    -2.7206323263479137,
+                    4.334431887661513
+                  ],
+                  [
+                    -2.7206323263479137,
+                    -4.334431887661513
+                  ]
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "roll_command_rad",
+                  "pitch_command_rad",
+                  "yaw_command_rad"
+                ],
+                "control_scales": [
+                  0.3,
+                  0.3,
+                  0.5
+                ],
+                "matrix_sha256": {
+                  "a": "967842e0d772d9073c65b1be3fec44b5ca055996d79f4435b7c98fd9fe0983a7",
+                  "b": "b893f63448c958d33adf20a44a53d31f90370aa719452eeb815ff935a689747c",
+                  "k": "56fa4b41b6cbd5a7cc9dc2c8f6148ae501523025b04fa314faf2b978a74d145f",
+                  "q": "8d9ec30a4999f88cdf2e0cb9489fdbdd508c61e203d6d95da61d99576efcd181",
+                  "r": "4c3c3e505bdf29ae58121c486c57e1cc1e35edbfbc44d426c1546991f654cca3"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -2.0562648417436056
+                },
+                "profile_id": "hummingbird-pseudo-hover.tracking-0.25.effort-2",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "roll_rad",
+                  "pitch_rad",
+                  "yaw_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s"
+                ],
+                "state_scales": [
+                  0.3,
+                  0.3,
+                  0.5,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "status": "safe",
+                "vehicle_id": "hummingbird",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25
+                  ],
+                  "r_diagonal": [
+                    2.0,
+                    2.0,
+                    2.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  [
+                    -3.134459542536548,
+                    4.216745294204878
+                  ],
+                  [
+                    -3.134459542536548,
+                    -4.216745294204878
+                  ],
+                  [
+                    -2.423926056627827,
+                    2.904379026229071
+                  ],
+                  [
+                    -2.423926056627827,
+                    -2.904379026229071
+                  ],
+                  [
+                    -3.134459542536548,
+                    4.216745294204879
+                  ],
+                  [
+                    -3.134459542536548,
+                    -4.216745294204879
+                  ]
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "roll_command_rad",
+                  "pitch_command_rad",
+                  "yaw_command_rad"
+                ],
+                "control_scales": [
+                  0.3,
+                  0.3,
+                  0.5
+                ],
+                "matrix_sha256": {
+                  "a": "967842e0d772d9073c65b1be3fec44b5ca055996d79f4435b7c98fd9fe0983a7",
+                  "b": "b893f63448c958d33adf20a44a53d31f90370aa719452eeb815ff935a689747c",
+                  "k": "b570047364566ec0f6738e2cd5677dd78aefd0ced1f09bcbdb6e4fc22b89f658",
+                  "q": "8d9ec30a4999f88cdf2e0cb9489fdbdd508c61e203d6d95da61d99576efcd181",
+                  "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -2.423926056627827
+                },
+                "profile_id": "hummingbird-pseudo-hover.tracking-0.25.effort-1",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "roll_rad",
+                  "pitch_rad",
+                  "yaw_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s"
+                ],
+                "state_scales": [
+                  0.3,
+                  0.3,
+                  0.5,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "status": "safe",
+                "vehicle_id": "hummingbird",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25
+                  ],
+                  "r_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  [
+                    -4.875391308744895,
+                    3.3390736707271116
+                  ],
+                  [
+                    -4.875391308744895,
+                    -3.3390736707271116
+                  ],
+                  [
+                    -3.930771781620985,
+                    1.6281789825408644
+                  ],
+                  [
+                    -3.930771781620985,
+                    -1.6281789825408644
+                  ],
+                  [
+                    -4.875391308744893,
+                    3.3390736707271134
+                  ],
+                  [
+                    -4.875391308744893,
+                    -3.3390736707271134
+                  ]
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "roll_command_rad",
+                  "pitch_command_rad",
+                  "yaw_command_rad"
+                ],
+                "control_scales": [
+                  0.3,
+                  0.3,
+                  0.5
+                ],
+                "matrix_sha256": {
+                  "a": "967842e0d772d9073c65b1be3fec44b5ca055996d79f4435b7c98fd9fe0983a7",
+                  "b": "b893f63448c958d33adf20a44a53d31f90370aa719452eeb815ff935a689747c",
+                  "k": "77a51aa70d9e133fe4d2df6ef3c3afa57d2adb78f66dee92a053474a6bddc4c8",
+                  "q": "8d9ec30a4999f88cdf2e0cb9489fdbdd508c61e203d6d95da61d99576efcd181",
+                  "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -3.930771781620985
+                },
+                "profile_id": "hummingbird-pseudo-hover.tracking-0.25.effort-0.25",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "roll_rad",
+                  "pitch_rad",
+                  "yaw_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s"
+                ],
+                "state_scales": [
+                  0.3,
+                  0.3,
+                  0.5,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "status": "safe",
+                "vehicle_id": "hummingbird",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25
+                  ],
+                  "r_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  [
+                    -3.817277853290747,
+                    3.9584092637333863
+                  ],
+                  [
+                    -3.817277853290747,
+                    -3.9584092637333863
+                  ],
+                  [
+                    -3.0196634211292768,
+                    2.5609309199793273
+                  ],
+                  [
+                    -3.0196634211292768,
+                    -2.5609309199793273
+                  ],
+                  [
+                    -3.8172778532907463,
+                    3.9584092637333863
+                  ],
+                  [
+                    -3.8172778532907463,
+                    -3.9584092637333863
+                  ]
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "roll_command_rad",
+                  "pitch_command_rad",
+                  "yaw_command_rad"
+                ],
+                "control_scales": [
+                  0.3,
+                  0.3,
+                  0.5
+                ],
+                "matrix_sha256": {
+                  "a": "967842e0d772d9073c65b1be3fec44b5ca055996d79f4435b7c98fd9fe0983a7",
+                  "b": "b893f63448c958d33adf20a44a53d31f90370aa719452eeb815ff935a689747c",
+                  "k": "59cf95df89d08055448554cbc50870478b0175adbd5aaabbb803fe85593936d2",
+                  "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+                  "r": "4c3c3e505bdf29ae58121c486c57e1cc1e35edbfbc44d426c1546991f654cca3"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -3.0196634211292768
+                },
+                "profile_id": "hummingbird-pseudo-hover.tracking-1.effort-2",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "roll_rad",
+                  "pitch_rad",
+                  "yaw_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s"
+                ],
+                "state_scales": [
+                  0.3,
+                  0.3,
+                  0.5,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "status": "safe",
+                "vehicle_id": "hummingbird",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  "r_diagonal": [
+                    2.0,
+                    2.0,
+                    2.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  [
+                    -4.875391308744896,
+                    3.3390736707271094
+                  ],
+                  [
+                    -4.875391308744896,
+                    -3.3390736707271094
+                  ],
+                  [
+                    -3.9307717816209866,
+                    1.6281789825408663
+                  ],
+                  [
+                    -3.9307717816209866,
+                    -1.6281789825408663
+                  ],
+                  [
+                    -4.875391308744895,
+                    3.3390736707271103
+                  ],
+                  [
+                    -4.875391308744895,
+                    -3.3390736707271103
+                  ]
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "roll_command_rad",
+                  "pitch_command_rad",
+                  "yaw_command_rad"
+                ],
+                "control_scales": [
+                  0.3,
+                  0.3,
+                  0.5
+                ],
+                "matrix_sha256": {
+                  "a": "967842e0d772d9073c65b1be3fec44b5ca055996d79f4435b7c98fd9fe0983a7",
+                  "b": "b893f63448c958d33adf20a44a53d31f90370aa719452eeb815ff935a689747c",
+                  "k": "d0f891ce9b8a53ec78e1bbd4d73d364dfa05457863533272fafe08bf2d2b26ef",
+                  "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+                  "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -3.9307717816209866
+                },
+                "profile_id": "hummingbird-pseudo-hover.tracking-1.effort-1",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "roll_rad",
+                  "pitch_rad",
+                  "yaw_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s"
+                ],
+                "state_scales": [
+                  0.3,
+                  0.3,
+                  0.5,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "status": "safe",
+                "vehicle_id": "hummingbird",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  "r_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -4.208119041407539,
+                  -13.120245519843367,
+                  -2.395635326895677,
+                  -11.947423629407696,
+                  -13.120245519843369,
+                  -4.20811904140754
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "roll_command_rad",
+                  "pitch_command_rad",
+                  "yaw_command_rad"
+                ],
+                "control_scales": [
+                  0.3,
+                  0.3,
+                  0.5
+                ],
+                "matrix_sha256": {
+                  "a": "967842e0d772d9073c65b1be3fec44b5ca055996d79f4435b7c98fd9fe0983a7",
+                  "b": "b893f63448c958d33adf20a44a53d31f90370aa719452eeb815ff935a689747c",
+                  "k": "18da8c9b2a9765b819c61274a4ae60b7d5f6299dc97caa2c351235ab86022c84",
+                  "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+                  "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -2.395635326895677
+                },
+                "profile_id": "hummingbird-pseudo-hover.tracking-1.effort-0.25",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "roll_rad",
+                  "pitch_rad",
+                  "yaw_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s"
+                ],
+                "state_scales": [
+                  0.3,
+                  0.3,
+                  0.5,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "status": "safe",
+                "vehicle_id": "hummingbird",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  "r_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  [
+                    -6.435120678399839,
+                    1.1644348247410587
+                  ],
+                  [
+                    -6.435120678399839,
+                    -1.1644348247410587
+                  ],
+                  -2.9085871363994613,
+                  -7.622343528729957,
+                  [
+                    -6.4351206783998345,
+                    1.1644348247410867
+                  ],
+                  [
+                    -6.4351206783998345,
+                    -1.1644348247410867
+                  ]
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "roll_command_rad",
+                  "pitch_command_rad",
+                  "yaw_command_rad"
+                ],
+                "control_scales": [
+                  0.3,
+                  0.3,
+                  0.5
+                ],
+                "matrix_sha256": {
+                  "a": "967842e0d772d9073c65b1be3fec44b5ca055996d79f4435b7c98fd9fe0983a7",
+                  "b": "b893f63448c958d33adf20a44a53d31f90370aa719452eeb815ff935a689747c",
+                  "k": "1a980dae8f118c110803a854378f4510ff7741b285320ff367741d0e5652e741",
+                  "q": "770663b8d8860dc2fd98a3f480275a1ad0913234f85184bde80c068e52676947",
+                  "r": "4c3c3e505bdf29ae58121c486c57e1cc1e35edbfbc44d426c1546991f654cca3"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -2.9085871363994613
+                },
+                "profile_id": "hummingbird-pseudo-hover.tracking-4.effort-2",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "roll_rad",
+                  "pitch_rad",
+                  "yaw_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s"
+                ],
+                "state_scales": [
+                  0.3,
+                  0.3,
+                  0.5,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "status": "safe",
+                "vehicle_id": "hummingbird",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0
+                  ],
+                  "r_diagonal": [
+                    2.0,
+                    2.0,
+                    2.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -4.208119041407532,
+                  -13.120245519843401,
+                  -2.395635326895686,
+                  -11.947423629407695,
+                  -13.12024551984339,
+                  -4.208119041407531
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "roll_command_rad",
+                  "pitch_command_rad",
+                  "yaw_command_rad"
+                ],
+                "control_scales": [
+                  0.3,
+                  0.3,
+                  0.5
+                ],
+                "matrix_sha256": {
+                  "a": "967842e0d772d9073c65b1be3fec44b5ca055996d79f4435b7c98fd9fe0983a7",
+                  "b": "b893f63448c958d33adf20a44a53d31f90370aa719452eeb815ff935a689747c",
+                  "k": "af866e16ca2aa5f5d35fb288c437dcd0af17793566b47cbab50c29b6627d3f10",
+                  "q": "770663b8d8860dc2fd98a3f480275a1ad0913234f85184bde80c068e52676947",
+                  "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -2.395635326895686
+                },
+                "profile_id": "hummingbird-pseudo-hover.tracking-4.effort-1",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "roll_rad",
+                  "pitch_rad",
+                  "yaw_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s"
+                ],
+                "state_scales": [
+                  0.3,
+                  0.3,
+                  0.5,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "status": "safe",
+                "vehicle_id": "hummingbird",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0
+                  ],
+                  "r_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -3.5212419377359048,
+                  -28.91169620716371,
+                  -2.0933234456214365,
+                  -25.21146558516603,
+                  -28.9116962071637,
+                  -3.5212419377358937
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "roll_command_rad",
+                  "pitch_command_rad",
+                  "yaw_command_rad"
+                ],
+                "control_scales": [
+                  0.3,
+                  0.3,
+                  0.5
+                ],
+                "matrix_sha256": {
+                  "a": "967842e0d772d9073c65b1be3fec44b5ca055996d79f4435b7c98fd9fe0983a7",
+                  "b": "b893f63448c958d33adf20a44a53d31f90370aa719452eeb815ff935a689747c",
+                  "k": "2badfb2094fbee4799a1bca9d627dac96c3402b3971742d2bc481a21cb5a573e",
+                  "q": "770663b8d8860dc2fd98a3f480275a1ad0913234f85184bde80c068e52676947",
+                  "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -2.0933234456214365
+                },
+                "profile_id": "hummingbird-pseudo-hover.tracking-4.effort-0.25",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "roll_rad",
+                  "pitch_rad",
+                  "yaw_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s"
+                ],
+                "state_scales": [
+                  0.3,
+                  0.3,
+                  0.5,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "status": "safe",
+                "vehicle_id": "hummingbird",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0
+                  ],
+                  "r_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25
+                  ]
+                }
+              }
+            ],
+            "design_source": "hummingbird-pseudo-hover-attitude-v1:hover-attitude-inner-loop:taoryx.hummingbird.aggregate_thrust.attitude_response_p6dof@hummingbird.attitude_response_p6dof.v1",
+            "status": "safe",
+            "vehicle_id": "hummingbird"
+          },
+          "message": "trim, derivative consistency, authority preflight, and a bounded LQR candidate passed",
+          "node_id": "hover-attitude-inner-loop",
+          "status": "candidate_ready",
+          "trim": {
+            "controls": {
+              "pitch_command_rad": 0.0,
+              "roll_command_rad": 0.0,
+              "thrust_ratio": 0.09781218831039297,
+              "yaw_command_rad": 0.0
+            },
+            "cost": 0.0,
+            "diagnostics": [],
+            "iterations": 0,
+            "max_residual": 0.0,
+            "message": "analytic quasi-steady hover trim for the named thrust-vector response model",
+            "operating_point": {
+              "model": "hummingbird-aggregate-thrust-attitude-response",
+              "profile_id": "hummingbird.attitude_response_p6dof.v1",
+              "thrust_frame": "world_euler"
+            },
+            "residuals": {
+              "altitude_m": 0.0,
+              "east_m": 0.0,
+              "east_velocity_m_s": -0.0,
+              "north_m": 0.0,
+              "north_velocity_m_s": 0.0,
+              "pitch_rad": 0.0,
+              "pitch_rate_rad_s": 0.0,
+              "roll_rad": 0.0,
+              "roll_rate_rad_s": 0.0,
+              "vertical_velocity_m_s": 0.0,
+              "yaw_rad": 0.0,
+              "yaw_rate_rad_s": 0.0
+            },
+            "scaled_residual_norm": 0.0,
+            "state": {
+              "altitude_m": 1.0,
+              "battery_fraction": 1.0,
+              "east_m": 0.0,
+              "east_velocity_m_s": 0.0,
+              "north_m": 0.0,
+              "north_velocity_m_s": 0.0,
+              "pitch_rad": 0.0,
+              "pitch_rate_rad_s": 0.0,
+              "roll_rad": 0.0,
+              "roll_rate_rad_s": 0.0,
+              "vertical_velocity_m_s": 0.0,
+              "yaw_rad": 0.0,
+              "yaw_rate_rad_s": 0.0
+            },
+            "status": 1,
+            "success": true
+          }
+        }
+      ],
+      "schema": "taoryx.tuning-campaign/v1alpha1",
+      "status": "candidate_ready"
+    },
+    {
+      "campaign": {
+        "campaign_id": "a320-pseudo-cruise-attitude-v1",
+        "family_id": "a320_openap_3dof",
+        "nodes": [
+          {
+            "authority_requirement": {
+              "id": "a320-pseudo-cruise-attitude",
+              "maximum_controllability_condition": null,
+              "maximum_uncontrolled_fraction": 1e-08,
+              "minimum_controllability_rank": null,
+              "required_state_names": [
+                "alpha_rad",
+                "beta_rad",
+                "roll_rate_rad_s",
+                "pitch_rate_rad_s",
+                "yaw_rate_rad_s",
+                "bank_angle_rad"
+              ]
+            },
+            "control_scales": [
+              0.2,
+              0.2,
+              0.2
+            ],
+            "design_control_names": [
+              "aileron_rad",
+              "elevator_rad",
+              "rudder_rad"
+            ],
+            "design_state_names": [
+              "alpha_rad",
+              "beta_rad",
+              "roll_rate_rad_s",
+              "pitch_rate_rad_s",
+              "yaw_rate_rad_s",
+              "bank_angle_rad"
+            ],
+            "linearization_options": {},
+            "maximum_omitted_state_coupling": 1e-08,
+            "node_id": "cruise-attitude-response",
+            "profile_grid": {
+              "control_base_weights": [],
+              "control_effort_multipliers": [
+                2.0,
+                1.0,
+                0.25
+              ],
+              "id_prefix": "a320-pseudo-cruise",
+              "state_base_weights": [],
+              "state_weight_multipliers": [
+                0.25,
+                1.0,
+                4.0
+              ]
+            },
+            "profiles": [],
+            "state_scales": [
+              0.1,
+              0.1,
+              0.5,
+              0.5,
+              0.5,
+              0.5
+            ],
+            "trim_initial_guess": {},
+            "trim_target": {}
+          }
+        ],
+        "strategy_id": "powered_fixed_wing.v1",
+        "tier": "pseudo_6dof"
+      },
+      "claim_boundary": "Candidate-design evidence only: passing nodes have trim, derivative, and authority evidence plus an LQR candidate, not nonlinear mission or physical-effector qualification.",
+      "nodes": [
+        {
+          "authority_preflight": {
+            "blockers": [],
+            "metrics": {
+              "control_dimension": 3.0,
+              "controllability_condition_number": 3553497.1275165994,
+              "controllability_rank": 6.0,
+              "required_controllability_rank": 6.0,
+              "required_state_count": 6.0,
+              "state_dimension": 6.0,
+              "uncontrolled_fraction.alpha_rad": 5.325562792074908e-16,
+              "uncontrolled_fraction.bank_angle_rad": 6.726282067042946e-16,
+              "uncontrolled_fraction.beta_rad": 4.3192247287297647e-16,
+              "uncontrolled_fraction.pitch_rate_rad_s": 4.373154666514172e-16,
+              "uncontrolled_fraction.roll_rate_rad_s": 4.518515572229512e-16,
+              "uncontrolled_fraction.yaw_rate_rad_s": 1.2428744378043274e-16
+            },
+            "reason": "a320-pseudo-cruise-attitude found every declared required state controllable before gain synthesis",
+            "status": "passed"
+          },
+          "blockers": [],
+          "derivative_consistent": true,
+          "derivative_metrics": {
+            "control_step": 0.0001,
+            "maximum_absolute_difference": 2.876927283068653e-07,
+            "maximum_omitted_state_coupling": 2.0737284705580508e-16,
+            "maximum_relative_difference": 3.382342024675755e-06,
+            "state_step": 0.0001
+          },
+          "lqr": {
+            "best_profile_id": "a320-pseudo-cruise.tracking-0.25.effort-2",
+            "candidates": [
+              {
+                "closed_loop_eigenvalues": [
+                  -0.8920821460495247,
+                  -9.619638179114567,
+                  -10.99241140205346,
+                  -10.171690051566054,
+                  -0.06815442684254905,
+                  -0.3096923866504971
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "aileron_rad",
+                  "elevator_rad",
+                  "rudder_rad"
+                ],
+                "control_scales": [
+                  0.2,
+                  0.2,
+                  0.2
+                ],
+                "matrix_sha256": {
+                  "a": "dd6534efb05da05e1c0fd0e02beb968fc40125c5200d4f8643191a850d0f6eeb",
+                  "b": "f77654b84796a1ee316cbe7ad772eb0092542e7b0d435ff1c33f1fd39f9135c6",
+                  "k": "ec1bce8ba29bc1e15fe29dfd57062c44cf4dff74231ba9c34b99c055aa0055b1",
+                  "q": "8d9ec30a4999f88cdf2e0cb9489fdbdd508c61e203d6d95da61d99576efcd181",
+                  "r": "4c3c3e505bdf29ae58121c486c57e1cc1e35edbfbc44d426c1546991f654cca3"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -0.06815442684254905
+                },
+                "profile_id": "a320-pseudo-cruise.tracking-0.25.effort-2",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "alpha_rad",
+                  "beta_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s",
+                  "bank_angle_rad"
+                ],
+                "state_scales": [
+                  0.1,
+                  0.1,
+                  0.5,
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "status": "safe",
+                "vehicle_id": "a320_openap_3dof",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25
+                  ],
+                  "r_diagonal": [
+                    2.0,
+                    2.0,
+                    2.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -0.8961504441936619,
+                  -9.622282019509354,
+                  -0.353052057520576,
+                  -0.0959856731501984,
+                  -11.017315627067648,
+                  -10.182108804671838
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "aileron_rad",
+                  "elevator_rad",
+                  "rudder_rad"
+                ],
+                "control_scales": [
+                  0.2,
+                  0.2,
+                  0.2
+                ],
+                "matrix_sha256": {
+                  "a": "dd6534efb05da05e1c0fd0e02beb968fc40125c5200d4f8643191a850d0f6eeb",
+                  "b": "f77654b84796a1ee316cbe7ad772eb0092542e7b0d435ff1c33f1fd39f9135c6",
+                  "k": "bf22c55de41c5a3cceeb90923a079abc1fbac6cd78eafb5daf12bedfa43e1be0",
+                  "q": "8d9ec30a4999f88cdf2e0cb9489fdbdd508c61e203d6d95da61d99576efcd181",
+                  "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -0.0959856731501984
+                },
+                "profile_id": "a320-pseudo-cruise.tracking-0.25.effort-1",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "alpha_rad",
+                  "beta_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s",
+                  "bank_angle_rad"
+                ],
+                "state_scales": [
+                  0.1,
+                  0.1,
+                  0.5,
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "status": "safe",
+                "vehicle_id": "a320_openap_3dof",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25
+                  ],
+                  "r_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -0.9200908246562491,
+                  -9.638138592659935,
+                  -10.24454210216224,
+                  -11.165590698432737,
+                  -0.18867505941342022,
+                  -0.5429471055733806
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "aileron_rad",
+                  "elevator_rad",
+                  "rudder_rad"
+                ],
+                "control_scales": [
+                  0.2,
+                  0.2,
+                  0.2
+                ],
+                "matrix_sha256": {
+                  "a": "dd6534efb05da05e1c0fd0e02beb968fc40125c5200d4f8643191a850d0f6eeb",
+                  "b": "f77654b84796a1ee316cbe7ad772eb0092542e7b0d435ff1c33f1fd39f9135c6",
+                  "k": "7c598c68de56940d97aa1e58105c4774ef255ccb4c8ab2a77ad5f18b735d2971",
+                  "q": "8d9ec30a4999f88cdf2e0cb9489fdbdd508c61e203d6d95da61d99576efcd181",
+                  "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -0.18867505941342022
+                },
+                "profile_id": "a320-pseudo-cruise.tracking-0.25.effort-0.25",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "alpha_rad",
+                  "beta_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s",
+                  "bank_angle_rad"
+                ],
+                "state_scales": [
+                  0.1,
+                  0.1,
+                  0.5,
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "status": "safe",
+                "vehicle_id": "a320_openap_3dof",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25
+                  ],
+                  "r_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -0.9042187648696256,
+                  -9.627568777490218,
+                  -10.20293531750462,
+                  -11.066958147440028,
+                  -0.13485176695568085,
+                  -0.4263890476534515
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "aileron_rad",
+                  "elevator_rad",
+                  "rudder_rad"
+                ],
+                "control_scales": [
+                  0.2,
+                  0.2,
+                  0.2
+                ],
+                "matrix_sha256": {
+                  "a": "dd6534efb05da05e1c0fd0e02beb968fc40125c5200d4f8643191a850d0f6eeb",
+                  "b": "f77654b84796a1ee316cbe7ad772eb0092542e7b0d435ff1c33f1fd39f9135c6",
+                  "k": "ce35b96274a2b9f1bc2b2fdf9380841617a2bc89403586d83ad03f9bb49364b7",
+                  "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+                  "r": "4c3c3e505bdf29ae58121c486c57e1cc1e35edbfbc44d426c1546991f654cca3"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -0.13485176695568085
+                },
+                "profile_id": "a320-pseudo-cruise.tracking-1.effort-2",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "alpha_rad",
+                  "beta_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s",
+                  "bank_angle_rad"
+                ],
+                "state_scales": [
+                  0.1,
+                  0.1,
+                  0.5,
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "status": "safe",
+                "vehicle_id": "a320_openap_3dof",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  "r_diagonal": [
+                    2.0,
+                    2.0,
+                    2.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -0.9200908246562491,
+                  -9.638138592659935,
+                  -10.244542102162265,
+                  -11.165590698432755,
+                  -0.18867505941341867,
+                  -0.5429471055733792
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "aileron_rad",
+                  "elevator_rad",
+                  "rudder_rad"
+                ],
+                "control_scales": [
+                  0.2,
+                  0.2,
+                  0.2
+                ],
+                "matrix_sha256": {
+                  "a": "dd6534efb05da05e1c0fd0e02beb968fc40125c5200d4f8643191a850d0f6eeb",
+                  "b": "f77654b84796a1ee316cbe7ad772eb0092542e7b0d435ff1c33f1fd39f9135c6",
+                  "k": "3286cf55c0cf6d9a8f974129cd2d5a8d9d56faab6db0ca454076f823d673355f",
+                  "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+                  "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -0.18867505941341867
+                },
+                "profile_id": "a320-pseudo-cruise.tracking-1.effort-1",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "alpha_rad",
+                  "beta_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s",
+                  "bank_angle_rad"
+                ],
+                "state_scales": [
+                  0.1,
+                  0.1,
+                  0.5,
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "status": "safe",
+                "vehicle_id": "a320_openap_3dof",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  "r_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -1.0087816201833952,
+                  -9.70145274693749,
+                  -11.740299391648676,
+                  -10.492704845985362,
+                  -0.35813009259752665,
+                  -0.9673316431072106
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "aileron_rad",
+                  "elevator_rad",
+                  "rudder_rad"
+                ],
+                "control_scales": [
+                  0.2,
+                  0.2,
+                  0.2
+                ],
+                "matrix_sha256": {
+                  "a": "dd6534efb05da05e1c0fd0e02beb968fc40125c5200d4f8643191a850d0f6eeb",
+                  "b": "f77654b84796a1ee316cbe7ad772eb0092542e7b0d435ff1c33f1fd39f9135c6",
+                  "k": "ea405cd6575ec4a0e49fd62bbf2090b5a3e70597ee6f21a815887de5a796f2d4",
+                  "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+                  "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -0.35813009259752665
+                },
+                "profile_id": "a320-pseudo-cruise.tracking-1.effort-0.25",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "alpha_rad",
+                  "beta_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s",
+                  "bank_angle_rad"
+                ],
+                "state_scales": [
+                  0.1,
+                  0.1,
+                  0.5,
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "status": "safe",
+                "vehicle_id": "a320_openap_3dof",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  "r_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -0.9508392786316424,
+                  -9.65926334442383,
+                  -11.360329615158847,
+                  -10.32755608759252,
+                  -0.26190897136485736,
+                  -0.717883263994479
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "aileron_rad",
+                  "elevator_rad",
+                  "rudder_rad"
+                ],
+                "control_scales": [
+                  0.2,
+                  0.2,
+                  0.2
+                ],
+                "matrix_sha256": {
+                  "a": "dd6534efb05da05e1c0fd0e02beb968fc40125c5200d4f8643191a850d0f6eeb",
+                  "b": "f77654b84796a1ee316cbe7ad772eb0092542e7b0d435ff1c33f1fd39f9135c6",
+                  "k": "91647e40feafa2a524b7689ea5568f82b87ce15db7a11a702717494c45b66e11",
+                  "q": "770663b8d8860dc2fd98a3f480275a1ad0913234f85184bde80c068e52676947",
+                  "r": "4c3c3e505bdf29ae58121c486c57e1cc1e35edbfbc44d426c1546991f654cca3"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -0.26190897136485736
+                },
+                "profile_id": "a320-pseudo-cruise.tracking-4.effort-2",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "alpha_rad",
+                  "beta_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s",
+                  "bank_angle_rad"
+                ],
+                "state_scales": [
+                  0.1,
+                  0.1,
+                  0.5,
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "status": "safe",
+                "vehicle_id": "a320_openap_3dof",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0
+                  ],
+                  "r_diagonal": [
+                    2.0,
+                    2.0,
+                    2.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -1.008781620183397,
+                  -9.70145274693749,
+                  -11.740299391648671,
+                  -10.492704845985353,
+                  -0.9673316431072067,
+                  -0.35813009259751966
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "aileron_rad",
+                  "elevator_rad",
+                  "rudder_rad"
+                ],
+                "control_scales": [
+                  0.2,
+                  0.2,
+                  0.2
+                ],
+                "matrix_sha256": {
+                  "a": "dd6534efb05da05e1c0fd0e02beb968fc40125c5200d4f8643191a850d0f6eeb",
+                  "b": "f77654b84796a1ee316cbe7ad772eb0092542e7b0d435ff1c33f1fd39f9135c6",
+                  "k": "89e4f359726022cf69470305933819ddf1e463c418573bffa8a7e060850fe7fa",
+                  "q": "770663b8d8860dc2fd98a3f480275a1ad0913234f85184bde80c068e52676947",
+                  "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -0.35813009259751966
+                },
+                "profile_id": "a320-pseudo-cruise.tracking-4.effort-1",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "alpha_rad",
+                  "beta_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s",
+                  "bank_angle_rad"
+                ],
+                "state_scales": [
+                  0.1,
+                  0.1,
+                  0.5,
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "status": "safe",
+                "vehicle_id": "a320_openap_3dof",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0
+                  ],
+                  "r_diagonal": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                }
+              },
+              {
+                "closed_loop_eigenvalues": [
+                  -1.287983389997482,
+                  -9.95284366152432,
+                  -13.805681278308878,
+                  -11.455244060546116,
+                  -1.7267000689133505,
+                  -0.6087886931883801
+                ],
+                "condition_number": 1.0,
+                "control_names": [
+                  "aileron_rad",
+                  "elevator_rad",
+                  "rudder_rad"
+                ],
+                "control_scales": [
+                  0.2,
+                  0.2,
+                  0.2
+                ],
+                "matrix_sha256": {
+                  "a": "dd6534efb05da05e1c0fd0e02beb968fc40125c5200d4f8643191a850d0f6eeb",
+                  "b": "f77654b84796a1ee316cbe7ad772eb0092542e7b0d435ff1c33f1fd39f9135c6",
+                  "k": "3789f3d4fed2a05fdf2b4dc0070654c6e61c6178a370e8436cc69745e1bc145f",
+                  "q": "770663b8d8860dc2fd98a3f480275a1ad0913234f85184bde80c068e52676947",
+                  "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+                },
+                "metrics": {
+                  "condition_number": 1.0,
+                  "maximum_real_pole": -0.6087886931883801
+                },
+                "profile_id": "a320-pseudo-cruise.tracking-4.effort-0.25",
+                "robustness": null,
+                "score": 1e-06,
+                "state_names": [
+                  "alpha_rad",
+                  "beta_rad",
+                  "roll_rate_rad_s",
+                  "pitch_rate_rad_s",
+                  "yaw_rate_rad_s",
+                  "bank_angle_rad"
+                ],
+                "state_scales": [
+                  0.1,
+                  0.1,
+                  0.5,
+                  0.5,
+                  0.5,
+                  0.5
+                ],
+                "status": "safe",
+                "vehicle_id": "a320_openap_3dof",
+                "violations": [],
+                "weights": {
+                  "q_diagonal": [
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0
+                  ],
+                  "r_diagonal": [
+                    0.25,
+                    0.25,
+                    0.25
+                  ]
+                }
+              }
+            ],
+            "design_source": "a320-pseudo-cruise-attitude-v1:cruise-attitude-response:taoryx.a320.openap_jsbsim.pseudo6dof@f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+            "status": "safe",
+            "vehicle_id": "a320_openap_3dof"
+          },
+          "message": "trim, derivative consistency, authority preflight, and a bounded LQR candidate passed",
+          "node_id": "cruise-attitude-response",
+          "status": "candidate_ready",
+          "trim": {
+            "controls": {
+              "aileron_rad": -1.2736943660208457e-28,
+              "elevator_rad": 0.019999999999995393,
+              "flight_path_angle_rad": 9.001060854074868e-27,
+              "rudder_rad": 5.0947774640929335e-27,
+              "throttle_ratio": 0.7174806937690654
+            },
+            "cost": 4.2143432665986284e-29,
+            "diagnostics": [],
+            "iterations": 6,
+            "max_residual": 9.144161122742744e-16,
+            "message": "`gtol` termination condition is satisfied.",
+            "operating_point": {
+              "altitude_m": 11000.0,
+              "mach": 0.78,
+              "model": "a320-openap-jsbsim-pseudo6dof"
+            },
+            "residuals": {
+              "alpha_rad": -9.144161122742744e-16,
+              "altitude_m": 2.0716320044598396e-24,
+              "beta_rad": 5.094777464092934e-28,
+              "mach": -2.991507267487124e-28,
+              "pitch_rate_rad_s": 8.192574035629611e-17,
+              "roll_rate_rad_s": 1.2537996006406305e-39,
+              "yaw_rate_rad_s": -1.752826406882654e-26
+            },
+            "scaled_residual_norm": 9.180787838305194e-15,
+            "state": {
+              "alpha_rad": 0.00250000000000171,
+              "altitude_m": 11000.0,
+              "bank_angle_rad": 0.0,
+              "beta_rad": 0.0,
+              "mach": 0.78,
+              "mass_kg": 60000.0,
+              "pitch_rate_rad_s": 0.0,
+              "range_m": 0.0,
+              "roll_rate_rad_s": 0.0,
+              "yaw_rate_rad_s": 0.0
+            },
+            "status": 1,
+            "success": true
+          }
+        }
+      ],
+      "schema": "taoryx.tuning-campaign/v1alpha1",
+      "status": "candidate_ready"
+    }
+  ],
+  "claim_boundary": "Reusable lower-tier candidate-design screens only; no physical surface/rotor allocation, nonlinear mission, or family-envelope qualification claim.",
+  "schema": "taoryx.reduced-tuning-campaign-witnesses/v1alpha1",
+  "status": "candidate_ready"
+}

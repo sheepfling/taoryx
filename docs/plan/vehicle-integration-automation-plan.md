@@ -221,6 +221,16 @@ Exit criteria:
 
 ## Milestone C — Plant and effector contract generation
 
+Before actuator information can participate in trim, allocation, or a runtime
+plant, intake must classify its destination.  Scalar values that the native
+grammar explicitly supports may be lowered to a native runtime directive.
+Nested values such as actuator dynamics, allocation matrices, provenance, and
+sensor settings remain structured manifest data until a named adapter consumes
+them.  The generator must not stringify nested YAML/Python values into a
+native scalar attribute: every generated problem is successor-parsed as an
+onboarding regression check.  This preserves the source/model record without
+mistaking metadata serialization for an implemented actuator.
+
 Automate the distinction between direct-wrench and physical-effector paths.
 The intake should require an explicit control path and generate tests for:
 

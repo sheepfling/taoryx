@@ -15,6 +15,9 @@ The native guided rigid-body work is staged separately in
 The composition, resolved-scenario, artifact, and visualization sequence is
 tracked in
 [`../plan/composable-scenario-runtime.md`](../plan/composable-scenario-runtime.md).
+The common vehicle metadata, parameter, semantic control, resource, status,
+and AI/RL observation boundary is defined in
+[vehicle-interface-contract.md](vehicle-interface-contract.md).
 The progressive point-mass, kinematic bridge, and two rigid-body control-
 realization tiers are described in
 [`dynamics-fidelity-ladder.md`](dynamics-fidelity-ladder.md).
@@ -135,6 +138,10 @@ declared model/status values second, and deep diagnostics only on request.
 - [`docs/architecture/vehicle-data-model.md`](vehicle-data-model.md) groups
   the successor-side geometry, mass, propulsion, and effector data families
   that sit above the current TAOS `.tbl` abstraction.
+- [`docs/architecture/vehicle-interface-contract.md`](vehicle-interface-contract.md)
+  defines the resolved vehicle-facing parameter, action, status, resource,
+  truth, and observation contract used by composition and interactive
+  execution.
 - [`docs/architecture/telemetry.md`](telemetry.md) defines the structured
   runtime artifact consumed by reports and visualization backends.
 - [`docs/architecture/table-explorer.md`](table-explorer.md) explains the

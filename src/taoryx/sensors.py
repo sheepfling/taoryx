@@ -33,6 +33,50 @@ def _rotation(value: Array3, name: str) -> Array3:
     return result
 
 
+def _truth_payload(truth: "TruthPoint | None") -> dict[str, object] | None:
+    """Serialize one committed truth point for a sensor-only checkpoint."""
+
+    if truth is None:
+        return None
+    return {
+        "time_s": truth.time_s,
+        "position_eci_m": truth.position_eci_m.tolist(),
+        "velocity_eci_mps": truth.velocity_eci_mps.tolist(),
+        "velocity_without_gravity_eci_mps": truth.velocity_without_gravity_eci_mps.tolist(),
+        "orientation_eci_from_body": None if truth.orientation_eci_from_body is None else truth.orientation_eci_from_body.tolist(),
+        "gravity_eci_mps2": truth.gravity_eci_mps2.tolist(),
+        "angular_rate_body_radps": None if truth.angular_rate_body_radps is None else truth.angular_rate_body_radps.tolist(),
+        "acceleration_eci_mps2": None if truth.acceleration_eci_mps2 is None else truth.acceleration_eci_mps2.tolist(),
+        "angular_acceleration_body_radps2": None
+        if truth.angular_acceleration_body_radps2 is None
+        else truth.angular_acceleration_body_radps2.tolist(),
+        "temperature_celsius": truth.temperature_celsius,
+    }
+    ####
+
+
+def _truth_from_payload(payload: Mapping[str, object] | None) -> "TruthPoint | None":
+    """Restore a committed truth point saved by :func:`_truth_payload`."""
+
+    if payload is None:
+        return None
+    return TruthPoint(
+        float(cast(float | int | str, payload["time_s"])),
+        np.asarray(payload["position_eci_m"], dtype=float),
+        np.asarray(payload["velocity_eci_mps"], dtype=float),
+        np.asarray(payload["velocity_without_gravity_eci_mps"], dtype=float),
+        None if payload.get("orientation_eci_from_body") is None else np.asarray(payload["orientation_eci_from_body"], dtype=float),
+        np.asarray(payload["gravity_eci_mps2"], dtype=float),
+        None if payload.get("angular_rate_body_radps") is None else np.asarray(payload["angular_rate_body_radps"], dtype=float),
+        None if payload.get("acceleration_eci_mps2") is None else np.asarray(payload["acceleration_eci_mps2"], dtype=float),
+        None
+        if payload.get("angular_acceleration_body_radps2") is None
+        else np.asarray(payload["angular_acceleration_body_radps2"], dtype=float),
+        None if payload.get("temperature_celsius") is None else float(cast(float | int | str, payload["temperature_celsius"])),
+    )
+    ####
+
+
 @dataclass(frozen=True, slots=True)
 class TruthPoint:
     """One immutable, sensor-visible committed truth boundary.
@@ -499,6 +543,29 @@ class IdealImuAdapter:
     def reset(self) -> None:
         self._last_truth = None
 
+    def snapshot(self) -> dict[str, object]:
+        """Return enough accepted-history state for deterministic continuation."""
+
+        return {
+            "schema_version": 1,
+            "adapter_type": "taoryx.IdealImuAdapter",
+            "last_truth": _truth_payload(self._last_truth),
+        }
+        ####
+
+    def restore(self, checkpoint: Mapping[str, object]) -> None:
+        """Restore a checkpoint produced by :meth:`snapshot`."""
+
+        if int(cast(Any, checkpoint.get("schema_version", 0))) != 1:
+            raise ValueError("unsupported ideal IMU checkpoint schema")
+        if checkpoint.get("adapter_type") != "taoryx.IdealImuAdapter":
+            raise ValueError("ideal IMU checkpoint adapter type does not match")
+        raw_truth = checkpoint.get("last_truth")
+        if raw_truth is not None and not isinstance(raw_truth, Mapping):
+            raise ValueError("ideal IMU checkpoint last_truth must be a mapping")
+        self._last_truth = _truth_from_payload(cast(Mapping[str, object] | None, raw_truth))
+        ####
+
     def sample(self, truth: TruthPoint) -> MeasurementPacket[ImuIncrement]:
         previous = self._last_truth
         if previous is not None and truth.time_s <= previous.time_s:
@@ -558,6 +625,29 @@ class IdealGyroscopeAdapter:
     def reset(self) -> None:
         self._last_truth = None
 
+    def snapshot(self) -> dict[str, object]:
+        """Return enough accepted-history state for deterministic continuation."""
+
+        return {
+            "schema_version": 1,
+            "adapter_type": "taoryx.IdealGyroscopeAdapter",
+            "last_truth": _truth_payload(self._last_truth),
+        }
+        ####
+
+    def restore(self, checkpoint: Mapping[str, object]) -> None:
+        """Restore a checkpoint produced by :meth:`snapshot`."""
+
+        if int(cast(Any, checkpoint.get("schema_version", 0))) != 1:
+            raise ValueError("unsupported ideal gyroscope checkpoint schema")
+        if checkpoint.get("adapter_type") != "taoryx.IdealGyroscopeAdapter":
+            raise ValueError("ideal gyroscope checkpoint adapter type does not match")
+        raw_truth = checkpoint.get("last_truth")
+        if raw_truth is not None and not isinstance(raw_truth, Mapping):
+            raise ValueError("ideal gyroscope checkpoint last_truth must be a mapping")
+        self._last_truth = _truth_from_payload(cast(Mapping[str, object] | None, raw_truth))
+        ####
+
     def sample(self, truth: TruthPoint) -> MeasurementPacket[GyroIncrement]:
         previous = self._last_truth
         if previous is not None and truth.time_s <= previous.time_s:
@@ -611,6 +701,29 @@ class TranslationAccelerationAdapter:
 
     def reset(self) -> None:
         self._last_truth = None
+
+    def snapshot(self) -> dict[str, object]:
+        """Return enough accepted-history state for deterministic continuation."""
+
+        return {
+            "schema_version": 1,
+            "adapter_type": "taoryx.TranslationAccelerationAdapter",
+            "last_truth": _truth_payload(self._last_truth),
+        }
+        ####
+
+    def restore(self, checkpoint: Mapping[str, object]) -> None:
+        """Restore a checkpoint produced by :meth:`snapshot`."""
+
+        if int(cast(Any, checkpoint.get("schema_version", 0))) != 1:
+            raise ValueError("unsupported translation-acceleration checkpoint schema")
+        if checkpoint.get("adapter_type") != "taoryx.TranslationAccelerationAdapter":
+            raise ValueError("translation-acceleration checkpoint adapter type does not match")
+        raw_truth = checkpoint.get("last_truth")
+        if raw_truth is not None and not isinstance(raw_truth, Mapping):
+            raise ValueError("translation-acceleration checkpoint last_truth must be a mapping")
+        self._last_truth = _truth_from_payload(cast(Mapping[str, object] | None, raw_truth))
+        ####
 
     def sample(self, truth: TruthPoint) -> MeasurementPacket[AccelerationIncrement]:
         previous = self._last_truth

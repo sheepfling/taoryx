@@ -66,6 +66,11 @@ def test_generated_alpha2_catalog_has_honest_statuses_when_present() -> None:
     catalog = json.loads(path.read_text(encoding="utf-8"))
     records = {item["id"]: item for item in catalog["families"]}
     assert records["cahi-x8-plus-boosters"]["mission_pass"] is False
-    assert records["x8-racetrack"]["mission_pass"] is True
+    # The canonical surface-allocation racetrack is intentionally fail-closed
+    # when the two-elevon witness reaches the source beta boundary.  A
+    # numerical failure must remain visible in the catalog rather than being
+    # mistaken for the prior direct-wrench or aggregate nominal result.
+    assert records["x8-racetrack"]["mission_pass"] is False
+    assert records["x8-racetrack"]["status"] == "integration_failure_qualification_blocked"
     assert records["hummingbird-pad-to-pad"]["mission_pass"] is True
 ####

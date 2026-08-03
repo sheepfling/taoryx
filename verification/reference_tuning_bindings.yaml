@@ -12,6 +12,9 @@ families:
     evidence_tier: T0_structural
     source_linearization_status: blocked
     gap: source-trim state-derivative Jacobian and physical surface allocator required
+    authority_requirement:
+      id: b747-attitude-screen-authority
+      required_state_names: [roll-error, pitch-error, yaw-error, p, q, r]
   skywalker_x8:
     trim_spec: x8-powered-trim-v1
     linearization_mode: runtime_inertia_attitude_bridge
@@ -19,6 +22,9 @@ families:
     evidence_tier: T0_structural
     source_linearization_status: blocked
     gap: source-trim A/B model and elevon allocator must replace the direct-wrench screen
+    authority_requirement:
+      id: skywalker_x8-attitude-screen-authority
+      required_state_names: [roll-error, pitch-error, yaw-error, p, q, r]
   hummingbird:
     trim_spec: hummingbird-hover-v1
     linearization_mode: quad_x_rotor_rate_bridge
@@ -26,6 +32,9 @@ families:
     evidence_tier: T0_structural
     source_linearization_status: estimated
     gap: source-backed rotor-rate damping and full attitude/position plant derivatives required
+    authority_requirement:
+      id: hummingbird-attitude-screen-authority
+      required_state_names: [roll-error, pitch-error, yaw-error, p, q, r]
   x15:
     trim_spec: x15-release-glide-v1
     linearization_mode: runtime_inertia_attitude_bridge
@@ -33,3 +42,6 @@ families:
     evidence_tier: T0_structural
     source_linearization_status: blocked
     gap: source-trim aerodynamic derivative schedule and actuator realization required
+    authority_requirement:
+      id: x15-attitude-screen-authority
+      required_state_names: [roll-error, pitch-error, yaw-error, p, q, r]

@@ -2,6 +2,25 @@
   "claim_boundary": "Standardized local controller-design screens for the four reference aircraft. Runtime-inertia and rotor-allocation bridges are not source-backed aircraft linearizations and do not constitute flight-control qualification.",
   "families": {
     "b747": {
+      "authority_preflight": {
+        "blockers": [],
+        "metrics": {
+          "control_dimension": 3.0,
+          "controllability_condition_number": 2.730769225002156,
+          "controllability_rank": 6.0,
+          "required_controllability_rank": 6.0,
+          "required_state_count": 6.0,
+          "state_dimension": 6.0,
+          "uncontrolled_fraction.p": 0.0,
+          "uncontrolled_fraction.pitch-error": 0.0,
+          "uncontrolled_fraction.q": 0.0,
+          "uncontrolled_fraction.r": 0.0,
+          "uncontrolled_fraction.roll-error": 0.0,
+          "uncontrolled_fraction.yaw-error": 0.0
+        },
+        "reason": "b747-attitude-screen-authority found every declared required state controllable before gain synthesis",
+        "status": "passed"
+      },
       "control_realization": "direct_wrench_screen",
       "evidence_tier": "T0_structural",
       "gap": "source-trim state-derivative Jacobian and physical surface allocator required",
@@ -240,6 +259,25 @@
       "tuning_stage": "generic_lqr_screen"
     },
     "hummingbird": {
+      "authority_preflight": {
+        "blockers": [],
+        "metrics": {
+          "control_dimension": 4.0,
+          "controllability_condition_number": 9.482277719725944,
+          "controllability_rank": 6.0,
+          "required_controllability_rank": 6.0,
+          "required_state_count": 6.0,
+          "state_dimension": 6.0,
+          "uncontrolled_fraction.p": 6.955817987548423e-17,
+          "uncontrolled_fraction.pitch-error": 0.0,
+          "uncontrolled_fraction.q": 6.955817987548423e-17,
+          "uncontrolled_fraction.r": 2.1382117680737565e-49,
+          "uncontrolled_fraction.roll-error": 0.0,
+          "uncontrolled_fraction.yaw-error": 1.3945222387368396e-31
+        },
+        "reason": "hummingbird-attitude-screen-authority found every declared required state controllable before gain synthesis",
+        "status": "passed"
+      },
       "control_realization": "individual_rotor_allocation_screen",
       "evidence_tier": "T0_structural",
       "gap": "source-backed rotor-rate damping and full attitude/position plant derivatives required",
@@ -475,6 +513,25 @@
       "tuning_stage": "generic_lqr_screen"
     },
     "skywalker_x8": {
+      "authority_preflight": {
+        "blockers": [],
+        "metrics": {
+          "control_dimension": 3.0,
+          "controllability_condition_number": 2.8571428571428568,
+          "controllability_rank": 6.0,
+          "required_controllability_rank": 6.0,
+          "required_state_count": 6.0,
+          "state_dimension": 6.0,
+          "uncontrolled_fraction.p": 0.0,
+          "uncontrolled_fraction.pitch-error": 0.0,
+          "uncontrolled_fraction.q": 0.0,
+          "uncontrolled_fraction.r": 0.0,
+          "uncontrolled_fraction.roll-error": 0.0,
+          "uncontrolled_fraction.yaw-error": 0.0
+        },
+        "reason": "skywalker_x8-attitude-screen-authority found every declared required state controllable before gain synthesis",
+        "status": "passed"
+      },
       "control_realization": "direct_wrench_screen",
       "evidence_tier": "T0_structural",
       "gap": "source-trim A/B model and elevon allocator must replace the direct-wrench screen",
@@ -701,6 +758,25 @@
       "tuning_stage": "generic_lqr_screen"
     },
     "x15": {
+      "authority_preflight": {
+        "blockers": [],
+        "metrics": {
+          "control_dimension": 3.0,
+          "controllability_condition_number": 26.638300309240613,
+          "controllability_rank": 6.0,
+          "required_controllability_rank": 6.0,
+          "required_state_count": 6.0,
+          "state_dimension": 6.0,
+          "uncontrolled_fraction.p": 0.0,
+          "uncontrolled_fraction.pitch-error": 0.0,
+          "uncontrolled_fraction.q": 0.0,
+          "uncontrolled_fraction.r": 0.0,
+          "uncontrolled_fraction.roll-error": 0.0,
+          "uncontrolled_fraction.yaw-error": 0.0
+        },
+        "reason": "x15-attitude-screen-authority found every declared required state controllable before gain synthesis",
+        "status": "passed"
+      },
       "control_realization": "direct_wrench_screen",
       "evidence_tier": "T0_structural",
       "gap": "source-trim aerodynamic derivative schedule and actuator realization required",

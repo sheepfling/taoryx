@@ -62,13 +62,19 @@ The attitude status declaration supports:
 
 - `mode=lag`: track fixed roll, pitch, and yaw targets through a first-order
   body-rate command with `lag-s` and `max-rate-deg-s`;
+- `mode=route-lag`: derive the roll target from the active racetrack turn,
+  pitch from flight path plus the declared alpha reference, and yaw from the
+  route tangent; then track those targets through the same bounded response
+  law. This is a kinematic mission-response proof, not a moment or effector
+  model;
 - `mode=prescribed`: the same fixed-angle target contract using the default
   lag and rate limit;
 - `mode=rate`: prescribe `roll-rate-deg-s`, `pitch-rate-deg-s`, and
   `yaw-rate-deg-s` directly.
 
 The bridge maintains a normalized quaternion and publishes `qw`, `qx`, `qy`,
-and `qz` in the run history. It does not generate aerodynamic moments,
+`qz`, response-law Euler command/achieved channels, and commanded body-rate
+channels in the run history. It does not generate aerodynamic moments,
 estimate inertia response, or claim rigid-body stability.
 
 ## Recommended migration sequence

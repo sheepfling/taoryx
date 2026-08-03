@@ -10,6 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from taoryx.showcase import validate_showcase_run_artifact_boundary
 from tools import build_fidelity_ladder_packet as packet
 
 pytestmark = pytest.mark.slow
@@ -135,6 +136,15 @@ def test_packet_contains_all_families_and_hashes_inputs(tmp_path: Path, monkeypa
         manifest = json.loads(handle.read("manifest.json"))
         assert {item["id"] for item in manifest["families"]} == {"b747", "skywalker_x8", "hummingbird", "x15"}
         assert manifest["tiers"] == ["point-mass-3dof", "kinematic-3-plus-3-dof", "rigid-body-6dof"]
+        assert len(manifest["run_artifacts"]) == 12
+        assert {item["fidelity"] for item in manifest["run_artifacts"]} == {
+            "point_mass_3dof",
+            "pseudo_6dof",
+            "rigid_body_6dof_surface_allocated",
+        }
+        assert all(item["realization"]["control_realization"] for item in manifest["run_artifacts"])
+        for run_artifact in manifest["run_artifacts"]:
+            validate_showcase_run_artifact_boundary(run_artifact)
         assert set(manifest["closure_contract"]) == {"b747", "skywalker_x8", "hummingbird", "x15"}
         assert manifest["claim_inputs"] == [
             "verification/claims.md",

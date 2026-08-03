@@ -41,10 +41,12 @@ class SensorBinding:
     provenance: Mapping[str, object] = field(default_factory=dict)
     truth_provider: TruthProvider | None = None
     drop_predicate: Callable[[MeasurementPacket[Any]], bool] | None = None
+    checkpoint_drop_policy_id: str | None = None
     interval_start: TruthPoint | None = None
     samples_emitted: int = 0
     invalid_samples: int = 0
     dropped_samples: int = 0
+    drop_attempts: int = 0
     dropped_packets: list[MeasurementPacket[Any]] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -90,6 +92,11 @@ class SensorBinding:
             "clock": self.clock.to_metadata(),
             "provenance": dict(self.provenance),
             "truth_provider": None if self.truth_provider is None else getattr(self.truth_provider, "__class__", type(self.truth_provider)).__name__,
+            "drop_policy": (
+                "none"
+                if self.drop_predicate is None
+                else self.checkpoint_drop_policy_id or "unregistered_callback"
+            ),
             "checkpointing": {
                 "supported": callable(snapshot) and callable(restore),
                 "protocol": "snapshot-restore" if callable(snapshot) and callable(restore) else None,
@@ -97,6 +104,7 @@ class SensorBinding:
             "samples_emitted": self.samples_emitted,
             "invalid_samples": self.invalid_samples,
             "dropped_samples": self.dropped_samples,
+            "drop_attempts": self.drop_attempts,
             "dropped_packet_times_s": [packet.sampled_at_s for packet in self.dropped_packets],
             "interval_start_s": None if self.interval_start is None else self.interval_start.time_s,
         }
@@ -245,6 +253,7 @@ class SensorBus:
         binding.interval_start = end
 
     def _queue(self, binding: SensorBinding, packet: MeasurementPacket[Any]) -> None:
+        binding.drop_attempts += 1
         if binding.drop_predicate is not None and binding.drop_predicate(packet):
             binding.dropped_samples += 1
             binding.dropped_packets.append(packet)

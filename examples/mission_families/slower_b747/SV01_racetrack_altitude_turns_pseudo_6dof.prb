@@ -11,7 +11,7 @@
 *units/fmt gama deg f.3
 *units/fmt psi deg f.3
 *runtime status vehicle reference-area=510.96672 reference-length=8.324088 dry-mass-kg=288756.9 nominal-mass-kg=288756.9 inertia-x=24675886.7 inertia-y=44877574.1 inertia-z=67384152.0 envelope-min-forward-speed=20 envelope-max-mach=0.9 envelope-max-alpha-deg=4 envelope-max-beta-deg=5 aero-alpha-reference-deg=3.1
-*runtime status attitude mode=lag roll-deg=0 pitch-deg=0 yaw-deg=90 response-profile-id=b747.attitude_response_p6dof.v1 response-law=first-order-rate-limited-v1 lag-s=1.0 max-rate-deg-s=30
+*runtime status attitude mode=route-lag response-profile-id=b747.attitude_response_p6dof.v1 response-law=first-order-rate-limited-v1 lag-s=1.0 max-rate-deg-s=30
 *runtime control throttle vehicle=1 default=0.2854 lower=0 upper=1
 *runtime control elevator-deg vehicle=1 default=0.3861602391 lower=-10 upper=10
 *runtime status target latitude-deg=0.0 longitude-deg=0.0 altitude-m=100.0

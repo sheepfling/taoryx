@@ -189,7 +189,10 @@ def test_adapter_loads_profile_document_and_preserves_provenance() -> None:
 
 def test_packaged_hardware_profile_and_checkpoint_replay() -> None:
     pytest.importorskip("imu_error_model")
-    assert package_version("imu-error-model") == "0.1.3"
+    # Local source installations carry a PEP 440 development/local suffix
+    # while preserving the same 0.1.3 public profile contract.
+    version = package_version("imu-error-model")
+    assert version == "0.1.3" or version.startswith("0.1.3.dev")
 
     adapter = ImuErrorModelAdapter.from_example_profile("hg1700ag58.yaml", seed=41)
     adapter.sample(_truth(0.0, 0.0))

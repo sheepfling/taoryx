@@ -43,6 +43,7 @@ ordering, and truth-isolated decision ports.
 | Drive timesteps | [Interactive engine](architecture/interactive-engine.md) | `InteractiveSession.step(...)` |
 | Build plots | [Telemetry](architecture/telemetry.md) | `RunArtifact`, `render_run_artifact_plots(...)` |
 | Add control above trim | [Controller stack](architecture/controller-stack.md), [Control contracts](architecture/control-contracts.md), and [LQR](extensions/lqr.md) | `TrimSpec`, `solve_trim`, controller/allocator |
+| Add an airbreathing vehicle mission | [Mission-composition automation](plan/mission-composition-automation.md) | `compile_powered_fixed_wing_racetrack(...)` |
 
 ## Grammar validation
 

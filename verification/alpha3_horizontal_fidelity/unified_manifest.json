@@ -1,0 +1,188 @@
+{
+  "families": [
+    {
+      "adapter_id": "taoryx.fixed_wing.source_table.v1",
+      "automatic_lowering": true,
+      "family_id": "skywalker_x8",
+      "mission_overlay": "fixed_wing_racetrack",
+      "physical_family": "powered_fixed_wing",
+      "resolved_source_family_id": null,
+      "source_family_id": null,
+      "source_manifest": null,
+      "source_manifest_profile_count": 0,
+      "strategy_id": "powered_fixed_wing.v1",
+      "tiers": {
+        "point_mass_3dof": "skywalker_x8.point_mass_3dof.v1",
+        "pseudo_6dof": "skywalker_x8.attitude_response_p6dof.v1",
+        "rigid_body_6dof_direct_wrench": "skywalker_x8.direct_wrench_6dof.v1",
+        "rigid_body_6dof_surface_allocated": "skywalker_x8.surface_allocated_6dof.v1"
+      },
+      "vehicle_definition_present": true,
+      "vehicle_registry_id": "skywalker_x8"
+    },
+    {
+      "adapter_id": "taoryx.fixed_wing.source_table.v1",
+      "automatic_lowering": true,
+      "family_id": "b747",
+      "mission_overlay": "heavy_transport_racetrack",
+      "physical_family": "powered_fixed_wing",
+      "resolved_source_family_id": null,
+      "source_family_id": null,
+      "source_manifest": null,
+      "source_manifest_profile_count": 0,
+      "strategy_id": "powered_fixed_wing.v1",
+      "tiers": {
+        "point_mass_3dof": "b747.point_mass_3dof.v1",
+        "pseudo_6dof": "b747.attitude_response_p6dof.v1",
+        "rigid_body_6dof_direct_wrench": "b747.direct_wrench_6dof.v1",
+        "rigid_body_6dof_surface_allocated": "b747.surface_allocated_6dof.v1"
+      },
+      "vehicle_definition_present": true,
+      "vehicle_registry_id": "b747"
+    },
+    {
+      "adapter_id": "taoryx.fixed_wing.openap.v1",
+      "automatic_lowering": true,
+      "family_id": "a320_openap_3dof",
+      "mission_overlay": "transport_racetrack",
+      "physical_family": "powered_fixed_wing",
+      "resolved_source_family_id": null,
+      "source_family_id": null,
+      "source_manifest": null,
+      "source_manifest_profile_count": 0,
+      "strategy_id": "powered_fixed_wing.v1",
+      "tiers": {
+        "point_mass_3dof": "a320_openap_3dof.point_mass_3dof.v1",
+        "pseudo_6dof": "a320.attitude_response_p6dof.v1",
+        "rigid_body_6dof_direct_wrench": "a320.direct_wrench_6dof.v1",
+        "rigid_body_6dof_surface_allocated": "a320.surface_allocated_6dof.v1"
+      },
+      "vehicle_definition_present": false,
+      "vehicle_registry_id": null
+    },
+    {
+      "adapter_id": "taoryx.fixed_wing.daveml.v1",
+      "automatic_lowering": true,
+      "family_id": "f16_s119",
+      "mission_overlay": "fighter_energy_maneuver",
+      "physical_family": "powered_fixed_wing",
+      "resolved_source_family_id": "reference_f16_s119",
+      "source_family_id": "reference_f16_s119",
+      "source_manifest": "families/reference_f16_s119/family.yaml",
+      "source_manifest_profile_count": 5,
+      "strategy_id": "powered_fixed_wing.v1",
+      "tiers": {
+        "point_mass_3dof": "f16_s119.point_mass_3dof.v1",
+        "pseudo_6dof": "f16_s119.attitude_response_p6dof.v1",
+        "rigid_body_6dof_direct_wrench": "f16_s119.direct_wrench_6dof.v1",
+        "rigid_body_6dof_surface_allocated": "f16_s119.surface_allocated_6dof.v1"
+      },
+      "vehicle_definition_present": false,
+      "vehicle_registry_id": null
+    },
+    {
+      "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+      "automatic_lowering": true,
+      "family_id": "x15",
+      "mission_overlay": "rocket_aircraft_high_energy",
+      "physical_family": "powered_fixed_wing",
+      "resolved_source_family_id": null,
+      "source_family_id": null,
+      "source_manifest": null,
+      "source_manifest_profile_count": 0,
+      "strategy_id": "rocket_aircraft_high_energy.v1",
+      "tiers": {
+        "point_mass_3dof": "x15.point_mass_3dof.v1",
+        "pseudo_6dof": "x15.attitude_response_p6dof.v1",
+        "rigid_body_6dof_direct_wrench": "x15.direct_wrench_6dof.v1",
+        "rigid_body_6dof_surface_allocated": "x15.surface_allocated_6dof.v1"
+      },
+      "vehicle_definition_present": true,
+      "vehicle_registry_id": "x15"
+    },
+    {
+      "adapter_id": "taoryx.multirotor.native_quad_x.v1",
+      "automatic_lowering": true,
+      "family_id": "hummingbird",
+      "mission_overlay": "pad_to_pad_hover_translation",
+      "physical_family": "multirotor",
+      "resolved_source_family_id": null,
+      "source_family_id": null,
+      "source_manifest": null,
+      "source_manifest_profile_count": 0,
+      "strategy_id": "multirotor_hover_translation.v1",
+      "tiers": {
+        "point_mass_3dof": "hummingbird.point_mass_3dof.v1",
+        "pseudo_6dof": "hummingbird.attitude_response_p6dof.v1",
+        "rigid_body_6dof_direct_wrench": "hummingbird.direct_wrench_6dof.v1",
+        "rigid_body_6dof_surface_allocated": "hummingbird.surface_allocated_6dof.v1"
+      },
+      "vehicle_definition_present": true,
+      "vehicle_registry_id": "hummingbird"
+    },
+    {
+      "adapter_id": "taoryx.lifting_body.daveml.v1",
+      "automatic_lowering": true,
+      "family_id": "hl20_mod_k",
+      "mission_overlay": "glide_energy_management",
+      "physical_family": "lifting_body",
+      "resolved_source_family_id": "reference_hl20_mod_k",
+      "source_family_id": "reference_hl20_mod_k",
+      "source_manifest": "families/reference_hl20_mod_k/family.yaml",
+      "source_manifest_profile_count": 4,
+      "strategy_id": "lifting_body_glide.v1",
+      "tiers": {
+        "point_mass_3dof": "hl20_mod_k.point_mass_3dof.v1",
+        "pseudo_6dof": "hl20.attitude_response_p6dof.v1",
+        "rigid_body_6dof_direct_wrench": "hl20.direct_wrench_6dof.v1",
+        "rigid_body_6dof_surface_allocated": "hl20.surface_allocated_6dof.v1"
+      },
+      "vehicle_definition_present": false,
+      "vehicle_registry_id": null
+    },
+    {
+      "adapter_id": "taoryx.rocket.variable_mass_nesc.v1",
+      "automatic_lowering": true,
+      "family_id": "reference_nesc_two_stage_rocket",
+      "mission_overlay": "staged_launch_target_state",
+      "physical_family": "mass_depleting_rocket",
+      "resolved_source_family_id": "reference_nesc_two_stage_rocket",
+      "source_family_id": "reference_nesc_two_stage_rocket",
+      "source_manifest": "families/reference_nesc_two_stage_rocket/family.yaml",
+      "source_manifest_profile_count": 3,
+      "strategy_id": "staged_rocket_replay.v1",
+      "tiers": {
+        "point_mass_3dof": "nesc_rocket.performance_3dof.v1",
+        "pseudo_6dof": "nesc_rocket.attitude_response_p6dof.v1",
+        "rigid_body_6dof_direct_wrench": "nesc_rocket.direct_wrench_6dof.v1",
+        "rigid_body_6dof_surface_allocated": "nesc_rocket.surface_allocated_6dof.v1"
+      },
+      "vehicle_definition_present": false,
+      "vehicle_registry_id": null
+    },
+    {
+      "adapter_id": "taoryx.passive_body.rigid_aero.v1",
+      "automatic_lowering": false,
+      "family_id": "tumbling_body",
+      "mission_overlay": "release_damping_impact",
+      "physical_family": "passive_ballistic_tumbling_body",
+      "resolved_source_family_id": null,
+      "source_family_id": null,
+      "source_manifest": null,
+      "source_manifest_profile_count": 0,
+      "strategy_id": "passive_ballistic_tumbling.v1",
+      "tiers": {
+        "point_mass_3dof": "tumbling_body.average_area_3dof.v1",
+        "pseudo_6dof": "tumbling_body.rigid_body_reuse_p6dof.v1",
+        "rigid_body_6dof_direct_wrench": null,
+        "rigid_body_6dof_surface_allocated": null
+      },
+      "vehicle_definition_present": false,
+      "vehicle_registry_id": null
+    }
+  ],
+  "family_count": 9,
+  "findings": [],
+  "schema": "taoryx.unified-family-manifest/v1alpha1",
+  "status": "pass"
+}

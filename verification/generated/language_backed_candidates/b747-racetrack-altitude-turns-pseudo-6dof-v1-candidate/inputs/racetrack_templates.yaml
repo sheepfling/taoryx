@@ -1,0 +1,354 @@
+schema_version: 1
+template:
+  id: powered_fixed_wing_racetrack_v1
+  family: powered_fixed_wing
+  mission_contract: A common powered fixed-wing course with a long outbound straight,
+    isolated climb and high-altitude level gate, left semicircle, isolated inbound
+    descent and low-altitude level gate, right semicircle, and oriented start/finish
+    crossing.
+  phase_order:
+  - outbound-climb
+  - outbound-level
+  - left-turn
+  - inbound-descent
+  - inbound-level
+  - right-turn
+  realization_rule: Geometry and truth objectives are shared. Guidance, trim, control
+    allocation, propulsion, resources, and fidelity claims are supplied by the vehicle
+    binding and never inferred from another vehicle.
+  required_route_attributes:
+  - racetrack-length-m
+  - racetrack-turn-radius-m
+  - racetrack-speed-mps
+  - racetrack-low-altitude-m
+  - racetrack-high-altitude-m
+  - racetrack-climb-rate-mps
+  - racetrack-descent-rate-mps
+  gate_semantics:
+    high-altitude-level-gate:
+      phase: outbound-level
+      normal:
+      - 0.0
+      - 1.0
+      - 0.0
+    left-turn-exit-gate:
+      phase: left-turn
+      normal:
+      - 0.0
+      - -1.0
+      - 0.0
+    low-altitude-level-gate:
+      phase: inbound-level
+      normal:
+      - 0.0
+      - -1.0
+      - 0.0
+    terminal-start-finish-gate:
+      phase: right-turn
+      normal:
+      - 0.0
+      - 1.0
+      - 0.0
+bindings:
+  x8-reference:
+    vehicle_id: skywalker_x8
+    fidelity: rigid_body_6dof_surface_allocated
+    straight_length_m: 700.0
+    turn_radius_m: 250.0
+    speed_m_s: 17.9
+    low_altitude_m: 178.0
+    high_altitude_m: 188.0
+    climb_rate_m_s: 0.5
+    descent_rate_m_s: 0.3
+    left_turn_bank_deg: -5.0
+    right_turn_bank_deg: -5.0
+    altitude_capture_gain_per_s: 0.1
+    altitude_capture_max_mps: 2.0
+    position_capture_gain: 0.01
+    position_capture_max_correction_mps: 2.0
+    simulation_margin_s: 4.0
+    source_realization: bounded_elevon_allocation_bank_pitch_pd
+    status: nominal_case_pass_overall_qualification_pending
+  x8-point-mass:
+    vehicle_id: skywalker_x8
+    fidelity: point_mass_3dof
+    straight_length_m: 700.0
+    turn_radius_m: 250.0
+    speed_m_s: 17.9
+    low_altitude_m: 178.0
+    high_altitude_m: 188.0
+    climb_rate_m_s: 0.5
+    descent_rate_m_s: 0.3
+    left_turn_bank_deg: -5.0
+    right_turn_bank_deg: -5.0
+    altitude_capture_gain_per_s: 0.1
+    altitude_capture_max_mps: 2.0
+    position_capture_gain: 0.01
+    position_capture_max_correction_mps: 2.0
+    simulation_margin_s: 4.0
+    source_realization: source_table_point_mass_route
+    status: nominal_case_pass_overall_qualification_pending
+  x8-kinematic-bridge:
+    vehicle_id: skywalker_x8
+    fidelity: pseudo_6dof_kinematic_bridge
+    straight_length_m: 700.0
+    turn_radius_m: 250.0
+    speed_m_s: 17.9
+    low_altitude_m: 178.0
+    high_altitude_m: 188.0
+    climb_rate_m_s: 0.5
+    descent_rate_m_s: 0.3
+    left_turn_bank_deg: -5.0
+    right_turn_bank_deg: -5.0
+    altitude_capture_gain_per_s: 0.1
+    altitude_capture_max_mps: 2.0
+    position_capture_gain: 0.01
+    position_capture_max_correction_mps: 2.0
+    simulation_margin_s: 4.0
+    source_realization: source_table_translation_plus_prescribed_attitude_lag
+    status: nominal_case_pass_overall_qualification_pending
+  x8-direct-wrench:
+    vehicle_id: skywalker_x8
+    fidelity: rigid_body_6dof_direct_wrench
+    straight_length_m: 700.0
+    turn_radius_m: 250.0
+    speed_m_s: 17.9
+    low_altitude_m: 178.0
+    high_altitude_m: 188.0
+    climb_rate_m_s: 0.5
+    descent_rate_m_s: 0.3
+    left_turn_bank_deg: -8.0
+    right_turn_bank_deg: -8.0
+    altitude_capture_gain_per_s: 0.1
+    altitude_capture_max_mps: 2.0
+    position_capture_gain: 0.01
+    position_capture_max_correction_mps: 2.0
+    simulation_margin_s: 4.0
+    source_realization: source_table_aerodynamics_plus_direct_moment_injection
+    status: integration_baseline_direct_wrench_qualification_pending
+  b747-transport-scaled:
+    vehicle_id: b747
+    fidelity: point_mass_3dof
+    straight_length_m: 24000.0
+    turn_radius_m: 6000.0
+    speed_m_s: 153.0
+    low_altitude_m: 100.0
+    high_altitude_m: 250.0
+    climb_rate_m_s: 1.5
+    descent_rate_m_s: 1.2
+    left_turn_bank_deg: -18.0
+    right_turn_bank_deg: 18.0
+    altitude_capture_gain_per_s: 0.25
+    altitude_capture_max_mps: 3.0
+    position_capture_gain: 0.002
+    position_capture_max_correction_mps: 20.0
+    simulation_margin_s: 10.0
+    source_realization: source_table_point_mass_route
+    status: binding_defined_nominal_run_pending
+  b747-transport-scaled-kinematic:
+    vehicle_id: b747
+    fidelity: pseudo_6dof_kinematic_bridge
+    straight_length_m: 24000.0
+    turn_radius_m: 6000.0
+    speed_m_s: 153.0
+    low_altitude_m: 100.0
+    high_altitude_m: 250.0
+    climb_rate_m_s: 1.5
+    descent_rate_m_s: 1.2
+    left_turn_bank_deg: -18.0
+    right_turn_bank_deg: 18.0
+    altitude_capture_gain_per_s: 0.25
+    altitude_capture_max_mps: 3.0
+    position_capture_gain: 0.002
+    position_capture_max_correction_mps: 20.0
+    simulation_margin_s: 10.0
+    source_realization: source_table_translation_plus_prescribed_attitude_lag
+    status: nominal_case_pass_overall_qualification_pending
+  b747-transport-scaled-rigid:
+    vehicle_id: b747
+    fidelity: rigid_body_6dof_direct_wrench
+    straight_length_m: 24000.0
+    turn_radius_m: 8300.0
+    speed_m_s: 153.0
+    low_altitude_m: 500.0
+    high_altitude_m: 620.0
+    climb_rate_m_s: 1.5
+    descent_rate_m_s: 1.2
+    left_turn_bank_deg: -14.0
+    right_turn_bank_deg: 14.0
+    altitude_capture_gain_per_s: 1.0
+    altitude_capture_max_mps: 10.0
+    position_capture_gain: 0.01
+    position_capture_max_correction_mps: 50.0
+    simulation_margin_s: 10.0
+    source_realization: source_table_aerodynamics_plus_bounded_direct_local_bank_pitch_pd_total_wrench
+    status: nominal_case_pass_overall_qualification_pending
+  a320-openap-3dof:
+    vehicle_id: a320_openap_3dof
+    fidelity: point_mass_3dof
+    straight_length_m: 30000.0
+    turn_radius_m: 6000.0
+    speed_m_s: 230.1542
+    low_altitude_m: 10500.0
+    high_altitude_m: 11000.0
+    climb_rate_m_s: 4.0
+    descent_rate_m_s: 4.0
+    left_turn_bank_deg: -20.0
+    right_turn_bank_deg: 20.0
+    altitude_capture_gain_per_s: 0.15
+    altitude_capture_max_mps: 8.0
+    position_capture_gain: 0.001
+    position_capture_max_correction_mps: 25.0
+    gate_corridor_m: 500.0
+    gate_altitude_tolerance_m: 75.0
+    gate_speed_tolerance_mps: 8.0
+    simulation_margin_s: 90.0
+    source_realization: openap_derived_exact_point_mass_performance
+    status: binding_defined_mission_execution_pending
+  a320-openap-pseudo6dof:
+    vehicle_id: a320_openap_jsbsim_pseudo6dof
+    fidelity: pseudo_6dof_kinematic_bridge
+    straight_length_m: 30000.0
+    turn_radius_m: 6000.0
+    speed_m_s: 230.1542
+    low_altitude_m: 10500.0
+    high_altitude_m: 11000.0
+    climb_rate_m_s: 4.0
+    descent_rate_m_s: 4.0
+    left_turn_bank_deg: -20.0
+    right_turn_bank_deg: 20.0
+    altitude_capture_gain_per_s: 0.15
+    altitude_capture_max_mps: 8.0
+    position_capture_gain: 0.001
+    position_capture_max_correction_mps: 25.0
+    gate_corridor_m: 500.0
+    gate_altitude_tolerance_m: 75.0
+    gate_speed_tolerance_mps: 8.0
+    simulation_margin_s: 120.0
+    source_realization: openap_performance_plus_jsbsim_rotational_surrogate
+    status: binding_defined_mission_execution_pending
+  f16-s119-point-mass:
+    vehicle_id: reference_f16_s119
+    fidelity: point_mass_3dof
+    straight_length_m: 12000.0
+    turn_radius_m: 25000.0
+    speed_m_s: 152.4
+    low_altitude_m: 0.0
+    high_altitude_m: 300.0
+    climb_rate_m_s: 6.0
+    descent_rate_m_s: 6.0
+    left_turn_bank_deg: -6.0
+    right_turn_bank_deg: -6.0
+    altitude_capture_gain_per_s: 0.2
+    altitude_capture_max_mps: 12.0
+    position_capture_gain: 0.02
+    position_capture_max_correction_mps: 20.0
+    gate_corridor_m: 500.0
+    gate_altitude_tolerance_m: 35.0
+    gate_speed_tolerance_mps: 12.0
+    position_capture_bank_gain_rad_per_m: 0.0
+    position_capture_max_bank_correction_deg: 3.0
+    turn_rate_command_scale: 1.0
+    simulation_margin_s: 120.0
+    source_realization: f16_source_force_reduction_pending_route_adapter
+    status: binding_defined_mission_pending
+  f16-s119-pseudo-6dof:
+    vehicle_id: reference_f16_s119
+    fidelity: pseudo_6dof_kinematic_bridge
+    straight_length_m: 12000.0
+    turn_radius_m: 25000.0
+    speed_m_s: 152.4
+    low_altitude_m: 0.0
+    high_altitude_m: 300.0
+    climb_rate_m_s: 6.0
+    descent_rate_m_s: 6.0
+    left_turn_bank_deg: -6.0
+    right_turn_bank_deg: -6.0
+    altitude_capture_gain_per_s: 0.2
+    altitude_capture_max_mps: 12.0
+    position_capture_gain: 0.02
+    position_capture_max_correction_mps: 20.0
+    gate_corridor_m: 500.0
+    gate_altitude_tolerance_m: 35.0
+    gate_speed_tolerance_mps: 12.0
+    position_capture_bank_gain_rad_per_m: 0.0
+    position_capture_max_bank_correction_deg: 3.0
+    turn_rate_command_scale: 1.0
+    simulation_margin_s: 120.0
+    source_realization: f16_source_force_plus_named_response_bridge_pending_route_adapter
+    status: binding_defined_mission_pending
+  f16-s119-direct-wrench:
+    vehicle_id: reference_f16_s119
+    fidelity: rigid_body_6dof_direct_wrench
+    straight_length_m: 12000.0
+    turn_radius_m: 25000.0
+    speed_m_s: 152.4
+    low_altitude_m: 0.0
+    high_altitude_m: 300.0
+    climb_rate_m_s: 6.0
+    descent_rate_m_s: 6.0
+    left_turn_bank_deg: -6.0
+    right_turn_bank_deg: -6.0
+    altitude_capture_gain_per_s: 0.2
+    altitude_capture_max_mps: 12.0
+    position_capture_gain: 0.02
+    position_capture_max_correction_mps: 20.0
+    gate_corridor_m: 500.0
+    gate_altitude_tolerance_m: 35.0
+    gate_speed_tolerance_mps: 12.0
+    position_capture_bank_gain_rad_per_m: 0.0
+    position_capture_max_bank_correction_deg: 3.0
+    turn_rate_command_scale: 1.0
+    simulation_margin_s: 120.0
+    source_realization: f16_source_rigid_body_direct_wrench_development_runner
+    status: development_route_evidence_pending_qualification
+  f16-s119-surfaces:
+    vehicle_id: reference_f16_s119
+    fidelity: rigid_body_6dof_surface_allocated
+    straight_length_m: 12000.0
+    turn_radius_m: 25000.0
+    speed_m_s: 152.4
+    low_altitude_m: 0.0
+    high_altitude_m: 300.0
+    climb_rate_m_s: 6.0
+    descent_rate_m_s: 6.0
+    left_turn_bank_deg: -6.0
+    right_turn_bank_deg: -6.0
+    altitude_capture_gain_per_s: 0.2
+    altitude_capture_max_mps: 12.0
+    position_capture_gain: 0.02
+    position_capture_max_correction_mps: 20.0
+    gate_corridor_m: 500.0
+    gate_altitude_tolerance_m: 35.0
+    gate_speed_tolerance_mps: 12.0
+    position_capture_bank_gain_rad_per_m: 0.0
+    position_capture_max_bank_correction_deg: 3.0
+    turn_rate_command_scale: 1.0
+    simulation_margin_s: 120.0
+    source_realization: f16_source_surface_allocation_development_runner
+    status: development_route_evidence_pending_qualification
+  b747-cruise-pseudo_6dof_kinematic_bridge-candidate:
+    vehicle_id: b747
+    fidelity: pseudo_6dof_kinematic_bridge
+    straight_length_m: 30000.0
+    turn_radius_m: 8081.255404639615
+    speed_m_s: 153.0
+    low_altitude_m: 100.0
+    high_altitude_m: 250.0
+    climb_rate_m_s: 1.5
+    descent_rate_m_s: 1.2
+    left_turn_bank_deg: -18.0
+    right_turn_bank_deg: 18.0
+    simulation_margin_s: 60.0
+    altitude_capture_gain_per_s: 0.0
+    altitude_capture_max_mps: 0.0
+    position_capture_gain: 0.0
+    position_capture_max_correction_mps: 0.0
+    gate_corridor_m: 500.0
+    gate_altitude_tolerance_m: 35.0
+    gate_speed_tolerance_mps: 12.0
+    position_capture_bank_gain_rad_per_m: 2.5e-05
+    position_capture_max_bank_correction_deg: 3.0
+    turn_rate_command_scale: 1.0
+    source_realization: capability_scaled_candidate_materialization
+    status: capability_feasible

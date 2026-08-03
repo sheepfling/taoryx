@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable, Mapping, Sequence
 from copy import copy, deepcopy
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from taoryx.contracts import Frame, Vector3
 from taoryx.language.expressions import ExpressionType
@@ -92,9 +93,49 @@ class RuntimeState:
 Derivative = Callable[[RuntimeState], Sequence[float]]
 PointMassDerivative = Callable[[PointMassState], PointMassRates]
 BodyRateProvider = Callable[[RuntimeState], Vector3]
+KinematicAttitudeTargetProvider = Callable[[RuntimeState], Vector3]
 StallDetector = Callable[[RuntimeState], bool]
 SpawnProvider = Callable[[RuntimeState], Sequence["SpawnRequest"]]
 TruthProvider = Callable[[RuntimeState], TruthPoint]
+LoadEvaluationPhase = Literal[
+    "solver_stage_environment",
+    "solver_stage_rhs",
+    "committed_truth_environment",
+    "committed_truth_rhs",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class LoadEvaluationRecord:
+    """Time provenance for one runtime environment or RHS load evaluation.
+
+    Solver-stage evaluations are retained solely as computational provenance;
+    they never become sensor, controller, or telemetry truth. The separate
+    achieved-control timestamp identifies the accepted boundary at which the
+    currently applied command set became effective.
+    """
+
+    state_time_s: float
+    achieved_control_time_s: float
+    phase: LoadEvaluationPhase
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.state_time_s) or not math.isfinite(self.achieved_control_time_s):
+            raise ValueError("load-evaluation state and achieved-control times must be finite")
+        if self.achieved_control_time_s > self.state_time_s + 1.0e-12:
+            raise ValueError("load-evaluation achieved-control time cannot follow its evaluated state")
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Return an auditable, JSON-safe timing record."""
+
+        return {
+            "state_time_s": self.state_time_s,
+            "achieved_control_time_s": self.achieved_control_time_s,
+            "phase": self.phase,
+        }
+        ####
+    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -184,6 +225,8 @@ class RuntimeVehicle:
     definition_call_handler: Callable[[str, Sequence[float]], float] | None = None
     parameters: Mapping[str, float] = field(default_factory=dict)
     control_values: Mapping[str, float] = field(default_factory=dict)
+    control_values_time_s: float | None = None
+    load_evaluation_history: list[LoadEvaluationRecord] = field(default_factory=list)
     table_evaluators: Mapping[str, Callable[[Mapping[str, float]], float]] = field(default_factory=dict)
     environment_evaluator: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
     event_handlers: Mapping[str, Callable[[RuntimeState], RuntimeState]] = field(default_factory=dict)
@@ -193,6 +236,7 @@ class RuntimeVehicle:
     publish_derived_rates: bool = True
     kinematic_state: Kinematic6DofState | None = None
     body_rate_provider: BodyRateProvider | None = None
+    kinematic_attitude_target_provider: KinematicAttitudeTargetProvider | None = None
     kinematic_response_profile_id: str | None = None
     stall_detector: StallDetector | None = None
     vehicle_kind: VehicleKind = VehicleKind.GENERIC
@@ -215,6 +259,10 @@ class RuntimeVehicle:
         if self.control_values:
             named = {**self.state.named, **self.control_values}
             self.state = RuntimeState(self.state.time, self.state.values, self.state.frame, named, self.state.value_names, self.state.segment_endpoints)
+        if self.control_values_time_s is None:
+            self.control_values_time_s = self.state.time
+        if not math.isfinite(self.control_values_time_s) or self.control_values_time_s > self.state.time + 1.0e-12:
+            raise ValueError("RuntimeVehicle control_values_time_s must be finite and no later than the committed state")
         if self.dynamics_mode is DynamicsMode.KINEMATIC_6DOF and self.kinematic_state is None:
             raise FidelitySetupError(
                 "missing-kinematic-sidecar",
@@ -231,6 +279,15 @@ class RuntimeVehicle:
             )
         if not self.history:
             self.history.append(self.state)
+        ####
+
+    def record_load_evaluation(self, state_time_s: float, phase: LoadEvaluationPhase) -> None:
+        """Append private load-evaluation provenance without publishing a state."""
+
+        control_time_s = self.control_values_time_s
+        if control_time_s is None:
+            raise RuntimeError("RuntimeVehicle control timestamp is unavailable")
+        self.load_evaluation_history.append(LoadEvaluationRecord(state_time_s, control_time_s, phase))
         ####
     ####
 
@@ -362,6 +419,16 @@ class RuntimeProblem:
             clone = copy(source)
             clone.state = exact
             clone.history = retained
+            clone.load_evaluation_history = [
+                record for record in source.load_evaluation_history if record.state_time_s <= bounded_time + 1.0e-12
+            ]
+            if clone.control_values_time_s is None:
+                raise RuntimeError(f"vehicle {name!r} has no control activation timestamp to clone")
+            # A branch retains the effective command vector, but it becomes a
+            # new executable boundary when the source command postdates the
+            # requested rewind time.  Never carry a future control activation
+            # timestamp into a historical branch.
+            clone.control_values_time_s = min(clone.control_values_time_s, bounded_time)
             clone.fired_events = set(event for event in source.fired_events if event in {condition.name for condition in source.events if condition.action != "stop"})
             if resume:
                 clone.active = True

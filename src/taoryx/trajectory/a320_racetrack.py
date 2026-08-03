@@ -12,7 +12,7 @@ source-exact actuator behavior.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Literal
 
 from ..racetrack_guidance import RacetrackGuidanceReference, racetrack_reference_at_time
@@ -71,6 +71,7 @@ class A320RacetrackRunner:
     maximum_turn_rate_rad_s: float = math.radians(8.0)
     maximum_flight_path_rate_rad_s: float = math.radians(3.0)
     response_profile: Pseudo6DOFProfile | None = None
+    operating_point: A320OpenAPOperatingPoint | None = None
 
     def __post_init__(self) -> None:
         if self.mode == "point_mass_3dof" and not isinstance(self.model, A320OpenAPModel):
@@ -108,8 +109,26 @@ class A320RacetrackRunner:
         return float(self.trim.state.get("alpha_rad", 0.0))
         ####
 
-    def _reference(self, time_s: float) -> RacetrackGuidanceReference:
-        return racetrack_reference_at_time(self.route, time_s, trim_pitch_rad=self._trim_alpha)
+    def _reference(self, time_s: float, north_m: float, east_m: float) -> RacetrackGuidanceReference:
+        """Return the route reference, then explicitly acquire the terminal gate.
+
+        The terminal period is not another indefinite low-level leg.  Once the
+        nominal racetrack has completed, steer toward the start/finish gate so
+        its crossing can be independently evaluated and the existing hold
+        logic can freeze the terminal state.  This also makes longer
+        capability-scaled routes behave like the catalog baseline rather than
+        drifting past the finish line during their simulation margin.
+        """
+
+        reference = racetrack_reference_at_time(self.route, time_s, trim_pitch_rad=self._trim_alpha)
+        if time_s >= self.route.declared_duration_s:
+            reference = replace(
+                reference,
+                heading_rad=math.atan2(-east_m, -north_m),
+                flight_path_angle_rad=0.0,
+                bank_rad=0.0,
+            )
+        return reference
         ####
 
     def _point_observables(self, state: dict[str, float], controls: dict[str, float]) -> dict[str, float]:
@@ -257,10 +276,11 @@ class A320RacetrackRunner:
         horizon = self.route.horizon_s if duration_s is None else float(duration_s)
         if not math.isfinite(horizon) or horizon <= 0.0:
             raise ValueError("A320 racetrack horizon must be finite and positive")
+        initial_point = self.operating_point or A320OpenAPOperatingPoint(self.route.low_altitude_m, 0.78, 60000.0)
         state: dict[str, float] = {
-            "altitude_m": self.route.low_altitude_m,
-            "mach": 0.78,
-            "mass_kg": 60000.0,
+            "altitude_m": initial_point.altitude_m,
+            "mach": initial_point.mach,
+            "mass_kg": initial_point.mass_kg,
             "range_m": 0.0,
             "heading_rad": math.pi / 2.0,
             "flight_path_angle_rad": self._trim_gamma,
@@ -301,7 +321,7 @@ class A320RacetrackRunner:
         time_s = 0.0
         while time_s <= horizon + 1.0e-9:
             try:
-                reference = self._reference(time_s)
+                reference = self._reference(time_s, north_m, east_m)
                 if self.mode == "point_mass_3dof":
                     model = self.model
                     assert isinstance(model, A320OpenAPModel)

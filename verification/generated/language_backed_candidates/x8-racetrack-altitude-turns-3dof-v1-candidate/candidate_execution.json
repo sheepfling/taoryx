@@ -1,0 +1,16 @@
+{
+  "binding_id": "x8-cruise-point_mass_3dof-candidate",
+  "evaluation": {
+    "hard_gates_passed": true,
+    "mission_pass": true,
+    "required_objectives": 4,
+    "required_passed": 4
+  },
+  "fidelity": "point_mass_3dof",
+  "mission_proposal_fingerprint": "685f0282c3669c57ec507d0741384a7baf317e079d5e1730d7da4bd12ea06120",
+  "packet": "verification/generated/language_backed_candidates/x8-racetrack-altitude-turns-3dof-v1-candidate",
+  "runtime": {
+    "numerical_valid": true
+  },
+  "schema_version": "taoryx.language-backed-candidate-execution/v1"
+}

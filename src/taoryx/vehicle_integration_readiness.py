@@ -12,19 +12,17 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
+from .fidelity_contracts import CANONICAL_FIDELITY_TIERS, FidelityTier, control_realization_for, runtime_fidelity_for
 from .vehicle_registry import ROOT
 
 SUPPORTED_FAMILIES = ROOT / "verification/supported_reference_families.yaml"
 FAMILY_ROOT = ROOT / "families"
-STANDARD_PROFILES: tuple[tuple[str, str], ...] = (
-    ("point_mass_3dof", "point_mass_3dof"),
-    ("pseudo_6dof", "pseudo_6dof"),
-    ("rigid_body_6dof_direct_wrench", "rigid_body_6dof"),
-    ("rigid_body_6dof_surface_allocated", "rigid_body_6dof"),
+STANDARD_PROFILES: tuple[tuple[FidelityTier, str], ...] = tuple(
+    (tier, runtime_fidelity_for(tier)) for tier in CANONICAL_FIDELITY_TIERS
 )
 QUALIFIED_STATUSES = frozenset(
     {"equivalence_passed", "multi_fidelity_qualified", "qualified", "runtime_replay_qualification_passed"}
@@ -66,6 +64,7 @@ class FidelityProfileReadiness:
     metadata_ready: bool
     automatically_lowerable: bool
     findings: tuple[IntegrationReadinessFinding, ...]
+    tier: str = ""
 
     @property
     def errors(self) -> tuple[IntegrationReadinessFinding, ...]:
@@ -79,7 +78,9 @@ class FidelityProfileReadiness:
 
         return {
             "profile_id": self.profile_id,
+            "tier": self.tier or self.runtime_fidelity,
             "runtime_fidelity": self.runtime_fidelity,
+            "control_realization": control_realization_for(cast(FidelityTier, self.tier)) if self.tier in CANONICAL_FIDELITY_TIERS else "unspecified",
             "declared": self.declared,
             "declared_status": self.declared_status,
             "metadata_ready": self.metadata_ready,
@@ -205,13 +206,14 @@ def _check_manifest(manifest_path: Path, family_id: str, manifest: Mapping[str, 
 def _profile_report(
     manifest_path: Path,
     profile_id: str,
+    tier: str,
     runtime_fidelity: str,
     profile: Mapping[str, Any] | None,
 ) -> FidelityProfileReadiness:
     findings: list[IntegrationReadinessFinding] = []
     if profile is None:
         _finding(findings, "error", "profile-not-declared", f"{manifest_path}:fidelity_profiles", f"expected profile for {runtime_fidelity!r} is not declared", "Add a named profile or explicitly remove this tier from the family support contract.")
-        return FidelityProfileReadiness(profile_id, runtime_fidelity, False, "not_declared", False, False, tuple(findings))
+        return FidelityProfileReadiness(profile_id, runtime_fidelity, False, "not_declared", False, False, tuple(findings), tier)
     status = str(profile.get("status", "undeclared_status"))
     if not _present(profile.get("equations")):
         _finding(findings, "error", "profile-equations-missing", f"{manifest_path}:fidelity_profiles.{profile_id}.equations", "profile has no equation declaration", "List the equations actually executed by this fidelity realization.")
@@ -228,6 +230,7 @@ def _profile_report(
         metadata_ready,
         metadata_ready and status in QUALIFIED_STATUSES,
         tuple(findings),
+        tier,
     )
     ####
 
@@ -251,7 +254,7 @@ def validate_vehicle_integration_readiness(family_id: str) -> VehicleIntegration
     findings = _check_manifest(manifest_path, family_id, manifest)
     declared_profiles = manifest.get("fidelity_profiles")
 
-    def select_profile(runtime: str, expected_label: str) -> Mapping[str, Any] | None:
+    def select_profile(runtime: str, expected_label: FidelityTier) -> Mapping[str, Any] | None:
         candidates = [
             item
             for item in declared_profiles
@@ -261,8 +264,14 @@ def validate_vehicle_integration_readiness(family_id: str) -> VehicleIntegration
             preferred = [
                 item
                 for item in candidates
-                if expected_label.removeprefix("rigid_body_6dof_") in str(item.get("profile_id", ""))
+                if str(item.get("control_realization", "")) == control_realization_for(expected_label)
             ]
+            if not preferred:
+                preferred = [
+                    item
+                    for item in candidates
+                    if expected_label.removeprefix("rigid_body_6dof_") in str(item.get("profile_id", ""))
+                ]
             if preferred:
                 return preferred[0]
             if expected_label != "rigid_body_6dof":
@@ -277,11 +286,14 @@ def validate_vehicle_integration_readiness(family_id: str) -> VehicleIntegration
             if profile is not None
             else f"{family_id}.{expected_label}"
         )
-        profile_reports.append(_profile_report(manifest_path, profile_id, runtime, profile))
+        profile_reports.append(_profile_report(manifest_path, profile_id, expected_label, runtime, profile))
     profiles = tuple(profile_reports)
     all_errors = any(item.severity == "error" for item in findings) or any(profile.errors for profile in profiles)
     status = "blocked" if all_errors else "ready_for_runtime_probes"
-    if not all_errors and any(item.findings for item in profiles) or any(item.severity == "warning" for item in findings):
+    if not all_errors and (
+        any(item.findings for item in profiles)
+        or any(item.severity == "warning" for item in findings)
+    ):
         status = "ready_with_warnings"
     return VehicleIntegrationReadinessReport(
         family_id,

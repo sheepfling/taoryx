@@ -6,7 +6,7 @@ boards:
   - id: f16-maneuver-trim-evidence-v1
     family_id: reference_f16_s119
     qualification_class: reference_exact
-    fidelity_profiles: [rigid_body_6dof]
+    fidelity_profiles: [rigid_body_6dof_direct_wrench]
     evidence_grade: source
     evidence:
       - verification/daveml_f16_equilibrium_trim_evidence.json
@@ -20,7 +20,7 @@ boards:
   - id: hl20-glide-entry-evidence-v1
     family_id: reference_hl20_mod_k
     qualification_class: reference_exact
-    fidelity_profiles: [rigid_body_6dof]
+    fidelity_profiles: [rigid_body_6dof_direct_wrench]
     evidence_grade: source
     evidence:
       - verification/daveml_hl20_trim_evidence.json
@@ -34,7 +34,7 @@ boards:
   - id: nesc-two-stage-launch-lineage-v1
     family_id: reference_nesc_two_stage_rocket
     qualification_class: reference_exact
-    fidelity_profiles: [rigid_body_6dof]
+    fidelity_profiles: [pseudo_6dof]
     evidence_grade: source
     evidence:
       - verification/daveml_nesc_replay_evidence.json
@@ -60,7 +60,7 @@ boards:
   - id: nesc-synthetic-passive-child-deployment-v1
     family_id: reference_nesc_two_stage_rocket
     qualification_class: mixed
-    fidelity_profiles: [rigid_body_6dof, pseudo_6dof]
+    fidelity_profiles: [pseudo_6dof]
     evidence_grade: mixed
     evidence:
       - verification/daveml_nesc_replay_evidence.json

@@ -165,10 +165,15 @@ def test_views() -> None:
     print("  audit-alpha2    audit the A2-T1 through A2-T7 machine-readable exit signals")
     print("  check-problems verify generated .prb products are current")
     print("  check-vehicles verify vehicle-family contracts and table bindings")
+    print("  check-vehicle-interfaces verify every declared semantic interface and episode binding")
     print("  onboard-vehicles diagnose the complete new-vehicle metadata path")
     print("  fidelity-readiness check declared data for all four fidelity tiers")
     print("  pseudo6dof-profiles validate the Alpha 3 pseudo-6DOF family profile catalog")
+    print("  horizontal-fidelity validate the canonical four-tier family registry")
+    print("  family-adapter-registry run executable family-adapter witnesses and planned bindings")
     print("  alpha3-readiness regenerate paired-fidelity, cross-fidelity, and R1 readiness indexes")
+    print("  showcase-artifact-boundary validate resolved fidelity/control metadata in generated showcase runs")
+    print("  showcase-catalog-references validate aggregate catalog child manifests")
     print("  alpha3-showcase-catalog verify all nine family recipes, evidence pairs, and canonical boards")
     print("  hummingbird-directional validate the Hummingbird altitude/yaw/body-direction mission witness")
     print("  hummingbird-native-horizontal validate the Hummingbird native source-plant horizontal witness")
@@ -191,6 +196,7 @@ def test_views() -> None:
     print("  tumbling-r1 index the fixed passive tumbling-body matrix")
     print("  reference-tuning verify the four-family generic controller-design report")
     print("  compile-segments compile external segment catalogs into native .prb products")
+    print("  powered-fixed-wing-mission-proposals verify capability-scaled first-mission planning profiles")
     print("  audit-vehicles verify scoped problem files match registry provenance")
     print("  vehicles   run the complete vehicle registry, generation, and provenance check")
     print("  segment-lint/build/run validate, compile, or execute the declarative segment catalog")
@@ -475,6 +481,20 @@ def check_supported_reference_families() -> None:
     ####
 
 
+def check_vehicle_interfaces() -> None:
+    """Validate all resolved semantic interfaces against declared runtime bindings."""
+
+    run(tool_script("validate_vehicle_interface_catalog.py", "--check"))
+    ####
+
+
+def check_vehicle_execution_witnesses() -> None:
+    """Validate every runnable endpoint has an exact checked-in request."""
+
+    run(tool_script("validate_vehicle_execution_witnesses.py"))
+    ####
+
+
 def onboard_vehicles() -> None:
     """Diagnose every registered vehicle's metadata and source-contract hooks."""
     run(tool_script("validate_vehicle_onboarding.py", "--vehicle", "all"))
@@ -490,6 +510,37 @@ def fidelity_readiness() -> None:
 def pseudo6dof_profiles() -> None:
     """Validate the Alpha 3 pseudo-6DOF family profile catalog."""
     run(tool_script("validate_pseudo6dof_profiles.py", "--smoke"))
+    ####
+
+
+def horizontal_fidelity() -> None:
+    """Validate the shared four-tier family integration registry."""
+    run(tool_script("validate_horizontal_fidelity.py", "--check"))
+    ####
+
+
+def unified_family_manifest() -> None:
+    """Validate the joined horizontal, profile, source, and vehicle manifests."""
+    run(tool_script("validate_unified_family_manifest.py", "--check"))
+    ####
+
+
+def horizontal_readiness() -> None:
+    """Regenerate the joined all-family, all-tier readiness matrix."""
+    run(tool_script("validate_horizontal_readiness.py", "--check"))
+    ####
+
+
+def family_strategy_worklists() -> None:
+    """Compile generic topology-specific integration and tuning worklists."""
+
+    run(tool_script("compile_family_strategy_worklists.py", "--check"))
+    ####
+
+
+def family_adapter_registry() -> None:
+    """Run executable family-adapter witnesses and planned-binding checks."""
+    run(tool_script("validate_family_adapter_registry.py", "--check"))
     ####
 
 
@@ -693,6 +744,18 @@ def check_fidelity_parity_contracts() -> None:
 def check_reference_tuning() -> None:
     """Verify the four-family generic tuning report is reproducible."""
     run([project_python(), str(TOOLS / "tune_reference_aircraft.py"), "--check"])
+    ####
+
+
+def reduced_tuning_campaigns() -> None:
+    """Verify cross-topology reduced-order tuning campaigns without manual gains."""
+    run(tool_script("validate_reduced_tuning_campaigns.py", "--check"))
+    ####
+
+
+def powered_fixed_wing_mission_proposals() -> None:
+    """Verify capability-scaled powered-fixed-wing mission planning evidence."""
+    run(tool_script("validate_powered_fixed_wing_mission_proposals.py", "--check"))
     ####
 
 
@@ -1101,6 +1164,20 @@ def daveml_showcase() -> None:
     ####
 
 
+def showcase_artifact_boundary() -> None:
+    """Build and validate the common showcase artifact boundary."""
+
+    run(tool_script("validate_showcase_artifact_boundary.py", "--build-daveml"))
+    ####
+
+
+def showcase_catalog_references() -> None:
+    """Validate aggregate showcase catalogs without reinterpreting children."""
+
+    run(tool_script("validate_showcase_catalog_references.py"))
+    ####
+
+
 def daveml_operational_contracts() -> None:
     """Validate the shared DaveML family operational contracts."""
 
@@ -1153,11 +1230,21 @@ def handoff() -> None:
 def check() -> None:
     check_vehicle_models()
     check_supported_reference_families()
+    check_vehicle_interfaces()
+    check_vehicle_execution_witnesses()
     onboard_vehicles()
     pseudo6dof_profiles()
+    horizontal_fidelity()
+    unified_family_manifest()
+    family_adapter_registry()
+    horizontal_readiness()
+    family_strategy_worklists()
+    showcase_artifact_boundary()
     run(tool_script("build_alpha3_direct_wrench_contract.py"))
     check_fidelity_parity_contracts()
     check_reference_tuning()
+    reduced_tuning_campaigns()
+    powered_fixed_wing_mission_proposals()
     compile_segments()
     audit_vehicle_provenance()
     check_problem_files()
@@ -1229,9 +1316,16 @@ TASKS: dict[str, Callable[[], None]] = {
     "check-problems": check_problem_files,
     "check-vehicles": check_vehicle_models,
     "check-reference-families": check_supported_reference_families,
+    "check-vehicle-interfaces": check_vehicle_interfaces,
     "onboard-vehicles": onboard_vehicles,
     "fidelity-readiness": fidelity_readiness,
     "pseudo6dof-profiles": pseudo6dof_profiles,
+    "horizontal-fidelity": horizontal_fidelity,
+    "family-adapter-registry": family_adapter_registry,
+    "horizontal-readiness": horizontal_readiness,
+    "family-strategy-worklists": family_strategy_worklists,
+    "showcase-artifact-boundary": showcase_artifact_boundary,
+    "showcase-catalog-references": showcase_catalog_references,
     "alpha3-readiness": alpha3_readiness,
     "alpha3-showcase-catalog": alpha3_showcase_catalog,
     "hummingbird-directional": hummingbird_directional,
@@ -1256,6 +1350,8 @@ TASKS: dict[str, Callable[[], None]] = {
     "controller-mission-preflight": controller_mission_preflight,
     "solve-trim-evidence": solve_trim_evidence,
     "reference-tuning": check_reference_tuning,
+    "reduced-tuning-campaigns": reduced_tuning_campaigns,
+    "powered-fixed-wing-mission-proposals": powered_fixed_wing_mission_proposals,
     "check-parity": check_fidelity_parity_contracts,
     "run-parity": run_fidelity_parity,
     "compile-segments": compile_segments,

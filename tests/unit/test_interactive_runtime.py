@@ -60,6 +60,65 @@ def test_step_applies_bounded_named_commands_and_routes_them_to_derivative() -> 
 ####
 
 
+def test_load_evaluations_preserve_state_and_control_activation_timing() -> None:
+    """A command boundary is retained through every private solver evaluation."""
+
+    vehicle = RuntimeVehicle(
+        "timed-player",
+        RuntimeState(0.0, (0.0,), value_names=("downrange",)),
+        derivative=lambda state: (state.named.get("throttle", 0.0),),
+        environment_evaluator=lambda _values: {"density": 1.225},
+        step_size=0.1,
+    )
+    session = InteractiveSession(
+        RuntimeProblem({vehicle.name: vehicle}),
+        (ControlSpec("throttle", lower=0.0, upper=1.0),),
+    )
+
+    session.step(0.1, {"throttle": 0.6})
+    first_records = tuple(vehicle.load_evaluation_history)
+    assert first_records
+    assert {record.phase for record in first_records} >= {
+        "solver_stage_environment",
+        "solver_stage_rhs",
+        "committed_truth_environment",
+        "committed_truth_rhs",
+    }
+    assert all(record.achieved_control_time_s == pytest.approx(0.0) for record in first_records)
+    assert all(record.achieved_control_time_s <= record.state_time_s for record in first_records)
+    assert max(record.state_time_s for record in first_records) == pytest.approx(0.1)
+
+    session.step(0.1, {"throttle": 0.2})
+    second_records = vehicle.load_evaluation_history[len(first_records) :]
+    assert second_records
+    assert all(record.achieved_control_time_s == pytest.approx(0.1) for record in second_records)
+    assert all(record.achieved_control_time_s <= record.state_time_s for record in second_records)
+####
+
+
+def test_adaptive_interactive_step_reaches_the_requested_accepted_truth_boundary() -> None:
+    """An adaptive inner step may shrink, but must not shorten the API step."""
+
+    vehicle = RuntimeVehicle(
+        "adaptive",
+        RuntimeState(0.0, (1.0,), value_names=("state",)),
+        derivative=lambda state: (25.0 * state.values[0],),
+        step_size=0.05,
+        integrator="rkf45",
+        absolute_tolerance=1.0e-12,
+        relative_tolerance=1.0e-12,
+    )
+    session = InteractiveSession(RuntimeProblem({vehicle.name: vehicle}))
+
+    snapshot = session.step(0.1)
+
+    assert snapshot.time_start == pytest.approx(0.0)
+    assert snapshot.time_end == pytest.approx(0.1)
+    assert vehicle.state.time == pytest.approx(0.1)
+    assert len(vehicle.history) > 2
+    ####
+
+
 def test_pause_resume_interrupt_and_artifact_are_explicit(tmp_path) -> None:
     session = InteractiveSession(_problem(), _controls())
     session.step(0.1, {"throttle": 0.5})

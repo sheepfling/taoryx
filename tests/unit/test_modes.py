@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from taoryx.contracts import Frame, FrameVector3, Vector3
@@ -127,6 +129,50 @@ def test_kinematic_problem_mode_consumes_catalog_response_profile() -> None:
     ####
 
 
+def test_kinematic_route_lag_target_follows_semantic_racetrack() -> None:
+    document = parse_problem_text(
+        "(kinematic-route-lag-smoke)\n"
+        "*mode kinematic-6dof\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*runtime status vehicle aero-alpha-reference-deg=4\n"
+        "*runtime status attitude mode=route-lag lag-s=0.5 max-rate-deg-s=180\n"
+        "*runtime status route mode=racetrack start-latitude-deg=0 start-longitude-deg=0 "
+        "racetrack-length-m=1000 racetrack-turn-radius-m=203.8258680187507 racetrack-speed-mps=17.9 "
+        "racetrack-low-altitude-m=178 racetrack-high-altitude-m=188 racetrack-climb-rate-mps=0.5 "
+        "racetrack-descent-rate-mps=0.3 racetrack-left-bank-deg=-10 racetrack-right-bank-deg=10\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecic x=7000000 y=0 z=0 xdt=0 ydt=17.9 zdt=0 time=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *integ dtprnt=0.1 dt=0.1\n"
+        "    *when time>1.0 stop\n"
+        "*end\n",
+        profile="taoryx",
+    )
+
+    lowered = lower_problem_document(document)
+    vehicle = lowered.cases[0].problem.vehicles["1"]
+    assert vehicle.kinematic_attitude_target_provider is not None
+    assert vehicle.kinematic_state is not None
+    target = vehicle.kinematic_attitude_target_provider
+
+    climb = target(RuntimeState(0.0, (), named={"time": 0.0}))
+    left_turn = target(RuntimeState(70.0, (), named={"time": 70.0}))
+    descent = target(RuntimeState(110.0, (), named={"time": 110.0}))
+    right_turn = target(RuntimeState(175.0, (), named={"time": 175.0}))
+
+    assert math.degrees(climb.x) == pytest.approx(0.0)
+    assert math.degrees(climb.y) > 4.0
+    assert math.degrees(climb.z) == pytest.approx(90.0)
+    initial = vehicle.kinematic_state.attitude.to_euler_321()
+    assert math.degrees(initial.y) == pytest.approx(math.degrees(climb.y))
+    assert math.degrees(initial.z) == pytest.approx(math.degrees(climb.z))
+    assert math.degrees(left_turn.x) == pytest.approx(-10.0)
+    assert math.degrees(descent.y) < math.degrees(climb.y)
+    assert math.degrees(right_turn.x) == pytest.approx(10.0)
+    ####
+
+
 def test_kinematic_problem_mode_accepts_prescribed_body_rates() -> None:
     document = parse_problem_text(
         "(kinematic-rate-smoke)\n"
@@ -243,6 +289,7 @@ def test_runtime_kinematic_mode_advances_controller_attitude_sidecar() -> None:
         dynamics_mode=DynamicsMode.KINEMATIC_6DOF,
         kinematic_state=kinematic,
         body_rate_provider=lambda state: Vector3(0.0, 0.0, 1.0),
+        kinematic_attitude_target_provider=lambda state: Vector3(0.1, 0.2, 0.3),
     )
 
     integrate_active_vehicles(RuntimeProblem({"demo": vehicle}), 0.1)
@@ -250,6 +297,9 @@ def test_runtime_kinematic_mode_advances_controller_attitude_sidecar() -> None:
     assert vehicle.kinematic_state is not None
     assert vehicle.kinematic_state.time == pytest.approx(0.1)
     assert vehicle.kinematic_state.attitude.z > 0.0
+    assert vehicle.state.named["kinematic_body_rate_r_rad_s"] == pytest.approx(1.0)
+    assert vehicle.state.named["kinematic_roll_command_deg"] == pytest.approx(math.degrees(0.1))
+    assert "kinematic_yaw_deg" in vehicle.state.named
 
 
 def test_kinematic_attitude_sidecar_does_not_mutate_translational_state() -> None:

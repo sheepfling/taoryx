@@ -7,6 +7,7 @@ import csv
 import hashlib
 import json
 import math
+import mimetypes
 import os
 import re
 import shutil
@@ -23,6 +24,13 @@ from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.objectives import ObjectiveSpec, score_objectives
 from taoryx.runtime.runner import run_files
 from taoryx.scenario_contract import ScenarioContract, compare_contracts
+from taoryx.showcase import (
+    ArtifactFile,
+    EvidenceBoardSpec,
+    FidelityShowcaseRealization,
+    ShowcaseOutcome,
+    build_showcase_run_artifact,
+)
 from taoryx.trajectory import EvaluationMetric, EvidenceChannel, objective_report_to_evaluation
 from taoryx.trajectory.evaluation import OutcomeStatus, ValidityStatus
 from taoryx.validation import independent_force_closure, independent_moment_closure
@@ -150,6 +158,22 @@ CLOSURE_CONTRACT = {
     "hummingbird": {"independent_force_p99_max": 1.0e-6, "independent_moment_p99_max": 1.0e-6, "test": "tests/e2e/test_hummingbird_family_validation.py"},
     "x15": {"independent_force_p99_max": 1.0e-3, "independent_moment_p99_max": 2.0e-2, "test": "tests/e2e/test_glider_family_validation.py"},
 }
+SHOWCASE_MODULES = (
+    "trajectory_3d",
+    "mission_timeline",
+    "energy_and_resources",
+    "attitude_and_rates",
+    "semantic_controls",
+    "physical_effectors",
+    "envelope_margins",
+    "terminal_corridor",
+)
+SURFACE_EFFECTORS = {
+    "b747": ("elevator_deg", "aileron_deg", "rudder_deg"),
+    "skywalker_x8": ("collective_elevon_deg", "differential_elevon_deg", "throttle_fraction"),
+    "hummingbird": ("rotor_speed", "rotor_1_speed", "rotor_2_speed", "rotor_3_speed", "rotor_4_speed"),
+    "x15": ("throttle_fraction", "symmetric_stabilator_deg", "differential_stabilator_deg", "rudder_deg"),
+}
 
 
 def _sha256(path: Path) -> str:
@@ -166,6 +190,98 @@ def _payload_sha256(payload: object) -> str:
 
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+    ####
+
+
+def _artifact_files(packet: Path, scenario_hash: str) -> tuple[ArtifactFile, ...]:
+    """Describe the complete ladder packet with the manifest as trust root."""
+
+    names = ["manifest.json"]
+    names.extend(
+        path.relative_to(packet).as_posix()
+        for path in _files(packet)
+        if path.name != "manifest.json"
+    )
+    return tuple(
+        ArtifactFile(
+            path=name,
+            sha256=scenario_hash if name == "manifest.json" else _sha256(packet / name),
+            media_type=mimetypes.guess_type(name)[0] or "application/octet-stream",
+        )
+        for name in names
+    )
+    ####
+
+
+def _ladder_realization(family: str, tier: str) -> FidelityShowcaseRealization:
+    """Resolve one legacy ladder label to the canonical four-tier contract."""
+
+    tier_map = {
+        "point-mass-3dof": ("point_mass_3dof", "force_model"),
+        "kinematic-3-plus-3-dof": ("pseudo_6dof", "response_law"),
+        "rigid-body-6dof": ("rigid_body_6dof_surface_allocated", "surface_allocated"),
+    }
+    canonical_tier, control_realization = tier_map[tier]
+    physical_effectors = SURFACE_EFFECTORS.get(family, ()) if tier == "rigid-body-6dof" else ()
+    claims = {
+        "point-mass-3dof": "This run proves source-bounded center-of-mass trajectory, energy, and resource behavior at point-mass fidelity.",
+        "kinematic-3-plus-3-dof": "This run proves the declared attitude/rate response law and translational mission behavior at pseudo-6DOF fidelity.",
+        "rigid-body-6dof": "This run records the source-bounded rigid-body plant and its declared physical control inputs at the surface-allocation boundary.",
+    }
+    nonclaims = [
+        "family-wide qualification",
+        "flight-test or production validation",
+        "unsupported dynamics outside the declared source/model envelope",
+    ]
+    if tier == "point-mass-3dof":
+        nonclaims.extend(("physical attitude dynamics", "individual physical effectors"))
+    elif tier == "kinematic-3-plus-3-dof":
+        nonclaims.extend(("physical moment balance", "individual physical effectors or actuator allocation"))
+    else:
+        nonclaims.append("full nonlinear actuator validation beyond the declared source controls")
+    state_schema = {
+        "point-mass-3dof": ("position_velocity_mass_resource",),
+        "kinematic-3-plus-3-dof": ("position_velocity_quaternion_response_rates",),
+        "rigid-body-6dof": ("position_velocity_quaternion_body_rates_mass_resource",),
+    }[tier]
+    return FidelityShowcaseRealization(
+        fidelity=canonical_tier,
+        control_realization=control_realization,
+        realization_id=f"{family}.fidelity_ladder.{canonical_tier}.v1",
+        state_schema=state_schema,
+        semantic_command_mapping={
+            "mission": "fidelity_ladder.yaml case definition",
+            "vehicle_controls": "declared source problem controls",
+        },
+        physical_effectors=physical_effectors,
+        available_physics=(
+            "source-bounded aerodynamic or rotor loads",
+            "declared propulsion and resource evolution",
+            "point-mass translational equations"
+            if tier == "point-mass-3dof"
+            else "named attitude response law"
+            if tier == "kinematic-3-plus-3-dof"
+            else "rigid-body translation and rotation with declared effectors",
+        ),
+        claim=claims[tier],
+        nonclaims=tuple(nonclaims),
+        evidence_grade="mixed",
+    )
+    ####
+
+
+def _ladder_outcome(summary: dict[str, Any]) -> ShowcaseOutcome:
+    """Map the neutral ladder evaluation to the showcase outcome vocabulary."""
+
+    evaluation = summary.get("evaluation", {})
+    outcome = str(evaluation.get("outcome", ""))
+    if outcome == "numerical_failure" or int(summary.get("exit_code", 1)) != 0:
+        return "numerical_failure"
+    if outcome == "time_limited":
+        return "time_limited"
+    if outcome == "completed":
+        return "completed"
+    return "partial"
     ####
 
 
@@ -1540,6 +1656,7 @@ def build(
         encoding="utf-8",
     )
     manifest["source_differential_report"] = "evidence/source-differential-report.json"
+    showcase_records: list[tuple[str, str, dict[str, Any], dict[str, Any]]] = []
     cases = _load_cases()
     if family_ids is not None:
         cases = tuple(case for case in cases if _family_key(str(case["id"])) in family_ids)
@@ -1622,6 +1739,7 @@ def build(
             (tier_dir / "summary.json").parent.mkdir(parents=True, exist_ok=True)
             (tier_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
             family_report["tiers"][tier] = summary
+            showcase_records.append((family, tier, summary, family_report))
         contracts: dict[str, ScenarioContract] = {
             ScenarioContract.model_validate(
                 {
@@ -1911,6 +2029,35 @@ def build(
     manifest["controller_missions"] = controller_mission_reports
     manifest["controller_missions_status"] = "executed" if include_controller_missions else "skipped-by-request"
     _write_case_manifests(packet)
+    run_artifacts: list[dict[str, Any]] = []
+    for family, tier, summary, family_report in showcase_records:
+        realization = _ladder_realization(family, tier)
+        contract = summary.get("scenario_contract")
+        scenario_contract_hash = (
+            str(contract["contract_sha256"])
+            if isinstance(contract, dict) and contract.get("contract_sha256")
+            else _payload_sha256({"family": family, "tier": tier, "summary": summary})
+        )
+        showcase_run = build_showcase_run_artifact(
+            realization=realization,
+            run_id=f"{run_id}-{family}-{realization.fidelity}",
+            showcase_id=f"org.taoryx.showcase.fidelity-ladder.{family}",
+            vehicle_binding_id=f"{family}.fidelity-ladder-v1",
+            scenario_contract_sha256=scenario_contract_hash,
+            outcome=_ladder_outcome(summary),
+            files=_artifact_files(packet, scenario_contract_hash),
+            board=EvidenceBoardSpec(profile="family-evidence-board-v1", modules=SHOWCASE_MODULES),
+            archetypes=(
+                "mission_geometry",
+                "mission_timeline",
+                "dynamics_and_resources",
+                "envelope_and_qualification",
+            ),
+        )
+        serialized = showcase_run.model_dump(mode="json")
+        run_artifacts.append(serialized)
+        family_report.setdefault("run_artifacts", []).append(serialized)
+    manifest["run_artifacts"] = run_artifacts
     manifest_path = packet / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     manifest["files"] = {

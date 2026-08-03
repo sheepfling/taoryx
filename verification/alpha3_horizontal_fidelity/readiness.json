@@ -1,0 +1,864 @@
+{
+  "claim_boundary": "Readiness and adapter-probe evidence only; this artifact is not family mission qualification.",
+  "family_count": 9,
+  "findings": [],
+  "records": [
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "family_flagship_mission",
+        "adapter_probe_artifact_not_found"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "ready_for_runtime_probes",
+      "declared_status": "development",
+      "family_id": "skywalker_x8",
+      "operation_status": {},
+      "profile_id": "skywalker_x8.point_mass_3dof.v1",
+      "required_operations": [],
+      "status": "ready_for_runtime_probes",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "family_flagship_mission",
+        "adapter_probe_artifact_not_found"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "ready_for_runtime_probes",
+      "declared_status": "development",
+      "family_id": "skywalker_x8",
+      "operation_status": {},
+      "profile_id": "skywalker_x8.attitude_response_p6dof.v1",
+      "required_operations": [],
+      "status": "ready_for_runtime_probes",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "nonlinear_direct_wrench_mission"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "partial",
+      "declared_status": "development",
+      "family_id": "skywalker_x8",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "skywalker_x8.direct_wrench_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "status": "development",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "end_to_end_surface_allocated_racetrack"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "partial",
+      "declared_status": "development",
+      "family_id": "skywalker_x8",
+      "operation_status": {
+        "allocate": "pass",
+        "effectiveness": "pass",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "skywalker_x8.surface_allocated_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "status": "development",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "family_flagship_mission",
+        "adapter_probe_artifact_not_found"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "ready_for_runtime_probes",
+      "declared_status": "development",
+      "family_id": "b747",
+      "operation_status": {},
+      "profile_id": "b747.point_mass_3dof.v1",
+      "required_operations": [],
+      "status": "ready_for_runtime_probes",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "family_flagship_mission",
+        "adapter_probe_artifact_not_found"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "ready_for_runtime_probes",
+      "declared_status": "development",
+      "family_id": "b747",
+      "operation_status": {},
+      "profile_id": "b747.attitude_response_p6dof.v1",
+      "required_operations": [],
+      "status": "ready_for_runtime_probes",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "nonlinear_direct_wrench_mission"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "partial",
+      "declared_status": "development",
+      "family_id": "b747",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "b747.direct_wrench_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "status": "development",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "end_to_end_surface_allocated_racetrack"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "partial",
+      "declared_status": "development",
+      "family_id": "b747",
+      "operation_status": {
+        "allocate": "pass",
+        "effectiveness": "pass",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "b747.surface_allocated_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "status": "development",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "broader_operating_point_matrix",
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "data_source": "",
+      "data_status": "not_registered",
+      "declared_status": "development",
+      "family_id": "a320_openap_3dof",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "a320_openap_3dof.point_mass_3dof.v1",
+      "required_operations": [],
+      "status": "blocked",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "calibrated_response_model_and_operating_points",
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "data_source": "",
+      "data_status": "not_registered",
+      "declared_status": "development",
+      "family_id": "a320_openap_3dof",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "a320.attitude_response_p6dof.v1",
+      "required_operations": [],
+      "status": "blocked",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "participating_rigid_body_plant",
+        "physical_surface_effectivity",
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "data_source": "",
+      "data_status": "not_registered",
+      "declared_status": "planned",
+      "family_id": "a320_openap_3dof",
+      "operation_status": {},
+      "profile_id": "a320.direct_wrench_6dof.v1",
+      "required_operations": [],
+      "status": "planned",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "participating_rigid_body_plant",
+        "physical_surface_effectivity",
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "data_source": "",
+      "data_status": "not_registered",
+      "declared_status": "planned",
+      "family_id": "a320_openap_3dof",
+      "operation_status": {},
+      "profile_id": "a320.surface_allocated_6dof.v1",
+      "required_operations": [],
+      "status": "planned",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "multi_regime_energy_mission",
+        "omitted:physical_attitude_dynamics",
+        "omitted:aerodynamic_moments",
+        "omitted:physical_actuator_states"
+      ],
+      "data_source": "families/reference_f16_s119/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "f16_s119",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "f16_s119.point_mass_3dof.v1",
+      "required_operations": [],
+      "status": "probe_ready",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "high_rate_alpha_beta_load_factor_envelope",
+        "omitted:moment_balance_as_response_source",
+        "omitted:fuel_mass_evolution"
+      ],
+      "data_source": "families/reference_f16_s119/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "f16_s119",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "f16_s119.attitude_response_p6dof.v1",
+      "required_operations": [],
+      "status": "probe_ready",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "nonlinear_energy_maneuver_mission",
+        "omitted:fuel_mass_evolution",
+        "omitted:actuator_dynamics",
+        "omitted:runway_contact"
+      ],
+      "data_source": "families/reference_f16_s119/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "f16_s119",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "f16_s119.direct_wrench_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "status": "probe_ready",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "scheduled_surface_qualification",
+        "omitted:source_validated_actuator_dynamics",
+        "omitted:fuel_mass_evolution",
+        "omitted:runway_contact"
+      ],
+      "data_source": "families/reference_f16_s119/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "f16_s119",
+      "operation_status": {
+        "allocate": "pass",
+        "effectiveness": "pass",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "f16_s119.surface_allocated_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "status": "probe_ready",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "release_burn_coast_terminal_handoff",
+        "adapter_probe_artifact_not_found"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "ready_for_runtime_probes",
+      "declared_status": "development",
+      "family_id": "x15",
+      "operation_status": {},
+      "profile_id": "x15.point_mass_3dof.v1",
+      "required_operations": [],
+      "status": "ready_for_runtime_probes",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "powered_coast_atmospheric_schedule",
+        "adapter_probe_artifact_not_found"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "ready_for_runtime_probes",
+      "declared_status": "development",
+      "family_id": "x15",
+      "operation_status": {},
+      "profile_id": "x15.attitude_response_p6dof.v1",
+      "required_operations": [],
+      "status": "ready_for_runtime_probes",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "full_source_physical_effector_trim",
+        "powered_coast_atmospheric_schedule"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "partial",
+      "declared_status": "development",
+      "family_id": "x15",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "x15.direct_wrench_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "status": "development",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "source_trim_acceptance",
+        "stabilator_rudder_rcs_propulsion_effectivity",
+        "allocator_declaration: value does not contain 'allocator'"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "blocked",
+      "declared_status": "planned",
+      "family_id": "x15",
+      "operation_status": {},
+      "profile_id": "x15.surface_allocated_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "status": "planned",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "translated_yaw_disturbance_landing_mission"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "ready_for_runtime_probes",
+      "declared_status": "development",
+      "family_id": "hummingbird",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "hummingbird.point_mass_3dof.v1",
+      "required_operations": [],
+      "status": "development",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "rotor_response_and_yaw_authority_envelope"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "ready_for_runtime_probes",
+      "declared_status": "development",
+      "family_id": "hummingbird",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "hummingbird.attitude_response_p6dof.v1",
+      "required_operations": [],
+      "status": "development",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "direct_wrench_is_debug_comparator"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "partial",
+      "declared_status": "development",
+      "family_id": "hummingbird",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "hummingbird.direct_wrench_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "status": "development",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "battery_voltage_contact_and_full_envelope"
+      ],
+      "data_source": "verification/vehicle_models.yaml",
+      "data_status": "partial",
+      "declared_status": "development",
+      "family_id": "hummingbird",
+      "operation_status": {
+        "allocate": "pass",
+        "effectiveness": "pass",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "hummingbird.surface_allocated_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "status": "development",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "glide_energy_management_mission",
+        "omitted:physical_attitude_dynamics",
+        "omitted:aerodynamic_moments",
+        "omitted:physical_actuator_states",
+        "adapter_probe_artifact_not_found"
+      ],
+      "data_source": "families/reference_hl20_mod_k/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "hl20_mod_k",
+      "operation_status": {},
+      "profile_id": "hl20_mod_k.point_mass_3dof.v1",
+      "required_operations": [],
+      "status": "data_ready",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "bank_reversal_alpha_limit_energy_coupling",
+        "omitted:moment_balance_as_response_source",
+        "omitted:physical_actuator_states",
+        "adapter_probe_artifact_not_found"
+      ],
+      "data_source": "families/reference_hl20_mod_k/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "hl20_mod_k",
+      "operation_status": {},
+      "profile_id": "hl20.attitude_response_p6dof.v1",
+      "required_operations": [],
+      "status": "data_ready",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "source_trim_acceptance",
+        "omitted:propulsion",
+        "omitted:actuator_dynamics",
+        "omitted:landing_contact"
+      ],
+      "data_source": "families/reference_hl20_mod_k/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "hl20_mod_k",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "not_applicable",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "not_applicable",
+        "trim_fragment": "pass"
+      },
+      "profile_id": "hl20.direct_wrench_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim_fragment"
+      ],
+      "status": "probe_ready",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "full_state_trim",
+        "closed_loop_glide_qualification",
+        "omitted:closed_loop_controller",
+        "omitted:landing_contact"
+      ],
+      "data_source": "families/reference_hl20_mod_k/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "hl20_mod_k",
+      "operation_status": {
+        "allocate": "pass",
+        "effectiveness": "pass",
+        "linearize": "not_applicable",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "not_applicable",
+        "trim_fragment": "pass"
+      },
+      "profile_id": "hl20.surface_allocated_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim_fragment",
+        "effectiveness",
+        "allocate"
+      ],
+      "status": "probe_ready",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "source_replay_not_participating_plant",
+        "omitted:attitude_dynamics",
+        "omitted:aerodynamic_moments",
+        "omitted:body_rates"
+      ],
+      "data_source": "families/reference_nesc_two_stage_rocket/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "not_applicable",
+        "observe": "not_applicable",
+        "replay": "pass",
+        "resource_rates": "not_applicable",
+        "state_derivative": "not_applicable",
+        "trim": "not_applicable",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "nesc_rocket.performance_3dof.v1",
+      "required_operations": [],
+      "status": "probe_ready",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "source_replay_not_participating_attitude",
+        "omitted:full_moment_balance",
+        "omitted:actuator_dynamics"
+      ],
+      "data_source": "families/reference_nesc_two_stage_rocket/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "operation_status": {
+        "allocate": "not_applicable",
+        "effectiveness": "not_applicable",
+        "linearize": "not_applicable",
+        "observe": "not_applicable",
+        "replay": "pass",
+        "resource_rates": "not_applicable",
+        "state_derivative": "not_applicable",
+        "trim": "not_applicable",
+        "trim_fragment": "not_applicable"
+      },
+      "profile_id": "nesc_rocket.attitude_response_p6dof.v1",
+      "required_operations": [],
+      "status": "probe_ready",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "time_aligned_attitude_gimbal_effectivity",
+        "omitted:independent_full_participating_simulation_equivalence"
+      ],
+      "data_source": "families/reference_nesc_two_stage_rocket/family.yaml",
+      "data_status": "source_declared",
+      "declared_status": "planned",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "operation_status": {},
+      "profile_id": "nesc_rocket.direct_wrench_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "status": "planned",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "time_aligned_attitude_gimbal_effectivity",
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "data_source": "",
+      "data_status": "not_registered",
+      "declared_status": "planned",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "operation_status": {},
+      "profile_id": "nesc_rocket.surface_allocated_6dof.v1",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "status": "planned",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "orientation_averaged_area_is_not_tumble_proof",
+        "adapter_probe_artifact_not_found"
+      ],
+      "data_source": "verification/pseudo6dof_profiles.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "tumbling_body",
+      "operation_status": {},
+      "profile_id": "tumbling_body.average_area_3dof.v1",
+      "required_operations": [],
+      "status": "data_ready",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "adapter_status": "pass",
+      "blockers": [
+        "passive_uncontrolled_rotation_evidence"
+      ],
+      "data_source": "verification/pseudo6dof_profiles.yaml",
+      "data_status": "source_declared",
+      "declared_status": "development",
+      "family_id": "tumbling_body",
+      "operation_status": {},
+      "profile_id": "tumbling_body.rigid_body_reuse_p6dof.v1",
+      "required_operations": [],
+      "status": "probe_ready",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "data_source": "",
+      "data_status": "not_registered",
+      "declared_status": "not_applicable",
+      "family_id": "tumbling_body",
+      "operation_status": {},
+      "profile_id": null,
+      "required_operations": [],
+      "status": "not_applicable",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "adapter_status": "not_checked",
+      "blockers": [
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "data_source": "",
+      "data_status": "not_registered",
+      "declared_status": "not_applicable",
+      "family_id": "tumbling_body",
+      "operation_status": {},
+      "profile_id": null,
+      "required_operations": [],
+      "status": "not_applicable",
+      "tier": "rigid_body_6dof_surface_allocated"
+    }
+  ],
+  "schema": "taoryx.horizontal-readiness/v1alpha1",
+  "status": "development",
+  "status_counts": {
+    "blocked": 2,
+    "data_ready": 3,
+    "development": 9,
+    "not_applicable": 2,
+    "planned": 5,
+    "probe_ready": 9,
+    "ready_for_runtime_probes": 6
+  },
+  "tier_count": 36
+}

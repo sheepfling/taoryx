@@ -16,9 +16,10 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..controller_realization import ControllerRealization
+from ..fidelity_contracts import LegacyFidelityTier
 
 CapabilityStatus = Literal["native", "emulated", "approximated", "unsupported"]
-FidelityProfile = Literal["point_mass_3dof", "pseudo_6dof", "rigid_body_6dof"]
+FidelityProfile = LegacyFidelityTier
 ParameterKind = Literal["number", "integer", "boolean", "string"]
 ParameterRole = Literal["independent", "derived", "developer"]
 ModifierOperation = Literal["set", "add", "scale"]

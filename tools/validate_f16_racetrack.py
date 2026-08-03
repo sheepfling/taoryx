@@ -27,7 +27,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
 from taoryx.mission_objectives import TruthObjectiveSpec, evaluate_truth_objectives
-from taoryx.racetrack_template import ResolvedRacetrack, load_racetrack_template_catalog
+from taoryx.racetrack_template import RacetrackFidelity, ResolvedRacetrack, load_racetrack_template_catalog
 from taoryx.trajectory import (
     F16AttitudeResponsePseudo6DOFModel,
     F16PointMass3DOFModel,
@@ -118,6 +118,18 @@ def _objective_specs(route: ResolvedRacetrack) -> tuple[TruthObjectiveSpec, ...]
             )
         )
     return tuple(specs)
+    ####
+
+
+def _expected_fidelity(mode: F16RacetrackMode | F16ReducedRacetrackMode) -> RacetrackFidelity:
+    """Return the fidelity contract required by one executable mode."""
+
+    return cast(RacetrackFidelity, {
+        "point_mass_3dof": "point_mass_3dof",
+        "pseudo_6dof_kinematic_bridge": "pseudo_6dof_kinematic_bridge",
+        "direct_wrench": "rigid_body_6dof_direct_wrench",
+        "surface_allocated": "rigid_body_6dof_surface_allocated",
+    }[mode])
     ####
 
 
@@ -237,18 +249,34 @@ def run_case(
     duration_s: float | None,
     dt_s: float,
     perturbation: Mapping[str, float] | None = None,
+    *,
+    route_override: ResolvedRacetrack | None = None,
+    mission_proposal_fingerprint: str | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, float | int | str]]]:
-    """Execute one F-16 route realization and evaluate its truth gates."""
+    """Execute one F-16 route realization and evaluate its truth gates.
+
+    ``route_override`` is intentionally an ephemeral execution seam.  It lets
+    the capability-scaled compiler prove a candidate geometry without editing
+    the versioned qualification catalog.  A supplied proposal fingerprint is
+    copied into evidence so promotion can fail closed if the route later
+    changes.
+    """
+
+    if route_override is not None and route_override.fidelity != _expected_fidelity(mode):
+        raise ValueError(
+            f"mode {mode!r} requires {_expected_fidelity(mode)!r}, "
+            f"not candidate fidelity {route_override.fidelity!r}"
+        )
 
     result: F16RacetrackRun | F16ReducedRacetrackRun
     if mode in {"point_mass_3dof", "pseudo_6dof_kinematic_bridge"}:
         source, trim, trim_pitch_rad = _build_reduction_case()
-        catalog = load_racetrack_template_catalog(CATALOG)
         binding_id = {
             "point_mass_3dof": "f16-s119-point-mass",
             "pseudo_6dof_kinematic_bridge": "f16-s119-pseudo-6dof",
         }[mode]
-        route = catalog.get(binding_id)
+        route = route_override or load_racetrack_template_catalog(CATALOG).get(binding_id)
+        binding_id = route.binding_id
         reduced_mode = mode
         model: F16PointMass3DOFModel | F16AttitudeResponsePseudo6DOFModel
         if reduced_mode == "point_mass_3dof":
@@ -291,9 +319,9 @@ def run_case(
         )
     else:
         adapter, trim, design = _build_case()
-        catalog = load_racetrack_template_catalog(CATALOG)
         binding_id = "f16-s119-surfaces" if mode == "surface_allocated" else "f16-s119-direct-wrench"
-        route = catalog.get(binding_id)
+        route = route_override or load_racetrack_template_catalog(CATALOG).get(binding_id)
+        binding_id = route.binding_id
         runner = F16RacetrackRunner(
             adapter.source,
             trim,
@@ -365,6 +393,8 @@ def run_case(
         "evaluation": evaluation,
         "claim_boundary": claim_boundary,
     }
+    if mission_proposal_fingerprint is not None:
+        packet["mission_proposal_fingerprint"] = mission_proposal_fingerprint
     return packet, rows
     ####
 
@@ -395,13 +425,54 @@ def main() -> int:
     parser.add_argument("--duration-s", type=float, default=None)
     parser.add_argument("--dt-s", type=float, default=0.2)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "verification/f16_racetrack")
+    parser.add_argument(
+        "--candidate-profile",
+        help=(
+            "Compile and execute this named capability-scaled profile without changing the baseline catalog. "
+            "Only the F-16 profile is accepted by this runner."
+        ),
+    )
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    packet, rows = run_case(args.mode, args.duration_s, args.dt_s)
+    route_override = None
+    proposal_fingerprint = None
     stem = f"{args.mode}"
+    if args.candidate_profile is not None:
+        from taoryx.mission_promotion import mission_proposal_fingerprint
+        from taoryx.powered_fixed_wing_mission_compiler import (
+            compile_powered_fixed_wing_racetrack,
+            load_powered_fixed_wing_mission_profiles,
+        )
+
+        profiles = load_powered_fixed_wing_mission_profiles(ROOT / "verification/powered_fixed_wing_mission_profiles.yaml")
+        if args.candidate_profile not in profiles:
+            parser.error(f"unknown candidate profile: {args.candidate_profile}")
+        capability, intent = profiles[args.candidate_profile]
+        if capability.vehicle_id != "reference_f16_s119":
+            parser.error(
+                f"candidate profile {args.candidate_profile!r} belongs to {capability.vehicle_id!r}; "
+                "this runner only executes reference_f16_s119"
+            )
+        fidelity = _expected_fidelity(args.mode)
+        proposal = compile_powered_fixed_wing_racetrack(
+            capability,
+            intent,
+            binding_id=f"{args.candidate_profile}-{fidelity}-candidate",
+            fidelity=fidelity,
+        )
+        route_override = proposal.route
+        proposal_fingerprint = mission_proposal_fingerprint(proposal)
+        stem = f"{args.mode}_{args.candidate_profile}_candidate"
+    packet, rows = run_case(
+        args.mode,
+        args.duration_s,
+        args.dt_s,
+        route_override=route_override,
+        mission_proposal_fingerprint=proposal_fingerprint,
+    )
     (args.output_dir / f"{stem}_evidence.json").write_text(json.dumps(packet, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     _write_csv(args.output_dir / f"{stem}_telemetry.csv", rows)
-    route = load_racetrack_template_catalog(CATALOG).get(str(packet["binding_id"]))
+    route = route_override or load_racetrack_template_catalog(CATALOG).get(str(packet["binding_id"]))
     _render_board(args.output_dir / f"{stem}_board.png", rows, packet["evaluation"], route, args.mode)
     print(json.dumps(packet, indent=2, sort_keys=True))
     return 0 if packet["evaluation"]["mission_pass"] else 1

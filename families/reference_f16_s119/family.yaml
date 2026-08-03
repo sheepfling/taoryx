@@ -49,6 +49,7 @@ plant:
 fidelity_profiles:
   - profile_id: f16.performance_3dof.v1
     runtime_fidelity: point_mass_3dof
+    control_realization: force_model
     equations: [newton_point_mass_translation]
     status: qualified_local_projection
     parent_profile: f16.rigid_body_6dof.v1
@@ -56,6 +57,7 @@ fidelity_profiles:
     omitted_physics: [physical_attitude_dynamics, aerodynamic_moments, physical_actuator_states]
   - profile_id: f16.attitude_response_p6dof.v1
     runtime_fidelity: pseudo_6dof
+    control_realization: response_law
     equations: [newton_point_mass_translation, quaternion_kinematics, scheduled_attitude_response]
     status: qualified_surrogate_response
     parent_profile: f16.rigid_body_6dof.v1
@@ -63,12 +65,14 @@ fidelity_profiles:
     omitted_physics: [moment_balance_as_response_source, fuel_mass_evolution]
   - profile_id: f16.rigid_body_6dof.v1
     runtime_fidelity: rigid_body_6dof
+    control_realization: direct_wrench
     equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
     status: runtime_replay_qualification_passed
     data_contract: [source_force_moment_graph, fixed_mass_properties, steady_propulsion, direct_controls]
     omitted_physics: [fuel_mass_evolution, actuator_dynamics, runway_contact]
   - profile_id: f16.rigid_body_6dof.direct_wrench_screen.v1
     runtime_fidelity: rigid_body_6dof
+    control_realization: direct_wrench
     equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
     status: development_screen_pending
     parent_profile: f16.rigid_body_6dof.v1
@@ -76,6 +80,7 @@ fidelity_profiles:
     omitted_physics: [physical_effector_allocation, actuator_dynamics, fuel_mass_evolution, runway_contact]
   - profile_id: f16.rigid_body_6dof.surface_allocated.v1
     runtime_fidelity: rigid_body_6dof
+    control_realization: surface_allocated
     equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
     status: development_nominal_case_pass
     parent_profile: f16.rigid_body_6dof.v1

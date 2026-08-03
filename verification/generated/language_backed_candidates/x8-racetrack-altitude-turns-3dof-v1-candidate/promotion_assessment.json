@@ -1,0 +1,19 @@
+{
+  "candidate_binding_id": "x8-cruise-point_mass_3dof-candidate",
+  "checks": {
+    "candidate_binding_matches": true,
+    "execution_artifact_present": true,
+    "fidelity_matches": true,
+    "hard_gates_pass": true,
+    "numerical_valid": true,
+    "proposal_fingerprint_matches": true,
+    "proposal_is_capability_feasible": true,
+    "truth_objectives_pass": true
+  },
+  "claim_boundary": "Promotion eligibility only. This record does not replace a family evidence tier, robustness qualification, or physical-effector claim.",
+  "fidelity": "point_mass_3dof",
+  "findings": [],
+  "proposal_fingerprint": "685f0282c3669c57ec507d0741384a7baf317e079d5e1730d7da4bd12ea06120",
+  "schema_version": "taoryx.mission-promotion/v1",
+  "status": "promotion_eligible"
+}

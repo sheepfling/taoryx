@@ -54,6 +54,24 @@ def test_truth_evaluator_requires_dwell_and_reports_margin() -> None:
     assert record["margin"] == 0.05
 
 
+def test_truth_evaluator_accepts_terminal_gate_without_a_declared_dwell() -> None:
+    result = evaluate_truth_objectives(
+        (
+            TruthObjectiveSpec(
+                id="handoff",
+                objective_type="terminal_state_gate",
+                target={"north_m": 10.0, "speed_m_s": 100.0},
+                tolerance={"north_m": 0.1, "speed_m_s": 0.5},
+            ),
+        ),
+        ({"time_s": 1.0, "north_m": 10.0, "speed_m_s": 100.0},),
+    )
+
+    assert result["mission_pass"] is True
+    assert result["results"][0]["truth_time_s"] == 1.0
+    assert result["results"][0]["dwell_actual_s"] == 0.0
+
+
 def test_truth_evaluator_supports_gate_and_truth_event() -> None:
     telemetry = (
         {"time_s": 0.0, "north_m": -1.0, "east_m": 0.0, "altitude_m": 2.0},

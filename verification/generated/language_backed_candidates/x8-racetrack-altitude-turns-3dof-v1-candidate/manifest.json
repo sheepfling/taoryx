@@ -1,0 +1,261 @@
+{
+  "claim_boundary": "independent truth-evaluated family qualification; integration baselines remain nonqualified",
+  "fidelity_tier": "point_mass_3dof",
+  "files": {
+    "README.md": "1240ef3f1daa7039163d00c3b91d7478ece5e3addbe86b7bcb50ba54f884c5dc",
+    "claim.json": "2f5bfb8754a3c786ac6b1eac7184be98ec985b5b51cefb0714e9d07698b5ba4d",
+    "controller_transitions.json": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc",
+    "envelope_report.json": "12ac7202f5e087b37b733b3d9454b8451e6ba976f79083c4d46c49eacac4bd13",
+    "events.json": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c",
+    "inputs/skywalker_x8_collective_elevon_6axis.tbl": "b3c5c31a8ae134a48974afcff51200bc9235f23550173053baad79e93693adc4",
+    "inputs/skywalker_x8_differential_elevon_6axis.tbl": "e0f0122dac5ae341b35bdff075269d28bf1ca480be16bab01caa1b0a336cbc25",
+    "inputs/skywalker_x8_static_6axis.tbl": "434d6d373147381b5af63a8aef5780b49624a3f4533a7f7d995f450942bf727e",
+    "inputs/skywalker_x8_thrust.tbl": "9b05bb9eb2a70a14ec8edb3446fa631040ccff5abcacc2ba9f0780b7711fdca8",
+    "inputs/x8-racetrack-altitude-turns-3dof-v1-candidate.prb": "906c025d2a54e82d7d6ba84cab1ad432421cc7a9d59a28714ef50bcae0b03f36",
+    "mission.yaml": "16bdd7fbcd7a147747972f753eb64dcfd7016229081277e76ff2195f40e1377c",
+    "mission_sequence.png": "8bf3489cffbe9ed97ca2806b2a024118120fb4c4e41803e2ae2bac24b96c0af6",
+    "objective_report.json": "1cb0716464b527e002946d2b34a88efd2c830920288b6889ccde563d0bf52a73",
+    "plots/plot-manifest.json": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa",
+    "preflight_timing_estimate.json": "679ff21bf6be5e0f4ea1859876c2a8f4b269e666b599fbf334c6f218e23e423b",
+    "qualification_board.png": "4384367b4a7f76a0f0815a15c4719931f5c642da6aa70fec368b9507eb49d64d",
+    "realized_fidelity.json": "950fae233fd4791514bab75bd74e51b0054171d21b8fa0b22725aecb8d9081b2",
+    "reproduction.txt": "bf3e06c6dda897a4a29ea106d7d17a09bc6658ca5b62e4aa62839ac9c9ff0977",
+    "resolved_racetrack.json": "ed14548b31eb3d9682b4282509d1692cef9f2c7d2571c4a62020d4c8a6724de5",
+    "run/1.print": "707f7f63b2f9e19de68997cac9f8449a359e2ec1545b05e9118e338dd2ce9c9d",
+    "runtime_diagnostics.json": "541cf9e6a3f7c7844552f7b2f8f1bf84211a7327c2615b90ff3f8330d4f18efa",
+    "summary.json": "2ce6ae93e263be8072e8b06288b17234e5064729a20a2d75f0f83b4ffa52273f",
+    "truth_telemetry.csv": "ea2b3bff4589c95f9b8877d99e6578e8ee6a0113fa132e366728a5d26cfe6612"
+  },
+  "mission_id": "x8-racetrack-altitude-turns-3dof-v1-candidate",
+  "realization": {
+    "actuator_realization": "kinematic_route_command_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_point_mass_3dof",
+    "note": "The point-mass adapter integrates translational motion and resolves speed, heading, and flight-path commands from the shared racetrack. No attitude, moment, or individual surface signal is used to pass the mission.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant"
+  },
+  "run_artifacts": [
+    {
+      "archetypes": [
+        "mission_geometry",
+        "mission_timeline",
+        "dynamics_and_resources",
+        "envelope_and_qualification"
+      ],
+      "board": {
+        "event_marker_policy": "family_local",
+        "missing_channel_policy": "unavailable",
+        "modules": [
+          "mission_geometry",
+          "mission_timeline",
+          "dynamics_and_resources",
+          "envelope_and_qualification"
+        ],
+        "profile": "family-evidence-board-v1",
+        "units_required": true
+      },
+      "claim": "The source-table X8 point-mass reduction completes the shared powered fixed-wing racetrack geometry with independent truth-based altitude, speed, route, and terminal gates.",
+      "control_realization": "force_model",
+      "fidelity": "point_mass_3dof",
+      "files": [
+        {
+          "media_type": "application/json",
+          "path": "manifest.json",
+          "required": true,
+          "sha256": "a1973ab31b691287496f93e766d927a3a9fed499700a8236c38f322021a739ae"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "README.md",
+          "required": true,
+          "sha256": "1240ef3f1daa7039163d00c3b91d7478ece5e3addbe86b7bcb50ba54f884c5dc"
+        },
+        {
+          "media_type": "application/json",
+          "path": "claim.json",
+          "required": true,
+          "sha256": "2f5bfb8754a3c786ac6b1eac7184be98ec985b5b51cefb0714e9d07698b5ba4d"
+        },
+        {
+          "media_type": "application/json",
+          "path": "controller_transitions.json",
+          "required": true,
+          "sha256": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc"
+        },
+        {
+          "media_type": "application/json",
+          "path": "envelope_report.json",
+          "required": true,
+          "sha256": "12ac7202f5e087b37b733b3d9454b8451e6ba976f79083c4d46c49eacac4bd13"
+        },
+        {
+          "media_type": "application/json",
+          "path": "events.json",
+          "required": true,
+          "sha256": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/skywalker_x8_collective_elevon_6axis.tbl",
+          "required": true,
+          "sha256": "b3c5c31a8ae134a48974afcff51200bc9235f23550173053baad79e93693adc4"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/skywalker_x8_differential_elevon_6axis.tbl",
+          "required": true,
+          "sha256": "e0f0122dac5ae341b35bdff075269d28bf1ca480be16bab01caa1b0a336cbc25"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/skywalker_x8_static_6axis.tbl",
+          "required": true,
+          "sha256": "434d6d373147381b5af63a8aef5780b49624a3f4533a7f7d995f450942bf727e"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/skywalker_x8_thrust.tbl",
+          "required": true,
+          "sha256": "9b05bb9eb2a70a14ec8edb3446fa631040ccff5abcacc2ba9f0780b7711fdca8"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/x8-racetrack-altitude-turns-3dof-v1-candidate.prb",
+          "required": true,
+          "sha256": "906c025d2a54e82d7d6ba84cab1ad432421cc7a9d59a28714ef50bcae0b03f36"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "mission.yaml",
+          "required": true,
+          "sha256": "16bdd7fbcd7a147747972f753eb64dcfd7016229081277e76ff2195f40e1377c"
+        },
+        {
+          "media_type": "image/png",
+          "path": "mission_sequence.png",
+          "required": true,
+          "sha256": "8bf3489cffbe9ed97ca2806b2a024118120fb4c4e41803e2ae2bac24b96c0af6"
+        },
+        {
+          "media_type": "application/json",
+          "path": "objective_report.json",
+          "required": true,
+          "sha256": "1cb0716464b527e002946d2b34a88efd2c830920288b6889ccde563d0bf52a73"
+        },
+        {
+          "media_type": "application/json",
+          "path": "plots/plot-manifest.json",
+          "required": true,
+          "sha256": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa"
+        },
+        {
+          "media_type": "application/json",
+          "path": "preflight_timing_estimate.json",
+          "required": true,
+          "sha256": "679ff21bf6be5e0f4ea1859876c2a8f4b269e666b599fbf334c6f218e23e423b"
+        },
+        {
+          "media_type": "image/png",
+          "path": "qualification_board.png",
+          "required": true,
+          "sha256": "4384367b4a7f76a0f0815a15c4719931f5c642da6aa70fec368b9507eb49d64d"
+        },
+        {
+          "media_type": "application/json",
+          "path": "realized_fidelity.json",
+          "required": true,
+          "sha256": "950fae233fd4791514bab75bd74e51b0054171d21b8fa0b22725aecb8d9081b2"
+        },
+        {
+          "media_type": "text/plain",
+          "path": "reproduction.txt",
+          "required": true,
+          "sha256": "bf3e06c6dda897a4a29ea106d7d17a09bc6658ca5b62e4aa62839ac9c9ff0977"
+        },
+        {
+          "media_type": "application/json",
+          "path": "resolved_racetrack.json",
+          "required": true,
+          "sha256": "ed14548b31eb3d9682b4282509d1692cef9f2c7d2571c4a62020d4c8a6724de5"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "run/1.print",
+          "required": true,
+          "sha256": "707f7f63b2f9e19de68997cac9f8449a359e2ec1545b05e9118e338dd2ce9c9d"
+        },
+        {
+          "media_type": "application/json",
+          "path": "runtime_diagnostics.json",
+          "required": true,
+          "sha256": "541cf9e6a3f7c7844552f7b2f8f1bf84211a7327c2615b90ff3f8330d4f18efa"
+        },
+        {
+          "media_type": "application/json",
+          "path": "summary.json",
+          "required": true,
+          "sha256": "2ce6ae93e263be8072e8b06288b17234e5064729a20a2d75f0f83b4ffa52273f"
+        },
+        {
+          "media_type": "text/csv",
+          "path": "truth_telemetry.csv",
+          "required": true,
+          "sha256": "ea2b3bff4589c95f9b8877d99e6578e8ee6a0113fa132e366728a5d26cfe6612"
+        }
+      ],
+      "nonclaims": [
+        "attitude or body-rate dynamics",
+        "physical elevon, moment, or actuator authority",
+        "flight-test or manufacturer fidelity",
+        "wind robustness, takeoff, or landing",
+        "realization boundary: The point-mass adapter integrates translational motion and resolves speed, heading, and flight-path commands from the shared racetrack. No attitude, moment, or individual surface signal is used to pass the mission."
+      ],
+      "object_lineage": null,
+      "outcome": "completed",
+      "realization": {
+        "available_physics": [
+          "force_source=source_table",
+          "moment_source=not_applicable_point_mass_3dof",
+          "actuator_realization=kinematic_route_command_no_surface_claim",
+          "propulsion_model=source_table_thrust",
+          "resource_model=fixed_mass_zero_propellant"
+        ],
+        "claim": "The source-table X8 point-mass reduction completes the shared powered fixed-wing racetrack geometry with independent truth-based altitude, speed, route, and terminal gates.",
+        "control_realization": "force_model",
+        "evidence_grade": "mixed",
+        "fidelity": "point_mass_3dof",
+        "nonclaims": [
+          "attitude or body-rate dynamics",
+          "physical elevon, moment, or actuator authority",
+          "flight-test or manufacturer fidelity",
+          "wind robustness, takeoff, or landing",
+          "realization boundary: The point-mass adapter integrates translational motion and resolves speed, heading, and flight-path commands from the shared racetrack. No attitude, moment, or individual surface signal is used to pass the mission."
+        ],
+        "physical_effectors": [],
+        "realization_id": "x8-racetrack-altitude-turns-3dof-v1-candidate.point_mass_3dof.v1",
+        "semantic_command_mapping": {
+          "route.altitude": "shared_racetrack.altitude_command",
+          "route.bank": "shared_racetrack.bank_command",
+          "route.heading": "shared_racetrack.heading_command",
+          "route.speed": "shared_racetrack.speed_command"
+        },
+        "state_schema": [
+          "north_m",
+          "east_m",
+          "altitude_m",
+          "speed_m_s",
+          "heading_deg"
+        ]
+      },
+      "run_id": "x8-racetrack-altitude-turns-3dof-v1-candidate-point_mass_3dof",
+      "scenario_contract_sha256": "a1973ab31b691287496f93e766d927a3a9fed499700a8236c38f322021a739ae",
+      "schema_version": "taoryx.showcase/v1alpha1",
+      "showcase_id": "org.taoryx.showcase.x8-racetrack-altitude-turns-3dof-v1-candidate",
+      "vehicle_binding_id": "skywalker_x8.qualification-v1"
+    }
+  ],
+  "schema_version": 1,
+  "summary": "summary.json",
+  "truth_telemetry": "truth_telemetry.csv"
+}

@@ -20,7 +20,12 @@ from typing import Any
 
 from taoryx.contracts import Vector3
 from taoryx.control_allocation import EffectorEffectiveness, EffectorLimits
-from taoryx.generic_tuning import GenericLqrProfile, tune_lqr_profiles
+from taoryx.generic_tuning import (
+    GenericLqrProfile,
+    LinearAuthorityRequirement,
+    linear_authority_preflight,
+    tune_lqr_profiles,
+)
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.physical_lqr import (
     PhysicalWrenchLqrDesign,
@@ -226,6 +231,20 @@ def build_artifact() -> dict[str, Any]:
         wrench_names=_WRENCH_NAMES,
         effector_names=_SURFACE_NAMES,
     )
+    authority_preflight = linear_authority_preflight(
+        LinearAuthorityRequirement(
+            "b747-condition3-three-axis-surface-authority",
+            _STATE_NAMES,
+        ),
+        state_names=projection.state_names,
+        a_matrix=projection.a_matrix,
+        b_matrix=projection.b_matrix,
+    )
+    if authority_preflight.status != "passed":
+        raise RuntimeError(
+            "B747 physical-surface authority preflight blocked LQR synthesis: "
+            + json.dumps(authority_preflight.as_dict(), sort_keys=True)
+        )
     wrench_scales = _physical_wrench_scales(effectiveness, plant)
     initial_state = dict(trim.state)
     initial_state.update(
@@ -362,6 +381,7 @@ def build_artifact() -> dict[str, Any]:
             **acceptance,
             "observed_final_normalized_feedback_error_fraction": final_error_fraction,
         },
+        "authority_preflight": authority_preflight.as_dict(),
         "trim": trim.as_dict(),
         "linearization": {
             "state_names": list(linearization.primary.state_names),

@@ -8,6 +8,9 @@ control_space: desired_wrench
 linearization_artifact: verification/f16_runtime_linearization_evidence.json
 effectiveness_artifact: verification/f16_physical_allocation_evidence.json
 state_names: [u_m_s, v_m_s, w_m_s, p_rad_s, q_rad_s, r_rad_s]
+authority_requirement:
+  id: f16-local-physical-wrench-body-axis-authority
+  required_state_names: [u_m_s, v_m_s, w_m_s, p_rad_s, q_rad_s, r_rad_s]
 effector_names: [elevator_deg, aileron_deg, rudder_deg, throttle_fraction]
 wrench_names: [total_force_x_n, total_moment_x_nm, total_moment_y_nm, total_moment_z_nm]
 state_scales: [50.0, 50.0, 50.0, 0.5, 0.5, 0.5]

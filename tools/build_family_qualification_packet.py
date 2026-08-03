@@ -7,20 +7,30 @@ import csv
 import hashlib
 import json
 import math
+import mimetypes
 import re
 import shutil
 import zipfile
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
+from taoryx.fidelity_contracts import FidelityTier, control_realization_for
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.mission_objectives import ControllerTransition, TruthObjectiveSpec, evaluate_truth_objectives
 from taoryx.racetrack_template import load_racetrack_template_catalog
 from taoryx.racetrack_timing import estimate_racetrack_timing
 from taoryx.runtime.runner import run_files
+from taoryx.showcase import (
+    ArtifactFile,
+    EvidenceBoardSpec,
+    FidelityShowcaseRealization,
+    ShowcaseArchetype,
+    ShowcaseOutcome,
+    build_showcase_run_artifact,
+)
 from taoryx.visualization import render_run_artifact_plots
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -113,6 +123,140 @@ def _write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+SHOWCASE_MODULES: tuple[str, ...] = (
+    "mission_geometry",
+    "mission_timeline",
+    "dynamics_and_resources",
+    "envelope_and_qualification",
+)
+
+
+def _payload_sha256(value: object) -> str:
+    """Hash resolved mission metadata for the common artifact contract."""
+
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _mission_fidelity(mission: dict[str, Any]) -> FidelityTier:
+    """Return the explicit mission fidelity, rejecting legacy inference."""
+
+    value = mission.get("fidelity_tier")
+    if value not in {
+        "point_mass_3dof",
+        "pseudo_6dof",
+        "rigid_body_6dof_direct_wrench",
+        "rigid_body_6dof_surface_allocated",
+    }:
+        raise ValueError(f"{mission['id']}: fidelity_tier must be explicit and canonical")
+    return value
+
+
+def _physical_effector_names(problem: Path, tier: FidelityTier) -> tuple[str, ...]:
+    """Extract declared runtime effectors only for the surface tier."""
+
+    if tier != "rigid_body_6dof_surface_allocated":
+        return ()
+    names: list[str] = []
+    for line in problem.read_text(encoding="utf-8").splitlines():
+        match = re.match(r"\*runtime control ([^\s]+)", line.strip())
+        if match:
+            names.append(match.group(1))
+    return tuple(dict.fromkeys(names))
+
+
+def _showcase_realization(
+    mission: dict[str, Any],
+    problem: Path,
+    rows: tuple[dict[str, object], ...],
+) -> FidelityShowcaseRealization:
+    """Construct one canonical realization from explicit mission metadata."""
+
+    tier = _mission_fidelity(mission)
+    realization = dict(mission.get("realization", {}))
+    control_realization = control_realization_for(tier)
+    physical_effectors = _physical_effector_names(problem, tier)
+    if control_realization == "surface_allocated" and not physical_effectors:
+        raise ValueError(f"{mission['id']}: surface tier declares no runtime effectors")
+    state_candidates = (
+        "north_m",
+        "east_m",
+        "altitude_m",
+        "speed_m_s",
+        "heading_deg",
+        "local_roll_deg",
+        "local_pitch_deg",
+        "local_heading_deg",
+        "kinematic_roll_deg",
+        "kinematic_pitch_deg",
+        "kinematic_yaw_deg",
+        "kinematic_body_rate_p_rad_s",
+        "kinematic_body_rate_q_rad_s",
+        "kinematic_body_rate_r_rad_s",
+    )
+    state_schema = tuple(channel for channel in state_candidates if rows and channel in rows[0]) or ("truth_telemetry",)
+    available_physics = tuple(
+        f"{key}={value}"
+        for key, value in realization.items()
+        if key != "note" and isinstance(value, (str, int, float, bool))
+    )
+    nonclaims = tuple(str(item) for item in mission.get("nonclaims", ()))
+    note = realization.get("note")
+    if note:
+        nonclaims += (f"realization boundary: {note}",)
+    return FidelityShowcaseRealization(
+        fidelity=tier,
+        control_realization=control_realization,
+        realization_id=f"{mission['id']}.{tier}.v1",
+        state_schema=state_schema,
+        semantic_command_mapping={
+            "route.speed": "shared_racetrack.speed_command",
+            "route.altitude": "shared_racetrack.altitude_command",
+            "route.heading": "shared_racetrack.heading_command",
+            "route.bank": "shared_racetrack.bank_command",
+        },
+        physical_effectors=physical_effectors,
+        available_physics=available_physics or ("declared mission realization",),
+        claim=str(mission["claim"]),
+        nonclaims=nonclaims,
+        evidence_grade="mixed",
+    )
+
+
+def _showcase_outcome(
+    *,
+    mission_pass: bool,
+    numerical_valid: bool,
+    envelope_pass: bool,
+) -> ShowcaseOutcome:
+    """Map qualification results to the shared artifact outcome vocabulary."""
+
+    if not numerical_valid:
+        return "numerical_failure"
+    if not envelope_pass:
+        return "envelope_limited"
+    return "completed" if mission_pass else "partial"
+
+
+def _artifact_files(packet: Path, scenario_hash: str) -> tuple[ArtifactFile, ...]:
+    """Build packet content identities, retaining manifest as trust root."""
+
+    names = ["manifest.json"]
+    names.extend(
+        str(path.relative_to(packet))
+        for path in _files(packet)
+        if path.name != "manifest.json"
+    )
+    return tuple(
+        ArtifactFile(
+            path=name,
+            sha256=scenario_hash if name == "manifest.json" else _sha256(packet / name),
+            media_type=mimetypes.guess_type(name)[0] or "application/octet-stream",
+        )
+        for name in names
+    )
+
+
 def _resolve_racetrack_objective(
     item: dict[str, Any],
     resolved_racetrack: Any | None,
@@ -127,6 +271,7 @@ def _resolve_racetrack_objective(
     """
 
     resolved = dict(item)
+    resolved.pop("racetrack_phase", None)
     gate_id = resolved.pop("racetrack_gate_id", None)
     if gate_id is None:
         return resolved
@@ -523,6 +668,29 @@ def _render_board(
             bbox={"facecolor": "#fff7ed", "edgecolor": "#fecaca", "alpha": 0.9, "pad": 2.0},
         )
         axes[1, 0].legend(fontsize="xx-small", loc="best", ncol=2)
+    elif any("kinematic_roll_command_deg" in row for row in plot_rows):
+        response_rates = (
+            ("kinematic_body_rate_p_rad_s", "roll rate p", "#2563eb"),
+            ("kinematic_body_rate_q_rad_s", "pitch rate q", "#dc2626"),
+            ("kinematic_body_rate_r_rad_s", "yaw rate r", "#16a34a"),
+        )
+        for name, label, color in response_rates:
+            if any(name in row for row in plot_rows):
+                axes[1, 0].plot(times, [float(row.get(name, math.nan)) for row in plot_rows], color=color, label=label)
+        axes[1, 0].set_title("Kinematic response-law body rates — no physical allocation")
+        axes[1, 0].set_ylabel("rad/s")
+        axes[1, 0].text(
+            0.5,
+            0.02,
+            "Pseudo-6DOF response sidecar: these are commanded kinematic rates, not aerodynamic moments or elevon activity.",
+            ha="center",
+            va="bottom",
+            transform=axes[1, 0].transAxes,
+            color="#991b1b",
+            fontsize=6,
+            bbox={"facecolor": "#fff7ed", "edgecolor": "#fecaca", "alpha": 0.9, "pad": 2.0},
+        )
+        axes[1, 0].legend(fontsize="small", loc="best")
     else:
         allocation_pairs = (
             ("surface_allocation_collective_elevon_commanded_deg", "surface_allocation_collective_elevon_achieved_deg", "collective elevon", "#0891b2"),
@@ -555,36 +723,60 @@ def _render_board(
         axes[1, 0].set_title("Physical surface allocation and residual")
         axes[1, 0].set_ylabel("surface deflection (deg)")
         if not allocation_plotted:
-            axes[1, 0].text(0.5, 0.5, "not applicable in this run:\ndirect canonical moment realization", ha="center", va="center", transform=axes[1, 0].transAxes, color="#991b1b", fontsize=10, bbox={"facecolor": "#fff7ed", "edgecolor": "#fecaca"})
+            axes[1, 0].text(0.5, 0.5, "no physical allocation telemetry in this run", ha="center", va="center", transform=axes[1, 0].transAxes, color="#991b1b", fontsize=10, bbox={"facecolor": "#fff7ed", "edgecolor": "#fecaca"})
         else:
             axes[1, 0].legend(fontsize="small", loc="best")
     axes[1, 0].set_xlabel("time (s)")
     axes[1, 0].grid(True, color="#cbd5e1")
-    for name, color in (("local_roll_deg", "#2563eb"), ("local_pitch_deg", "#dc2626"), ("local_heading_deg", "#16a34a")):
+    kinematic_response = any("kinematic_roll_command_deg" in row for row in plot_rows)
+    attitude_channels = (
+        (("kinematic_roll_deg", "#2563eb"), ("kinematic_pitch_deg", "#dc2626"), ("kinematic_yaw_deg", "#16a34a"))
+        if kinematic_response
+        else (("local_roll_deg", "#2563eb"), ("local_pitch_deg", "#dc2626"), ("local_heading_deg", "#16a34a"))
+    )
+    for name, color in attitude_channels:
         values = [float(row.get(name, math.nan)) for row in plot_rows]
         axes[1, 1].plot(times, values, label=name.removesuffix("_deg"), color=color)
     axes[1, 1].set_title(
-        "Attitude truth — bank and pitch reversal"
-        if any("pitch" in objective_id for objective_id in objective_ids)
-        else "Attitude truth — bank and heading reversal"
+        "Kinematic response-law attitude — bank, climb/descent pitch, heading"
+        if kinematic_response
+        else (
+            "Attitude truth — bank and pitch reversal"
+            if any("pitch" in objective_id for objective_id in objective_ids)
+            else "Attitude truth — bank and heading reversal"
+        )
     )
     axes[1, 1].set_xlabel("time (s)")
     axes[1, 1].set_ylabel("deg")
     axes[1, 1].grid(True, color="#cbd5e1")
     axes[1, 1].legend(fontsize="small")
     actuator_channels = (
-        ("route_bank_command_deg", "bank command", "#7c3aed", ":"),
-        ("route_bank_achieved_deg", "bank achieved", "#7c3aed", "-"),
-        ("route_pitch_command_deg", "pitch command", "#0891b2", ":"),
-        ("route_pitch_achieved_deg", "pitch achieved", "#0891b2", "-"),
+        (
+            ("kinematic_roll_command_deg", "bank command", "#7c3aed", ":"),
+            ("kinematic_roll_deg", "bank achieved", "#7c3aed", "-"),
+            ("kinematic_pitch_command_deg", "pitch command", "#0891b2", ":"),
+            ("kinematic_pitch_deg", "pitch achieved", "#0891b2", "-"),
+            ("kinematic_yaw_command_deg", "heading command", "#16a34a", ":"),
+            ("kinematic_yaw_deg", "heading achieved", "#16a34a", "-"),
+        )
+        if kinematic_response
+        else (
+            ("route_bank_command_deg", "bank command", "#7c3aed", ":"),
+            ("route_bank_achieved_deg", "bank achieved", "#7c3aed", "-"),
+            ("route_pitch_command_deg", "pitch command", "#0891b2", ":"),
+            ("route_pitch_achieved_deg", "pitch achieved", "#0891b2", "-"),
+        )
     )
+    response_plotted = False
     for name, label, color, linestyle in actuator_channels:
         if any(name in row for row in plot_rows):
             axes[2, 0].plot(times, [float(row.get(name, math.nan)) for row in plot_rows], label=label, color=color, linestyle=linestyle)
-    axes[2, 0].set_title("Guidance commands versus achieved attitude response")
+            response_plotted = True
+    axes[2, 0].set_title("Route attitude commands versus kinematic response" if kinematic_response else "Guidance commands versus achieved attitude response")
     axes[2, 0].set_xlabel("time (s)")
     axes[2, 0].grid(True, color="#cbd5e1")
-    axes[2, 0].legend(fontsize="small")
+    if response_plotted:
+        axes[2, 0].legend(fontsize="small")
     axes[2, 0].text(
         0.99,
         0.98,
@@ -650,8 +842,18 @@ def build(
     *,
     problem_override: Path | None = None,
     reproduction_command: str | None = None,
+    mission_config: Path = CONFIG,
+    racetrack_config: Path = RACETRACK_CONFIG,
+    evidence_metadata: dict[str, object] | None = None,
 ) -> Path:
-    catalog = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
+    """Build one packet from immutable or caller-materialized inputs.
+
+    Candidate route execution may supply temporary mission/catalog files and
+    an evidence identity.  The default remains the versioned baseline inputs,
+    so ordinary qualification builds retain their existing behavior.
+    """
+
+    catalog = yaml.safe_load(mission_config.read_text(encoding="utf-8"))
     mission = next(item for item in catalog["missions"] if item["id"] == mission_id)
     packet = output / mission_id
     run_dir = packet / "run"
@@ -662,7 +864,7 @@ def build(
     tables = tuple(ROOT / path for path in mission["tables"])
     resolved_racetrack = None
     if "racetrack_binding" in mission:
-        racetrack_catalog = load_racetrack_template_catalog(RACETRACK_CONFIG)
+        racetrack_catalog = load_racetrack_template_catalog(racetrack_config)
         resolved_racetrack = racetrack_catalog.get(str(mission["racetrack_binding"]))
         _validate_racetrack_problem_binding(problem, resolved_racetrack)
     shutil.copy2(problem, inputs / problem.name)
@@ -799,6 +1001,8 @@ def build(
             "duration_s": None if not rows else rows[-1]["time_s"],
         },
     }
+    if evidence_metadata:
+        summary["execution_metadata"] = dict(evidence_metadata)
     _write_json(packet / "summary.json", summary)
     _write_json(packet / "objective_report.json", truth_evaluation)
     _write_json(packet / "envelope_report.json", envelope_report)
@@ -878,15 +1082,52 @@ def build(
         )
     _render_board(packet, rows, truth_evaluation, str(summary["status"]), mission, runtime_diagnostics)
     _render_mission_sequence(packet, truth_evaluation, mission)
+    fidelity_tier = _mission_fidelity(mission)
+    realization = _showcase_realization(mission, problem, rows)
+    _write_json(packet / "claim.json", {
+        "claim": realization.claim,
+        "nonclaims": list(realization.nonclaims),
+        "evidence_grade": realization.evidence_grade,
+        "outcome": _showcase_outcome(
+            mission_pass=mission_pass,
+            numerical_valid=numerical_valid,
+            envelope_pass=bool(envelope_report["pass"]),
+        ),
+    })
+    _write_json(packet / "realized_fidelity.json", realization.model_dump(mode="json"))
+    scenario_contract_hash = _payload_sha256(
+        {
+            "mission": mission,
+            "problem_sha256": _sha256(problem),
+            "table_sha256": [_sha256(path) for path in tables],
+            "fidelity": fidelity_tier,
+        }
+    )
+    showcase_run = build_showcase_run_artifact(
+        realization=realization,
+        run_id=f"{mission_id}-{fidelity_tier}",
+        showcase_id=f"org.taoryx.showcase.{mission_id}",
+        vehicle_binding_id=f"{mission['family']}.qualification-v1",
+        scenario_contract_sha256=scenario_contract_hash,
+        outcome=_showcase_outcome(
+            mission_pass=mission_pass,
+            numerical_valid=numerical_valid,
+            envelope_pass=bool(envelope_report["pass"]),
+        ),
+        files=_artifact_files(packet, scenario_contract_hash),
+        board=EvidenceBoardSpec(profile="family-evidence-board-v1", modules=SHOWCASE_MODULES),
+        archetypes=tuple(cast(ShowcaseArchetype, item) for item in SHOWCASE_MODULES),
+    )
     manifest = {
         "schema_version": 1,
         "claim_boundary": catalog["claim_boundary"],
         "mission_id": mission_id,
-        "fidelity_tier": None if resolved_racetrack is None else resolved_racetrack.fidelity,
+        "fidelity_tier": fidelity_tier,
         "realization": mission.get("realization", {}),
         "summary": "summary.json",
         "truth_telemetry": "truth_telemetry.csv",
         "files": {},
+        "run_artifacts": [showcase_run.model_dump(mode="json")],
     }
     manifest_path = packet / "manifest.json"
     manifest["files"] = {str(path.relative_to(packet)): _sha256(path) for path in _files(packet) if path != manifest_path}

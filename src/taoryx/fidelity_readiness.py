@@ -10,15 +10,31 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
+from .fidelity_contracts import CANONICAL_FIDELITY_TIERS, FidelityTier, control_realization_for
 from .vehicle_registry import ROOT
 
 CATALOG = ROOT / "verification/fidelity_data_requirements.yaml"
 REGISTRY = ROOT / "verification/vehicle_models.yaml"
 SEVERITIES = {"required", "recommended"}
+READINESS_TIER_ALIASES = {"pseudo_6dof_kinematic_bridge": "pseudo_6dof"}
+CATALOG_TIER_NAMES = {canonical: legacy for legacy, canonical in READINESS_TIER_ALIASES.items()}
+
+
+def canonical_readiness_tier(tier: str) -> str:
+    """Normalize readiness names while rejecting ambiguous rigid-body legacy names."""
+
+    if tier in CANONICAL_FIDELITY_TIERS:
+        return tier
+    if tier in READINESS_TIER_ALIASES:
+        return READINESS_TIER_ALIASES[tier]
+    if tier == "rigid_body_6dof":
+        raise ValueError("legacy 'rigid_body_6dof' requires direct_wrench or surface_allocated")
+    raise KeyError(f"unknown fidelity tier {tier!r}")
+    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +73,13 @@ class FidelityReadinessReport:
     runtime_proof_status: str = "not_evaluated"
 
     @property
+    def control_realization(self) -> str:
+        """Return the canonical realization represented by this readiness tier."""
+
+        return control_realization_for(cast(FidelityTier, self.tier)) if self.tier in CANONICAL_FIDELITY_TIERS else "unspecified"
+        ####
+
+    @property
     def errors(self) -> tuple[ReadinessFinding, ...]:
         """Return missing required data."""
 
@@ -88,6 +111,7 @@ class FidelityReadinessReport:
             "vehicle_id": self.vehicle_id,
             "family_id": self.family_id,
             "tier": self.tier,
+            "control_realization": self.control_realization,
             "status": self.status,
             "runtime_proof_status": self.runtime_proof_status,
             "error_count": len(self.errors),
@@ -121,6 +145,7 @@ def _present(value: Any) -> bool:
 
 
 def _requirements(catalog: Mapping[str, Any], tier: str) -> list[Mapping[str, Any]]:
+    tier = CATALOG_TIER_NAMES.get(tier, tier)
     tiers = catalog.get("tiers", {})
     if not isinstance(tiers, Mapping) or tier not in tiers:
         raise KeyError(f"unknown fidelity tier: {tier}")
@@ -136,13 +161,18 @@ def _requirements(catalog: Mapping[str, Any], tier: str) -> list[Mapping[str, An
 
 
 def _family_requirements(catalog: Mapping[str, Any], family_id: str, tier: str) -> list[Mapping[str, Any]]:
+    tier = CATALOG_TIER_NAMES.get(tier, tier)
     families = catalog.get("family_overlays", {})
     family = families.get(family_id) if isinstance(families, Mapping) else None
     if not isinstance(family, Mapping):
         return []
     result = [item for item in family.get("requirements", ()) if isinstance(item, Mapping)]
     tier_overlays = family.get("tiers", {})
-    tier_overlay = tier_overlays.get(tier) if isinstance(tier_overlays, Mapping) else None
+    tier_overlay = None
+    if isinstance(tier_overlays, Mapping):
+        tier_overlay = tier_overlays.get(tier)
+        if tier_overlay is None:
+            tier_overlay = tier_overlays.get(READINESS_TIER_ALIASES.get(tier, tier))
     if isinstance(tier_overlay, Mapping):
         result.extend(item for item in tier_overlay.get("requirements", ()) if isinstance(item, Mapping))
     return result
@@ -228,6 +258,7 @@ def _check(requirement: Mapping[str, Any], vehicle: Mapping[str, Any]) -> tuple[
 def validate_fidelity_readiness(vehicle_id: str, tier: str) -> FidelityReadinessReport:
     """Validate one registered vehicle against one fidelity data contract."""
 
+    canonical_tier = canonical_readiness_tier(tier)
     catalog = _load_yaml(CATALOG)
     registry = _load_yaml(REGISTRY)
     vehicles = registry.get("vehicles", {})
@@ -236,7 +267,7 @@ def validate_fidelity_readiness(vehicle_id: str, tier: str) -> FidelityReadiness
     vehicle = vehicles[vehicle_id]
     family_id = str(vehicle.get("family_id", ""))
     findings: list[ReadinessFinding] = []
-    requirements = _requirements(catalog, tier) + _family_requirements(catalog, family_id, tier)
+    requirements = _requirements(catalog, canonical_tier) + _family_requirements(catalog, family_id, canonical_tier)
     seen: set[str] = set()
     for requirement in requirements:
         requirement_id = str(requirement.get("id", "unknown"))
@@ -248,7 +279,7 @@ def validate_fidelity_readiness(vehicle_id: str, tier: str) -> FidelityReadiness
             raise ValueError(f"invalid severity {severity!r} for {requirement_id}")
         status, message, paths = _check(requirement, vehicle)
         findings.append(ReadinessFinding(requirement_id, str(requirement.get("title", requirement_id)), severity, status, message, paths))
-    return FidelityReadinessReport(vehicle_id, family_id, tier, tuple(findings))
+    return FidelityReadinessReport(vehicle_id, family_id, canonical_tier, tuple(findings))
     ####
 
 

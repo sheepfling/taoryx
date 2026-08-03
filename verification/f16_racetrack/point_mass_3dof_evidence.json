@@ -32,31 +32,31 @@
         "required": true,
         "status": "pass",
         "tolerance": 12.0,
-        "truth_time_s": 78.7999999999998
+        "truth_time_s": 79.0
       },
       {
-        "closest_error": 31.959323250631257,
+        "closest_error": 31.016488787505182,
         "controller_reason": null,
         "controller_time_s": null,
         "controller_transition_valid": null,
         "critical_metric": {
-          "actual": 31.959323250631257,
+          "actual": 31.016488787505182,
           "channel": "gate_altitude_error",
-          "error": 31.959323250631257,
+          "error": 31.016488787505182,
           "limit": 35.0,
-          "margin": 3.0406767493687425,
+          "margin": 3.983511212494818,
           "target": 0.0,
           "units": "m"
         },
         "dwell_actual_s": null,
         "id": "left-turn-exit-gate",
-        "margin": 3.0406767493687425,
+        "margin": 3.983511212494818,
         "message": null,
         "objective_type": "fly_by_gate",
         "required": true,
         "status": "pass",
         "tolerance": 35.0,
-        "truth_time_s": 602.2000000000684
+        "truth_time_s": 603.0
       },
       {
         "closest_error": 0.0,
@@ -80,7 +80,7 @@
         "required": true,
         "status": "pass",
         "tolerance": 12.0,
-        "truth_time_s": 681.0000000000863
+        "truth_time_s": 681.5
       },
       {
         "closest_error": 0.0,
@@ -104,7 +104,7 @@
         "required": true,
         "status": "pass",
         "tolerance": 12.0,
-        "truth_time_s": 1188.2000000000148
+        "truth_time_s": 1188.5
       }
     ],
     "schema_version": 1
@@ -172,8 +172,8 @@
     }
   },
   "runtime": {
-    "dt_s": 0.1,
-    "duration_s": 1308.0999999999058,
+    "dt_s": 0.5,
+    "duration_s": 1308.0,
     "envelope_violations": [],
     "failure": null,
     "hard_gates_passed": true,

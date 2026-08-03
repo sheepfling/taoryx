@@ -1,0 +1,12 @@
+{
+  "claim": "The source-table X8 kinematic 3-plus-3 bridge completes the shared translational racetrack while exposing a bounded prescribed-attitude response sidecar.",
+  "evidence_grade": "mixed",
+  "nonclaims": [
+    "physical moment balance or elevon allocation",
+    "route bank authority from aerodynamic surfaces",
+    "flight-test or manufacturer fidelity",
+    "wind robustness, takeoff, or landing",
+    "realization boundary: Translation is the same force-integrated point-mass realization used by the 3DOF packet. Quaternion and body-rate channels are supplied by the declared kinematic attitude bridge; they are not moment-derived."
+  ],
+  "outcome": "completed"
+}

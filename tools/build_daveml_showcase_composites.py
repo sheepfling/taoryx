@@ -10,18 +10,21 @@ import json
 import math
 import zipfile
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
+from taoryx.fidelity_contracts import ControlRealization, LegacyFidelityTier
 from taoryx.showcase import (
     ArtifactFile,
     EvidenceBoardSpec,
+    FidelityShowcaseRealization,
     ObjectLineage,
     ObjectLineageEvent,
     ObjectLineageNode,
-    ShowcaseRunArtifact,
+    build_showcase_run_artifact,
 )
+from taoryx.showcase.contracts import EvidenceGrade, ShowcaseArchetype
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CATALOG = ROOT / "verification/daveml_showcase_catalog.yaml"
@@ -198,6 +201,40 @@ def _pack_data(board: dict[str, Any]) -> tuple[dict[str, float], list[dict[str, 
     return metrics, samples, _events(board_id, board), lineage, {"telemetry_kind": "qualified_evidence_summary", "synthetic_child": None}
 
 
+def _realization(board: dict[str, Any], fidelity: str) -> FidelityShowcaseRealization:
+    """Resolve one catalog fidelity into the common showcase boundary.
+
+    These DAVE-ML boards package qualified evidence summaries rather than a
+    live plant adapter. The explicit realization therefore uses an evidence
+    telemetry schema and preserves the same nonclaims; it does not invent
+    physical effectors for a direct-wrench or pseudo-6DOF board.
+    """
+
+    control_realization_by_fidelity: dict[str, ControlRealization] = {
+        "point_mass_3dof": "force_model",
+        "pseudo_6dof": "response_law",
+        "rigid_body_6dof_direct_wrench": "direct_wrench",
+        "rigid_body_6dof_surface_allocated": "surface_allocated",
+    }
+    control_realization = control_realization_by_fidelity.get(fidelity)
+    if control_realization is None:
+        raise ValueError(f"{board['id']}: unknown canonical showcase fidelity {fidelity!r}")
+    physical_effectors = tuple(str(item) for item in board.get("physical_effectors", ()))
+    if control_realization != "surface_allocated":
+        physical_effectors = ()
+    return FidelityShowcaseRealization(
+        fidelity=cast(LegacyFidelityTier, fidelity),
+        control_realization=control_realization,
+        realization_id=f"{board['id']}.{fidelity}",
+        state_schema=("evidence_telemetry",),
+        physical_effectors=physical_effectors,
+        available_physics=("source_evidence_summary", "family_local_event_timeline"),
+        claim=str(board["claim"]),
+        nonclaims=tuple(str(item) for item in board["nonclaims"]),
+        evidence_grade=cast(EvidenceGrade, str(board["evidence_grade"])),
+    )
+
+
 def _render_board(board: dict[str, Any], metrics: dict[str, float], samples: list[dict[str, Any]], events: list[dict[str, Any]], destination: Path) -> None:
     import matplotlib
 
@@ -282,18 +319,23 @@ def build_board(board: dict[str, Any], output_root: Path) -> dict[str, Any]:
     contract_hash = _sha256_bytes(json.dumps(core, sort_keys=True, separators=(",", ":")).encode("utf-8"))
     run_artifacts: list[dict[str, Any]] = []
     for fidelity in board["fidelity_profiles"]:
-        run = ShowcaseRunArtifact(
+        run = build_showcase_run_artifact(
+            realization=_realization(board, str(fidelity)),
             run_id=f"{board['id']}-{fidelity}",
             showcase_id=str(board["id"]),
             vehicle_binding_id=f"{board['family_id']}-showcase-v1",
-            fidelity=fidelity,
             scenario_contract_sha256=contract_hash,
             outcome="completed",
-            claim=str(board["claim"]),
-            nonclaims=tuple(str(item) for item in board["nonclaims"]),
-            files=tuple(ArtifactFile(path=name, sha256=contract_hash if name == "manifest.json" else _sha256(destination / name), media_type="image/png" if name.endswith(".png") else "application/json") for name in files),
+            files=tuple(
+                ArtifactFile(
+                    path=name,
+                    sha256=contract_hash if name == "manifest.json" else _sha256(destination / name),
+                    media_type="image/png" if name.endswith(".png") else "application/json",
+                )
+                for name in files
+            ),
             board=EvidenceBoardSpec(profile="daveml-family-evidence-board-v1", modules=tuple(str(item) for item in board["archetypes"])),
-            archetypes=tuple(str(item) for item in board["archetypes"]),
+            archetypes=tuple(cast(ShowcaseArchetype, str(item)) for item in board["archetypes"]),
             object_lineage=lineage,
         )
         run_artifacts.append(run.model_dump(mode="json"))

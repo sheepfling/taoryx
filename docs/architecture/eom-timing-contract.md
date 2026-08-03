@@ -143,21 +143,34 @@ and exposes timing metadata. `RuntimeVehicle.truth_provider` projects each
 accepted state into a `TruthPoint`, and `SensorBus` owns model calls, interval
 accumulation, delivery latency, validity, drops, and estimator subscribers in
 both batch and interactive execution. Sensor models never receive solver-stage
-states or post-step interpolations. Remaining gaps are adaptive/rejected-step
-coverage, richer actuator/support-force truth, and checkpoint factories that
-can reconstruct external sensor and estimator instances from provenance.
+states or post-step interpolations. RKF45 regression cases now force rejected
+trial steps for both instantaneous and interval IMUs, then verify that the
+measurement and interval endpoints remain accepted history boundaries in both
+batch and interactive paths. Every runtime environment and right-hand-side
+load evaluation now records its evaluated state timestamp, the accepted
+boundary at which its achieved controls became active, and one of four phases:
+`solver_stage_environment`, `solver_stage_rhs`,
+`committed_truth_environment`, or `committed_truth_rhs`. Solver-stage records
+remain computation provenance only; they are not emitted as accepted truth or
+sensor input. Declared `SensorScenarioSpec` checkpoints now reconstruct their
+registered provider, queued/delivered latency packets, interval baseline,
+and packet-only estimator state in both loaded-program and interactive flows.
+Custom callback-only sensor/estimator integrations remain deliberately
+non-checkpointable rather than being silently reattached with different
+behavior. Remaining gaps are richer actuator/support-force truth and named
+checkpoint factories for additional physical sensor/estimator families.
 
 ## Required Alpha 3 implementation gates
 
 1. [x] Preserve immutable committed truth points at every accepted boundary
    and both sides of every segment transition.
 2. [x] Return accepted truth segments to the sensor bus.
-3. [ ] Tag all load evaluations with state time, achieved-control time, and
+3. [x] Tag all runtime load evaluations with state time, achieved-control time, and
    step phase.
 4. [x] Add a scheduler that creates explicit sensor boundaries.
 5. [x] Implement IMU ideal/error-model measurements before navigation use.
-6. [ ] Test instantaneous and interval IMUs across adaptive and rejected
-   steps; fixed-step batch and interactive paths are covered.
+6. [x] Test instantaneous and interval IMUs across adaptive and rejected
+   steps in batch and interactive execution.
 7. [x] Prove batch and stepped sensor runs use identical accepted truth.
 
 The acceptance condition is not merely that an IMU plot looks smooth. It is

@@ -1,0 +1,28 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: x15-direct-wrench-semantic-v1
+vehicle: x15
+fidelity: rigid_body_6dof_direct_wrench
+initialization:
+  id: air_launch_release
+  inputs:
+    altitude_m: {value: 13000.0, unit: m}
+    speed_m_s: {value: 250.0, unit: m/s}
+    heading_deg: {value: 90.0, unit: deg}
+mission:
+  id: rocket_aircraft_high_energy_v1
+segments:
+  - id: separation
+    inputs:
+      clearance_time_s: {value: 5.0, unit: s}
+  - id: powered_climb
+    inputs:
+      target_altitude_m: {value: 30000.0, unit: m}
+      cutoff_condition: {value: declared_cutoff}
+  - id: coast_apogee
+    inputs:
+      target_energy: {value: 500000.0, unit: J/kg}
+  - id: atmospheric_handoff
+    inputs:
+      target_altitude_m: {value: 15000.0, unit: m}
+      target_speed_m_s: {value: 300.0, unit: m/s}
+      target_heading_deg: {value: 90.0, unit: deg}

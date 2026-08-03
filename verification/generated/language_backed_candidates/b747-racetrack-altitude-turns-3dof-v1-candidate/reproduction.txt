@@ -1,0 +1,1 @@
+PYTHONPATH=src python3 tools/execute_language_backed_racetrack_candidate.py --profile b747-cruise --fidelity point_mass_3dof --output verification/generated/language_backed_candidates

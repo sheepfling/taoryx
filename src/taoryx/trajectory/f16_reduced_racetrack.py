@@ -208,6 +208,8 @@ class F16ReducedRacetrackRunner:
             "route_bank_achieved_deg": math.degrees(roll_rad),
             "route_pitch_achieved_deg": math.degrees(actual_pitch),
             "route_heading_achieved_deg": math.degrees(actual_yaw),
+            "heading_rad": heading_rad,
+            "flight_path_angle_rad": flight_path_angle_rad,
             "p_rad_s": p_rad_s,
             "q_rad_s": q_rad_s,
             "r_rad_s": r_rad_s,

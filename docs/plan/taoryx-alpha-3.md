@@ -5,6 +5,12 @@
 **Boundary:** Add and qualify new vehicle archetypes without weakening the
 common runtime, family-package, control, or evidence contracts.
 
+**Reprioritization:** The breadth work below follows the P1/P2 common
+compose-to-run airbreather slice in
+[three-product-execution-roadmap.md](three-product-execution-roadmap.md).
+New-family work may maintain evidence and conformance witnesses in the
+meantime, but it must not create another bespoke scenario-to-run path.
+
 The [Family Showcase Composite Master Plan](taoryx-family-showcase-composite-master-plan.md)
 is the governing execution plan for Alpha 3 flagship packs, standard evidence
 boards, family-local event markers, and cross-fidelity qualification.

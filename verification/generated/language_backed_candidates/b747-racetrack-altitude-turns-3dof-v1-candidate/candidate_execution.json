@@ -1,0 +1,16 @@
+{
+  "binding_id": "b747-cruise-point_mass_3dof-candidate",
+  "evaluation": {
+    "hard_gates_passed": true,
+    "mission_pass": true,
+    "required_objectives": 4,
+    "required_passed": 4
+  },
+  "fidelity": "point_mass_3dof",
+  "mission_proposal_fingerprint": "4603d64050251b4af6db0fc96da1d066ad7fe880a0251c47f055a5983e3f7aa5",
+  "packet": "verification/generated/language_backed_candidates/b747-racetrack-altitude-turns-3dof-v1-candidate",
+  "runtime": {
+    "numerical_valid": true
+  },
+  "schema_version": "taoryx.language-backed-candidate-execution/v1"
+}

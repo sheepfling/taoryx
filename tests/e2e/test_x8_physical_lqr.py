@@ -42,6 +42,10 @@ def test_x8_table_coordinate_physical_lqr_artifact_closes_the_local_chain(tmp_pa
     assert len(payload["physical_mapping"]["hypotheses"]) == 2
     assert payload["physical_mapping"]["selected_hypothesis"]["differential_sign"] == 1
     assert payload["linearization"]["provenance"]["derivative_consistent"]
+    assert payload["authority_preflight"]["status"] == "passed"
+    assert payload["authority_preflight"]["metrics"]["controllability_rank"] == 4.0
+    assert payload["authority_preflight"]["metrics"]["required_state_count"] == 4.0
+    assert payload["authority_preflight"]["blockers"] == []
     assert payload["nonlinear_validation"]["metrics"]["final_feedback_error_norm"] < (
         payload["nonlinear_validation"]["metrics"]["initial_feedback_error_norm"] * 0.05
     )

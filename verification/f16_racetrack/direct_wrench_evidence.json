@@ -4,107 +4,75 @@
   "evaluation": {
     "claim_boundary": "truth telemetry verifies objective geometry; controller transitions are diagnostic and cannot create a pass",
     "evaluator": "independent_truth_telemetry",
-    "hard_gates_passed": true,
+    "hard_gates_passed": false,
     "mission_pass": false,
     "objective_pass": false,
     "required_objectives": 4,
-    "required_passed": 1,
+    "required_passed": 0,
     "results": [
       {
-        "closest_error": 0.15567250847792025,
+        "closest_error": null,
         "controller_reason": null,
         "controller_time_s": null,
         "controller_transition_valid": null,
-        "critical_metric": {
-          "actual": 0.15567250847792025,
-          "channel": "gate_speed_error",
-          "error": 0.15567250847792025,
-          "limit": 12.0,
-          "margin": 11.84432749152208,
-          "target": 0.0,
-          "units": "m/s"
-        },
+        "critical_metric": null,
         "dwell_actual_s": null,
         "id": "high-altitude-level-gate",
-        "margin": 11.84432749152208,
-        "message": null,
+        "margin": null,
+        "message": "no truth telemetry in objective window",
         "objective_type": "fly_by_gate",
         "required": true,
-        "status": "pass",
-        "tolerance": 12.0,
-        "truth_time_s": 80.0
+        "status": "blocked",
+        "tolerance": 500.0,
+        "truth_time_s": null
       },
       {
-        "closest_error": 0.18845868419663248,
+        "closest_error": null,
         "controller_reason": null,
         "controller_time_s": null,
         "controller_transition_valid": null,
-        "critical_metric": {
-          "actual": 0.18845868419663248,
-          "channel": "gate_speed_error",
-          "error": 0.18845868419663248,
-          "limit": 12.0,
-          "margin": 11.811541315803368,
-          "target": 0.0,
-          "units": "m/s"
-        },
+        "critical_metric": null,
         "dwell_actual_s": null,
         "id": "left-turn-exit-gate",
-        "margin": 11.811541315803368,
-        "message": "truth telemetry did not cross the gate within lateral and altitude limits",
+        "margin": null,
+        "message": "no truth telemetry in objective window",
         "objective_type": "fly_by_gate",
         "required": true,
-        "status": "fail",
-        "tolerance": 12.0,
-        "truth_time_s": 559.5
+        "status": "blocked",
+        "tolerance": 500.0,
+        "truth_time_s": null
       },
       {
-        "closest_error": 1323.6201666304048,
+        "closest_error": null,
         "controller_reason": null,
         "controller_time_s": null,
         "controller_transition_valid": null,
-        "critical_metric": {
-          "actual": 1323.6201666304048,
-          "channel": "gate_lateral_error",
-          "error": 1323.6201666304048,
-          "limit": 500.0,
-          "margin": -823.6201666304048,
-          "target": 0.0,
-          "units": "m"
-        },
+        "critical_metric": null,
         "dwell_actual_s": null,
         "id": "low-altitude-level-gate",
-        "margin": -823.6201666304048,
-        "message": "truth telemetry did not cross the gate within lateral and altitude limits",
+        "margin": null,
+        "message": "no truth telemetry in objective window",
         "objective_type": "fly_by_gate",
         "required": true,
-        "status": "fail",
+        "status": "blocked",
         "tolerance": 500.0,
-        "truth_time_s": 632.5
+        "truth_time_s": null
       },
       {
-        "closest_error": 6349.462098432097,
+        "closest_error": null,
         "controller_reason": null,
         "controller_time_s": null,
         "controller_transition_valid": null,
-        "critical_metric": {
-          "actual": 6349.462098432097,
-          "channel": "gate_lateral_error",
-          "error": 6349.462098432097,
-          "limit": 500.0,
-          "margin": -5849.462098432097,
-          "target": 0.0,
-          "units": "m"
-        },
+        "critical_metric": null,
         "dwell_actual_s": null,
         "id": "terminal-start-finish-gate",
-        "margin": -5849.462098432097,
-        "message": "truth telemetry did not cross the gate within lateral and altitude limits",
+        "margin": null,
+        "message": "no truth telemetry in objective window",
         "objective_type": "fly_by_gate",
         "required": true,
-        "status": "fail",
+        "status": "blocked",
         "tolerance": 500.0,
-        "truth_time_s": 1200.0
+        "truth_time_s": null
       }
     ],
     "schema_version": 1
@@ -112,11 +80,14 @@
   "family_id": "reference_f16_s119",
   "fidelity": "rigid_body_6dof_direct_wrench",
   "mode": "direct_wrench",
+  "perturbation": {},
   "route": {
     "gates": [
       {
         "altitude_m": 300.0,
         "east_m": 12000.0,
+        "gate_normal_east": 1.0,
+        "gate_normal_north": 0.0,
         "id": "high-altitude-level-gate",
         "north_m": 0.0,
         "phase": "outbound-level"
@@ -124,6 +95,8 @@
       {
         "altitude_m": 300.0,
         "east_m": 12000.0,
+        "gate_normal_east": -1.0,
+        "gate_normal_north": 0.0,
         "id": "left-turn-exit-gate",
         "north_m": 50000.0,
         "phase": "left-turn"
@@ -131,6 +104,8 @@
       {
         "altitude_m": 0.0,
         "east_m": 0.0,
+        "gate_normal_east": -1.0,
+        "gate_normal_north": 0.0,
         "id": "low-altitude-level-gate",
         "north_m": 50000.0,
         "phase": "inbound-level"
@@ -138,11 +113,14 @@
       {
         "altitude_m": 0.0,
         "east_m": 0.0,
+        "gate_normal_east": 1.0,
+        "gate_normal_north": 0.0,
         "id": "terminal-start-finish-gate",
         "north_m": 0.0,
         "phase": "right-turn"
       }
     ],
+    "source_realization": "f16_source_rigid_body_direct_wrench_development_runner",
     "template_id": "powered_fixed_wing_racetrack_v1",
     "timing": {
       "climb_time_s": 50.0,
@@ -152,20 +130,86 @@
       "gate_speed_tolerance_mps": 12.0,
       "inbound_level_time_s": 28.740157480314963,
       "outbound_level_time_s": 28.740157480314963,
-      "position_capture_bank_gain_rad_per_m": 2.5e-05,
+      "position_capture_bank_gain_rad_per_m": 0.0,
       "position_capture_max_bank_correction_deg": 3.0,
       "route_duration_s": 1188.1865661383836,
-      "simulation_horizon_s": 1200.1865661383836,
+      "simulation_horizon_s": 1308.1865661383836,
       "straight_time_s": 78.74015748031496,
+      "turn_rate_command_scale": 1.0,
       "turn_time_s": 515.3531255888768
     }
   },
   "runtime": {
     "dt_s": 0.5,
-    "duration_s": 1200.0,
-    "failure": null,
-    "hard_gates_passed": true,
-    "numerical_valid": true
+    "duration_s": 3.5,
+    "envelope_violations": [
+      {
+        "channel": "aero_alpha_deg",
+        "comparison_tolerance": 4.5000000000000006e-08,
+        "lower": -10.0,
+        "sample_index": 4,
+        "time_s": 2.0,
+        "upper": 45.0,
+        "value": -29.85989806025476
+      },
+      {
+        "channel": "mach",
+        "comparison_tolerance": 1e-09,
+        "lower": 0.0,
+        "sample_index": 5,
+        "time_s": 2.5,
+        "upper": 1.0,
+        "value": 3.038974575074477
+      },
+      {
+        "channel": "aero_alpha_deg",
+        "comparison_tolerance": 4.5000000000000006e-08,
+        "lower": -10.0,
+        "sample_index": 5,
+        "time_s": 2.5,
+        "upper": 45.0,
+        "value": -176.89873650633635
+      },
+      {
+        "channel": "mach",
+        "comparison_tolerance": 1e-09,
+        "lower": 0.0,
+        "sample_index": 6,
+        "time_s": 3.0,
+        "upper": 1.0,
+        "value": 200261.43927158654
+      },
+      {
+        "channel": "aero_alpha_deg",
+        "comparison_tolerance": 4.5000000000000006e-08,
+        "lower": -10.0,
+        "sample_index": 6,
+        "time_s": 3.0,
+        "upper": 45.0,
+        "value": 92.87919508468377
+      },
+      {
+        "channel": "mach",
+        "comparison_tolerance": 1e-09,
+        "lower": 0.0,
+        "sample_index": 7,
+        "time_s": 3.5,
+        "upper": 1.0,
+        "value": 2.4923885023370147e+75
+      },
+      {
+        "channel": "aero_alpha_deg",
+        "comparison_tolerance": 4.5000000000000006e-08,
+        "lower": -10.0,
+        "sample_index": 7,
+        "time_s": 3.5,
+        "upper": 45.0,
+        "value": 90.0
+      }
+    ],
+    "failure": "ValueError: F-16 reference airspeed must be finite and positive",
+    "hard_gates_passed": false,
+    "numerical_valid": false
   },
   "schema_version": "taoryx.f16-racetrack-evidence/v1",
   "status": "development_screen_pending",

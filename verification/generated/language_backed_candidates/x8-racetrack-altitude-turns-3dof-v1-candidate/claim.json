@@ -1,0 +1,12 @@
+{
+  "claim": "The source-table X8 point-mass reduction completes the shared powered fixed-wing racetrack geometry with independent truth-based altitude, speed, route, and terminal gates.",
+  "evidence_grade": "mixed",
+  "nonclaims": [
+    "attitude or body-rate dynamics",
+    "physical elevon, moment, or actuator authority",
+    "flight-test or manufacturer fidelity",
+    "wind robustness, takeoff, or landing",
+    "realization boundary: The point-mass adapter integrates translational motion and resolves speed, heading, and flight-path commands from the shared racetrack. No attitude, moment, or individual surface signal is used to pass the mission."
+  ],
+  "outcome": "completed"
+}

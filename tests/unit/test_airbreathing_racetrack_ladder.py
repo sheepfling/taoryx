@@ -45,8 +45,28 @@ def test_every_ladder_mission_resolves_a_declared_template_binding() -> None:
         assert mission["racetrack_binding"]
         assert Path(ROOT / mission["problem"]).exists()
         assert "racetrack_gate_id" in mission["terminal"]
-        assert all(
-            item["objective_type"] == "event" or "racetrack_gate_id" in item
-            for item in mission["objectives"]
-        )
+        for objective in mission["objectives"]:
+            if objective["objective_type"] == "event":
+                continue
+            if objective["objective_type"] == "dwell":
+                assert objective["racetrack_phase"]
+                assert objective["target"]
+                assert objective["tolerance"]
+                continue
+            assert "racetrack_gate_id" in objective
+    ####
+
+
+def test_qualification_missions_declare_canonical_fidelity_explicitly() -> None:
+    missions = yaml.safe_load((ROOT / "verification/family_qualification_missions.yaml").read_text(encoding="utf-8"))["missions"]
+    canonical = {
+        "point_mass_3dof",
+        "pseudo_6dof",
+        "rigid_body_6dof_direct_wrench",
+        "rigid_body_6dof_surface_allocated",
+    }
+
+    assert missions
+    assert {str(item["fidelity_tier"]) for item in missions} <= canonical
+    assert all("fidelity_tier" in item for item in missions)
     ####

@@ -1,0 +1,254 @@
+schema: taoryx.family-integration-strategies/v1alpha1
+version: 1
+description: >-
+  Reusable vehicle-family integration strategies. A strategy defines the data,
+  adapter operations, automatic calibration path, and diagnostic sequence for
+  a physical topology. It is a worklist compiler input, not a qualification
+  claim or permission to invent missing model authority.
+strategies:
+  - id: powered_fixed_wing.v1
+    physical_families: [powered_fixed_wing]
+    summary: >-
+      Air-breathing fixed-wing strategy for light, transport, and fighter
+      vehicles. Reuses capability-scaled racetrack geometry, trim grids,
+      finite-difference local models, scaled LQR candidates, and bounded
+      surface allocation when physical effectors are declared.
+    family_inputs:
+      - mass_properties
+      - aerodynamic_force_model
+      - propulsion_and_resource_model
+      - alpha_beta_table_domains
+      - speed_altitude_operating_points
+      - turn_climb_descent_envelope
+    non_tunable_blockers:
+      - missing_or_inconsistent_frames
+      - missing_trim_or_operating_point
+      - insufficient_effector_rank
+      - uncontrolled_required_axis
+      - missing_actuator_limits
+      - source_table_domain_exit
+    tier_recipes:
+      point_mass_3dof:
+        data: [mass_properties, translational_force_model, propulsion_and_resource_model, state_envelope, terminal_contract]
+        operations: [state_derivative, trim]
+        calibration_mode: capability_scaled_kinematic_guidance
+        stages: [source_audit, trim_grid, guidance_preflight, altitude_speed_turn_probe, mission_objective_evaluation]
+      pseudo_6dof:
+        data: [point_mass_parent, response_law, response_calibration_cases, attitude_rate_limits, semantic_control_mapping]
+        operations: [state_derivative, trim]
+        calibration_mode: response_law_calibration
+        stages: [parent_parity_check, response_identification, bank_pitch_reversal_probe, altitude_speed_turn_probe, mission_objective_evaluation]
+      rigid_body_6dof_direct_wrench:
+        data: [inertia_tensor, force_moment_model, frame_sign_contract, direct_wrench_contract, operating_point_catalog]
+        operations: [state_derivative, trim, linearize]
+        calibration_mode: trim_linearize_scaled_lqr
+        stages: [trim_grid, derivative_consistency, authority_preflight, operating_point_campaign, authority_envelope, attitude_rate_reversal_probe, mission_preflight]
+      rigid_body_6dof_surface_allocated:
+        data: [direct_wrench_parent, physical_effectors, effector_limits, actuator_dynamics, local_effectiveness, allocation_policy, achieved_wrench_telemetry]
+        operations: [state_derivative, trim, linearize, effectiveness, allocate]
+        calibration_mode: trim_linearize_scaled_lqr_and_constrained_allocation
+        stages: [trim_grid, derivative_consistency, authority_preflight, operating_point_campaign, authority_envelope, actuator_limit_probe, attitude_rate_reversal_probe, mission_preflight]
+
+  - id: rocket_aircraft_high_energy.v1
+    physical_families: [powered_fixed_wing]
+    summary: >-
+      Regime-scheduled rocket-aircraft strategy. Separates release, powered,
+      coast, and atmospheric phases, and never carries an authority result
+      across a dynamic-pressure or control-topology transition without a
+      declared schedule node.
+    family_inputs:
+      - release_contract
+      - staged_propulsion_and_resource_model
+      - aerodynamic_force_moment_schedule
+      - mach_dynamic_pressure_operating_points
+      - control_authority_transition_map
+      - high_energy_terminal_corridor
+    non_tunable_blockers:
+      - missing_phase_specific_trim
+      - missing_control_authority_transition
+      - missing_stabilator_rudder_rcs_effectivity
+      - source_table_domain_exit
+      - missing_stage_event_contract
+    tier_recipes:
+      point_mass_3dof:
+        data: [release_state, variable_mass_force_model, stage_event_contract, energy_terminal_corridor]
+        operations: [state_derivative, trim]
+        calibration_mode: energy_guidance_schedule
+        stages: [release_audit, phase_preflight, powered_coast_energy_probe, terminal_corridor_probe, mission_objective_evaluation]
+      pseudo_6dof:
+        data: [point_mass_parent, regime_response_law, phase_rate_limits, attitude_handoff_contract]
+        operations: [state_derivative, trim]
+        calibration_mode: regime_response_calibration
+        stages: [parent_parity_check, phase_response_identification, attitude_handoff_probe, bank_pitch_reversal_probe, terminal_corridor_probe]
+      rigid_body_6dof_direct_wrench:
+        data: [inertia_tensor, force_moment_model, direct_wrench_contract, phase_trim_catalog, dynamic_pressure_schedule]
+        operations: [state_derivative, trim, linearize]
+        calibration_mode: phase_scheduled_trim_linearize_scaled_lqr
+        stages: [phase_trim_grid, derivative_consistency, authority_preflight, operating_point_campaign, authority_transition_probe, mission_preflight]
+      rigid_body_6dof_surface_allocated:
+        data: [direct_wrench_parent, physical_effectors, actuator_dynamics, stabilator_rudder_rcs_or_gimbal_effectiveness, allocation_policy]
+        operations: [state_derivative, trim, linearize, effectiveness, allocate]
+        calibration_mode: phase_scheduled_constrained_allocation
+        stages: [phase_trim_grid, authority_preflight, authority_envelope, transition_allocation_probe, actuator_limit_probe, mission_preflight]
+
+  - id: multirotor_hover_translation.v1
+    physical_families: [multirotor]
+    summary: >-
+      Rotor-resolved hover and translation strategy. Uses a hover equilibrium,
+      individual-rotor allocation, nested position/attitude/rate loops, and
+      a pad-contact terminal contract.
+    family_inputs:
+      - mass_inertia_and_cg
+      - rotor_geometry_and_spin_directions
+      - thrust_and_reaction_torque_model
+      - motor_limits_rate_and_lag
+      - battery_or_resource_model
+      - contact_terminal_contract
+    non_tunable_blockers:
+      - missing_rotor_geometry_or_spin_direction
+      - rank_deficient_rotor_allocation
+      - missing_motor_limits
+      - missing_contact_model
+      - missing_yaw_authority
+    tier_recipes:
+      point_mass_3dof:
+        data: [mass_properties, aggregate_thrust_model, resource_model, translational_envelope, terminal_contract]
+        operations: [state_derivative, trim]
+        calibration_mode: bounded_position_guidance
+        stages: [hover_equilibrium, translation_preflight, xyz_translation_probe, mission_objective_evaluation]
+      pseudo_6dof:
+        data: [point_mass_parent, thrust_vector_response_law, attitude_rate_limits, yaw_response_calibration]
+        operations: [state_derivative, trim]
+        calibration_mode: thrust_vector_response_calibration
+        stages: [parent_parity_check, hover_attitude_probe, yaw_translation_probe, disturbance_recovery_probe, mission_objective_evaluation]
+      rigid_body_6dof_direct_wrench:
+        data: [inertia_tensor, rigid_body_force_moment_model, direct_wrench_contract, hover_operating_point]
+        operations: [state_derivative, trim, linearize]
+        calibration_mode: hover_linearize_scaled_lqr
+        stages: [hover_trim, derivative_consistency, authority_preflight, operating_point_campaign, attitude_rate_recovery_probe, direct_wrench_comparator_probe]
+      rigid_body_6dof_surface_allocated:
+        data: [individual_rotor_effectiveness, motor_limits_rate_and_lag, allocation_policy, contact_model, achieved_wrench_telemetry]
+        operations: [state_derivative, trim, linearize, effectiveness, allocate]
+        calibration_mode: nested_hover_linearize_and_rotor_allocation
+        stages: [hover_trim, authority_preflight, rotor_authority_envelope, motor_limit_probe, yaw_translation_probe, landing_settle_probe, mission_preflight]
+
+  - id: lifting_body_glide.v1
+    physical_families: [lifting_body]
+    summary: >-
+      Unpowered lifting-body strategy. Treats energy, alpha, bank reversal,
+      and crossrange as coupled constraints; source-channel trim fragments may
+      support local development work but never substitute for full trim.
+    family_inputs:
+      - release_contract
+      - mass_inertia_and_cg
+      - aerodynamic_force_moment_model
+      - alpha_bank_crossrange_envelope
+      - glide_energy_terminal_corridor
+      - surface_effectiveness_if_claimed
+    non_tunable_blockers:
+      - missing_full_state_trim
+      - missing_alpha_limit
+      - missing_surface_effectivity
+      - missing_energy_corridor
+      - source_table_domain_exit
+    tier_recipes:
+      point_mass_3dof:
+        data: [release_state, glide_force_model, energy_envelope, terminal_corridor]
+        operations: [state_derivative, trim_fragment]
+        calibration_mode: glide_energy_guidance
+        stages: [release_audit, energy_preflight, bank_reversal_energy_probe, terminal_corridor_probe]
+      pseudo_6dof:
+        data: [point_mass_parent, attitude_response_law, alpha_bank_limits, response_calibration_cases]
+        operations: [state_derivative, trim_fragment]
+        calibration_mode: lifting_body_response_calibration
+        stages: [parent_parity_check, bank_reversal_probe, alpha_limit_probe, terminal_corridor_probe]
+      rigid_body_6dof_direct_wrench:
+        data: [inertia_tensor, force_moment_model, direct_wrench_contract, source_trim_fragment]
+        operations: [state_derivative, trim_fragment]
+        calibration_mode: local_channel_control_screen
+        stages: [source_channel_trim_check, derivative_or_response_provenance, authority_preflight, direct_wrench_authority_probe]
+      rigid_body_6dof_surface_allocated:
+        data: [physical_effectors, local_effectiveness, actuator_dynamics, allocation_policy, source_trim_fragment]
+        operations: [state_derivative, trim_fragment, effectiveness, allocate]
+        calibration_mode: source_channel_constrained_allocation
+        stages: [source_channel_trim_check, authority_preflight, authority_envelope, surface_limit_probe, closed_loop_glide_readiness]
+
+  - id: staged_rocket_replay.v1
+    physical_families: [mass_depleting_rocket]
+    summary: >-
+      Staged rocket strategy for source replay and later participating plants.
+      Translation, event ordering, and resources can be validated before a
+      gimbal or attitude-control path exists; physical control tiers remain
+      blocked until source-aligned gimbal/effectivity data are supplied.
+    family_inputs:
+      - staged_mass_and_propulsion_model
+      - stage_event_contract
+      - launch_or_release_state
+      - target_state_or_impact_contract
+      - attitude_gimbal_effectivity_when_controlled
+    non_tunable_blockers:
+      - source_replay_not_participating_plant
+      - missing_time_aligned_attitude_data
+      - missing_gimbal_effectivity
+      - missing_stage_event_contract
+    tier_recipes:
+      point_mass_3dof:
+        data: [staged_translation_replay, stage_event_contract, resource_ledger, target_state_contract]
+        operations: [replay]
+        calibration_mode: trajectory_replay_and_reachability
+        stages: [source_audit, event_ordering_probe, resource_closure_probe, target_state_evaluation]
+      pseudo_6dof:
+        data: [point_mass_parent, declared_attitude_response, phase_handoff_contract]
+        operations: [replay]
+        calibration_mode: response_law_calibration_when_attitude_data_exists
+        stages: [parent_parity_check, attitude_data_audit, response_handoff_probe]
+      rigid_body_6dof_direct_wrench:
+        data: [participating_state_derivative, inertia_tensor, direct_wrench_contract, gimbal_or_attitude_effectivity]
+        operations: [state_derivative, trim, linearize]
+        calibration_mode: staged_direct_wrench_schedule
+        stages: [phase_trim_grid, derivative_consistency, authority_preflight, gimbal_authority_probe, stage_transition_probe]
+      rigid_body_6dof_surface_allocated:
+        data: [physical_gimbal_or_attitude_effectors, actuator_dynamics, local_effectiveness, allocation_policy]
+        operations: [state_derivative, trim, linearize, effectiveness, allocate]
+        calibration_mode: staged_constrained_gimbal_allocation
+        stages: [phase_trim_grid, authority_preflight, gimbal_authority_envelope, actuator_limit_probe, stage_transition_probe]
+
+  - id: passive_ballistic_tumbling.v1
+    physical_families: [passive_ballistic_tumbling_body]
+    summary: >-
+      Passive release and tumble strategy. It validates source geometry,
+      projected area, inertia, aerodynamic moments, release conditions, and
+      impact; no controller, direct-wrench, or physical-effector claim is
+      applicable.
+    family_inputs:
+      - release_state
+      - mass_inertia_and_geometry
+      - orientation_dependent_aerodynamics
+      - impact_contract
+    non_tunable_blockers:
+      - no_control_authority_by_topology
+      - missing_orientation_dependent_aerodynamics
+      - missing_inertia_or_release_state
+    tier_recipes:
+      point_mass_3dof:
+        data: [orientation_averaged_area_model, translational_force_model, impact_contract]
+        operations: [state_derivative]
+        calibration_mode: ballistic_parameter_estimation
+        stages: [release_audit, ballistic_coefficient_probe, impact_evaluation]
+      pseudo_6dof:
+        data: [rigid_body_reuse_contract, orientation_telemetry, impact_contract]
+        operations: [state_derivative]
+        calibration_mode: passive_rotation_replay
+        stages: [release_audit, rotation_invariant_probe, impact_evaluation]
+      rigid_body_6dof_direct_wrench:
+        applicable: false
+        data: []
+        operations: []
+        calibration_mode: not_applicable
+        stages: []
+      rigid_body_6dof_surface_allocated:
+        applicable: false
+        data: []
+        operations: []
+        calibration_mode: not_applicable
+        stages: []

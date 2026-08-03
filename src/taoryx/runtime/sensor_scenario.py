@@ -31,8 +31,10 @@ from taoryx.sensors import (
     IdealGyroscopeAdapter,
     IdealImuAdapter,
     ImuErrorModelAdapter,
+    ImuIncrement,
     MeasurementPacket,
     TranslationAccelerationAdapter,
+    TruthPoint,
 )
 
 from .common import RuntimeProblem
@@ -66,6 +68,20 @@ def _as_vector(value: object, name: str) -> tuple[float, ...] | None:
     if len(values) != 3 or not all(math.isfinite(item) for item in values):
         raise ValueError(f"{name} must be a finite 3-vector")
     return values
+
+
+def _checkpoint_float(value: object) -> float:
+    """Convert one JSON checkpoint scalar to a runtime float."""
+
+    return float(cast(float | int | str, value))
+    ####
+
+
+def _checkpoint_int(value: object) -> int:
+    """Convert one JSON checkpoint scalar to a runtime integer."""
+
+    return int(cast(int | str | float, value))
+    ####
 
 
 def _as_rotation(value: object, name: str) -> np.ndarray | None:
@@ -366,6 +382,75 @@ class SensorScenarioSpec:
             "source_path": None if self.source_path is None else str(self.source_path),
         }
 
+    @classmethod
+    def from_metadata(cls, payload: Mapping[str, object]) -> SensorScenarioSpec:
+        """Rebuild a declared scenario without requiring its original YAML file.
+
+        Checkpoints carry this resolved, typed sidecar rather than serializing
+        provider callbacks.  A missing or malformed field is a restoration
+        failure, not a reason to attach a different default sensor.
+        """
+
+        if _checkpoint_int(payload.get("schema_version", 0)) != 1:
+            raise ValueError("unsupported sensor scenario metadata schema")
+        raw_provider = payload.get("provider_config", payload.get("provider"))
+        provider_config = parse_provider_config(raw_provider)
+        raw_truth = payload.get("truth_config")
+        if raw_truth is None:
+            raw_truth = {"mode": payload.get("truth_mode", "vehicle")}
+        if not isinstance(raw_truth, Mapping):
+            raise ValueError("sensor scenario metadata truth_config must be a mapping")
+        truth_config = parse_truth_config(raw_truth)
+        raw_estimators = payload.get("estimator_modes", ())
+        if not isinstance(raw_estimators, Sequence) or isinstance(raw_estimators, (str, bytes)):
+            raise ValueError("sensor scenario metadata estimator_modes must be a sequence")
+        raw_orientation = payload.get("orientation_policy", {})
+        if not isinstance(raw_orientation, Mapping):
+            raise ValueError("sensor scenario metadata orientation_policy must be a mapping")
+        raw_feedback = payload.get("feedback", {})
+        if not isinstance(raw_feedback, Mapping):
+            raise ValueError("sensor scenario metadata feedback must be a mapping")
+        raw_observation = payload.get("observation_model")
+        if raw_observation is not None and not isinstance(raw_observation, Mapping):
+            raise ValueError("sensor scenario metadata observation_model must be a mapping")
+        raw_body_from_sensor = payload.get("body_from_sensor")
+        raw_lever_arm = payload.get("lever_arm_body_m")
+        return cls(
+            sensor_name=str(payload["sensor_name"]),
+            vehicle_name=str(payload["vehicle_name"]),
+            scenario_id=str(payload["scenario_id"]),
+            provider=provider_config.kind,
+            truth_mode=truth_config.mode,
+            alignment=str(raw_orientation.get("alignment", "velocity")),
+            speed_threshold_mps=_checkpoint_float(raw_orientation.get("speed_threshold_mps", 1.0)),
+            bank_source=str(raw_orientation.get("bank_source", "controller")),
+            bank_default_rad=_checkpoint_float(raw_orientation.get("bank_default_rad", 0.0)),
+            yaw_source=str(raw_orientation.get("yaw_source", "controller-then-heading")),
+            zero_speed_policy=str(raw_orientation.get("zero_speed_policy", "hold-then-initial-frame")),
+            pole_crossing_policy=str(raw_orientation.get("pole_crossing_policy", "parallel-transport")),
+            cadence_s=None if payload.get("cadence_s") is None else _checkpoint_float(payload["cadence_s"]),
+            phase_s=_checkpoint_float(payload.get("phase_s", 0.0)),
+            sample_mode=str(payload.get("sample_mode", "instantaneous")),
+            delivery_s=_checkpoint_float(payload.get("delivery_s", 0.0)),
+            truth_policy=str(payload.get("truth_policy", "boundary")),
+            rate_policy=str(payload.get("rate_policy", "split")),
+            earth_rate_mode=str(payload.get("earth_rate_mode", "source")),
+            earth_omega_rad_s=None if payload.get("earth_omega_rad_s") is None else _checkpoint_float(payload["earth_omega_rad_s"]),
+            drop_every_n=None if payload.get("drop_every_n") is None else _checkpoint_int(payload["drop_every_n"]),
+            profile_path=None if payload.get("profile_path") is None else Path(str(payload["profile_path"])),
+            profile_name=None if payload.get("profile_name") is None else str(payload["profile_name"]),
+            profile_category=str(payload.get("profile_category", "hardware_estimates")),
+            seed=None if payload.get("seed") is None else _checkpoint_int(payload["seed"]),
+            body_from_sensor=None if raw_body_from_sensor is None else _as_rotation(raw_body_from_sensor, "body_from_sensor"),
+            lever_arm_body_m=_as_vector(raw_lever_arm, "lever_arm_body_m"),
+            estimator_modes=tuple(str(item) for item in raw_estimators),
+            truth_config=truth_config,
+            provider_config=provider_config,
+            observation_model=parse_observation_config(raw_observation),
+            feedback=parse_navigation_feedback(raw_feedback),
+        )
+        ####
+
 
 SensorAdapterBuilder = Callable[[SensorScenarioSpec], Any]
 
@@ -575,6 +660,142 @@ class SensorScenarioRuntime:
             raise TypeError(f"sensor model {binding.name!r} does not support checkpointing")
         restore(checkpoint)
 
+    def checkpoint_payload(self) -> dict[str, object]:
+        """Return a complete declared-sensor checkpoint for automatic rebind.
+
+        The payload intentionally supports only this scenario-owned adapter
+        factory, its recognized packet types, and its packet-only estimators.
+        Arbitrary consumer callbacks remain non-checkpointable rather than
+        being silently dropped or reconstructed as different logic.
+        """
+
+        binding = next(item for item in self.bus.bindings if item.name == self.spec.sensor_name)
+        if binding.drop_predicate is not None and binding.checkpoint_drop_policy_id != "drop_every_n":
+            raise TypeError(
+                f"sensor binding {binding.name!r} uses an unregistered drop callback and cannot be checkpointed automatically"
+            )
+        snapshot = getattr(binding.model, "snapshot", None)
+        if not callable(snapshot):
+            raise TypeError(f"sensor model {binding.name!r} does not support checkpointing")
+        model_checkpoint = snapshot()
+        if not isinstance(model_checkpoint, Mapping):
+            raise TypeError(f"sensor model {binding.name!r} returned a non-mapping checkpoint")
+        return {
+            "schema_version": 1,
+            "spec": self.spec.to_metadata(),
+            "spec_sha256": _stable_hash(self.spec.to_metadata()),
+            "model_checkpoint": dict(model_checkpoint),
+            "bus": {
+                "initialized": self.bus.initialized,
+                "bindings": {
+                    binding.name: {
+                        "interval_start": _checkpoint_truth(binding.interval_start),
+                        "samples_emitted": binding.samples_emitted,
+                        "invalid_samples": binding.invalid_samples,
+                        "dropped_samples": binding.dropped_samples,
+                        "drop_attempts": binding.drop_attempts,
+                        "dropped_packets": [_checkpoint_packet(packet) for packet in binding.dropped_packets],
+                    }
+                },
+                "queued": {
+                    name: [_checkpoint_packet(packet) for packet in packets]
+                    for name, packets in self.bus.queued.items()
+                },
+                "delivered": {
+                    name: [_checkpoint_packet(packet) for packet in packets]
+                    for name, packets in self.bus.delivered.items()
+                },
+            },
+            "estimators": {
+                name: _checkpoint_estimator(estimator)
+                for name, estimator in self.estimators.items()
+            },
+            "histories": {name: list(history) for name, history in self.histories.items()},
+            "estimator_gaps": {name: list(gaps) for name, gaps in self.estimator_gaps.items()},
+            "feedback_selected_count": self.feedback_selected_count,
+            "feedback_last_available_s": self.feedback_last_available_s,
+        }
+        ####
+
+    def restore_checkpoint(self, payload: Mapping[str, object]) -> None:
+        """Restore the matching declared sensor, bus, and estimator state."""
+
+        if _checkpoint_int(payload.get("schema_version", 0)) != 1:
+            raise ValueError("unsupported sensor scenario checkpoint schema")
+        raw_spec = payload.get("spec")
+        if not isinstance(raw_spec, Mapping):
+            raise ValueError("sensor scenario checkpoint is missing resolved spec")
+        expected_spec_hash = _stable_hash(self.spec.to_metadata())
+        if payload.get("spec_sha256") != expected_spec_hash:
+            raise ValueError("sensor scenario checkpoint spec does not match the supplied scenario")
+        raw_model_checkpoint = payload.get("model_checkpoint")
+        if not isinstance(raw_model_checkpoint, Mapping):
+            raise ValueError("sensor scenario checkpoint is missing model_checkpoint")
+        binding = next(item for item in self.bus.bindings if item.name == self.spec.sensor_name)
+        restore_model = getattr(binding.model, "restore", None)
+        if not callable(restore_model):
+            raise TypeError(f"sensor model {binding.name!r} does not support checkpoint restoration")
+        restore_model(raw_model_checkpoint)
+
+        raw_bus = payload.get("bus")
+        if not isinstance(raw_bus, Mapping):
+            raise ValueError("sensor scenario checkpoint is missing bus state")
+        raw_binding_states = raw_bus.get("bindings")
+        if not isinstance(raw_binding_states, Mapping):
+            raise ValueError("sensor scenario checkpoint bus state is missing bindings")
+        raw_binding = raw_binding_states.get(binding.name)
+        if not isinstance(raw_binding, Mapping):
+            raise ValueError(f"sensor scenario checkpoint is missing binding state for {binding.name!r}")
+        binding.interval_start = _restore_checkpoint_truth(raw_binding.get("interval_start"))
+        binding.samples_emitted = _checkpoint_int(raw_binding.get("samples_emitted", 0))
+        binding.invalid_samples = _checkpoint_int(raw_binding.get("invalid_samples", 0))
+        binding.dropped_samples = _checkpoint_int(raw_binding.get("dropped_samples", 0))
+        binding.drop_attempts = _checkpoint_int(raw_binding.get("drop_attempts", 0))
+        raw_dropped = raw_binding.get("dropped_packets", ())
+        if not isinstance(raw_dropped, Sequence) or isinstance(raw_dropped, (str, bytes)):
+            raise ValueError("sensor scenario checkpoint dropped_packets must be a sequence")
+        binding.dropped_packets = [_restore_checkpoint_packet(cast(Mapping[str, object], item)) for item in raw_dropped]
+        self.bus.queued = _restore_packet_collection(raw_bus.get("queued"), "queued")
+        self.bus.delivered = _restore_packet_collection(raw_bus.get("delivered"), "delivered")
+        expected_names = {item.name for item in self.bus.bindings}
+        if set(self.bus.queued) != expected_names or set(self.bus.delivered) != expected_names:
+            raise ValueError("sensor scenario checkpoint packet collections do not match declared bindings")
+        self.bus.initialized = bool(raw_bus.get("initialized", False))
+
+        raw_estimators = payload.get("estimators")
+        if not isinstance(raw_estimators, Mapping) or set(raw_estimators) != set(self.estimators):
+            raise ValueError("sensor scenario checkpoint estimator set does not match declared scenario")
+        for name, estimator in self.estimators.items():
+            raw_estimator = raw_estimators[name]
+            if not isinstance(raw_estimator, Mapping):
+                raise ValueError(f"sensor scenario checkpoint estimator {name!r} must be a mapping")
+            _restore_checkpoint_estimator(estimator, raw_estimator)
+        raw_histories = payload.get("histories", {})
+        raw_gaps = payload.get("estimator_gaps", {})
+        if not isinstance(raw_histories, Mapping) or not isinstance(raw_gaps, Mapping):
+            raise ValueError("sensor scenario checkpoint estimator histories must be mappings")
+        self.histories = {name: list(cast(Sequence[dict[str, object]], raw_histories.get(name, ()))) for name in self.estimators}
+        self.estimator_gaps = {name: list(cast(Sequence[dict[str, float]], raw_gaps.get(name, ()))) for name in self.estimators}
+        self.feedback_selected_count = _checkpoint_int(payload.get("feedback_selected_count", 0))
+        raw_feedback_time = payload.get("feedback_last_available_s")
+        self.feedback_last_available_s = None if raw_feedback_time is None else _checkpoint_float(raw_feedback_time)
+        self._restore_feedback_state()
+        ####
+
+    def _restore_feedback_state(self) -> None:
+        """Restore controller feedback after the estimator has been restored."""
+
+        if self.problem is None:
+            return
+        estimator_name = _feedback_estimator_name(self.spec.feedback.source)
+        if estimator_name is None:
+            return
+        estimator = self.estimators.get(estimator_name)
+        vehicle = self.problem.vehicles.get(self.spec.vehicle_name)
+        if vehicle is not None and isinstance(estimator, (DeadReckoningNavigator, MultiplicativeEkf)):
+            self._apply_feedback(vehicle, estimator.state, self.feedback_last_available_s or estimator.state.time_s)
+        ####
+
     def artifact(self) -> dict[str, object]:
         packets = self.bus.packets(self.spec.sensor_name)
         binding = next(item for item in self.bus.bindings if item.name == self.spec.sensor_name)
@@ -621,7 +842,8 @@ class SensorScenarioRuntime:
             "sensor_bindings": self.bus.to_metadata()["bindings"],
             "checkpointing": {
                 "sensor_model": binding.to_metadata()["checkpointing"],
-                "runtime_rebind_required": True,
+                "registered_scenario_auto_restore": True,
+                "custom_callback_rebind_required": True,
             },
             "measurement_summary": {
                 "emitted": binding.samples_emitted,
@@ -651,7 +873,7 @@ class SensorScenarioRuntime:
             "plots": dict(self.plot_manifest) if self.plot_manifest else {"status": "not-rendered"},
             "limitations": [
                 "Research estimator implementation; not flight qualified.",
-                "Checkpoint load requires explicit sensor and estimator rebind.",
+                "Registered SensorScenario checkpoints restore the declared provider, bus, queued packets, and packet-only estimator state; custom callback integrations require an explicit factory or rebind.",
             ],
         }
 
@@ -798,15 +1020,13 @@ def attach_sensor_scenario(
         problem.feedback_guard = feedback_guard
     if spec.drop_every_n is not None:
         drop_every_n = spec.drop_every_n
-        emission_index = 0
+        binding = bus.bindings[0]
 
         def drop_packet(_: MeasurementPacket[Any]) -> bool:
-            nonlocal emission_index
-            emission_index += 1
-            return emission_index % drop_every_n == 0
+            return binding.drop_attempts % drop_every_n == 0
 
-        binding = bus.bindings[0]
         binding.drop_predicate = drop_packet
+        binding.checkpoint_drop_policy_id = "drop_every_n"
     for mode in spec.estimator_modes:
         normalized = mode.casefold().replace("_", "-")
         estimator: _Navigator
@@ -872,11 +1092,311 @@ def attach_sensor_scenario(
 
     bus.subscribe(spec.sensor_name, consume)
     bus.initialize(problem)
+    problem.metadata["_sensor_scenario_runtime"] = runtime
+    return runtime
+
+
+def sensor_scenario_checkpoint_payload(problem: RuntimeProblem) -> dict[str, object] | None:
+    """Return a scenario-owned checkpoint, or ``None`` for an unregistered bus."""
+
+    runtime = problem.metadata.get("_sensor_scenario_runtime")
+    if runtime is None:
+        return None
+    if not isinstance(runtime, SensorScenarioRuntime):
+        raise TypeError("runtime sensor scenario metadata has an unexpected type")
+    return runtime.checkpoint_payload()
+    ####
+
+
+def restore_sensor_scenario_checkpoint(
+    problem: RuntimeProblem,
+    payload: Mapping[str, object],
+) -> SensorScenarioRuntime:
+    """Reconstruct and restore one declared provider/estimator scenario.
+
+    This is deliberately limited to the registered scenario factory.  A
+    checkpoint containing a custom sensor callback cannot substitute another
+    provider on restore; it remains an explicit unsupported checkpoint.
+    """
+
+    raw_spec = payload.get("spec")
+    if not isinstance(raw_spec, Mapping):
+        raise ValueError("sensor scenario checkpoint is missing resolved spec")
+    spec = SensorScenarioSpec.from_metadata(raw_spec)
+    runtime = attach_sensor_scenario(problem, spec)
+    runtime.restore_checkpoint(payload)
+    problem.metadata["sensor_rebind"] = {
+        "required": False,
+        "scenario_id": spec.scenario_id,
+        "status": "restored-from-checkpoint",
+    }
     return runtime
 
 
 def _feedback_estimator_name(source: str) -> str | None:
     return {"mekf": "mekf", "dead-reckoning": "dead_reckoning"}.get(source)
+
+
+def _checkpoint_truth(truth: TruthPoint | None) -> dict[str, object] | None:
+    """Serialize a committed truth boundary needed by an interval sensor."""
+
+    if truth is None:
+        return None
+    return {
+        "time_s": truth.time_s,
+        "position_eci_m": truth.position_eci_m.tolist(),
+        "velocity_eci_mps": truth.velocity_eci_mps.tolist(),
+        "velocity_without_gravity_eci_mps": truth.velocity_without_gravity_eci_mps.tolist(),
+        "orientation_eci_from_body": None if truth.orientation_eci_from_body is None else truth.orientation_eci_from_body.tolist(),
+        "gravity_eci_mps2": truth.gravity_eci_mps2.tolist(),
+        "angular_rate_body_radps": None if truth.angular_rate_body_radps is None else truth.angular_rate_body_radps.tolist(),
+        "acceleration_eci_mps2": None if truth.acceleration_eci_mps2 is None else truth.acceleration_eci_mps2.tolist(),
+        "angular_acceleration_body_radps2": None
+        if truth.angular_acceleration_body_radps2 is None
+        else truth.angular_acceleration_body_radps2.tolist(),
+        "temperature_celsius": truth.temperature_celsius,
+    }
+    ####
+
+
+def _restore_checkpoint_truth(value: object) -> TruthPoint | None:
+    """Restore one committed truth boundary from checkpoint data."""
+
+    if value is None:
+        return None
+    if not isinstance(value, Mapping):
+        raise ValueError("sensor scenario checkpoint truth must be a mapping")
+    return TruthPoint(
+        float(value["time_s"]),
+        np.asarray(value["position_eci_m"], dtype=float),
+        np.asarray(value["velocity_eci_mps"], dtype=float),
+        np.asarray(value["velocity_without_gravity_eci_mps"], dtype=float),
+        None if value.get("orientation_eci_from_body") is None else np.asarray(value["orientation_eci_from_body"], dtype=float),
+        np.asarray(value["gravity_eci_mps2"], dtype=float),
+        None if value.get("angular_rate_body_radps") is None else np.asarray(value["angular_rate_body_radps"], dtype=float),
+        None if value.get("acceleration_eci_mps2") is None else np.asarray(value["acceleration_eci_mps2"], dtype=float),
+        None
+        if value.get("angular_acceleration_body_radps2") is None
+        else np.asarray(value["angular_acceleration_body_radps2"], dtype=float),
+        None if value.get("temperature_celsius") is None else float(value["temperature_celsius"]),
+    )
+    ####
+
+
+def _checkpoint_packet(packet: MeasurementPacket[Any]) -> dict[str, object]:
+    """Serialize a declared provider's recognized immutable packet type."""
+
+    payload = packet.payload
+    if payload is None:
+        payload_record: dict[str, object] | None = None
+    elif isinstance(payload, ImuIncrement):
+        payload_record = {
+            "kind": "imu_increment",
+            "delta_v_body_mps": payload.delta_v_body_mps.tolist(),
+            "delta_theta_body_rad": payload.delta_theta_body_rad.tolist(),
+            "start_time_s": payload.start_time_s,
+            "end_time_s": payload.end_time_s,
+            "temperature_celsius": payload.temperature_celsius,
+        }
+    elif isinstance(payload, GyroIncrement):
+        payload_record = {
+            "kind": "gyro_increment",
+            "delta_theta_body_rad": payload.delta_theta_body_rad.tolist(),
+            "start_time_s": payload.start_time_s,
+            "end_time_s": payload.end_time_s,
+        }
+    elif isinstance(payload, AccelerationIncrement):
+        payload_record = {
+            "kind": "acceleration_increment",
+            "delta_v_eci_mps": payload.delta_v_eci_mps.tolist(),
+            "start_time_s": payload.start_time_s,
+            "end_time_s": payload.end_time_s,
+        }
+    else:
+        raise TypeError(f"sensor scenario checkpoints do not support packet payload {type(payload).__name__!r}")
+    return {
+        "sampled_at_s": packet.sampled_at_s,
+        "available_at_s": packet.available_at_s,
+        "interval_start_s": packet.interval_start_s,
+        "valid": packet.valid,
+        "payload": payload_record,
+    }
+    ####
+
+
+def _restore_checkpoint_packet(value: Mapping[str, object]) -> MeasurementPacket[Any]:
+    """Restore one recognized immutable packet from checkpoint data."""
+
+    raw_payload = value.get("payload")
+    payload: ImuIncrement | GyroIncrement | AccelerationIncrement | None
+    if raw_payload is None:
+        payload = None
+    elif not isinstance(raw_payload, Mapping):
+        raise ValueError("sensor scenario checkpoint packet payload must be a mapping")
+    elif raw_payload.get("kind") == "imu_increment":
+        payload = ImuIncrement(
+            np.asarray(raw_payload["delta_v_body_mps"], dtype=float),
+            np.asarray(raw_payload["delta_theta_body_rad"], dtype=float),
+            _checkpoint_float(raw_payload["start_time_s"]),
+            _checkpoint_float(raw_payload["end_time_s"]),
+            None if raw_payload.get("temperature_celsius") is None else _checkpoint_float(raw_payload["temperature_celsius"]),
+        )
+    elif raw_payload.get("kind") == "gyro_increment":
+        payload = GyroIncrement(
+            np.asarray(raw_payload["delta_theta_body_rad"], dtype=float),
+            _checkpoint_float(raw_payload["start_time_s"]),
+            _checkpoint_float(raw_payload["end_time_s"]),
+        )
+    elif raw_payload.get("kind") == "acceleration_increment":
+        payload = AccelerationIncrement(
+            np.asarray(raw_payload["delta_v_eci_mps"], dtype=float),
+            _checkpoint_float(raw_payload["start_time_s"]),
+            _checkpoint_float(raw_payload["end_time_s"]),
+        )
+    else:
+        raise ValueError(f"unsupported sensor scenario checkpoint packet kind {raw_payload.get('kind')!r}")
+    return MeasurementPacket(
+        _checkpoint_float(value["sampled_at_s"]),
+        _checkpoint_float(value["available_at_s"]),
+        None if value.get("interval_start_s") is None else _checkpoint_float(value["interval_start_s"]),
+        payload,
+        bool(value.get("valid", True)),
+    )
+    ####
+
+
+def _restore_packet_collection(value: object, field_name: str) -> dict[str, list[MeasurementPacket[Any]]]:
+    """Restore one sensor-bus packet collection without invoking consumers."""
+
+    if not isinstance(value, Mapping):
+        raise ValueError(f"sensor scenario checkpoint {field_name} must be a mapping")
+    collection: dict[str, list[MeasurementPacket[Any]]] = {}
+    for name, raw_packets in value.items():
+        if not isinstance(raw_packets, Sequence) or isinstance(raw_packets, (str, bytes)):
+            raise ValueError(f"sensor scenario checkpoint {field_name}.{name} must be a sequence")
+        packets: list[MeasurementPacket[Any]] = []
+        for packet in raw_packets:
+            if not isinstance(packet, Mapping):
+                raise ValueError(f"sensor scenario checkpoint {field_name}.{name} packet must be a mapping")
+            packets.append(_restore_checkpoint_packet(packet))
+        collection[str(name)] = packets
+    return collection
+    ####
+
+
+def _checkpoint_navigation_state(state: NavigationState | TranslationNavigationState | AttitudeNavigationState) -> dict[str, object]:
+    """Serialize the declared estimator's compact navigation state."""
+
+    if isinstance(state, TranslationNavigationState):
+        return {
+            "kind": "translation",
+            "time_s": state.time_s,
+            "position_eci_m": state.position_eci_m.tolist(),
+            "velocity_eci_mps": state.velocity_eci_mps.tolist(),
+        }
+    if isinstance(state, AttitudeNavigationState):
+        return {
+            "kind": "attitude",
+            "time_s": state.time_s,
+            "orientation_eci_from_body": state.orientation_eci_from_body.tolist(),
+        }
+    return {
+        "kind": "navigation",
+        "time_s": state.time_s,
+        "position_eci_m": state.position_eci_m.tolist(),
+        "velocity_eci_mps": state.velocity_eci_mps.tolist(),
+        "orientation_eci_from_body": state.orientation_eci_from_body.tolist(),
+        "accelerometer_bias_body_mps2": state.accelerometer_bias_body_mps2.tolist(),
+        "gyroscope_bias_body_radps": state.gyroscope_bias_body_radps.tolist(),
+        "body_rate_body_radps": state.body_rate_body_radps.tolist(),
+    }
+    ####
+
+
+def _restore_checkpoint_navigation_state(value: Mapping[str, object]) -> NavigationState | TranslationNavigationState | AttitudeNavigationState:
+    """Restore one typed estimator state from a checkpoint."""
+
+    kind = value.get("kind")
+    if kind == "translation":
+        return TranslationNavigationState(
+            _checkpoint_float(value["time_s"]),
+            np.asarray(value["position_eci_m"], dtype=float),
+            np.asarray(value["velocity_eci_mps"], dtype=float),
+        )
+    if kind == "attitude":
+        return AttitudeNavigationState(_checkpoint_float(value["time_s"]), np.asarray(value["orientation_eci_from_body"], dtype=float))
+    if kind == "navigation":
+        return NavigationState(
+            _checkpoint_float(value["time_s"]),
+            np.asarray(value["position_eci_m"], dtype=float),
+            np.asarray(value["velocity_eci_mps"], dtype=float),
+            np.asarray(value["orientation_eci_from_body"], dtype=float),
+            np.asarray(value["accelerometer_bias_body_mps2"], dtype=float),
+            np.asarray(value["gyroscope_bias_body_radps"], dtype=float),
+            np.asarray(value["body_rate_body_radps"], dtype=float),
+        )
+    raise ValueError(f"unsupported sensor scenario checkpoint navigation state {kind!r}")
+    ####
+
+
+def _checkpoint_estimator(estimator: _Navigator) -> dict[str, object]:
+    """Serialize one of the scenario-owned packet-only navigator types."""
+
+    if isinstance(estimator, TranslationOnlyNavigator):
+        kind = "translation_dead_reckoning"
+    elif isinstance(estimator, AttitudeOnlyNavigator):
+        kind = "attitude_dead_reckoning"
+    elif isinstance(estimator, DeadReckoningNavigator):
+        kind = "dead_reckoning"
+    elif isinstance(estimator, MultiplicativeEkf):
+        kind = "mekf"
+    else:
+        raise TypeError(f"sensor scenario checkpoints do not support estimator {type(estimator).__name__!r}")
+    payload: dict[str, object] = {
+        "kind": kind,
+        "state": _checkpoint_navigation_state(estimator.state),
+    }
+    if isinstance(estimator, MultiplicativeEkf):
+        payload["covariance"] = estimator.covariance.tolist()
+    return payload
+    ####
+
+
+def _restore_checkpoint_estimator(estimator: _Navigator, value: Mapping[str, object]) -> None:
+    """Restore a matching scenario-owned estimator without changing its type."""
+
+    expected_kind = _checkpoint_estimator(estimator)["kind"]
+    if value.get("kind") != expected_kind:
+        raise ValueError(f"sensor scenario checkpoint estimator kind {value.get('kind')!r} does not match {expected_kind!r}")
+    raw_state = value.get("state")
+    if not isinstance(raw_state, Mapping):
+        raise ValueError("sensor scenario checkpoint estimator is missing state")
+    state = _restore_checkpoint_navigation_state(raw_state)
+    if isinstance(estimator, TranslationOnlyNavigator):
+        if not isinstance(state, TranslationNavigationState):
+            raise ValueError("translation estimator checkpoint state has the wrong type")
+        estimator.state = state
+    elif isinstance(estimator, AttitudeOnlyNavigator):
+        if not isinstance(state, AttitudeNavigationState):
+            raise ValueError("attitude estimator checkpoint state has the wrong type")
+        estimator.state = state
+    elif isinstance(estimator, (DeadReckoningNavigator, MultiplicativeEkf)):
+        if not isinstance(state, NavigationState):
+            raise ValueError("navigation estimator checkpoint state has the wrong type")
+        estimator.state = state
+        if isinstance(estimator, MultiplicativeEkf):
+            raw_covariance = value.get("covariance")
+            covariance = np.asarray(raw_covariance, dtype=float)
+            if covariance.shape != (MultiplicativeEkf.ERROR_DIMENSION, MultiplicativeEkf.ERROR_DIMENSION) or not np.all(np.isfinite(covariance)):
+                raise ValueError("MEKF checkpoint covariance has the wrong shape or non-finite values")
+            if not np.allclose(covariance, covariance.T, atol=1.0e-12):
+                raise ValueError("MEKF checkpoint covariance must be symmetric")
+            if np.linalg.eigvalsh(covariance).min() < -1.0e-10:
+                raise ValueError("MEKF checkpoint covariance must be positive semidefinite")
+            estimator.covariance = covariance.copy()
+    else:
+        raise TypeError(f"sensor scenario checkpoints do not support estimator {type(estimator).__name__!r}")
+    ####
 
 
 def _quaternion_from_rotation(rotation: np.ndarray) -> Quaternion:

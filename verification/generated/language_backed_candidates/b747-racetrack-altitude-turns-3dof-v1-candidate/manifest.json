@@ -1,0 +1,284 @@
+{
+  "claim_boundary": "independent truth-evaluated family qualification; integration baselines remain nonqualified",
+  "fidelity_tier": "point_mass_3dof",
+  "files": {
+    "README.md": "9c1c3a8026ed9b899920d8804b27b3d64729569c2007a6240c9710aa51fa3fca",
+    "candidate_execution.json": "bd2eaa952590d113fe530c8a51786890aaa7dfba91e4c76e39ec80ba282a4863",
+    "candidate_proposal.json": "8dd0740385de35eb9779c4c5f6b3c0c7ac95321f362f6caf8021b195d9ca74b9",
+    "claim.json": "7d19d1e9a472b5f4814e367adfe89eecb8fcce4226d305ed5879db334fe1a96f",
+    "controller_transitions.json": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc",
+    "envelope_report.json": "4084bf7d5be3c353545476a4294fefb9dfc78a511856107984a1eea11568a528",
+    "events.json": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c",
+    "inputs/b747-racetrack-altitude-turns-3dof-v1-candidate.prb": "c3b2b868bbe0488ca220185d6b164bd12c55d3c1b89f91de0cd1b2ecca75f528",
+    "inputs/b747_jt9d_thrust.tbl": "555052738e548108fb39efba3df1617fb5d8ca3ff23cdd79c8261efe97d2c5d3",
+    "inputs/b747_nominal_static_6axis.tbl": "6e6590bce179b9aa62aab919a8fe149d733e0bb4732635738f5132e18c4a530e",
+    "inputs/family_qualification_missions.yaml": "1432deef5cb4aeb24fe1b1e6360fdf8dd4e0db2f37536f9966020c06aed3f3e4",
+    "inputs/racetrack_templates.yaml": "e0c6ab0f6918a6094ddc8c49c250a3ebf6708e7c387d741b262becf572b2d3c2",
+    "mission.yaml": "a57f8a894d42853e9457ec44559d3ddede092e26717a1491a0642208a49d56f7",
+    "mission_sequence.png": "26bed54189ce9d03c21c2a4e336f0e0f51d8928494c37a49ba344c9347f676ed",
+    "objective_report.json": "e32b89b911c6a972a29cfa65338ff8b0b49bdc8624355115952ca43690947c48",
+    "plots/plot-manifest.json": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa",
+    "preflight_timing_estimate.json": "da9e83e39d24ef5ea9eaf73be7bf423689f20b457c165349c005d0af5bddb42f",
+    "promotion_assessment.json": "a005792ee52162c3aa7b529dda4b75644aaea9532729270f04c92a0220528922",
+    "qualification_board.png": "bcd082aeb1617d9b137757d3e0cf546f501e45af2b966908c72fde3b5cd87f0b",
+    "realized_fidelity.json": "d1bdc9147840353075af46eedc230f361a655188a9a2a29bfedfae8f90c546e4",
+    "reproduction.txt": "5ea08f9034418f0c533359ada088e25d45459eb0b3b996fefaa5faf25609d7a2",
+    "resolved_racetrack.json": "265be14df2f2a4901c69856c143061484733ecbebb6d4c639f3a7bf06fd0c70f",
+    "run/1.print": "648835a413a6e32920c7e0126baef52f67a4282c5d92bbf630a4849a65c284bd",
+    "runtime_diagnostics.json": "541cf9e6a3f7c7844552f7b2f8f1bf84211a7327c2615b90ff3f8330d4f18efa",
+    "summary.json": "1232e8c8866a6e3d922ed4a73887287284ee1d47ab4bee79fb889bcfa55d5b68",
+    "truth_telemetry.csv": "f39e45e84282ccca22e5f8638fde9390c33ae0507960ecc56112c66af4fa1a10"
+  },
+  "mission_id": "b747-racetrack-altitude-turns-3dof-v1-candidate",
+  "realization": {
+    "actuator_realization": "kinematic_route_command_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_point_mass_3dof",
+    "note": "This is the first scaled realization of the shared powered-fixed-wing template. The point-mass adapter commands speed, heading, and flight-path angle from the racetrack tangent and bounded position/ altitude corrections; it does not create attitude or surface telemetry.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant"
+  },
+  "run_artifacts": [
+    {
+      "archetypes": [
+        "mission_geometry",
+        "mission_timeline",
+        "dynamics_and_resources",
+        "envelope_and_qualification"
+      ],
+      "board": {
+        "event_marker_policy": "family_local",
+        "missing_channel_policy": "unavailable",
+        "modules": [
+          "mission_geometry",
+          "mission_timeline",
+          "dynamics_and_resources",
+          "envelope_and_qualification"
+        ],
+        "profile": "family-evidence-board-v1",
+        "units_required": true
+      },
+      "claim": "The B747 public-research point-mass reduction resolves the same powered fixed-wing racetrack mission contract as the X8 at transport scale, with longer legs, larger turns, slower vertical changes, and independent truth-based altitude, speed, route, and terminal gates.",
+      "control_realization": "force_model",
+      "fidelity": "point_mass_3dof",
+      "files": [
+        {
+          "media_type": "application/json",
+          "path": "manifest.json",
+          "required": true,
+          "sha256": "0836965096a8b2341158c6384d9628cf5d50768ec01ae3b01efcd41e9bf6dfd8"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "README.md",
+          "required": true,
+          "sha256": "9c1c3a8026ed9b899920d8804b27b3d64729569c2007a6240c9710aa51fa3fca"
+        },
+        {
+          "media_type": "application/json",
+          "path": "candidate_execution.json",
+          "required": true,
+          "sha256": "bd2eaa952590d113fe530c8a51786890aaa7dfba91e4c76e39ec80ba282a4863"
+        },
+        {
+          "media_type": "application/json",
+          "path": "candidate_proposal.json",
+          "required": true,
+          "sha256": "8dd0740385de35eb9779c4c5f6b3c0c7ac95321f362f6caf8021b195d9ca74b9"
+        },
+        {
+          "media_type": "application/json",
+          "path": "claim.json",
+          "required": true,
+          "sha256": "7d19d1e9a472b5f4814e367adfe89eecb8fcce4226d305ed5879db334fe1a96f"
+        },
+        {
+          "media_type": "application/json",
+          "path": "controller_transitions.json",
+          "required": true,
+          "sha256": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc"
+        },
+        {
+          "media_type": "application/json",
+          "path": "envelope_report.json",
+          "required": true,
+          "sha256": "4084bf7d5be3c353545476a4294fefb9dfc78a511856107984a1eea11568a528"
+        },
+        {
+          "media_type": "application/json",
+          "path": "events.json",
+          "required": true,
+          "sha256": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/b747-racetrack-altitude-turns-3dof-v1-candidate.prb",
+          "required": true,
+          "sha256": "c3b2b868bbe0488ca220185d6b164bd12c55d3c1b89f91de0cd1b2ecca75f528"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/b747_jt9d_thrust.tbl",
+          "required": true,
+          "sha256": "555052738e548108fb39efba3df1617fb5d8ca3ff23cdd79c8261efe97d2c5d3"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/b747_nominal_static_6axis.tbl",
+          "required": true,
+          "sha256": "6e6590bce179b9aa62aab919a8fe149d733e0bb4732635738f5132e18c4a530e"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/family_qualification_missions.yaml",
+          "required": true,
+          "sha256": "1432deef5cb4aeb24fe1b1e6360fdf8dd4e0db2f37536f9966020c06aed3f3e4"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/racetrack_templates.yaml",
+          "required": true,
+          "sha256": "e0c6ab0f6918a6094ddc8c49c250a3ebf6708e7c387d741b262becf572b2d3c2"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "mission.yaml",
+          "required": true,
+          "sha256": "a57f8a894d42853e9457ec44559d3ddede092e26717a1491a0642208a49d56f7"
+        },
+        {
+          "media_type": "image/png",
+          "path": "mission_sequence.png",
+          "required": true,
+          "sha256": "26bed54189ce9d03c21c2a4e336f0e0f51d8928494c37a49ba344c9347f676ed"
+        },
+        {
+          "media_type": "application/json",
+          "path": "objective_report.json",
+          "required": true,
+          "sha256": "e32b89b911c6a972a29cfa65338ff8b0b49bdc8624355115952ca43690947c48"
+        },
+        {
+          "media_type": "application/json",
+          "path": "plots/plot-manifest.json",
+          "required": true,
+          "sha256": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa"
+        },
+        {
+          "media_type": "application/json",
+          "path": "preflight_timing_estimate.json",
+          "required": true,
+          "sha256": "da9e83e39d24ef5ea9eaf73be7bf423689f20b457c165349c005d0af5bddb42f"
+        },
+        {
+          "media_type": "application/json",
+          "path": "promotion_assessment.json",
+          "required": true,
+          "sha256": "a005792ee52162c3aa7b529dda4b75644aaea9532729270f04c92a0220528922"
+        },
+        {
+          "media_type": "image/png",
+          "path": "qualification_board.png",
+          "required": true,
+          "sha256": "bcd082aeb1617d9b137757d3e0cf546f501e45af2b966908c72fde3b5cd87f0b"
+        },
+        {
+          "media_type": "application/json",
+          "path": "realized_fidelity.json",
+          "required": true,
+          "sha256": "d1bdc9147840353075af46eedc230f361a655188a9a2a29bfedfae8f90c546e4"
+        },
+        {
+          "media_type": "text/plain",
+          "path": "reproduction.txt",
+          "required": true,
+          "sha256": "5ea08f9034418f0c533359ada088e25d45459eb0b3b996fefaa5faf25609d7a2"
+        },
+        {
+          "media_type": "application/json",
+          "path": "resolved_racetrack.json",
+          "required": true,
+          "sha256": "265be14df2f2a4901c69856c143061484733ecbebb6d4c639f3a7bf06fd0c70f"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "run/1.print",
+          "required": true,
+          "sha256": "648835a413a6e32920c7e0126baef52f67a4282c5d92bbf630a4849a65c284bd"
+        },
+        {
+          "media_type": "application/json",
+          "path": "runtime_diagnostics.json",
+          "required": true,
+          "sha256": "541cf9e6a3f7c7844552f7b2f8f1bf84211a7327c2615b90ff3f8330d4f18efa"
+        },
+        {
+          "media_type": "application/json",
+          "path": "summary.json",
+          "required": true,
+          "sha256": "1232e8c8866a6e3d922ed4a73887287284ee1d47ab4bee79fb889bcfa55d5b68"
+        },
+        {
+          "media_type": "text/csv",
+          "path": "truth_telemetry.csv",
+          "required": true,
+          "sha256": "f39e45e84282ccca22e5f8638fde9390c33ae0507960ecc56112c66af4fa1a10"
+        }
+      ],
+      "nonclaims": [
+        "rigid-body attitude or bank dynamics",
+        "physical elevator, aileron, or rudder allocation",
+        "source-validated transport flight-control law",
+        "fuel depletion or certified JT9D performance",
+        "takeoff, landing, wind robustness, or manufacturer fidelity",
+        "realization boundary: This is the first scaled realization of the shared powered-fixed-wing template. The point-mass adapter commands speed, heading, and flight-path angle from the racetrack tangent and bounded position/ altitude corrections; it does not create attitude or surface telemetry."
+      ],
+      "object_lineage": null,
+      "outcome": "completed",
+      "realization": {
+        "available_physics": [
+          "force_source=source_table",
+          "moment_source=not_applicable_point_mass_3dof",
+          "actuator_realization=kinematic_route_command_no_surface_claim",
+          "propulsion_model=source_table_thrust",
+          "resource_model=fixed_mass_zero_propellant"
+        ],
+        "claim": "The B747 public-research point-mass reduction resolves the same powered fixed-wing racetrack mission contract as the X8 at transport scale, with longer legs, larger turns, slower vertical changes, and independent truth-based altitude, speed, route, and terminal gates.",
+        "control_realization": "force_model",
+        "evidence_grade": "mixed",
+        "fidelity": "point_mass_3dof",
+        "nonclaims": [
+          "rigid-body attitude or bank dynamics",
+          "physical elevator, aileron, or rudder allocation",
+          "source-validated transport flight-control law",
+          "fuel depletion or certified JT9D performance",
+          "takeoff, landing, wind robustness, or manufacturer fidelity",
+          "realization boundary: This is the first scaled realization of the shared powered-fixed-wing template. The point-mass adapter commands speed, heading, and flight-path angle from the racetrack tangent and bounded position/ altitude corrections; it does not create attitude or surface telemetry."
+        ],
+        "physical_effectors": [],
+        "realization_id": "b747-racetrack-altitude-turns-3dof-v1-candidate.point_mass_3dof.v1",
+        "semantic_command_mapping": {
+          "route.altitude": "shared_racetrack.altitude_command",
+          "route.bank": "shared_racetrack.bank_command",
+          "route.heading": "shared_racetrack.heading_command",
+          "route.speed": "shared_racetrack.speed_command"
+        },
+        "state_schema": [
+          "north_m",
+          "east_m",
+          "altitude_m",
+          "speed_m_s",
+          "heading_deg"
+        ]
+      },
+      "run_id": "b747-racetrack-altitude-turns-3dof-v1-candidate-point_mass_3dof",
+      "scenario_contract_sha256": "0836965096a8b2341158c6384d9628cf5d50768ec01ae3b01efcd41e9bf6dfd8",
+      "schema_version": "taoryx.showcase/v1alpha1",
+      "showcase_id": "org.taoryx.showcase.b747-racetrack-altitude-turns-3dof-v1-candidate",
+      "vehicle_binding_id": "b747.qualification-v1"
+    }
+  ],
+  "schema_version": 1,
+  "summary": "summary.json",
+  "truth_telemetry": "truth_telemetry.csv"
+}

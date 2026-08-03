@@ -92,6 +92,28 @@ class Quaternion:
             self.z + 0.5 * step_size * derivative.z,
         ).normalized()
         ####
+
+    def to_euler_321(self) -> Vector3:
+        """Return roll, pitch, and yaw for the matching 3-2-1 convention.
+
+        The result is a kinematic attitude observation.  It is useful for
+        exposing the response-law state, but does not make the sidecar a
+        moment-derived rigid-body state.
+        """
+
+        attitude = self.normalized()
+        roll = math.atan2(
+            2.0 * (attitude.w * attitude.x + attitude.y * attitude.z),
+            1.0 - 2.0 * (attitude.x * attitude.x + attitude.y * attitude.y),
+        )
+        pitch_argument = max(-1.0, min(1.0, 2.0 * (attitude.w * attitude.y - attitude.z * attitude.x)))
+        pitch = math.asin(pitch_argument)
+        yaw = math.atan2(
+            2.0 * (attitude.w * attitude.z + attitude.x * attitude.y),
+            1.0 - 2.0 * (attitude.y * attitude.y + attitude.z * attitude.z),
+        )
+        return Vector3(roll, pitch, yaw)
+        ####
 ####
 
 

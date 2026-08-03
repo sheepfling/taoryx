@@ -38,6 +38,23 @@
       "upper": 1.0
     }
   },
+  "authority_preflight": {
+    "blockers": [],
+    "metrics": {
+      "control_dimension": 2.0,
+      "controllability_condition_number": 2.3214285714290552,
+      "controllability_rank": 4.0,
+      "required_controllability_rank": 4.0,
+      "required_state_count": 4.0,
+      "state_dimension": 4.0,
+      "uncontrolled_fraction.p_rad_s": 0.0,
+      "uncontrolled_fraction.pitch_error_rad": 3.340024337211779e-60,
+      "uncontrolled_fraction.q_rad_s": 3.340024337211779e-60,
+      "uncontrolled_fraction.roll_error_rad": 9.406487949466571e-71
+    },
+    "reason": "x8-roll-pitch-source-coordinate-authority found every declared required state controllable before gain synthesis",
+    "status": "passed"
+  },
   "claim": {
     "direct_body_moment_injection": false,
     "earned_controller_evidence_tier": "T4_physically_allocated_source_coordinate",

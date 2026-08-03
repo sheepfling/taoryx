@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -91,6 +92,7 @@ def _integrate_vehicle(vehicle: RuntimeVehicle, step: float) -> None:
         def model(simulation_state: SimulationState) -> tuple[float, ...]:
             staged = start.with_values(simulation_state.values, time=simulation_state.time)
             staged = _refresh_runtime_state(vehicle, staged, publish_rates=False)
+            vehicle.record_load_evaluation(staged.time, "solver_stage_rhs")
             if point_mass_derivative is not None:
                 return point_mass_derivative(staged.to_point_mass_state()).to_values()
             return tuple(float(value) for value in cast(Derivative, derivative)(staged))
@@ -152,16 +154,39 @@ def _integrate_vehicle(vehicle: RuntimeVehicle, step: float) -> None:
                 step,
             )
         attitude = vehicle.kinematic_state.attitude
+        attitude_euler = attitude.to_euler_321()
+        target_attitude = (
+            vehicle.kinematic_attitude_target_provider(candidate)
+            if vehicle.kinematic_attitude_target_provider is not None
+            else None
+        )
+        kinematic_named = {
+            "qw": attitude.w,
+            "qx": attitude.x,
+            "qy": attitude.y,
+            "qz": attitude.z,
+            "kinematic_roll_deg": math.degrees(attitude_euler.x),
+            "kinematic_pitch_deg": math.degrees(attitude_euler.y),
+            "kinematic_yaw_deg": math.degrees(attitude_euler.z),
+            "kinematic_body_rate_p_rad_s": body_rate.x,
+            "kinematic_body_rate_q_rad_s": body_rate.y,
+            "kinematic_body_rate_r_rad_s": body_rate.z,
+        }
+        if target_attitude is not None:
+            kinematic_named.update(
+                {
+                    "kinematic_roll_command_deg": math.degrees(target_attitude.x),
+                    "kinematic_pitch_command_deg": math.degrees(target_attitude.y),
+                    "kinematic_yaw_command_deg": math.degrees(target_attitude.z),
+                }
+            )
         candidate = RuntimeState(
             candidate.time,
             candidate.values,
             candidate.frame,
             {
                 **candidate.named,
-                "qw": attitude.w,
-                "qx": attitude.x,
-                "qy": attitude.y,
-                "qz": attitude.z,
+                **kinematic_named,
             },
             candidate.value_names,
             candidate.segment_endpoints,
@@ -568,6 +593,10 @@ def _refresh_runtime_state(vehicle: RuntimeVehicle, state: RuntimeState, *, publ
         environment_values = named
         if not publish_rates:
             environment_values = {**named, "_runtime_derivative_stage": 1.0}
+        vehicle.record_load_evaluation(
+            state.time,
+            "committed_truth_environment" if publish_rates else "solver_stage_environment",
+        )
         named.update(vehicle.environment_evaluator(environment_values))
     if vehicle.derived_definitions:
         named = evaluate_definition_program(
@@ -583,6 +612,7 @@ def _refresh_runtime_state(vehicle: RuntimeVehicle, state: RuntimeState, *, publ
     refreshed = RuntimeState(state.time, state.values, state.frame, named, state.value_names, state.segment_endpoints)
     if publish_rates and vehicle.publish_derived_rates and vehicle.derivative is not None:
         try:
+            vehicle.record_load_evaluation(state.time, "committed_truth_rhs")
             rates = tuple(float(value) for value in vehicle.derivative(refreshed))
         except (KeyError, TypeError, ValueError, ZeroDivisionError):
             rates = ()

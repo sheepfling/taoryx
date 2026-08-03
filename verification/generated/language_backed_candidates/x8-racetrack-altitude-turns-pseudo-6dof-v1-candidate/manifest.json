@@ -1,0 +1,293 @@
+{
+  "claim_boundary": "independent truth-evaluated family qualification; integration baselines remain nonqualified",
+  "fidelity_tier": "pseudo_6dof",
+  "files": {
+    "README.md": "8d2014f749209cef082f12dcbf504d9aafc207158c70aef4f0d37a7af8fec926",
+    "candidate_execution.json": "f0d626ee72c6a3bdd1254b5888d2de90b807185d3a5de302ca68a6f09813aacf",
+    "candidate_proposal.json": "3fc2c71f7e8ac03dd249672e1f7794d4914cf2cb80009e823513467a84731c1e",
+    "claim.json": "789a3c7389a3a26f7ada82529de88610a3c7aae0d48ffed5aa83523211a12f7a",
+    "controller_transitions.json": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc",
+    "envelope_report.json": "12ac7202f5e087b37b733b3d9454b8451e6ba976f79083c4d46c49eacac4bd13",
+    "events.json": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c",
+    "inputs/family_qualification_missions.yaml": "5b8acbad4cd6bbc48f49fa6a35b0f1f7006cbaed3b33e1f9d066f36bfd452f59",
+    "inputs/racetrack_templates.yaml": "31d6cd2cd06bd4aae57666a37f7eb254658a95d10eb404d68d6a2d9f3629ec88",
+    "inputs/skywalker_x8_collective_elevon_6axis.tbl": "b3c5c31a8ae134a48974afcff51200bc9235f23550173053baad79e93693adc4",
+    "inputs/skywalker_x8_differential_elevon_6axis.tbl": "e0f0122dac5ae341b35bdff075269d28bf1ca480be16bab01caa1b0a336cbc25",
+    "inputs/skywalker_x8_static_6axis.tbl": "434d6d373147381b5af63a8aef5780b49624a3f4533a7f7d995f450942bf727e",
+    "inputs/skywalker_x8_thrust.tbl": "9b05bb9eb2a70a14ec8edb3446fa631040ccff5abcacc2ba9f0780b7711fdca8",
+    "inputs/x8-racetrack-altitude-turns-pseudo-6dof-v1-candidate.prb": "360bc7dc9f1929a85e5019b36cd8146999e79fe5db7c147f74316e283b7b6363",
+    "mission.yaml": "c2ee9d6563359c55131742089dcae699301d6dc141a5971e8975a24b02da6c76",
+    "mission_sequence.png": "3fb5800d70a4b2d513f9d55d76160d77e895e1e6a72701f6981d409148ed9f68",
+    "objective_report.json": "1cb0716464b527e002946d2b34a88efd2c830920288b6889ccde563d0bf52a73",
+    "plots/plot-manifest.json": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa",
+    "preflight_timing_estimate.json": "679ff21bf6be5e0f4ea1859876c2a8f4b269e666b599fbf334c6f218e23e423b",
+    "qualification_board.png": "050d0664bc577dcb4ce5387aa414e04b9c14088a59cc759e50185ce181847565",
+    "realized_fidelity.json": "636fe7a6696a18d9624d86c1f9b9a1d57334a3b90b17f7602ede44de72ede916",
+    "reproduction.txt": "9de3a2e859be7b4f39481ec663b6671e057f2e6f8f91f2d5202456fb45ce06cd",
+    "resolved_racetrack.json": "567435fae85493fbec8e8f716548584551654aabb3707495c793104f78c1dd6a",
+    "run/1.print": "707f7f63b2f9e19de68997cac9f8449a359e2ec1545b05e9118e338dd2ce9c9d",
+    "runtime_diagnostics.json": "541cf9e6a3f7c7844552f7b2f8f1bf84211a7327c2615b90ff3f8330d4f18efa",
+    "summary.json": "2e0cc77cea2d4719ed09b8aa1a210da27a65b9fa4a019d66d95ea34d91f5a0bf",
+    "truth_telemetry.csv": "86a79401251a5815fc5b1b73c7db1c510f36889dddeb2b2bf161f52bc80f6df9"
+  },
+  "mission_id": "x8-racetrack-altitude-turns-pseudo-6dof-v1-candidate",
+  "realization": {
+    "actuator_realization": "prescribed_attitude_lag_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_kinematic_bridge",
+    "note": "Translation is the same force-integrated point-mass realization used by the 3DOF packet. Quaternion and body-rate channels are supplied by the declared kinematic attitude bridge; they are not moment-derived.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant",
+    "response_law": "first-order-rate-limited-v1",
+    "response_profile_id": "skywalker_x8.attitude_response_p6dof.v1"
+  },
+  "run_artifacts": [
+    {
+      "archetypes": [
+        "mission_geometry",
+        "mission_timeline",
+        "dynamics_and_resources",
+        "envelope_and_qualification"
+      ],
+      "board": {
+        "event_marker_policy": "family_local",
+        "missing_channel_policy": "unavailable",
+        "modules": [
+          "mission_geometry",
+          "mission_timeline",
+          "dynamics_and_resources",
+          "envelope_and_qualification"
+        ],
+        "profile": "family-evidence-board-v1",
+        "units_required": true
+      },
+      "claim": "The source-table X8 kinematic 3-plus-3 bridge completes the shared translational racetrack while exposing a bounded prescribed-attitude response sidecar.",
+      "control_realization": "response_law",
+      "fidelity": "pseudo_6dof",
+      "files": [
+        {
+          "media_type": "application/json",
+          "path": "manifest.json",
+          "required": true,
+          "sha256": "5deec64ea3c9e763c34a43a9ba219a8631ff134929c63a8664a45eca79dd8a5e"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "README.md",
+          "required": true,
+          "sha256": "8d2014f749209cef082f12dcbf504d9aafc207158c70aef4f0d37a7af8fec926"
+        },
+        {
+          "media_type": "application/json",
+          "path": "candidate_execution.json",
+          "required": true,
+          "sha256": "f0d626ee72c6a3bdd1254b5888d2de90b807185d3a5de302ca68a6f09813aacf"
+        },
+        {
+          "media_type": "application/json",
+          "path": "candidate_proposal.json",
+          "required": true,
+          "sha256": "3fc2c71f7e8ac03dd249672e1f7794d4914cf2cb80009e823513467a84731c1e"
+        },
+        {
+          "media_type": "application/json",
+          "path": "claim.json",
+          "required": true,
+          "sha256": "789a3c7389a3a26f7ada82529de88610a3c7aae0d48ffed5aa83523211a12f7a"
+        },
+        {
+          "media_type": "application/json",
+          "path": "controller_transitions.json",
+          "required": true,
+          "sha256": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc"
+        },
+        {
+          "media_type": "application/json",
+          "path": "envelope_report.json",
+          "required": true,
+          "sha256": "12ac7202f5e087b37b733b3d9454b8451e6ba976f79083c4d46c49eacac4bd13"
+        },
+        {
+          "media_type": "application/json",
+          "path": "events.json",
+          "required": true,
+          "sha256": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/family_qualification_missions.yaml",
+          "required": true,
+          "sha256": "5b8acbad4cd6bbc48f49fa6a35b0f1f7006cbaed3b33e1f9d066f36bfd452f59"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/racetrack_templates.yaml",
+          "required": true,
+          "sha256": "31d6cd2cd06bd4aae57666a37f7eb254658a95d10eb404d68d6a2d9f3629ec88"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/skywalker_x8_collective_elevon_6axis.tbl",
+          "required": true,
+          "sha256": "b3c5c31a8ae134a48974afcff51200bc9235f23550173053baad79e93693adc4"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/skywalker_x8_differential_elevon_6axis.tbl",
+          "required": true,
+          "sha256": "e0f0122dac5ae341b35bdff075269d28bf1ca480be16bab01caa1b0a336cbc25"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/skywalker_x8_static_6axis.tbl",
+          "required": true,
+          "sha256": "434d6d373147381b5af63a8aef5780b49624a3f4533a7f7d995f450942bf727e"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/skywalker_x8_thrust.tbl",
+          "required": true,
+          "sha256": "9b05bb9eb2a70a14ec8edb3446fa631040ccff5abcacc2ba9f0780b7711fdca8"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "inputs/x8-racetrack-altitude-turns-pseudo-6dof-v1-candidate.prb",
+          "required": true,
+          "sha256": "360bc7dc9f1929a85e5019b36cd8146999e79fe5db7c147f74316e283b7b6363"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "mission.yaml",
+          "required": true,
+          "sha256": "c2ee9d6563359c55131742089dcae699301d6dc141a5971e8975a24b02da6c76"
+        },
+        {
+          "media_type": "image/png",
+          "path": "mission_sequence.png",
+          "required": true,
+          "sha256": "3fb5800d70a4b2d513f9d55d76160d77e895e1e6a72701f6981d409148ed9f68"
+        },
+        {
+          "media_type": "application/json",
+          "path": "objective_report.json",
+          "required": true,
+          "sha256": "1cb0716464b527e002946d2b34a88efd2c830920288b6889ccde563d0bf52a73"
+        },
+        {
+          "media_type": "application/json",
+          "path": "plots/plot-manifest.json",
+          "required": true,
+          "sha256": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa"
+        },
+        {
+          "media_type": "application/json",
+          "path": "preflight_timing_estimate.json",
+          "required": true,
+          "sha256": "679ff21bf6be5e0f4ea1859876c2a8f4b269e666b599fbf334c6f218e23e423b"
+        },
+        {
+          "media_type": "image/png",
+          "path": "qualification_board.png",
+          "required": true,
+          "sha256": "050d0664bc577dcb4ce5387aa414e04b9c14088a59cc759e50185ce181847565"
+        },
+        {
+          "media_type": "application/json",
+          "path": "realized_fidelity.json",
+          "required": true,
+          "sha256": "636fe7a6696a18d9624d86c1f9b9a1d57334a3b90b17f7602ede44de72ede916"
+        },
+        {
+          "media_type": "text/plain",
+          "path": "reproduction.txt",
+          "required": true,
+          "sha256": "9de3a2e859be7b4f39481ec663b6671e057f2e6f8f91f2d5202456fb45ce06cd"
+        },
+        {
+          "media_type": "application/json",
+          "path": "resolved_racetrack.json",
+          "required": true,
+          "sha256": "567435fae85493fbec8e8f716548584551654aabb3707495c793104f78c1dd6a"
+        },
+        {
+          "media_type": "application/octet-stream",
+          "path": "run/1.print",
+          "required": true,
+          "sha256": "707f7f63b2f9e19de68997cac9f8449a359e2ec1545b05e9118e338dd2ce9c9d"
+        },
+        {
+          "media_type": "application/json",
+          "path": "runtime_diagnostics.json",
+          "required": true,
+          "sha256": "541cf9e6a3f7c7844552f7b2f8f1bf84211a7327c2615b90ff3f8330d4f18efa"
+        },
+        {
+          "media_type": "application/json",
+          "path": "summary.json",
+          "required": true,
+          "sha256": "2e0cc77cea2d4719ed09b8aa1a210da27a65b9fa4a019d66d95ea34d91f5a0bf"
+        },
+        {
+          "media_type": "text/csv",
+          "path": "truth_telemetry.csv",
+          "required": true,
+          "sha256": "86a79401251a5815fc5b1b73c7db1c510f36889dddeb2b2bf161f52bc80f6df9"
+        }
+      ],
+      "nonclaims": [
+        "physical moment balance or elevon allocation",
+        "route bank authority from aerodynamic surfaces",
+        "flight-test or manufacturer fidelity",
+        "wind robustness, takeoff, or landing",
+        "realization boundary: Translation is the same force-integrated point-mass realization used by the 3DOF packet. Quaternion and body-rate channels are supplied by the declared kinematic attitude bridge; they are not moment-derived."
+      ],
+      "object_lineage": null,
+      "outcome": "completed",
+      "realization": {
+        "available_physics": [
+          "force_source=source_table",
+          "moment_source=not_applicable_kinematic_bridge",
+          "actuator_realization=prescribed_attitude_lag_no_surface_claim",
+          "response_profile_id=skywalker_x8.attitude_response_p6dof.v1",
+          "response_law=first-order-rate-limited-v1",
+          "propulsion_model=source_table_thrust",
+          "resource_model=fixed_mass_zero_propellant"
+        ],
+        "claim": "The source-table X8 kinematic 3-plus-3 bridge completes the shared translational racetrack while exposing a bounded prescribed-attitude response sidecar.",
+        "control_realization": "response_law",
+        "evidence_grade": "mixed",
+        "fidelity": "pseudo_6dof",
+        "nonclaims": [
+          "physical moment balance or elevon allocation",
+          "route bank authority from aerodynamic surfaces",
+          "flight-test or manufacturer fidelity",
+          "wind robustness, takeoff, or landing",
+          "realization boundary: Translation is the same force-integrated point-mass realization used by the 3DOF packet. Quaternion and body-rate channels are supplied by the declared kinematic attitude bridge; they are not moment-derived."
+        ],
+        "physical_effectors": [],
+        "realization_id": "x8-racetrack-altitude-turns-pseudo-6dof-v1-candidate.pseudo_6dof.v1",
+        "semantic_command_mapping": {
+          "route.altitude": "shared_racetrack.altitude_command",
+          "route.bank": "shared_racetrack.bank_command",
+          "route.heading": "shared_racetrack.heading_command",
+          "route.speed": "shared_racetrack.speed_command"
+        },
+        "state_schema": [
+          "north_m",
+          "east_m",
+          "altitude_m",
+          "speed_m_s",
+          "heading_deg"
+        ]
+      },
+      "run_id": "x8-racetrack-altitude-turns-pseudo-6dof-v1-candidate-pseudo_6dof",
+      "scenario_contract_sha256": "5deec64ea3c9e763c34a43a9ba219a8631ff134929c63a8664a45eca79dd8a5e",
+      "schema_version": "taoryx.showcase/v1alpha1",
+      "showcase_id": "org.taoryx.showcase.x8-racetrack-altitude-turns-pseudo-6dof-v1-candidate",
+      "vehicle_binding_id": "skywalker_x8.qualification-v1"
+    }
+  ],
+  "schema_version": 1,
+  "summary": "summary.json",
+  "truth_telemetry": "truth_telemetry.csv"
+}

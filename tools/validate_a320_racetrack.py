@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from taoryx.mission_objectives import TruthObjectiveSpec, evaluate_truth_objectives  # noqa: E402
-from taoryx.racetrack_template import ResolvedRacetrack, load_racetrack_template_catalog  # noqa: E402
+from taoryx.racetrack_template import RacetrackFidelity, ResolvedRacetrack, load_racetrack_template_catalog  # noqa: E402
 from taoryx.trajectory import (  # noqa: E402
     A320OpenAPModel,
     A320OpenAPOperatingPoint,
@@ -76,14 +76,24 @@ def _finite_rows(rows: list[dict[str, float | int | str]]) -> bool:
     ####
 
 
+def _expected_fidelity(mode: A320RacetrackMode) -> RacetrackFidelity:
+    """Return the fidelity contract required by an A320 reduction mode."""
+
+    return mode
+    ####
+
+
 def _build_run(
     mode: A320RacetrackMode,
     dt_s: float,
     operating_point: A320OpenAPOperatingPoint | None = None,
+    *,
+    route_override: ResolvedRacetrack | None = None,
 ) -> tuple[ResolvedRacetrack, A320RacetrackRun, dict[str, Any]]:
-    catalog = load_racetrack_template_catalog(CATALOG)
     binding_id = "a320-openap-3dof" if mode == "point_mass_3dof" else "a320-openap-pseudo6dof"
-    route = catalog.get(binding_id)
+    route = route_override or load_racetrack_template_catalog(CATALOG).get(binding_id)
+    if route.fidelity != _expected_fidelity(mode):
+        raise ValueError(f"mode {mode!r} requires {_expected_fidelity(mode)!r}, not {route.fidelity!r}")
     operating_point = operating_point or A320OpenAPOperatingPoint(10500.0, 0.78, 60000.0)
     model: A320OpenAPModel | A320Pseudo6DOFModel
     if mode == "point_mass_3dof":
@@ -97,7 +107,7 @@ def _build_run(
         _, response_profile = load_pseudo6dof_catalog(ROOT / "verification/pseudo6dof_profiles.yaml").for_family("a320_openap_3dof")
     result = A320RacetrackRunner(model, trim, route, mode, dt_s=dt_s, response_profile=response_profile).run()
     return route, result, {
-        "binding_id": binding_id,
+        "binding_id": route.binding_id,
         "trim": trim.as_dict(),
         "model_provenance": model.provenance,
     }
@@ -108,10 +118,18 @@ def run_case(
     mode: A320RacetrackMode,
     dt_s: float,
     operating_point: A320OpenAPOperatingPoint | None = None,
+    *,
+    route_override: ResolvedRacetrack | None = None,
+    mission_proposal_fingerprint: str | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, float | int | str]]]:
-    """Execute one A320 lane and evaluate it only from truth telemetry."""
+    """Execute one A320 lane and evaluate it only from truth telemetry.
 
-    route, result, metadata = _build_run(mode, dt_s, operating_point)
+    A candidate route is execution-only: it never edits the baseline catalog.
+    The optional fingerprint makes the resulting evidence ineligible for
+    promotion if its compiled geometry is later changed.
+    """
+
+    route, result, metadata = _build_run(mode, dt_s, operating_point, route_override=route_override)
     rows = [dict(row) for row in result.rows]
     hard_gates_passed = result.numerical_valid and _finite_rows(rows)
     evaluation = evaluate_truth_objectives(_objective_specs(route), rows, hard_gates_passed=hard_gates_passed)
@@ -169,6 +187,8 @@ def run_case(
             "full rigid-body 6DOF equivalence",
         ],
     }
+    if mission_proposal_fingerprint is not None:
+        packet["mission_proposal_fingerprint"] = mission_proposal_fingerprint
     return packet, rows
     ####
 
@@ -260,15 +280,54 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--mode", choices=("all", "point_mass_3dof", "pseudo_6dof_kinematic_bridge"), default="all")
     parser.add_argument("--dt-s", type=float, default=0.2)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "verification/a320_racetrack")
+    parser.add_argument(
+        "--candidate-profile",
+        help=(
+            "Compile and execute this named capability-scaled profile without changing the baseline catalog. "
+            "Only the A320 profile is accepted by this runner."
+        ),
+    )
     args = parser.parse_args(argv)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     modes: tuple[A320RacetrackMode, ...] = ("point_mass_3dof", "pseudo_6dof_kinematic_bridge") if args.mode == "all" else (cast(A320RacetrackMode, args.mode),)
     packets: list[dict[str, Any]] = []
     all_passed = True
     for mode in modes:
-        packet, rows = run_case(mode, args.dt_s)
+        route_override = None
+        proposal_fingerprint = None
+        stem: str = mode
+        if args.candidate_profile is not None:
+            from taoryx.mission_promotion import mission_proposal_fingerprint
+            from taoryx.powered_fixed_wing_mission_compiler import (
+                compile_powered_fixed_wing_racetrack,
+                load_powered_fixed_wing_mission_profiles,
+            )
+
+            profiles = load_powered_fixed_wing_mission_profiles(ROOT / "verification/powered_fixed_wing_mission_profiles.yaml")
+            if args.candidate_profile not in profiles:
+                parser.error(f"unknown candidate profile: {args.candidate_profile}")
+            capability, intent = profiles[args.candidate_profile]
+            if capability.vehicle_id != "a320_openap_3dof":
+                parser.error(
+                    f"candidate profile {args.candidate_profile!r} belongs to {capability.vehicle_id!r}; "
+                    "this runner only executes a320_openap_3dof"
+                )
+            proposal = compile_powered_fixed_wing_racetrack(
+                capability,
+                intent,
+                binding_id=f"{args.candidate_profile}-{mode}-candidate",
+                fidelity=_expected_fidelity(mode),
+            )
+            route_override = proposal.route
+            proposal_fingerprint = mission_proposal_fingerprint(proposal)
+            stem = f"{mode}_{args.candidate_profile}_candidate"
+        packet, rows = run_case(
+            mode,
+            args.dt_s,
+            route_override=route_override,
+            mission_proposal_fingerprint=proposal_fingerprint,
+        )
         all_passed = all_passed and bool(packet["evaluation"]["mission_pass"])
-        stem = mode
         (args.output_dir / f"{stem}_evidence.json").write_text(json.dumps(packet, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         _write_csv(args.output_dir / f"{stem}_telemetry.csv", rows)
         _render_board(args.output_dir / f"{stem}_board.png", rows, packet)

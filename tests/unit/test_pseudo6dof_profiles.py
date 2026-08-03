@@ -21,6 +21,7 @@ def test_alpha3_catalog_covers_all_target_families() -> None:
 
     assert len(catalog.bindings) == 9
     assert len(catalog.direct_wrench_profiles) == 8
+    assert len(catalog.surface_allocation_profiles) == 8
     assert {item.family_id for item in catalog.bindings} == {
         "skywalker_x8",
         "b747",
@@ -33,8 +34,9 @@ def test_alpha3_catalog_covers_all_target_families() -> None:
         "tumbling_body",
     }
     assert all(profile.unsupported_claims for profile in catalog.profiles)
-    assert {profile.control_realization for profile in catalog.profiles} == {"response_law", "rigid_body_6dof"}
+    assert {profile.control_realization for profile in catalog.profiles} == {"response_law", "uncontrolled"}
     assert {profile.family_id for profile in catalog.direct_wrench_profiles} >= {"hummingbird", "hl20_mod_k", "x15"}
+    assert {profile.family_id for profile in catalog.surface_allocation_profiles} >= {"skywalker_x8", "b747", "hummingbird", "hl20_mod_k"}
     ####
 
 
@@ -133,8 +135,25 @@ def test_passive_rigid_reuse_is_nominal_but_not_a_controller_fallback() -> None:
 
     assert profile.status == "nominal_case_pass"
     assert profile.model_kind == "rigid_body_reuse"
-    assert profile.control_realization == "rigid_body_6dof"
+    assert profile.control_realization == "uncontrolled"
     assert binding.automatic_lowering is False
+    ####
+
+
+def test_canonical_lowering_never_emits_ambiguous_legacy_rigid_step() -> None:
+    """Canonical four-tier requests must remain canonical at passive boundaries."""
+
+    catalog = load_pseudo6dof_catalog(ROOT / "verification/pseudo6dof_profiles.yaml")
+    report = build_automatic_lowering_report(
+        "tumbling_body",
+        "rigid_body_6dof_surface_allocated",
+        {"tumbling_body.average_area_3dof.v1": {"status": "equivalence_passed"}},
+        catalog=catalog,
+    )
+
+    assert report.selected is None
+    assert all(step.fidelity != "rigid_body_6dof" for step in report.steps)
+    assert report.steps[0].fidelity == "rigid_body_6dof_surface_allocated"
     ####
 
 
@@ -144,7 +163,10 @@ def test_automatic_lowering_accepts_scoped_x15_event_energy_policy() -> None:
     report = build_automatic_lowering_report(
         "x15",
         "rigid_body_6dof",
-        {"x15.point_mass_3dof.v1": {"status": "equivalence_passed"}},
+        {
+            "x15.point_mass_3dof.v1": {"status": "equivalence_passed"},
+            "x15.attitude_response_p6dof.v1": {"status": "nominal_case_pass"},
+        },
     )
 
     assert report.accepted
@@ -159,7 +181,10 @@ def test_automatic_lowering_accepts_scoped_hummingbird_nominal_policy() -> None:
     report = build_automatic_lowering_report(
         "hummingbird",
         "rigid_body_6dof",
-        {"hummingbird.point_mass_3dof.v1": {"status": "equivalence_passed"}},
+        {
+            "hummingbird.point_mass_3dof.v1": {"status": "equivalence_passed"},
+            "hummingbird.attitude_response_p6dof.v1": {"status": "nominal_case_pass"},
+        },
     )
 
     assert report.accepted
@@ -183,6 +208,62 @@ def test_direct_wrench_is_an_explicit_bridge_before_pseudo_lowering() -> None:
         assert report.accepted
         assert report.selected == "rigid_body_6dof_direct_wrench"
         assert report.steps[-1].profile_id == profile.id
+    ####
+
+
+def test_surface_allocation_is_selectable_only_with_explicit_surface_evidence() -> None:
+    """The highest tier requires its own checked evidence and its direct parent."""
+
+    catalog = load_pseudo6dof_catalog(ROOT / "verification/pseudo6dof_profiles.yaml")
+    binding, surface = catalog.for_family_surface_allocated("skywalker_x8")
+    evidence = {
+        surface.id: {"status": "nominal_case_pass"},
+        "skywalker_x8.direct_wrench_6dof.v1": {"status": "nominal_case_pass"},
+        "skywalker_x8.point_mass_3dof.v1": {"status": "nominal_case_pass"},
+    }
+    report = build_automatic_lowering_report(
+        "skywalker_x8",
+        "rigid_body_6dof_surface_allocated",
+        evidence,
+        catalog=catalog,
+    )
+    assert binding.surface_allocation_profile_id == surface.id
+    assert report.selected == "rigid_body_6dof_surface_allocated"
+    assert report.steps[0].status == "eligible"
+    ####
+
+
+def test_lowering_combines_manifest_operations_with_profile_evidence() -> None:
+    """A qualified profile still lowers when its adapter operation is absent."""
+
+    catalog = load_pseudo6dof_catalog(ROOT / "verification/pseudo6dof_profiles.yaml")
+    evidence = {
+        "skywalker_x8.surface_allocated_6dof.v1": {"status": "nominal_case_pass"},
+        "skywalker_x8.direct_wrench_6dof.v1": {"status": "nominal_case_pass"},
+        "skywalker_x8.attitude_response_p6dof.v1": {"status": "nominal_case_pass"},
+        "skywalker_x8.point_mass_3dof.v1": {"status": "nominal_case_pass"},
+    }
+    report = build_automatic_lowering_report(
+        "skywalker_x8",
+        "rigid_body_6dof_surface_allocated",
+        evidence,
+        catalog=catalog,
+        required_operations={
+            "rigid_body_6dof_surface_allocated": ("trim", "effectiveness", "allocate"),
+        },
+        operation_status={
+            "rigid_body_6dof_surface_allocated": {
+                "trim": "not_available",
+                "effectiveness": "available",
+                "allocate": "available",
+            },
+        },
+    )
+
+    assert report.selected == "rigid_body_6dof_direct_wrench"
+    surface_step = report.steps[0]
+    assert surface_step.required_operations == ("trim", "effectiveness", "allocate")
+    assert surface_step.missing_operations == ("trim",)
     ####
 
 
@@ -286,7 +367,7 @@ def test_checked_nominal_evidence_authorizes_all_current_nominal_lowering() -> N
 def test_rigid_body_reuse_requires_explicit_rigid_realization() -> None:
     """Native reuse cannot be mislabeled as a kinematic response law."""
 
-    with pytest.raises(ValueError, match="rigid_body_6dof realization"):
+    with pytest.raises(ValueError, match="uncontrolled realization"):
         Pseudo6DOFProfile(
             id="invalid",
             family_id="tumbling_body",

@@ -9,9 +9,16 @@ import math
 from html import escape
 from pathlib import Path
 
+from taoryx.composition_policy import replay_composition_policy_trace_file
+from taoryx.hummingbird_composition_execution import execute_hummingbird_pseudo_composition
 from taoryx.integration import available_integrator_descriptions, available_integrators
 from taoryx.language.grammar_contracts import GrammarProfile
+from taoryx.language_backed_execution import execute_powered_fixed_wing_composition
+from taoryx.language_backed_racetrack import materialize_powered_fixed_wing_composition
+from taoryx.local_direct_wrench_composition_execution import execute_local_direct_wrench_composition
+from taoryx.nesc_composition_execution import execute_nesc_source_replay_composition
 from taoryx.outputs import RunArtifact
+from taoryx.passive_tumbling_composition_execution import execute_passive_tumbling_composition
 from taoryx.reachability_catalog import ReachabilityCatalog, load_reachability_catalog
 from taoryx.reachability_envelope import (
     ReachabilityFidelity,
@@ -22,6 +29,7 @@ from taoryx.reachability_envelope import (
     run_reachability_envelope,
 )
 from taoryx.reachability_visualization import load_reachability_artifact, render_reachability_plot_bundle
+from taoryx.reduced_fixed_wing_execution import execute_reduced_fixed_wing_composition
 from taoryx.scenario import ScenarioCompileError, ScenarioCompiler
 from taoryx.table_explorer import InterpolationExplanation, TableInspection, explain_interpolation, inspect_table_file
 from taoryx.trajectory import (
@@ -39,9 +47,22 @@ from taoryx.trajectory import (
     resolve_case,
 )
 from taoryx.trajectory.resolution import ResolutionError
+from taoryx.vehicle_composition import (
+    VehicleCompositionError,
+    compile_vehicle_composition,
+    load_compiled_vehicle_composition,
+    load_vehicle_composition_request,
+    resolve_vehicle_composition_interface_contract,
+)
+from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
+from taoryx.vehicle_execution_bindings import resolve_vehicle_execution_binding
+from taoryx.vehicle_execution_preflight import preflight_vehicle_composition
+from taoryx.vehicle_interface import build_vehicle_interface_catalog_report, resolve_vehicle_interface_contract, validate_vehicle_interface_contract
+from taoryx.vehicle_runtime_lowering import lower_vehicle_composition
 from taoryx.visualization import render_run_artifact_html, render_run_artifact_plots
 from taoryx.x15_native_replay import write_x15_native_boundary_replay
 from taoryx.x15_reachability import write_x15_reachability_bundle
+from taoryx.x15_staged_composition_execution import execute_x15_staged_reachability_composition
 
 from .optimization_runtime import available_optimizers
 from .runner import run_files
@@ -203,6 +224,78 @@ def main(argv: list[str] | None = None) -> int:
     family_schema.add_argument("family_id")
     family_schema.add_argument("--exposure", choices=("common",), default="common")
     family_schema.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
+    vehicle = subparsers.add_parser("vehicle", help="inspect the unified vehicle-to-trajectory composition registry")
+    vehicle_subparsers = vehicle.add_subparsers(dest="vehicle_command", required=True)
+    vehicle_subparsers.add_parser("list", help="list registered vehicles, families, tiers, and mission templates")
+    vehicle_subparsers.add_parser(
+        "interface-report",
+        help="validate every registered vehicle/fidelity interface against its execution bindings",
+    )
+    vehicle_inspect = vehicle_subparsers.add_parser("inspect", help="show one vehicle's composition contract")
+    vehicle_inspect.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_schema = vehicle_subparsers.add_parser("schema", help="export one vehicle composition schema section")
+    vehicle_schema.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_schema.add_argument("kind", choices=("initialization", "segments", "missions"))
+    vehicle_endpoints = vehicle_subparsers.add_parser(
+        "endpoints",
+        help="list the exact batch and interactive factories declared for one vehicle family",
+    )
+    vehicle_endpoints.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_interface = vehicle_subparsers.add_parser(
+        "interface",
+        help="resolve the versioned parameter, action, status, resource, and observation contract for one fidelity",
+    )
+    vehicle_interface.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_interface.add_argument(
+        "fidelity",
+        choices=(
+            "point_mass_3dof",
+            "pseudo_6dof",
+            "rigid_body_6dof_direct_wrench",
+            "rigid_body_6dof_surface_allocated",
+        ),
+    )
+    vehicle_composition_interface = vehicle_subparsers.add_parser(
+        "interface-composition",
+        help="resolve the exact fingerprinted interface selected by a compiled composition",
+    )
+    vehicle_composition_interface.add_argument("composition", type=Path, help="compiled vehicle composition JSON")
+    vehicle_compose = vehicle_subparsers.add_parser(
+        "compose",
+        help="validate a vehicle initialization and ordered mission into a semantic adapter handoff",
+    )
+    vehicle_compose.add_argument("request", type=Path, help="YAML or JSON vehicle composition request")
+    vehicle_compose.add_argument("--output", type=Path, help="write the compiled semantic scenario as JSON")
+    vehicle_lower = vehicle_subparsers.add_parser(
+        "lower",
+        help="bind a compiled semantic scenario to its declared native adapter without fallback",
+    )
+    vehicle_lower.add_argument("composition", type=Path, help="compiled vehicle composition JSON")
+    vehicle_preflight = vehicle_subparsers.add_parser(
+        "preflight",
+        help="fail closed when a semantic composition cannot map to its declared native mission translator",
+    )
+    vehicle_preflight.add_argument("composition", type=Path, help="compiled vehicle composition JSON")
+    vehicle_materialize = vehicle_subparsers.add_parser(
+        "materialize",
+        help="write exact language-backed native inputs for a translation-ready composition",
+    )
+    vehicle_materialize.add_argument("composition", type=Path, help="compiled vehicle composition JSON")
+    vehicle_materialize.add_argument("--output-dir", type=Path, required=True, help="directory for disposable native inputs")
+    vehicle_run = vehicle_subparsers.add_parser(
+        "run",
+        help="execute a translation-ready composition through its exact declared source-owned batch binding",
+    )
+    vehicle_run.add_argument("composition", type=Path, help="compiled vehicle composition JSON")
+    vehicle_run.add_argument("--output-dir", type=Path, required=True, help="directory for immutable nominal-run evidence")
+    vehicle_run.add_argument("--max-steps", type=int, help="optional positive runtime step limit")
+    vehicle_replay_policy = vehicle_subparsers.add_parser(
+        "replay-policy",
+        help="replay a persisted semantic action trace through the exact selected composition episode",
+    )
+    vehicle_replay_policy.add_argument("composition", type=Path, help="compiled vehicle composition JSON")
+    vehicle_replay_policy.add_argument("trace", type=Path, help="persisted composition policy trace JSON")
+    vehicle_replay_policy.add_argument("--output", type=Path, help="optional replay verdict JSON path")
     case = subparsers.add_parser("case", help="resolve and inspect Alpha 2 case intents")
     case_subparsers = case.add_subparsers(dest="case_command", required=True)
     case_validate = case_subparsers.add_parser("validate", help="validate a case intent")
@@ -260,6 +353,8 @@ def main(argv: list[str] | None = None) -> int:
         return _catalog_command(arguments)
     if arguments.command == "family":
         return _family_command(arguments)
+    if arguments.command == "vehicle":
+        return _vehicle_command(arguments)
     if arguments.command == "case":
         return _case_command(arguments)
     if arguments.command == "schema":
@@ -656,6 +751,233 @@ def _family_command(arguments: argparse.Namespace) -> int:
     except (OSError, KeyError, ResolutionError, TypeError, ValueError) as error:
         print(f"error: family-failed: {error}")
         return 2
+    ####
+
+
+def _vehicle_command(arguments: argparse.Namespace) -> int:
+    """Handle user-facing vehicle/fidelity/trajectory composition discovery."""
+
+    try:
+        catalog = load_resolved_vehicle_composition_catalog()
+        if arguments.vehicle_command == "compose":
+            compiled = compile_vehicle_composition(load_vehicle_composition_request(arguments.request), catalog=catalog)
+            if arguments.output is not None:
+                compiled.write_json(arguments.output)
+            _print_json(compiled.model_dump(mode="json", by_alias=True))
+            return 0
+        if arguments.vehicle_command == "interface-composition":
+            composition = load_compiled_vehicle_composition(arguments.composition)
+            contract = resolve_vehicle_composition_interface_contract(composition, catalog=catalog)
+            findings = validate_vehicle_interface_contract(contract)
+            _print_json(
+                {
+                    **contract.as_dict(),
+                    "composition_id": composition.id,
+                    "composition_identity_sha256": composition.identity_sha256,
+                    "validation": {
+                        "status": "pass" if not findings else "fail",
+                        "findings": list(findings),
+                    },
+                }
+            )
+            return 0 if not findings else 2
+        if arguments.vehicle_command == "lower":
+            _print_json(lower_vehicle_composition(load_compiled_vehicle_composition(arguments.composition)).as_dict())
+            return 0
+        if arguments.vehicle_command == "preflight":
+            result = preflight_vehicle_composition(load_compiled_vehicle_composition(arguments.composition))
+            _print_json(result.as_dict())
+            return 0 if result.status == "translation_ready" else 2
+        if arguments.vehicle_command == "materialize":
+            composition = load_compiled_vehicle_composition(arguments.composition)
+            materialized = materialize_powered_fixed_wing_composition(composition, arguments.output_dir)
+            _print_json(
+                {
+                    "schema": "taoryx.vehicle-language-backed-materialization/v1alpha1",
+                    "composition_id": composition.id,
+                    "composition_identity_sha256": composition.identity_sha256,
+                    "source_mission_id": materialized.source_mission_id,
+                    "materialized_mission_id": materialized.materialized_mission_id,
+                    "proposal": materialized.proposal.manifest(),
+                    "inputs": {
+                        "problem": str(materialized.problem),
+                        "mission_config": str(materialized.mission_config),
+                        "racetrack_config": str(materialized.racetrack_config),
+                    },
+                    "claim_boundary": (
+                        "Materialization writes a route and independent-evaluation inputs matching preflight. "
+                        "It does not bind a runtime adapter, execute a controller, or qualify the vehicle."
+                    ),
+                }
+            )
+            return 0
+        if arguments.vehicle_command == "run":
+            if arguments.max_steps is not None and arguments.max_steps <= 0:
+                raise ValueError("--max-steps must be positive")
+            composition = load_compiled_vehicle_composition(arguments.composition)
+            binding = resolve_vehicle_execution_binding(composition, "batch")
+            if binding.factory_id == "language_backed_powered_fixed_wing.v1":
+                language_execution = execute_powered_fixed_wing_composition(
+                    composition,
+                    arguments.output_dir,
+                    max_steps=arguments.max_steps,
+                )
+                payload = language_execution.as_dict()
+                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
+                    arguments.output_dir,
+                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                )
+                _print_json(payload)
+                return 0 if language_execution.mission_pass else 1
+            if binding.factory_id in {"reduced_fixed_wing_openap.v1", "reduced_fixed_wing_f16_source.v1"}:
+                if arguments.max_steps is not None:
+                    raise ValueError("--max-steps is not available for this reduced fixed-wing adapter yet")
+                reduced_execution = execute_reduced_fixed_wing_composition(composition, arguments.output_dir)
+                payload = reduced_execution.as_dict()
+                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
+                    arguments.output_dir,
+                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                )
+                _print_json(payload)
+                return 0 if reduced_execution.mission_pass else 1
+            if binding.factory_id == "hummingbird_aggregate_thrust_pseudo_batch.v1":
+                if arguments.max_steps is not None:
+                    raise ValueError("--max-steps is not available for the Hummingbird pseudo batch adapter yet")
+                hummingbird_execution = execute_hummingbird_pseudo_composition(composition, arguments.output_dir)
+                payload = hummingbird_execution.as_dict()
+                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
+                    arguments.output_dir,
+                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                )
+                _print_json(payload)
+                return 0 if hummingbird_execution.mission_pass else 1
+            if binding.factory_id == "nesc_source_replay.v1":
+                if arguments.max_steps is not None:
+                    raise ValueError("--max-steps is not available for the NESC source-replay adapter")
+                nesc_execution = execute_nesc_source_replay_composition(composition, arguments.output_dir)
+                payload = nesc_execution.as_dict()
+                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
+                    arguments.output_dir,
+                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                )
+                _print_json(payload)
+                return 0 if nesc_execution.mission_pass else 1
+            if binding.factory_id == "x15_staged_reachability.v1":
+                if arguments.max_steps is not None:
+                    raise ValueError("--max-steps is not available for the X-15 staged reachability adapter")
+                x15_execution = execute_x15_staged_reachability_composition(composition, arguments.output_dir)
+                payload = x15_execution.as_dict()
+                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
+                    arguments.output_dir,
+                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                )
+                _print_json(payload)
+                return 0 if x15_execution.mission_pass else 1
+            if binding.factory_id == "local_direct_wrench_screen.v1":
+                if arguments.max_steps is not None:
+                    raise ValueError("--max-steps is not available for the local direct-wrench screen adapter")
+                local_screen_execution = execute_local_direct_wrench_composition(composition, arguments.output_dir)
+                payload = local_screen_execution.as_dict()
+                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
+                    arguments.output_dir,
+                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                )
+                _print_json(payload)
+                return 0 if local_screen_execution.screen_pass else 1
+            if binding.factory_id == "passive_tumbling_direct_release.v1":
+                if arguments.max_steps is not None:
+                    raise ValueError("--max-steps is not available for the passive tumbling batch adapter")
+                tumbling_execution = execute_passive_tumbling_composition(composition, arguments.output_dir)
+                payload = tumbling_execution.as_dict()
+                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
+                    arguments.output_dir,
+                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                )
+                _print_json(payload)
+                return 0 if tumbling_execution.mission_pass else 1
+            raise ValueError(f"batch execution factory is declared but not implemented: {binding.factory_id!r}")
+        if arguments.vehicle_command == "replay-policy":
+            composition = load_compiled_vehicle_composition(arguments.composition)
+            replay_report = replay_composition_policy_trace_file(composition, arguments.trace)
+            _print_json(replay_report.as_dict(), arguments.output)
+            return 0
+        if arguments.vehicle_command == "list":
+            _print_json(catalog.list_dict())
+            return 0
+        if arguments.vehicle_command == "interface-report":
+            report = build_vehicle_interface_catalog_report(catalog)
+            _print_json(report)
+            return 0 if report["status"] == "pass" else 2
+        if arguments.vehicle_command == "interface":
+            contract = resolve_vehicle_interface_contract(arguments.identifier, arguments.fidelity, catalog=catalog)
+            findings = validate_vehicle_interface_contract(contract)
+            _print_json(
+                {
+                    **contract.as_dict(),
+                    "validation": {
+                        "status": "pass" if not findings else "fail",
+                        "findings": list(findings),
+                    },
+                }
+            )
+            return 0 if not findings else 2
+        payload = catalog.vehicle(arguments.identifier).as_dict()
+        if arguments.vehicle_command == "inspect":
+            _print_json(payload)
+        elif arguments.vehicle_command == "endpoints":
+            _print_json(
+                {
+                    "vehicle_id": payload["vehicle_id"],
+                    "family_id": payload["family_id"],
+                    "execution_bindings": payload["execution_bindings"],
+                }
+            )
+        else:
+            field = {
+                "initialization": "initialization_contracts",
+                "segments": "segment_contracts",
+                "missions": "mission_templates",
+            }[arguments.kind]
+            _print_json(
+                {
+                    "vehicle_id": payload["vehicle_id"],
+                    "family_id": payload["family_id"],
+                    "fidelities": payload["fidelities"],
+                    field: payload[field],
+                }
+            )
+        return 0
+    except (OSError, KeyError, TypeError, ValueError, VehicleCompositionError) as error:
+        print(f"error: vehicle-registry-failed: {error}")
+        return 2
+    ####
+
+
+def _write_vehicle_interface_artifact(
+    output_dir: Path,
+    contract: object,
+) -> dict[str, object]:
+    """Write the exact control/status schema used by a public composition run."""
+
+    from taoryx.vehicle_interface import VehicleInterfaceContract
+
+    if not isinstance(contract, VehicleInterfaceContract):
+        raise TypeError("vehicle interface artifact requires a resolved VehicleInterfaceContract")
+    findings = validate_vehicle_interface_contract(contract)
+    if findings:
+        raise ValueError("vehicle interface contract failed validation: " + "; ".join(findings))
+    output_dir.mkdir(parents=True, exist_ok=True)
+    destination = output_dir / "vehicle_interface.json"
+    payload = {
+        **contract.as_dict(),
+        "validation": {"status": "pass", "findings": []},
+    }
+    destination.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return {
+        "path": str(destination),
+        "interface_id": contract.id,
+        "fingerprint_sha256": contract.fingerprint,
+    }
     ####
 
 

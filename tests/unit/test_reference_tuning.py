@@ -26,6 +26,9 @@ def test_reference_aircraft_tuning_report_covers_all_four_families() -> None:
         assert family["qualification_status"] == "screen_only"
         assert family["plant_backed_linearization"] is False
         assert family["gap"]
+        assert family["authority_preflight"]["reason"].startswith(f"{vehicle_id}-attitude-screen-authority")
+        assert family["authority_preflight"]["status"] == "passed"
+        assert family["authority_preflight"]["metrics"]["controllability_rank"] == 6.0
         assert family["report"]["best_profile_id"] is not None
         assert family["report"]["status"] == "safe"
     ####

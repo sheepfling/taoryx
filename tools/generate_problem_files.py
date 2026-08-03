@@ -9,6 +9,9 @@ from typing import Any
 
 import yaml
 
+from taoryx.language.diagnostics import Severity
+from taoryx.language.grammar_contracts import GrammarProfile
+from taoryx.language.problem_parser import parse_problem_text
 from taoryx.vehicle_registry import vehicle_status_line
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,7 +34,7 @@ def _values(catalog: dict[str, Any], scenario: dict[str, Any]) -> dict[str, str]
         f"*runtime control {control['name']} vehicle=1 default={control['default']} lower={control['lower']} upper={control['upper']}"
         for control in vehicle.get("controls", [])
     )
-    actuator = " ".join(f"{key.replace('_', '-')}={value}" for key, value in vehicle.get("actuator", {}).items())
+    actuator = _runtime_scalar_attributes(vehicle.get("actuator", {}))
     earth_gm_suffix = f" gm={vehicle['earth_gm_m3_s2']}" if "earth_gm_m3_s2" in vehicle else ""
     values = {
         "mode": str(vehicle["mode"]),
@@ -71,6 +74,26 @@ def _values(catalog: dict[str, Any], scenario: dict[str, Any]) -> dict[str, str]
     if problem_comment:
         values["aero_comment"] = "\n".join(f"    # {line}" for line in problem_comment.splitlines())
     return values
+####
+
+
+def _runtime_scalar_attributes(attributes: object) -> str:
+    """Render only grammar-supported scalar runtime attributes.
+
+    Vehicle metadata may retain nested evidence such as motor-lag provenance.
+    A native ``.prb`` runtime-status directive accepts scalar assignments only;
+    rendering a Python/YAML mapping there would corrupt the source grammar.
+    The structured metadata remains in ``vehicle_models.yaml`` for the family
+    and controller/actuator layers to consume explicitly.
+    """
+
+    if not isinstance(attributes, dict):
+        raise ValueError("vehicle actuator metadata must be a mapping")
+    tokens: list[str] = []
+    for key, value in attributes.items():
+        if isinstance(value, (str, int, float)) and not isinstance(value, bool):
+            tokens.append(f"{key.replace('_', '-')}={value}")
+    return " ".join(tokens)
 ####
 
 
@@ -178,6 +201,21 @@ def render_scenario(catalog: dict[str, Any], scenario: dict[str, Any]) -> str:
 ####
 
 
+def _require_successor_parseable(source: str, path: Path) -> None:
+    """Reject generated native source with error-level successor diagnostics."""
+
+    document = parse_problem_text(source, str(path), profile=GrammarProfile.TAORYX)
+    errors = [
+        diagnostic
+        for diagnostic in document.diagnostics
+        if diagnostic.severity is Severity.ERROR
+    ]
+    if errors:
+        messages = "; ".join(f"{item.code}: {item.message}" for item in errors)
+        raise ValueError(f"generated problem is not valid TAORYX source: {path}: {messages}")
+####
+
+
 def render_catalog(catalog_path: Path = CATALOG) -> tuple[Path, ...]:
     """Write every catalog scenario and return the generated paths."""
 
@@ -185,8 +223,10 @@ def render_catalog(catalog_path: Path = CATALOG) -> tuple[Path, ...]:
     generated: list[Path] = []
     for scenario in catalog["scenarios"]:
         output = ROOT / scenario["output"]
+        rendered = render_scenario(catalog, scenario)
+        _require_successor_parseable(rendered, output)
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(render_scenario(catalog, scenario), encoding="utf-8")
+        output.write_text(rendered, encoding="utf-8")
         generated.append(output)
     return tuple(generated)
 ####
@@ -201,6 +241,7 @@ def check_catalog(catalog_path: Path = CATALOG) -> tuple[Path, ...]:
     for scenario in catalog["scenarios"]:
         output = ROOT / scenario["output"]
         expected = render_scenario(catalog, scenario)
+        _require_successor_parseable(expected, output)
         if not output.is_file() or output.read_text(encoding="utf-8") != expected:
             stale.append(output)
     if stale:

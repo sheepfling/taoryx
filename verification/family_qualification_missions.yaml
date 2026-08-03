@@ -4,6 +4,7 @@ claim_boundary: independent truth-evaluated family qualification; integration ba
 missions:
   - id: hummingbird-hover-to-touchdown-strict-v1
     family: hummingbird
+    fidelity_tier: rigid_body_6dof_direct_wrench
     display_name: Hummingbird strict hover-to-touchdown baseline
     evidence_level: integration_baseline_probe
     claim: The source-bounded Hummingbird surrogate can hold its declared airborne start and execute the available motor-shutdown landing segment under an independent truth evaluator.
@@ -42,6 +43,7 @@ missions:
         dwell_s: 1.0
   - id: x8-fixed-wing-flyby-route-v1
     family: skywalker_x8
+    fidelity_tier: rigid_body_6dof_direct_wrench
     display_name: Skywalker X8 left-hand fly-by waypoint sequence — nominal case
     evidence_level: nominal_case_pass_overall_qualification_pending
     claim: The source-bounded X8 rigid-body surrogate crosses four declared, oriented route gates inside the local aerodynamic envelope under independent truth evaluation.
@@ -104,6 +106,7 @@ missions:
         window_end_s: 120.0
   - id: x8-figure-eight-altitude-bank-pitch-v2
     family: skywalker_x8
+    fidelity_tier: rigid_body_6dof_direct_wrench
     display_name: Skywalker X8 figure-eight altitude, bank, and pitch reversal — nominal airborne pass; terminal pending
     evidence_level: nominal_case_pass_overall_qualification_pending
     claim: The source-bounded X8 rigid-body surrogate executes a figure-eight reference with explicit high/low altitude gates and truth-observable bank and pitch reversals inside the local aerodynamic envelope. An explicit return-to-terminal recovery is exercised, but stable terminal closure remains qualification-pending.
@@ -182,6 +185,7 @@ missions:
         event_id: pitch-negative-response
   - id: x8-racetrack-altitude-turns-v1
     family: skywalker_x8
+    fidelity_tier: rigid_body_6dof_surface_allocated
     display_name: Skywalker X8 racetrack climb, level, return-turn, descent, and start/finish gate
     evidence_level: nominal_case_pass_overall_qualification_pending
     claim: The source-bounded X8 rigid-body surrogate follows a reusable, source-domain racetrack reference with isolated outbound climb, high-altitude level flight, a left lobe, inbound descent, low-altitude recovery, a return lobe, and an oriented start/finish crossing through bounded physical elevon allocation.
@@ -270,6 +274,7 @@ missions:
 
   - id: x8-racetrack-altitude-turns-direct-moment-baseline-v1
     family: skywalker_x8
+    fidelity_tier: rigid_body_6dof_direct_wrench
     display_name: Skywalker X8 racetrack direct-moment baseline
     evidence_level: integration_baseline_direct_moment
     claim: >-
@@ -357,6 +362,7 @@ missions:
 
   - id: b747-racetrack-altitude-turns-3dof-v1
     family: b747
+    fidelity_tier: point_mass_3dof
     display_name: B747 transport-scaled racetrack climb, level, turn, descent, and start/finish gate
     evidence_level: nominal_case_pass_overall_qualification_pending
     claim: >-
@@ -424,6 +430,7 @@ missions:
 
   - id: x8-racetrack-altitude-turns-3dof-v1
     family: skywalker_x8
+    fidelity_tier: point_mass_3dof
     display_name: Skywalker X8 racetrack point-mass 3DOF
     evidence_level: nominal_case_pass_overall_qualification_pending
     claim: >-
@@ -491,12 +498,13 @@ missions:
 
   - id: x8-racetrack-altitude-turns-pseudo-6dof-v1
     family: skywalker_x8
+    fidelity_tier: pseudo_6dof
     display_name: Skywalker X8 racetrack kinematic pseudo-6DOF
     evidence_level: nominal_case_pass_overall_qualification_pending
     claim: >-
       The source-table X8 kinematic 3-plus-3 bridge completes the shared
-      translational racetrack while exposing a bounded prescribed-attitude
-      response sidecar.
+      translational racetrack while exposing the declared bounded route-lag
+      attitude response sidecar.
     nonclaims:
       - physical moment balance or elevon allocation
       - route bank authority from aerodynamic surfaces
@@ -505,15 +513,17 @@ missions:
     realization:
       force_source: source_table
       moment_source: not_applicable_kinematic_bridge
-      actuator_realization: prescribed_attitude_lag_no_surface_claim
+      actuator_realization: route_lag_kinematic_response_no_surface_claim
       response_profile_id: skywalker_x8.attitude_response_p6dof.v1
       response_law: first-order-rate-limited-v1
       propulsion_model: source_table_thrust
       resource_model: fixed_mass_zero_propellant
       note: >-
         Translation is the same force-integrated point-mass realization used
-        by the 3DOF packet. Quaternion and body-rate channels are supplied by
-        the declared kinematic attitude bridge; they are not moment-derived.
+        by the 3DOF packet. The declared route-lag sidecar derives bank,
+        flight-path-plus-alpha pitch, and tangent heading targets, then
+        publishes quaternion and body-rate response. These are not
+        moment-derived signals.
     problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_pseudo_6dof.prb
     racetrack_binding: x8-kinematic-bridge
     tables:
@@ -535,6 +545,12 @@ missions:
       tolerance: {corridor_m: 220.0, altitude_m: 15.0, speed_m_s: 4.0}
       crossing_direction: 1
     objectives:
+      - id: climb-pitch-response
+        objective_type: dwell
+        racetrack_phase: outbound-climb
+        target: {kinematic_pitch_command_deg: 9.4, kinematic_pitch_deg: 9.4}
+        tolerance: {kinematic_pitch_command_deg: 0.75, kinematic_pitch_deg: 0.75}
+        dwell_s: 1.0
       - id: high-altitude-level-gate
         objective_type: fly_by_gate
         racetrack_gate_id: high-altitude-level-gate
@@ -542,6 +558,12 @@ missions:
         crossing_direction: 1
         window_start_s: 25.0
         window_end_s: 50.0
+      - id: left-turn-bank-response
+        objective_type: dwell
+        racetrack_phase: left-turn
+        target: {kinematic_roll_command_deg: -10.0, kinematic_roll_deg: -10.0}
+        tolerance: {kinematic_roll_command_deg: 1.0, kinematic_roll_deg: 2.0}
+        dwell_s: 1.0
       - id: left-turn-exit-gate
         objective_type: fly_by_gate
         racetrack_gate_id: left-turn-exit-gate
@@ -549,6 +571,12 @@ missions:
         crossing_direction: 1
         window_start_s: 70.0
         window_end_s: 100.0
+      - id: descent-pitch-response
+        objective_type: dwell
+        racetrack_phase: inbound-descent
+        target: {kinematic_pitch_command_deg: 6.85, kinematic_pitch_deg: 6.85}
+        tolerance: {kinematic_pitch_command_deg: 0.75, kinematic_pitch_deg: 0.75}
+        dwell_s: 1.0
       - id: low-altitude-level-gate
         objective_type: fly_by_gate
         racetrack_gate_id: low-altitude-level-gate
@@ -556,9 +584,16 @@ missions:
         crossing_direction: 1
         window_start_s: 100.0
         window_end_s: 140.0
+      - id: right-turn-bank-response
+        objective_type: dwell
+        racetrack_phase: right-turn
+        target: {kinematic_roll_command_deg: 10.0, kinematic_roll_deg: 10.0}
+        tolerance: {kinematic_roll_command_deg: 1.0, kinematic_roll_deg: 2.0}
+        dwell_s: 1.0
 
   - id: x8-racetrack-altitude-turns-direct-wrench-v1
     family: skywalker_x8
+    fidelity_tier: rigid_body_6dof_direct_wrench
     display_name: Skywalker X8 racetrack induced-wrench rigid-body 6DOF
     evidence_level: integration_baseline_direct_wrench
     claim: >-
@@ -626,6 +661,7 @@ missions:
 
   - id: b747-racetrack-altitude-turns-pseudo-6dof-v1
     family: b747
+    fidelity_tier: pseudo_6dof
     display_name: B747 transport-scaled racetrack kinematic pseudo-6DOF
     evidence_level: nominal_case_pass_overall_qualification_pending
     claim: >-
@@ -640,15 +676,16 @@ missions:
     realization:
       force_source: source_table
       moment_source: not_applicable_kinematic_bridge
-      actuator_realization: prescribed_attitude_lag_no_surface_claim
+      actuator_realization: route_lag_kinematic_response_no_surface_claim
       response_profile_id: b747.attitude_response_p6dof.v1
       response_law: first-order-rate-limited-v1
       propulsion_model: source_table_thrust
       resource_model: fixed_mass_zero_propellant
       note: >-
-        The bridge supplies quaternion and body-rate response independently of
-        the point-mass translation. It is a named pseudo-6DOF realization,
-        not a physical B747 surface or moment qualification.
+        The route-lag sidecar derives bank, flight-path-plus-alpha pitch, and
+        tangent heading targets from the same racetrack used by the point-mass
+        translation. It is a named pseudo-6DOF realization, not a physical
+        B747 surface or moment qualification.
     problem: examples/mission_families/slower_b747/SV01_racetrack_altitude_turns_pseudo_6dof.prb
     racetrack_binding: b747-transport-scaled-kinematic
     tables:
@@ -668,6 +705,12 @@ missions:
       tolerance: {corridor_m: 2000.0, altitude_m: 35.0, speed_m_s: 8.0}
       crossing_direction: 1
     objectives:
+      - id: climb-pitch-response
+        objective_type: dwell
+        racetrack_phase: outbound-climb
+        target: {kinematic_pitch_command_deg: 3.66, kinematic_pitch_deg: 3.66}
+        tolerance: {kinematic_pitch_command_deg: 0.5, kinematic_pitch_deg: 0.75}
+        dwell_s: 2.0
       - id: high-altitude-level-gate
         objective_type: fly_by_gate
         racetrack_gate_id: high-altitude-level-gate
@@ -675,6 +718,12 @@ missions:
         crossing_direction: 1
         window_start_s: 145.0
         window_end_s: 175.0
+      - id: left-turn-bank-response
+        objective_type: dwell
+        racetrack_phase: left-turn
+        target: {kinematic_roll_command_deg: -18.0, kinematic_roll_deg: -18.0}
+        tolerance: {kinematic_roll_command_deg: 1.0, kinematic_roll_deg: 2.0}
+        dwell_s: 2.0
       - id: left-turn-exit-gate
         objective_type: fly_by_gate
         racetrack_gate_id: left-turn-exit-gate
@@ -682,6 +731,12 @@ missions:
         crossing_direction: 1
         window_start_s: 265.0
         window_end_s: 295.0
+      - id: descent-pitch-response
+        objective_type: dwell
+        racetrack_phase: inbound-descent
+        target: {kinematic_pitch_command_deg: 2.65, kinematic_pitch_deg: 2.65}
+        tolerance: {kinematic_pitch_command_deg: 0.5, kinematic_pitch_deg: 0.75}
+        dwell_s: 2.0
       - id: low-altitude-level-gate
         objective_type: fly_by_gate
         racetrack_gate_id: low-altitude-level-gate
@@ -689,9 +744,16 @@ missions:
         crossing_direction: 1
         window_start_s: 420.0
         window_end_s: 455.0
+      - id: right-turn-bank-response
+        objective_type: dwell
+        racetrack_phase: right-turn
+        target: {kinematic_roll_command_deg: 18.0, kinematic_roll_deg: 18.0}
+        tolerance: {kinematic_roll_command_deg: 1.0, kinematic_roll_deg: 2.0}
+        dwell_s: 2.0
 
   - id: b747-racetrack-altitude-turns-6dof-v1
     family: b747
+    fidelity_tier: rigid_body_6dof_direct_wrench
     display_name: B747 transport-scaled racetrack rigid-body 6DOF
     evidence_level: bounded_direct_wrench_nominal_case
     claim: >-

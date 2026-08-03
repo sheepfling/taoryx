@@ -1,0 +1,181 @@
+{
+  "claim": "The source-table X8 kinematic 3-plus-3 bridge completes the shared translational racetrack while exposing a bounded prescribed-attitude response sidecar.",
+  "display_name": "Skywalker X8 racetrack kinematic pseudo-6DOF",
+  "envelope_report": {
+    "checks": [
+      {
+        "channel": "speed_m_s",
+        "maximum": 27.0,
+        "minimum": 2.0,
+        "pass": true,
+        "violations": []
+      },
+      {
+        "channel": "altitude_m",
+        "maximum": 215.0,
+        "minimum": 150.0,
+        "pass": true,
+        "violations": []
+      }
+    ],
+    "pass": true,
+    "schema_version": 1
+  },
+  "evidence_level": "nominal_case_pass_overall_qualification_pending",
+  "execution_metadata": {
+    "candidate_binding_id": "x8-cruise-pseudo_6dof_kinematic_bridge-candidate",
+    "candidate_fidelity": "pseudo_6dof_kinematic_bridge",
+    "mission_proposal_fingerprint": "685f0282c3669c57ec507d0741384a7baf317e079d5e1730d7da4bd12ea06120"
+  },
+  "family": "skywalker_x8",
+  "fidelity_tier": "pseudo_6dof_kinematic_bridge",
+  "mission_id": "x8-racetrack-altitude-turns-pseudo-6dof-v1-candidate",
+  "mission_pass": true,
+  "nonclaims": [
+    "physical moment balance or elevon allocation",
+    "route bank authority from aerodynamic surfaces",
+    "flight-test or manufacturer fidelity",
+    "wind robustness, takeoff, or landing"
+  ],
+  "numerical_valid": true,
+  "preflight_timing_estimate": {
+    "climb_time_s": 20.0,
+    "descent_time_s": 33.333333333333336,
+    "inbound_level_time_s": 22.532588454376167,
+    "outbound_level_time_s": 35.8659217877095,
+    "straight_time_s": 55.8659217877095,
+    "total_time_s": 183.27797202003018,
+    "turn_time_s": 35.773064222305585
+  },
+  "realization": {
+    "actuator_realization": "prescribed_attitude_lag_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_kinematic_bridge",
+    "note": "Translation is the same force-integrated point-mass realization used by the 3DOF packet. Quaternion and body-rate channels are supplied by the declared kinematic attitude bridge; they are not moment-derived.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant",
+    "response_law": "first-order-rate-limited-v1",
+    "response_profile_id": "skywalker_x8.attitude_response_p6dof.v1"
+  },
+  "run": {
+    "completed": [
+      true
+    ],
+    "duration_s": 203.27797202003,
+    "exit_code": 0,
+    "sample_count": 4067,
+    "stop_reasons": [
+      "stop_condition"
+    ]
+  },
+  "schema_version": 1,
+  "status": "nominal_case_pass_overall_qualification_pending",
+  "truth_evaluation": {
+    "claim_boundary": "truth telemetry verifies objective geometry; controller transitions are diagnostic and cannot create a pass",
+    "evaluator": "independent_truth_telemetry",
+    "hard_gates_passed": true,
+    "mission_pass": true,
+    "objective_pass": true,
+    "required_objectives": 4,
+    "required_passed": 4,
+    "results": [
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 4.0,
+          "margin": 4.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "high-altitude-level-gate",
+        "margin": 4.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 4.0,
+        "truth_time_s": 55.849999999998964
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 4.0,
+          "margin": 4.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "left-turn-exit-gate",
+        "margin": 4.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 4.0,
+        "truth_time_s": 91.79999999999693
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 4.0,
+          "margin": 4.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "low-altitude-level-gate",
+        "margin": 4.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 4.0,
+        "truth_time_s": 147.64999999999932
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 4.0,
+          "margin": 4.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "terminal-contract",
+        "margin": 4.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 4.0,
+        "truth_time_s": 183.30000000000743
+      }
+    ],
+    "schema_version": 1
+  }
+}

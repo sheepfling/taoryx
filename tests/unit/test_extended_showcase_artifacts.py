@@ -6,6 +6,7 @@ import pytest
 from examples.showcases.orbital_insertion_coast_reentry.run_showcase import generate as generate_orbital
 from examples.showcases.quadcopter_drone_racetrack.run_showcase import generate as generate_quadcopter
 from examples.showcases.suborbital_ballistic_return.run_showcase import generate as generate_suborbital
+from taoryx.showcase import validate_showcase_run_artifact_boundary
 
 pytestmark = pytest.mark.artifact
 
@@ -28,6 +29,9 @@ def test_extended_showcase_generators_emit_standard_artifacts(tmp_path: Path, ge
     assert required_panels <= {path.stem for path in report.plot_paths}
     assert (tmp_path / "telemetry.json").exists()
     assert (tmp_path / "telemetry.sqlite").exists()
+    manifest = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
+    assert len(manifest["run_artifacts"]) == 1
+    validate_showcase_run_artifact_boundary(manifest["run_artifacts"][0])
     payload = json.loads(report.log_path.read_text(encoding="utf-8"))
     assert payload["problem"]
     assert all(panel["rendered"] for panel in payload["panels"])

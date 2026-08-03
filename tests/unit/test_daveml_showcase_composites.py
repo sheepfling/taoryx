@@ -34,6 +34,10 @@ def test_daveml_showcase_builder_emits_all_five_evidence_boards(tmp_path: Path) 
         assert manifest["artifact_contract_hash"] == item["artifact_contract_hash"]
         assert (board / "evidence-board.png").is_file()
         assert json.loads((board / "evidence-summary.json").read_text(encoding="utf-8"))["evidence"]
+        for run in manifest["run_artifacts"]:
+            assert run["realization"]["fidelity"] == run["fidelity"]
+            if run["control_realization"] == "direct_wrench":
+                assert run["realization"]["physical_effectors"] == []
 
 
 def test_daveml_showcase_preserves_a320_fidelity_split_and_synthetic_child(tmp_path: Path) -> None:

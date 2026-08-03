@@ -1,0 +1,6 @@
+{
+  "note": "These route-leg changes are diagnostic telemetry records without causal controller reasons; truth results remain independent and an early transition invalidates that objective for mission pass.",
+  "schema_version": 1,
+  "source": "controller",
+  "transitions": []
+}

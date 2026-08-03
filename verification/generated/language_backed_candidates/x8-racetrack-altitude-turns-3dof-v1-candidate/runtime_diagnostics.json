@@ -1,0 +1,6 @@
+{
+  "diagnostics": [],
+  "exit_code": 0,
+  "note": "Runtime diagnostics are preserved even when no truth telemetry exists; they cannot be converted into objective success.",
+  "schema_version": 1
+}

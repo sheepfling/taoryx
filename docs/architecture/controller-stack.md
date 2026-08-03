@@ -215,6 +215,26 @@ accepted trim + plant evaluator
 The older residual Jacobian used for trim diagnostics is not interchangeable
 with a dynamics `A/B` matrix.
 
+For a source adapter that only exposes a local force/moment derivative,
+TAORYX can run a **local direct-wrench screen**.  The adapter—not the generic
+runner—declares the state order, local operating point, bridge bias, authority
+box, numerical perturbation sizes, and LQR scaling.  The runner then follows:
+
+```text
+source local derivative + declared bridge bias
+    → finite-difference A/B at the same local point
+    → scaled LQR
+    → requested six-axis body wrench
+    → bounded/rate-limited direct-wrench projection
+    → same nonlinear local derivative
+    → requested-versus-achieved residual and state recovery record
+```
+
+This is a reusable T3 bridge witness, not an implicit trim repair.  If the
+declared direct-wrench limits cannot cancel the source load, the result is an
+authority deficit and fails closed; the runner must not widen limits, suppress
+the residual, or promote the operating point to physical trim.
+
 ### Level 4 — Allocation and actuator realization
 
 The regulator's generalized demand is not automatically a physical actuator
@@ -696,12 +716,12 @@ level, but much of the nested mission stack is still manually parameterized.
 | Trim | Generic bounded solver and source-trim adapters | Not every showcase starts from a newly solved, frozen trim artifact | Multi-start trim, continuation over speed/altitude/mass, automatic residual and margin gates |
 | Local linearization | Finite-difference `A/B` utility exists | Source-consistent `A/B` artifacts are not yet universal across families | Automatically generate and hash `A/B` at every accepted operating point |
 | LQR `Q/R` | Scaled profiles and pole/uncertainty checks exist | Mission-level tracking and saturation are not part of the design objective | Constrained `Q/R` search using settling time, overshoot, rate, moment, and table-margin metrics |
-| X8 outer guidance | Racetrack gains, bank, altitude capture, and timing are hand-selected | Coupling between route geometry, bank response, and terminal closure is still tuned by reruns | Constrained trajectory optimization over capture gains, bank schedule, phase timing, and horizon |
+| Fixed-wing outer guidance | Capability-scaled preflight now derives conservative turn radius, straight-leg dwell, gate geometry, and horizon; capture gains remain hand-selected | Tracking gains and the nonlinear authority/terminal trade remain tuned by reruns | Constrained trajectory optimization over capture gains, bank schedule, phase timing, horizon, and truth-objective margins |
 | X8 actuator realization | Direct moment path works; elevon tables exist | No physical moment-to-elevon allocation qualification in the racetrack | Bounded nonlinear allocation with rate/travel limits and allocation residual objective |
 | Hummingbird position loop | Hand-set position/velocity/altitude gains | No formal cascade bandwidth separation or source-trim LQR equivalent | Cascade autotuning with inner attitude/rate bandwidth fixed before outer position tuning |
 | Hummingbird yaw loop | Explicit proportional/rate-damping law | Yaw exercise and torque authority are not yet tuned from a common response target | Step-response identification and bounded yaw-gain search with rotor saturation penalty |
 | Rotor collective | Hand-set collective gain and tilt compensation | Thrust margin, battery/resource, and attitude coupling are not jointly optimized | Hover trim plus constrained energy/altitude response tuning |
-| Objective geometry | Timing estimator and declared truth gates exist | The optimizer does not yet choose physically compatible gate spacing and controller gains together | Preflight feasibility oracle plus route-geometry synthesis |
+| Objective geometry | Timing estimator, declared truth gates, and capability-scaled route synthesis exist | The planner does not yet jointly optimize compatible gate spacing and controller gains | Preflight feasibility oracle plus constrained route/controller co-design |
 | Cross-fidelity tuning | Same concepts are documented | No automatic parameter mapping from 3DOF to pseudo-6DOF to 6DOF | Fit reduced-order response parameters to higher-fidelity step and mission fragments |
 | Robustness tuning | Fixed perturbation and evidence contracts exist | Nominal tuning can still be separated from robustness optimization | Tune against worst-case or percentile objective margin, not nominal score alone |
 

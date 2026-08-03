@@ -1,0 +1,36 @@
+{
+  "available_physics": [
+    "force_source=source_table",
+    "moment_source=not_applicable_point_mass_3dof",
+    "actuator_realization=kinematic_route_command_no_surface_claim",
+    "propulsion_model=source_table_thrust",
+    "resource_model=fixed_mass_zero_propellant"
+  ],
+  "claim": "The B747 public-research point-mass reduction resolves the same powered fixed-wing racetrack mission contract as the X8 at transport scale, with longer legs, larger turns, slower vertical changes, and independent truth-based altitude, speed, route, and terminal gates.",
+  "control_realization": "force_model",
+  "evidence_grade": "mixed",
+  "fidelity": "point_mass_3dof",
+  "nonclaims": [
+    "rigid-body attitude or bank dynamics",
+    "physical elevator, aileron, or rudder allocation",
+    "source-validated transport flight-control law",
+    "fuel depletion or certified JT9D performance",
+    "takeoff, landing, wind robustness, or manufacturer fidelity",
+    "realization boundary: This is the first scaled realization of the shared powered-fixed-wing template. The point-mass adapter commands speed, heading, and flight-path angle from the racetrack tangent and bounded position/ altitude corrections; it does not create attitude or surface telemetry."
+  ],
+  "physical_effectors": [],
+  "realization_id": "b747-racetrack-altitude-turns-3dof-v1-candidate.point_mass_3dof.v1",
+  "semantic_command_mapping": {
+    "route.altitude": "shared_racetrack.altitude_command",
+    "route.bank": "shared_racetrack.bank_command",
+    "route.heading": "shared_racetrack.heading_command",
+    "route.speed": "shared_racetrack.speed_command"
+  },
+  "state_schema": [
+    "north_m",
+    "east_m",
+    "altitude_m",
+    "speed_m_s",
+    "heading_deg"
+  ]
+}

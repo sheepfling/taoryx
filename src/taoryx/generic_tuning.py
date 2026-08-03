@@ -11,9 +11,9 @@ into state derivatives.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
-from typing import Any
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass, field
+from typing import Any, Literal
 
 import numpy as np
 
@@ -22,6 +22,204 @@ from .runtime.lqr import LqrResult, LqrRobustnessReport, assess_lqr_robustness, 
 from .trim import DynamicsEvaluator, DynamicsLinearization, TrimEvaluator, TrimResult, TrimSpec, finite_difference_dynamics_linearization, solve_trim
 
 Matrix = tuple[tuple[float, ...], ...]
+AuthorityPreflightStatus = Literal["passed", "blocked"]
+
+
+@dataclass(frozen=True, slots=True)
+class AuthorityPreflightReport:
+    """Family-provided authority gate placed before controller candidate search.
+
+    The generic tuner cannot infer whether a two-elevon flying wing must
+    control yaw, whether a rotor layout has independent yaw authority, or
+    whether a gimbal is usable at the current flight phase.  The family
+    adapter supplies that judgment here.  A blocked report prevents LQR
+    synthesis, ensuring a structurally infeasible plant is not treated as a
+    gain-tuning problem.
+    """
+
+    status: AuthorityPreflightStatus
+    reason: str
+    metrics: Mapping[str, float] = field(default_factory=dict)
+    blockers: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.reason.strip():
+            raise ValueError("authority preflight requires a non-empty reason")
+        if any(not math.isfinite(float(value)) for value in self.metrics.values()):
+            raise ValueError("authority preflight metrics must be finite")
+        object.__setattr__(self, "metrics", dict(self.metrics))
+        if self.status == "passed" and self.blockers:
+            raise ValueError("a passed authority preflight cannot declare blockers")
+        if self.status == "blocked" and not self.blockers:
+            raise ValueError("a blocked authority preflight requires at least one blocker")
+        ####
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the authority decision included in a tuning report."""
+
+        return {
+            "status": self.status,
+            "reason": self.reason,
+            "metrics": dict(self.metrics),
+            "blockers": list(self.blockers),
+        }
+        ####
+    ####
+
+
+AuthorityPreflightEvaluator = Callable[[TrimResult, DynamicsLinearization], AuthorityPreflightReport]
+
+
+@dataclass(frozen=True, slots=True)
+class LinearAuthorityRequirement:
+    """A declared pre-tuning authority requirement for one local plant.
+
+    ``required_state_names`` are the state coordinates that the prospective
+    controller must be able to influence through the *actual declared input
+    space*.  They are intentionally supplied by the family strategy: a
+    flying wing can require roll and pitch rate without pretending that two
+    elevons supply independent yaw control, while a multirotor may require
+    all three attitude-rate axes.
+
+    The requirement does not manufacture an actuator model.  It evaluates the
+    reachable subspace of the supplied local ``A``/``B`` pair and blocks a gain
+    search when the requested objective is structurally unreachable.
+    """
+
+    id: str
+    required_state_names: tuple[str, ...]
+    minimum_controllability_rank: int | None = None
+    maximum_uncontrolled_fraction: float = 1.0e-8
+    maximum_controllability_condition: float | None = None
+
+    def __post_init__(self) -> None:
+        if not self.id.strip():
+            raise ValueError("linear authority requirement requires an id")
+        if not self.required_state_names or len(set(self.required_state_names)) != len(self.required_state_names):
+            raise ValueError("linear authority requirement needs unique required state names")
+        if self.minimum_controllability_rank is not None and self.minimum_controllability_rank <= 0:
+            raise ValueError("minimum controllability rank must be positive when supplied")
+        if not math.isfinite(self.maximum_uncontrolled_fraction) or not 0.0 <= self.maximum_uncontrolled_fraction < 1.0:
+            raise ValueError("maximum uncontrolled fraction must be finite in [0, 1)")
+        if self.maximum_controllability_condition is not None and (
+            not math.isfinite(self.maximum_controllability_condition)
+            or self.maximum_controllability_condition <= 1.0
+        ):
+            raise ValueError("maximum controllability condition must be finite and greater than one")
+        ####
+    ####
+
+
+def linear_authority_preflight(
+    requirement: LinearAuthorityRequirement,
+    *,
+    state_names: Sequence[str],
+    a_matrix: Sequence[Sequence[float]],
+    b_matrix: Sequence[Sequence[float]],
+) -> AuthorityPreflightReport:
+    """Evaluate controllability and named-state reachability before tuning.
+
+    This is deliberately more specific than merely calling an LQR solver.  A
+    failed Riccati solve tells a developer that something is wrong; this
+    report identifies which declared mission/control state is unreachable and
+    preserves the rank and conditioning evidence needed to choose between a
+    new effector, a different topology, a schedule node, or a reduced mission.
+    """
+
+    names = tuple(state_names)
+    if not names or len(set(names)) != len(names):
+        raise ValueError("linear authority preflight requires unique state names")
+    missing = tuple(name for name in requirement.required_state_names if name not in names)
+    if missing:
+        raise ValueError(f"authority requirement names unknown states: {', '.join(missing)}")
+
+    a = np.asarray(a_matrix, dtype=float)
+    b = np.asarray(b_matrix, dtype=float)
+    state_count = len(names)
+    if a.shape != (state_count, state_count):
+        raise ValueError("authority preflight A matrix must be square in the declared state order")
+    if b.ndim != 2 or b.shape[0] != state_count or b.shape[1] == 0:
+        raise ValueError("authority preflight B matrix must have one or more declared controls")
+    if not np.isfinite(a).all() or not np.isfinite(b).all():
+        raise ValueError("authority preflight matrices must be finite")
+
+    controllability = np.hstack(tuple(np.linalg.matrix_power(a, power) @ b for power in range(state_count)))
+    singular_values = np.linalg.svd(controllability, compute_uv=False)
+    largest = float(singular_values[0]) if len(singular_values) else 0.0
+    rank_tolerance = max(largest * max(controllability.shape) * np.finfo(float).eps, 1.0e-14)
+    rank = int(np.count_nonzero(singular_values > rank_tolerance))
+    positive = singular_values[singular_values > rank_tolerance]
+    condition = float(positive[0] / positive[-1]) if len(positive) else 0.0
+    # A nested controller need not control every state in the parent plant.
+    # For example, an inner multirotor attitude loop deliberately leaves
+    # position and resource states to outer loops.  The caller still proves
+    # that every *declared required* state is reachable below; the default rank
+    # gate therefore reflects the requested local subproblem rather than
+    # accidentally requiring a full-state controller.
+    required_rank = requirement.minimum_controllability_rank or len(requirement.required_state_names)
+    if required_rank > state_count:
+        raise ValueError("authority minimum controllability rank exceeds the declared state dimension")
+
+    if rank:
+        left_vectors = np.linalg.svd(controllability, full_matrices=False)[0][:, :rank]
+        reachable_projector = left_vectors @ left_vectors.T
+    else:
+        reachable_projector = np.zeros((state_count, state_count))
+
+    metrics: dict[str, float] = {
+        "state_dimension": float(state_count),
+        "control_dimension": float(b.shape[1]),
+        "controllability_rank": float(rank),
+        "required_controllability_rank": float(required_rank),
+        "controllability_condition_number": condition,
+        "required_state_count": float(len(requirement.required_state_names)),
+    }
+    blockers: list[str] = []
+    if rank < required_rank:
+        blockers.append("controllability_rank_below_requirement")
+    for state_name in requirement.required_state_names:
+        index = names.index(state_name)
+        basis = np.zeros(state_count)
+        basis[index] = 1.0
+        uncontrolled_fraction = float(np.linalg.norm(basis - reachable_projector @ basis))
+        metrics[f"uncontrolled_fraction.{state_name}"] = uncontrolled_fraction
+        if uncontrolled_fraction > requirement.maximum_uncontrolled_fraction:
+            blockers.append(f"uncontrolled_required_state:{state_name}")
+    if (
+        requirement.maximum_controllability_condition is not None
+        and (rank == 0 or condition > requirement.maximum_controllability_condition)
+    ):
+        blockers.append("controllability_ill_conditioned")
+
+    if blockers:
+        return AuthorityPreflightReport(
+            "blocked",
+            f"{requirement.id} found a structural authority limitation before gain synthesis",
+            metrics,
+            tuple(blockers),
+        )
+    return AuthorityPreflightReport(
+        "passed",
+        f"{requirement.id} found every declared required state controllable before gain synthesis",
+        metrics,
+    )
+    ####
+
+
+def linear_authority_preflight_evaluator(requirement: LinearAuthorityRequirement) -> AuthorityPreflightEvaluator:
+    """Bind a reusable linear-authority requirement to trim/tuning workflow."""
+
+    def evaluate(_: TrimResult, linearization: DynamicsLinearization) -> AuthorityPreflightReport:
+        return linear_authority_preflight(
+            requirement,
+            state_names=linearization.state_names,
+            a_matrix=tuple(tuple(float(value) for value in row) for row in linearization.a_matrix),
+            b_matrix=tuple(tuple(float(value) for value in row) for row in linearization.b_matrix),
+        )
+        ####
+
+    return evaluate
+    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,6 +235,81 @@ class GenericLqrProfile:
             raise ValueError("generic LQR profiles require an id and non-empty weights")
         if any(not math.isfinite(value) or value <= 0.0 for value in (*self.q_diagonal, *self.r_diagonal)):
             raise ValueError("generic LQR profile weights must be finite and positive")
+        ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class NormalizedLqrProfileGrid:
+    """Generate a bounded, scaled LQR profile lattice without hand tuning.
+
+    State and control coordinates have already been normalized by the
+    campaign's declared scales. The grid therefore searches only a small,
+    interpretable set of relative tracking and effort priorities instead of
+    asking every family to invent absolute Q/R magnitudes. It is a candidate
+    generator, not a substitute for the family-specific nonlinear-response
+    and actuator gates that determine promotion.
+    """
+
+    id_prefix: str
+    state_weight_multipliers: tuple[float, ...] = (0.25, 1.0, 4.0)
+    control_effort_multipliers: tuple[float, ...] = (2.0, 1.0, 0.25)
+    state_base_weights: tuple[float, ...] = ()
+    control_base_weights: tuple[float, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.id_prefix.strip():
+            raise ValueError("normalized LQR profile grids require an ID prefix")
+        for label, values in (
+            ("state weight multipliers", self.state_weight_multipliers),
+            ("control effort multipliers", self.control_effort_multipliers),
+        ):
+            if not values or any(not math.isfinite(value) or value <= 0.0 for value in values):
+                raise ValueError(f"normalized LQR {label} must be finite and positive")
+            if len(values) != len(set(values)):
+                raise ValueError(f"normalized LQR {label} must not contain duplicates")
+        for label, values in (
+            ("state base weights", self.state_base_weights),
+            ("control base weights", self.control_base_weights),
+        ):
+            if values and any(not math.isfinite(value) or value <= 0.0 for value in values):
+                raise ValueError(f"normalized LQR {label} must be finite and positive")
+        ####
+
+    def profiles(self, state_count: int, control_count: int) -> tuple[GenericLqrProfile, ...]:
+        """Return deterministic candidates for one scaled local plant."""
+
+        if state_count <= 0 or control_count <= 0:
+            raise ValueError("normalized LQR profile grids require positive state/control dimensions")
+        state_base = self.state_base_weights or (1.0,) * state_count
+        control_base = self.control_base_weights or (1.0,) * control_count
+        if len(state_base) != state_count:
+            raise ValueError("normalized LQR state base weights must match the selected state dimension")
+        if len(control_base) != control_count:
+            raise ValueError("normalized LQR control base weights must match the selected control dimension")
+        profiles: list[GenericLqrProfile] = []
+        for tracking in self.state_weight_multipliers:
+            for effort in self.control_effort_multipliers:
+                profiles.append(
+                    GenericLqrProfile(
+                        f"{self.id_prefix}.tracking-{tracking:g}.effort-{effort:g}",
+                        tuple(value * tracking for value in state_base),
+                        tuple(value * effort for value in control_base),
+                    )
+                )
+        return tuple(profiles)
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Return the portable candidate-generation policy."""
+
+        return {
+            "id_prefix": self.id_prefix,
+            "state_weight_multipliers": list(self.state_weight_multipliers),
+            "control_effort_multipliers": list(self.control_effort_multipliers),
+            "state_base_weights": list(self.state_base_weights),
+            "control_base_weights": list(self.control_base_weights),
+        }
         ####
     ####
 
@@ -298,6 +571,7 @@ class TrimToTuneResult:
     lqr: GenericLqrReport | None
     status: str
     failure_reason: str | None = None
+    authority_preflight: AuthorityPreflightReport | None = None
 
     def as_dict(self) -> dict[str, Any]:
         """Return stage results without hiding a failed prerequisite."""
@@ -316,6 +590,11 @@ class TrimToTuneResult:
                 "trim_controls": dict(self.linearization.trim_controls),
                 "metadata": dict(self.linearization.metadata),
             } if self.linearization is not None else None,
+            "authority_preflight": (
+                self.authority_preflight.as_dict()
+                if self.authority_preflight is not None
+                else None
+            ),
             "lqr": self.lqr.as_dict() if self.lqr is not None else None,
         }
         ####
@@ -331,6 +610,7 @@ def trim_linearize_and_tune(
     control_scales: Sequence[float],
     profiles: Sequence[GenericLqrProfile],
     limits: AutoTuneLimits | None = None,
+    authority_preflight: AuthorityPreflightEvaluator | None = None,
     maneuver_evaluator: ManeuverEvaluator | None = None,
     state_step: float = 1.0e-6,
     control_step: float = 1.0e-6,
@@ -340,7 +620,10 @@ def trim_linearize_and_tune(
 
     This is the reusable adapter boundary for B747, X8, helicopters,
     spacecraft, and other families.  A failed trim stops the pipeline rather
-    than allowing an LQR design around an arbitrary initial condition.
+    than allowing an LQR design around an arbitrary initial condition.  When
+    supplied, ``authority_preflight`` runs after derivative construction and
+    before LQR synthesis, so a topology or effectivity blocker cannot be
+    obscured by a gain sweep.
     """
 
     try:
@@ -358,6 +641,27 @@ def trim_linearize_and_tune(
             control_step=control_step,
             metadata=metadata,
         )
+    except (KeyError, TypeError, ValueError, OverflowError, RuntimeError, np.linalg.LinAlgError) as error:
+        return TrimToTuneResult(vehicle_id, trim, None, None, "linearization_or_tuning_failed", str(error))
+
+    authority: AuthorityPreflightReport | None = None
+    if authority_preflight is not None:
+        try:
+            authority = authority_preflight(trim, linearization)
+        except (KeyError, TypeError, ValueError, OverflowError, RuntimeError, np.linalg.LinAlgError) as error:
+            return TrimToTuneResult(vehicle_id, trim, linearization, None, "authority_preflight_invalid", str(error))
+        if authority.status != "passed":
+            return TrimToTuneResult(
+                vehicle_id,
+                trim,
+                linearization,
+                None,
+                "authority_preflight_blocked",
+                authority.reason,
+                authority,
+            )
+
+    try:
         report = tune_lqr_profiles(
             vehicle_id,
             tuple(tuple(float(value) for value in row) for row in linearization.a_matrix),
@@ -372,6 +676,6 @@ def trim_linearize_and_tune(
             design_source="trimmed-plant-finite-difference-linearization",
         )
     except (KeyError, TypeError, ValueError, OverflowError, RuntimeError, np.linalg.LinAlgError) as error:
-        return TrimToTuneResult(vehicle_id, trim, None, None, "linearization_or_tuning_failed", str(error))
-    return TrimToTuneResult(vehicle_id, trim, linearization, report, "tuned")
+        return TrimToTuneResult(vehicle_id, trim, linearization, None, "linearization_or_tuning_failed", str(error), authority)
+    return TrimToTuneResult(vehicle_id, trim, linearization, report, "tuned", authority_preflight=authority)
     ####

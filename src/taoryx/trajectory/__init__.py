@@ -14,6 +14,7 @@ from ..controller_realization import (
     preflight_controller_realization,
 )
 from ..racetrack_guidance import RacetrackGuidanceReference, racetrack_reference_at_time
+from .a320_adapter import A320OpenAPControlPlant, A320Pseudo6DOFControlPlant
 from .a320_openap import A320OpenAPEnvelopeError, A320OpenAPModel, A320OpenAPOperatingPoint, A320OpenAPResult
 from .a320_pseudo6dof import A320Pseudo6DOFModel, A320Pseudo6DOFOperatingPoint, A320Pseudo6DOFResult
 from .a320_racetrack import A320RacetrackMode, A320RacetrackRun, A320RacetrackRunner
@@ -131,6 +132,7 @@ from .evaluation import (
 )
 from .f16_operating_points import F16OperatingPoint, runtime_trim_result, solve_f16_source_trim
 from .f16_racetrack import F16RacetrackMode, F16RacetrackNavigationState, F16RacetrackRun, F16RacetrackRunner
+from .f16_reduced_adapter import F16PointMassControlPlant, F16Pseudo6DOFControlPlant, build_f16_reduced_control_plant
 from .f16_reduced_racetrack import F16ReducedRacetrackMode, F16ReducedRacetrackRun, F16ReducedRacetrackRunner
 from .f16_reductions import F16AttitudeResponsePseudo6DOFModel, F16PointMass3DOFModel
 from .f16_reference import (
@@ -140,7 +142,19 @@ from .f16_reference import (
     load_f16_reference_plant,
 )
 from .fidelity_ladder import FidelityProblem, project_state, render_fidelity_problems, scale_problem_step
-from .fidelity_selection import FidelitySelectionRequest, FidelitySelectionResult, select_validated_fidelity
+from .fidelity_selection import (
+    CanonicalFidelitySelectionRequest,
+    CanonicalFidelitySelectionResult,
+    FidelitySelectionRequest,
+    FidelitySelectionResult,
+    select_validated_canonical_fidelity,
+    select_validated_fidelity,
+)
+from .hummingbird_adapter import (
+    HummingbirdPointMassControlPlant,
+    HummingbirdPseudo6DOFControlPlant,
+    build_hummingbird_reduced_control_plant,
+)
 from .hummingbird_pseudo6dof import HummingbirdPseudo6DOFCommand, HummingbirdPseudo6DOFModel, HummingbirdPseudo6DOFState
 from .nesc_pseudo6dof import NESCCompositePseudo6DOFResult, build_nesc_composite_pseudo6dof
 from .providers import (
@@ -169,6 +183,7 @@ from .pseudo6dof_profiles import (
     load_pseudo6dof_catalog,
     load_qualified_fidelity_evidence,
 )
+from .reduced_control_plant import ReducedOrderControlPlant, declared_equilibrium_trim
 from .reference_families import (
     ReferenceFamilyManifest,
     ReferenceFidelityProfile,
@@ -183,7 +198,7 @@ from .reference_families import (
 )
 from .reference_packages import ReferencePackageBindingError, ReferencePackageInspection, inspect_reference_package
 from .resolution import ResolutionError, diff_resolved_cases, load_case_intent, resolve_case
-from .response_laws import AxisResponseState, bounded_axis_rate_command, step_bounded_axis_response
+from .response_laws import AxisResponseState, bounded_axis_acceleration, bounded_axis_rate_command, step_bounded_axis_response
 
 __all__ = [
     "AllocationSchema",
@@ -301,6 +316,8 @@ __all__ = [
     "F16RacetrackRunner",
     "F16AttitudeResponsePseudo6DOFModel",
     "F16PointMass3DOFModel",
+    "F16PointMassControlPlant",
+    "F16Pseudo6DOFControlPlant",
     "F16ReducedRacetrackMode",
     "F16ReducedRacetrackRun",
     "F16ReducedRacetrackRunner",
@@ -309,10 +326,14 @@ __all__ = [
     "load_f16_reference_plant",
     "FidelitySelectionRequest",
     "FidelitySelectionResult",
+    "CanonicalFidelitySelectionRequest",
+    "CanonicalFidelitySelectionResult",
     "RacetrackGuidanceReference",
     "racetrack_reference_at_time",
     "select_validated_fidelity",
+    "select_validated_canonical_fidelity",
     "step_bounded_axis_response",
+    "bounded_axis_acceleration",
     "DAVEMLFixedWingDynamicsBinding",
     "DAVEMLGraph",
     "evaluate_daveml_checkdata",
@@ -322,10 +343,12 @@ __all__ = [
     "load_compatibility_overlay_for_payload",
     "load_quarantine_for_payload",
     "A320OpenAPEnvelopeError",
+    "A320OpenAPControlPlant",
     "A320OpenAPModel",
     "A320OpenAPOperatingPoint",
     "A320OpenAPResult",
     "A320Pseudo6DOFModel",
+    "A320Pseudo6DOFControlPlant",
     "A320Pseudo6DOFOperatingPoint",
     "A320Pseudo6DOFResult",
     "A320RacetrackMode",
@@ -340,8 +363,14 @@ __all__ = [
     "HummingbirdPseudo6DOFCommand",
     "HummingbirdPseudo6DOFModel",
     "HummingbirdPseudo6DOFState",
+    "HummingbirdPointMassControlPlant",
+    "HummingbirdPseudo6DOFControlPlant",
     "NESCCompositePseudo6DOFResult",
     "build_nesc_composite_pseudo6dof",
+    "build_f16_reduced_control_plant",
+    "build_hummingbird_reduced_control_plant",
+    "ReducedOrderControlPlant",
+    "declared_equilibrium_trim",
     "load_daveml_atmosphere",
     "load_pseudo6dof_catalog",
     "load_qualified_fidelity_evidence",

@@ -1,0 +1,35 @@
+{
+  "available_physics": [
+    "force_source=source_table",
+    "moment_source=not_applicable_point_mass_3dof",
+    "actuator_realization=kinematic_route_command_no_surface_claim",
+    "propulsion_model=source_table_thrust",
+    "resource_model=fixed_mass_zero_propellant"
+  ],
+  "claim": "The source-table X8 point-mass reduction completes the shared powered fixed-wing racetrack geometry with independent truth-based altitude, speed, route, and terminal gates.",
+  "control_realization": "force_model",
+  "evidence_grade": "mixed",
+  "fidelity": "point_mass_3dof",
+  "nonclaims": [
+    "attitude or body-rate dynamics",
+    "physical elevon, moment, or actuator authority",
+    "flight-test or manufacturer fidelity",
+    "wind robustness, takeoff, or landing",
+    "realization boundary: The point-mass adapter integrates translational motion and resolves speed, heading, and flight-path commands from the shared racetrack. No attitude, moment, or individual surface signal is used to pass the mission."
+  ],
+  "physical_effectors": [],
+  "realization_id": "x8-racetrack-altitude-turns-3dof-v1-candidate.point_mass_3dof.v1",
+  "semantic_command_mapping": {
+    "route.altitude": "shared_racetrack.altitude_command",
+    "route.bank": "shared_racetrack.bank_command",
+    "route.heading": "shared_racetrack.heading_command",
+    "route.speed": "shared_racetrack.speed_command"
+  },
+  "state_schema": [
+    "north_m",
+    "east_m",
+    "altitude_m",
+    "speed_m_s",
+    "heading_deg"
+  ]
+}

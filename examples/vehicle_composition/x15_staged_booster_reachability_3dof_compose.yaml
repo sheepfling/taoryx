@@ -1,0 +1,32 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: x15-staged-booster-reachability-3dof-v1
+vehicle: x15
+fidelity: point_mass_3dof
+initialization:
+  id: staged_booster_launch
+  inputs:
+    initial_mass_kg: {value: 30000.0, unit: kg}
+    initial_speed_m_s: {value: 1555.6349186151906, unit: m/s}
+    initial_altitude_m: {value: 0.0, unit: m}
+    launch_azimuth_deg: {value: 0.0, unit: deg}
+    launch_elevation_deg: {value: 45.0, unit: deg}
+    glide_bank_deg: {value: 0.0, unit: deg}
+mission:
+  id: x15_staged_booster_reachability_v1
+segments:
+  - id: booster_powered
+    instance_id: source-booster-burn
+    inputs:
+      cutoff_time_s: {value: 20.0, unit: s}
+  - id: booster_coast_release
+    instance_id: source-booster-release
+    inputs:
+      release_time_s: {value: 50.0, unit: s}
+  - id: unpowered_glide_handoff
+    instance_id: reduced-glide-handoff
+    inputs:
+      horizon_s: {value: 1000.0, unit: s}
+  - id: impact_witness
+    instance_id: passive-impact
+    inputs:
+      terminal_kind: {value: impact}

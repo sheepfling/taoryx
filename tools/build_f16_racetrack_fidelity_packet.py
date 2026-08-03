@@ -12,12 +12,26 @@ import csv
 import hashlib
 import json
 import math
+import mimetypes
 import shutil
 import zipfile
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, cast
 
-from validate_f16_racetrack import F16_VALIDITY_ENVELOPE, _envelope_violations, _render_board, run_case
+try:
+    from validate_f16_racetrack import F16_VALIDITY_ENVELOPE, _envelope_violations, _render_board, run_case
+except ModuleNotFoundError:  # pragma: no cover - package import path
+    from tools.validate_f16_racetrack import F16_VALIDITY_ENVELOPE, _envelope_violations, _render_board, run_case
+
+from taoryx.fidelity_contracts import FidelityTier, control_realization_for
+from taoryx.showcase import (
+    ArtifactFile,
+    EvidenceBoardSpec,
+    FidelityShowcaseRealization,
+    ShowcaseArchetype,
+    ShowcaseOutcome,
+    build_showcase_run_artifact,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "artifacts/showcases/f16-s119-racetrack-fidelity-ladder"
@@ -59,6 +73,70 @@ NONCLAIMS: Final[tuple[str, ...]] = (
     "wind or uncertainty robustness",
     "TAOS 96 runtime compatibility",
 )
+MODE_FIDELITIES: Final[dict[str, FidelityTier]] = {
+    "point_mass_3dof": "point_mass_3dof",
+    "pseudo_6dof_kinematic_bridge": "pseudo_6dof",
+    "direct_wrench": "rigid_body_6dof_direct_wrench",
+    "surface_allocated": "rigid_body_6dof_surface_allocated",
+}
+MODE_EVIDENCE_GRADES: Final[dict[str, str]] = {
+    "point_mass_3dof": "mixed",
+    "pseudo_6dof_kinematic_bridge": "mixed",
+    "direct_wrench": "mixed",
+    "surface_allocated": "mixed",
+}
+MODE_STATE_SCHEMAS: Final[dict[str, tuple[str, ...]]] = {
+    "point_mass_3dof": (
+        "north_m",
+        "east_m",
+        "altitude_m",
+        "speed_m_s",
+        "route_heading_achieved_deg",
+        "route_bank_achieved_deg",
+    ),
+    "pseudo_6dof_kinematic_bridge": (
+        "north_m",
+        "east_m",
+        "altitude_m",
+        "speed_m_s",
+        "route_heading_achieved_deg",
+        "route_pitch_achieved_deg",
+        "route_bank_achieved_deg",
+        "p_rad_s",
+        "q_rad_s",
+        "r_rad_s",
+    ),
+    "direct_wrench": (
+        "north_m",
+        "east_m",
+        "altitude_m",
+        "speed_m_s",
+        "route_heading_achieved_deg",
+        "route_pitch_achieved_deg",
+        "route_bank_achieved_deg",
+        "p_rad_s",
+        "q_rad_s",
+        "r_rad_s",
+    ),
+    "surface_allocated": (
+        "north_m",
+        "east_m",
+        "altitude_m",
+        "speed_m_s",
+        "route_heading_achieved_deg",
+        "route_pitch_achieved_deg",
+        "route_bank_achieved_deg",
+        "p_rad_s",
+        "q_rad_s",
+        "r_rad_s",
+    ),
+}
+SHOWCASE_MODULES: Final[tuple[str, ...]] = (
+    "mission_geometry",
+    "mission_timeline",
+    "dynamics_and_resources",
+    "envelope_and_qualification",
+)
 ####
 
 
@@ -82,6 +160,98 @@ def _write_csv(path: Path, rows: list[dict[str, float | int | str]]) -> None:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
         writer.writerows(rows)
+    ####
+
+
+def _payload_sha256(value: object) -> str:
+    """Hash stable scenario metadata without tying it to generated files."""
+
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+    ####
+
+
+def _showcase_realization(
+    runtime_mode: str,
+    evidence: dict[str, Any],
+) -> FidelityShowcaseRealization:
+    """Resolve the F-16 mode through the canonical four-tier vocabulary."""
+
+    tier = MODE_FIDELITIES[runtime_mode]
+    control_realization = control_realization_for(tier)
+    physical_effectors = (
+        "elevator_deg",
+        "aileron_deg",
+        "rudder_deg",
+        "throttle_fraction",
+    ) if control_realization == "surface_allocated" else ()
+    command_mapping = {
+        "route.speed": "route_speed_command_m_s",
+        "route.altitude": "route_altitude_command_m",
+        "route.heading": "route_heading_command_deg",
+        "route.bank": "route_bank_command_deg",
+    }
+    if control_realization in {"direct_wrench", "surface_allocated"}:
+        command_mapping["attitude_lqr.wrench"] = (
+            "direct_wrench" if control_realization == "direct_wrench" else "constrained_effector_allocator"
+        )
+    available_physics = {
+        "point_mass_3dof": ("source force diagnostics", "bounded translational kinematics"),
+        "pseudo_6dof_kinematic_bridge": ("source force diagnostics", "named attitude/rate response law"),
+        "direct_wrench": ("source aerodynamic loads", "direct generalized force/moment bridge"),
+        "surface_allocated": (
+            "source aerodynamic loads",
+            "bounded surface/throttle allocation",
+            "actuator position and rate limits",
+        ),
+    }[runtime_mode]
+    return FidelityShowcaseRealization(
+        fidelity=tier,
+        control_realization=control_realization,
+        realization_id=f"reference_f16_s119.racetrack.{runtime_mode}.v1",
+        state_schema=MODE_STATE_SCHEMAS[runtime_mode],
+        semantic_command_mapping=command_mapping,
+        physical_effectors=physical_effectors,
+        available_physics=available_physics,
+        claim=str(MODE_DEFINITIONS[runtime_mode]["claim"]),
+        nonclaims=(*NONCLAIMS, str(evidence["claim_boundary"])),
+        evidence_grade=cast(Any, MODE_EVIDENCE_GRADES[runtime_mode]),
+    )
+    ####
+
+
+def _showcase_outcome(evidence: dict[str, Any]) -> ShowcaseOutcome:
+    """Map the truth-evaluated result into the common outcome vocabulary."""
+
+    runtime = evidence["runtime"]
+    if not bool(runtime.get("numerical_valid", False)):
+        return "numerical_failure"
+    if runtime.get("envelope_violations"):
+        return "envelope_limited"
+    return "completed" if bool(evidence["evaluation"].get("mission_pass", False)) else "partial"
+    ####
+
+
+def _artifact_files(packet: Path, scenario_hash: str) -> tuple[ArtifactFile, ...]:
+    """Build content identities for one packet, keeping manifest as trust root."""
+
+    names = ["manifest.json"]
+    names.extend(
+        str(path.relative_to(packet))
+        for path in sorted(packet.rglob("*"))
+        if path.is_file() and path.name != "manifest.json"
+    )
+    result: list[ArtifactFile] = []
+    for name in names:
+        media_type = mimetypes.guess_type(name)[0] or "application/octet-stream"
+        result.append(
+            ArtifactFile(
+                path=name,
+                sha256=scenario_hash if name == "manifest.json" else _sha256(packet / name),
+                media_type=media_type,
+            )
+        )
+    return tuple(result)
     ####
 
 
@@ -350,6 +520,7 @@ def build(output: Path = DEFAULT_OUTPUT, *, dt_s: float = 0.5) -> Path:
     )
     records: list[dict[str, object]] = []
     run_artifacts: dict[str, tuple[dict[str, Any], list[dict[str, float | int | str]]]] = {}
+    showcase_run_artifacts: list[dict[str, Any]] = []
     for packet_name, runtime_mode in MODES:
         evidence, rows = run_case(runtime_mode, None, dt_s)
         run_artifacts[runtime_mode] = (evidence, rows)
@@ -500,6 +671,32 @@ def build(output: Path = DEFAULT_OUTPUT, *, dt_s: float = 0.5) -> Path:
             f"PYTHONPATH=src python3 tools/validate_f16_racetrack.py --mode {runtime_mode} --dt-s {dt_s} --output-dir {packet}\n",
             encoding="utf-8",
         )
+        scenario_contract_hash = _payload_sha256(
+            {
+                "family_id": evidence["family_id"],
+                "vehicle_id": evidence["vehicle_id"],
+                "binding_id": binding_id,
+                "runtime_mode": runtime_mode,
+                "route": route,
+                "dt_s": dt_s,
+            }
+        )
+        showcase_run = build_showcase_run_artifact(
+            realization=_showcase_realization(runtime_mode, evidence),
+            run_id=f"reference-f16-s119-racetrack-{runtime_mode}",
+            showcase_id="org.taoryx.showcase.reference_f16_s119.racetrack",
+            vehicle_binding_id=binding_id,
+            scenario_contract_sha256=scenario_contract_hash,
+            outcome=_showcase_outcome(evidence),
+            files=_artifact_files(packet, scenario_contract_hash),
+            board=EvidenceBoardSpec(
+                profile="family-evidence-board-v1",
+                modules=SHOWCASE_MODULES,
+            ),
+            archetypes=tuple(cast(ShowcaseArchetype, item) for item in SHOWCASE_MODULES),
+        )
+        showcase_run_payload = showcase_run.model_dump(mode="json")
+        showcase_run_artifacts.append(showcase_run_payload)
         manifest = {
             "schema_version": 1,
             "showcase_schema": "taoryx.showcase/v1alpha1",
@@ -509,6 +706,7 @@ def build(output: Path = DEFAULT_OUTPUT, *, dt_s: float = 0.5) -> Path:
             "runtime_mode": runtime_mode,
             "status": evidence["status"],
             "files": {},
+            "run_artifacts": [showcase_run_payload],
         }
         manifest_path = packet / "manifest.json"
         manifest["files"] = {str(path.relative_to(packet)): _sha256(path) for path in sorted(packet.rglob("*")) if path.is_file() and path != manifest_path}
@@ -521,6 +719,8 @@ def build(output: Path = DEFAULT_OUTPUT, *, dt_s: float = 0.5) -> Path:
             "required_passed": evidence["evaluation"]["required_passed"],
             "required_objectives": evidence["evaluation"]["required_objectives"],
             "packet": str(packet.relative_to(output)),
+            "showcase_run_id": showcase_run.run_id,
+            "showcase_outcome": showcase_run.outcome,
         })
     _write_json(output / "comparison.json", {
         "schema_version": 1,
@@ -550,6 +750,7 @@ def build(output: Path = DEFAULT_OUTPUT, *, dt_s: float = 0.5) -> Path:
         "catalog": "f16-s119-racetrack-fidelity-ladder-v1",
         "family_id": "reference_f16_s119",
         "records": records,
+        "run_artifacts": showcase_run_artifacts,
         "files": {str(path.relative_to(output)): _sha256(path) for path in sorted(output.rglob("*")) if path.is_file() and path != manifest_path},
     })
     archive = output.parent / f"{output.name}.zip"
@@ -577,6 +778,33 @@ def _convergence_report(
     post-terminal endpoint drift as mission failure.
     """
 
+    if not bool(base_evidence["evaluation"].get("mission_pass", False)):
+        return {
+            "schema_version": 1,
+            "status": "semantic_gate_convergence_pending",
+            "runtime_mode": runtime_mode,
+            "base_step_s": base_dt_s,
+            "comparison_step_s": None,
+            "base_sample_count": len(base_rows),
+            "comparison_sample_count": None,
+            "mission_status_parity": None,
+            "objective_status_parity": None,
+            "maximum_truth_event_time_delta_s": None,
+            "maximum_critical_margin_delta": None,
+            "comparison_status": "not_run",
+            "skip_reason": "nominal mission did not pass the independent truth-objective gate",
+            "acceptance": {
+                "maximum_truth_event_time_delta_s": 30.0,
+                "maximum_critical_margin_delta": 5.0,
+                "definition": "semantic gate convergence; not sample-by-sample trajectory identity",
+            },
+            "objectives": [],
+            "claim_boundary": (
+                "Convergence is not promoted when the nominal mission itself is pending or failed; "
+                "the packet retains that distinction instead of running an unnecessary long comparison."
+            ),
+        }
+
     comparison_dt_s = (
         0.75
         if runtime_mode == "surface_allocated" and math.isclose(base_dt_s, 0.5)
@@ -597,11 +825,20 @@ def _convergence_report(
             if base_time is None or comparison_time is None
             else float(comparison_time) - float(base_time)
         )
-        margin_delta = float(comparison_result["margin"]) - float(base_result["margin"])
+        base_margin = base_result.get("margin")
+        comparison_margin = comparison_result.get("margin")
+        margin_delta = (
+            None
+            if base_margin is None or comparison_margin is None
+            else float(comparison_margin) - float(base_margin)
+        )
         if time_delta is not None:
             max_time_delta = max(max_time_delta, abs(time_delta))
-        max_margin_delta = max(max_margin_delta, abs(margin_delta))
+        if margin_delta is not None:
+            max_margin_delta = max(max_margin_delta, abs(margin_delta))
         status_parity = status_parity and base_result["status"] == comparison_result["status"]
+        base_critical_metric = base_result.get("critical_metric") or {}
+        comparison_critical_metric = comparison_result.get("critical_metric") or {}
         objective_deltas.append({
             "id": base_result["id"],
             "base_status": base_result["status"],
@@ -609,8 +846,8 @@ def _convergence_report(
             "base_truth_time_s": base_time,
             "comparison_truth_time_s": comparison_time,
             "truth_time_delta_s": time_delta,
-            "base_critical_margin": base_result["critical_metric"]["margin"],
-            "comparison_critical_margin": comparison_result["critical_metric"]["margin"],
+            "base_critical_margin": base_critical_metric.get("margin"),
+            "comparison_critical_margin": comparison_critical_metric.get("margin"),
             "critical_margin_delta": margin_delta,
         })
     mission_status_parity = bool(base_evidence["evaluation"]["mission_pass"]) == bool(

@@ -1203,23 +1203,32 @@ def _lower_case(
             return _apply_segment_updates(state, segments[target], parameters, tables)
         ####
 
-        if _dynamics_mode(problem) is DynamicsMode.KINEMATIC_6DOF:
+        dynamics_mode = _dynamics_mode(problem)
+        kinematic_profile = _kinematic_response_profile(problem) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else None
+        kinematic_attitude_target_provider = (
+            _build_kinematic_attitude_target_provider(problem)
+            if dynamics_mode is DynamicsMode.KINEMATIC_6DOF
+            else None
+        )
+        initial_attitude = Quaternion.identity()
+        if dynamics_mode is DynamicsMode.KINEMATIC_6DOF:
+            attitude_attributes = _runtime_attributes(problem, "attitude")
+            if attitude_attributes.get("mode", "").casefold() == "route-lag" and kinematic_attitude_target_provider is not None:
+                initial_attitude = _quaternion_from_euler(kinematic_attitude_target_provider(initial_state))
             initial_named = {
                 **initial_state.named,
-                "qw": 1.0,
-                "qx": 0.0,
-                "qy": 0.0,
-                "qz": 0.0,
+                "qw": initial_attitude.w,
+                "qx": initial_attitude.x,
+                "qy": initial_attitude.y,
+                "qz": initial_attitude.z,
             }
             initial_state = RuntimeState(initial_state.time, initial_state.values, initial_state.frame, initial_named, initial_state.value_names, initial_state.segment_endpoints)
-        dynamics_mode = _dynamics_mode(problem)
         base_truth_provider = TranslationTruthProvider(
             earth_mu,
             earth_omega,
             length_scale_to_m=0.3048 if point_mass_si_contract else 1.0,
         )
         truth_provider = KinematicTruthProvider(base_truth_provider) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else base_truth_provider
-        kinematic_profile = _kinematic_response_profile(problem) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else None
         vehicle = RuntimeVehicle(
             str(trajectory.number),
             initial_state,
@@ -1243,10 +1252,19 @@ def _lower_case(
             event_handlers=event_handlers,
             activation_handler=activation_handler,
             dynamics_mode=dynamics_mode,
-            body_rate_provider=_build_kinematic_body_rate_provider(problem, kinematic_profile) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else None,
+            body_rate_provider=(
+                _build_kinematic_body_rate_provider(problem, kinematic_profile, kinematic_attitude_target_provider)
+                if dynamics_mode is DynamicsMode.KINEMATIC_6DOF
+                else None
+            ),
+            kinematic_attitude_target_provider=kinematic_attitude_target_provider,
             kinematic_response_profile_id=kinematic_profile.id if kinematic_profile is not None else None,
             publish_derived_rates=publish_derived_rates,
-            kinematic_state=_kinematic_state(initial_state) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else None,
+            kinematic_state=(
+                _kinematic_state(initial_state, initial_attitude)
+                if dynamics_mode is DynamicsMode.KINEMATIC_6DOF
+                else None
+            ),
             stall_detector=stall_detector,
             truth_provider=truth_provider,
         )
@@ -4886,9 +4904,61 @@ def _kinematic_response_profile(problem: Problem) -> Pseudo6DOFProfile | None:
     ####
 
 
+def _build_kinematic_attitude_target_provider(problem: Problem) -> Callable[[RuntimeState], Vector3]:
+    """Build an explicit static or racetrack-derived kinematic attitude target.
+
+    ``route-lag`` is a response-law bridge: it derives Euler-angle references
+    from the semantic route and leaves the translational force model unchanged.
+    It does not synthesize aerodynamic moments or allocate control surfaces.
+    """
+
+    attributes = _runtime_attributes(problem, "attitude")
+    mode = attributes.get("mode", "prescribed").casefold()
+    static_target = Vector3(
+        math.radians(float(attributes.get("roll-deg", "0.0"))),
+        math.radians(float(attributes.get("pitch-deg", "0.0"))),
+        math.radians(float(attributes.get("yaw-deg", "0.0"))),
+    )
+    if mode != "route-lag":
+        return lambda state: static_target
+
+    route_attributes = _runtime_attributes(problem, "route")
+    if route_attributes.get("mode", "").casefold() != "racetrack":
+        raise FidelitySetupError(
+            "invalid-kinematic-route-target",
+            "route-lag attitude mode currently requires mode=racetrack guidance",
+            "select mode=lag for a static target, or provide a racetrack route declaration",
+            field="attitude.mode",
+        )
+    speed = max(abs(float(route_attributes.get("racetrack-speed-mps", "0.0"))), 1.0e-6)
+    vehicle_attributes = _runtime_attributes(problem, "vehicle")
+    alpha_offset = math.radians(
+        float(attributes.get("route-alpha-offset-deg", vehicle_attributes.get("aero-alpha-reference-deg", "0.0")))
+    )
+
+    def route_target(state: RuntimeState) -> Vector3:
+        reference = _runtime_racetrack_local_reference(route_attributes, state.time)
+        if reference is None:
+            return static_target
+        _, _, _, tangent_east, tangent_north, vertical_rate, phase = reference
+        bank = 0.0
+        if phase == 2:
+            bank = math.radians(float(route_attributes.get("racetrack-left-bank-deg", "0.0")))
+        elif phase == 5:
+            bank = math.radians(float(route_attributes.get("racetrack-right-bank-deg", "0.0")))
+        pitch = math.atan2(vertical_rate, speed) + alpha_offset
+        heading = math.atan2(tangent_east, tangent_north)
+        return Vector3(bank, pitch, heading)
+        ####
+
+    return route_target
+    ####
+
+
 def _build_kinematic_body_rate_provider(
     problem: Problem,
     response_profile: Pseudo6DOFProfile | None = None,
+    target_provider: Callable[[RuntimeState], Vector3] | None = None,
 ) -> Callable[[RuntimeState], Vector3]:
     """Build the generic prescribed/lagged attitude bridge controller.
 
@@ -4901,18 +4971,14 @@ def _build_kinematic_body_rate_provider(
     attributes = _runtime_attributes(problem, "attitude")
     response_profile = response_profile if response_profile is not None else _kinematic_response_profile(problem)
     mode = attributes.get("mode", "prescribed").casefold()
-    if mode not in {"prescribed", "lag", "rate"}:
+    if mode not in {"prescribed", "lag", "route-lag", "rate"}:
         raise FidelitySetupError(
             "invalid-kinematic-attitude-mode",
-            "kinematic attitude mode must be prescribed, lag, or rate",
-            "set mode=prescribed, mode=lag, or mode=rate on the attitude runtime status",
+            "kinematic attitude mode must be prescribed, lag, route-lag, or rate",
+            "set mode=prescribed, mode=lag, mode=route-lag, or mode=rate on the attitude runtime status",
             field="attitude.mode",
         )
-    target = Vector3(
-        math.radians(float(attributes.get("roll-deg", "0.0"))),
-        math.radians(float(attributes.get("pitch-deg", "0.0"))),
-        math.radians(float(attributes.get("yaw-deg", "0.0"))),
-    )
+    target_provider = target_provider if target_provider is not None else _build_kinematic_attitude_target_provider(problem)
     commanded_rate = Vector3(
         math.radians(float(attributes.get("roll-rate-deg-s", "0.0"))),
         math.radians(float(attributes.get("pitch-rate-deg-s", "0.0"))),
@@ -4944,21 +5010,32 @@ def _build_kinematic_body_rate_provider(
             float(state.named.get("qy", 0.0)),
             float(state.named.get("qz", 0.0)),
         ).normalized()
-        target_attitude = _quaternion_from_euler(target)
-        error = target_attitude.multiply(current.conjugate()).normalized()
-        sign = -1.0 if error.w < 0.0 else 1.0
+        current_euler = current.to_euler_321()
+        target = target_provider(state)
+        error = Vector3(
+            _wrapped_kinematic_angle(target.x - current_euler.x),
+            _wrapped_kinematic_angle(target.y - current_euler.y),
+            _wrapped_kinematic_angle(target.z - current_euler.z),
+        )
         if response_profile is None:
-            rate = Vector3(
-                sign * 2.0 * error.x / lag_s,
-                sign * 2.0 * error.y / lag_s,
-                sign * 2.0 * error.z / lag_s,
+            euler_rate = Vector3(
+                error.x / lag_s,
+                error.y / lag_s,
+                error.z / lag_s,
             )
         else:
-            rate = Vector3(
-                bounded_axis_rate_command(response_profile.response["roll"], sign * 2.0 * error.x),
-                bounded_axis_rate_command(response_profile.response["pitch"], sign * 2.0 * error.y),
-                bounded_axis_rate_command(response_profile.response["yaw"], sign * 2.0 * error.z),
+            euler_rate = Vector3(
+                bounded_axis_rate_command(response_profile.response["roll"], error.x),
+                bounded_axis_rate_command(response_profile.response["pitch"], error.y),
+                bounded_axis_rate_command(response_profile.response["yaw"], error.z),
             )
+        roll = current_euler.x
+        pitch = current_euler.y
+        rate = Vector3(
+            euler_rate.x - math.sin(pitch) * euler_rate.z,
+            math.cos(roll) * euler_rate.y + math.sin(roll) * math.cos(pitch) * euler_rate.z,
+            -math.sin(roll) * euler_rate.y + math.cos(roll) * math.cos(pitch) * euler_rate.z,
+        )
         magnitude = rate.norm()
         if magnitude > maximum_rate:
             rate = rate.scaled(maximum_rate / magnitude)
@@ -4966,6 +5043,13 @@ def _build_kinematic_body_rate_provider(
         ####
 
     return provider
+    ####
+
+
+def _wrapped_kinematic_angle(angle: float) -> float:
+    """Return the shortest signed error for one Euler response-law axis."""
+
+    return math.atan2(math.sin(angle), math.cos(angle))
     ####
 
 
@@ -8433,7 +8517,7 @@ def _dynamics_mode(problem: Problem) -> DynamicsMode:
 ####
 
 
-def _kinematic_state(state: RuntimeState) -> Kinematic6DofState:
+def _kinematic_state(state: RuntimeState, attitude: Quaternion = Quaternion.identity()) -> Kinematic6DofState:
     """Build the kinematic attitude sidecar from an ECFC Cartesian state."""
 
     required = ("x", "y", "z", "xdt", "ydt", "zdt")
@@ -8449,6 +8533,7 @@ def _kinematic_state(state: RuntimeState) -> Kinematic6DofState:
         time=state.time,
         position=FrameVector3(Vector3(*(state.named[name] for name in ("x", "y", "z"))), Frame.ECFC),
         velocity=FrameVector3(Vector3(*(state.named[name] for name in ("xdt", "ydt", "zdt"))), Frame.ECFC),
+        attitude=attitude,
     )
 ####
 

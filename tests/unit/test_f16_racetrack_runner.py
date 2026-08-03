@@ -6,10 +6,15 @@ from pathlib import Path
 
 import numpy as np
 
+from taoryx.mission_promotion import assess_mission_promotion, mission_proposal_fingerprint
+from taoryx.powered_fixed_wing_mission_compiler import (
+    compile_powered_fixed_wing_racetrack,
+    load_powered_fixed_wing_mission_profiles,
+)
 from taoryx.racetrack_template import load_racetrack_template_catalog
 from taoryx.trajectory import F16RacetrackRunner
 from tools.validate_f16_physical_wrench_perturbations import _build_case
-from tools.validate_f16_racetrack import _envelope_violations
+from tools.validate_f16_racetrack import _envelope_violations, run_case
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -75,4 +80,33 @@ def test_f16_racetrack_envelope_check_ignores_roundoff_at_ground() -> None:
 
     rows = [{"time_s": 1.0, "altitude_m": -1.0e-12, "mach": 0.8, "aero_alpha_deg": 0.0, "aero_sideslip_deg": 0.0}]
     assert _envelope_violations(rows) == []
+    ####
+
+
+def test_f16_candidate_route_executes_without_mutating_baseline_catalog() -> None:
+    """A compiled proposal must bind its run evidence to exact candidate geometry."""
+
+    profiles = load_powered_fixed_wing_mission_profiles(
+        ROOT / "verification/powered_fixed_wing_mission_profiles.yaml"
+    )
+    proposal = compile_powered_fixed_wing_racetrack(
+        *profiles["f16-subsonic"],
+        binding_id="f16-subsonic-pseudo_6dof_kinematic_bridge-candidate",
+        fidelity="pseudo_6dof_kinematic_bridge",
+    )
+    fingerprint = mission_proposal_fingerprint(proposal)
+
+    packet, _ = run_case(
+        "pseudo_6dof_kinematic_bridge",
+        None,
+        1.0,
+        route_override=proposal.route,
+        mission_proposal_fingerprint=fingerprint,
+    )
+
+    assert packet["binding_id"] == proposal.route.binding_id
+    assert packet["mission_proposal_fingerprint"] == fingerprint
+    assert packet["evaluation"]["mission_pass"] is True
+    assessment = assess_mission_promotion(proposal, packet)
+    assert assessment.status == "promotion_eligible"
     ####

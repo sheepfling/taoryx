@@ -21,10 +21,10 @@ true state-derivative evaluator
 finite-difference A/B linearization
         |
         v
-dimension-matched Q/R profile sweep
+normalized Q/R profile grid
         |
         v
-LQR candidates -> stability/uncertainty/mission gates
+LQR candidates -> linear, nonlinear-response, and mission gates
         |
         v
 controller realization -> allocator -> actuator -> plant
@@ -38,7 +38,8 @@ The reusable entry point is
 - a dynamics evaluator returning derivatives named exactly like the trim
   states;
 - positive state and control scaling vectors;
-- one or more `GenericLqrProfile` objects;
+- either explicit `GenericLqrProfile` candidates or a bounded
+  `NormalizedLqrProfileGrid`;
 - optional maneuver metrics and `AutoTuneLimits`.
 
 The utility accepts arbitrary named state and control dimensions. It is not
@@ -46,6 +47,50 @@ limited to the six-state/three-moment attitude bridge used by the legacy
 registered-vehicle convenience function. This allows the same pipeline to
 serve fixed-wing surfaces, rotorcraft rates, spacecraft attitude actuators,
 rocket gimbals, and reduced-order response models.
+
+## Candidate generation policy
+
+The first controller-design action for a newly integrated controlled family is
+not a multi-day manual gain search. `TuningCampaign` performs a fixed sequence
+at each declared operating point:
+
+```text
+trim
+  -> two-step derivative-consistency check
+  -> declared-axis authority check
+  -> closed nested-loop projection check, where applicable
+  -> normalized LQR candidate grid
+  -> declared linear and nonlinear-response gates
+```
+
+`NormalizedLqrProfileGrid` generates a small Cartesian lattice of relative
+tracking and control-effort priorities *after* the family has declared state
+and control scales. The default grid is nine candidates: tracking multipliers
+`[0.25, 1, 4]` crossed with effort multipliers `[2, 1, 0.25]`. This removes
+unexplained absolute Q/R constants from ordinary integrations while keeping
+the search bounded, reproducible, and auditable. A family may supply base
+weights only to express an intentional axis priority, such as pitch versus
+yaw; it must not use the grid as a substitute for an unavailable effector or
+an uncontrolled axis.
+
+The winner is only a `candidate_ready` design-screen result. It is promoted
+only after the family-specific local nonlinear-response evaluator, allocator,
+actuator, and mission gates pass. This prevents a numerically stable gain from
+being presented as a flight-control solution.
+
+The checked lower-tier witnesses demonstrate that a multirotor and a
+powered-fixed-wing family now use this identical sequence without manual gain
+selection:
+
+```text
+PYTHONPATH=src .venv/bin/python tools/validate_reduced_tuning_campaigns.py
+PYTHONPATH=src .venv/bin/python tools/validate_reduced_tuning_campaigns.py --check
+```
+
+Hummingbird's pseudo-6DOF hover-attitude inner loop and the A320 pseudo-6DOF
+cruise-attitude inner loop each generate the nine normalized candidates. Their
+claim boundary remains reduced-order candidate design only: neither witness
+proves rotor/surface allocation, a nonlinear mission, or an envelope.
 
 ## What remains family-specific
 

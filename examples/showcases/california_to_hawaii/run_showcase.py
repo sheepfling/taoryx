@@ -3,13 +3,21 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
+import mimetypes
 import os
 from pathlib import Path
 
 from taoryx.language import GrammarProfile
 from taoryx.outputs import RunArtifact
 from taoryx.runtime.runner import run_files
-
+from taoryx.showcase import (
+    ArtifactFile,
+    EvidenceBoardSpec,
+    FidelityShowcaseRealization,
+    build_showcase_run_artifact,
+)
 
 MISSION_FILE = Path(__file__).with_name("mission.prb")
 AERO_TABLE_FILE = Path(__file__).with_name("aero.tbl")
@@ -38,6 +46,76 @@ def _channel(artifact: RunArtifact, source_name: str) -> list[float]:
     vehicle = next(iter(artifact.vehicles.values()))
     channel = next(channel for channel in vehicle.channels.values() if channel.source_name == source_name)
     return [float(value) for value in channel.values if value is not None]
+    ####
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+    ####
+
+
+def _payload_sha256(value: object) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+    ####
+
+
+def _artifact_files(root: Path, scenario_hash: str) -> tuple[ArtifactFile, ...]:
+    """Describe the native CA-HI packet through the common file contract."""
+
+    names = [
+        path.relative_to(root).as_posix()
+        for path in sorted(root.rglob("*"))
+        if path.is_file() and path.name != "manifest.json"
+    ]
+    names.append("manifest.json")
+    return tuple(
+        ArtifactFile(
+            path=name,
+            sha256=scenario_hash if name == "manifest.json" else _sha256(root / name),
+            media_type=mimetypes.guess_type(name)[0] or "application/octet-stream",
+        )
+        for name in names
+    )
+    ####
+
+
+def _realization() -> FidelityShowcaseRealization:
+    """Declare the native CA-HI control boundary without implying surfaces."""
+
+    return FidelityShowcaseRealization(
+        fidelity="rigid_body_6dof",
+        control_realization="direct_wrench",
+        realization_id="california-to-hawaii-native-direct-wrench-v1",
+        state_schema=("ecic_position_velocity_quaternion_body_rates_mass_resource",),
+        semantic_command_mapping={
+            "throttle": "declared propulsion command",
+            "alpha_deg": "declared aerodynamic guidance command",
+            "bank_deg": "declared aerodynamic guidance command",
+        },
+        available_physics=(
+            "native rigid-body quaternion integration",
+            "declared propulsion and mass-flow segments",
+            "source-bounded aerodynamic force and moment tables",
+            "thermal and terminal guidance telemetry",
+        ),
+        claim=(
+            "The native CA-HI example executes a source-bounded rigid-body "
+            "trajectory with staged propulsion, mass flow, aerodynamic loads, "
+            "and terminal guidance through the direct-wrench bridge."
+        ),
+        nonclaims=(
+            "physical control-surface allocation",
+            "manufacturer or flight-test controller fidelity",
+            "validated thermal or aeroballistic design",
+            "historical TAOS 96 compatibility",
+        ),
+        evidence_grade="synthetic",
+    )
     ####
 
 
@@ -92,6 +170,77 @@ def generate(output_dir: Path) -> Path:
     artifact.write_sqlite(output_dir / "run.sqlite", run_id="california-to-hawaii")
     (output_dir / "summary.txt").write_text(artifact.format_text(max_rows=12), encoding="utf-8")
     write_plots(artifact, output_dir / "plots")
+    realization = _realization()
+    (output_dir / "realized_fidelity.json").write_text(
+        json.dumps(realization.model_dump(mode="json"), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    (output_dir / "claim.json").write_text(
+        json.dumps(
+            {
+                "claim": realization.claim,
+                "nonclaims": list(realization.nonclaims),
+                "fidelity": realization.fidelity,
+                "control_realization": realization.control_realization,
+                "outcome": "completed",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    scenario_hash = _payload_sha256(
+        {
+            "mission": MISSION_FILE.read_text(encoding="utf-8"),
+            "aero_table": AERO_TABLE_FILE.read_text(encoding="utf-8"),
+            "start": START,
+            "destination": DESTINATION,
+        }
+    )
+    showcase_run = build_showcase_run_artifact(
+        realization=realization,
+        run_id="california-to-hawaii-native-direct-wrench-v1",
+        showcase_id="org.taoryx.showcase.california_to_hawaii.native",
+        vehicle_binding_id="synthetic.ca-hi-x8-plus-boosters-v1",
+        scenario_contract_sha256=scenario_hash,
+        outcome="completed",
+        files=_artifact_files(output_dir, scenario_hash),
+        board=EvidenceBoardSpec(
+            profile="family-evidence-board-v1",
+            modules=(
+                "trajectory_3d",
+                "trajectory_vertical",
+                "mission_timeline",
+                "energy_and_resources",
+                "attitude_and_rates",
+                "semantic_controls",
+                "envelope_margins",
+            ),
+        ),
+        archetypes=(
+            "mission_geometry",
+            "mission_timeline",
+            "dynamics_and_resources",
+            "envelope_and_qualification",
+        ),
+    )
+    manifest = {
+        "schema_version": 1,
+        "showcase_id": "org.taoryx.showcase.california_to_hawaii.native",
+        "family": "rocket_plane",
+        "vehicle": "synthetic.ca-hi-x8-plus-boosters-v1",
+        "realized_fidelity": "realized_fidelity.json",
+        "run_artifacts": [showcase_run.model_dump(mode="json")],
+        "files": {},
+    }
+    manifest_path = output_dir / "manifest.json"
+    manifest["files"] = {
+        path.relative_to(output_dir).as_posix(): _sha256(path)
+        for path in sorted(output_dir.rglob("*"))
+        if path.is_file() and path != manifest_path
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return json_path
     ####
 

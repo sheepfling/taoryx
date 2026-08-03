@@ -8,7 +8,7 @@ evidence; a missing controller or mission binding remains explicit.
 
 from __future__ import annotations
 
-import math
+import json
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -17,6 +17,8 @@ from typing import Any, Literal
 
 import yaml
 
+from .generic_tuning import LinearAuthorityRequirement, linear_authority_preflight
+from .racetrack_template import resolve_racetrack_binding
 from .vehicle_registry import ROOT
 
 PreflightStatus = Literal["passed", "development", "planned", "blocked", "not_applicable"]
@@ -172,6 +174,16 @@ def _read_yaml(path: Path) -> Mapping[str, Any]:
     ####
 
 
+def _read_json(path: Path) -> Mapping[str, Any]:
+    """Load one declared controller evidence artifact as a mapping."""
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, Mapping):
+        raise ValueError(f"{path} must contain a JSON object")
+    return payload
+    ####
+
+
 def _finding(
     findings: list[PreflightFinding],
     severity: Literal["error", "warning", "info"],
@@ -230,11 +242,101 @@ def _load_control_names(family_dir: Path) -> set[str]:
     ####
 
 
+def _authority_preflight_for_controller(
+    path: Path,
+    payload: Mapping[str, Any],
+    linearization_path: Path | None,
+    findings: list[PreflightFinding],
+) -> Mapping[str, object] | None:
+    """Check a declared LQR objective against its plant-derived A/B artifact.
+
+    This is the onboarding use of the generic authority gate.  The controller
+    profile declares *which states must be controlled*; the artifact declares
+    the actual local state derivative.  Neither side gets to silently infer
+    the other, and an unavailable artifact remains a prior preflight error.
+    """
+
+    requirement_payload = payload.get("authority_requirement")
+    if not isinstance(requirement_payload, Mapping):
+        _finding(
+            findings,
+            "error",
+            "controller-authority-requirement-missing",
+            _relative(path),
+            "controller profile does not declare the state authority required before tuning",
+            "Declare authority_requirement.id and authority_requirement.required_state_names so rank loss is caught before gain search.",
+        )
+        return None
+    names = requirement_payload.get("required_state_names")
+    if not isinstance(names, list) or not names or not all(isinstance(name, str) and name for name in names):
+        _finding(
+            findings,
+            "error",
+            "controller-authority-requirement-invalid",
+            f"{_relative(path)}:authority_requirement.required_state_names",
+            "authority requirement must contain one or more non-empty state names",
+            "Use the exact state ordering/names emitted by the plant-derived linearization artifact.",
+        )
+        return None
+    if linearization_path is None or not linearization_path.is_file():
+        return None
+    try:
+        artifact = _read_json(linearization_path)
+        state_names = artifact.get("state_names")
+        a_matrix = artifact.get("a_matrix")
+        b_matrix = artifact.get("b_matrix")
+        if not isinstance(state_names, list) or not isinstance(a_matrix, list) or not isinstance(b_matrix, list):
+            raise ValueError("linearization artifact lacks state_names, a_matrix, or b_matrix")
+        requirement = LinearAuthorityRequirement(
+            str(requirement_payload.get("id", "")),
+            tuple(names),
+            minimum_controllability_rank=(
+                int(requirement_payload["minimum_controllability_rank"])
+                if requirement_payload.get("minimum_controllability_rank") is not None
+                else None
+            ),
+            maximum_uncontrolled_fraction=float(requirement_payload.get("maximum_uncontrolled_fraction", 1.0e-8)),
+            maximum_controllability_condition=(
+                float(requirement_payload["maximum_controllability_condition"])
+                if requirement_payload.get("maximum_controllability_condition") is not None
+                else None
+            ),
+        )
+        report = linear_authority_preflight(
+            requirement,
+            state_names=tuple(str(name) for name in state_names),
+            a_matrix=a_matrix,
+            b_matrix=b_matrix,
+        )
+    except (KeyError, TypeError, ValueError, OSError, json.JSONDecodeError) as error:
+        _finding(
+            findings,
+            "error",
+            "controller-authority-preflight-invalid",
+            _relative(linearization_path),
+            f"authority preflight could not consume the declared linearization: {error}",
+            "Regenerate the A/B artifact and align the controller authority requirement with its exact state schema.",
+        )
+        return None
+    if report.status != "passed":
+        _finding(
+            findings,
+            "error",
+            "controller-authority-blocked",
+            _relative(linearization_path),
+            report.reason,
+            "Add/control the missing physical axis, select a supported reduced objective, or use a different scheduled operating point before tuning.",
+        )
+    return report.as_dict()
+    ####
+
+
 def _controller_preflight(family_id: str) -> ControllerPreflightResult:
     family_dir = ROOT / "families" / family_id
     controller_dir = family_dir / "controllers"
     findings: list[PreflightFinding] = []
     profile_ids: list[str] = []
+    authority_reports: dict[str, Mapping[str, object]] = {}
     if not controller_dir.is_dir():
         _finding(findings, "info", "controller-directory-absent", _relative(controller_dir), "no controller profiles are declared", "Use not_applicable only when the family contract explicitly declares no controller.")
         return ControllerPreflightResult(family_id, "not_applicable", (), tuple(findings), {"profiles_checked": 0})
@@ -251,13 +353,17 @@ def _controller_preflight(family_id: str) -> ControllerPreflightResult:
             if required not in payload:
                 _finding(findings, "error", "controller-field-missing", f"{_relative(path)}:{required}", f"controller profile lacks {required!r}", "Declare the controller identity and ordered state contract.")
         implementation = str(payload.get("method", ""))
+        linearization_path: Path | None = None
         if implementation in {"continuous_lqr", "lqr", "lqi", "gain_scheduled_lqr"} and not payload.get("linearization_artifact"):
             _finding(findings, "error", "controller-linearization-missing", _relative(path), "LQR profile does not name a linearization artifact", "Bind the controller to a plant-derived A/B artifact.")
         if implementation in {"continuous_lqr", "lqr", "lqi", "gain_scheduled_lqr"}:
             artifact_value = payload.get("linearization_artifact")
-            artifact_path = _path_from_value(artifact_value)
-            if artifact_path is not None and not artifact_path.is_file():
-                _finding(findings, "error", "controller-linearization-missing", _relative(artifact_path), "controller linearization artifact does not exist", "Generate the referenced linearization evidence before controller preflight.")
+            linearization_path = _path_from_value(artifact_value)
+            if linearization_path is not None and not linearization_path.is_file():
+                _finding(findings, "error", "controller-linearization-missing", _relative(linearization_path), "controller linearization artifact does not exist", "Generate the referenced linearization evidence before controller preflight.")
+            authority = _authority_preflight_for_controller(path, payload, linearization_path, findings)
+            if authority is not None:
+                authority_reports[profile_id] = authority
         effectiveness_path = _path_from_value(payload.get("effectiveness_artifact"))
         if effectiveness_path is not None and not effectiveness_path.is_file():
             _finding(findings, "error", "controller-effectiveness-missing", _relative(effectiveness_path), "controller effectiveness artifact does not exist", "Generate or correct the effectivity evidence.")
@@ -273,25 +379,32 @@ def _controller_preflight(family_id: str) -> ControllerPreflightResult:
         if not payload.get("evidence") and not payload.get("linearization_artifact"):
             _finding(findings, "warning", "controller-evidence-missing", _relative(path), "controller profile names no evidence artifact or source", "Attach the design, trim, and nonlinear validation evidence.")
     status = _status_from_findings(findings, empty="passed" if profile_ids else "not_applicable")
-    return ControllerPreflightResult(family_id, status, tuple(profile_ids), tuple(findings), {"profiles_checked": len(profile_ids), "canonical_control_count": len(control_names)})
+    return ControllerPreflightResult(
+        family_id,
+        status,
+        tuple(profile_ids),
+        tuple(findings),
+        {
+            "profiles_checked": len(profile_ids),
+            "canonical_control_count": len(control_names),
+            "authority_preflights": authority_reports,
+        },
+    )
     ####
 
 
-def _estimate_racetrack(binding: Mapping[str, Any]) -> float | None:
+def _estimate_racetrack(template_id: str, binding_id: str, binding: Mapping[str, Any]) -> float | None:
+    """Resolve timing through the canonical mission compiler.
+
+    The vertical phases occur on the straight legs, so adding their durations
+    to a closed-course estimate double-counts route time.  Reuse the canonical
+    resolver rather than maintaining a second approximation here.
+    """
+
     try:
-        speed = float(binding["speed_m_s"])
-        straight = float(binding["straight_length_m"])
-        radius = float(binding["turn_radius_m"])
-        climb = abs(float(binding["climb_rate_m_s"]))
-        descent = abs(float(binding["descent_rate_m_s"]))
-        altitude_delta = abs(float(binding["high_altitude_m"]) - float(binding["low_altitude_m"]))
-        margin = max(0.0, float(binding.get("simulation_margin_s", 0.0)))
+        return resolve_racetrack_binding(template_id, binding_id, dict(binding)).horizon_s
     except (KeyError, TypeError, ValueError):
         return None
-    if speed <= 0.0 or straight <= 0.0 or radius <= 0.0 or climb <= 0.0 or descent <= 0.0:
-        return None
-    estimate = (2.0 * straight + 2.0 * math.pi * radius) / speed
-    return estimate + altitude_delta / climb + altitude_delta / descent + margin
     ####
 
 
@@ -320,6 +433,10 @@ def _mission_preflight(family_id: str) -> MissionPreflightResult:
         return MissionPreflightResult(family_id, "blocked", str(binding.get("mission_profile", "")) or None, tuple(evidence), tuple(findings), {"estimated_duration_s": None})
     binding_ids = binding.get("binding_ids")
     catalog_bindings = catalog.get("bindings")
+    template = catalog.get("template")
+    template_id = str(template.get("id", "")) if isinstance(template, Mapping) else ""
+    if not template_id:
+        _finding(findings, "error", "mission-template-id-missing", _relative(template_path), "mission template has no semantic identifier", "Declare template.id before resolving route timing.")
     if not isinstance(binding_ids, list) or not binding_ids:
         _finding(findings, "error", "mission-binding-ids-missing", _relative(binding_path), "mission binding declares no realization IDs", "List the 3DOF, pseudo-6DOF, and/or 6DOF realizations explicitly.")
     if not isinstance(catalog_bindings, Mapping):
@@ -333,7 +450,7 @@ def _mission_preflight(family_id: str) -> MissionPreflightResult:
             continue
         if str(candidate.get("vehicle_id")) != family_id:
             _finding(findings, "error", "mission-realization-family-mismatch", f"{_relative(template_path)}:bindings.{binding_id}", "mission realization belongs to a different vehicle family", "Use only bindings whose vehicle_id matches the selected family.")
-        estimate = _estimate_racetrack(candidate)
+        estimate = _estimate_racetrack(template_id, str(binding_id), candidate) if template_id else None
         if estimate is None:
             _finding(findings, "error", "mission-time-estimate-unavailable", f"{_relative(template_path)}:bindings.{binding_id}", "route timing cannot be estimated from the declared geometry and rates", "Declare positive speed, turn radius, leg length, and climb/descent rates.")
         else:

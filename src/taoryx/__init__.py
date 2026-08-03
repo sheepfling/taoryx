@@ -6,6 +6,8 @@ from . import (
     aerodynamics,
     atmosphere,
     attitude,
+    composition_episode,
+    composition_policy,
     contracts,
     coordinates,
     earth,
@@ -39,6 +41,16 @@ from . import (
     visualization,
     x15_reachability,
 )
+from .composition_episode import (
+    EpisodeChannel,
+    EpisodeObservation,
+    EpisodeStep,
+    HummingbirdPseudoCompositionEpisode,
+    LanguageBackedCompositionEpisode,
+    VehicleCompositionEpisode,
+    open_vehicle_composition_episode,
+)
+from .composition_policy import CompositionPolicyTrace, PolicyDecision, PolicyFunction, run_composition_policy
 from .control_directions import ControlDirectionProbe, ControlDirectionResult, audit_control_directions
 from .controller_autotune import (
     AutoTuneCandidate,
@@ -84,15 +96,94 @@ from .direct_wrench import (
     add_direct_wrench_to_local_derivative,
     compose_direct_wrench_load,
 )
+from .family_adapter import (
+    AdapterCapability,
+    AdapterCapabilityError,
+    AdapterChannel,
+    AdapterConformanceFinding,
+    AdapterConformanceReport,
+    AllocationProvider,
+    EffectivenessProvider,
+    FamilyAdapter,
+    FamilyAdapterDescriptor,
+    FamilyCapabilityReport,
+    StandardFamilyAdapter,
+    StateDerivativeProvider,
+    descriptor_from_control_plant,
+    descriptor_from_direct_wrench_state,
+    validate_family_adapter,
+)
+from .family_adapter_probes import AdapterProbeCase, AdapterProbeOperation, AdapterProbeReport, run_adapter_probe
+from .family_adapter_registry import (
+    AdapterRegistrationCheck,
+    AdapterRegistrationError,
+    AdapterRegistryReport,
+    FamilyAdapterProbeFactory,
+    FamilyAdapterRegistration,
+    FamilyAdapterRegistry,
+)
 from .family_debug_rendering import FamilyDebugRenderReport, render_family_debug_artifacts
 from .family_debugging import DebugFamily, FamilyDebugPlan, build_family_debug_plan, family_profile
+from .family_manifest import (
+    UnifiedFamilyManifest,
+    UnifiedFamilyManifestCatalog,
+    UnifiedFamilyManifestFinding,
+    load_unified_family_manifest_catalog,
+)
+from .family_strategy import (
+    FAMILY_STRATEGY_CATALOG,
+    FamilyIntegrationStrategy,
+    FamilyIntegrationStrategyCatalog,
+    FamilyStrategyConformanceReport,
+    FamilyStrategyWorkItem,
+    FamilyStrategyWorklistReport,
+    FamilyTierStrategy,
+    build_family_strategy_worklist,
+    load_family_strategy_catalog,
+    validate_family_strategy_catalog,
+)
+from .fidelity_contracts import (
+    CANONICAL_FIDELITY_TIERS,
+    FIDELITY_TIER_RANK,
+    LEGACY_FIDELITY_ORDER,
+    canonical_tier_for_runtime,
+    canonicalize_fidelity,
+    control_realization_for,
+    parent_fidelity,
+    runtime_fidelity_for,
+)
+from .fidelity_lowering import LoweringCandidate, LoweringDecision, select_canonical_lowering
 from .generic_tuning import (
+    AuthorityPreflightReport,
     GenericLqrCandidate,
     GenericLqrProfile,
     GenericLqrReport,
+    LinearAuthorityRequirement,
     TrimToTuneResult,
+    linear_authority_preflight,
+    linear_authority_preflight_evaluator,
     trim_linearize_and_tune,
     tune_lqr_profiles,
+)
+from .hl20_adapter import (
+    HL20SourceDirectWrenchPlant,
+    HL20SourceSurfacePlant,
+    build_hl20_source_adapter,
+    build_hl20_source_direct_wrench_adapter,
+    build_hl20_source_surface_adapter,
+)
+from .horizontal_fidelity import (
+    HorizontalConformanceReport,
+    HorizontalFidelityRegistry,
+    load_horizontal_registry,
+    validate_horizontal_fidelity,
+)
+from .horizontal_readiness import (
+    HorizontalReadinessReport,
+    HorizontalShowcasePreflight,
+    HorizontalTierReadiness,
+    build_horizontal_readiness_report,
+    preflight_horizontal_showcase,
 )
 from .imu_profile_comparison import ImuProfileComparison, compare_imu_profiles
 from .mission_objectives import (
@@ -219,10 +310,15 @@ from .showcase import (
     FamilyShowcaseTemplate,
     FidelityShowcaseRealization,
     MissionSegmentSpec,
+    ShowcaseArtifactBoundaryFinding,
+    ShowcaseOutcome,
     ShowcaseRunArtifact,
     StartContract,
     TerminalContract,
     VehicleShowcaseBinding,
+    build_showcase_run_artifact,
+    inspect_showcase_run_artifact,
+    validate_showcase_run_artifact_boundary,
 )
 from .state import PointMassRates, PointMassState
 from .table_explorer import (
@@ -360,10 +456,10 @@ from .x15_reachability import (
 
 __all__ = ["__version__", "AutoTuneCandidate", "AutoTuneLimits", "AutoTuneReport", "auto_tune_lqr_profiles", "default_attitude_linearization", "OnboardingFinding", "VehicleOnboardingReport", "validate_all_vehicle_onboarding", "validate_vehicle_onboarding", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "iip", "language", "linalg", "modes", "numeric", "objectives", "optimization", "outputs", "radar", "rigid_body", "rigid_body_frames", "rotorcraft", "runtime", "scenario", "segmentation", "searches", "simulation", "state", "state_rates", "table_explorer", "tables", "trim", "validation", "vehicle", "visualization", "AeroQueryContext", "AerodynamicOutput", "AxisInterpolationBracket", "ControlContract", "ControlDirectionProbe", "ControlDirectionResult", "ControllerDesignCatalog", "ControllerDesignMethod", "ControllerDesignSpec", "DebugFamily", "Direction", "DynamicsKind", "DynamicsLinearization", "DynamicsMode", "EarthRotationAdapter", "EventRecord", "FamilyDebugPlan", "GoalSpec", "FamilyDebugRenderReport", "InterpolationExplanation", "Kinematic6DofState", "MassProperties", "ObjectiveResult", "ObjectiveSpec", "OutputContract", "PhaseWindow", "PointMassRates", "PointMassState", "PreparedAerodynamicCoefficients", "PreparedCoefficientTable", "PropulsionOutput", "QuadRotorAllocation", "Quaternion", "RIGID_BODY_STATE_NAMES", "RandomSeed", "ResolutionRecord", "ResolvedScenario", "RigidBody6DofModel", "RigidBody6DofState", "RigidBodyForceMoment", "RotorCommandSet", "RunArtifact", "ScenarioCompileError", "ScenarioCompiler", "ScenarioRequest", "ScenarioRuntimeContract", "ScenarioSource", "SegmentSpan", "SegmentSpec", "SegmentationCatalog", "SegmentationScenario", "StageDefinition", "StagedPropulsion", "StatusContract", "TableAerodynamicModel", "TableInspection", "TableInspectionArtifact", "TableInspectionFormat", "TableInspectionStatus", "TelemetryChannel", "ThermalAssessment", "ThermalLimits", "TransitionEventSpec", "TransitionPolicy", "TrimCatalog", "TrimCatalogEntry", "TrimResult", "TrimSpec", "VehicleKind", "VehicleTelemetry", "actuator_saturation_fraction", "assess_thermal_limits", "audit_control_directions", "build_family_debug_plan", "build_lqr_controller", "build_run_artifact", "capture_time", "dwell_in_band", "energy_balance_residual", "explain_interpolation", "family_profile", "finite_difference_dynamics_linearization", "finite_difference_linearization", "independent_force_closure", "inspect_table_document", "inspect_table_file", "integral_mass_balance_error", "load_controller_catalog", "load_trim_catalog", "phase_slice", "render_family_debug_artifacts", "render_run_artifact_html", "render_run_artifact_plots", "require_bounded", "require_change_of_sign", "require_channel", "require_monotonic", "require_net_change", "score_objective", "score_objectives", "require_net_change", "settling_time", "solve_trim", "specific_energy", "timestep_convergence_error", "transition_audit", "wrapped_angle_error"]
 __all__ += ["TrimGate", "TrimGateResult", "TrimProcedure", "TrimProcedureResult", "solve_trim_continuation", "solve_trim_procedure", "objective_report_to_evaluation"]
-__all__ += ["showcase", "ArtifactFile", "EvidenceBoardSpec", "FailureCode", "FidelityShowcaseRealization", "FamilyShowcaseTemplate", "MissionSegmentSpec", "ShowcaseRunArtifact", "StartContract", "TerminalContract", "VehicleShowcaseBinding"]
+__all__ += ["showcase", "ArtifactFile", "EvidenceBoardSpec", "FailureCode", "FidelityShowcaseRealization", "ShowcaseArtifactBoundaryFinding", "build_showcase_run_artifact", "inspect_showcase_run_artifact", "validate_showcase_run_artifact_boundary", "FamilyShowcaseTemplate", "MissionSegmentSpec", "ShowcaseRunArtifact", "ShowcaseOutcome", "StartContract", "TerminalContract", "VehicleShowcaseBinding"]
 __all__ = ["__version__", "AutoTuneCandidate", "AutoTuneLimits", "AutoTuneReport", "ReachabilityCatalog", "ReachabilityCommonObject", "ReachabilityFamilySpec", "ReachabilityProfileSpec", "ReachabilityStudySemantic", "DetachedBodyTrajectory", "EnvelopeBounds", "EnvelopeSample", "EnvelopeTermination", "LaunchCommand", "PointMass3DofState", "Pseudo6DofState", "RigidBody6DofReachabilityState", "ReachabilityEnvelope", "ReachabilityFidelity", "ReachabilitySearchSpace", "RocketGlideVehicle", "RocketStageSpec", "SearchAxis", "StageSeparationSpec", "StagedRocketSpec", "TerminalCriteria", "TrajectoryResult", "ReachabilityPlotReport", "load_reachability_artifact", "plot_children_trajectories", "plot_deployment_timeline", "plot_fidelity_progression", "plot_flown_trajectories", "plot_parent_trajectory", "plot_projected_area", "plot_search_coverage", "plot_terminal_capability", "render_reachability_plot_bundle", "X15IntegrationPreflight", "X15ReachabilityBundle", "x15_integration_preflight", "run_x15_reachability_tiers", "write_x15_reachability_bundle", "x15_reachability_commands", "x15_source_staging_contract", "x15_surrogate_vehicle", "generate_launch_grid", "run_reachability_envelope", "simulate_rocket_glide", "auto_tune_lqr_profiles", "default_attitude_linearization", "OnboardingFinding", "VehicleOnboardingReport", "load_reachability_catalog", "validate_all_vehicle_onboarding", "validate_vehicle_onboarding", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "iip", "language", "linalg", "modes", "numeric", "objectives", "optimization", "outputs", "radar", "reachability_catalog", "reachability_envelope", "reachability_visualization", "x15_reachability", "rigid_body", "rigid_body_frames", "rotorcraft", "runtime", "scenario", "segmentation", "searches", "simulation", "state", "state_rates", "table_explorer", "tables", "trim", "validation", "vehicle", "visualization", "AeroQueryContext", "AerodynamicOutput", "AxisInterpolationBracket", "ControlContract", "ControlDirectionProbe", "ControlDirectionResult", "ControllerDesignCatalog", "ControllerDesignMethod", "ControllerDesignSpec", "DebugFamily", "DetachedBodyDefinition", "DetachedBodyShape", "Direction", "DynamicsKind", "DynamicsLinearization", "DynamicsMode", "EarthRotationAdapter", "EventRecord", "FamilyDebugPlan", "GoalSpec", "FamilyDebugRenderReport", "ImpulseFrame", "InterpolationExplanation", "Kinematic6DofState", "MassProperties", "ObjectiveResult", "ObjectiveSpec", "OutputContract", "PhaseWindow", "PointMassRates", "PointMassState", "PreparedAerodynamicCoefficients", "PreparedCoefficientTable", "PropulsionOutput", "PropellantType", "PropulsionCapabilities", "StageMassDefinition", "StageDefinition", "StageSeparationEvent", "StagedVehicleDefinition", "StagedPropulsion", "QuadRotorAllocation", "Quaternion", "RIGID_BODY_STATE_NAMES", "RandomSeed", "ResolutionRecord", "ResolvedScenario", "RigidBody6DofModel", "RigidBody6DofState", "RigidBodyForceMoment", "RotorCommandSet", "RunArtifact", "ScenarioCompileError", "ScenarioCompiler", "ScenarioRequest", "ScenarioRuntimeContract", "ScenarioSource", "SegmentSpan", "SegmentSpec", "SegmentationCatalog", "SegmentationScenario", "StatusContract", "TableAerodynamicModel", "TableInspection", "TableInspectionArtifact", "TableInspectionFormat", "TableInspectionStatus", "TelemetryChannel", "ThermalAssessment", "ThermalLimits", "TransitionEventSpec", "TransitionPolicy", "TrimCatalog", "TrimCatalogEntry", "TrimResult", "TrimSpec", "TumblingPolicy", "VehicleKind", "VehicleTelemetry", "actuator_saturation_fraction", "assess_thermal_limits", "audit_control_directions", "build_family_debug_plan", "build_lqr_controller", "build_run_artifact", "capture_time", "dwell_in_band", "energy_balance_residual", "explain_interpolation", "family_profile", "finite_difference_dynamics_linearization", "finite_difference_linearization", "independent_force_closure", "inspect_table_document", "inspect_table_file", "integral_mass_balance_error", "load_controller_catalog", "load_trim_catalog", "phase_slice", "render_family_debug_artifacts", "render_run_artifact_html", "render_run_artifact_plots", "require_bounded", "require_change_of_sign", "require_channel", "require_monotonic", "require_net_change", "score_objective", "score_objectives", "require_net_change", "settling_time", "solve_trim", "specific_energy", "timestep_convergence_error", "transition_audit", "wrapped_angle_error"]
 __all__ += ["TrimGate", "TrimGateResult", "TrimProcedure", "TrimProcedureResult", "solve_trim_continuation", "solve_trim_procedure", "objective_report_to_evaluation"]
-__all__ += ["showcase", "ArtifactFile", "EvidenceBoardSpec", "FailureCode", "FidelityShowcaseRealization", "FamilyShowcaseTemplate", "MissionSegmentSpec", "ShowcaseRunArtifact", "StartContract", "TerminalContract", "VehicleShowcaseBinding"]
+__all__ += ["showcase", "ArtifactFile", "EvidenceBoardSpec", "FailureCode", "FidelityShowcaseRealization", "ShowcaseArtifactBoundaryFinding", "build_showcase_run_artifact", "inspect_showcase_run_artifact", "validate_showcase_run_artifact_boundary", "FamilyShowcaseTemplate", "MissionSegmentSpec", "ShowcaseRunArtifact", "ShowcaseOutcome", "StartContract", "TerminalContract", "VehicleShowcaseBinding"]
 __all__ += ["ControllerTransition", "TruthObjectiveResult", "TruthObjectiveSpec", "evaluate_truth_objectives"]
 __all__ += [
     "DIRECT_WRENCH_NAMES",
@@ -375,8 +471,12 @@ __all__ += [
 __all__ += [
     "GenericLqrCandidate",
     "GenericLqrProfile",
+    "AuthorityPreflightReport",
+    "LinearAuthorityRequirement",
     "GenericLqrReport",
     "TrimToTuneResult",
+    "linear_authority_preflight",
+    "linear_authority_preflight_evaluator",
     "trim_linearize_and_tune",
     "tune_lqr_profiles",
 ]
@@ -482,4 +582,86 @@ __all__ += [
     "VehicleTrimSolveReport",
     "solve_all_vehicle_trim_evidence",
     "solve_vehicle_trim_evidence",
+]
+__all__ += [
+    "CANONICAL_FIDELITY_TIERS",
+    "FIDELITY_TIER_RANK",
+    "LEGACY_FIDELITY_ORDER",
+    "canonicalize_fidelity",
+    "canonical_tier_for_runtime",
+    "control_realization_for",
+    "parent_fidelity",
+    "runtime_fidelity_for",
+    "LoweringCandidate",
+    "LoweringDecision",
+    "select_canonical_lowering",
+    "HorizontalConformanceReport",
+    "HorizontalFidelityRegistry",
+    "load_horizontal_registry",
+    "validate_horizontal_fidelity",
+    "HL20SourceDirectWrenchPlant",
+    "HL20SourceSurfacePlant",
+    "build_hl20_source_adapter",
+    "build_hl20_source_direct_wrench_adapter",
+    "build_hl20_source_surface_adapter",
+    "AdapterCapability",
+    "AdapterCapabilityError",
+    "AdapterChannel",
+    "AdapterConformanceFinding",
+    "AdapterConformanceReport",
+    "FamilyAdapter",
+    "FamilyAdapterDescriptor",
+    "FamilyCapabilityReport",
+    "AllocationProvider",
+    "EffectivenessProvider",
+    "StandardFamilyAdapter",
+    "StateDerivativeProvider",
+    "descriptor_from_control_plant",
+    "descriptor_from_direct_wrench_state",
+    "validate_family_adapter",
+    "AdapterProbeCase",
+    "AdapterProbeOperation",
+    "AdapterProbeReport",
+    "run_adapter_probe",
+    "AdapterRegistrationCheck",
+    "AdapterRegistrationError",
+    "AdapterRegistryReport",
+    "FamilyAdapterProbeFactory",
+    "FamilyAdapterRegistration",
+    "FamilyAdapterRegistry",
+    "UnifiedFamilyManifest",
+    "UnifiedFamilyManifestCatalog",
+    "UnifiedFamilyManifestFinding",
+    "load_unified_family_manifest_catalog",
+    "FAMILY_STRATEGY_CATALOG",
+    "FamilyIntegrationStrategy",
+    "FamilyIntegrationStrategyCatalog",
+    "FamilyStrategyConformanceReport",
+    "FamilyStrategyWorkItem",
+    "FamilyStrategyWorklistReport",
+    "FamilyTierStrategy",
+    "AuthorityPreflightReport",
+    "build_family_strategy_worklist",
+    "load_family_strategy_catalog",
+    "validate_family_strategy_catalog",
+    "HorizontalReadinessReport",
+    "HorizontalShowcasePreflight",
+    "HorizontalTierReadiness",
+    "build_horizontal_readiness_report",
+    "preflight_horizontal_showcase",
+]
+__all__ += [
+    "composition_episode",
+    "composition_policy",
+    "EpisodeChannel",
+    "EpisodeObservation",
+    "EpisodeStep",
+    "HummingbirdPseudoCompositionEpisode",
+    "LanguageBackedCompositionEpisode",
+    "VehicleCompositionEpisode",
+    "open_vehicle_composition_episode",
+    "CompositionPolicyTrace",
+    "PolicyDecision",
+    "PolicyFunction",
+    "run_composition_policy",
 ]

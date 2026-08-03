@@ -4,107 +4,107 @@
   "evaluation": {
     "claim_boundary": "truth telemetry verifies objective geometry; controller transitions are diagnostic and cannot create a pass",
     "evaluator": "independent_truth_telemetry",
-    "hard_gates_passed": true,
+    "hard_gates_passed": false,
     "mission_pass": false,
     "objective_pass": false,
     "required_objectives": 4,
-    "required_passed": 3,
+    "required_passed": 1,
     "results": [
       {
-        "closest_error": 0.15226006592587282,
+        "closest_error": 0.4819255572358543,
         "controller_reason": null,
         "controller_time_s": null,
         "controller_transition_valid": null,
         "critical_metric": {
-          "actual": 0.15226006592587282,
+          "actual": 0.4819255572358543,
           "channel": "gate_speed_error",
-          "error": 0.15226006592587282,
+          "error": 0.4819255572358543,
           "limit": 12.0,
-          "margin": 11.847739934074127,
+          "margin": 11.518074442764146,
           "target": 0.0,
           "units": "m/s"
         },
         "dwell_actual_s": null,
         "id": "high-altitude-level-gate",
-        "margin": 11.847739934074127,
+        "margin": 11.518074442764146,
         "message": null,
         "objective_type": "fly_by_gate",
         "required": true,
         "status": "pass",
         "tolerance": 12.0,
-        "truth_time_s": 80.0
+        "truth_time_s": 79.09999999999978
       },
       {
-        "closest_error": 44.992783757341954,
+        "closest_error": 5510.240289366133,
         "controller_reason": null,
         "controller_time_s": null,
         "controller_transition_valid": null,
         "critical_metric": {
-          "actual": 44.992783757341954,
-          "channel": "gate_altitude_error",
-          "error": 44.992783757341954,
-          "limit": 35.0,
-          "margin": -9.992783757341954,
+          "actual": 5510.240289366133,
+          "channel": "gate_lateral_error",
+          "error": 5510.240289366133,
+          "limit": 500.0,
+          "margin": -5010.240289366133,
           "target": 0.0,
           "units": "m"
         },
         "dwell_actual_s": null,
         "id": "left-turn-exit-gate",
-        "margin": -9.992783757341954,
+        "margin": -5010.240289366133,
         "message": "truth telemetry did not cross the gate within lateral and altitude limits",
         "objective_type": "fly_by_gate",
         "required": true,
         "status": "fail",
-        "tolerance": 35.0,
-        "truth_time_s": 602.5
+        "tolerance": 500.0,
+        "truth_time_s": 606.0000000000692
       },
       {
-        "closest_error": 0.4359415047262871,
+        "closest_error": 9.58913268102657,
         "controller_reason": null,
         "controller_time_s": null,
         "controller_transition_valid": null,
         "critical_metric": {
-          "actual": 0.4359415047262871,
+          "actual": 9.58913268102657,
           "channel": "gate_speed_error",
-          "error": 0.4359415047262871,
+          "error": 9.58913268102657,
           "limit": 12.0,
-          "margin": 11.564058495273713,
+          "margin": 2.4108673189734304,
           "target": 0.0,
           "units": "m/s"
         },
         "dwell_actual_s": null,
         "id": "low-altitude-level-gate",
-        "margin": 11.564058495273713,
-        "message": null,
+        "margin": 2.4108673189734304,
+        "message": "truth telemetry did not cross the gate within lateral and altitude limits",
         "objective_type": "fly_by_gate",
         "required": true,
-        "status": "pass",
+        "status": "fail",
         "tolerance": 12.0,
-        "truth_time_s": 680.5
+        "truth_time_s": 677.8000000000856
       },
       {
-        "closest_error": 0.09212486179953316,
+        "closest_error": 15034.658594142647,
         "controller_reason": null,
         "controller_time_s": null,
         "controller_transition_valid": null,
         "critical_metric": {
-          "actual": 0.09212486179953316,
-          "channel": "gate_speed_error",
-          "error": 0.09212486179953316,
-          "limit": 12.0,
-          "margin": 11.907875138200467,
+          "actual": 15034.658594142647,
+          "channel": "gate_lateral_error",
+          "error": 15034.658594142647,
+          "limit": 500.0,
+          "margin": -14534.658594142647,
           "target": 0.0,
-          "units": "m/s"
+          "units": "m"
         },
         "dwell_actual_s": null,
         "id": "terminal-start-finish-gate",
-        "margin": 11.907875138200467,
-        "message": null,
+        "margin": -14534.658594142647,
+        "message": "truth telemetry did not cross the gate within lateral and altitude limits",
         "objective_type": "fly_by_gate",
         "required": true,
-        "status": "pass",
-        "tolerance": 12.0,
-        "truth_time_s": 1199.5
+        "status": "fail",
+        "tolerance": 500.0,
+        "truth_time_s": 1104.0000000000914
       }
     ],
     "schema_version": 1
@@ -112,11 +112,14 @@
   "family_id": "reference_f16_s119",
   "fidelity": "rigid_body_6dof_surface_allocated",
   "mode": "surface_allocated",
+  "perturbation": {},
   "route": {
     "gates": [
       {
         "altitude_m": 300.0,
         "east_m": 12000.0,
+        "gate_normal_east": 1.0,
+        "gate_normal_north": 0.0,
         "id": "high-altitude-level-gate",
         "north_m": 0.0,
         "phase": "outbound-level"
@@ -124,6 +127,8 @@
       {
         "altitude_m": 300.0,
         "east_m": 12000.0,
+        "gate_normal_east": -1.0,
+        "gate_normal_north": 0.0,
         "id": "left-turn-exit-gate",
         "north_m": 50000.0,
         "phase": "left-turn"
@@ -131,6 +136,8 @@
       {
         "altitude_m": 0.0,
         "east_m": 0.0,
+        "gate_normal_east": -1.0,
+        "gate_normal_north": 0.0,
         "id": "low-altitude-level-gate",
         "north_m": 50000.0,
         "phase": "inbound-level"
@@ -138,11 +145,14 @@
       {
         "altitude_m": 0.0,
         "east_m": 0.0,
+        "gate_normal_east": 1.0,
+        "gate_normal_north": 0.0,
         "id": "terminal-start-finish-gate",
         "north_m": 0.0,
         "phase": "right-turn"
       }
     ],
+    "source_realization": "f16_source_surface_allocation_development_runner",
     "template_id": "powered_fixed_wing_racetrack_v1",
     "timing": {
       "climb_time_s": 50.0,
@@ -162,10 +172,11 @@
     }
   },
   "runtime": {
-    "dt_s": 0.5,
-    "duration_s": 1310.0,
+    "dt_s": 0.1,
+    "duration_s": 1308.1865661383836,
+    "envelope_violations": [],
     "failure": null,
-    "hard_gates_passed": true,
+    "hard_gates_passed": false,
     "numerical_valid": true
   },
   "schema_version": "taoryx.f16-racetrack-evidence/v1",

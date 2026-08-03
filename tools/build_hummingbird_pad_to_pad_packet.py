@@ -11,8 +11,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
+import mimetypes
 import re
 import tempfile
 import zipfile
@@ -22,6 +24,7 @@ from typing import Any
 from taoryx.language import GrammarProfile
 from taoryx.mission_objectives import ControllerTransition, TruthObjectiveSpec, evaluate_truth_objectives
 from taoryx.runtime.runner import run_files
+from taoryx.showcase import ArtifactFile, EvidenceBoardSpec, FidelityShowcaseRealization, build_showcase_run_artifact
 from tools.build_family_qualification_packet import _render_mission_sequence, _sha256
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,6 +39,68 @@ R_EARTH_M = 6_378_137.0
 
 def _write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _payload_sha256(value: object) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _artifact_files(packet: Path, scenario_hash: str) -> tuple[ArtifactFile, ...]:
+    names = ["manifest.json"]
+    names.extend(
+        str(path.relative_to(packet))
+        for path in sorted(packet.rglob("*"))
+        if path.is_file() and path.name != "manifest.json"
+    )
+    return tuple(
+        ArtifactFile(
+            path=name,
+            sha256=scenario_hash if name == "manifest.json" else _sha256(packet / name),
+            media_type=mimetypes.guess_type(name)[0] or "application/octet-stream",
+        )
+        for name in names
+    )
+
+
+def _showcase_realization(summary: dict[str, Any], individual_rotor_source: bool) -> FidelityShowcaseRealization:
+    if individual_rotor_source:
+        return FidelityShowcaseRealization(
+            fidelity="rigid_body_6dof_surface_allocated",
+            control_realization="surface_allocated",
+            realization_id="hummingbird.pad_to_pad.individual_rotor_source.v1",
+            state_schema=("position_velocity_quaternion_body_rates_mass_resource",),
+            semantic_command_mapping={
+                "attitude.wrench": "quad-X allocator",
+                "rotor_commands": "individual rotor source equations and motor lag",
+            },
+            physical_effectors=("rotor_1_speed", "rotor_2_speed", "rotor_3_speed", "rotor_4_speed"),
+            available_physics=(
+                "source-derived individual rotor force/moment equations",
+                "bounded quad-X allocation",
+                "motor lag",
+                "static-pad contact and settle model",
+            ),
+            claim=str(summary["claim"]),
+            nonclaims=tuple(str(item) for item in summary["nonclaims"]),
+            evidence_grade="mixed",
+        )
+    return FidelityShowcaseRealization(
+        fidelity="rigid_body_6dof_direct_wrench",
+        control_realization="direct_wrench",
+        realization_id="hummingbird.pad_to_pad.aggregate_direct_wrench.v1",
+        state_schema=("position_velocity_quaternion_body_rates_mass_resource",),
+        semantic_command_mapping={"attitude.wrench": "aggregate direct-wrench bridge with quad-X command allocation"},
+        physical_effectors=(),
+        available_physics=(
+            "aggregate aerodynamic/rotor force and moment tables",
+            "bounded semantic quad-X command allocation",
+            "static-pad contact and settle model",
+        ),
+        claim=str(summary["claim"]),
+        nonclaims=(*tuple(str(item) for item in summary["nonclaims"]), "physical individual-rotor validation"),
+        evidence_grade="derived",
+    )
 
 
 def _local_rows(states: tuple[Any, ...], phase_id: str, phase_index: int, time_offset_s: float, origin_lat: float, origin_lon: float) -> tuple[dict[str, object], ...]:
@@ -410,17 +475,25 @@ def _phase_problem(
     return text
 
 
-def _run_phase(text: str, phase_dir: Path) -> tuple[Any, tuple[Any, ...]]:
+def _run_phase(text: str, phase_dir: Path, *, max_steps: int, allow_incomplete: bool) -> tuple[Any, tuple[Any, ...]]:
     phase_dir.mkdir(parents=True, exist_ok=True)
     problem = phase_dir / "phase.prb"
     problem.write_text(text, encoding="utf-8")
-    report = run_files(problem, TABLES, output_dir=phase_dir / "run", max_steps=25_000, integrator="rk4", profile=GrammarProfile.TAORYX)
-    if not report.results or not report.results[0].completed:
+    report = run_files(problem, TABLES, output_dir=phase_dir / "run", max_steps=max_steps, integrator="rk4", profile=GrammarProfile.TAORYX)
+    if not report.results:
+        raise RuntimeError(f"Hummingbird phase failed: {phase_dir.name}: {report.diagnostics}")
+    if not report.results[0].completed and not allow_incomplete:
         raise RuntimeError(f"Hummingbird phase failed: {phase_dir.name}: {report.diagnostics}")
     return report, tuple(report.results[0].states["1"])
 
 
-def build(output: Path, *, individual_rotor_source: bool = False) -> Path:
+def build(
+    output: Path,
+    *,
+    individual_rotor_source: bool = False,
+    max_steps: int = 25_000,
+    allow_incomplete: bool = False,
+) -> Path:
     mission_id = (
         "hummingbird-pad-to-pad-altitude-yaw-individual-rotor-v1"
         if individual_rotor_source
@@ -471,7 +544,12 @@ def build(output: Path, *, individual_rotor_source: bool = False) -> Path:
                 guidance_extra=guidance_extra,
                 individual_rotor_source=individual_rotor_source,
             )
-            report, states = _run_phase(text, phase_root / phase_id)
+            report, states = _run_phase(
+                text,
+                phase_root / phase_id,
+                max_steps=max_steps,
+                allow_incomplete=allow_incomplete,
+            )
             generated_problem = packet / "inputs" / f"{index:02d}_{phase_id}.prb"
             generated_problem.write_text(text, encoding="utf-8")
             rows = _local_rows(states, phase_id, index, time_offset, origin_lat, origin_lon)
@@ -484,7 +562,7 @@ def build(output: Path, *, individual_rotor_source: bool = False) -> Path:
                     for channel in channels
                 }
                 handoff_records.append({"from_phase": phases[index - 1][0], "to_phase": phase_id, "max_abs_state_residual": max(residuals.values()), "state_residuals": residuals, "pass": max(residuals.values()) <= 1.0e-8})
-            phase_records.append({"id": phase_id, "index": index, "duration_s": duration_s, "start_time_s": time_offset, "end_time_s": time_offset + float(final.time), "sample_count": len(states), "exit_code": report.exit_code, "target_north_m": math.radians(target_lat - origin_lat) * R_EARTH_M, "target_east_m": math.radians(target_lon - origin_lon) * R_EARTH_M, "target_altitude_m": target_altitude})
+            phase_records.append({"id": phase_id, "index": index, "duration_s": duration_s, "start_time_s": time_offset, "end_time_s": time_offset + float(final.time), "sample_count": len(states), "exit_code": report.exit_code, "completed": bool(report.results[0].completed), "target_north_m": math.radians(target_lat - origin_lat) * R_EARTH_M, "target_east_m": math.radians(target_lon - origin_lon) * R_EARTH_M, "target_altitude_m": target_altitude})
             time_offset += float(final.time)
             previous_state = final
             if index == 0:
@@ -550,7 +628,7 @@ def build(output: Path, *, individual_rotor_source: bool = False) -> Path:
         "ground_reaction_peak_n": None if not contact_rows else max(float(row.get("ground_reaction_n", 0.0)) for row in contact_rows),
         "note": "The rigid-body runtime records an explicit static-pad contact impulse, normal reaction, and post-contact settle segment; landing gear, tire, and ground-effect dynamics remain outside this claim.",
     }
-    hard_gates_passed = all(item["exit_code"] == 0 for item in phase_records) and all(item["pass"] for item in handoff_records)
+    hard_gates_passed = all(item["exit_code"] == 0 and item["completed"] for item in phase_records) and all(item["pass"] for item in handoff_records)
     evaluation = evaluate_truth_objectives(specs, rows, controller_transitions=controller_transitions, truth_events=truth_events, truth_event_times=truth_event_times, hard_gates_passed=hard_gates_passed)
     summary = {
         "schema_version": 1,
@@ -596,7 +674,64 @@ def build(output: Path, *, individual_rotor_source: bool = False) -> Path:
         # Use the final phase artifact for standard plots; the complete truth CSV
         # remains the authoritative concatenated evidence source.
         pass
-    manifest = {"schema_version": 1, "mission_id": mission_id, "summary": "summary.json", "truth_telemetry": "truth_telemetry.csv", "files": {}}
+    realization = _showcase_realization(summary, individual_rotor_source)
+    scenario_contract_hash = _payload_sha256(
+        {
+            "mission_id": mission_id,
+            "fidelity": realization.fidelity,
+            "control_realization": realization.control_realization,
+            "individual_rotor_source": individual_rotor_source,
+            "tables": [_sha256(path) for path in TABLES],
+        }
+    )
+    _write_json(packet / "realized_fidelity.json", realization.model_dump(mode="json"))
+    _write_json(
+        packet / "claim.json",
+        {
+            "claim": realization.claim,
+            "nonclaims": list(realization.nonclaims),
+            "fidelity": realization.fidelity,
+            "control_realization": realization.control_realization,
+            "outcome": "completed" if bool(summary["mission_pass"]) else "partial",
+        },
+    )
+    showcase_run = build_showcase_run_artifact(
+        realization=realization,
+        run_id=f"{mission_id}-{realization.fidelity}",
+        showcase_id=f"org.taoryx.showcase.{mission_id}",
+        vehicle_binding_id="hummingbird.source-bounded-v1",
+        scenario_contract_sha256=scenario_contract_hash,
+        outcome="completed" if bool(summary["mission_pass"]) else "partial",
+        files=_artifact_files(packet, scenario_contract_hash),
+        board=EvidenceBoardSpec(
+            profile="family-evidence-board-v1",
+            modules=(
+                "trajectory_3d",
+                "mission_timeline",
+                "energy_and_resources",
+                "attitude_and_rates",
+                "semantic_controls",
+                "physical_effectors",
+                "terminal_corridor",
+            ),
+        ),
+        archetypes=(
+            "mission_geometry",
+            "mission_timeline",
+            "dynamics_and_resources",
+            "envelope_and_qualification",
+        ),
+    )
+    manifest = {
+        "schema_version": 1,
+        "mission_id": mission_id,
+        "summary": "summary.json",
+        "truth_telemetry": "truth_telemetry.csv",
+        "fidelity": realization.fidelity,
+        "control_realization": realization.control_realization,
+        "run_artifacts": [showcase_run.model_dump(mode="json")],
+        "files": {},
+    }
     manifest_path = packet / "manifest.json"
     manifest["files"] = {str(path.relative_to(packet)): _sha256(path) for path in sorted(packet.rglob("*")) if path.is_file() and path != manifest_path}
     _write_json(manifest_path, manifest)
@@ -616,8 +751,10 @@ def main() -> None:
         action="store_true",
         help="use the source-derived individual-rotor force/moment equations instead of the aggregate table bridge",
     )
+    parser.add_argument("--max-steps", type=int, default=25_000, help="per-phase runtime limit for bounded smoke builds")
+    parser.add_argument("--allow-incomplete", action="store_true", help="retain incomplete phases as an honest partial packet instead of failing the build")
     args = parser.parse_args()
-    print(build(args.output, individual_rotor_source=args.individual_rotor_source))
+    print(build(args.output, individual_rotor_source=args.individual_rotor_source, max_steps=args.max_steps, allow_incomplete=args.allow_incomplete))
 
 
 if __name__ == "__main__":

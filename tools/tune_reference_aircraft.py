@@ -9,7 +9,13 @@ from typing import Any
 
 import yaml
 
-from taoryx.generic_tuning import GenericLqrProfile, GenericLqrReport, tune_lqr_profiles
+from taoryx.generic_tuning import (
+    GenericLqrProfile,
+    GenericLqrReport,
+    LinearAuthorityRequirement,
+    linear_authority_preflight,
+    tune_lqr_profiles,
+)
 from taoryx.rotorcraft import QuadRotorAllocation
 from taoryx.vehicle_registry import derive_lqr_scale_contract, lqr_profile_attributes, vehicle_definition
 
@@ -91,11 +97,27 @@ def build(binding_path: Path = BINDINGS) -> dict[str, Any]:
         else:
             controls = ("moment-x", "moment-y", "moment-z")
             state_scales, control_scales, a_matrix, b_matrix = _attitude_bridge_clean(vehicle_id, controls)
+        state_names = ("roll-error", "pitch-error", "yaw-error", "p", "q", "r")
+        authority_binding = binding["authority_requirement"]
+        authority_preflight = linear_authority_preflight(
+            LinearAuthorityRequirement(
+                str(authority_binding["id"]),
+                tuple(str(name) for name in authority_binding["required_state_names"]),
+            ),
+            state_names=state_names,
+            a_matrix=a_matrix,
+            b_matrix=b_matrix,
+        )
+        if authority_preflight.status != "passed":
+            raise RuntimeError(
+                f"{vehicle_id} direct-wrench screen is structurally uncontrollable: "
+                f"{authority_preflight.as_dict()}"
+            )
         report: GenericLqrReport = tune_lqr_profiles(
             vehicle_id,
             a_matrix,
             b_matrix,
-            state_names=("roll-error", "pitch-error", "yaw-error", "p", "q", "r"),
+            state_names=state_names,
             control_names=controls,
             state_scales=state_scales,
             control_scales=control_scales,
@@ -112,6 +134,7 @@ def build(binding_path: Path = BINDINGS) -> dict[str, Any]:
             "qualification_status": "screen_only",
             "plant_backed_linearization": str(binding["source_linearization_status"]) == "available",
             "gap": str(binding["gap"]),
+            "authority_preflight": authority_preflight.as_dict(),
             "report": report.as_dict(),
         }
     return {

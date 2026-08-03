@@ -15,6 +15,7 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..fidelity_contracts import ControlRealization
 from .contracts import (
     ControlSchema,
     FamilyCatalog,
@@ -153,6 +154,7 @@ class ReferenceFidelityProfile(BaseModel):
 
     profile_id: str = Field(min_length=1)
     runtime_fidelity: FidelityProfile
+    control_realization: ControlRealization = "unspecified"
     equations: tuple[str, ...] = ()
     status: str = Field(min_length=1)
     parent_profile: str | None = None

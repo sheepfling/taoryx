@@ -18,6 +18,7 @@ from taoryx.runtime.interactive import ControlSpec, InteractiveSession
 from taoryx.runtime.lowering import lower_problem_document
 from taoryx.runtime.program import LoadedProgram
 from taoryx.runtime.runner import run_files
+from taoryx.runtime.sensor_scenario import SensorScenarioSpec
 
 
 def test_runtime_problem_clone_interpolates_and_branches_independently() -> None:
@@ -44,6 +45,27 @@ def test_runtime_problem_clone_interpolates_and_branches_independently() -> None
     assert branch.vehicles["test"].state.values == pytest.approx((9.0,))
     assert vehicle.state.values == pytest.approx((6.0,))
     assert branch.metadata["cloned_at_time"] == pytest.approx(1.5)
+####
+
+
+def test_runtime_problem_clone_never_carries_a_future_control_timestamp() -> None:
+    vehicle = RuntimeVehicle(
+        "test",
+        RuntimeState(0.0, (0.0,), value_names=("x",)),
+        derivative=lambda state: (state.named["rate"],),
+        step_size=1.0,
+        control_values={"rate": 1.0},
+    )
+    problem = RuntimeProblem({"test": vehicle}, final_time=3.0)
+    compute_trajectories(problem, max_steps=4)
+    vehicle.control_values = {"rate": 2.0}
+    vehicle.control_values_time_s = vehicle.state.time
+
+    branch = problem.clone_at(1.0)
+
+    assert branch.vehicles["test"].control_values_time_s == pytest.approx(1.0)
+    compute_trajectories(branch, max_steps=1)
+    assert branch.vehicles["test"].state.time == pytest.approx(2.0)
 ####
 
 
@@ -247,6 +269,54 @@ def test_loaded_program_checkpoint_restarts_from_disk(tmp_path: Path) -> None:
     assert resumed_result.completed
     assert resumed_result.states["1"][-1].time == pytest.approx(2.0)
     assert resumed.inspect()["title"] == "checkpoint"
+####
+
+
+def test_loaded_program_checkpoint_reconstructs_declared_sensor_scenario(tmp_path: Path) -> None:
+    source = tmp_path / "checkpoint-sensor.prb"
+    source.write_text(
+        "(checkpoint-sensor)\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial geodetic alt=0 long=0 lat=0 vel=10 gama=0 psi=0 time=0 wt=1\n"
+        "  *segment 1 flight\n"
+        "    *integ dt=0.1\n"
+        "    *prop thrust=10 mdot=0\n"
+        "    *when time>0.2 stop\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+    program = LoadedProgram.load(source, profile=GrammarProfile.TAORYX)
+    runtime = program.attach_sensor_scenario(
+        SensorScenarioSpec(
+            "accel",
+            "1",
+            provider="translation-acceleration",
+            truth_mode="translation-only",
+            cadence_s=0.1,
+            delivery_s=0.1,
+            estimator_modes=("translation-dead-reckoning",),
+        )
+    )
+    compute_trajectories(program.case(), max_steps=1)
+    checkpoint = program.save_checkpoint(tmp_path / "sensor.checkpoint.json")
+
+    restored = LoadedProgram.load_checkpoint(checkpoint)
+
+    assert restored.case().sensor_bus is not None
+    assert restored.case().metadata["sensor_rebind"] == {
+        "required": False,
+        "scenario_id": "sensor-scenario-v1",
+        "status": "restored-from-checkpoint",
+    }
+    compute_trajectories(program.case(), max_steps=10)
+    compute_trajectories(restored.case(), max_steps=10)
+    original_packets = runtime.bus.packets("accel")
+    restored_packets = restored.case().sensor_bus.packets("accel")
+    assert [packet.sampled_at_s for packet in restored_packets] == pytest.approx(
+        [packet.sampled_at_s for packet in original_packets]
+    )
 ####
 
 

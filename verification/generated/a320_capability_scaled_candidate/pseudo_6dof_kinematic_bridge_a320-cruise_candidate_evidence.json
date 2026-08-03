@@ -1,0 +1,257 @@
+{
+  "binding_id": "a320-cruise-pseudo_6dof_kinematic_bridge-candidate",
+  "claim_boundary": "OpenAP performance plus the declared JSBSim rotational surrogate and Taoryx kinematic attitude-response law; no source-exact actuator or manufacturer flight-dynamics claim.",
+  "evaluation": {
+    "claim_boundary": "truth telemetry verifies objective geometry; controller transitions are diagnostic and cannot create a pass",
+    "evaluator": "independent_truth_telemetry",
+    "hard_gates_passed": true,
+    "mission_pass": true,
+    "objective_pass": true,
+    "required_objectives": 4,
+    "required_passed": 4,
+    "results": [
+      {
+        "closest_error": 1.1157473752039664,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 1.1157473752039664,
+          "channel": "gate_speed_error",
+          "error": 1.1157473752039664,
+          "limit": 8.0,
+          "margin": 6.884252624796034,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "high-altitude-level-gate",
+        "margin": 6.884252624796034,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 222.0
+      },
+      {
+        "closest_error": 0.011201117997501342,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.011201117997501342,
+          "channel": "gate_speed_error",
+          "error": 0.011201117997501342,
+          "limit": 8.0,
+          "margin": 7.988798882002499,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "left-turn-exit-gate",
+        "margin": 7.988798882002499,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 439.0
+      },
+      {
+        "closest_error": 1.3007550504513574,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 1.3007550504513574,
+          "channel": "gate_speed_error",
+          "error": 1.3007550504513574,
+          "limit": 8.0,
+          "margin": 6.699244949548643,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "low-altitude-level-gate",
+        "margin": 6.699244949548643,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 652.0
+      },
+      {
+        "closest_error": 0.006905686394077293,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.006905686394077293,
+          "channel": "gate_speed_error",
+          "error": 0.006905686394077293,
+          "limit": 8.0,
+          "margin": 7.993094313605923,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "terminal-start-finish-gate",
+        "margin": 7.993094313605923,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 890.0
+      }
+    ],
+    "schema_version": 1
+  },
+  "family_id": "a320_openap_jsbsim_pseudo6dof",
+  "fidelity": "pseudo_6dof_kinematic_bridge",
+  "mission_proposal_fingerprint": "50e1549a32d0c46a23867ea6187bf5285e543b8240453da0b3c5db2327fd6880",
+  "model_provenance": {
+    "authorities": {
+      "actuators": "taoryx-policy",
+      "aerodynamics.alpha_mapping": "jsbsim-1.3.1-a320",
+      "aerodynamics.drag": "openap-2.6.0",
+      "aerodynamics.normal_force_target": "openap-2.6.0",
+      "aerodynamics.side_force": "jsbsim-1.3.1-a320",
+      "mass.cg_and_inertia": "jsbsim-rescaled-estimate",
+      "mass.scalar_schedule": "openap-2.6.0",
+      "moments.pitch": "jsbsim-1.3.1-a320",
+      "moments.roll": "jsbsim-1.3.1-a320",
+      "moments.yaw": "jsbsim-1.3.1-a320",
+      "propulsion.fuel_flow": "openap-2.6.0",
+      "propulsion.thrust": "openap-2.6.0",
+      "stability_augmentation": "taoryx-controller"
+    },
+    "corpus_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+    "disabled_contributions": [
+      "jsbsim.aerodynamic_drag",
+      "jsbsim.propulsion_thrust",
+      "jsbsim.fuel_flow"
+    ],
+    "inertia_policy": "linear_mass_rescale_from_jsbsim_empty_mass",
+    "manufacturer_validated": false,
+    "model_id": "a320-openap-jsbsim-pseudo6dof",
+    "openap_package_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+    "qualification_class": "surrogate_composite",
+    "rate_damping_policy": {
+      "coefficient_per_s": 10.0,
+      "type": "diagonal_body_rate_feedback"
+    },
+    "source_exact": false
+  },
+  "nonclaims": [
+    "manufacturer validation",
+    "source-exact aircraft control law",
+    "physical actuator qualification",
+    "full rigid-body 6DOF equivalence"
+  ],
+  "operating_point": {
+    "altitude_m": 10500.0,
+    "mach": 0.78,
+    "mass_kg": 60000.0
+  },
+  "route": {
+    "gates": [
+      {
+        "altitude_m": 11000.0,
+        "east_m": 50000.0,
+        "gate_normal_east": 1.0,
+        "gate_normal_north": 0.0,
+        "id": "high-altitude-level-gate",
+        "north_m": 0.0,
+        "phase": "outbound-level"
+      },
+      {
+        "altitude_m": 11000.0,
+        "east_m": 50000.0,
+        "gate_normal_east": -1.0,
+        "gate_normal_north": 0.0,
+        "id": "left-turn-exit-gate",
+        "north_m": 32649.305394725994,
+        "phase": "left-turn"
+      },
+      {
+        "altitude_m": 10500.0,
+        "east_m": 0.0,
+        "gate_normal_east": -1.0,
+        "gate_normal_north": 0.0,
+        "id": "low-altitude-level-gate",
+        "north_m": 32649.305394725994,
+        "phase": "inbound-level"
+      },
+      {
+        "altitude_m": 10500.0,
+        "east_m": 0.0,
+        "gate_normal_east": 1.0,
+        "gate_normal_north": 0.0,
+        "id": "terminal-start-finish-gate",
+        "north_m": 0.0,
+        "phase": "right-turn"
+      }
+    ],
+    "source_realization": "capability_scaled_planning_only",
+    "template_id": "powered_fixed_wing_racetrack_v1",
+    "timing": {
+      "climb_time_s": 125.0,
+      "descent_time_s": 125.0,
+      "gate_altitude_tolerance_m": 75.0,
+      "gate_corridor_m": 500.0,
+      "gate_speed_tolerance_mps": 8.0,
+      "inbound_level_time_s": 92.24565530413958,
+      "outbound_level_time_s": 92.24565530413958,
+      "position_capture_bank_gain_rad_per_m": 2.5e-05,
+      "position_capture_max_bank_correction_deg": 3.0,
+      "route_duration_s": 880.1526019202812,
+      "simulation_horizon_s": 1000.1526019202812,
+      "straight_time_s": 217.24565530413958,
+      "turn_rate_command_scale": 1.0,
+      "turn_time_s": 222.83064565600102
+    }
+  },
+  "runtime": {
+    "dt_s": 1.0,
+    "duration_s": 1000.1526019202812,
+    "failure": null,
+    "hard_gates_passed": true,
+    "numerical_valid": true
+  },
+  "schema_version": "taoryx.a320-racetrack-evidence/v1",
+  "status": "nominal_case_pass",
+  "trim": {
+    "controls": {
+      "aileron_rad": 2.3409907592003427e-28,
+      "elevator_rad": 0.01999999999998898,
+      "flight_path_angle_rad": 7.778053681881626e-26,
+      "rudder_rad": -9.363963036801382e-27,
+      "throttle_ratio": 0.7182817244469165
+    },
+    "cost": 2.4127562866389904e-28,
+    "diagnostics": [],
+    "iterations": 6,
+    "max_residual": 2.1894378671172277e-15,
+    "message": "`gtol` termination condition is satisfied.",
+    "operating_point": {},
+    "residuals": {
+      "alpha_rad": -2.1894378671172277e-15,
+      "altitude_m": 1.803383334750055e-23,
+      "beta_rad": -9.363963036801383e-28,
+      "mach": -2.5660735411076893e-27,
+      "pitch_rate_rad_s": 1.785340284403662e-16,
+      "roll_rate_rad_s": -1.6034638251380763e-42,
+      "yaw_rate_rad_s": 3.510298213690713e-26
+    },
+    "scaled_residual_norm": 2.19670493541531e-14,
+    "state": {
+      "alpha_rad": 0.002500000000004096
+    },
+    "status": 1,
+    "success": true
+  },
+  "vehicle_id": "a320_openap"
+}

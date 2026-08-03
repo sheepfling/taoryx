@@ -156,7 +156,7 @@ profiles:
     family_id: tumbling_body
     parent_3dof_profile_id: tumbling_body.average_area_3dof.v1
     model_kind: rigid_body_reuse
-    control_realization: rigid_body_6dof
+    control_realization: uncontrolled
     # This is a passing pseudo-tier realization because it reuses the native
     # rigid-body equations.  It remains ineligible for controller lowering:
     # passive rotation has no control law to synthesize.
@@ -266,13 +266,86 @@ direct_wrench_profiles:
     required_channels: [source_force, requested_wrench, achieved_wrench, residual_wrench, stage]
     unsupported_claims: [source_attitude_data, physical_gimbal_allocation, plume_interaction, source_exact_moments]
 
+surface_allocation_profiles:
+  - id: skywalker_x8.surface_allocated_6dof.v1
+    family_id: skywalker_x8
+    parent_direct_wrench_profile_id: skywalker_x8.direct_wrench_6dof.v1
+    status: development
+    evidence_grade: source_table_local
+    allocator_id: x8-bounded-collective-differential-elevon-v1
+    effector_channels: [left_elevon_deg, right_elevon_deg, throttle]
+    required_channels: [requested_wrench, allocated_effectors, achieved_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [servo_hardware_fidelity, independent_yaw_authority, family_wide_schedule]
+  - id: b747.surface_allocated_6dof.v1
+    family_id: b747
+    parent_direct_wrench_profile_id: b747.direct_wrench_6dof.v1
+    status: development
+    evidence_grade: source_table_local
+    allocator_id: b747-bounded-surface-v1
+    effector_channels: [elevator_deg, aileron_deg, rudder_deg, throttle]
+    required_channels: [requested_wrench, allocated_effectors, achieved_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [servo_hardware_fidelity, fuel_flow, full_envelope_schedule]
+  - id: a320.surface_allocated_6dof.v1
+    family_id: a320_openap_3dof
+    parent_direct_wrench_profile_id: a320.direct_wrench_6dof.v1
+    status: planned
+    evidence_grade: unavailable
+    allocator_id: a320-surface-allocation-pending-v1
+    effector_channels: [elevator_deg, aileron_deg, rudder_deg, throttle]
+    required_channels: [requested_wrench, allocated_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [physical_surface_effectivity, servo_dynamics, scheduled_full_envelope]
+  - id: f16_s119.surface_allocated_6dof.v1
+    family_id: f16_s119
+    parent_direct_wrench_profile_id: f16_s119.direct_wrench_6dof.v1
+    status: development
+    evidence_grade: source_plant_local
+    allocator_id: f16-bounded-elevator-aileron-rudder-throttle-v1
+    effector_channels: [elevator_deg, aileron_deg, rudder_deg, throttle]
+    required_channels: [requested_wrench, allocated_effectors, achieved_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [full_envelope_schedule, servo_certification, operational_flight]
+  - id: x15.surface_allocated_6dof.v1
+    family_id: x15
+    parent_direct_wrench_profile_id: x15.direct_wrench_6dof.v1
+    status: planned
+    evidence_grade: unavailable
+    allocator_id: x15-source-effector-contract-pending-v1
+    effector_channels: [stabilator_deg, rudder_deg, throttle]
+    required_channels: [requested_wrench, allocated_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [source_exact_effector_effectivity, powered_control_authority, terminal_handoff]
+  - id: hummingbird.surface_allocated_6dof.v1
+    family_id: hummingbird
+    parent_direct_wrench_profile_id: hummingbird.direct_wrench_6dof.v1
+    status: development
+    evidence_grade: native_rotor_local
+    allocator_id: hummingbird-bounded-quad-x-v1
+    effector_channels: [rotor_1_speed, rotor_2_speed, rotor_3_speed, rotor_4_speed]
+    required_channels: [requested_wrench, allocated_effectors, achieved_effectors, achieved_wrench, residual_wrench, saturation, power]
+    unsupported_claims: [blade_resolved_aerodynamics, battery_depletion, full_translated_envelope]
+  - id: hl20.surface_allocated_6dof.v1
+    family_id: hl20_mod_k
+    parent_direct_wrench_profile_id: hl20.direct_wrench_6dof.v1
+    status: development
+    evidence_grade: logical_surface_overlay
+    allocator_id: hl20-logical-surface-v1
+    effector_channels: [left_wing_flap, right_wing_flap, body_flap, rudder]
+    required_channels: [requested_wrench, allocated_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [source_servo_dynamics, thermal_model, full_arrival_qualification]
+  - id: nesc_rocket.surface_allocated_6dof.v1
+    family_id: reference_nesc_two_stage_rocket
+    parent_direct_wrench_profile_id: nesc_rocket.direct_wrench_6dof.v1
+    status: not_applicable
+    evidence_grade: unavailable
+    allocator_id: nesc-source-gimbal-contract-pending-v1
+    effector_channels: [thrust_vector_gimbal_x, thrust_vector_gimbal_y]
+    required_channels: [requested_wrench, achieved_wrench, residual_wrench, stage]
+    unsupported_claims: [source_gimbal_effectivity, plume_interaction, active_guidance]
 bindings:
-  - {family_id: skywalker_x8, point_mass_profile_id: skywalker_x8.point_mass_3dof.v1, pseudo_profile_id: skywalker_x8.attitude_response_p6dof.v1, direct_wrench_profile_id: skywalker_x8.direct_wrench_6dof.v1, automatic_lowering: true, lowering_note: shared fixed-wing response and direct-wrench bridge}
-  - {family_id: b747, point_mass_profile_id: b747.point_mass_3dof.v1, pseudo_profile_id: b747.attitude_response_p6dof.v1, direct_wrench_profile_id: b747.direct_wrench_6dof.v1, automatic_lowering: true, lowering_note: transport-scaled response and direct-wrench bridge}
-  - {family_id: a320_openap_3dof, point_mass_profile_id: a320_openap_3dof.point_mass_3dof.v1, pseudo_profile_id: a320.attitude_response_p6dof.v1, direct_wrench_profile_id: a320.direct_wrench_6dof.v1, automatic_lowering: true, lowering_note: mixed OpenAP/source-surrogate response and direct-wrench bridge}
-  - {family_id: f16_s119, point_mass_profile_id: f16_s119.point_mass_3dof.v1, pseudo_profile_id: f16_s119.attitude_response_p6dof.v1, direct_wrench_profile_id: f16_s119.direct_wrench_6dof.v1, automatic_lowering: true, lowering_note: source-derived subsonic response and direct-wrench bridge}
-  - {family_id: x15, point_mass_profile_id: x15.point_mass_3dof.v1, pseudo_profile_id: x15.attitude_response_p6dof.v1, direct_wrench_profile_id: x15.direct_wrench_6dof.v1, automatic_lowering: true, lowering_note: staged response and explicit direct-wrench bridge; source trim and physical effectors remain gates}
-  - {family_id: hummingbird, point_mass_profile_id: hummingbird.point_mass_3dof.v1, pseudo_profile_id: hummingbird.attitude_response_p6dof.v1, direct_wrench_profile_id: hummingbird.direct_wrench_6dof.v1, automatic_lowering: true, lowering_note: hover response and direct-wrench comparator; native rotor allocation remains preferred}
-  - {family_id: hl20_mod_k, point_mass_profile_id: hl20_mod_k.point_mass_3dof.v1, pseudo_profile_id: hl20.attitude_response_p6dof.v1, direct_wrench_profile_id: hl20.direct_wrench_6dof.v1, automatic_lowering: true, lowering_note: source-derived glide response and direct-wrench bridge}
-  - {family_id: reference_nesc_two_stage_rocket, point_mass_profile_id: nesc_rocket.performance_3dof.v1, pseudo_profile_id: nesc_rocket.attitude_response_p6dof.v1, direct_wrench_profile_id: nesc_rocket.direct_wrench_6dof.v1, automatic_lowering: true, lowering_note: staged response and translation-derived direct-wrench bridge; source gimbal remains explicit}
-  - {family_id: tumbling_body, point_mass_profile_id: tumbling_body.average_area_3dof.v1, pseudo_profile_id: tumbling_body.rigid_body_reuse_p6dof.v1, automatic_lowering: false, lowering_note: rigid-body reuse is required to prove tumble}
+  - {family_id: skywalker_x8, point_mass_profile_id: skywalker_x8.point_mass_3dof.v1, pseudo_profile_id: skywalker_x8.attitude_response_p6dof.v1, direct_wrench_profile_id: skywalker_x8.direct_wrench_6dof.v1, surface_allocation_profile_id: skywalker_x8.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'shared fixed-wing response, direct-wrench bridge, and declared surface path'}
+  - {family_id: b747, point_mass_profile_id: b747.point_mass_3dof.v1, pseudo_profile_id: b747.attitude_response_p6dof.v1, direct_wrench_profile_id: b747.direct_wrench_6dof.v1, surface_allocation_profile_id: b747.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'transport-scaled response, direct-wrench bridge, and declared surface path'}
+  - {family_id: a320_openap_3dof, point_mass_profile_id: a320_openap_3dof.point_mass_3dof.v1, pseudo_profile_id: a320.attitude_response_p6dof.v1, direct_wrench_profile_id: a320.direct_wrench_6dof.v1, surface_allocation_profile_id: a320.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'mixed OpenAP/source-surrogate response, direct-wrench bridge, and pending surface path'}
+  - {family_id: f16_s119, point_mass_profile_id: f16_s119.point_mass_3dof.v1, pseudo_profile_id: f16_s119.attitude_response_p6dof.v1, direct_wrench_profile_id: f16_s119.direct_wrench_6dof.v1, surface_allocation_profile_id: f16_s119.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'source-derived subsonic response, direct-wrench bridge, and declared surface path'}
+  - {family_id: x15, point_mass_profile_id: x15.point_mass_3dof.v1, pseudo_profile_id: x15.attitude_response_p6dof.v1, direct_wrench_profile_id: x15.direct_wrench_6dof.v1, surface_allocation_profile_id: x15.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'staged response and direct-wrench bridge; source trim and physical effectors remain gates'}
+  - {family_id: hummingbird, point_mass_profile_id: hummingbird.point_mass_3dof.v1, pseudo_profile_id: hummingbird.attitude_response_p6dof.v1, direct_wrench_profile_id: hummingbird.direct_wrench_6dof.v1, surface_allocation_profile_id: hummingbird.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'hover response, direct-wrench comparator, and native rotor allocation path'}
+  - {family_id: hl20_mod_k, point_mass_profile_id: hl20_mod_k.point_mass_3dof.v1, pseudo_profile_id: hl20.attitude_response_p6dof.v1, direct_wrench_profile_id: hl20.direct_wrench_6dof.v1, surface_allocation_profile_id: hl20.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'source-derived glide response, direct-wrench bridge, and logical surface overlay'}
+  - {family_id: reference_nesc_two_stage_rocket, point_mass_profile_id: nesc_rocket.performance_3dof.v1, pseudo_profile_id: nesc_rocket.attitude_response_p6dof.v1, direct_wrench_profile_id: nesc_rocket.direct_wrench_6dof.v1, surface_allocation_profile_id: nesc_rocket.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'staged response and translation-derived direct-wrench bridge; source gimbal remains not applicable'}
+  - {family_id: tumbling_body, point_mass_profile_id: tumbling_body.average_area_3dof.v1, pseudo_profile_id: tumbling_body.rigid_body_reuse_p6dof.v1, automatic_lowering: false, lowering_note: 'uncontrolled rigid-body reuse is required to prove tumble'}

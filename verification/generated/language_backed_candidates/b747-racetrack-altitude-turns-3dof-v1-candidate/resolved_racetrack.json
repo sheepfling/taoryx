@@ -1,0 +1,136 @@
+{
+  "binding_id": "b747-cruise-point_mass_3dof-candidate",
+  "binding_status": "capability_feasible",
+  "fidelity": "point_mass_3dof",
+  "gates": [
+    {
+      "gate_normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "id": "high-altitude-level-gate",
+      "phase": "outbound-level",
+      "target": {
+        "altitude_m": 250.0,
+        "east_m": 30000.0,
+        "north_m": 0.0,
+        "speed_m_s": 153.0
+      }
+    },
+    {
+      "gate_normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "id": "left-turn-exit-gate",
+      "phase": "left-turn",
+      "target": {
+        "altitude_m": 250.0,
+        "east_m": 30000.0,
+        "north_m": 16162.51080927923,
+        "speed_m_s": 153.0
+      }
+    },
+    {
+      "gate_normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "id": "low-altitude-level-gate",
+      "phase": "inbound-level",
+      "target": {
+        "altitude_m": 100.0,
+        "east_m": 0.0,
+        "north_m": 16162.51080927923,
+        "speed_m_s": 153.0
+      }
+    },
+    {
+      "gate_normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "id": "terminal-start-finish-gate",
+      "phase": "right-turn",
+      "target": {
+        "altitude_m": 100.0,
+        "east_m": 0.0,
+        "north_m": 0.0,
+        "speed_m_s": 153.0
+      }
+    }
+  ],
+  "phase_windows": [
+    {
+      "end_s": 100.0,
+      "name": "outbound-climb",
+      "start_s": 0.0
+    },
+    {
+      "end_s": 196.07843137254903,
+      "name": "outbound-level",
+      "start_s": 100.0
+    },
+    {
+      "end_s": 362.0131543202525,
+      "name": "left-turn",
+      "start_s": 196.07843137254903
+    },
+    {
+      "end_s": 487.0131543202525,
+      "name": "inbound-descent",
+      "start_s": 362.0131543202525
+    },
+    {
+      "end_s": 558.0915856928016,
+      "name": "inbound-level",
+      "start_s": 487.0131543202525
+    },
+    {
+      "end_s": 724.026308640505,
+      "name": "right-turn",
+      "start_s": 558.0915856928016
+    }
+  ],
+  "route_attributes": {
+    "duration-s": "724.026308640505",
+    "mode": "racetrack",
+    "position-capture-gain": "0",
+    "position-capture-max-correction-mps": "0",
+    "racetrack-altitude-capture-gain-per-s": "0",
+    "racetrack-altitude-capture-max-mps": "0",
+    "racetrack-climb-rate-mps": "1.5",
+    "racetrack-descent-rate-mps": "1.2",
+    "racetrack-high-altitude-m": "250",
+    "racetrack-left-bank-deg": "-18",
+    "racetrack-length-m": "30000",
+    "racetrack-low-altitude-m": "100",
+    "racetrack-right-bank-deg": "18",
+    "racetrack-speed-mps": "153",
+    "racetrack-turn-radius-m": "8081.255404639615"
+  },
+  "schema_version": 1,
+  "source_realization": "capability_scaled_candidate_materialization",
+  "template_id": "powered_fixed_wing_racetrack_v1",
+  "timing": {
+    "climb_time_s": 100.0,
+    "descent_time_s": 125.0,
+    "gate_altitude_tolerance_m": 35.0,
+    "gate_corridor_m": 500.0,
+    "gate_speed_tolerance_mps": 12.0,
+    "inbound_level_time_s": 71.07843137254903,
+    "outbound_level_time_s": 96.07843137254903,
+    "position_capture_bank_gain_rad_per_m": 2.5e-05,
+    "position_capture_max_bank_correction_deg": 3.0,
+    "route_duration_s": 724.026308640505,
+    "simulation_horizon_s": 784.026308640505,
+    "straight_time_s": 196.07843137254903,
+    "turn_rate_command_scale": 1.0,
+    "turn_time_s": 165.93472294770345
+  },
+  "vehicle_id": "b747"
+}

@@ -1,0 +1,1703 @@
+{
+  "claim_boundary": "A worklist determines admissible diagnostic and calibration work. It is neither controller tuning evidence nor a promotion claim.",
+  "family_count": 9,
+  "items": [
+    {
+      "calibration_mode": "capability_scaled_kinematic_guidance",
+      "data_requirements": [
+        "mass_properties",
+        "translational_force_model",
+        "propulsion_and_resource_model",
+        "state_envelope",
+        "terminal_contract"
+      ],
+      "declared_blockers": [
+        "family_flagship_mission"
+      ],
+      "family_id": "skywalker_x8",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "fixed_wing_racetrack",
+      "next_action": "validate_adapter_operation:state_derivative",
+      "pending_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "family_flagship_mission",
+        "adapter_probe_artifact_not_found"
+      ],
+      "readiness_status": "ready_for_runtime_probes",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "source_audit",
+        "trim_grid",
+        "guidance_preflight",
+        "altitude_speed_turn_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "waiting_for_adapter_operation",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "calibration_mode": "response_law_calibration",
+      "data_requirements": [
+        "point_mass_parent",
+        "response_law",
+        "response_calibration_cases",
+        "attitude_rate_limits",
+        "semantic_control_mapping"
+      ],
+      "declared_blockers": [
+        "family_flagship_mission"
+      ],
+      "family_id": "skywalker_x8",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "fixed_wing_racetrack",
+      "next_action": "validate_adapter_operation:state_derivative",
+      "pending_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "family_flagship_mission",
+        "adapter_probe_artifact_not_found"
+      ],
+      "readiness_status": "ready_for_runtime_probes",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "parent_parity_check",
+        "response_identification",
+        "bank_pitch_reversal_probe",
+        "altitude_speed_turn_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "waiting_for_adapter_operation",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "calibration_mode": "trim_linearize_scaled_lqr",
+      "data_requirements": [
+        "inertia_tensor",
+        "force_moment_model",
+        "frame_sign_contract",
+        "direct_wrench_contract",
+        "operating_point_catalog"
+      ],
+      "declared_blockers": [
+        "nonlinear_direct_wrench_mission"
+      ],
+      "family_id": "skywalker_x8",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "fixed_wing_racetrack",
+      "next_action": "run_strategy_stage:trim_grid",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "nonlinear_direct_wrench_mission"
+      ],
+      "readiness_status": "development",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "stages": [
+        "trim_grid",
+        "derivative_consistency",
+        "authority_preflight",
+        "operating_point_campaign",
+        "authority_envelope",
+        "attitude_rate_reversal_probe",
+        "mission_preflight"
+      ],
+      "status": "strategy_development",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "calibration_mode": "trim_linearize_scaled_lqr_and_constrained_allocation",
+      "data_requirements": [
+        "direct_wrench_parent",
+        "physical_effectors",
+        "effector_limits",
+        "actuator_dynamics",
+        "local_effectiveness",
+        "allocation_policy",
+        "achieved_wrench_telemetry"
+      ],
+      "declared_blockers": [
+        "end_to_end_surface_allocated_racetrack"
+      ],
+      "family_id": "skywalker_x8",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "fixed_wing_racetrack",
+      "next_action": "run_strategy_stage:trim_grid",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "end_to_end_surface_allocated_racetrack"
+      ],
+      "readiness_status": "development",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "stages": [
+        "trim_grid",
+        "derivative_consistency",
+        "authority_preflight",
+        "operating_point_campaign",
+        "authority_envelope",
+        "actuator_limit_probe",
+        "attitude_rate_reversal_probe",
+        "mission_preflight"
+      ],
+      "status": "strategy_development",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "calibration_mode": "capability_scaled_kinematic_guidance",
+      "data_requirements": [
+        "mass_properties",
+        "translational_force_model",
+        "propulsion_and_resource_model",
+        "state_envelope",
+        "terminal_contract"
+      ],
+      "declared_blockers": [
+        "family_flagship_mission"
+      ],
+      "family_id": "b747",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "heavy_transport_racetrack",
+      "next_action": "validate_adapter_operation:state_derivative",
+      "pending_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "family_flagship_mission",
+        "adapter_probe_artifact_not_found"
+      ],
+      "readiness_status": "ready_for_runtime_probes",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "source_audit",
+        "trim_grid",
+        "guidance_preflight",
+        "altitude_speed_turn_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "waiting_for_adapter_operation",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "calibration_mode": "response_law_calibration",
+      "data_requirements": [
+        "point_mass_parent",
+        "response_law",
+        "response_calibration_cases",
+        "attitude_rate_limits",
+        "semantic_control_mapping"
+      ],
+      "declared_blockers": [
+        "family_flagship_mission"
+      ],
+      "family_id": "b747",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "heavy_transport_racetrack",
+      "next_action": "validate_adapter_operation:state_derivative",
+      "pending_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "family_flagship_mission",
+        "adapter_probe_artifact_not_found"
+      ],
+      "readiness_status": "ready_for_runtime_probes",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "parent_parity_check",
+        "response_identification",
+        "bank_pitch_reversal_probe",
+        "altitude_speed_turn_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "waiting_for_adapter_operation",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "calibration_mode": "trim_linearize_scaled_lqr",
+      "data_requirements": [
+        "inertia_tensor",
+        "force_moment_model",
+        "frame_sign_contract",
+        "direct_wrench_contract",
+        "operating_point_catalog"
+      ],
+      "declared_blockers": [
+        "nonlinear_direct_wrench_mission"
+      ],
+      "family_id": "b747",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "heavy_transport_racetrack",
+      "next_action": "run_strategy_stage:trim_grid",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "nonlinear_direct_wrench_mission"
+      ],
+      "readiness_status": "development",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "stages": [
+        "trim_grid",
+        "derivative_consistency",
+        "authority_preflight",
+        "operating_point_campaign",
+        "authority_envelope",
+        "attitude_rate_reversal_probe",
+        "mission_preflight"
+      ],
+      "status": "strategy_development",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "calibration_mode": "trim_linearize_scaled_lqr_and_constrained_allocation",
+      "data_requirements": [
+        "direct_wrench_parent",
+        "physical_effectors",
+        "effector_limits",
+        "actuator_dynamics",
+        "local_effectiveness",
+        "allocation_policy",
+        "achieved_wrench_telemetry"
+      ],
+      "declared_blockers": [
+        "end_to_end_surface_allocated_racetrack"
+      ],
+      "family_id": "b747",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "heavy_transport_racetrack",
+      "next_action": "run_strategy_stage:trim_grid",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "end_to_end_surface_allocated_racetrack"
+      ],
+      "readiness_status": "development",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "stages": [
+        "trim_grid",
+        "derivative_consistency",
+        "authority_preflight",
+        "operating_point_campaign",
+        "authority_envelope",
+        "actuator_limit_probe",
+        "attitude_rate_reversal_probe",
+        "mission_preflight"
+      ],
+      "status": "strategy_development",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "calibration_mode": "capability_scaled_kinematic_guidance",
+      "data_requirements": [
+        "mass_properties",
+        "translational_force_model",
+        "propulsion_and_resource_model",
+        "state_envelope",
+        "terminal_contract"
+      ],
+      "declared_blockers": [
+        "broader_operating_point_matrix"
+      ],
+      "family_id": "a320_openap_3dof",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "transport_racetrack",
+      "next_action": "resolve_declared_blocker:broader_operating_point_matrix",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "broader_operating_point_matrix",
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "readiness_status": "blocked",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "source_audit",
+        "trim_grid",
+        "guidance_preflight",
+        "altitude_speed_turn_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "blocked",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "calibration_mode": "response_law_calibration",
+      "data_requirements": [
+        "point_mass_parent",
+        "response_law",
+        "response_calibration_cases",
+        "attitude_rate_limits",
+        "semantic_control_mapping"
+      ],
+      "declared_blockers": [
+        "calibrated_response_model_and_operating_points"
+      ],
+      "family_id": "a320_openap_3dof",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "transport_racetrack",
+      "next_action": "resolve_declared_blocker:calibrated_response_model_and_operating_points",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "calibrated_response_model_and_operating_points",
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "readiness_status": "blocked",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "parent_parity_check",
+        "response_identification",
+        "bank_pitch_reversal_probe",
+        "altitude_speed_turn_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "blocked",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "calibration_mode": "trim_linearize_scaled_lqr",
+      "data_requirements": [
+        "inertia_tensor",
+        "force_moment_model",
+        "frame_sign_contract",
+        "direct_wrench_contract",
+        "operating_point_catalog"
+      ],
+      "declared_blockers": [
+        "participating_rigid_body_plant",
+        "physical_surface_effectivity"
+      ],
+      "family_id": "a320_openap_3dof",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "transport_racetrack",
+      "next_action": "resolve_declared_blocker:participating_rigid_body_plant",
+      "pending_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "participating_rigid_body_plant",
+        "physical_surface_effectivity",
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "readiness_status": "planned",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "stages": [
+        "trim_grid",
+        "derivative_consistency",
+        "authority_preflight",
+        "operating_point_campaign",
+        "authority_envelope",
+        "attitude_rate_reversal_probe",
+        "mission_preflight"
+      ],
+      "status": "planned",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "calibration_mode": "trim_linearize_scaled_lqr_and_constrained_allocation",
+      "data_requirements": [
+        "direct_wrench_parent",
+        "physical_effectors",
+        "effector_limits",
+        "actuator_dynamics",
+        "local_effectiveness",
+        "allocation_policy",
+        "achieved_wrench_telemetry"
+      ],
+      "declared_blockers": [
+        "participating_rigid_body_plant",
+        "physical_surface_effectivity"
+      ],
+      "family_id": "a320_openap_3dof",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "transport_racetrack",
+      "next_action": "resolve_declared_blocker:participating_rigid_body_plant",
+      "pending_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "participating_rigid_body_plant",
+        "physical_surface_effectivity",
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "readiness_status": "planned",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "stages": [
+        "trim_grid",
+        "derivative_consistency",
+        "authority_preflight",
+        "operating_point_campaign",
+        "authority_envelope",
+        "actuator_limit_probe",
+        "attitude_rate_reversal_probe",
+        "mission_preflight"
+      ],
+      "status": "planned",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "calibration_mode": "capability_scaled_kinematic_guidance",
+      "data_requirements": [
+        "mass_properties",
+        "translational_force_model",
+        "propulsion_and_resource_model",
+        "state_envelope",
+        "terminal_contract"
+      ],
+      "declared_blockers": [
+        "multi_regime_energy_mission"
+      ],
+      "family_id": "f16_s119",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "fighter_energy_maneuver",
+      "next_action": "run_strategy_stage:source_audit",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "multi_regime_energy_mission",
+        "omitted:physical_attitude_dynamics",
+        "omitted:aerodynamic_moments",
+        "omitted:physical_actuator_states"
+      ],
+      "readiness_status": "probe_ready",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "source_audit",
+        "trim_grid",
+        "guidance_preflight",
+        "altitude_speed_turn_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "strategy_probe_ready",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "calibration_mode": "response_law_calibration",
+      "data_requirements": [
+        "point_mass_parent",
+        "response_law",
+        "response_calibration_cases",
+        "attitude_rate_limits",
+        "semantic_control_mapping"
+      ],
+      "declared_blockers": [
+        "high_rate_alpha_beta_load_factor_envelope"
+      ],
+      "family_id": "f16_s119",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "fighter_energy_maneuver",
+      "next_action": "run_strategy_stage:parent_parity_check",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "high_rate_alpha_beta_load_factor_envelope",
+        "omitted:moment_balance_as_response_source",
+        "omitted:fuel_mass_evolution"
+      ],
+      "readiness_status": "probe_ready",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "parent_parity_check",
+        "response_identification",
+        "bank_pitch_reversal_probe",
+        "altitude_speed_turn_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "strategy_probe_ready",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "calibration_mode": "trim_linearize_scaled_lqr",
+      "data_requirements": [
+        "inertia_tensor",
+        "force_moment_model",
+        "frame_sign_contract",
+        "direct_wrench_contract",
+        "operating_point_catalog"
+      ],
+      "declared_blockers": [
+        "nonlinear_energy_maneuver_mission"
+      ],
+      "family_id": "f16_s119",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "fighter_energy_maneuver",
+      "next_action": "run_strategy_stage:trim_grid",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "nonlinear_energy_maneuver_mission",
+        "omitted:fuel_mass_evolution",
+        "omitted:actuator_dynamics",
+        "omitted:runway_contact"
+      ],
+      "readiness_status": "probe_ready",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "stages": [
+        "trim_grid",
+        "derivative_consistency",
+        "authority_preflight",
+        "operating_point_campaign",
+        "authority_envelope",
+        "attitude_rate_reversal_probe",
+        "mission_preflight"
+      ],
+      "status": "strategy_probe_ready",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "calibration_mode": "trim_linearize_scaled_lqr_and_constrained_allocation",
+      "data_requirements": [
+        "direct_wrench_parent",
+        "physical_effectors",
+        "effector_limits",
+        "actuator_dynamics",
+        "local_effectiveness",
+        "allocation_policy",
+        "achieved_wrench_telemetry"
+      ],
+      "declared_blockers": [
+        "scheduled_surface_qualification"
+      ],
+      "family_id": "f16_s119",
+      "family_inputs": [
+        "mass_properties",
+        "aerodynamic_force_model",
+        "propulsion_and_resource_model",
+        "alpha_beta_table_domains",
+        "speed_altitude_operating_points",
+        "turn_climb_descent_envelope"
+      ],
+      "mission_overlay": "fighter_energy_maneuver",
+      "next_action": "run_strategy_stage:trim_grid",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "scheduled_surface_qualification",
+        "omitted:source_validated_actuator_dynamics",
+        "omitted:fuel_mass_evolution",
+        "omitted:runway_contact"
+      ],
+      "readiness_status": "probe_ready",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "stages": [
+        "trim_grid",
+        "derivative_consistency",
+        "authority_preflight",
+        "operating_point_campaign",
+        "authority_envelope",
+        "actuator_limit_probe",
+        "attitude_rate_reversal_probe",
+        "mission_preflight"
+      ],
+      "status": "strategy_probe_ready",
+      "strategy_id": "powered_fixed_wing.v1",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "calibration_mode": "energy_guidance_schedule",
+      "data_requirements": [
+        "release_state",
+        "variable_mass_force_model",
+        "stage_event_contract",
+        "energy_terminal_corridor"
+      ],
+      "declared_blockers": [
+        "release_burn_coast_terminal_handoff"
+      ],
+      "family_id": "x15",
+      "family_inputs": [
+        "release_contract",
+        "staged_propulsion_and_resource_model",
+        "aerodynamic_force_moment_schedule",
+        "mach_dynamic_pressure_operating_points",
+        "control_authority_transition_map",
+        "high_energy_terminal_corridor"
+      ],
+      "mission_overlay": "rocket_aircraft_high_energy",
+      "next_action": "validate_adapter_operation:state_derivative",
+      "pending_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "release_burn_coast_terminal_handoff",
+        "adapter_probe_artifact_not_found"
+      ],
+      "readiness_status": "ready_for_runtime_probes",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "release_audit",
+        "phase_preflight",
+        "powered_coast_energy_probe",
+        "terminal_corridor_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "waiting_for_adapter_operation",
+      "strategy_id": "rocket_aircraft_high_energy.v1",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "calibration_mode": "regime_response_calibration",
+      "data_requirements": [
+        "point_mass_parent",
+        "regime_response_law",
+        "phase_rate_limits",
+        "attitude_handoff_contract"
+      ],
+      "declared_blockers": [
+        "powered_coast_atmospheric_schedule"
+      ],
+      "family_id": "x15",
+      "family_inputs": [
+        "release_contract",
+        "staged_propulsion_and_resource_model",
+        "aerodynamic_force_moment_schedule",
+        "mach_dynamic_pressure_operating_points",
+        "control_authority_transition_map",
+        "high_energy_terminal_corridor"
+      ],
+      "mission_overlay": "rocket_aircraft_high_energy",
+      "next_action": "validate_adapter_operation:state_derivative",
+      "pending_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "powered_coast_atmospheric_schedule",
+        "adapter_probe_artifact_not_found"
+      ],
+      "readiness_status": "ready_for_runtime_probes",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "parent_parity_check",
+        "phase_response_identification",
+        "attitude_handoff_probe",
+        "bank_pitch_reversal_probe",
+        "terminal_corridor_probe"
+      ],
+      "status": "waiting_for_adapter_operation",
+      "strategy_id": "rocket_aircraft_high_energy.v1",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "calibration_mode": "phase_scheduled_trim_linearize_scaled_lqr",
+      "data_requirements": [
+        "inertia_tensor",
+        "force_moment_model",
+        "direct_wrench_contract",
+        "phase_trim_catalog",
+        "dynamic_pressure_schedule"
+      ],
+      "declared_blockers": [
+        "full_source_physical_effector_trim",
+        "powered_coast_atmospheric_schedule"
+      ],
+      "family_id": "x15",
+      "family_inputs": [
+        "release_contract",
+        "staged_propulsion_and_resource_model",
+        "aerodynamic_force_moment_schedule",
+        "mach_dynamic_pressure_operating_points",
+        "control_authority_transition_map",
+        "high_energy_terminal_corridor"
+      ],
+      "mission_overlay": "rocket_aircraft_high_energy",
+      "next_action": "run_strategy_stage:phase_trim_grid",
+      "pending_operations": [],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "full_source_physical_effector_trim",
+        "powered_coast_atmospheric_schedule"
+      ],
+      "readiness_status": "development",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "stages": [
+        "phase_trim_grid",
+        "derivative_consistency",
+        "authority_preflight",
+        "operating_point_campaign",
+        "authority_transition_probe",
+        "mission_preflight"
+      ],
+      "status": "strategy_development",
+      "strategy_id": "rocket_aircraft_high_energy.v1",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "calibration_mode": "phase_scheduled_constrained_allocation",
+      "data_requirements": [
+        "direct_wrench_parent",
+        "physical_effectors",
+        "actuator_dynamics",
+        "stabilator_rudder_rcs_or_gimbal_effectiveness",
+        "allocation_policy"
+      ],
+      "declared_blockers": [
+        "source_trim_acceptance",
+        "stabilator_rudder_rcs_propulsion_effectivity"
+      ],
+      "family_id": "x15",
+      "family_inputs": [
+        "release_contract",
+        "staged_propulsion_and_resource_model",
+        "aerodynamic_force_moment_schedule",
+        "mach_dynamic_pressure_operating_points",
+        "control_authority_transition_map",
+        "high_energy_terminal_corridor"
+      ],
+      "mission_overlay": "rocket_aircraft_high_energy",
+      "next_action": "resolve_declared_blocker:source_trim_acceptance",
+      "pending_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "physical_family": "powered_fixed_wing",
+      "readiness_blockers": [
+        "source_trim_acceptance",
+        "stabilator_rudder_rcs_propulsion_effectivity",
+        "allocator_declaration: value does not contain 'allocator'"
+      ],
+      "readiness_status": "planned",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "stages": [
+        "phase_trim_grid",
+        "authority_preflight",
+        "authority_envelope",
+        "transition_allocation_probe",
+        "actuator_limit_probe",
+        "mission_preflight"
+      ],
+      "status": "planned",
+      "strategy_id": "rocket_aircraft_high_energy.v1",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "calibration_mode": "bounded_position_guidance",
+      "data_requirements": [
+        "mass_properties",
+        "aggregate_thrust_model",
+        "resource_model",
+        "translational_envelope",
+        "terminal_contract"
+      ],
+      "declared_blockers": [
+        "translated_yaw_disturbance_landing_mission"
+      ],
+      "family_id": "hummingbird",
+      "family_inputs": [
+        "mass_inertia_and_cg",
+        "rotor_geometry_and_spin_directions",
+        "thrust_and_reaction_torque_model",
+        "motor_limits_rate_and_lag",
+        "battery_or_resource_model",
+        "contact_terminal_contract"
+      ],
+      "mission_overlay": "pad_to_pad_hover_translation",
+      "next_action": "run_strategy_stage:hover_equilibrium",
+      "pending_operations": [],
+      "physical_family": "multirotor",
+      "readiness_blockers": [
+        "translated_yaw_disturbance_landing_mission"
+      ],
+      "readiness_status": "development",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "hover_equilibrium",
+        "translation_preflight",
+        "xyz_translation_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "strategy_development",
+      "strategy_id": "multirotor_hover_translation.v1",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "calibration_mode": "thrust_vector_response_calibration",
+      "data_requirements": [
+        "point_mass_parent",
+        "thrust_vector_response_law",
+        "attitude_rate_limits",
+        "yaw_response_calibration"
+      ],
+      "declared_blockers": [
+        "rotor_response_and_yaw_authority_envelope"
+      ],
+      "family_id": "hummingbird",
+      "family_inputs": [
+        "mass_inertia_and_cg",
+        "rotor_geometry_and_spin_directions",
+        "thrust_and_reaction_torque_model",
+        "motor_limits_rate_and_lag",
+        "battery_or_resource_model",
+        "contact_terminal_contract"
+      ],
+      "mission_overlay": "pad_to_pad_hover_translation",
+      "next_action": "run_strategy_stage:parent_parity_check",
+      "pending_operations": [],
+      "physical_family": "multirotor",
+      "readiness_blockers": [
+        "rotor_response_and_yaw_authority_envelope"
+      ],
+      "readiness_status": "development",
+      "required_operations": [
+        "state_derivative",
+        "trim"
+      ],
+      "stages": [
+        "parent_parity_check",
+        "hover_attitude_probe",
+        "yaw_translation_probe",
+        "disturbance_recovery_probe",
+        "mission_objective_evaluation"
+      ],
+      "status": "strategy_development",
+      "strategy_id": "multirotor_hover_translation.v1",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "calibration_mode": "hover_linearize_scaled_lqr",
+      "data_requirements": [
+        "inertia_tensor",
+        "rigid_body_force_moment_model",
+        "direct_wrench_contract",
+        "hover_operating_point"
+      ],
+      "declared_blockers": [
+        "direct_wrench_is_debug_comparator"
+      ],
+      "family_id": "hummingbird",
+      "family_inputs": [
+        "mass_inertia_and_cg",
+        "rotor_geometry_and_spin_directions",
+        "thrust_and_reaction_torque_model",
+        "motor_limits_rate_and_lag",
+        "battery_or_resource_model",
+        "contact_terminal_contract"
+      ],
+      "mission_overlay": "pad_to_pad_hover_translation",
+      "next_action": "run_strategy_stage:hover_trim",
+      "pending_operations": [],
+      "physical_family": "multirotor",
+      "readiness_blockers": [
+        "direct_wrench_is_debug_comparator"
+      ],
+      "readiness_status": "development",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "stages": [
+        "hover_trim",
+        "derivative_consistency",
+        "authority_preflight",
+        "operating_point_campaign",
+        "attitude_rate_recovery_probe",
+        "direct_wrench_comparator_probe"
+      ],
+      "status": "strategy_development",
+      "strategy_id": "multirotor_hover_translation.v1",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "calibration_mode": "nested_hover_linearize_and_rotor_allocation",
+      "data_requirements": [
+        "individual_rotor_effectiveness",
+        "motor_limits_rate_and_lag",
+        "allocation_policy",
+        "contact_model",
+        "achieved_wrench_telemetry"
+      ],
+      "declared_blockers": [
+        "battery_voltage_contact_and_full_envelope"
+      ],
+      "family_id": "hummingbird",
+      "family_inputs": [
+        "mass_inertia_and_cg",
+        "rotor_geometry_and_spin_directions",
+        "thrust_and_reaction_torque_model",
+        "motor_limits_rate_and_lag",
+        "battery_or_resource_model",
+        "contact_terminal_contract"
+      ],
+      "mission_overlay": "pad_to_pad_hover_translation",
+      "next_action": "run_strategy_stage:hover_trim",
+      "pending_operations": [],
+      "physical_family": "multirotor",
+      "readiness_blockers": [
+        "battery_voltage_contact_and_full_envelope"
+      ],
+      "readiness_status": "development",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "stages": [
+        "hover_trim",
+        "authority_preflight",
+        "rotor_authority_envelope",
+        "motor_limit_probe",
+        "yaw_translation_probe",
+        "landing_settle_probe",
+        "mission_preflight"
+      ],
+      "status": "strategy_development",
+      "strategy_id": "multirotor_hover_translation.v1",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "calibration_mode": "glide_energy_guidance",
+      "data_requirements": [
+        "release_state",
+        "glide_force_model",
+        "energy_envelope",
+        "terminal_corridor"
+      ],
+      "declared_blockers": [
+        "glide_energy_management_mission"
+      ],
+      "family_id": "hl20_mod_k",
+      "family_inputs": [
+        "release_contract",
+        "mass_inertia_and_cg",
+        "aerodynamic_force_moment_model",
+        "alpha_bank_crossrange_envelope",
+        "glide_energy_terminal_corridor",
+        "surface_effectiveness_if_claimed"
+      ],
+      "mission_overlay": "glide_energy_management",
+      "next_action": "validate_adapter_operation:state_derivative",
+      "pending_operations": [
+        "state_derivative",
+        "trim_fragment"
+      ],
+      "physical_family": "lifting_body",
+      "readiness_blockers": [
+        "glide_energy_management_mission",
+        "omitted:physical_attitude_dynamics",
+        "omitted:aerodynamic_moments",
+        "omitted:physical_actuator_states",
+        "adapter_probe_artifact_not_found"
+      ],
+      "readiness_status": "data_ready",
+      "required_operations": [
+        "state_derivative",
+        "trim_fragment"
+      ],
+      "stages": [
+        "release_audit",
+        "energy_preflight",
+        "bank_reversal_energy_probe",
+        "terminal_corridor_probe"
+      ],
+      "status": "waiting_for_adapter_operation",
+      "strategy_id": "lifting_body_glide.v1",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "calibration_mode": "lifting_body_response_calibration",
+      "data_requirements": [
+        "point_mass_parent",
+        "attitude_response_law",
+        "alpha_bank_limits",
+        "response_calibration_cases"
+      ],
+      "declared_blockers": [
+        "bank_reversal_alpha_limit_energy_coupling"
+      ],
+      "family_id": "hl20_mod_k",
+      "family_inputs": [
+        "release_contract",
+        "mass_inertia_and_cg",
+        "aerodynamic_force_moment_model",
+        "alpha_bank_crossrange_envelope",
+        "glide_energy_terminal_corridor",
+        "surface_effectiveness_if_claimed"
+      ],
+      "mission_overlay": "glide_energy_management",
+      "next_action": "validate_adapter_operation:state_derivative",
+      "pending_operations": [
+        "state_derivative",
+        "trim_fragment"
+      ],
+      "physical_family": "lifting_body",
+      "readiness_blockers": [
+        "bank_reversal_alpha_limit_energy_coupling",
+        "omitted:moment_balance_as_response_source",
+        "omitted:physical_actuator_states",
+        "adapter_probe_artifact_not_found"
+      ],
+      "readiness_status": "data_ready",
+      "required_operations": [
+        "state_derivative",
+        "trim_fragment"
+      ],
+      "stages": [
+        "parent_parity_check",
+        "bank_reversal_probe",
+        "alpha_limit_probe",
+        "terminal_corridor_probe"
+      ],
+      "status": "waiting_for_adapter_operation",
+      "strategy_id": "lifting_body_glide.v1",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "calibration_mode": "local_channel_control_screen",
+      "data_requirements": [
+        "inertia_tensor",
+        "force_moment_model",
+        "direct_wrench_contract",
+        "source_trim_fragment"
+      ],
+      "declared_blockers": [
+        "source_trim_acceptance"
+      ],
+      "family_id": "hl20_mod_k",
+      "family_inputs": [
+        "release_contract",
+        "mass_inertia_and_cg",
+        "aerodynamic_force_moment_model",
+        "alpha_bank_crossrange_envelope",
+        "glide_energy_terminal_corridor",
+        "surface_effectiveness_if_claimed"
+      ],
+      "mission_overlay": "glide_energy_management",
+      "next_action": "run_strategy_stage:source_channel_trim_check",
+      "pending_operations": [],
+      "physical_family": "lifting_body",
+      "readiness_blockers": [
+        "source_trim_acceptance",
+        "omitted:propulsion",
+        "omitted:actuator_dynamics",
+        "omitted:landing_contact"
+      ],
+      "readiness_status": "probe_ready",
+      "required_operations": [
+        "state_derivative",
+        "trim_fragment"
+      ],
+      "stages": [
+        "source_channel_trim_check",
+        "derivative_or_response_provenance",
+        "authority_preflight",
+        "direct_wrench_authority_probe"
+      ],
+      "status": "strategy_probe_ready",
+      "strategy_id": "lifting_body_glide.v1",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "calibration_mode": "source_channel_constrained_allocation",
+      "data_requirements": [
+        "physical_effectors",
+        "local_effectiveness",
+        "actuator_dynamics",
+        "allocation_policy",
+        "source_trim_fragment"
+      ],
+      "declared_blockers": [
+        "full_state_trim",
+        "closed_loop_glide_qualification"
+      ],
+      "family_id": "hl20_mod_k",
+      "family_inputs": [
+        "release_contract",
+        "mass_inertia_and_cg",
+        "aerodynamic_force_moment_model",
+        "alpha_bank_crossrange_envelope",
+        "glide_energy_terminal_corridor",
+        "surface_effectiveness_if_claimed"
+      ],
+      "mission_overlay": "glide_energy_management",
+      "next_action": "run_strategy_stage:source_channel_trim_check",
+      "pending_operations": [],
+      "physical_family": "lifting_body",
+      "readiness_blockers": [
+        "full_state_trim",
+        "closed_loop_glide_qualification",
+        "omitted:closed_loop_controller",
+        "omitted:landing_contact"
+      ],
+      "readiness_status": "probe_ready",
+      "required_operations": [
+        "state_derivative",
+        "trim_fragment",
+        "effectiveness",
+        "allocate"
+      ],
+      "stages": [
+        "source_channel_trim_check",
+        "authority_preflight",
+        "authority_envelope",
+        "surface_limit_probe",
+        "closed_loop_glide_readiness"
+      ],
+      "status": "strategy_probe_ready",
+      "strategy_id": "lifting_body_glide.v1",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "calibration_mode": "trajectory_replay_and_reachability",
+      "data_requirements": [
+        "staged_translation_replay",
+        "stage_event_contract",
+        "resource_ledger",
+        "target_state_contract"
+      ],
+      "declared_blockers": [
+        "source_replay_not_participating_plant"
+      ],
+      "family_id": "reference_nesc_two_stage_rocket",
+      "family_inputs": [
+        "staged_mass_and_propulsion_model",
+        "stage_event_contract",
+        "launch_or_release_state",
+        "target_state_or_impact_contract",
+        "attitude_gimbal_effectivity_when_controlled"
+      ],
+      "mission_overlay": "staged_launch_target_state",
+      "next_action": "run_strategy_stage:source_audit",
+      "pending_operations": [],
+      "physical_family": "mass_depleting_rocket",
+      "readiness_blockers": [
+        "source_replay_not_participating_plant",
+        "omitted:attitude_dynamics",
+        "omitted:aerodynamic_moments",
+        "omitted:body_rates"
+      ],
+      "readiness_status": "probe_ready",
+      "required_operations": [
+        "replay"
+      ],
+      "stages": [
+        "source_audit",
+        "event_ordering_probe",
+        "resource_closure_probe",
+        "target_state_evaluation"
+      ],
+      "status": "strategy_probe_ready",
+      "strategy_id": "staged_rocket_replay.v1",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "calibration_mode": "response_law_calibration_when_attitude_data_exists",
+      "data_requirements": [
+        "point_mass_parent",
+        "declared_attitude_response",
+        "phase_handoff_contract"
+      ],
+      "declared_blockers": [
+        "source_replay_not_participating_attitude"
+      ],
+      "family_id": "reference_nesc_two_stage_rocket",
+      "family_inputs": [
+        "staged_mass_and_propulsion_model",
+        "stage_event_contract",
+        "launch_or_release_state",
+        "target_state_or_impact_contract",
+        "attitude_gimbal_effectivity_when_controlled"
+      ],
+      "mission_overlay": "staged_launch_target_state",
+      "next_action": "run_strategy_stage:parent_parity_check",
+      "pending_operations": [],
+      "physical_family": "mass_depleting_rocket",
+      "readiness_blockers": [
+        "source_replay_not_participating_attitude",
+        "omitted:full_moment_balance",
+        "omitted:actuator_dynamics"
+      ],
+      "readiness_status": "probe_ready",
+      "required_operations": [
+        "replay"
+      ],
+      "stages": [
+        "parent_parity_check",
+        "attitude_data_audit",
+        "response_handoff_probe"
+      ],
+      "status": "strategy_probe_ready",
+      "strategy_id": "staged_rocket_replay.v1",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "calibration_mode": "staged_direct_wrench_schedule",
+      "data_requirements": [
+        "participating_state_derivative",
+        "inertia_tensor",
+        "direct_wrench_contract",
+        "gimbal_or_attitude_effectivity"
+      ],
+      "declared_blockers": [
+        "time_aligned_attitude_gimbal_effectivity"
+      ],
+      "family_id": "reference_nesc_two_stage_rocket",
+      "family_inputs": [
+        "staged_mass_and_propulsion_model",
+        "stage_event_contract",
+        "launch_or_release_state",
+        "target_state_or_impact_contract",
+        "attitude_gimbal_effectivity_when_controlled"
+      ],
+      "mission_overlay": "staged_launch_target_state",
+      "next_action": "resolve_declared_blocker:time_aligned_attitude_gimbal_effectivity",
+      "pending_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "physical_family": "mass_depleting_rocket",
+      "readiness_blockers": [
+        "time_aligned_attitude_gimbal_effectivity",
+        "omitted:independent_full_participating_simulation_equivalence"
+      ],
+      "readiness_status": "planned",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize"
+      ],
+      "stages": [
+        "phase_trim_grid",
+        "derivative_consistency",
+        "authority_preflight",
+        "gimbal_authority_probe",
+        "stage_transition_probe"
+      ],
+      "status": "planned",
+      "strategy_id": "staged_rocket_replay.v1",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "calibration_mode": "staged_constrained_gimbal_allocation",
+      "data_requirements": [
+        "physical_gimbal_or_attitude_effectors",
+        "actuator_dynamics",
+        "local_effectiveness",
+        "allocation_policy"
+      ],
+      "declared_blockers": [
+        "time_aligned_attitude_gimbal_effectivity"
+      ],
+      "family_id": "reference_nesc_two_stage_rocket",
+      "family_inputs": [
+        "staged_mass_and_propulsion_model",
+        "stage_event_contract",
+        "launch_or_release_state",
+        "target_state_or_impact_contract",
+        "attitude_gimbal_effectivity_when_controlled"
+      ],
+      "mission_overlay": "staged_launch_target_state",
+      "next_action": "resolve_declared_blocker:time_aligned_attitude_gimbal_effectivity",
+      "pending_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "physical_family": "mass_depleting_rocket",
+      "readiness_blockers": [
+        "time_aligned_attitude_gimbal_effectivity",
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "readiness_status": "planned",
+      "required_operations": [
+        "state_derivative",
+        "trim",
+        "linearize",
+        "effectiveness",
+        "allocate"
+      ],
+      "stages": [
+        "phase_trim_grid",
+        "authority_preflight",
+        "gimbal_authority_envelope",
+        "actuator_limit_probe",
+        "stage_transition_probe"
+      ],
+      "status": "planned",
+      "strategy_id": "staged_rocket_replay.v1",
+      "tier": "rigid_body_6dof_surface_allocated"
+    },
+    {
+      "calibration_mode": "ballistic_parameter_estimation",
+      "data_requirements": [
+        "orientation_averaged_area_model",
+        "translational_force_model",
+        "impact_contract"
+      ],
+      "declared_blockers": [
+        "orientation_averaged_area_is_not_tumble_proof"
+      ],
+      "family_id": "tumbling_body",
+      "family_inputs": [
+        "release_state",
+        "mass_inertia_and_geometry",
+        "orientation_dependent_aerodynamics",
+        "impact_contract"
+      ],
+      "mission_overlay": "release_damping_impact",
+      "next_action": "validate_adapter_operation:state_derivative",
+      "pending_operations": [
+        "state_derivative"
+      ],
+      "physical_family": "passive_ballistic_tumbling_body",
+      "readiness_blockers": [
+        "orientation_averaged_area_is_not_tumble_proof",
+        "adapter_probe_artifact_not_found"
+      ],
+      "readiness_status": "data_ready",
+      "required_operations": [
+        "state_derivative"
+      ],
+      "stages": [
+        "release_audit",
+        "ballistic_coefficient_probe",
+        "impact_evaluation"
+      ],
+      "status": "waiting_for_adapter_operation",
+      "strategy_id": "passive_ballistic_tumbling.v1",
+      "tier": "point_mass_3dof"
+    },
+    {
+      "calibration_mode": "passive_rotation_replay",
+      "data_requirements": [
+        "rigid_body_reuse_contract",
+        "orientation_telemetry",
+        "impact_contract"
+      ],
+      "declared_blockers": [
+        "passive_uncontrolled_rotation_evidence"
+      ],
+      "family_id": "tumbling_body",
+      "family_inputs": [
+        "release_state",
+        "mass_inertia_and_geometry",
+        "orientation_dependent_aerodynamics",
+        "impact_contract"
+      ],
+      "mission_overlay": "release_damping_impact",
+      "next_action": "validate_adapter_operation:state_derivative",
+      "pending_operations": [
+        "state_derivative"
+      ],
+      "physical_family": "passive_ballistic_tumbling_body",
+      "readiness_blockers": [
+        "passive_uncontrolled_rotation_evidence"
+      ],
+      "readiness_status": "probe_ready",
+      "required_operations": [
+        "state_derivative"
+      ],
+      "stages": [
+        "release_audit",
+        "rotation_invariant_probe",
+        "impact_evaluation"
+      ],
+      "status": "waiting_for_adapter_operation",
+      "strategy_id": "passive_ballistic_tumbling.v1",
+      "tier": "pseudo_6dof"
+    },
+    {
+      "calibration_mode": "not_applicable",
+      "data_requirements": [],
+      "declared_blockers": [],
+      "family_id": "tumbling_body",
+      "family_inputs": [
+        "release_state",
+        "mass_inertia_and_geometry",
+        "orientation_dependent_aerodynamics",
+        "impact_contract"
+      ],
+      "mission_overlay": "release_damping_impact",
+      "next_action": "no_control_tuning_required",
+      "pending_operations": [],
+      "physical_family": "passive_ballistic_tumbling_body",
+      "readiness_blockers": [
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "readiness_status": "not_applicable",
+      "required_operations": [],
+      "stages": [],
+      "status": "not_applicable",
+      "strategy_id": "passive_ballistic_tumbling.v1",
+      "tier": "rigid_body_6dof_direct_wrench"
+    },
+    {
+      "calibration_mode": "not_applicable",
+      "data_requirements": [],
+      "declared_blockers": [],
+      "family_id": "tumbling_body",
+      "family_inputs": [
+        "release_state",
+        "mass_inertia_and_geometry",
+        "orientation_dependent_aerodynamics",
+        "impact_contract"
+      ],
+      "mission_overlay": "release_damping_impact",
+      "next_action": "no_control_tuning_required",
+      "pending_operations": [],
+      "physical_family": "passive_ballistic_tumbling_body",
+      "readiness_blockers": [
+        "no vehicle metadata or source-family profile is bound"
+      ],
+      "readiness_status": "not_applicable",
+      "required_operations": [],
+      "stages": [],
+      "status": "not_applicable",
+      "strategy_id": "passive_ballistic_tumbling.v1",
+      "tier": "rigid_body_6dof_surface_allocated"
+    }
+  ],
+  "readiness_status": "development",
+  "schema": "taoryx.family-strategy-worklist/v1alpha1",
+  "status": "pass",
+  "status_counts": {
+    "blocked": 2,
+    "not_applicable": 2,
+    "planned": 5,
+    "strategy_development": 9,
+    "strategy_probe_ready": 8,
+    "waiting_for_adapter_operation": 10
+  },
+  "strategy_conformance": {
+    "claim_boundary": "Strategy conformance only; a valid strategy mapping is not vehicle, controller, or mission qualification.",
+    "error_count": 0,
+    "family_count": 9,
+    "findings": [],
+    "schema": "taoryx.family-strategy-conformance/v1alpha1",
+    "status": "pass",
+    "strategy_catalog": "verification/family_integration_strategies.yaml"
+  },
+  "tier_count": 36
+}

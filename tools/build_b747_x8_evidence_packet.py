@@ -5,14 +5,23 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import mimetypes
 import shutil
 import uuid
 import zipfile
 from pathlib import Path
 from typing import Any
 
+from taoryx.fidelity_contracts import control_realization_for
 from taoryx.language import GrammarProfile
 from taoryx.runtime.runner import run_files
+from taoryx.showcase import (
+    ArtifactFile,
+    EvidenceBoardSpec,
+    FidelityShowcaseRealization,
+    ShowcaseOutcome,
+    build_showcase_run_artifact,
+)
 from taoryx.validation import independent_force_closure, independent_moment_closure
 from taoryx.visualization import render_run_artifact_plots
 
@@ -167,6 +176,16 @@ PLOT_CHANNELS = (
     "taos.route_corner_2_error_m",
     "taos.route_corner_3_error_m",
 )
+SHOWCASE_MODULES = (
+    "trajectory_3d",
+    "mission_timeline",
+    "energy_and_resources",
+    "attitude_and_rates",
+    "semantic_controls",
+    "physical_effectors",
+    "envelope_margins",
+    "terminal_corridor",
+)
 ####
 
 
@@ -176,6 +195,91 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+####
+
+
+def _payload_sha256(value: object) -> str:
+    """Hash resolved case inputs without depending on generated outputs."""
+
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+####
+
+
+def _artifact_files(packet: Path, scenario_hash: str) -> tuple[ArtifactFile, ...]:
+    """Describe one legacy packet with the common artifact boundary."""
+
+    names = ["manifest.json"]
+    names.extend(
+        str(path.relative_to(packet))
+        for path in sorted(packet.rglob("*"))
+        if path.is_file() and path.name != "manifest.json"
+    )
+    return tuple(
+        ArtifactFile(
+            path=name,
+            sha256=scenario_hash if name == "manifest.json" else _sha256(packet / name),
+            media_type=mimetypes.guess_type(name)[0] or "application/octet-stream",
+        )
+        for name in names
+    )
+####
+
+
+def _case_realization(case: dict[str, Any]) -> FidelityShowcaseRealization:
+    """Resolve each historical case to an explicit canonical tier."""
+
+    is_3dof = str(case["id"]).endswith("3dof")
+    tier = "point_mass_3dof" if is_3dof else "rigid_body_6dof_surface_allocated"
+    controls = ("force_model",) if is_3dof else ("surface_allocated",)
+    effectors: tuple[str, ...] = ()
+    if not is_3dof:
+        effectors = (
+            ("elevator_deg",)
+            if str(case["vehicle"]) == "B747-100"
+            else ("collective_elevon_deg", "differential_elevon_deg", "throttle_fraction")
+        )
+    vehicle_slug = "b747" if str(case["vehicle"]) == "B747-100" else "skywalker_x8"
+    control = control_realization_for(tier)
+    assert control == controls[0]
+    return FidelityShowcaseRealization(
+        fidelity=tier,
+        control_realization=control,
+        realization_id=f"{vehicle_slug}.legacy_evidence.{case['id']}.v1",
+        state_schema=("geodetic_point_mass_3dof",) if is_3dof else ("ecic_rigid_body_6dof",),
+        semantic_command_mapping={
+            "vehicle.controls": "declared runtime controls in source problem",
+            "vehicle.propulsion": "declared propulsion schedule in source problem",
+        },
+        physical_effectors=effectors,
+        available_physics=(
+            "source-bounded aerodynamic loads",
+            "declared propulsion and mass properties",
+            "point-mass guidance" if is_3dof else "rigid-body translation and rotation",
+            "bounded declared surface-control path" if not is_3dof else "no physical effector claim",
+        ),
+        claim=(
+            f"The {case['vehicle']} {case['id']} case is a source-bounded "
+            "research-surrogate execution record with explicit fidelity and "
+            "control-path provenance."
+        ),
+        nonclaims=(
+            "family-wide qualification",
+            "flight validation",
+            "unmodeled actuator, propulsion, or aerodynamic behavior",
+            "direct-wrench results being equivalent to physical-effector validation",
+        ),
+        evidence_grade="mixed",
+    )
+####
+
+
+def _case_outcome(case: dict[str, Any], report: Any) -> ShowcaseOutcome:
+    """Map runtime completion to an honest artifact outcome."""
+
+    if report.exit_code != 0 or not report.results:
+        return "numerical_failure"
+    return "completed" if all(result.completed for result in report.results) else "partial"
 ####
 
 
@@ -300,7 +404,12 @@ def _route_corner_report(report: Any) -> dict[str, Any] | None:
 ####
 
 
-def build(output: Path, *, plots: bool = True) -> Path:
+def build(
+    output: Path,
+    *,
+    plots: bool = True,
+    case_ids: tuple[str, ...] | None = None,
+) -> Path:
     """Run the declared cases and return the resulting zip packet."""
 
     import sys
@@ -316,6 +425,7 @@ def build(output: Path, *, plots: bool = True) -> Path:
         "run_id": run_id,
         "claim_boundary": "source-bounded research-surrogate evidence; not flight qualification",
         "metadata_inputs": ["claims.md", "controller_scenarios.yaml", "problem_generation.yaml"],
+        "selected_cases": list(case_ids) if case_ids is not None else "all",
         "cases": [],
     }
     for metadata_name in ("verification/claims.md", "verification/controller_scenarios.yaml", "verification/problem_generation.yaml"):
@@ -325,7 +435,14 @@ def build(output: Path, *, plots: bool = True) -> Path:
         json.dumps(source_differential_reports(), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    for case in CASES:
+    case_records: list[tuple[dict[str, Any], Any]] = []
+    selected_cases = CASES if case_ids is None else tuple(case for case in CASES if case["id"] in case_ids)
+    unknown_cases = set(case_ids or ()) - {str(case["id"]) for case in CASES}
+    if unknown_cases:
+        raise ValueError(f"unknown evidence case ids: {sorted(unknown_cases)}")
+    if not selected_cases:
+        raise ValueError("case selection produced no evidence cases")
+    for case in selected_cases:
         case_dir = packet / "cases" / str(case["id"])
         case_dir.mkdir(parents=True, exist_ok=True)
         problem = ROOT / str(case["problem"])
@@ -347,6 +464,7 @@ def build(output: Path, *, plots: bool = True) -> Path:
             integrator="rk4",
             profile=GrammarProfile.TAORYX,
         )
+        case_records.append((case, report))
         (case_dir / "run-report.json").write_text(
             json.dumps(
                 {
@@ -388,6 +506,42 @@ def build(output: Path, *, plots: bool = True) -> Path:
                 "runtime_exit_code": report.exit_code,
             }
         )
+    run_artifacts = []
+    for case, report in case_records:
+        realization = _case_realization(case)
+        scenario_contract_hash = _payload_sha256(
+            {
+                "case": case,
+                "problem_sha256": _sha256(ROOT / str(case["problem"])),
+                "tables_sha256": [
+                    _sha256(TABLE_ROOT / str(table_name)) for table_name in case["tables"]
+                ],
+                "fidelity": realization.fidelity,
+                "control_realization": realization.control_realization,
+            }
+        )
+        showcase_run = build_showcase_run_artifact(
+            realization=realization,
+            run_id=f"{run_id}-{case['id']}",
+            showcase_id=f"org.taoryx.showcase.b747-x8-evidence.{case['id']}",
+            vehicle_binding_id=(
+                "b747-100.source-bounded-v1"
+                if str(case["vehicle"]) == "B747-100"
+                else "skywalker-x8.source-bounded-v1"
+            ),
+            scenario_contract_sha256=scenario_contract_hash,
+            outcome=_case_outcome(case, report),
+            files=_artifact_files(packet, scenario_contract_hash),
+            board=EvidenceBoardSpec(profile="family-evidence-board-v1", modules=SHOWCASE_MODULES),
+            archetypes=(
+                "mission_geometry",
+                "mission_timeline",
+                "dynamics_and_resources",
+                "envelope_and_qualification",
+            ),
+        )
+        run_artifacts.append(showcase_run.model_dump(mode="json"))
+    manifest["run_artifacts"] = run_artifacts
     manifest_path = packet / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     # A manifest cannot contain its own final digest without recursive
@@ -408,9 +562,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts/verification/b747_x8_v1")
     parser.add_argument("--no-plots", action="store_true")
+    parser.add_argument("--case", dest="case_ids", action="append", help="run one declared case; repeat to select several")
     arguments = parser.parse_args()
     arguments.output.mkdir(parents=True, exist_ok=True)
-    print(build(arguments.output, plots=not arguments.no_plots))
+    selected = None if arguments.case_ids is None else tuple(arguments.case_ids)
+    print(build(arguments.output, plots=not arguments.no_plots, case_ids=selected))
 ####
 
 

@@ -55,6 +55,7 @@ plant:
 fidelity_profiles:
   - profile_id: hl20.energy_glide_3dof.v1
     runtime_fidelity: point_mass_3dof
+    control_realization: force_model
     equations: [newton_point_mass_translation]
     status: source_graph_coupled_reduced_fail_closed_witness
     parent_profile: hl20.rigid_body_6dof.v1
@@ -62,6 +63,7 @@ fidelity_profiles:
     omitted_physics: [physical_attitude_dynamics, aerodynamic_moments, physical_actuator_states]
   - profile_id: hl20.attitude_response_p6dof.v1
     runtime_fidelity: pseudo_6dof
+    control_realization: response_law
     equations: [newton_point_mass_translation, quaternion_kinematics, scheduled_attitude_response]
     status: source_graph_coupled_energy_profile_fail_closed_witness
     parent_profile: hl20.rigid_body_6dof.v1
@@ -69,12 +71,14 @@ fidelity_profiles:
     omitted_physics: [moment_balance_as_response_source, physical_actuator_states]
   - profile_id: hl20.rigid_body_6dof.v1
     runtime_fidelity: rigid_body_6dof
+    control_realization: direct_wrench
     equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
     status: source_graph_reachability_coupled_native_stabilization_witness
     data_contract: [exact_daveml_force_moment_graph, fixed_mass_properties, seven_direct_surfaces]
     omitted_physics: [propulsion, actuator_dynamics, landing_contact]
   - profile_id: hl20.rigid_body_6dof_surface_allocated.v1
     runtime_fidelity: rigid_body_6dof
+    control_realization: surface_allocated
     equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation, logical_surface_allocation]
     status: source_graph_actuator_probe_and_native_stabilization_witness
     parent_profile: hl20.rigid_body_6dof.v1

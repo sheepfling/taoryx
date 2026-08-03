@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import math
+import mimetypes
 import shutil
 import zipfile
 from pathlib import Path
@@ -19,6 +20,13 @@ from typing import Any
 
 from taoryx.language import GrammarProfile
 from taoryx.runtime.runner import run_files
+from taoryx.showcase import (
+    ArtifactFile,
+    EvidenceBoardSpec,
+    FidelityShowcaseRealization,
+    ShowcaseOutcome,
+    build_showcase_run_artifact,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 SHOWCASE = ROOT / "examples/showcases/california_to_hawaii"
@@ -42,6 +50,80 @@ def _sha256(path: Path) -> str:
 
 def _write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+####
+
+
+def _payload_sha256(value: object) -> str:
+    """Hash resolved mission inputs without tying the identity to output files."""
+
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+####
+
+
+def _artifact_files(packet: Path, scenario_hash: str) -> tuple[ArtifactFile, ...]:
+    """Describe the packet contents with the manifest as trust root."""
+
+    names = ["manifest.json"]
+    names.extend(
+        str(path.relative_to(packet))
+        for path in sorted(packet.rglob("*"))
+        if path.is_file() and path.name != "manifest.json"
+    )
+    return tuple(
+        ArtifactFile(
+            path=name,
+            sha256=scenario_hash if name == "manifest.json" else _sha256(packet / name),
+            media_type=mimetypes.guess_type(name)[0] or "application/octet-stream",
+        )
+        for name in names
+    )
+####
+
+
+def _showcase_realization() -> FidelityShowcaseRealization:
+    """Declare the synthetic CA-HI runtime at the honest control boundary."""
+
+    return FidelityShowcaseRealization(
+        fidelity="rigid_body_6dof_direct_wrench",
+        control_realization="direct_wrench",
+        realization_id="synthetic.cahi_x8_plus_boosters.v1",
+        state_schema=("ecic_rigid_body_6dof_with_staged_mass_flow",),
+        semantic_command_mapping={
+            "propulsion.throttle": "runtime control throttle",
+            "aero.alpha": "runtime control alpha-deg",
+            "aero.bank": "runtime control bank-deg",
+        },
+        physical_effectors=(),
+        available_physics=(
+            "ECIC rigid-body translation and rotation",
+            "staged propellant mass flow",
+            "table-driven aerodynamic loads",
+            "bounded direct generalized force/moment response",
+        ),
+        claim=(
+            "The synthetic CA-HI native runtime executes two powered stages, "
+            "coast, glide, and terminal guidance with coupled mass flow and "
+            "equation-closure evidence."
+        ),
+        nonclaims=(
+            "successful California-to-Hawaii endpoint",
+            "real X8 or booster fidelity",
+            "validated aeroballistic or thermal design",
+            "historical TAOS 96 compatibility",
+            "physical surface or engine-effector allocation",
+        ),
+        evidence_grade="synthetic",
+    )
+####
+
+
+def _showcase_outcome(evaluation: dict[str, Any], report: Any) -> ShowcaseOutcome:
+    """Map the independent result to the common outcome vocabulary."""
+
+    if report.exit_code != 0 or not bool(evaluation["hard_checks"]["finite_states"]):
+        return "numerical_failure"
+    return "completed" if bool(evaluation["mission_pass"]) else "partial"
 ####
 
 
@@ -253,7 +335,65 @@ def build(output: Path) -> Path:
         encoding="utf-8",
     )
     (packet / "reproduction.txt").write_text("PYTHONPATH=.:src python3 tools/build_cahi_showcase_packet.py --output artifacts/showcases/alpha2\n", encoding="utf-8")
-    manifest = {"schema_version": 1, "mission_id": "cahi-x8-plus-boosters-v1", "summary": "objective_report.json", "files": {}}
+    realization = _showcase_realization()
+    scenario_contract_hash = _payload_sha256(
+        {
+            "mission": str(MISSION.relative_to(ROOT)),
+            "aero": str(AERO.relative_to(ROOT)),
+            "mission_sha256": _sha256(MISSION),
+            "aero_sha256": _sha256(AERO),
+            "fidelity": realization.fidelity,
+            "control_realization": realization.control_realization,
+        }
+    )
+    outcome = _showcase_outcome(evaluation, report)
+    _write_json(packet / "realized_fidelity.json", realization.model_dump(mode="json"))
+    _write_json(
+        packet / "claim.json",
+        {
+            "status": "evidence_only_nominal_endpoint_failure",
+            "claim": realization.claim,
+            "nonclaims": list(realization.nonclaims),
+            "fidelity": realization.fidelity,
+            "control_realization": realization.control_realization,
+            "outcome": outcome,
+        },
+    )
+    showcase_run = build_showcase_run_artifact(
+        realization=realization,
+        run_id="cahi-x8-plus-boosters-v1-rigid_body_6dof_direct_wrench",
+        showcase_id="org.taoryx.showcase.cahi-x8-plus-boosters-v1",
+        vehicle_binding_id="synthetic_x8_plus_boosters.cahi-v1",
+        scenario_contract_sha256=scenario_contract_hash,
+        outcome=outcome,
+        files=_artifact_files(packet, scenario_contract_hash),
+        board=EvidenceBoardSpec(
+            profile="family-evidence-board-v1",
+            modules=(
+                "trajectory_3d",
+                "mission_timeline",
+                "energy_and_resources",
+                "envelope_margins",
+                "terminal_corridor",
+            ),
+        ),
+        archetypes=(
+            "mission_geometry",
+            "mission_timeline",
+            "dynamics_and_resources",
+            "envelope_and_qualification",
+        ),
+    )
+    manifest = {
+        "schema_version": 1,
+        "mission_id": "cahi-x8-plus-boosters-v1",
+        "fidelity": realization.fidelity,
+        "control_realization": realization.control_realization,
+        "summary": "objective_report.json",
+        "realized_fidelity": "realized_fidelity.json",
+        "run_artifacts": [showcase_run.model_dump(mode="json")],
+        "files": {},
+    }
     manifest_path = packet / "manifest.json"
     manifest["files"] = {str(path.relative_to(packet)): _sha256(path) for path in sorted(packet.rglob("*")) if path.is_file() and path != manifest_path}
     _write_json(manifest_path, manifest)

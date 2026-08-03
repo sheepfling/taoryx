@@ -1,0 +1,29 @@
+schema: taoryx.vehicle-execution-witnesses/v1alpha1
+version: 1
+description: >-
+  One checked-in composition request for every currently runnable exact
+  family/mission/fidelity/operation endpoint. This is an onboarding and
+  discovery gate, not a mission-qualification matrix.
+witnesses:
+  - {id: x8-3dof-batch, composition: examples/vehicle_composition/x8_racetrack_capability_3dof_compose.yaml, operation: batch}
+  - {id: x8-pseudo6dof-batch, composition: examples/vehicle_composition/x8_racetrack_capability_compose.yaml, operation: batch}
+  - {id: x8-3dof-episode, composition: examples/vehicle_composition/x8_racetrack_capability_3dof_compose.yaml, operation: episode}
+  - {id: x8-pseudo6dof-episode, composition: examples/vehicle_composition/x8_racetrack_capability_compose.yaml, operation: episode}
+  - {id: b747-3dof-batch, composition: examples/vehicle_composition/b747_racetrack_capability_3dof_compose.yaml, operation: batch}
+  - {id: b747-pseudo6dof-batch, composition: examples/vehicle_composition/b747_racetrack_capability_pseudo6dof_compose.yaml, operation: batch}
+  - {id: b747-3dof-episode, composition: examples/vehicle_composition/b747_racetrack_capability_3dof_compose.yaml, operation: episode}
+  - {id: b747-pseudo6dof-episode, composition: examples/vehicle_composition/b747_racetrack_capability_pseudo6dof_compose.yaml, operation: episode}
+  - {id: a320-3dof-batch, composition: examples/vehicle_composition/a320_racetrack_capability_3dof_compose.yaml, operation: batch}
+  - {id: a320-pseudo6dof-batch, composition: examples/vehicle_composition/a320_racetrack_capability_pseudo6dof_compose.yaml, operation: batch}
+  - {id: f16-3dof-batch, composition: examples/vehicle_composition/f16_racetrack_capability_3dof_compose.yaml, operation: batch}
+  - {id: f16-pseudo6dof-batch, composition: examples/vehicle_composition/f16_racetrack_capability_pseudo6dof_compose.yaml, operation: batch}
+  - {id: nesc-3dof-batch, composition: examples/vehicle_composition/nesc_staged_source_replay_3dof_compose.yaml, operation: batch}
+  - {id: nesc-pseudo6dof-batch, composition: examples/vehicle_composition/nesc_staged_source_replay_pseudo6dof_compose.yaml, operation: batch}
+  - {id: x15-staged-3dof-batch, composition: examples/vehicle_composition/x15_staged_booster_reachability_3dof_compose.yaml, operation: batch}
+  - {id: x15-staged-pseudo6dof-batch, composition: examples/vehicle_composition/x15_staged_booster_reachability_pseudo6dof_compose.yaml, operation: batch}
+  - {id: x15-local-direct-wrench-screen-batch, composition: examples/vehicle_composition/x15_local_direct_wrench_screen_compose.yaml, operation: batch}
+  - {id: x15-local-direct-wrench-screen-episode, composition: examples/vehicle_composition/x15_local_direct_wrench_screen_compose.yaml, operation: episode}
+  - {id: tumbling-3dof-batch, composition: examples/vehicle_composition/tumbling_body_direct_release_3dof_compose.yaml, operation: batch}
+  - {id: tumbling-pseudo6dof-batch, composition: examples/vehicle_composition/tumbling_body_direct_release_pseudo6dof_compose.yaml, operation: batch}
+  - {id: hummingbird-pseudo6dof-batch, composition: examples/vehicle_composition/hummingbird_hover_yaw_episode_pseudo6dof_compose.yaml, operation: batch}
+  - {id: hummingbird-pseudo6dof-episode, composition: examples/vehicle_composition/hummingbird_hover_yaw_episode_pseudo6dof_compose.yaml, operation: episode}

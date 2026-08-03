@@ -1,0 +1,530 @@
+schema: taoryx.vehicle-composition-registry/v1alpha1
+version: 1
+description: >-
+  User-facing vehicle-to-trajectory registry. This is a composition overlay:
+  it declares available initialization contracts, segment schemas, and mission
+  templates without duplicating vehicle physics or promoting a fidelity tier.
+vehicles:
+  - family_id: skywalker_x8
+    initialization_contracts:
+      - id: airborne_trim
+        status: runnable
+        description: Source-domain airborne trim or a declared airborne state.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: north_m, canonical_unit: m, required: false, description: North reference position.}
+          - {id: east_m, canonical_unit: m, required: false, description: East reference position.}
+          - {id: altitude_m, canonical_unit: m, required: true, description: Initial geometric altitude.}
+          - {id: speed_m_s, canonical_unit: m/s, required: true, description: Initial airspeed or speed target.}
+          - {id: heading_deg, canonical_unit: deg, required: true, description: Initial course or body heading.}
+    segment_contracts:
+      - id: trim_hold
+        status: runnable
+        description: Establish and dwell in source-domain trimmed flight.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: duration_s, canonical_unit: s, required: true, description: Required trimmed dwell duration.}]
+        required_control_intents: [speed, altitude, heading]
+      - id: climb_level_gate
+        status: runnable
+        description: Fly a straight climb then cross an oriented level-flight gate.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Required high altitude.}
+          - {id: climb_rate_m_s, canonical_unit: m/s, required: true, description: Requested climb rate.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: North-east-down gate center.}
+          - {id: corridor_m, canonical_unit: m, required: true, description: Lateral gate tolerance.}
+        required_control_intents: [speed, altitude, flight_path]
+      - id: fly_by_turn
+        status: runnable
+        description: Cross an oriented turn gate using the declared turn direction and bank limit.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: turn_direction, canonical_unit: null, required: true, description: left or right route turn.}
+          - {id: turn_radius_m, canonical_unit: m, required: true, description: Planned turn radius.}
+          - {id: bank_limit_deg, canonical_unit: deg, required: true, description: Maximum commanded bank magnitude.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: Oriented turn-exit gate center.}
+        required_control_intents: [bank, heading]
+      - id: descent_level_gate
+        status: runnable
+        description: Fly a straight descent then cross an oriented low-level gate.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Required low altitude.}
+          - {id: descent_rate_m_s, canonical_unit: m/s, required: true, description: Requested descent rate.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: North-east-down gate center.}
+        required_control_intents: [speed, altitude, flight_path]
+      - id: terminal_state_gate
+        status: development
+        description: Cross a start/finish gate with position, altitude, speed, and heading tolerances.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: target_ned_m, canonical_unit: m, required: true, description: Terminal gate position.}
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Terminal altitude.}
+          - {id: target_speed_m_s, canonical_unit: m/s, required: true, description: Terminal speed.}
+          - {id: target_heading_deg, canonical_unit: deg, required: true, description: Terminal heading.}
+        required_control_intents: [speed, altitude, heading]
+    mission_templates:
+      - id: powered_fixed_wing_racetrack_v1
+        status: runnable
+        description: Isolated climb, level, left turn, descent, level, right turn, and start/finish crossing.
+        initialization_contracts: [airborne_trim]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        segment_sequence: [trim_hold, climb_level_gate, fly_by_turn, descent_level_gate, fly_by_turn, terminal_state_gate]
+        backing_templates: [powered_fixed_wing_racetrack_v1]
+        qualification_missions: [x8-racetrack-altitude-turns-3dof-v1, x8-racetrack-altitude-turns-pseudo-6dof-v1, x8-racetrack-altitude-turns-direct-wrench-v1, x8-racetrack-altitude-turns-v1]
+
+  - family_id: b747
+    initialization_contracts:
+      - id: airborne_trim
+        status: runnable
+        description: Source-domain airborne transport trim; this does not imply runway takeoff or landing.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: altitude_m, canonical_unit: m, required: true, description: Initial geometric altitude.}
+          - {id: speed_m_s, canonical_unit: m/s, required: true, description: Initial speed.}
+          - {id: heading_deg, canonical_unit: deg, required: true, description: Initial heading.}
+          - {id: mass_kg, canonical_unit: kg, required: false, description: Initial modeled mass.}
+    segment_contracts:
+      - id: trim_hold
+        status: runnable
+        description: Stabilize at the selected transport trim condition.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: duration_s, canonical_unit: s, required: true, description: Required dwell duration.}]
+        required_control_intents: [speed, altitude, heading]
+      - id: climb_level_gate
+        status: runnable
+        description: Managed climb to a high-level oriented route gate.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Required high altitude.}
+          - {id: climb_rate_m_s, canonical_unit: m/s, required: true, description: Requested climb rate.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: North-east-down high-level gate center.}
+          - {id: corridor_m, canonical_unit: m, required: true, description: Lateral high-level gate tolerance.}
+        required_control_intents: [speed, altitude, flight_path]
+      - id: fly_by_turn
+        status: runnable
+        description: Large-radius directional transport turn through an oriented gate.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: turn_direction, canonical_unit: null, required: true, description: left or right route turn.}
+          - {id: turn_radius_m, canonical_unit: m, required: true, description: Planned turn radius.}
+          - {id: bank_limit_deg, canonical_unit: deg, required: true, description: Bank limit.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: North-east-down turn-exit gate center.}
+        required_control_intents: [bank, heading]
+      - id: descent_level_gate
+        status: runnable
+        description: Managed descent to a low-level oriented route gate.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Required low altitude.}
+          - {id: descent_rate_m_s, canonical_unit: m/s, required: true, description: Requested descent rate.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: North-east-down low-level gate center.}
+        required_control_intents: [speed, altitude, flight_path]
+      - id: terminal_state_gate
+        status: development
+        description: Stabilized airborne arrival gate; not a contact or landing segment.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: target_ned_m, canonical_unit: m, required: true, description: Terminal gate position.}
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Terminal altitude.}
+          - {id: target_speed_m_s, canonical_unit: m/s, required: true, description: Terminal speed.}
+          - {id: target_heading_deg, canonical_unit: deg, required: true, description: Terminal heading.}
+        required_control_intents: [speed, altitude, heading]
+    mission_templates:
+      - id: powered_fixed_wing_racetrack_v1
+        status: runnable
+        description: Transport-scaled reusable racetrack with isolated vertical and turning demands.
+        initialization_contracts: [airborne_trim]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        segment_sequence: [trim_hold, climb_level_gate, fly_by_turn, descent_level_gate, fly_by_turn, terminal_state_gate]
+        backing_templates: [powered_fixed_wing_racetrack_v1]
+        qualification_missions: [b747-racetrack-altitude-turns-3dof-v1, b747-racetrack-altitude-turns-pseudo-6dof-v1, b747-racetrack-altitude-turns-6dof-v1]
+
+  - family_id: a320_openap_3dof
+    initialization_contracts:
+      - id: airborne_trim
+        status: runnable
+        description: OpenAP airborne operating state with declared mass, speed, altitude, and course.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters: [{id: altitude_m, canonical_unit: m, required: true, description: Initial altitude.}, {id: speed_m_s, canonical_unit: m/s, required: true, description: Initial speed.}, {id: heading_deg, canonical_unit: deg, required: true, description: Initial course.}, {id: mass_kg, canonical_unit: kg, required: false, description: Initial mass.}]
+    segment_contracts:
+      - id: trim_hold
+        status: runnable
+        description: Capture the selected OpenAP operating point.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters: [{id: duration_s, canonical_unit: s, required: true, description: Dwell duration.}]
+        required_control_intents: [speed, altitude, heading]
+      - id: climb_level_gate
+        status: runnable
+        description: Controlled climb and high-level gate crossing.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters:
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Target altitude.}
+          - {id: climb_rate_m_s, canonical_unit: m/s, required: true, description: Requested climb rate.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: North-east-down high-level gate center.}
+          - {id: corridor_m, canonical_unit: m, required: true, description: Lateral gate tolerance.}
+        required_control_intents: [speed, altitude, flight_path]
+      - id: fly_by_turn
+        status: runnable
+        description: Bank-limited turn through an oriented route gate.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters:
+          - {id: turn_direction, canonical_unit: null, required: true, description: left or right turn.}
+          - {id: turn_radius_m, canonical_unit: m, required: true, description: Turn radius.}
+          - {id: bank_limit_deg, canonical_unit: deg, required: true, description: Bank limit.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: North-east-down turn-exit gate center.}
+        required_control_intents: [bank, heading]
+      - id: descent_level_gate
+        status: runnable
+        description: Controlled descent and low-level gate crossing.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters:
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Target altitude.}
+          - {id: descent_rate_m_s, canonical_unit: m/s, required: true, description: Requested descent rate.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: North-east-down low-level gate center.}
+        required_control_intents: [speed, altitude, flight_path]
+      - id: terminal_state_gate
+        status: development
+        description: Stabilized airborne start/finish gate; not a runway arrival or contact segment.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters:
+          - {id: target_ned_m, canonical_unit: m, required: true, description: Terminal gate position.}
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Terminal altitude.}
+          - {id: target_speed_m_s, canonical_unit: m/s, required: true, description: Terminal speed.}
+          - {id: target_heading_deg, canonical_unit: deg, required: true, description: Terminal heading.}
+        required_control_intents: [speed, altitude, heading]
+    mission_templates:
+      - id: powered_fixed_wing_racetrack_v1
+        status: runnable
+        description: Transport-scale reusable racetrack at the supported performance and pseudo-response levels.
+        initialization_contracts: [airborne_trim]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        segment_sequence: [trim_hold, climb_level_gate, fly_by_turn, descent_level_gate, fly_by_turn, terminal_state_gate]
+        backing_templates: [powered_fixed_wing_racetrack_v1]
+
+  - family_id: f16_s119
+    initialization_contracts:
+      - id: airborne_trim
+        status: development
+        description: Source-grounded DAVE-ML airborne trim with a declared subsonic operating condition.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: altitude_m, canonical_unit: m, required: true, description: Initial altitude.}
+          - {id: speed_m_s, canonical_unit: m/s, required: true, description: Initial speed used by common powered-fixed-wing missions.}
+          - {id: mach, canonical_unit: dimensionless, required: true, description: Initial Mach number for source-domain energy missions.}
+          - {id: heading_deg, canonical_unit: deg, required: true, description: Initial heading.}
+          - {id: mass_kg, canonical_unit: kg, required: false, description: Initial mass.}
+    segment_contracts:
+      - id: trim_hold
+        status: development
+        description: Stabilize at a declared source-domain operating point.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: duration_s, canonical_unit: s, required: true, description: Dwell duration.}]
+        required_control_intents: [speed, altitude, heading]
+      - id: energy_climb
+        status: development
+        description: Bounded acceleration and climb inside the declared energy envelope.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: target_mach, canonical_unit: dimensionless, required: true, description: Speed target.}, {id: target_altitude_m, canonical_unit: m, required: true, description: Altitude target.}, {id: load_factor_limit, canonical_unit: g, required: true, description: Maximum permitted load factor.}]
+        required_control_intents: [speed, altitude, load_factor]
+      - id: fly_by_turn
+        status: development
+        description: Directed turn with explicit roll reversal evidence.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: turn_direction, canonical_unit: null, required: true, description: left or right turn.}, {id: turn_radius_m, canonical_unit: m, required: true, description: Planned turn radius.}, {id: bank_limit_deg, canonical_unit: deg, required: true, description: Bank limit.}, {id: gate_center_ned_m, canonical_unit: m, required: true, description: Gate location.}]
+        required_control_intents: [bank, heading]
+      - id: climb_level_gate
+        status: development
+        description: Source-domain bounded climb and high-level route gate for the reusable airbreather racetrack.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: High altitude.}
+          - {id: climb_rate_m_s, canonical_unit: m/s, required: true, description: Bounded climb rate.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: North-east-down high-level gate center.}
+          - {id: corridor_m, canonical_unit: m, required: true, description: Lateral gate tolerance.}
+        required_control_intents: [speed, altitude, flight_path]
+      - id: descent_level_gate
+        status: development
+        description: Source-domain bounded descent and low-level route gate for the reusable airbreather racetrack.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Low altitude.}
+          - {id: descent_rate_m_s, canonical_unit: m/s, required: true, description: Bounded descent rate.}
+          - {id: gate_center_ned_m, canonical_unit: m, required: true, description: North-east-down low-level gate center.}
+        required_control_intents: [speed, altitude, flight_path]
+      - id: terminal_state_gate
+        status: development
+        description: Stabilized airborne start/finish gate for the reusable airbreather racetrack.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters:
+          - {id: target_ned_m, canonical_unit: m, required: true, description: Terminal gate position.}
+          - {id: target_altitude_m, canonical_unit: m, required: true, description: Terminal altitude.}
+          - {id: target_speed_m_s, canonical_unit: m/s, required: true, description: Terminal speed.}
+          - {id: target_heading_deg, canonical_unit: deg, required: true, description: Terminal heading.}
+        required_control_intents: [speed, altitude, heading]
+      - id: energy_recovery_gate
+        status: planned
+        description: Recover to a bounded speed, altitude, heading, and load-factor terminal set.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: target_mach, canonical_unit: dimensionless, required: true, description: Terminal Mach.}, {id: target_altitude_m, canonical_unit: m, required: true, description: Terminal altitude.}]
+        required_control_intents: [speed, altitude, heading]
+    mission_templates:
+      - id: powered_fixed_wing_racetrack_v1
+        status: development
+        description: Reusable subsonic climb, left turn, descent, right turn, and start/finish route.
+        initialization_contracts: [airborne_trim]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        segment_sequence: [trim_hold, climb_level_gate, fly_by_turn, descent_level_gate, fly_by_turn, terminal_state_gate]
+        backing_templates: [powered_fixed_wing_racetrack_v1]
+      - id: fighter_subsonic_energy_maneuver_v1
+        status: development
+        description: Subsonic trim, acceleration/climb, right and left energy turns, recovery, and airborne arrival.
+        initialization_contracts: [airborne_trim]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        segment_sequence: [trim_hold, energy_climb, fly_by_turn, fly_by_turn, energy_recovery_gate]
+
+  - family_id: x15
+    initialization_contracts:
+      - id: air_launch_release
+        status: development
+        description: Carrier release state with explicit separation, mass, energy, and flight-condition inputs.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: altitude_m, canonical_unit: m, required: true, description: Release altitude.}, {id: speed_m_s, canonical_unit: m/s, required: true, description: Release speed.}, {id: heading_deg, canonical_unit: deg, required: true, description: Release heading.}, {id: mass_kg, canonical_unit: kg, required: false, description: Release mass.}]
+      - id: source_release_glide_local_point
+        status: runnable
+        description: Pinned X-15 source-load local release/glide operating point used only by the direct-wrench recovery screen.
+        compatible_fidelities: [rigid_body_6dof_direct_wrench]
+      - id: staged_booster_launch
+        status: runnable
+        description: Local-frame, X-15-scaled booster stack state pinned to the retained rocket-to-Hawaii source staging values; it is not the synthetic California-to-Hawaii vehicle.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters:
+          - {id: initial_mass_kg, canonical_unit: kg, required: true, description: Source-pinned stacked launch mass.}
+          - {id: initial_speed_m_s, canonical_unit: m/s, required: true, description: Magnitude of the retained source ECIC launch velocity.}
+          - {id: initial_altitude_m, canonical_unit: m, required: true, description: Local reduced-model launch altitude.}
+          - {id: launch_azimuth_deg, canonical_unit: deg, required: true, description: Declared local-frame reduced-model launch azimuth.}
+          - {id: launch_elevation_deg, canonical_unit: deg, required: true, description: Declared local-frame reduced-model launch elevation.}
+          - {id: glide_bank_deg, canonical_unit: deg, required: true, description: Declared open-loop glide-bank witness command.}
+    segment_contracts:
+      - id: separation
+        status: development
+        description: Carrier separation and clearance event.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: clearance_time_s, canonical_unit: s, required: true, description: Required separation clearance duration.}]
+        required_control_intents: [attitude_rate]
+        permitted_transition_events: [release]
+      - id: local_wrench_recovery_screen
+        status: runnable
+        description: Bounded local six-axis direct-wrench LQR recovery at the pinned source-load operating point; it is not a navigation segment.
+        compatible_fidelities: [rigid_body_6dof_direct_wrench]
+        required_control_intents: [wrench]
+      - id: powered_climb
+        status: development
+        description: Bounded rocket-powered acceleration and climb.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: target_altitude_m, canonical_unit: m, required: true, description: Climb target altitude.}, {id: cutoff_condition, canonical_unit: null, required: true, description: Explicit engine cutoff or burnout condition.}]
+        required_control_intents: [throttle, flight_path, bank]
+      - id: coast_apogee
+        status: development
+        description: Ballistic coast through apogee with a declared energy corridor.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: target_energy, canonical_unit: J/kg, required: true, description: Energy corridor target.}]
+        required_control_intents: [bank]
+      - id: atmospheric_handoff
+        status: development
+        description: Re-entry/descent energy management to a named airborne handoff corridor.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: target_altitude_m, canonical_unit: m, required: true, description: Handoff altitude.}, {id: target_speed_m_s, canonical_unit: m/s, required: true, description: Handoff speed.}, {id: target_heading_deg, canonical_unit: deg, required: true, description: Handoff heading.}]
+        required_control_intents: [bank, flight_path]
+      - id: booster_powered
+        status: runnable
+        description: Source-pinned open-loop attached-booster burn ending at the retained cutoff time.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters: [{id: cutoff_time_s, canonical_unit: s, required: true, description: Booster cutoff time from the retained source mission.}]
+        permitted_transition_events: [booster_cutoff]
+      - id: booster_coast_release
+        status: runnable
+        description: Source-pinned coast interval followed by passive spent-booster deployment at the retained release time.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters: [{id: release_time_s, canonical_unit: s, required: true, description: Booster release time from the retained source mission.}]
+        permitted_transition_events: [booster_release]
+      - id: unpowered_glide_handoff
+        status: runnable
+        description: Open-loop reduced glide with independent high-energy and atmospheric-handoff corridor evidence.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters: [{id: horizon_s, canonical_unit: s, required: true, description: Fixed simulation horizon long enough to include the retained impact witness.}]
+        permitted_transition_events: [atmospheric_handoff]
+      - id: impact_witness
+        status: runnable
+        description: Passive terminal impact witness after the open-loop atmospheric handoff; it is not a guided target intercept.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters: [{id: terminal_kind, canonical_unit: null, required: true, description: Required terminal witness kind.}]
+        permitted_transition_events: [ground_contact]
+    mission_templates:
+      - id: x15_local_direct_wrench_screen_v1
+        status: runnable
+        description: Local source-load direct-wrench recovery screen with source-derived linearization and requested-versus-achieved wrench evidence.
+        initialization_contracts: [source_release_glide_local_point]
+        compatible_fidelities: [rigid_body_6dof_direct_wrench]
+        segment_sequence: [local_wrench_recovery_screen]
+      - id: rocket_aircraft_high_energy_v1
+        status: development
+        description: Release, separation, burn, cutoff, coast/apogee, atmospheric energy management, and terminal handoff.
+        initialization_contracts: [air_launch_release]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        segment_sequence: [separation, powered_climb, coast_apogee, atmospheric_handoff]
+      - id: x15_staged_booster_reachability_v1
+        status: runnable
+        description: Source-pinned booster burn and release followed by an X-15-scaled local reduced glide, open-loop atmospheric handoff witness, and passive impact witness.
+        initialization_contracts: [staged_booster_launch]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        segment_sequence: [booster_powered, booster_coast_release, unpowered_glide_handoff, impact_witness]
+        qualification_missions: [x15-scaled-staged-reachability-v1]
+
+  - family_id: hummingbird
+    initialization_contracts:
+      - id: grounded_idle
+        status: development
+        description: Pad-relative ground state before rotor spool and takeoff.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: pad_north_m, canonical_unit: m, required: true, description: Pad north coordinate.}, {id: pad_east_m, canonical_unit: m, required: true, description: Pad east coordinate.}, {id: heading_deg, canonical_unit: deg, required: true, description: Initial yaw.}, {id: mass_kg, canonical_unit: kg, required: false, description: Initial mass.}]
+      - id: airborne_hover
+        status: runnable
+        description: Declared low-speed hover state for airborne control checks.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: north_m, canonical_unit: m, required: false, description: Hover north coordinate.}, {id: east_m, canonical_unit: m, required: false, description: Hover east coordinate.}, {id: altitude_m, canonical_unit: m, required: true, description: Hover altitude.}, {id: heading_deg, canonical_unit: deg, required: true, description: Hover yaw.}]
+    segment_contracts:
+      - id: rotor_spool_takeoff
+        status: development
+        description: Rotor spool, vertical departure, and hover capture.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: target_altitude_m, canonical_unit: m, required: true, description: Hover target altitude.}, {id: climb_rate_m_s, canonical_unit: m/s, required: true, description: Vertical rate limit.}]
+        required_control_intents: [altitude]
+      - id: hover_dwell
+        status: runnable
+        description: Position, velocity, and yaw constrained hover dwell.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: target_ned_m, canonical_unit: m, required: true, description: Hover target position.}, {id: dwell_s, canonical_unit: s, required: true, description: Required settled dwell.}, {id: target_heading_deg, canonical_unit: deg, required: false, description: Optional yaw target.}]
+        required_control_intents: [position, altitude, yaw]
+      - id: waypoint_translation
+        status: development
+        description: Forward, lateral, or rearward position transfer with a capture dwell.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: target_ned_m, canonical_unit: m, required: true, description: Waypoint position.}, {id: maximum_speed_m_s, canonical_unit: m/s, required: true, description: Translational speed limit.}, {id: dwell_s, canonical_unit: s, required: true, description: Capture dwell.}]
+        required_control_intents: [position, altitude, yaw]
+      - id: yaw_scan
+        status: development
+        description: Independent yaw maneuver while holding a declared hover region.
+        compatible_fidelities: [pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: target_heading_deg, canonical_unit: deg, required: true, description: Target yaw.}, {id: yaw_rate_limit_deg_s, canonical_unit: deg/s, required: true, description: Yaw rate limit.}]
+        required_control_intents: [yaw]
+      - id: touchdown_settle_disarm
+        status: development
+        description: Controlled descent, contact, settled hold, and motor shutdown.
+        compatible_fidelities: [pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: pad_ned_m, canonical_unit: m, required: true, description: Landing pad position.}, {id: maximum_sink_rate_m_s, canonical_unit: m/s, required: true, description: Touchdown vertical speed limit.}, {id: settle_s, canonical_unit: s, required: true, description: Required post-contact hold.}]
+        required_control_intents: [position, altitude, yaw]
+        permitted_transition_events: [contact, motor_shutdown]
+    mission_templates:
+      - id: multirotor_pad_box_yaw_recovery_land_v1
+        status: development
+        description: Ground-to-ground multirotor route with hover, translation, yaw, recovery, and settling finality.
+        initialization_contracts: [grounded_idle, airborne_hover]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        segment_sequence: [rotor_spool_takeoff, hover_dwell, waypoint_translation, yaw_scan, waypoint_translation, hover_dwell, touchdown_settle_disarm]
+
+  - family_id: hl20_mod_k
+    initialization_contracts:
+      - id: high_altitude_release
+        status: development
+        description: Source-grounded lifting-body release state with declared energy and attitude assumptions.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: altitude_m, canonical_unit: m, required: true, description: Release altitude.}, {id: mach, canonical_unit: dimensionless, required: true, description: Release Mach.}, {id: heading_deg, canonical_unit: deg, required: true, description: Release heading.}, {id: mass_kg, canonical_unit: kg, required: false, description: Initial mass.}]
+    segment_contracts:
+      - id: trim_capture
+        status: development
+        description: Capture a source-domain glide condition after release.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: duration_s, canonical_unit: s, required: true, description: Capture duration.}]
+        required_control_intents: [alpha, bank]
+      - id: glide_bank_reversal
+        status: development
+        description: Crossrange generation through a bounded signed bank command.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: bank_limit_deg, canonical_unit: deg, required: true, description: Bank limit.}, {id: target_crossrange_m, canonical_unit: m, required: true, description: Crossrange target.}]
+        required_control_intents: [bank, alpha]
+      - id: energy_handoff
+        status: planned
+        description: Terminal glide energy, crossrange, heading, and altitude corridor.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: target_altitude_m, canonical_unit: m, required: true, description: Handoff altitude.}, {id: target_energy, canonical_unit: J/kg, required: true, description: Specific-energy target.}, {id: target_heading_deg, canonical_unit: deg, required: true, description: Handoff heading.}]
+        required_control_intents: [bank, alpha]
+    mission_templates:
+      - id: lifting_body_glide_energy_management_v1
+        status: development
+        description: Release, trim capture, opposing bank reversals, crossrange correction, and terminal energy handoff.
+        initialization_contracts: [high_altitude_release]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        segment_sequence: [trim_capture, glide_bank_reversal, glide_bank_reversal, energy_handoff]
+
+  - family_id: reference_nesc_two_stage_rocket
+    initialization_contracts:
+      - id: pad_launch
+        status: development
+        description: Staged launch state with mass, guidance, and environment declared before ignition.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: latitude_deg, canonical_unit: deg, required: true, description: Launch latitude.}, {id: longitude_deg, canonical_unit: deg, required: true, description: Launch longitude.}, {id: initial_mass_kg, canonical_unit: kg, required: true, description: Initial total mass.}, {id: initial_heading_deg, canonical_unit: deg, required: true, description: Initial azimuth.}]
+    segment_contracts:
+      - id: ignition_ascent
+        status: development
+        description: Ignition, release, and first-stage ascent under a declared pitch program.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: pitch_program, canonical_unit: deg, required: true, description: Pitch program or target law.}, {id: max_dynamic_pressure_pa, canonical_unit: Pa, required: false, description: Optional dynamic-pressure constraint.}]
+        required_control_intents: [flight_path, throttle]
+      - id: stage_separation
+        status: development
+        description: Ordered cutoff, separation, and upper-stage ignition event chain.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: separation_delay_s, canonical_unit: s, required: true, description: Staging delay.}]
+        required_control_intents: [attitude_rate]
+        permitted_transition_events: [stage_cutoff, stage_separation, upper_stage_ignition]
+      - id: coast_terminal_state
+        status: development
+        description: Post-cutoff coast to an apogee, impact, re-entry, or orbital target-state contract.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        parameters: [{id: terminal_kind, canonical_unit: null, required: true, description: "apogee, impact, reentry, or orbit target."}]
+        required_control_intents: [attitude_rate]
+    mission_templates:
+      - id: staged_rocket_launch_target_state_v1
+        status: development
+        description: Ignition, ascent, staging, upper-stage guidance, cutoff, and target-state/coast lifecycle.
+        initialization_contracts: [pad_launch]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
+        segment_sequence: [ignition_ascent, stage_separation, ignition_ascent, coast_terminal_state]
+
+  - family_id: tumbling_body
+    initialization_contracts:
+      - id: atmospheric_release
+        status: development
+        description: Passive-body release with geometry, orientation, angular-rate, and atmospheric state declared.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters: [{id: altitude_m, canonical_unit: m, required: true, description: Release altitude.}, {id: speed_m_s, canonical_unit: m/s, required: true, description: Release speed.}, {id: quaternion_wxyz, canonical_unit: dimensionless, required: false, description: Initial attitude; the first direct-release witness accepts identity only.}, {id: body_rates_rad_s, canonical_unit: rad/s, required: true, description: Initial body rates; retained even for 3DOF so cross-tier requests are explicit.}, {id: area_policy, canonical_unit: null, required: true, description: "orientation_averaged_projected_area for 3DOF, or native_rigid_body_reuse_instantaneous_projected_area for pseudo-6DOF."}]
+    segment_contracts:
+      - id: passive_coast
+        status: development
+        description: Maximum-horizon uncontrolled ballistic evolution with no controller command.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters: [{id: duration_s, canonical_unit: s, required: true, description: Passive evolution duration.}]
+      - id: atmospheric_descent
+        status: development
+        description: Passive descent with orientation-averaged 3DOF or rigid-body-reuse rotational behavior.
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        parameters: [{id: impact_plane_altitude_m, canonical_unit: m, required: true, description: Terminal impact-plane altitude.}]
+        permitted_transition_events: [impact]
+    mission_templates:
+      - id: tumbling_body_release_damping_impact_v1
+        status: development
+        description: Release, passive rotation or averaged-area descent, and terminal impact state report.
+        initialization_contracts: [atmospheric_release]
+        compatible_fidelities: [point_mass_3dof, pseudo_6dof]
+        segment_sequence: [passive_coast, atmospheric_descent]

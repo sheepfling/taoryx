@@ -16,6 +16,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from .fidelity_contracts import LegacyFidelityTier
+
 ControllerRole = Literal[
     "guidance",
     "attitude",
@@ -42,7 +44,7 @@ ControllerImplementation = Literal[
     "external",
     "unspecified",
 ]
-ControllerFidelity = Literal["point_mass_3dof", "pseudo_6dof", "rigid_body_6dof"]
+ControllerFidelity = LegacyFidelityTier
 InterpolationMethod = Literal["nearest", "linear", "cubic", "hold"]
 ControllerQualificationStatus = Literal["design", "wiring_verified", "local_stability_verified", "qualified"]
 ControllerEvidenceTier = Literal[
@@ -57,6 +59,7 @@ ControllerEvidenceTier = Literal[
 ControllerControlPath = Literal[
     "unspecified",
     "direct_wrench_screen",
+    "direct_wrench_bridge",
     "unconstrained_effector_allocation",
     "constrained_effector_allocation",
     "nonlinear_effector_validation",
@@ -557,7 +560,7 @@ def _validate_evidence_path(
     """
 
     level = _EVIDENCE_TIER_ORDER[evidence_tier]
-    if control_realization_path in {"direct_wrench_screen", "unconstrained_effector_allocation"} and level > 3:
+    if control_realization_path in {"direct_wrench_screen", "direct_wrench_bridge", "unconstrained_effector_allocation"} and level > 3:
         raise ValueError(f"{control_realization_path} cannot claim evidence beyond T3_linearly_controlled")
     if level >= 4 and control_realization_path not in {
         "constrained_effector_allocation",

@@ -256,9 +256,11 @@ Exit conditions:
 - Inject deterministic packet drops and latency.
 - Record timeout cases and provide a focused rerun command with a larger
   horizon/step budget.
-- Exercise checkpoint save/load with an explicit sensor/estimator rebind
-  requirement; never imply that metadata-only checkpoint loading restores a
-  stochastic external model.
+- Exercise automatic checkpoint save/load for a declared `SensorScenario`,
+  including sensor, bus, queued-packet, and packet-only estimator state.
+  Custom callback integrations remain fail-closed and require an explicit
+  factory or rebind; metadata-only loading must never imply that it restores
+  an arbitrary stochastic external model.
 
 Exit: two identical runs have identical packet hashes and estimator outputs;
 changed seed/profile/drop policy changes only the declared affected outputs.

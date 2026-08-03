@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
+import mimetypes
 from pathlib import Path
 from typing import Callable
 
 from taoryx.family_debug_rendering import FamilyDebugRenderReport, render_family_debug_artifacts
 from taoryx.outputs import DynamicsKind, EventRecord, RunArtifact, TelemetryChannel, VehicleKind, VehicleTelemetry
+from taoryx.showcase import (
+    ArtifactFile,
+    EvidenceBoardSpec,
+    FidelityShowcaseRealization,
+    build_showcase_run_artifact,
+)
 
 
 def generate_showcase(showcase_id: str, family: str, output_dir: str | Path) -> tuple[FamilyDebugRenderReport, ...]:
@@ -24,7 +33,133 @@ def generate_showcase(showcase_id: str, family: str, output_dir: str | Path) -> 
     artifact.write_json(root / "telemetry.json")
     artifact.write_sqlite(root / "telemetry.sqlite")
     (root / "telemetry.txt").write_text(artifact.format_text(max_rows=5), encoding="utf-8")
-    return render_family_debug_artifacts(artifact, root / "plots", family)
+    reports = render_family_debug_artifacts(artifact, root / "plots", family)
+    realization = _realization(showcase_id, family, artifact)
+    (root / "realized_fidelity.json").write_text(
+        json.dumps(realization.model_dump(mode="json"), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    (root / "claim.json").write_text(
+        json.dumps(
+            {
+                "claim": realization.claim,
+                "nonclaims": list(realization.nonclaims),
+                "fidelity": realization.fidelity,
+                "control_realization": realization.control_realization,
+                "outcome": "completed",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    scenario_hash = _payload_sha256(
+        {
+            "showcase_id": showcase_id,
+            "family": family,
+            "dynamics": artifact.vehicles[next(iter(artifact.vehicles))].dynamics.value,
+            "problem": artifact.problem,
+        }
+    )
+    showcase_run = build_showcase_run_artifact(
+        realization=realization,
+        run_id=f"{showcase_id}-{realization.fidelity}",
+        showcase_id=f"org.taoryx.showcase.synthetic.{showcase_id}",
+        vehicle_binding_id=f"synthetic.{family}.fixture-v1",
+        scenario_contract_sha256=scenario_hash,
+        outcome="completed",
+        files=_artifact_files(root, scenario_hash),
+        board=EvidenceBoardSpec(
+            profile="family-debug-board-v1",
+            modules=("trajectory_3d", "mission_timeline", "dynamics_and_resources", "envelope_margins"),
+        ),
+        archetypes=("mission_geometry", "mission_timeline", "dynamics_and_resources", "envelope_and_qualification"),
+    )
+    manifest = {
+        "schema_version": 1,
+        "showcase_id": showcase_id,
+        "family": family,
+        "fidelity": realization.fidelity,
+        "control_realization": realization.control_realization,
+        "realized_fidelity": "realized_fidelity.json",
+        "run_artifacts": [showcase_run.model_dump(mode="json")],
+        "files": {},
+    }
+    manifest_path = root / "manifest.json"
+    manifest["files"] = {
+        path.relative_to(root).as_posix(): _sha256(path)
+        for path in sorted(root.rglob("*"))
+        if path.is_file() and path != manifest_path
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return reports
+####
+
+
+def _payload_sha256(value: object) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+####
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+####
+
+
+def _artifact_files(root: Path, scenario_hash: str) -> tuple[ArtifactFile, ...]:
+    names = ["manifest.json"]
+    names.extend(
+        path.relative_to(root).as_posix()
+        for path in sorted(root.rglob("*"))
+        if path.is_file() and path.name != "manifest.json"
+    )
+    return tuple(
+        ArtifactFile(
+            path=name,
+            sha256=scenario_hash if name == "manifest.json" else _sha256(root / name),
+            media_type=mimetypes.guess_type(name)[0] or "application/octet-stream",
+        )
+        for name in names
+    )
+####
+
+
+def _realization(showcase_id: str, family: str, artifact: RunArtifact) -> FidelityShowcaseRealization:
+    dynamics = artifact.vehicles[next(iter(artifact.vehicles))].dynamics
+    if dynamics is DynamicsKind.POINT_MASS_3DOF:
+        fidelity = "point_mass_3dof"
+        control_realization = "force_model"
+        state_schema = ("position_velocity_mass_resource",)
+        effectors: tuple[str, ...] = ()
+        available = ("synthetic point-mass translational equations", "declared resource channels")
+    else:
+        fidelity = "pseudo_6dof"
+        control_realization = "response_law"
+        state_schema = ("position_velocity_attitude_response_rates",)
+        effectors = ()
+        available = ("synthetic translational telemetry", "named kinematic attitude/rate response")
+    return FidelityShowcaseRealization(
+        fidelity=fidelity,
+        control_realization=control_realization,
+        realization_id=f"synthetic.{showcase_id}.{fidelity}.v1",
+        state_schema=state_schema,
+        semantic_command_mapping={"mission": "synthetic showcase fixture", "controls": "semantic telemetry channels"},
+        physical_effectors=effectors,
+        available_physics=available,
+        claim=f"Synthetic {family} fixture emits a reproducible {fidelity} evidence artifact and family debug panels.",
+        nonclaims=(
+            "source-grounded vehicle fidelity",
+            "physical actuator, moment, rotor, wheel, or thruster qualification",
+            "family-wide mission qualification",
+        ),
+        evidence_grade="synthetic",
+    )
 ####
 
 
