@@ -25,29 +25,61 @@ import json
 import math
 import os
 import tempfile
-from collections.abc import Mapping
-from dataclasses import dataclass, replace
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Literal, Protocol, cast
 
 from .committed_boundary_sensor import CommittedBoundarySensor
-from .direct_wrench import DIRECT_WRENCH_NAMES, DirectWrenchProjection, DirectWrenchStatus
+from .direct_wrench import DIRECT_WRENCH_NAMES, DirectWrenchProjection
 from .language.grammar_contracts import GrammarProfile
 from .language_backed_execution import _mission, _mission_tables
 from .language_backed_racetrack import materialize_powered_fixed_wing_composition
+from .local_direct_wrench_screen_registry import resolve_local_direct_wrench_screen_definition
+from .reduced_fixed_wing_execution import _a320_operating_point_for_speed, _f16_source_trim
 from .runtime.interactive import InteractiveSession, InteractiveStatus
 from .scenario import ResolvedScenario, ScenarioCompiler
-from .trajectory import HummingbirdPseudo6DOFCommand, HummingbirdPseudo6DOFModel, HummingbirdPseudo6DOFState
+from .trajectory import (
+    A320GuidanceOverride,
+    A320OpenAPModel,
+    A320Pseudo6DOFModel,
+    A320RacetrackRunner,
+    A320RacetrackStepper,
+    A320RacetrackStepperState,
+    F16AttitudeResponsePseudo6DOFModel,
+    F16GuidanceOverride,
+    F16PointMass3DOFModel,
+    F16ReducedRacetrackRunner,
+    F16ReducedRacetrackStepper,
+    F16ReducedRacetrackStepperState,
+    HummingbirdPseudo6DOFCommand,
+    HummingbirdPseudo6DOFModel,
+    HummingbirdPseudo6DOFState,
+    load_pseudo6dof_catalog,
+)
+from .trajectory.pseudo6dof_profiles import Pseudo6DOFProfile
+from .value_space import (
+    ValueSpaceSpec,
+    boolean,
+    bounded_interval,
+    euclidean,
+    finite_set,
+    periodic_circle,
+    positive_half_line,
+    product,
+    unit_interval,
+)
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
+from .vehicle_composition_registry import mission_graph_execution_contract
 from .vehicle_execution_bindings import VehicleExecutionBindingError, resolve_vehicle_execution_binding
-from .vehicle_execution_preflight import preflight_vehicle_composition
+from .vehicle_execution_preflight import compile_powered_fixed_wing_racetrack_from_composition, preflight_vehicle_composition
 from .vehicle_interface import (
     ObservationProfile,
     VehicleInterfaceContract,
     project_committed_status_values,
+    validate_authority_action_values,
     validate_projected_status_values,
 )
-from .x15_adapter import build_x15_local_direct_wrench_screen_config
 
 EpisodeStatus = Literal["ready", "active", "completed", "closed"]
 
@@ -61,9 +93,28 @@ class EpisodeChannel:
     lower: float | None = None
     upper: float | None = None
     description: str = ""
+    value_space: ValueSpaceSpec | None = field(default=None, repr=False)
+
+    def __post_init__(self) -> None:
+        if not self.name.strip() or not self.description.strip():
+            raise ValueError("episode channels require a stable name and description")
+        if self.lower is not None and self.upper is not None and self.lower > self.upper:
+            raise ValueError(f"episode channel {self.name!r} has inverted bounds")
+        if self.value_space is None:
+            object.__setattr__(
+                self,
+                "value_space",
+                _episode_channel_value_space(self.name, self.unit, self.lower, self.upper),
+            )
+        ####
+
+    ####
 
     def as_dict(self) -> dict[str, object]:
         """Return the public channel schema."""
+
+        if self.value_space is None:
+            raise ValueError(f"episode channel {self.name!r} is missing a value-space declaration")
 
         return {
             "name": self.name,
@@ -71,8 +122,124 @@ class EpisodeChannel:
             "lower": self.lower,
             "upper": self.upper,
             "description": self.description,
+            "value_space": self.value_space.as_dict(),
         }
         ####
+
+    ####
+
+
+def _episode_channel_value_space(
+    name: str,
+    unit: str | None,
+    lower: float | None,
+    upper: float | None,
+) -> ValueSpaceSpec:
+    """Return a reviewed topology for a legacy native episode channel.
+
+    The semantic interface remains the authority for AI/RL-facing channels.
+    This adapter makes the older native-name episode schema equally explicit
+    instead of asking a caller to guess from a unit or identifier. It covers
+    the current source-owned episode bindings only; a new native channel must
+    extend this table or provide its own ``ValueSpaceSpec`` at construction.
+    """
+
+    normalized = name.casefold()
+    source_name = normalized.split(".", maxsplit=1)[1] if normalized.partition(".")[0].isdigit() else normalized
+    if unit == "boolean" or normalized in {
+        "motors_enabled",
+        "contact",
+        "wrench_saturated",
+        "physical_motor_allocation",
+        "physical_effector_allocation",
+    }:
+        return boolean()
+    if normalized in {"response_profile_id", "control_realization", "wrench_status"}:
+        return finite_set(representation="scalar declared identifier")
+    if normalized in {"yaw_rad", "attitude.yaw.command"} or normalized.endswith(".heading_rad"):
+        return periodic_circle(2.0 * math.pi)
+    if source_name in {"psi", "psigd", "yawgd", "_command_psi", "long"}:
+        return periodic_circle(360.0, representation="scalar source-degree")
+    if normalized == "attitude_rad":
+        return product(
+            bounded_interval(),
+            bounded_interval(),
+            periodic_circle(2.0 * math.pi),
+            representation="vector3 [roll, pitch, yaw]",
+        )
+    vector_channels = {
+        "position_ned_m",
+        "velocity_ned_m_s",
+        "body_rate_rad_s",
+        "force_body_n",
+        "moment_body_nm",
+        "body_velocity_m_s",
+        "requested_force_body_n",
+        "requested_moment_body_nm",
+        "achieved_force_body_n",
+        "achieved_moment_body_nm",
+        "residual_force_body_n",
+        "residual_moment_body_nm",
+    }
+    if normalized in vector_channels:
+        return euclidean(3)
+    if normalized in {"battery_fraction", "thrust_ratio"}:
+        return unit_interval()
+    if source_name in {"throttle"}:
+        return unit_interval()
+    if source_name in {
+        "collective-elevon-deg",
+        "differential-elevon-deg",
+        "gama",
+        "gamgd",
+        "_command_gamgd",
+        "pitchgd",
+        "alpha",
+        "alphat",
+        "_aero_alpha_reference_deg",
+        "lat",
+        "latgd",
+    }:
+        return bounded_interval(representation="scalar source-angle")
+    if source_name in {"_geodetic_state", "_point_mass_si_contract", "_dtprnt", "_segment"}:
+        return finite_set(representation="scalar source state code")
+    if source_name in {
+        "aggregate_thrust_n",
+        "time_s",
+        "duration_s",
+        "speed_m_s",
+        "mass_kg",
+        "alt",
+        "vel",
+        "vair",
+        "mass",
+        "mass_kg",
+        "rho",
+        "mach",
+        "dynprs",
+        "ntotal",
+        "plength",
+        "tseg",
+        "tmark",
+        "time",
+        "temp",
+        "pres",
+        "sndspd",
+        "nu",
+        "rotor_speed",
+        "_command_vel",
+        "power",
+        "wt",
+        "fuel",
+        "rcm",
+        "thrust",
+        "mdot",
+        "range",
+    }:
+        return positive_half_line()
+    if lower is not None or upper is not None:
+        return bounded_interval()
+    return euclidean()
     ####
 
 
@@ -98,6 +265,7 @@ class ActionFrame:
         if not math.isfinite(self.duration_s) or self.duration_s <= 0.0:
             raise ValueError("action frame duration_s must be positive and finite")
         ####
+
     ####
 
     def as_dict(self) -> dict[str, object]:
@@ -111,6 +279,7 @@ class ActionFrame:
             "duration_s": self.duration_s,
         }
         ####
+
     ####
 
 
@@ -137,6 +306,7 @@ class StatusFrame:
             "status": self.status,
         }
         ####
+
     ####
 
 
@@ -167,6 +337,7 @@ class ObservationFrame:
             "source_time_s": self.source_time_s,
         }
         ####
+
     ####
 
 
@@ -183,6 +354,7 @@ class EpisodeObservation:
 
         return {"time_s": self.time_s, "values": _json_safe(self.values), "status": self.status}
         ####
+
     ####
 
 
@@ -219,6 +391,7 @@ class EpisodeStep:
             "status_frame": None if self.status_frame is None else self.status_frame.as_dict(),
         }
         ####
+
     ####
 
 
@@ -307,8 +480,21 @@ class LanguageBackedCompositionEpisode:
     def action_schema(self) -> tuple[EpisodeChannel, ...]:
         """Expose only runtime-declared external controls."""
 
+        semantic_by_native = {
+            str(channel.binding["native_action"]): channel
+            for channel in self.interface_contract.action_channels
+            if isinstance(channel.binding.get("native_action"), str)
+        }
         return tuple(
-            EpisodeChannel(control.name, control.unit, control.lower, control.upper, "language-backed runtime control")
+            EpisodeChannel(
+                control.name,
+                semantic_by_native[control.name].canonical_unit
+                if control.name in semantic_by_native
+                else control.unit,
+                control.lower,
+                control.upper,
+                "language-backed runtime control",
+            )
             for control in self._session.controls
         )
         ####
@@ -319,7 +505,11 @@ class LanguageBackedCompositionEpisode:
 
         channels: list[EpisodeChannel] = []
         for vehicle in self._session.problem.vehicles.values():
-            channels.extend(EpisodeChannel(f"{vehicle.name}.{name}", None, description="committed runtime truth") for name in vehicle.state.value_names)
+            names = tuple(dict.fromkeys((*vehicle.state.value_names, *vehicle.state.named)))
+            channels.extend(
+                EpisodeChannel(f"{vehicle.name}.{name}", None, description="committed runtime truth")
+                for name in names
+            )
         return tuple(channels)
         ####
 
@@ -516,6 +706,7 @@ class LanguageBackedCompositionEpisode:
             self._sensor.reset()
             self._advance_sensor()
         ####
+
     ####
 
 
@@ -543,6 +734,10 @@ class HummingbirdPseudoCompositionEpisode:
         EpisodeChannel("battery_fraction", "dimensionless", 0.0, 1.0, "bounded engineering reserve"),
         EpisodeChannel("aggregate_thrust_n", "N", 0.0, description="achieved aggregate thrust"),
         EpisodeChannel("contact", "boolean", description="ground-contact state"),
+        EpisodeChannel("mass_kg", "kg", 0.0, description="fixed pseudo-plant operating mass"),
+        EpisodeChannel("response_profile_id", None, description="selected named pseudo-6DOF response profile"),
+        EpisodeChannel("control_realization", None, description="declared pseudo-plant control realization"),
+        EpisodeChannel("physical_motor_allocation", "boolean", description="individual motor allocation availability"),
     )
 
     def __init__(self, composition: CompiledVehicleComposition, *, seed: int | None = None, integration_step_s: float = 0.02) -> None:
@@ -556,7 +751,7 @@ class HummingbirdPseudoCompositionEpisode:
         self.interface_contract = _interface_contract_for_composition(composition)
         self.seed = seed
         self.integration_step_s = integration_step_s
-        self.model = HummingbirdPseudo6DOFModel()
+        self.model = HummingbirdPseudo6DOFModel(mass_kg=_hummingbird_initial_mass_kg(composition))
         self._closed = False
         self._status: EpisodeStatus = "ready"
         self._state = self._initial_state()
@@ -606,6 +801,7 @@ class HummingbirdPseudoCompositionEpisode:
                 "attitude_rad": list(self._state.attitude_rad),
                 "body_rate_rad_s": list(self._state.attitude_rate_rad_s),
                 "battery_fraction": self._state.battery_fraction,
+                "mass_kg": self.model.mass_kg,
                 "aggregate_thrust_n": self._state.thrust_n,
                 "contact": self._state.contact,
                 "response_profile_id": self.model.profile_id,
@@ -805,22 +1001,347 @@ class HummingbirdPseudoCompositionEpisode:
             self._sensor = _sensor_for_contract(self.interface_contract, seed=self.seed)
             self._advance_sensor()
         ####
+
     ####
 
 
-class X15LocalDirectWrenchCompositionEpisode:
-    """Bounded source-local X-15 direct-wrench episode.
+class ReducedFixedWingCompositionEpisode:
+    """Reusable accepted-truth contract for source-owned reduced fixed wing.
 
-    This is intentionally a local controller-screen episode.  It exposes the
-    same requested-to-achieved direct-wrench bridge that the public batch
-    screen uses, but it neither grows into a release-to-handoff trajectory nor
-    rebrands injected body loads as physical X-15 effectors.
+    A family subclass supplies only source-trim initialization, native
+    guidance lowering, and checkpoint-state shape. The public action,
+    status, observation, committed-truth, and checkpoint semantics remain
+    identical across the reduced fixed-wing family members. It does not
+    expose a surface, actuator, or moment command and makes no such claim.
     """
 
     claim_boundary = (
-        "This episode applies an explicit bounded direct wrench to one local X-15 source-load state. "
-        "It is bridge/screen evidence only: not physical stabilator, rudder, RCS, propulsion, or actuator allocation; "
-        "not source physical trim; and not a flight mission."
+        "This episode uses the declared source-owned A320 reduced-flight stepper. It accepts bounded kinematic "
+        "guidance through the point-mass or named route-lag response law; it does not establish physical surface "
+        "allocation, actuator dynamics, moment balance, batch/episode parity, or mission qualification."
+    )
+
+    _ACTION_SCHEMA = (
+        EpisodeChannel("speed_m_s", "m/s", 50.0, 300.0, "held reduced-model speed target"),
+        EpisodeChannel("flight_path_angle_deg", "deg", -20.0, 20.0, "held reduced-model flight-path target"),
+        EpisodeChannel("heading_deg", "deg", 0.0, 360.0, "held local-navigation heading target"),
+        EpisodeChannel("bank_angle_deg", "deg", -60.0, 60.0, "held response-law bank or lift-vector target"),
+    )
+
+    _FAMILY_ID = "a320_openap_3dof"
+    _FAMILY_LABEL = "A320"
+    _CHECKPOINT_SCHEMA = "taoryx.a320-reduced-composition-episode/v1alpha1"
+
+    def __init__(self, composition: CompiledVehicleComposition, *, seed: int | None = None) -> None:
+        if composition.family_id != self._FAMILY_ID or composition.fidelity not in {
+            "point_mass_3dof",
+            "pseudo_6dof",
+        }:
+            raise ValueError(f"{self._FAMILY_LABEL} reduced episode requires a 3DOF or pseudo-6DOF composition")
+        preflight = preflight_vehicle_composition(composition)
+        if preflight.status != "translation_ready":
+            details = "; ".join(preflight.diagnostics) or "no translation-ready route"
+            raise ValueError(f"cannot create A320 episode for {composition.id!r}: {preflight.status}: {details}")
+        self.composition = composition
+        self.interface_contract = _interface_contract_for_composition(composition)
+        self.seed = seed
+        self.preflight = preflight
+        self._stepper = self._build_stepper(composition)
+        self._held_native_action: dict[str, float] = {}
+        self._closed = False
+        self._status: EpisodeStatus = "ready"
+        ####
+
+    @property
+    def action_schema(self) -> tuple[EpisodeChannel, ...]:
+        return self._ACTION_SCHEMA
+        ####
+
+    @property
+    def observation_schema(self) -> tuple[EpisodeChannel, ...]:
+        channels = (
+            *self.interface_contract.status_channels,
+            *self.interface_contract.resource_channels,
+            *self.interface_contract.diagnostic_channels,
+        )
+        return tuple(
+            EpisodeChannel(channel.id, channel.canonical_unit, channel.lower, channel.upper, channel.description, channel.value_space)
+            for channel in channels
+            if channel.availability == "available"
+        )
+        ####
+
+    def reset(self, *, seed: int | None = None) -> EpisodeObservation:
+        """Restore the immutable trim and composition initialization."""
+
+        self._require_open()
+        self.seed = self.seed if seed is None else seed
+        self._stepper.reset()
+        self._held_native_action = {}
+        self._status = "ready"
+        return self.observe()
+        ####
+
+    def observe(self) -> EpisodeObservation:
+        """Return current committed reduced-plant truth without interpolation."""
+
+        self._require_open()
+        row = self._stepper.current_row(self._guidance_override(self._held_native_action))
+        return EpisodeObservation(self._stepper.state.time_s, self._status_values(row), self._status)
+        ####
+
+    def status_frame(self) -> StatusFrame:
+        """Project the committed reduced state through the canonical interface."""
+
+        self._require_open()
+        return _status_frame(self.interface_contract, self.observe())
+        ####
+
+    def observe_frame(self, observation_profile_id: str = "truth_debug") -> ObservationFrame:
+        """Return a selected committed-truth observation profile."""
+
+        self._require_open()
+        status = self.status_frame()
+        return _observation_frame(status, self.interface_contract.observation_profile(observation_profile_id))
+        ####
+
+    def step(self, action: Mapping[str, object], duration_s: float) -> EpisodeStep:
+        """Hold one native reduced-guidance request through integrated truth steps."""
+
+        self._require_open()
+        if not math.isfinite(duration_s) or duration_s <= 0.0:
+            raise ValueError("A320 episode duration_s must be positive and finite")
+        requested, applied = self._resolve_action(action)
+        start = self._stepper.state.time_s
+        rows = self._stepper.step(duration_s, self._guidance_override(applied))
+        self._held_native_action = applied
+        events: tuple[str, ...]
+        if not self._stepper.state.numerical_valid:
+            self._status = "completed"
+            events = ("numerical_failure",)
+        elif self._stepper.completed:
+            self._status = "completed"
+            events = ("horizon_reached",)
+        else:
+            self._status = "active"
+            events = ()
+        diagnostics = () if rows else ("no_advance_after_terminal_boundary",)
+        return EpisodeStep(start, self._stepper.state.time_s, requested, applied, self.observe(), events, diagnostics)
+        ####
+
+    def step_frame(self, action: ActionFrame) -> EpisodeStep:
+        """Map a validated semantic guidance frame into the reduced native coordinates."""
+
+        self._require_open()
+        step = self.step(_native_action_for_frame(self.interface_contract, action), action.duration_s)
+        status = self.status_frame()
+        observation = _observation_frame(status, self.interface_contract.observation_profile(self.composition.observation.profile_id))
+        return replace(
+            step,
+            action_frame=action,
+            applied_semantic_action=_semantic_action_from_native(self.interface_contract, action, step.applied_action),
+            observation_frame=observation,
+            status_frame=status,
+        )
+        ####
+
+    def save_checkpoint(self, path: str | Path) -> Path:
+        """Persist a composition-bound A320 stepper state without serializing code."""
+
+        self._require_open()
+        snapshot = self._stepper.state
+        payload: dict[str, object] = {
+            "schema": self._CHECKPOINT_SCHEMA,
+            "composition_identity_sha256": self.composition.identity_sha256,
+            "interface_fingerprint_sha256": self.interface_contract.fingerprint,
+            "seed": self.seed,
+            "status": self._status,
+            "held_native_action": dict(self._held_native_action),
+            "stepper_state": self._serialize_stepper_state(snapshot),
+        }
+        payload["integrity"] = _payload_digest(payload)
+        destination = Path(path)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = destination.with_name(f".{destination.name}.tmp")
+        temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        os.replace(temporary, destination)
+        return destination
+        ####
+
+    def load_checkpoint(self, path: str | Path) -> EpisodeObservation:
+        """Restore an integrity-checked composition-bound A320 stepper state."""
+
+        self._require_open()
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        if payload.get("schema") != self._CHECKPOINT_SCHEMA:
+            raise ValueError(f"unsupported {self._FAMILY_LABEL} composition episode checkpoint schema")
+        integrity = payload.pop("integrity", None)
+        if integrity != _payload_digest(payload):
+            raise ValueError(f"{self._FAMILY_LABEL} composition episode checkpoint integrity verification failed")
+        if payload.get("composition_identity_sha256") != self.composition.identity_sha256:
+            raise ValueError(f"{self._FAMILY_LABEL} composition episode checkpoint composition mismatch")
+        if payload.get("interface_fingerprint_sha256") != self.interface_contract.fingerprint:
+            raise ValueError(f"{self._FAMILY_LABEL} composition episode checkpoint interface mismatch")
+        stepper_state = payload.get("stepper_state")
+        if not isinstance(stepper_state, Mapping):
+            raise ValueError(f"{self._FAMILY_LABEL} checkpoint has no stepper state")
+        self._stepper.restore(self._deserialize_stepper_state(stepper_state))
+        held = payload.get("held_native_action")
+        if not isinstance(held, Mapping):
+            raise ValueError(f"{self._FAMILY_LABEL} checkpoint has no held native action")
+        _, self._held_native_action = self._resolve_action(held)
+        self.seed = payload.get("seed") if isinstance(payload.get("seed"), int) else None
+        self._status = _episode_status_literal(payload.get("status"))
+        return self.observe()
+        ####
+
+    def close(self) -> None:
+        self._closed = True
+        self._status = "closed"
+        ####
+
+    def _resolve_action(self, action: Mapping[str, object]) -> tuple[dict[str, float], dict[str, float]]:
+        unknown = sorted(set(action) - {channel.name for channel in self._ACTION_SCHEMA})
+        if unknown:
+            raise ValueError("unknown A320 reduced episode action(s): " + ", ".join(unknown))
+        requested = {**self._held_native_action, **dict(action)}
+        applied: dict[str, float] = {}
+        for channel in self._ACTION_SCHEMA:
+            value = requested.get(channel.name)
+            if value is None:
+                continue
+            numeric = _finite_number(value, channel.name)
+            if channel.lower is not None and numeric < channel.lower or channel.upper is not None and numeric > channel.upper:
+                raise ValueError(f"{self._FAMILY_LABEL} action {channel.name!r} is outside its declared bounds")
+            applied[channel.name] = numeric
+        return {name: _finite_number(value, name) for name, value in requested.items()}, applied
+        ####
+
+    def _require_open(self) -> None:
+        if self._closed:
+            raise RuntimeError("vehicle composition episode is closed")
+        ####
+
+    def _build_stepper(self, composition: CompiledVehicleComposition) -> Any:
+        return _a320_stepper_for_composition(composition)
+        ####
+
+    @staticmethod
+    def _guidance_override(action: Mapping[str, float]) -> Any:
+        return _a320_guidance_override(action)
+        ####
+
+    @staticmethod
+    def _status_values(row: Mapping[str, object]) -> dict[str, object]:
+        return _a320_status_values(row)
+        ####
+
+    @staticmethod
+    def _serialize_stepper_state(snapshot: Any) -> dict[str, object]:
+        return {
+            "time_s": snapshot.time_s,
+            "north_m": snapshot.north_m,
+            "east_m": snapshot.east_m,
+            "state": dict(snapshot.state),
+            "controls": dict(snapshot.controls),
+            "terminal_hold": snapshot.terminal_hold,
+            "numerical_valid": snapshot.numerical_valid,
+            "failure": snapshot.failure,
+        }
+        ####
+
+    @staticmethod
+    def _deserialize_stepper_state(payload: Mapping[str, object]) -> Any:
+        return _a320_stepper_state(payload)
+        ####
+
+    ####
+
+
+class A320ReducedCompositionEpisode(ReducedFixedWingCompositionEpisode):
+    """A320/OpenAP binding of the shared reduced fixed-wing episode contract."""
+
+    pass
+    ####
+
+
+class F16ReducedCompositionEpisode(ReducedFixedWingCompositionEpisode):
+    """Accepted-truth F-16 episode using the common reduced-flight contract.
+
+    It shares the same held kinematic-guidance action and canonical status
+    projection as the A320 adapter, while retaining the F-16 source trim,
+    source-load diagnostics, and named attitude-response bridge.  Its sampled
+    source controls remain diagnostics only: they are not allocated surfaces.
+    """
+
+    claim_boundary = (
+        "This episode uses the declared source-owned F-16 reduced-flight stepper. It accepts bounded kinematic "
+        "guidance through the point-mass or named attitude/rate response law; it does not establish physical "
+        "surface allocation, actuator dynamics, moment balance, batch/episode parity, or mission qualification."
+    )
+
+    _ACTION_SCHEMA = (
+        EpisodeChannel("speed_m_s", "m/s", 50.0, 500.0, "held reduced-model speed target"),
+        EpisodeChannel("flight_path_angle_deg", "deg", -20.0, 20.0, "held reduced-model flight-path target"),
+        EpisodeChannel("heading_deg", "deg", 0.0, 360.0, "held local-navigation heading target"),
+        EpisodeChannel("bank_angle_deg", "deg", -60.0, 60.0, "held response-law bank or lift-vector target"),
+    )
+
+    _FAMILY_ID = "f16_s119"
+    _FAMILY_LABEL = "F-16"
+    _CHECKPOINT_SCHEMA = "taoryx.f16-reduced-composition-episode/v1alpha1"
+
+    def _build_stepper(self, composition: CompiledVehicleComposition) -> F16ReducedRacetrackStepper:
+        return _f16_stepper_for_composition(composition)
+        ####
+
+    @staticmethod
+    def _guidance_override(action: Mapping[str, float]) -> F16GuidanceOverride:
+        return _f16_guidance_override(action)
+        ####
+
+    @staticmethod
+    def _serialize_stepper_state(snapshot: F16ReducedRacetrackStepperState) -> dict[str, object]:
+        return {
+            "time_s": snapshot.time_s,
+            "north_m": snapshot.north_m,
+            "east_m": snapshot.east_m,
+            "altitude_m": snapshot.altitude_m,
+            "speed_m_s": snapshot.speed_m_s,
+            "heading_rad": snapshot.heading_rad,
+            "flight_path_angle_rad": snapshot.flight_path_angle_rad,
+            "roll_rad": snapshot.roll_rad,
+            "pitch_rad": snapshot.pitch_rad,
+            "yaw_rad": snapshot.yaw_rad,
+            "p_rad_s": snapshot.p_rad_s,
+            "q_rad_s": snapshot.q_rad_s,
+            "r_rad_s": snapshot.r_rad_s,
+            "controls": dict(snapshot.controls),
+            "numerical_valid": snapshot.numerical_valid,
+            "failure": snapshot.failure,
+        }
+        ####
+
+    @staticmethod
+    def _deserialize_stepper_state(payload: Mapping[str, object]) -> F16ReducedRacetrackStepperState:
+        return _f16_stepper_state(payload)
+        ####
+
+    ####
+
+
+class LocalDirectWrenchCompositionEpisode:
+    """Bounded source-local direct-wrench bridge episode.
+
+    This is intentionally a local controller-screen episode.  It exposes the
+    same requested-to-achieved direct-wrench bridge that the public batch
+    screen uses, but it neither grows into a route trajectory nor rebrands
+    injected body loads as physical effectors.
+    """
+
+    claim_boundary = (
+        "This episode applies an explicit bounded direct wrench to one pinned local source-load state. "
+        "It is bridge/screen evidence only: not physical effector allocation, source physical trim, or a flight mission."
     )
 
     _ACTION_SCHEMA = (
@@ -834,25 +1355,28 @@ class X15LocalDirectWrenchCompositionEpisode:
         EpisodeChannel("requested_moment_body_nm", "N*m", description="requested direct body moment"),
         EpisodeChannel("achieved_force_body_n", "N", description="projected direct body force actually applied"),
         EpisodeChannel("achieved_moment_body_nm", "N*m", description="projected direct body moment actually applied"),
+        EpisodeChannel("residual_force_body_n", "N", description="unachieved direct body-force request"),
+        EpisodeChannel("residual_moment_body_nm", "N*m", description="unachieved direct body-moment request"),
         EpisodeChannel("wrench_saturated", "boolean", description="direct-wrench authority or slew projection status"),
+        EpisodeChannel("wrench_status", None, description="direct-wrench projection disposition"),
+        EpisodeChannel("control_realization", None, description="declared direct-wrench bridge realization"),
+        EpisodeChannel("physical_effector_allocation", "boolean", description="physical-effector allocation availability"),
     )
 
     def __init__(self, composition: CompiledVehicleComposition, *, seed: int | None = None) -> None:
-        if (
-            composition.family_id != "x15"
-            or composition.mission != "x15_local_direct_wrench_screen_v1"
-            or composition.fidelity != "rigid_body_6dof_direct_wrench"
-        ):
-            raise ValueError("X-15 direct-wrench episode requires the declared local screen composition")
+        definition = resolve_local_direct_wrench_screen_definition(composition)
+        if definition is None:
+            raise ValueError("direct-wrench episode requires a declared local screen composition")
         preflight = preflight_vehicle_composition(composition)
         if preflight.status != "translation_ready":
             detail = "; ".join(preflight.diagnostics) or "no source-local direct-wrench translator"
-            raise ValueError(f"cannot create X-15 direct-wrench episode for {composition.id!r}: {preflight.status}: {detail}")
+            raise ValueError(f"cannot create {definition.family_id} direct-wrench episode for {composition.id!r}: {preflight.status}: {detail}")
         self.composition = composition
         self.interface_contract = _interface_contract_for_composition(composition)
         self.preflight = preflight
         self.seed = seed
-        self.config = build_x15_local_direct_wrench_screen_config()
+        self.definition = definition
+        self.config = definition.config_factory()
         self._closed = False
         self._status: EpisodeStatus = "ready"
         self._time_s = 0.0
@@ -918,7 +1442,7 @@ class X15LocalDirectWrenchCompositionEpisode:
 
         self._require_open()
         if self._status == "completed":
-            raise RuntimeError("X-15 local direct-wrench screen has completed; reset before stepping again")
+            raise RuntimeError("local direct-wrench screen has completed; reset before stepping again")
         if not math.isfinite(duration_s) or duration_s <= 0.0:
             raise ValueError("episode duration_s must be positive and finite")
         requested = self._resolve_action(action)
@@ -930,11 +1454,10 @@ class X15LocalDirectWrenchCompositionEpisode:
             projection = self.config.limits.project(requested, self._projection.achieved, dt_s)
             derivative = self.config.source_derivative(self._state, projection.achieved)
             self._state = {
-                name: self._state[name] + dt_s * _finite_number(derivative.get(name), f"X-15 local derivative {name}")
-                for name in self.config.state_names
+                name: self._state[name] + dt_s * _finite_number(derivative.get(name), f"local direct-wrench derivative {name}") for name in self.config.state_names
             }
             if any(not math.isfinite(value) for value in self._state.values()):
-                raise RuntimeError("X-15 local direct-wrench episode produced a nonfinite state")
+                raise RuntimeError("local direct-wrench episode produced a nonfinite state")
             self._time_s += dt_s
             remaining -= dt_s
             self._projection = projection
@@ -981,7 +1504,7 @@ class X15LocalDirectWrenchCompositionEpisode:
 
         self._require_open()
         payload: dict[str, object] = {
-            "schema": "taoryx.x15-local-direct-wrench-composition-episode/v1alpha1",
+            "schema": "taoryx.local-direct-wrench-composition-episode/v1alpha1",
             "composition_identity_sha256": self.composition.identity_sha256,
             "interface_fingerprint_sha256": self.interface_contract.fingerprint,
             "seed": self.seed,
@@ -1005,27 +1528,27 @@ class X15LocalDirectWrenchCompositionEpisode:
 
         self._require_open()
         payload = json.loads(Path(path).read_text(encoding="utf-8"))
-        if payload.get("schema") != "taoryx.x15-local-direct-wrench-composition-episode/v1alpha1":
-            raise ValueError("unsupported X-15 direct-wrench episode checkpoint schema")
+        if payload.get("schema") != "taoryx.local-direct-wrench-composition-episode/v1alpha1":
+            raise ValueError("unsupported local direct-wrench episode checkpoint schema")
         integrity = payload.pop("integrity", None)
         if integrity != _payload_digest(payload):
-            raise ValueError("X-15 direct-wrench episode checkpoint integrity verification failed")
+            raise ValueError("local direct-wrench episode checkpoint integrity verification failed")
         if payload.get("composition_identity_sha256") != self.composition.identity_sha256:
-            raise ValueError("X-15 direct-wrench episode checkpoint composition mismatch")
+            raise ValueError("local direct-wrench episode checkpoint composition mismatch")
         if payload.get("interface_fingerprint_sha256") != self.interface_contract.fingerprint:
-            raise ValueError("X-15 direct-wrench episode checkpoint interface mismatch")
+            raise ValueError("local direct-wrench episode checkpoint interface mismatch")
         self.seed = payload.get("seed") if isinstance(payload.get("seed"), int) else None
-        self._time_s = _finite_number(payload.get("time_s"), "X-15 direct-wrench episode checkpoint time_s")
+        self._time_s = _finite_number(payload.get("time_s"), "local direct-wrench episode checkpoint time_s")
         if not 0.0 <= self._time_s <= self.config.duration_s + 1.0e-12:
-            raise ValueError("X-15 direct-wrench episode checkpoint time is outside the local-screen duration")
+            raise ValueError("local direct-wrench episode checkpoint time is outside the local-screen duration")
         self._status = _episode_status_literal(payload.get("status"))
         state = payload.get("state")
         request = payload.get("last_requested")
         projection = payload.get("projection")
         if not isinstance(state, Mapping) or not isinstance(request, Mapping) or not isinstance(projection, Mapping):
-            raise ValueError("X-15 direct-wrench episode checkpoint has malformed local state")
-        self._state = {name: _finite_number(state.get(name), f"X-15 direct-wrench checkpoint state {name}") for name in self.config.state_names}
-        self._last_requested = _direct_wrench_mapping(request, "X-15 direct-wrench checkpoint request")
+            raise ValueError("local direct-wrench episode checkpoint has malformed local state")
+        self._state = {name: _finite_number(state.get(name), f"local direct-wrench checkpoint state {name}") for name in self.config.state_names}
+        self._last_requested = _direct_wrench_mapping(request, "local direct-wrench checkpoint request")
         self._projection = _projection_from_payload(projection)
         return self.observe()
         ####
@@ -1036,13 +1559,13 @@ class X15LocalDirectWrenchCompositionEpisode:
         ####
 
     def _initial_requested_wrench(self) -> dict[str, float]:
-        return _direct_wrench_mapping(self.config.balancing_wrench(self.config.reference_state), "X-15 local balancing wrench")
+        return _direct_wrench_mapping(self.config.balancing_wrench(self.config.reference_state), "local balancing wrench")
         ####
 
     def _resolve_action(self, action: Mapping[str, object]) -> dict[str, float]:
         unknown = sorted(set(action) - {channel.name for channel in self._ACTION_SCHEMA})
         if unknown:
-            raise ValueError("unknown X-15 direct-wrench episode action(s): " + ", ".join(unknown))
+            raise ValueError("unknown local direct-wrench episode action(s): " + ", ".join(unknown))
         values = dict(self._last_requested)
         if "force_body_n" in action:
             values.update(_direct_wrench_vector(action["force_body_n"], ("force_x_n", "force_y_n", "force_z_n"), "force_body_n"))
@@ -1054,7 +1577,7 @@ class X15LocalDirectWrenchCompositionEpisode:
                     "moment_body_nm",
                 )
             )
-        return _direct_wrench_mapping(values, "X-15 direct-wrench episode action")
+        return _direct_wrench_mapping(values, "local direct-wrench episode action")
         ####
 
     def _raw_values(self) -> dict[str, object]:
@@ -1079,6 +1602,87 @@ class X15LocalDirectWrenchCompositionEpisode:
         if self._closed:
             raise RuntimeError("vehicle composition episode is closed")
         ####
+
+    ####
+
+
+# Compatibility name for callers that used the first installed local screen.
+X15LocalDirectWrenchCompositionEpisode = LocalDirectWrenchCompositionEpisode
+
+
+EpisodeFactory = Callable[[CompiledVehicleComposition, int | None, float], VehicleCompositionEpisode]
+
+
+def _open_language_backed_episode(
+    composition: CompiledVehicleComposition,
+    seed: int | None,
+    integration_step_s: float,
+) -> VehicleCompositionEpisode:
+    del integration_step_s
+    return LanguageBackedCompositionEpisode(composition, seed=seed)
+    ####
+
+
+def _open_hummingbird_episode(
+    composition: CompiledVehicleComposition,
+    seed: int | None,
+    integration_step_s: float,
+) -> VehicleCompositionEpisode:
+    return HummingbirdPseudoCompositionEpisode(composition, seed=seed, integration_step_s=integration_step_s)
+    ####
+
+
+def _open_a320_reduced_episode(
+    composition: CompiledVehicleComposition,
+    seed: int | None,
+    integration_step_s: float,
+) -> VehicleCompositionEpisode:
+    del integration_step_s
+    return A320ReducedCompositionEpisode(composition, seed=seed)
+    ####
+
+
+def _open_f16_reduced_episode(
+    composition: CompiledVehicleComposition,
+    seed: int | None,
+    integration_step_s: float,
+) -> VehicleCompositionEpisode:
+    del integration_step_s
+    return F16ReducedCompositionEpisode(composition, seed=seed)
+    ####
+
+
+def _open_local_direct_wrench_episode(
+    composition: CompiledVehicleComposition,
+    seed: int | None,
+    integration_step_s: float,
+) -> VehicleCompositionEpisode:
+    del integration_step_s
+    return LocalDirectWrenchCompositionEpisode(composition, seed=seed)
+    ####
+
+
+_EPISODE_FACTORY_BUILDERS: dict[str, EpisodeFactory] = {
+    "language_backed_interactive.v1": _open_language_backed_episode,
+    "hummingbird_aggregate_thrust_episode.v1": _open_hummingbird_episode,
+    "reduced_fixed_wing_a320_episode.v1": _open_a320_reduced_episode,
+    "reduced_fixed_wing_f16_episode.v1": _open_f16_reduced_episode,
+    "local_direct_wrench_episode.v1": _open_local_direct_wrench_episode,
+    "x15_local_direct_wrench_episode.v1": _open_local_direct_wrench_episode,
+}
+
+
+def registered_episode_factory_ids() -> tuple[str, ...]:
+    """Return every public episode factory implemented by this runtime.
+
+    The execution-binding catalog remains the authority for whether a factory
+    is advertised for a particular family/mission/fidelity. This registry
+    asserts the complementary runtime fact: a runnable factory identifier has
+    a concrete constructor that preserves a composition rather than selecting
+    a nearby fallback model.
+    """
+
+    return tuple(sorted(_EPISODE_FACTORY_BUILDERS))
     ####
 
 
@@ -1094,13 +1698,456 @@ def open_vehicle_composition_episode(
         binding = resolve_vehicle_execution_binding(composition, "episode")
     except VehicleExecutionBindingError as error:
         raise ValueError(f"no composition episode adapter is registered: {error}") from error
-    if binding.factory_id == "language_backed_interactive.v1":
-        return LanguageBackedCompositionEpisode(composition, seed=seed)
-    if binding.factory_id == "hummingbird_aggregate_thrust_episode.v1":
-        return HummingbirdPseudoCompositionEpisode(composition, seed=seed, integration_step_s=integration_step_s)
-    if binding.factory_id == "x15_local_direct_wrench_episode.v1":
-        return X15LocalDirectWrenchCompositionEpisode(composition, seed=seed)
-    raise ValueError(f"episode execution factory is declared but not implemented: {binding.factory_id!r}")
+    if binding.factory_id is None:
+        raise ValueError("runnable episode binding lacks a factory identifier")
+    try:
+        factory = _EPISODE_FACTORY_BUILDERS[binding.factory_id]
+    except KeyError as error:
+        raise ValueError(f"episode execution factory is declared but not implemented: {binding.factory_id!r}") from error
+    return factory(composition, seed, integration_step_s)
+    ####
+
+
+def validate_vehicle_composition_episode_contract(
+    episode: VehicleCompositionEpisode,
+) -> dict[str, object]:
+    """Validate one opened episode against its resolved semantic contract.
+
+    Episodes intentionally retain family-owned native action and observation
+    names for source-runtime compatibility.  Those names are not a second
+    public control API: every externally accepted native action must be bound
+    by an available semantic authority profile, and every canonical status or
+    observation frame must retain the immutable interface identity at a
+    committed truth boundary.  This inspection never steps or resets the
+    episode, so it can run as part of endpoint conformance without changing
+    the selected simulation state.
+    """
+
+    contract = episode.interface_contract
+    findings: list[str] = []
+    mission_graph = episode.composition.mission_graph
+    graph_summary: dict[str, object]
+    if mission_graph is None:
+        findings.append("episode composition omits its compiled mission graph")
+        graph_summary = {
+            "status": "missing",
+            "execution_observation_status": "not_emitted_by_episode",
+        }
+    else:
+        graph_instance_ids = [node.instance_id for node in mission_graph.nodes]
+        graph_segment_ids = [node.segment_id for node in mission_graph.nodes]
+        if len(graph_instance_ids) != len(set(graph_instance_ids)):
+            findings.append("episode composition mission graph has duplicate instance IDs")
+        if tuple(graph_segment_ids) != tuple(segment.id for segment in episode.composition.segments):
+            findings.append("episode composition mission graph does not match its compiled segment sequence")
+        if tuple(graph_instance_ids) != tuple(segment.instance_id for segment in episode.composition.segments):
+            findings.append("episode composition mission graph instance order does not match its compiled segments")
+        if mission_graph.entry_instance_id not in graph_instance_ids:
+            findings.append("episode composition mission graph entry is not a declared instance")
+        graph_summary = {
+            "status": "bound",
+            "graph_status": mission_graph.status,
+            "entry_instance_id": mission_graph.entry_instance_id,
+            "instance_ids": graph_instance_ids,
+            "segment_ids": graph_segment_ids,
+            "execution_contract": mission_graph_execution_contract(
+                episode.composition.family_id,
+                episode.composition.mission,
+                episode.composition.fidelity,
+            ),
+            "execution_observation_status": "not_emitted_by_episode",
+            "claim_boundary": (
+                "The episode is bound to this immutable graph, but opening or stepping it does not claim that a "
+                "family mission translator dispatched graph transitions. Batch graph-execution evidence remains separate."
+            ),
+        }
+    raw_action_channels = {native_channel.name: native_channel for native_channel in episode.action_schema}
+    raw_observation_channels = {
+        native_channel.name: native_channel for native_channel in episode.observation_schema
+    }
+
+    if len(raw_action_channels) != len(episode.action_schema):
+        findings.append("native episode action schema contains duplicate names")
+    if len(raw_observation_channels) != len(episode.observation_schema):
+        findings.append("native episode observation schema contains duplicate names")
+    for native_channel in (*episode.action_schema, *episode.observation_schema):
+        if native_channel.value_space is None:
+            findings.append(f"native episode channel {native_channel.name!r} omits a value-space declaration")
+
+    available_profiles = tuple(
+        profile for profile in contract.authority_profiles if profile.availability == "available"
+    )
+    semantic_actions_by_id = {
+        semantic_channel.id: semantic_channel for semantic_channel in contract.action_channels
+    }
+    semantic_to_native: dict[str, str] = {}
+    for profile in available_profiles:
+        for identifier in profile.action_ids:
+            semantic_channel = semantic_actions_by_id[identifier]
+            if semantic_channel.availability != "available":
+                findings.append(
+                    f"available authority profile {profile.id!r} exposes unavailable action {identifier!r}"
+                )
+                continue
+            native = semantic_channel.binding.get("native_action")
+            if not isinstance(native, str) or not native.strip():
+                findings.append(f"semantic action {identifier!r} has no episode-native binding")
+                continue
+            semantic_to_native[identifier] = native
+            bound_native_channel = raw_action_channels.get(native)
+            if bound_native_channel is None:
+                findings.append(
+                    f"semantic action {identifier!r} maps to absent native episode action {native!r}"
+                )
+                continue
+            if bound_native_channel.value_space is None:
+                findings.append(f"native action {native!r} has no declared value space")
+            if semantic_channel.value_space is None:
+                findings.append(f"semantic action {identifier!r} has no declared value space")
+            unit_compatible = (
+                semantic_channel.canonical_unit == bound_native_channel.unit
+                or (
+                    semantic_channel.value_type == "boolean"
+                    and semantic_channel.canonical_unit is None
+                    and bound_native_channel.unit == "boolean"
+                )
+            )
+            if not unit_compatible:
+                findings.append(
+                    f"semantic action {identifier!r} unit {semantic_channel.canonical_unit!r} does not match "
+                    f"native action {native!r} unit {bound_native_channel.unit!r}"
+                )
+            if (
+                semantic_channel.lower is not None
+                and bound_native_channel.lower is not None
+                and bound_native_channel.lower > semantic_channel.lower
+            ):
+                findings.append(
+                    f"native action {native!r} lower bound {bound_native_channel.lower!r} excludes "
+                    f"semantic action {identifier!r} lower bound {semantic_channel.lower!r}"
+                )
+            if (
+                semantic_channel.upper is not None
+                and bound_native_channel.upper is not None
+                and bound_native_channel.upper < semantic_channel.upper
+            ):
+                findings.append(
+                    f"native action {native!r} upper bound {bound_native_channel.upper!r} excludes "
+                    f"semantic action {identifier!r} upper bound {semantic_channel.upper!r}"
+                )
+
+    bound_native_actions = set(semantic_to_native.values())
+    unbound_native_actions = sorted(set(raw_action_channels) - bound_native_actions)
+    if unbound_native_actions:
+        findings.append(
+            "native episode actions lack an available semantic binding: " + ", ".join(unbound_native_actions)
+        )
+    duplicate_native_bindings = sorted(
+        native
+        for native in set(semantic_to_native.values())
+        if sum(bound == native for bound in semantic_to_native.values()) > 1
+    )
+    if duplicate_native_bindings:
+        findings.append(
+            "multiple semantic actions map to one native episode action: " + ", ".join(duplicate_native_bindings)
+        )
+
+    raw_observation = episode.observe()
+    flattened_native_observation = _flatten_episode_native_values(raw_observation.values)
+    semantic_observation_ids = {
+        semantic_channel.id
+        for semantic_channel in (*contract.status_channels, *contract.resource_channels, *contract.diagnostic_channels)
+        if semantic_channel.availability == "available"
+    }
+    if set(raw_observation_channels) == semantic_observation_ids:
+        observation_schema_projection = "semantic_contract"
+    else:
+        observation_schema_projection = "native_truth"
+        missing_native_observation_schema = sorted(set(flattened_native_observation) - set(raw_observation_channels))
+        if missing_native_observation_schema:
+            findings.append(
+                "committed native observation keys lack schema entries: " + ", ".join(missing_native_observation_schema)
+            )
+        missing_native_observation_values = sorted(set(raw_observation_channels) - set(flattened_native_observation))
+        if missing_native_observation_values:
+            findings.append(
+                "native observation schema keys are absent from committed truth: " + ", ".join(missing_native_observation_values)
+            )
+
+    status = episode.status_frame()
+    if status.interface_id != contract.id:
+        findings.append(f"status frame interface ID {status.interface_id!r} does not match {contract.id!r}")
+    if status.interface_fingerprint_sha256 != contract.fingerprint:
+        findings.append("status frame interface fingerprint does not match the resolved contract")
+    if status.time_s != raw_observation.time_s:
+        findings.append("status frame time does not match the committed native observation time")
+    if status.status != raw_observation.status:
+        findings.append("status frame lifecycle state does not match the committed native observation")
+
+    available_observations: list[dict[str, object]] = []
+    for observation_profile in contract.observation_profiles:
+        if observation_profile.availability != "available":
+            continue
+        observation = episode.observe_frame(observation_profile.id)
+        if observation.interface_id != contract.id:
+            findings.append(
+                f"observation profile {observation_profile.id!r} has interface ID {observation.interface_id!r}, expected {contract.id!r}"
+            )
+        if observation.interface_fingerprint_sha256 != contract.fingerprint:
+            findings.append(f"observation profile {observation_profile.id!r} has a mismatched interface fingerprint")
+        if observation.observation_profile_id != observation_profile.id:
+            findings.append(
+                f"observation profile {observation_profile.id!r} returned identity {observation.observation_profile_id!r}"
+            )
+        if observation.time_s != status.time_s or observation.status != status.status:
+            findings.append(f"observation profile {observation_profile.id!r} is not aligned to the committed status boundary")
+        unknown = sorted(set(observation.values) - set(observation_profile.channel_ids))
+        if unknown:
+            findings.append(
+                f"observation profile {observation_profile.id!r} emitted undeclared channels: {', '.join(unknown)}"
+            )
+        available_observations.append(
+            {
+                "id": observation_profile.id,
+                "source": observation_profile.source,
+                "channel_count": len(observation_profile.channel_ids),
+                "present_channel_count": len(observation.values),
+            }
+        )
+
+    return {
+        "schema": "taoryx.vehicle-composition-episode-contract/v1alpha1",
+        "status": "pass" if not findings else "fail",
+        "composition_id": episode.composition.id,
+        "composition_identity_sha256": episode.composition.identity_sha256,
+        "interface_id": contract.id,
+        "interface_fingerprint_sha256": contract.fingerprint,
+        "available_authority_profiles": [profile.id for profile in available_profiles],
+        "semantic_action_channel_count": len(semantic_to_native),
+        "native_action_channel_count": len(raw_action_channels),
+        "native_observation_channel_count": len(raw_observation_channels),
+        "observation_schema_projection": observation_schema_projection,
+        "available_observation_profiles": available_observations,
+        "mission_graph": graph_summary,
+        "findings": findings,
+        "claim_boundary": (
+            "This confirms that the opened source-owned episode exposes its selected semantic action, status, "
+            "observation, and immutable mission-graph contract without a native-control bypass. It does not establish "
+            "graph transition execution, physical actuator realization, mission qualification, or batch/episode trajectory parity."
+        ),
+    }
+    ####
+
+
+def _flatten_episode_native_values(
+    values: Mapping[str, object],
+    *,
+    prefix: str = "",
+) -> dict[str, object]:
+    """Flatten source-table nested truth into the episode schema's dotted keys."""
+
+    flattened: dict[str, object] = {}
+    for name, value in values.items():
+        identifier = f"{prefix}.{name}" if prefix else str(name)
+        if isinstance(value, Mapping):
+            flattened.update(_flatten_episode_native_values(value, prefix=identifier))
+        else:
+            flattened[identifier] = value
+    return flattened
+    ####
+
+
+def _a320_stepper_for_composition(composition: CompiledVehicleComposition) -> A320RacetrackStepper:
+    """Build the exact A320 reduced plant selected by one composition."""
+
+    route = compile_powered_fixed_wing_racetrack_from_composition(composition).route
+    inputs = composition.initialization.inputs
+    altitude_m = _composition_number(inputs, "altitude_m", default=6000.0)
+    mass_kg = _composition_number(inputs, "mass_kg", default=60000.0)
+    root = Path(__file__).resolve().parents[2]
+    base_model = A320OpenAPModel.from_repository(root)
+    operating_point = _a320_operating_point_for_speed(base_model, altitude_m, mass_kg, route.speed_m_s)
+    model: A320OpenAPModel | A320Pseudo6DOFModel
+    response_profile: Pseudo6DOFProfile | None
+    mode: Literal["point_mass_3dof", "pseudo_6dof_kinematic_bridge"]
+    if composition.fidelity == "point_mass_3dof":
+        model = base_model
+        trim = model.trim_level_flight(operating_point)
+        response_profile = None
+        mode = "point_mass_3dof"
+    elif composition.fidelity == "pseudo_6dof":
+        model = A320Pseudo6DOFModel.from_repository(root)
+        trim = model.trim_pseudo6dof(operating_point)
+        _, response_profile = load_pseudo6dof_catalog(root / "verification/pseudo6dof_profiles.yaml").for_family("a320_openap_3dof")
+        mode = "pseudo_6dof_kinematic_bridge"
+    else:
+        raise ValueError(f"A320 reduced episode has no fidelity adapter for {composition.fidelity!r}")
+    return A320RacetrackStepper(
+        A320RacetrackRunner(
+            model,
+            trim,
+            route,
+            mode,
+            dt_s=0.2,
+            response_profile=response_profile,
+            operating_point=operating_point,
+        )
+    )
+    ####
+
+
+def _f16_stepper_for_composition(composition: CompiledVehicleComposition) -> F16ReducedRacetrackStepper:
+    """Build the exact source-trimmed F-16 reduction selected by one composition."""
+
+    route = compile_powered_fixed_wing_racetrack_from_composition(composition).route
+    source, trim, trim_pitch_rad = _f16_source_trim()
+    observed_mach = float(source.evaluate_loads(trim.state, trim.controls, altitude_m=0.0)["mach"])
+    requested_mach = _composition_number(composition.initialization.inputs, "mach", default=observed_mach)
+    if not math.isclose(requested_mach, observed_mach, abs_tol=1.0e-9):
+        raise ValueError(f"F-16 reduced episode is pinned to its source trim Mach; requested {requested_mach:.12g}, expected {observed_mach:.12g}")
+    mode: Literal["point_mass_3dof", "pseudo_6dof_kinematic_bridge"]
+    model: F16PointMass3DOFModel | F16AttitudeResponsePseudo6DOFModel
+    if composition.fidelity == "point_mass_3dof":
+        model = F16PointMass3DOFModel(source, trim, trim_pitch_rad)
+        response_profile = None
+        mode = "point_mass_3dof"
+    elif composition.fidelity == "pseudo_6dof":
+        linearization = source.linearize_local(
+            trim.state,
+            trim.controls,
+            trim_pitch_rad=trim_pitch_rad,
+            altitude_m=0.0,
+            state_step=1.0e-5,
+            control_step=1.0e-5,
+        )
+        model = F16AttitudeResponsePseudo6DOFModel(source, trim, linearization, trim_pitch_rad)
+        root = Path(__file__).resolve().parents[2]
+        _, response_profile = load_pseudo6dof_catalog(root / "verification/pseudo6dof_profiles.yaml").for_family("f16_s119")
+        mode = "pseudo_6dof_kinematic_bridge"
+    else:
+        raise ValueError(f"F-16 reduced episode has no fidelity adapter for {composition.fidelity!r}")
+    return F16ReducedRacetrackStepper(F16ReducedRacetrackRunner(model, trim, route, mode, dt_s=0.2, response_profile=response_profile))
+    ####
+
+
+def _a320_guidance_override(action: Mapping[str, float]) -> A320GuidanceOverride:
+    """Translate held public/native A320 guidance coordinates into SI/radians."""
+
+    return A320GuidanceOverride(
+        speed_m_s=action.get("speed_m_s"),
+        flight_path_angle_rad=(None if "flight_path_angle_deg" not in action else math.radians(action["flight_path_angle_deg"])),
+        heading_rad=None if "heading_deg" not in action else math.radians(action["heading_deg"]),
+        bank_angle_rad=None if "bank_angle_deg" not in action else math.radians(action["bank_angle_deg"]),
+    )
+    ####
+
+
+def _f16_guidance_override(action: Mapping[str, float]) -> F16GuidanceOverride:
+    """Translate held public/native F-16 guidance coordinates into SI/radians."""
+
+    return F16GuidanceOverride(
+        speed_m_s=action.get("speed_m_s"),
+        flight_path_angle_rad=(None if "flight_path_angle_deg" not in action else math.radians(action["flight_path_angle_deg"])),
+        heading_rad=None if "heading_deg" not in action else math.radians(action["heading_deg"]),
+        bank_angle_rad=None if "bank_angle_deg" not in action else math.radians(action["bank_angle_deg"]),
+    )
+    ####
+
+
+def _a320_status_values(row: Mapping[str, object]) -> dict[str, object]:
+    """Enrich one reduced telemetry row with only declared portable vectors."""
+
+    values = dict(row)
+    attitude_keys = ("route_bank_achieved_deg", "route_pitch_achieved_deg", "route_heading_achieved_deg")
+    rate_keys = ("p_rad_s", "q_rad_s", "r_rad_s")
+    if all(key in values for key in attitude_keys):
+        values["attitude_euler_deg"] = [values[key] for key in attitude_keys]
+    if all(key in values for key in rate_keys):
+        values["body_rate_rad_s"] = [values[key] for key in rate_keys]
+    control_path = values.get("control_path")
+    values["control_realization"] = "response_law" if control_path == "pseudo_6dof_kinematic_bridge" else "force_model"
+    return values
+    ####
+
+
+def _f16_stepper_state(payload: Mapping[str, object]) -> F16ReducedRacetrackStepperState:
+    """Decode a checkpointed F-16 stepper state with no permissive coercion."""
+
+    controls = payload.get("controls")
+    if not isinstance(controls, Mapping):
+        raise ValueError("F-16 checkpoint stepper state has no control mapping")
+    scalar_controls = {str(name): _finite_number(value, f"F-16 checkpoint control {name!r}") for name, value in controls.items()}
+    numerical_valid = payload.get("numerical_valid")
+    failure = payload.get("failure")
+    if not isinstance(numerical_valid, bool):
+        raise ValueError("F-16 checkpoint has invalid numerical status")
+    if failure is not None and not isinstance(failure, str):
+        raise ValueError("F-16 checkpoint failure must be string or null")
+    scalars = [
+        _finite_number(payload.get(key), f"F-16 checkpoint {key}")
+        for key in (
+            "time_s",
+            "north_m",
+            "east_m",
+            "altitude_m",
+            "speed_m_s",
+            "heading_rad",
+            "flight_path_angle_rad",
+            "roll_rad",
+            "pitch_rad",
+            "yaw_rad",
+            "p_rad_s",
+            "q_rad_s",
+            "r_rad_s",
+        )
+    ]
+    return F16ReducedRacetrackStepperState(
+        scalars[0],
+        scalars[1],
+        scalars[2],
+        scalars[3],
+        scalars[4],
+        scalars[5],
+        scalars[6],
+        scalars[7],
+        scalars[8],
+        scalars[9],
+        scalars[10],
+        scalars[11],
+        scalars[12],
+        scalar_controls,
+        numerical_valid,
+        failure,
+    )
+    ####
+
+
+def _a320_stepper_state(payload: Mapping[str, object]) -> A320RacetrackStepperState:
+    """Decode a checkpointed A320 stepper state with no permissive coercion."""
+
+    state = payload.get("state")
+    controls = payload.get("controls")
+    if not isinstance(state, Mapping) or not isinstance(controls, Mapping):
+        raise ValueError("A320 checkpoint stepper state has no scalar state/control mappings")
+    scalar_state = {str(name): _finite_number(value, f"A320 checkpoint state {name!r}") for name, value in state.items()}
+    scalar_controls = {str(name): _finite_number(value, f"A320 checkpoint control {name!r}") for name, value in controls.items()}
+    terminal_hold = payload.get("terminal_hold")
+    numerical_valid = payload.get("numerical_valid")
+    failure = payload.get("failure")
+    if not isinstance(terminal_hold, bool) or not isinstance(numerical_valid, bool):
+        raise ValueError("A320 checkpoint has invalid terminal or numerical status")
+    if failure is not None and not isinstance(failure, str):
+        raise ValueError("A320 checkpoint failure must be string or null")
+    return A320RacetrackStepperState(
+        _finite_number(payload.get("time_s"), "A320 checkpoint time_s"),
+        _finite_number(payload.get("north_m"), "A320 checkpoint north_m"),
+        _finite_number(payload.get("east_m"), "A320 checkpoint east_m"),
+        scalar_state,
+        scalar_controls,
+        terminal_hold,
+        numerical_valid,
+        failure,
+    )
     ####
 
 
@@ -1169,6 +2216,18 @@ def _composition_number(values: Mapping[str, Any], name: str, *, default: float)
     if value is None:
         return default
     return float(value.value)
+    ####
+
+
+def _hummingbird_initial_mass_kg(composition: CompiledVehicleComposition) -> float:
+    """Resolve the one declared mass-bearing Hummingbird reset contract."""
+
+    if composition.initialization.id != "grounded_idle":
+        return 0.5
+    mass_kg = _composition_number(composition.initialization.inputs, "mass_kg", default=0.5)
+    if not math.isfinite(mass_kg) or mass_kg <= 0.0:
+        raise ValueError("Hummingbird grounded_idle mass_kg must be positive and finite")
+    return mass_kg
     ####
 
 
@@ -1256,7 +2315,7 @@ def _episode_status(status: InteractiveStatus, closed: bool) -> EpisodeStatus:
 def _episode_status_literal(value: object) -> EpisodeStatus:
     if value not in {"ready", "active", "completed", "closed"}:
         raise ValueError("invalid Hummingbird episode checkpoint status")
-    return cast(EpisodeStatus, value)
+    return value
     ####
 
 
@@ -1276,12 +2335,12 @@ def _native_action_for_frame(
         raise ValueError(f"action frame interface mismatch: {action.interface_id!r} != {contract.id!r}")
     if action.interface_fingerprint_sha256 != contract.fingerprint:
         raise ValueError("action frame interface fingerprint mismatch")
-    profile = contract.authority_profile(action.authority_profile_id)
-    if profile.availability != "available":
-        raise ValueError(f"authority profile {profile.id!r} is {profile.availability}, not executable")
-    unknown = sorted(set(action.values) - set(profile.action_ids))
-    if unknown:
-        raise ValueError(f"action frame contains values outside {profile.id!r}: {', '.join(unknown)}")
+    validate_authority_action_values(
+        contract,
+        action.authority_profile_id,
+        action.values,
+        context=f"semantic action frame for authority profile {action.authority_profile_id!r}",
+    )
     by_id = {channel.id: channel for channel in contract.action_channels}
     result: dict[str, object] = {}
     for identifier, value in action.values.items():
@@ -1438,16 +2497,16 @@ def _projection_from_payload(payload: Mapping[str, object]) -> DirectWrenchProje
     position_saturated = payload.get("position_saturated", [])
     rate_limited = payload.get("rate_limited", [])
     if not isinstance(requested, Mapping) or not isinstance(achieved, Mapping) or not isinstance(residual, Mapping):
-        raise ValueError("X-15 direct-wrench checkpoint projection mappings are malformed")
+        raise ValueError("local direct-wrench checkpoint projection mappings are malformed")
     if status not in {"feasible", "partially_achievable"}:
-        raise ValueError("X-15 direct-wrench checkpoint projection status is invalid")
+        raise ValueError("local direct-wrench checkpoint projection status is invalid")
     if not isinstance(position_saturated, list) or not isinstance(rate_limited, list):
-        raise ValueError("X-15 direct-wrench checkpoint projection limit flags are malformed")
+        raise ValueError("local direct-wrench checkpoint projection limit flags are malformed")
     return DirectWrenchProjection(
-        _direct_wrench_mapping(requested, "X-15 direct-wrench checkpoint requested projection"),
-        _direct_wrench_mapping(achieved, "X-15 direct-wrench checkpoint achieved projection"),
-        _direct_wrench_mapping(residual, "X-15 direct-wrench checkpoint residual projection"),
-        cast(DirectWrenchStatus, status),
+        _direct_wrench_mapping(requested, "local direct-wrench checkpoint requested projection"),
+        _direct_wrench_mapping(achieved, "local direct-wrench checkpoint achieved projection"),
+        _direct_wrench_mapping(residual, "local direct-wrench checkpoint residual projection"),
+        status,
         tuple(str(name) for name in position_saturated),
         tuple(str(name) for name in rate_limited),
     )
@@ -1481,9 +2540,14 @@ __all__ = [
     "EpisodeChannel",
     "EpisodeObservation",
     "EpisodeStep",
+    "A320ReducedCompositionEpisode",
+    "F16ReducedCompositionEpisode",
     "HummingbirdPseudoCompositionEpisode",
     "LanguageBackedCompositionEpisode",
+    "ReducedFixedWingCompositionEpisode",
     "X15LocalDirectWrenchCompositionEpisode",
     "VehicleCompositionEpisode",
     "open_vehicle_composition_episode",
+    "registered_episode_factory_ids",
+    "validate_vehicle_composition_episode_contract",
 ]

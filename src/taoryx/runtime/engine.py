@@ -70,9 +70,26 @@ def integrate_active_vehicles(problem: RuntimeProblem, step: float) -> None:
     if step <= 0.0:
         raise ValueError("integration step must be positive")
     for vehicle in problem.active_vehicles():
-        _integrate_vehicle(vehicle, step)
+        _integrate_and_record_control_interval(vehicle, step)
     ####
 ####
+
+
+def _integrate_and_record_control_interval(vehicle: RuntimeVehicle, step: float) -> None:
+    """Resolve held controls, then advance one accepted interval."""
+
+    vehicle.resolve_committed_controls()
+    start_time_s = vehicle.state.time
+    controls_at_start = vehicle.effective_control_values(vehicle.state.named)
+    evaluation_history_start = len(vehicle.control_evaluation_history)
+    _integrate_vehicle(vehicle, step)
+    vehicle.record_control_interval(
+        start_time_s,
+        vehicle.state.time,
+        controls_at_start,
+        evaluation_history_start=evaluation_history_start,
+    )
+    ####
 
 
 def _integrate_vehicle(vehicle: RuntimeVehicle, step: float) -> None:
@@ -224,6 +241,7 @@ def compute_trajectories(
         return _compute_independent_trajectories(problem, max_steps=max_steps)
 
     for vehicle in problem.active_vehicles():
+        vehicle.resolve_committed_controls()
         vehicle.state = _refresh_runtime_state(vehicle, vehicle.state)
         vehicle.history[0] = vehicle.state
     if problem.sensor_bus is not None:
@@ -283,9 +301,10 @@ def compute_trajectories(
                 if vehicle.state.time > restart_time:
                     vehicle.state = previous[vehicle.name]
                     vehicle.history.pop()
+                    vehicle.discard_control_provenance_after(vehicle.state.time)
                     restart_step = restart_time - vehicle.state.time
                     if restart_step > 1e-15:
-                        _integrate_vehicle(vehicle, restart_step)
+                        _integrate_and_record_control_interval(vehicle, restart_step)
             applicable_crossings = {
                 vehicle.name: tuple(
                     crossing
@@ -598,6 +617,24 @@ def _refresh_runtime_state(vehicle: RuntimeVehicle, state: RuntimeState, *, publ
             "committed_truth_environment" if publish_rates else "solver_stage_environment",
         )
         named.update(vehicle.environment_evaluator(environment_values))
+    # A resolver-owned control represents a command accepted at the preceding
+    # truth boundary.  Environment evaluators may calculate diagnostic or
+    # candidate guidance values at an RK stage, but may not replace that held
+    # command while the integrator probes uncommitted state.  Native controls
+    # without this resolver remain diagnostic-only: their historical mutation
+    # detection behavior is intentionally preserved until they are migrated.
+    named.update(
+        {
+            name: vehicle.control_values[name]
+            for name in vehicle.committed_control_names
+            if name in vehicle.control_values
+        }
+    )
+    vehicle.record_control_evaluation(
+        state.time,
+        "committed_truth" if publish_rates else "solver_stage",
+        named,
+    )
     if vehicle.derived_definitions:
         named = evaluate_definition_program(
             vehicle.derived_definitions,

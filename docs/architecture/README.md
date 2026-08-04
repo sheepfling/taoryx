@@ -5,6 +5,11 @@ The manual describes a trajectory-analysis system with several distinct
 responsibilities; the replacement should preserve those boundaries instead of
 turning the `.prb` parser into the simulator.
 
+For a user-facing tour of the three connected products—source/language,
+simulation/stepping, and vehicle/mission composition—start with the
+[three-product showcase guide](../THREE_PRODUCT_SHOWCASE.md). This page is
+the deeper reference for the runtime and its boundaries.
+
 Use this section when you want the runtime shape, the table explorer / plotter
 boundary, the telemetry contract, or the analysis workspace in one place.
 

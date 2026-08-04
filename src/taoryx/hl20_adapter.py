@@ -342,18 +342,52 @@ def build_hl20_source_adapter(tier: FidelityTier) -> StandardFamilyAdapter:
 
 
 def build_hl20_local_direct_wrench_screen_config() -> LocalDirectWrenchScreenConfig:
-    """Return the declared one-point HL-20 direct-wrench bridge contract.
+    """Return the declared source-feasible HL-20 direct-wrench screen.
 
-    The selected Mach-2, alpha-5-degree, 10-km query is intentionally the
-    same local source-load screen used by the retained validation evidence.
-    Altitude is held as an environment parameter because this local bridge
-    does not yet propagate attitude or position through gravity.
+    The selected Mach-0.5, alpha-5-degree, 10-km source point lies inside the
+    retained DAVE-ML envelope and can be balanced within the declared direct
+    wrench authority. Altitude is held as an environment parameter because
+    this local bridge does not yet propagate attitude or position through
+    gravity. This is a local bridge screen, not the high-energy glide mission.
     """
 
+    return _build_hl20_local_direct_wrench_screen_config(
+        id="hl20-source-mach0p5-local-direct-wrench-v1",
+        altitude_m=10_000.0,
+        mach=0.5,
+        alpha_deg=5.0,
+    )
+    ####
+
+
+def build_hl20_mach2_authority_probe_config() -> LocalDirectWrenchScreenConfig:
+    """Return the deliberately blocked Mach-2 authority diagnostic fixture.
+
+    This is retained as a source-owned negative control: the selected point
+    requires balancing force beyond the currently declared bridge limits. It
+    must never be bound as a runnable controller screen or a flight mission.
+    """
+
+    return _build_hl20_local_direct_wrench_screen_config(
+        id="hl20-source-mach2-authority-probe-v1",
+        altitude_m=10_000.0,
+        mach=2.0,
+        alpha_deg=5.0,
+    )
+    ####
+
+
+def _build_hl20_local_direct_wrench_screen_config(
+    *,
+    id: str,
+    altitude_m: float,
+    mach: float,
+    alpha_deg: float,
+) -> LocalDirectWrenchScreenConfig:
+    """Build one immutable source-domain local bridge fixture."""
+
     plant = HL20SourceDirectWrenchPlant()
-    altitude_m = 10_000.0
-    mach = 2.0
-    alpha_rad = math.radians(5.0)
+    alpha_rad = math.radians(alpha_deg)
     speed_m_s = mach * plant.source_plant.source.speed_of_sound_m_s
     state_names = HL20_LOCAL_STATE_NAMES[:-1]
     reference = {
@@ -398,7 +432,7 @@ def build_hl20_local_direct_wrench_screen_config() -> LocalDirectWrenchScreenCon
         }
     )
     return LocalDirectWrenchScreenConfig(
-        id="hl20-source-mach2-local-direct-wrench-v1",
+        id=id,
         plant_id="hl20-daveml-source-direct-wrench-local-plant",
         state_names=state_names,
         reference_state=reference,
@@ -507,6 +541,7 @@ __all__ = [
     "HL20SourceSurfacePlant",
     "HL20_TRIM_EVIDENCE",
     "build_hl20_local_direct_wrench_screen_config",
+    "build_hl20_mach2_authority_probe_config",
     "build_hl20_source_adapter",
     "build_hl20_source_direct_wrench_adapter",
     "build_hl20_source_surface_adapter",

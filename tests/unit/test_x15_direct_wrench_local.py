@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 
@@ -66,7 +67,37 @@ def test_x15_local_screen_uses_the_shared_direct_wrench_execution_seam() -> None
 
     assert screen.mission_pass is True
     assert screen.observed_statuses == ("feasible",)
+    assert screen.equilibrium_pass is True
+    assert screen.equilibrium_projection.status == "feasible"
+    assert screen.equilibrium_derivative_norm <= screen.config.equilibrium_derivative_norm_limit
     assert screen.lqr.hurwitz is True
     assert screen.final_error_norm < screen.initial_error_norm * 0.25
-    assert screen.as_dict()["physical_effector_allocation"] is False
+    payload = screen.as_dict()
+    assert payload["physical_effector_allocation"] is False
+    assert payload["evaluation"]["equilibrium"]["passed"] is True
+    ####
+
+
+def test_x15_local_screen_configuration_is_reused_within_one_source_revision() -> None:
+    """Product 3 preflight and execution must reuse one immutable source setup."""
+
+    first = build_x15_local_direct_wrench_screen_config()
+    second = build_x15_local_direct_wrench_screen_config()
+
+    assert first is second
+    assert first.id == "x15-source-release-glide-local-direct-wrench-v1"
+    ####
+
+
+def test_x15_direct_wrench_plant_reuses_source_setup_but_not_caller_mappings() -> None:
+    """Cached source loading must not make a caller's control map globally mutable."""
+
+    first = build_x15_source_direct_wrench_plant()
+    second = build_x15_source_direct_wrench_plant()
+    controls = cast(dict[str, float], first.source_controls)
+    controls["rudder_deg"] = 17.0
+
+    assert first is not second
+    assert second.source_controls["rudder_deg"] == 0.0
+    assert first.reference_state == second.reference_state
     ####

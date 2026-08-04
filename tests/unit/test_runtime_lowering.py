@@ -150,6 +150,35 @@ def test_runtime_samples_random_block_once_per_case() -> None:
 ####
 
 
+def test_run_files_writes_explicit_native_control_provenance_without_claiming_an_action_trace(tmp_path: Path) -> None:
+    problem = tmp_path / "control-provenance.prb"
+    problem.write_text(
+        "(control-provenance)\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecfc x=0 y=0 z=0 xdt=1 ydt=0 zdt=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *integ dt=0.1\n"
+        "    *when time>0.2 stop\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+
+    report = run_files(problem, output_dir=tmp_path / "out", max_steps=20, control_provenance="full")
+
+    assert report.exit_code == 0
+    provenance_path = tmp_path / "out" / "control_provenance.json"
+    payload = json.loads(provenance_path.read_text(encoding="utf-8"))
+    assert payload["schema"] == "taoryx.runtime-control-provenance/v1alpha1"
+    assert "not a semantic_action_trace" in payload["claim_boundary"]
+    vehicle = payload["cases"][0]["vehicles"]["1"]
+    assert vehicle["accepted_interval_count"] >= 2
+    assert vehicle["held_command_eligible_interval_count"] == vehicle["accepted_interval_count"]
+    assert len(vehicle["control_interval_records"]) == vehicle["accepted_interval_count"]
+####
+
+
 def test_runtime_lowering_triple_aliases_are_explicit() -> None:
     assert lowering_module.CartesianTriple == tuple[float, float, float]
     assert lowering_module.PlatformBasis == tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]

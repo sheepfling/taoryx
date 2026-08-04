@@ -71,6 +71,7 @@ class PoweredFixedWingRacetrackIntent:
     high_altitude_m: float
     requested_speed_m_s: float | None = None
     requested_bank_deg: float | None = None
+    requested_turn_radius_m: float | None = None
     minimum_straight_length_m: float = 0.0
     level_dwell_s: float = 30.0
     turn_radius_margin: float = 1.10
@@ -105,6 +106,7 @@ class PoweredFixedWingRacetrackIntent:
         for requested_name, requested_value in (
             ("requested_speed_m_s", self.requested_speed_m_s),
             ("requested_bank_deg", self.requested_bank_deg),
+            ("requested_turn_radius_m", self.requested_turn_radius_m),
         ):
             if requested_value is not None and (not math.isfinite(requested_value) or requested_value <= 0.0):
                 raise ValueError(f"{requested_name} must be finite and positive when supplied")
@@ -187,7 +189,18 @@ def compile_powered_fixed_wing_racetrack(
 
     bank_rad = math.radians(bank)
     minimum_turn_radius = speed**2 / (STANDARD_GRAVITY_M_S2 * math.tan(bank_rad))
-    selected_turn_radius = intent.turn_radius_margin * minimum_turn_radius
+    conservative_minimum_turn_radius = intent.turn_radius_margin * minimum_turn_radius
+    requested_turn_radius = intent.requested_turn_radius_m
+    selected_turn_radius = max(
+        conservative_minimum_turn_radius,
+        0.0 if requested_turn_radius is None else requested_turn_radius,
+    )
+    if requested_turn_radius is not None and requested_turn_radius < conservative_minimum_turn_radius:
+        diagnostics.append(
+            "requested turn radius "
+            f"{requested_turn_radius:.6g} m increased to {conservative_minimum_turn_radius:.6g} m "
+            "to preserve the declared bank-capability margin"
+        )
     altitude_delta = intent.high_altitude_m - intent.low_altitude_m
     climb_time = altitude_delta / capability.maximum_climb_rate_m_s
     descent_time = altitude_delta / capability.maximum_descent_rate_m_s

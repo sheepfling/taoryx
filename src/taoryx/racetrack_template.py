@@ -16,7 +16,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Final, Literal, cast
+from typing import Any, Final, Literal
 
 import yaml
 
@@ -50,6 +50,7 @@ class RacetrackPhaseWindow:
         if self.start_s < 0.0 or self.end_s < self.start_s:
             raise ValueError("racetrack phase window must be ordered and non-negative")
         ####
+
     ####
 
 
@@ -81,6 +82,7 @@ class RacetrackGate:
 
         return [self.gate_normal_north, self.gate_normal_east, 0.0]
         ####
+
     ####
 
 
@@ -211,6 +213,7 @@ class ResolvedRacetrack:
             ends.append(elapsed)
         return tuple(ends)
         ####
+
     ####
 
 
@@ -229,6 +232,7 @@ class RacetrackTemplateCatalog:
         except KeyError as error:
             raise KeyError(f"unknown racetrack binding: {binding_id}") from error
         ####
+
     ####
 
 
@@ -255,7 +259,7 @@ def resolve_racetrack_binding(template_id: str, binding_id: str, values: dict[st
     if fidelity_value not in RACETRACK_FIDELITIES:
         allowed = ", ".join(RACETRACK_FIDELITIES)
         raise ValueError(f"racetrack binding {binding_id!r} has unsupported fidelity {fidelity_value!r}; expected one of {allowed}")
-    fidelity = cast(RacetrackFidelity, fidelity_value)
+    fidelity = fidelity_value
     low_altitude = float(values["low_altitude_m"])
     high_altitude = float(values["high_altitude_m"])
     if high_altitude < low_altitude:
@@ -328,10 +332,7 @@ def load_racetrack_template_catalog(path: Path) -> RacetrackTemplateCatalog:
     bindings_payload = payload.get("bindings")
     if not isinstance(bindings_payload, dict) or not bindings_payload:
         raise ValueError("racetrack catalog requires non-empty bindings")
-    bindings = {
-        str(binding_id): resolve_racetrack_binding(template_id, str(binding_id), dict(values))
-        for binding_id, values in bindings_payload.items()
-    }
+    bindings = {str(binding_id): resolve_racetrack_binding(template_id, str(binding_id), dict(values)) for binding_id, values in bindings_payload.items()}
     return RacetrackTemplateCatalog(template_id=template_id, bindings=bindings)
     ####
 

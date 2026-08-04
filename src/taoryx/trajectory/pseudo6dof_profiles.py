@@ -116,6 +116,7 @@ class Pseudo6DOFProfile(BaseModel):
             return phase, scheduled
         return "default", self.response
         ####
+
     ####
 
 
@@ -148,6 +149,7 @@ class DirectWrenchProfile(BaseModel):
             raise ValueError("direct-wrench force and moment axes must be disjoint")
         return self
         ####
+
     ####
 
 
@@ -207,6 +209,7 @@ class AutomaticLoweringStep:
             "missing_operations": list(self.missing_operations),
         }
         ####
+
     ####
 
 
@@ -316,6 +319,7 @@ class AutomaticLoweringReport:
 
         return self.selected is not None
         ####
+
     ####
 
     def as_dict(self) -> dict[str, object]:
@@ -330,6 +334,7 @@ class AutomaticLoweringReport:
             "steps": [step.as_dict() for step in self.steps],
         }
         ####
+
     ####
 
 
@@ -349,7 +354,11 @@ class Pseudo6DOFCatalog(BaseModel):
         profile_ids = {profile.id for profile in self.profiles}
         direct_ids = {profile.id for profile in self.direct_wrench_profiles}
         surface_ids = {profile.id for profile in self.surface_allocation_profiles}
-        if len(profile_ids) != len(self.profiles) or len(direct_ids) != len(self.direct_wrench_profiles) or len(surface_ids) != len(self.surface_allocation_profiles):
+        if (
+            len(profile_ids) != len(self.profiles)
+            or len(direct_ids) != len(self.direct_wrench_profiles)
+            or len(surface_ids) != len(self.surface_allocation_profiles)
+        ):
             raise ValueError("fidelity profile IDs must be unique within each profile class")
         if (profile_ids & direct_ids) or (profile_ids & surface_ids) or (direct_ids & surface_ids):
             raise ValueError("fidelity profile IDs must be globally unique")
@@ -377,9 +386,7 @@ class Pseudo6DOFCatalog(BaseModel):
                 if surface.family_id != binding.family_id:
                     raise ValueError(f"surface-allocation profile family mismatch for {binding.family_id}")
                 if surface.parent_direct_wrench_profile_id not in direct_by_id:
-                    raise ValueError(
-                        f"surface-allocation profile {surface.id} must reference a direct-wrench profile"
-                    )
+                    raise ValueError(f"surface-allocation profile {surface.id} must reference a direct-wrench profile")
                 if direct_by_id[surface.parent_direct_wrench_profile_id].family_id != binding.family_id:
                     raise ValueError(f"surface-allocation parent family mismatch for {binding.family_id}")
         return self
@@ -418,6 +425,7 @@ class Pseudo6DOFCatalog(BaseModel):
         profile = next(item for item in self.surface_allocation_profiles if item.id == binding.surface_allocation_profile_id)
         return binding, profile
         ####
+
     ####
 
 
@@ -478,7 +486,7 @@ def build_automatic_lowering_report(
     binding, pseudo_profile = resolved_catalog.for_family(family_id)
     records = evidence if evidence is not None else load_qualified_fidelity_evidence()
     if requested in CANONICAL_FIDELITY_TIERS:
-        canonical_requested = cast(FidelityTier, requested)
+        canonical_requested = requested
         declared_operations = required_operations or {}
         candidates: dict[FidelityTier, LoweringCandidate] = {
             "point_mass_3dof": LoweringCandidate(
@@ -497,11 +505,7 @@ def build_automatic_lowering_report(
             "rigid_body_6dof_direct_wrench": LoweringCandidate(
                 "rigid_body_6dof_direct_wrench",
                 binding.direct_wrench_profile_id,
-                tuple(
-                    profile.parent_3dof_profile_id
-                    for profile in resolved_catalog.direct_wrench_profiles
-                    if profile.id == binding.direct_wrench_profile_id
-                ),
+                tuple(profile.parent_3dof_profile_id for profile in resolved_catalog.direct_wrench_profiles if profile.id == binding.direct_wrench_profile_id),
                 "qualified direct-wrench bridge and parent 3DOF evidence",
                 tuple(declared_operations.get("rigid_body_6dof_direct_wrench", ())),
             ),
@@ -529,10 +533,7 @@ def build_automatic_lowering_report(
             requested,
             decision.selected,
             decision.first_blocker,
-            tuple(
-                _automatic_lowering_step_from_record(item)
-                for item in decision.considered
-            ),
+            tuple(_automatic_lowering_step_from_record(item) for item in decision.considered),
         )
     steps: list[AutomaticLoweringStep] = []
     first_blocker: str | None = None
@@ -617,7 +618,9 @@ def build_automatic_lowering_report(
                 rigid_id,
                 "eligible" if rigid_ok else "unavailable",
                 "legacy native rigid-body qualification artifact",
-                f"evidence status {rigid_status!r} for {rigid_id!r}" if rigid_ok else "no native rigid-body qualification profile was supplied (legacy compatibility path)",
+                f"evidence status {rigid_status!r} for {rigid_id!r}"
+                if rigid_ok
+                else "no native rigid-body qualification profile was supplied (legacy compatibility path)",
             ):
                 return AutomaticLoweringReport(family_id, requested, "rigid_body_6dof", first_blocker, tuple(steps))
 

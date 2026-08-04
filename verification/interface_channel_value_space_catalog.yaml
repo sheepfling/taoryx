@@ -1,0 +1,185 @@
+schema: taoryx.interface-channel-value-space-catalog/v1alpha1
+version: 1
+description: >-
+  Explicit mathematical topology for every current public Product 2/3 vehicle
+  interface channel. Membership is semantic and does not infer a topology from
+  the identifier, unit, or numeric bounds.
+profiles:
+  boolean:
+    - contact.state
+    - control.physical_effector_allocation
+    - control.physical_motor_allocation
+    - control.wrench.saturated
+    - propulsion.enable
+    - resources.booster.attached
+  bounded_interval:
+    - attitude.pitch.command
+    - attitude.roll.command
+    - control.lateral.bridge.command
+    - control.longitudinal.bridge.command
+    - effector.aileron.command
+    - effector.collective.elevon.command
+    - effector.differential.elevon.command
+    - effector.differential.stabilator.command
+    - effector.elevator.command
+    - effector.rotor.1.speed.command
+    - effector.rotor.2.speed.command
+    - effector.rotor.3.speed.command
+    - effector.rotor.4.speed.command
+    - effector.rotor.speed.command
+    - effector.rudder.command
+    - effector.symmetric.stabilator.command
+    - effector.throttle.command
+    - guidance.bank.command
+    - guidance.flight_path_angle.command
+    - guidance.heading.command
+    - guidance.speed.command
+    - initialization.pad_launch.latitude_deg
+    - initialization.source_booster_launch.launch_elevation_deg
+    - initialization.staged_booster_launch.glide_bank_deg
+    - initialization.staged_booster_launch.launch_elevation_deg
+    - segment.fly_by_turn.bank_limit_deg
+    - segment.glide_bank_reversal.bank_command_deg
+    - segment.ignition_ascent.pitch_program
+    - segment.source_scheduled_bank.bank_command_deg
+  euclidean_scalar:
+    - flight.path_angle
+    - initialization.airborne_hover.east_m
+    - initialization.airborne_hover.north_m
+    - initialization.airborne_trim.east_m
+    - initialization.airborne_trim.north_m
+    - initialization.grounded_idle.pad_east_m
+    - initialization.grounded_idle.pad_north_m
+    - position.altitude
+    - position.east
+    - position.north
+    - segment.coast_apogee.target_energy
+    - segment.energy_handoff.target_energy
+    - segment.glide_bank_reversal.target_crossrange_m
+    - velocity.down
+    - velocity.east
+    - velocity.north
+  euclidean_vector3:
+    - body_rate
+    - control.wrench.achieved.force
+    - control.wrench.achieved.moment
+    - control.wrench.requested.force
+    - control.wrench.requested.moment
+    - control.wrench.residual.force
+    - control.wrench.residual.moment
+    - initialization.atmospheric_release.body_rates_rad_s
+    - position.inertial
+    - position.local
+    - segment.climb_level_gate.gate_center_ned_m
+    - segment.descent_level_gate.gate_center_ned_m
+    - segment.fly_by_turn.gate_center_ned_m
+    - segment.hover_dwell.target_ned_m
+    - segment.terminal_state_gate.target_ned_m
+    - segment.touchdown_settle_disarm.pad_ned_m
+    - segment.waypoint_translation.target_ned_m
+    - velocity.body
+    - velocity.inertial
+    - velocity.local
+    - wrench.force.command
+    - wrench.moment.command
+  finite_set:
+    - control.realization
+    - control.wrench.status
+    - execution.status
+    - initialization.atmospheric_release.area_policy
+    - phase.mode
+    - segment.coast_terminal_state.terminal_kind
+    - segment.fly_by_turn.turn_direction
+    - segment.impact_witness.terminal_kind
+    - segment.powered_climb.cutoff_condition
+  periodic_degrees:
+    - flight.heading
+    - initialization.air_launch_release.heading_deg
+    - initialization.airborne_hover.heading_deg
+    - initialization.airborne_trim.heading_deg
+    - initialization.grounded_idle.heading_deg
+    - initialization.high_altitude_release.heading_deg
+    - initialization.pad_launch.initial_heading_deg
+    - initialization.pad_launch.longitude_deg
+    - initialization.staged_booster_launch.launch_azimuth_deg
+    - initialization.source_booster_launch.launch_azimuth_deg
+    - segment.atmospheric_handoff.target_heading_deg
+    - segment.energy_handoff.target_heading_deg
+    - segment.hover_dwell.target_heading_deg
+    - segment.terminal_state_gate.target_heading_deg
+    - segment.yaw_scan.target_heading_deg
+  periodic_radians:
+    - attitude.yaw.command
+  positive_half_line:
+    - aero.dynamic_pressure
+    - execution.time
+    - initialization.air_launch_release.altitude_m
+    - initialization.air_launch_release.mass_kg
+    - initialization.air_launch_release.speed_m_s
+    - initialization.airborne_hover.altitude_m
+    - initialization.airborne_trim.altitude_m
+    - initialization.airborne_trim.mach
+    - initialization.airborne_trim.mass_kg
+    - initialization.airborne_trim.speed_m_s
+    - initialization.atmospheric_release.altitude_m
+    - initialization.atmospheric_release.speed_m_s
+    - initialization.grounded_idle.mass_kg
+    - initialization.high_altitude_release.altitude_m
+    - initialization.high_altitude_release.mach
+    - initialization.high_altitude_release.mass_kg
+    - initialization.pad_launch.initial_mass_kg
+    - initialization.source_booster_launch.initial_mass_kg
+    - initialization.source_booster_launch.initial_speed_m_s
+    - initialization.staged_booster_launch.initial_altitude_m
+    - initialization.staged_booster_launch.initial_mass_kg
+    - initialization.staged_booster_launch.initial_speed_m_s
+    - propulsion.output.thrust.aggregate
+    - resources.booster.propellant.consumed
+    - resources.mass.total
+    - segment.atmospheric_descent.impact_plane_altitude_m
+    - segment.atmospheric_handoff.target_altitude_m
+    - segment.atmospheric_handoff.target_speed_m_s
+    - segment.booster_coast_release.release_time_s
+    - segment.booster_powered.cutoff_time_s
+    - segment.climb_level_gate.climb_rate_m_s
+    - segment.climb_level_gate.corridor_m
+    - segment.climb_level_gate.target_altitude_m
+    - segment.descent_level_gate.descent_rate_m_s
+    - segment.descent_level_gate.target_altitude_m
+    - segment.energy_climb.load_factor_limit
+    - segment.energy_climb.target_altitude_m
+    - segment.energy_climb.target_mach
+    - segment.energy_handoff.target_altitude_m
+    - segment.energy_recovery_gate.target_altitude_m
+    - segment.energy_recovery_gate.target_mach
+    - segment.fly_by_turn.turn_radius_m
+    - segment.hover_dwell.dwell_s
+    - segment.ignition_ascent.max_dynamic_pressure_pa
+    - segment.passive_coast.duration_s
+    - segment.powered_climb.target_altitude_m
+    - segment.rotor_spool_takeoff.climb_rate_m_s
+    - segment.rotor_spool_takeoff.target_altitude_m
+    - segment.separation.clearance_time_s
+    - segment.stage_separation.separation_delay_s
+    - segment.source_booster_release.release_time_s
+    - segment.source_ground_contact.horizon_s
+    - segment.source_scheduled_bank.duration_s
+    - segment.terminal_state_gate.target_altitude_m
+    - segment.terminal_state_gate.target_speed_m_s
+    - segment.touchdown_settle_disarm.maximum_sink_rate_m_s
+    - segment.touchdown_settle_disarm.settle_s
+    - segment.trim_capture.duration_s
+    - segment.trim_hold.duration_s
+    - segment.unpowered_glide_handoff.horizon_s
+    - segment.waypoint_translation.dwell_s
+    - segment.waypoint_translation.maximum_speed_m_s
+    - segment.yaw_scan.yaw_rate_limit_deg_s
+    - velocity.speed
+  quaternion_so3:
+    - attitude.quaternion
+    - initialization.atmospheric_release.quaternion_wxyz
+  rotation_euler:
+    - attitude.euler
+  unit_interval:
+    - propulsion.command.fraction
+    - resources.battery.fraction_remaining

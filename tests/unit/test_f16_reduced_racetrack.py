@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 import numpy as np
@@ -9,8 +10,10 @@ import numpy as np
 from taoryx.racetrack_template import load_racetrack_template_catalog
 from taoryx.trajectory import (
     F16AttitudeResponsePseudo6DOFModel,
+    F16GuidanceOverride,
     F16PointMass3DOFModel,
     F16ReducedRacetrackRunner,
+    F16ReducedRacetrackStepper,
 )
 from taoryx.trajectory.pseudo6dof_profiles import load_pseudo6dof_catalog
 from tools.validate_f16_reductions import _build_case
@@ -98,4 +101,59 @@ def test_f16_pseudo6dof_can_use_shared_catalog_response_law() -> None:
 
     assert run.numerical_valid is True
     assert {row["response_profile_id"] for row in run.rows} == {profile.id}
+    ####
+
+
+def test_f16_stepper_owns_committed_state_and_matches_point_mass_batch_boundaries() -> None:
+    source, trim, trim_pitch_rad = _build_case()
+    route = load_racetrack_template_catalog(ROOT / "verification/racetrack_templates.yaml").get("f16-s119-point-mass")
+    runner = F16ReducedRacetrackRunner(
+        F16PointMass3DOFModel(source, trim, trim_pitch_rad),
+        trim,
+        route,
+        "point_mass_3dof",
+        dt_s=2.0,
+    )
+    batch_rows = runner.run(duration_s=4.0).rows
+    stepper = F16ReducedRacetrackStepper(runner)
+    stepper_rows = stepper.step(4.0)
+
+    assert len(batch_rows) >= len(stepper_rows)
+    assert math.isclose(stepper.state.time_s, 4.0, abs_tol=1.0e-12)
+    assert stepper.state.numerical_valid is True
+    for batch, stepped in zip(batch_rows, stepper_rows):
+        for channel in ("time_s", "north_m", "east_m", "altitude_m", "speed_m_s"):
+            assert math.isclose(float(batch[channel]), float(stepped[channel]), abs_tol=1.0e-12)
+    ####
+
+
+def test_f16_pseudo_stepper_applies_held_guidance_without_surface_claim() -> None:
+    source, trim, trim_pitch_rad = _build_case()
+    linearization = source.linearize_local(
+        trim.state,
+        trim.controls,
+        trim_pitch_rad=trim_pitch_rad,
+        altitude_m=0.0,
+        state_step=1.0e-5,
+        control_step=1.0e-5,
+    )
+    route = load_racetrack_template_catalog(ROOT / "verification/racetrack_templates.yaml").get("f16-s119-pseudo-6dof")
+    stepper = F16ReducedRacetrackStepper(
+        F16ReducedRacetrackRunner(
+            F16AttitudeResponsePseudo6DOFModel(source, trim, linearization, trim_pitch_rad),
+            trim,
+            route,
+            "pseudo_6dof_kinematic_bridge",
+            dt_s=2.0,
+        )
+    )
+
+    rows = stepper.step(4.0, F16GuidanceOverride(heading_rad=0.0, bank_angle_rad=0.15))
+    committed = stepper.current_row(F16GuidanceOverride(heading_rad=0.0, bank_angle_rad=0.15))
+
+    assert len(rows) == 2
+    assert float(committed["route_heading_command_deg"]) == 0.0
+    assert float(committed["route_bank_achieved_deg"]) != 0.0
+    assert committed["allocation_status"] == "reduced_response_law"
+    assert stepper.state.numerical_valid is True
     ####

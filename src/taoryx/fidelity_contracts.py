@@ -9,7 +9,7 @@ the advertised realization tiers.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Literal, cast
+from typing import Literal
 
 FidelityTier = Literal[
     "point_mass_3dof",
@@ -46,9 +46,7 @@ LEGACY_FIDELITY_ORDER: tuple[str, ...] = (
     "pseudo_6dof",
     "rigid_body_6dof",
 )
-FIDELITY_TIER_RANK: Mapping[FidelityTier, int] = {
-    tier: index for index, tier in enumerate(CANONICAL_FIDELITY_TIERS)
-}
+FIDELITY_TIER_RANK: Mapping[FidelityTier, int] = {tier: index for index, tier in enumerate(CANONICAL_FIDELITY_TIERS)}
 RUNTIME_FIDELITY_BY_TIER: Mapping[FidelityTier, RuntimeFidelity] = {
     "point_mass_3dof": "point_mass_3dof",
     "pseudo_6dof": "pseudo_6dof",
@@ -91,17 +89,14 @@ def canonicalize_fidelity(
     """
 
     if value in CANONICAL_FIDELITY_TIERS:
-        return cast(FidelityTier, value)
+        return value
     if value != "rigid_body_6dof":
         raise ValueError(f"unknown fidelity tier: {value!r}")
     if control_realization in {"direct_wrench", "direct_wrench_bridge"}:
         return "rigid_body_6dof_direct_wrench"
     if control_realization in {"surface_allocated", "constrained_effector_allocation", "nonlinear_effector_validation"}:
         return "rigid_body_6dof_surface_allocated"
-    raise ValueError(
-        "legacy 'rigid_body_6dof' is ambiguous; declare control_realization "
-        "as direct_wrench or surface_allocated"
-    )
+    raise ValueError("legacy 'rigid_body_6dof' is ambiguous; declare control_realization as direct_wrench or surface_allocated")
     ####
 
 

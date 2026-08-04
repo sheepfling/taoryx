@@ -1,0 +1,64 @@
+schema: taoryx.vehicle-execution-parity-witnesses/v1alpha1
+version: 1
+description: >-
+  One deterministic, short semantic action trace for every exact registered
+  batch/episode parity pair. These are kernel/status parity witnesses, not
+  mission trajectories or physical-effector qualification cases.
+witnesses:
+  - id: x8-3dof-native-bridge
+    composition: examples/vehicle_composition/x8_racetrack_capability_3dof_compose.yaml
+    authority_profile_id: native_control_bridge
+    actions:
+      - {values: {propulsion.command.fraction: 0.60}, duration_s: 0.10}
+  - id: x8-pseudo6dof-native-bridge
+    composition: examples/vehicle_composition/x8_racetrack_capability_compose.yaml
+    authority_profile_id: native_control_bridge
+    actions:
+      - {values: {propulsion.command.fraction: 0.50}, duration_s: 0.10}
+  - id: b747-3dof-native-bridge
+    composition: examples/vehicle_composition/b747_racetrack_capability_3dof_compose.yaml
+    authority_profile_id: native_control_bridge
+    actions:
+      - {values: {propulsion.command.fraction: 0.55}, duration_s: 0.10}
+  - id: b747-pseudo6dof-native-bridge
+    composition: examples/vehicle_composition/b747_racetrack_capability_pseudo6dof_compose.yaml
+    authority_profile_id: native_control_bridge
+    actions:
+      - {values: {propulsion.command.fraction: 0.50}, duration_s: 0.10}
+  - id: hummingbird-pseudo6dof-body-motion
+    composition: examples/vehicle_composition/hummingbird_hover_yaw_episode_pseudo6dof_compose.yaml
+    authority_profile_id: body_motion_response
+    seed: 7
+    integration_step_s: 0.02
+    actions:
+      - {values: {attitude.yaw.command: 0.25, propulsion.command.fraction: 0.75}, duration_s: 0.06}
+  - id: x15-local-direct-wrench
+    composition: examples/vehicle_composition/x15_local_direct_wrench_screen_compose.yaml
+    authority_profile_id: direct_wrench
+    actions:
+      - {values: {wrench.force.command: [1000.0, 0.0, 0.0], wrench.moment.command: [0.0, 50.0, 0.0]}, duration_s: 0.004}
+  - id: hl20-local-direct-wrench
+    composition: examples/vehicle_composition/hl20_local_direct_wrench_screen_compose.yaml
+    authority_profile_id: direct_wrench
+    actions:
+      - {values: {wrench.force.command: [1000.0, 0.0, 0.0], wrench.moment.command: [0.0, 50.0, 0.0]}, duration_s: 0.004}
+  - id: a320-3dof-kinematic-guidance
+    composition: examples/vehicle_composition/a320_racetrack_capability_3dof_compose.yaml
+    authority_profile_id: kinematic_guidance
+    actions:
+      - {values: {guidance.heading.command: 0.0, guidance.speed.command: 230.0}, duration_s: 0.40}
+  - id: a320-pseudo6dof-kinematic-guidance
+    composition: examples/vehicle_composition/a320_racetrack_capability_pseudo6dof_compose.yaml
+    authority_profile_id: kinematic_guidance
+    actions:
+      - {values: {guidance.heading.command: 0.0, guidance.speed.command: 230.0}, duration_s: 0.40}
+  - id: f16-3dof-kinematic-guidance
+    composition: examples/vehicle_composition/f16_racetrack_capability_3dof_compose.yaml
+    authority_profile_id: kinematic_guidance
+    actions:
+      - {values: {guidance.heading.command: 0.0, guidance.speed.command: 230.0}, duration_s: 0.40}
+  - id: f16-pseudo6dof-kinematic-guidance
+    composition: examples/vehicle_composition/f16_racetrack_capability_pseudo6dof_compose.yaml
+    authority_profile_id: kinematic_guidance
+    actions:
+      - {values: {guidance.heading.command: 0.0, guidance.speed.command: 230.0}, duration_s: 0.40}

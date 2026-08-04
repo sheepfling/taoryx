@@ -11,7 +11,9 @@ bindings:
     fidelity: point_mass_3dof
     operation: batch
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: language_backed_powered_fixed_wing.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Materialize the exact source-table route and execute it through the language runtime.
     claim_boundary: Point-mass source-table trajectory evidence; no attitude or physical-effector claim.
   - family_id: skywalker_x8
@@ -19,7 +21,9 @@ bindings:
     fidelity: pseudo_6dof
     operation: batch
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: language_backed_powered_fixed_wing.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Materialize the named route-lag pseudo-6DOF source-table route and execute it through the language runtime.
     claim_boundary: Named attitude-response bridge; no rigid-body moment or elevon-allocation claim.
   - family_id: skywalker_x8
@@ -27,7 +31,9 @@ bindings:
     fidelity: point_mass_3dof
     operation: episode
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: language_backed_interactive.v1
+    batch_action_trace: not_applicable
     description: Project the language-backed source runtime into an accepted-truth interactive episode.
     claim_boundary: External controls remain the declared runtime controls and do not promote the point-mass evidence tier.
   - family_id: skywalker_x8
@@ -35,7 +41,9 @@ bindings:
     fidelity: pseudo_6dof
     operation: episode
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: language_backed_interactive.v1
+    batch_action_trace: not_applicable
     description: Project the named pseudo-6DOF language runtime into an accepted-truth interactive episode.
     claim_boundary: External controls do not establish physical elevon allocation or moment balance.
 
@@ -44,7 +52,9 @@ bindings:
     fidelity: point_mass_3dof
     operation: batch
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: language_backed_powered_fixed_wing.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Materialize and execute the transport-scaled source-table point-mass racetrack.
     claim_boundary: Transport trajectory evidence only; no physical control-surface claim.
   - family_id: b747
@@ -52,7 +62,9 @@ bindings:
     fidelity: pseudo_6dof
     operation: batch
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: language_backed_powered_fixed_wing.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Materialize and execute the transport-scaled named route-lag racetrack.
     claim_boundary: Named route-lag pseudo response; no B747 surface-allocation or moment claim.
   - family_id: b747
@@ -60,7 +72,9 @@ bindings:
     fidelity: point_mass_3dof
     operation: episode
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: language_backed_interactive.v1
+    batch_action_trace: not_applicable
     description: Project the source-table transport runtime into an accepted-truth interactive episode.
     claim_boundary: Interactive control does not promote trajectory evidence to physical transport control evidence.
   - family_id: b747
@@ -68,7 +82,9 @@ bindings:
     fidelity: pseudo_6dof
     operation: episode
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: language_backed_interactive.v1
+    batch_action_trace: not_applicable
     description: Project the named transport route-lag runtime into an accepted-truth interactive episode.
     claim_boundary: The episode remains a named response-law bridge and does not establish physical effector behavior.
 
@@ -77,7 +93,9 @@ bindings:
     fidelity: point_mass_3dof
     operation: batch
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: reduced_fixed_wing_openap.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Execute the capability-derived racetrack through the declared OpenAP reduced model.
     claim_boundary: Reduced OpenAP trajectory evidence; no physical control-surface or moment claim.
   - family_id: a320_openap_3dof
@@ -85,16 +103,40 @@ bindings:
     fidelity: pseudo_6dof
     operation: batch
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: reduced_fixed_wing_openap.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Execute the named A320 response-law racetrack through the declared OpenAP reduced model.
     claim_boundary: Named pseudo response only; policy diagnostics are not physical surface allocation.
+  - family_id: a320_openap_3dof
+    mission: powered_fixed_wing_racetrack_v1
+    fidelity: point_mass_3dof
+    operation: episode
+    status: runnable
+    execution_mode: closed_loop_controller
+    factory_id: reduced_fixed_wing_a320_episode.v1
+    batch_action_trace: not_applicable
+    description: Step the source-owned A320 point-mass reduced runtime through bounded kinematic guidance intent.
+    claim_boundary: Accepted-truth kinematic-guidance episode only; no physical surface allocation, moment balance, batch/episode parity, or mission qualification claim.
+  - family_id: a320_openap_3dof
+    mission: powered_fixed_wing_racetrack_v1
+    fidelity: pseudo_6dof
+    operation: episode
+    status: runnable
+    execution_mode: closed_loop_controller
+    factory_id: reduced_fixed_wing_a320_episode.v1
+    batch_action_trace: not_applicable
+    description: Step the source-owned A320 route-lag pseudo-6DOF reduced runtime through bounded kinematic guidance intent.
+    claim_boundary: Accepted-truth route-lag pseudo-6DOF episode only; no physical surface allocation, moment balance, batch/episode parity, or mission qualification claim.
 
   - family_id: f16_s119
     mission: powered_fixed_wing_racetrack_v1
     fidelity: point_mass_3dof
     operation: batch
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: reduced_fixed_wing_f16_source.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Execute the capability-derived racetrack through the declared source-reduced F-16 path.
     claim_boundary: Source-reduced trajectory evidence; no direct-wrench or physical-surface promotion.
   - family_id: f16_s119
@@ -102,16 +144,40 @@ bindings:
     fidelity: pseudo_6dof
     operation: batch
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: reduced_fixed_wing_f16_source.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Execute the named source-local F-16 attitude/rate bridge.
     claim_boundary: Named response-law evidence only; no physical F-16 actuator allocation claim.
+  - family_id: f16_s119
+    mission: powered_fixed_wing_racetrack_v1
+    fidelity: point_mass_3dof
+    operation: episode
+    status: runnable
+    execution_mode: closed_loop_controller
+    factory_id: reduced_fixed_wing_f16_episode.v1
+    batch_action_trace: not_applicable
+    description: Step the source-owned F-16 point-mass reduced runtime through bounded kinematic guidance intent.
+    claim_boundary: Accepted-truth kinematic-guidance episode only; no physical surface allocation, moment balance, batch/episode parity, or mission qualification claim.
+  - family_id: f16_s119
+    mission: powered_fixed_wing_racetrack_v1
+    fidelity: pseudo_6dof
+    operation: episode
+    status: runnable
+    execution_mode: closed_loop_controller
+    factory_id: reduced_fixed_wing_f16_episode.v1
+    batch_action_trace: not_applicable
+    description: Step the source-owned F-16 attitude-response pseudo-6DOF runtime through bounded kinematic guidance intent.
+    claim_boundary: Accepted-truth attitude-response episode only; no physical surface allocation, moment balance, batch/episode parity, or mission qualification claim.
 
   - family_id: reference_nesc_two_stage_rocket
     mission: staged_rocket_launch_target_state_v1
     fidelity: point_mass_3dof
     operation: batch
     status: runnable
+    execution_mode: source_history_replay
     factory_id: nesc_source_replay.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Replay the exact source-qualified NESC translation history after source-compatible semantic preflight.
     claim_boundary: Source-history point-mass replay only; no participating rocket plant, guidance, or gimbal-allocation claim.
   - family_id: reference_nesc_two_stage_rocket
@@ -119,7 +185,9 @@ bindings:
     fidelity: pseudo_6dof
     operation: batch
     status: runnable
+    execution_mode: source_history_replay
     factory_id: nesc_source_replay.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Replay the NESC source translation with the declared phase-scheduled attitude-response surrogate.
     claim_boundary: Source translation plus named response-law evidence; no source-exact attitude, gimbal, or control-allocation claim.
 
@@ -128,7 +196,9 @@ bindings:
     fidelity: rigid_body_6dof_direct_wrench
     operation: batch
     status: runnable
+    execution_mode: local_direct_wrench_screen
     factory_id: local_direct_wrench_screen.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Execute the source-local X-15 direct-wrench LQR recovery screen through the public composition path.
     claim_boundary: Local direct-wrench recovery screen only; it is neither an X-15 flight mission nor physical effector allocation.
   - family_id: x15
@@ -136,14 +206,38 @@ bindings:
     fidelity: rigid_body_6dof_direct_wrench
     operation: episode
     status: runnable
+    execution_mode: local_direct_wrench_screen
     factory_id: x15_local_direct_wrench_episode.v1
+    batch_action_trace: not_applicable
     description: Step the source-local X-15 direct-wrench bridge through its declared bounded total-wrench command.
     claim_boundary: Local direct-wrench bridge episode only; it exposes requested-versus-achieved injected wrench, not physical effector allocation or an X-15 flight mission.
+  - family_id: hl20_mod_k
+    mission: hl20_local_direct_wrench_screen_v1
+    fidelity: rigid_body_6dof_direct_wrench
+    operation: batch
+    status: runnable
+    execution_mode: local_direct_wrench_screen
+    factory_id: local_direct_wrench_screen.v1
+    batch_action_trace: emits_committed_interval_trace
+    description: Execute the source-local subsonic HL-20 direct-wrench LQR recovery screen through the public composition path.
+    claim_boundary: Local direct-wrench recovery screen only; it is neither a high-energy HL-20 glide mission nor physical control-surface allocation.
+  - family_id: hl20_mod_k
+    mission: hl20_local_direct_wrench_screen_v1
+    fidelity: rigid_body_6dof_direct_wrench
+    operation: episode
+    status: runnable
+    execution_mode: local_direct_wrench_screen
+    factory_id: local_direct_wrench_episode.v1
+    batch_action_trace: not_applicable
+    description: Step the source-local HL-20 direct-wrench bridge through its declared bounded total-wrench command.
+    claim_boundary: Local direct-wrench bridge episode only; it exposes requested-versus-achieved injected wrench, not physical control-surface allocation or a high-energy glide mission.
   - family_id: x15
     mission: rocket_aircraft_high_energy_v1
     fidelity: rigid_body_6dof_direct_wrench
     operation: batch
     status: planned
+    execution_mode: planned
+    batch_action_trace: planned
     description: Execute release, burn/coast, and atmospheric handoff through the bounded X-15 source direct-wrench bridge.
     claim_boundary: The current local direct-wrench bridge is not yet an end-to-end X-15 mission executor.
     blockers:
@@ -155,7 +249,9 @@ bindings:
     fidelity: point_mass_3dof
     operation: batch
     status: runnable
+    execution_mode: open_loop_witness
     factory_id: x15_staged_reachability.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Execute the source-pinned X-15-scaled booster, coast, release, glide, open-loop handoff, and passive-impact witness through the reduced reachability model.
     claim_boundary: Local-frame X-15-scaled reduced witness only; it preserves declared staging anchors but is not the synthetic California-to-Hawaii vehicle, a native X-15 rigid-body mission, or a controlled terminal handoff.
   - family_id: x15
@@ -163,14 +259,38 @@ bindings:
     fidelity: pseudo_6dof
     operation: batch
     status: runnable
+    execution_mode: open_loop_witness
     factory_id: x15_staged_reachability.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Execute the source-pinned X-15-scaled staged witness with the declared named attitude-response bridge.
     claim_boundary: Local-frame X-15-scaled response-law witness only; it does not establish source-derived moments, physical effectors, or a controlled terminal handoff.
+  - family_id: hl20_mod_k
+    mission: hl20_source_booster_release_replay_v1
+    fidelity: point_mass_3dof
+    operation: batch
+    status: runnable
+    execution_mode: source_scheduled_replay
+    factory_id: hl20_source_booster_release_replay.v1
+    batch_action_trace: emits_committed_interval_trace
+    description: Execute the exact source-aerodynamic HL-20 synthetic-booster release and fixed bank-schedule witness through the point-mass tier.
+    claim_boundary: Source-scheduled aerodynamic release witness only; it does not establish generic high-altitude glide guidance, trim, or physical effector allocation.
+  - family_id: hl20_mod_k
+    mission: hl20_source_booster_release_replay_v1
+    fidelity: pseudo_6dof
+    operation: batch
+    status: runnable
+    execution_mode: source_scheduled_replay
+    factory_id: hl20_source_booster_release_replay.v1
+    batch_action_trace: emits_committed_interval_trace
+    description: Execute the exact source-aerodynamic HL-20 synthetic-booster release and fixed bank-schedule witness with its named attitude-response tier.
+    claim_boundary: Source-scheduled response-law witness only; it does not establish a user-driven guidance controller, source-derived moments, or physical effector allocation.
   - family_id: hl20_mod_k
     mission: lifting_body_glide_energy_management_v1
     fidelity: rigid_body_6dof_direct_wrench
     operation: batch
     status: planned
+    execution_mode: planned
+    batch_action_trace: planned
     description: Execute a release-to-energy-handoff mission through the local HL-20 source direct-wrench bridge.
     claim_boundary: The current local source load bridge does not provide a complete release, gravity, navigation, or glide mission plant.
     blockers:
@@ -183,6 +303,8 @@ bindings:
     fidelity: rigid_body_6dof_surface_allocated
     operation: batch
     status: planned
+    execution_mode: planned
+    batch_action_trace: planned
     description: Execute the HL-20 release-to-energy-handoff mission through source-surface allocation.
     claim_boundary: Current source-surface evidence is local allocation/effectivity only, not full lifting-body mission control.
     blockers:
@@ -194,7 +316,9 @@ bindings:
     fidelity: point_mass_3dof
     operation: batch
     status: runnable
+    execution_mode: passive_uncontrolled
     factory_id: passive_tumbling_direct_release.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Execute the declared direct passive-cylinder release with orientation-averaged projected area.
     claim_boundary: The passive 3DOF reduction cannot establish moment-driven rotational behavior or expose a control path.
   - family_id: tumbling_body
@@ -202,7 +326,9 @@ bindings:
     fidelity: pseudo_6dof
     operation: batch
     status: runnable
+    execution_mode: passive_uncontrolled
     factory_id: passive_tumbling_direct_release.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Execute the declared direct passive-cylinder release using native rigid-body passive-tumble reuse.
     claim_boundary: Passive pseudo-6DOF has no control or allocation path; it reuses real rigid-body evidence explicitly.
 
@@ -211,7 +337,9 @@ bindings:
     fidelity: pseudo_6dof
     operation: episode
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: hummingbird_aggregate_thrust_episode.v1
+    batch_action_trace: not_applicable
     description: Project the bounded aggregate-thrust Hummingbird response model into an accepted-truth episode.
     claim_boundary: Aggregate thrust-vector response only; no individual motor allocation, rotor inflow, or moment-balance claim.
   - family_id: hummingbird
@@ -219,6 +347,8 @@ bindings:
     fidelity: pseudo_6dof
     operation: batch
     status: runnable
+    execution_mode: closed_loop_controller
     factory_id: hummingbird_aggregate_thrust_pseudo_batch.v1
+    batch_action_trace: emits_committed_interval_trace
     description: Translate the declared hover/yaw/translation/contact composition into a source-owned pseudo-6DOF nominal run.
     claim_boundary: Aggregate thrust-vector response only; no individual motor allocation, rotor inflow, or moment-balance claim.

@@ -19,7 +19,14 @@ from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import ProblemDocument, RuntimeBlock, TableDocument, TitleBlock
 from taoryx.modes import Kinematic6DofState, Quaternion
 
-from .common import RuntimeProblem, RuntimeState, TransitionTruthPair, TransitionTruthSnapshot
+from .common import (
+    ControlEvaluationRecord,
+    ControlIntervalRecord,
+    RuntimeProblem,
+    RuntimeState,
+    TransitionTruthPair,
+    TransitionTruthSnapshot,
+)
 from .lowering import LoweredDocument, lower_problem_document, problem_unit_settings
 from .table_binding import bind_runtime_tables
 
@@ -424,6 +431,8 @@ class LoadedProgram:
                         "fired_events": sorted(vehicle.fired_events),
                         "control_values": _json_safe(vehicle.control_values),
                         "control_values_time_s": vehicle.control_values_time_s,
+                        "control_evaluation_history": [record.as_dict() for record in vehicle.control_evaluation_history],
+                        "control_interval_history": [record.as_dict() for record in vehicle.control_interval_history],
                         "parameters": _json_safe(vehicle.parameters),
                         "step_size": vehicle.step_size,
                         "integrator": vehicle.integrator,
@@ -507,6 +516,16 @@ class LoadedProgram:
             vehicle.fired_events = set(vehicle_payload.get("fired_events", ()))
             vehicle.control_values = {str(key): float(value) for key, value in vehicle_payload.get("control_values", {}).items()}
             vehicle.control_values_time_s = float(vehicle_payload.get("control_values_time_s", vehicle.state.time))
+            vehicle.control_evaluation_history = [
+                ControlEvaluationRecord.from_dict(item)
+                for item in vehicle_payload.get("control_evaluation_history", ())
+                if isinstance(item, Mapping)
+            ]
+            vehicle.control_interval_history = [
+                ControlIntervalRecord.from_dict(item)
+                for item in vehicle_payload.get("control_interval_history", ())
+                if isinstance(item, Mapping)
+            ]
             vehicle.parameters = {str(key): float(value) for key, value in vehicle_payload.get("parameters", {}).items()}
             vehicle.step_size = float(vehicle_payload["step_size"])
             vehicle.integrator = str(vehicle_payload["integrator"])

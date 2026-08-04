@@ -1229,6 +1229,19 @@ def _lower_case(
             length_scale_to_m=0.3048 if point_mass_si_contract else 1.0,
         )
         truth_provider = KinematicTruthProvider(base_truth_provider) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else base_truth_provider
+
+        def route_control_resolver(
+            state: RuntimeState,
+            route: Mapping[str, str] = route_attributes,
+            target: Mapping[str, str] = target_attributes,
+        ) -> dict[str, float]:
+            """Resolve native route references only at a committed boundary."""
+
+            if route.get("mode", "").casefold() not in {"great-circle", "rectangle", "racetrack"}:
+                return {}
+            return _runtime_point_mass_route_commands(route, target, state.named)
+            ####
+
         vehicle = RuntimeVehicle(
             str(trajectory.number),
             initial_state,
@@ -1247,6 +1260,7 @@ def _lower_case(
             definition_call_handler=surface_call_handler,
             parameters=parameters,
             control_values=control_values,
+            committed_control_resolver=route_control_resolver,
             table_evaluators=_table_evaluators(tables),
             environment_evaluator=vehicle_environment,
             event_handlers=event_handlers,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 
 import pytest
 
@@ -94,6 +95,82 @@ def test_load_evaluations_preserve_state_and_control_activation_timing() -> None
     assert all(record.achieved_control_time_s == pytest.approx(0.1) for record in second_records)
     assert all(record.achieved_control_time_s <= record.state_time_s for record in second_records)
 ####
+
+
+def test_accepted_control_interval_provenance_separates_held_commands_from_solver_stages() -> None:
+    """A normal externally held command is retained without a promotion claim."""
+
+    session = InteractiveSession(_problem(), _controls())
+
+    session.step(0.1, {"throttle": 0.6, "fin_pitch": -0.4})
+
+    vehicle = session.problem.vehicles["player"]
+    assert len(vehicle.control_interval_history) == 1
+    interval = vehicle.control_interval_history[0]
+    assert interval.interval_start_time_s == pytest.approx(0.0)
+    assert interval.committed_truth_time_s == pytest.approx(0.1)
+    assert dict(interval.controls_at_interval_start) == {"fin_pitch": -0.2, "throttle": 0.6}
+    assert interval.solver_stage_control_mutation_detected is False
+    assert {record.phase for record in vehicle.control_evaluation_history} == {"solver_stage", "committed_truth"}
+    ####
+
+
+def test_control_interval_provenance_marks_native_solver_stage_mutation_ineligible() -> None:
+    """A stage-mutating native controller cannot masquerade as sample-and-hold."""
+
+    def mutate_controls(values: Mapping[str, float]) -> dict[str, float]:
+        return {"throttle": min(1.0, values["time"] + 0.1)}
+
+    vehicle = RuntimeVehicle(
+        "mutating-player",
+        RuntimeState(0.0, (0.0,), value_names=("downrange",)),
+        derivative=lambda state: (state.named.get("throttle", 0.0),),
+        environment_evaluator=mutate_controls,
+        step_size=0.1,
+    )
+    session = InteractiveSession(RuntimeProblem({vehicle.name: vehicle}), (ControlSpec("throttle", lower=0.0, upper=1.0),))
+
+    session.step(0.1, {"throttle": 0.8})
+
+    interval = vehicle.control_interval_history[0]
+    assert dict(interval.controls_at_interval_start) == {"throttle": 0.8}
+    assert interval.solver_stage_control_mutation_detected is True
+    assert any(record.phase == "solver_stage" and dict(record.controls)["throttle"] != 0.8 for record in vehicle.control_evaluation_history)
+    ####
+
+
+def test_committed_control_resolver_holds_a_state_derived_command_through_solver_stages() -> None:
+    """A state-derived command is resolved once, not re-evaluated by RK stages."""
+
+    vehicle = RuntimeVehicle(
+        "held-guidance",
+        RuntimeState(0.0, (0.0,), value_names=("downrange",)),
+        derivative=lambda state: (state.named["throttle"],),
+        # This evaluator deliberately proposes a stage-dependent throttle.
+        # The resolved truth-boundary command must retain authority instead.
+        environment_evaluator=lambda values: {"throttle": values["time"] + 0.75},
+        committed_control_resolver=lambda state: {"throttle": 0.25 + state.values[0]},
+        step_size=0.1,
+    )
+    session = InteractiveSession(RuntimeProblem({vehicle.name: vehicle}))
+
+    session.step(0.1)
+
+    interval = vehicle.control_interval_history[-1]
+    assert dict(interval.controls_at_interval_start) == {"throttle": pytest.approx(0.25)}
+    assert interval.solver_stage_control_mutation_detected is False
+    assert vehicle.state.values == pytest.approx((0.025,))
+    assert all(
+        dict(record.controls)["throttle"] == pytest.approx(0.25)
+        for record in vehicle.control_evaluation_history
+        if record.phase == "solver_stage"
+    )
+
+    session.step(0.1)
+
+    assert dict(vehicle.control_interval_history[-1].controls_at_interval_start) == {"throttle": pytest.approx(0.275)}
+    assert vehicle.state.values == pytest.approx((0.0525,))
+    ####
 
 
 def test_adaptive_interactive_step_reaches_the_requested_accepted_truth_boundary() -> None:
@@ -263,6 +340,8 @@ def test_interactive_checkpoint_restores_command_history_and_continues(tmp_path)
     assert restored.time == pytest.approx(0.1)
     assert restored.command_history == first.command_history
     assert restored.problem.vehicles["player"].state.values == pytest.approx(first.problem.vehicles["player"].state.values)
+    assert restored.problem.vehicles["player"].control_interval_history == first.problem.vehicles["player"].control_interval_history
+    assert restored.problem.vehicles["player"].control_evaluation_history == first.problem.vehicles["player"].control_evaluation_history
 
     first.resume()
     restored.resume()

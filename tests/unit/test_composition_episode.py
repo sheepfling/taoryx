@@ -6,7 +6,15 @@ from pathlib import Path
 
 import pytest
 
-from taoryx.composition_episode import ActionFrame, open_vehicle_composition_episode
+from taoryx.composition_episode import (
+    ActionFrame,
+    EpisodeChannel,
+    HummingbirdPseudoCompositionEpisode,
+    ReducedFixedWingCompositionEpisode,
+    open_vehicle_composition_episode,
+    validate_vehicle_composition_episode_contract,
+)
+from taoryx.value_space import finite_set, validate_value_space_value
 from taoryx.vehicle_composition import VehicleCompositionRequest, compile_vehicle_composition, load_vehicle_composition_request
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -25,6 +33,21 @@ def test_x8_composition_episode_reuses_the_language_backed_interactive_kernel(tm
         "collective-elevon-deg",
         "differential-elevon-deg",
     }
+    assert all(channel.value_space is not None for channel in episode.action_schema)
+    action_spaces = {channel.name: channel.value_space for channel in episode.action_schema}
+    assert action_spaces["throttle"] is not None
+    assert action_spaces["throttle"].topology == "unit_interval"
+    assert action_spaces["collective-elevon-deg"] is not None
+    assert action_spaces["collective-elevon-deg"].topology == "bounded_interval"
+    assert all(channel.value_space is not None for channel in episode.observation_schema)
+    observations = {channel.name: channel.value_space for channel in episode.observation_schema}
+    assert observations["1.psi"] is not None
+    assert observations["1.psi"].topology == "periodic_circle"
+    assert observations["1.psi"].period == pytest.approx(360.0)
+    assert observations["1.vel"] is not None
+    assert observations["1.vel"].topology == "positive_half_line"
+    assert observations["1.throttle"] is not None
+    assert observations["1.throttle"].topology == "unit_interval"
     assert episode.observe().time_s == pytest.approx(0.0)
     first = episode.step({"throttle": 0.6}, 0.1)
 
@@ -36,6 +59,63 @@ def test_x8_composition_episode_reuses_the_language_backed_interactive_kernel(tm
     assert episode.observe().time_s == pytest.approx(0.0)
     restored = episode.load_checkpoint(checkpoint)
     assert restored.time_s == pytest.approx(0.1)
+    ####
+
+
+@pytest.mark.parametrize(
+    "composition_name",
+    (
+        "x8_racetrack_capability_3dof_compose.yaml",
+        "hummingbird_hover_yaw_sensor_episode_pseudo6dof_compose.yaml",
+        "a320_racetrack_capability_pseudo6dof_compose.yaml",
+        "f16_racetrack_capability_pseudo6dof_compose.yaml",
+        "x15_local_direct_wrench_screen_compose.yaml",
+    ),
+)
+def test_runnable_episode_exposes_only_contract_bound_native_channels(composition_name: str) -> None:
+    """Legacy native schemas must be a complete projection of the semantic API."""
+
+    episode = open_vehicle_composition_episode(_composition(composition_name))
+    report = validate_vehicle_composition_episode_contract(episode)
+
+    assert report["status"] == "pass", report["findings"]
+    graph = report["mission_graph"]
+    assert graph["status"] == "bound"
+    assert graph["execution_observation_status"] == "not_emitted_by_episode"
+    assert graph["instance_ids"]
+    assert graph["execution_contract"]["status"] in {
+        "template_success_sequence_only",
+        "family_extension_declared",
+    }
+    assert report["semantic_action_channel_count"] == report["native_action_channel_count"]
+    assert report["available_observation_profiles"]
+    episode.close()
+    ####
+
+
+def test_episode_contract_gate_rejects_an_unbound_native_action(monkeypatch: pytest.MonkeyPatch) -> None:
+    """An adapter cannot expose a legacy control that bypasses its semantic authority."""
+
+    original = HummingbirdPseudoCompositionEpisode.action_schema
+
+    def action_schema_with_bypass(self: HummingbirdPseudoCompositionEpisode) -> tuple[EpisodeChannel, ...]:
+        return (*original.__get__(self, HummingbirdPseudoCompositionEpisode), EpisodeChannel("hidden_native_bypass", None, description="invalid test bypass"))
+        ####
+
+    monkeypatch.setattr(
+        HummingbirdPseudoCompositionEpisode,
+        "action_schema",
+        property(action_schema_with_bypass),
+    )
+    episode = open_vehicle_composition_episode(
+        _composition("hummingbird_hover_yaw_sensor_episode_pseudo6dof_compose.yaml")
+    )
+
+    report = validate_vehicle_composition_episode_contract(episode)
+
+    assert report["status"] == "fail"
+    assert "hidden_native_bypass" in str(report["findings"])
+    episode.close()
     ####
 
 
@@ -159,6 +239,14 @@ def test_language_backed_reset_rebuilds_the_declared_sensor_at_the_requested_see
 def test_hummingbird_episode_maps_semantic_controls_and_status_without_motor_promotion() -> None:
     episode = open_vehicle_composition_episode(_composition("hummingbird_hover_yaw_sensor_episode_pseudo6dof_compose.yaml"))
     contract = episode.interface_contract
+    action_spaces = {channel.name: channel.value_space for channel in episode.action_schema}
+    assert action_spaces["yaw_rad"] is not None
+    assert action_spaces["yaw_rad"].topology == "periodic_circle"
+    assert action_spaces["thrust_ratio"] is not None
+    assert action_spaces["thrust_ratio"].topology == "unit_interval"
+    observation_spaces = {channel.name: channel.value_space for channel in episode.observation_schema}
+    assert observation_spaces["aggregate_thrust_n"] is not None
+    assert observation_spaces["aggregate_thrust_n"].topology == "positive_half_line"
     frame = ActionFrame(
         contract.id,
         contract.fingerprint,
@@ -170,12 +258,26 @@ def test_hummingbird_episode_maps_semantic_controls_and_status_without_motor_pro
         0.1,
     )
 
-    result = episode.step_frame(frame)
+    with pytest.raises(ValueError, match="exceeds its declared upper bound"):
+        episode.step_frame(frame)
+
+    result = episode.step_frame(
+        ActionFrame(
+            contract.id,
+            contract.fingerprint,
+            "body_motion_response",
+            {
+                "attitude.yaw.command": 0.5,
+                "propulsion.command.fraction": 0.8,
+            },
+            0.1,
+        )
+    )
 
     assert result.applied_action["yaw_rad"] == pytest.approx(0.5)
-    assert result.applied_action["thrust_ratio"] == pytest.approx(1.0)
+    assert result.applied_action["thrust_ratio"] == pytest.approx(0.8)
     assert result.applied_semantic_action is not None
-    assert result.applied_semantic_action["propulsion.command.fraction"] == pytest.approx(1.0)
+    assert result.applied_semantic_action["propulsion.command.fraction"] == pytest.approx(0.8)
     assert result.status_frame is not None
     assert result.status_frame.values["propulsion.output.thrust.aggregate"] > 0.0
     assert result.status_frame.values["control.physical_motor_allocation"] is False
@@ -191,6 +293,12 @@ def test_x15_local_direct_wrench_episode_exposes_bounded_bridge_not_effectors(tm
 
     episode = open_vehicle_composition_episode(_composition("x15_local_direct_wrench_screen_compose.yaml"))
     contract = episode.interface_contract
+    action_spaces = {channel.name: channel.value_space for channel in episode.action_schema}
+    assert action_spaces["force_body_n"] is not None
+    assert action_spaces["force_body_n"].topology == "euclidean"
+    observation_spaces = {channel.name: channel.value_space for channel in episode.observation_schema}
+    assert observation_spaces["wrench_saturated"] is not None
+    assert observation_spaces["wrench_saturated"].topology == "boolean"
 
     assert contract.authority_profile("direct_wrench").availability == "available"
     assert episode.claim_boundary.startswith("This episode applies an explicit bounded direct wrench")
@@ -228,9 +336,152 @@ def test_x15_local_direct_wrench_episode_exposes_bounded_bridge_not_effectors(tm
     ####
 
 
-def test_episode_creation_fails_closed_without_a_registered_adapter() -> None:
-    composition = _composition("a320_racetrack_capability_3dof_compose.yaml")
+def test_hl20_local_direct_wrench_episode_reuses_the_bridge_without_promoting_the_glide_mission() -> None:
+    episode = open_vehicle_composition_episode(_composition("hl20_local_direct_wrench_screen_compose.yaml"))
+    contract = episode.interface_contract
 
-    with pytest.raises(ValueError, match="no composition episode adapter"):
-        open_vehicle_composition_episode(composition)
+    assert contract.authority_profile("direct_wrench").availability == "available"
+    result = episode.step_frame(
+        ActionFrame(
+            contract.id,
+            contract.fingerprint,
+            "direct_wrench",
+            {
+                "wrench.force.command": [0.0, 0.0, 0.0],
+                "wrench.moment.command": [0.0, 0.0, 0.0],
+            },
+            0.004,
+        )
+    )
+    assert result.status_frame is not None
+    assert result.status_frame.values["control.realization"] == "direct_wrench_screen"
+    assert result.status_frame.values["control.physical_effector_allocation"] is False
+    assert "not physical effector allocation" in episode.claim_boundary
+    episode.close()
+    ####
+
+
+def test_a320_reduced_episode_steps_the_declared_kinematic_guidance_state(tmp_path: Path) -> None:
+    composition = _composition("a320_racetrack_capability_pseudo6dof_compose.yaml")
+    episode = open_vehicle_composition_episode(composition)
+    contract = episode.interface_contract
+
+    assert {channel.name for channel in episode.action_schema} == {
+        "speed_m_s",
+        "flight_path_angle_deg",
+        "heading_deg",
+        "bank_angle_deg",
+    }
+    frame = ActionFrame(
+        contract.id,
+        contract.fingerprint,
+        "kinematic_guidance",
+        {
+            "guidance.speed.command": 230.0,
+            "guidance.flight_path_angle.command": 2.0,
+            "guidance.heading.command": 0.0,
+            "guidance.bank.command": 8.0,
+        },
+        1.0,
+    )
+    result = episode.step_frame(frame)
+
+    assert result.time_end_s == pytest.approx(1.0)
+    assert result.applied_semantic_action == frame.values
+    assert result.status_frame is not None
+    assert result.status_frame.values["position.east"] > 0.0
+    assert result.status_frame.values["attitude.euler"][0] != 0.0
+    assert result.status_frame.values["control.realization"] == "response_law"
+
+    checkpoint = episode.save_checkpoint(tmp_path / "a320-reduced.checkpoint.json")
+    expected = episode.observe().as_dict()
+    episode.reset()
+    episode.load_checkpoint(checkpoint)
+    assert episode.observe().as_dict() == expected
+    ####
+
+
+def test_f16_reduced_episode_uses_the_shared_kinematic_guidance_contract(tmp_path: Path) -> None:
+    composition = _composition("f16_racetrack_capability_pseudo6dof_compose.yaml")
+    episode = open_vehicle_composition_episode(composition)
+    contract = episode.interface_contract
+
+    assert isinstance(episode, ReducedFixedWingCompositionEpisode)
+
+    frame = ActionFrame(
+        contract.id,
+        contract.fingerprint,
+        "kinematic_guidance",
+        {
+            "guidance.speed.command": 155.0,
+            "guidance.flight_path_angle.command": 2.0,
+            "guidance.heading.command": 0.0,
+            "guidance.bank.command": 8.0,
+        },
+        1.0,
+    )
+    result = episode.step_frame(frame)
+
+    assert result.time_end_s == pytest.approx(1.0)
+    assert result.applied_semantic_action == frame.values
+    assert result.status_frame is not None
+    assert result.status_frame.values["position.east"] > 0.0
+    assert result.status_frame.values["attitude.euler"][0] != 0.0
+    assert result.status_frame.values["control.realization"] == "response_law"
+
+    checkpoint = episode.save_checkpoint(tmp_path / "f16-reduced.checkpoint.json")
+    expected = episode.observe().as_dict()
+    episode.reset()
+    episode.load_checkpoint(checkpoint)
+    assert episode.observe().as_dict() == expected
+    ####
+
+
+@pytest.mark.parametrize(
+    "composition_name",
+    [
+        "a320_racetrack_capability_pseudo6dof_compose.yaml",
+        "f16_racetrack_capability_pseudo6dof_compose.yaml",
+    ],
+)
+def test_reduced_fixed_wing_episode_conformance_contract(composition_name: str) -> None:
+    """New reduced fixed-wing members retain one public episode vocabulary."""
+
+    episode = open_vehicle_composition_episode(_composition(composition_name))
+    contract = episode.interface_contract
+
+    assert isinstance(episode, ReducedFixedWingCompositionEpisode)
+    assert tuple(channel.name for channel in episode.action_schema) == (
+        "speed_m_s",
+        "flight_path_angle_deg",
+        "heading_deg",
+        "bank_angle_deg",
+    )
+    frame = ActionFrame(
+        contract.id,
+        contract.fingerprint,
+        "kinematic_guidance",
+        {
+            "guidance.speed.command": 155.0,
+            "guidance.flight_path_angle.command": 0.0,
+            "guidance.heading.command": 0.0,
+            "guidance.bank.command": 5.0,
+        },
+        0.2,
+    )
+    result = episode.step_frame(frame)
+
+    assert result.applied_semantic_action == frame.values
+    assert result.status_frame is not None
+    assert result.status_frame.values["control.realization"] == "response_law"
+    assert result.status_frame.values["execution.time"] == pytest.approx(0.2)
+    ####
+
+
+def test_native_source_state_codes_are_discrete_without_becoming_boolean_or_continuous() -> None:
+    specification = finite_set(representation="scalar source state code")
+
+    validate_value_space_value(specification, 1.0, context="source state")
+    with pytest.raises(ValueError, match="finite numeric"):
+        validate_value_space_value(specification, "1", context="source state")
     ####

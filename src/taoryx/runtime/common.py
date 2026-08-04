@@ -6,7 +6,7 @@ import math
 from collections.abc import Callable, Mapping, Sequence
 from copy import copy, deepcopy
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
 
 from taoryx.contracts import Frame, Vector3
 from taoryx.language.expressions import ExpressionType
@@ -94,6 +94,7 @@ Derivative = Callable[[RuntimeState], Sequence[float]]
 PointMassDerivative = Callable[[PointMassState], PointMassRates]
 BodyRateProvider = Callable[[RuntimeState], Vector3]
 KinematicAttitudeTargetProvider = Callable[[RuntimeState], Vector3]
+CommittedControlResolver = Callable[[RuntimeState], Mapping[str, float]]
 StallDetector = Callable[[RuntimeState], bool]
 SpawnProvider = Callable[[RuntimeState], Sequence["SpawnRequest"]]
 TruthProvider = Callable[[RuntimeState], TruthPoint]
@@ -103,6 +104,7 @@ LoadEvaluationPhase = Literal[
     "committed_truth_environment",
     "committed_truth_rhs",
 ]
+ControlEvaluationPhase = Literal["solver_stage", "committed_truth"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -134,6 +136,133 @@ class LoadEvaluationRecord:
             "achieved_control_time_s": self.achieved_control_time_s,
             "phase": self.phase,
         }
+        ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class ControlEvaluationRecord:
+    """Private control-vector provenance at one runtime evaluation point.
+
+    This is deliberately distinct from a public semantic action trace. Solver
+    stages may calculate a controller output while probing an uncommitted state;
+    such values are computational provenance and cannot be presented as a
+    command held over a truth interval.
+    """
+
+    state_time_s: float
+    control_activation_time_s: float
+    phase: ControlEvaluationPhase
+    controls: tuple[tuple[str, float], ...]
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.state_time_s) or not math.isfinite(self.control_activation_time_s):
+            raise ValueError("control-evaluation times must be finite")
+        if self.control_activation_time_s > self.state_time_s + 1.0e-12:
+            raise ValueError("control activation time cannot follow its evaluated state")
+        names = tuple(name for name, _ in self.controls)
+        if names != tuple(sorted(names)) or len(set(names)) != len(names):
+            raise ValueError("control-evaluation controls must be uniquely sorted")
+        if any(not math.isfinite(value) for _, value in self.controls):
+            raise ValueError("control-evaluation values must be finite")
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Return JSON-safe private provenance."""
+
+        return {
+            "state_time_s": self.state_time_s,
+            "control_activation_time_s": self.control_activation_time_s,
+            "phase": self.phase,
+            "controls": dict(self.controls),
+        }
+        ####
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object]) -> ControlEvaluationRecord:
+        """Restore one serialized private provenance sample."""
+
+        controls = payload.get("controls")
+        if not isinstance(controls, Mapping):
+            raise ValueError("control-evaluation controls must be a mapping")
+        return cls(
+            float(cast(float | int | str, payload["state_time_s"])),
+            float(cast(float | int | str, payload["control_activation_time_s"])),
+            cast(ControlEvaluationPhase, str(payload["phase"])),
+            tuple(sorted((str(name), float(cast(float | int | str, value))) for name, value in controls.items())),
+        )
+        ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class ControlIntervalRecord:
+    """Accepted interval control provenance, without a held-command claim.
+
+    ``controls_at_interval_start`` is the exact control mapping visible when
+    integration began. ``solver_stage_control_mutation_detected`` records that
+    a private stage evaluation changed the mutable native control mapping. In
+    that case the record is expressly ineligible for Product 3's held-command
+    action-trace artifact.
+    """
+
+    interval_start_time_s: float
+    committed_truth_time_s: float
+    control_activation_time_s: float
+    controls_at_interval_start: tuple[tuple[str, float], ...]
+    solver_stage_control_mutation_detected: bool
+
+    def __post_init__(self) -> None:
+        if not all(
+            math.isfinite(value)
+            for value in (
+                self.interval_start_time_s,
+                self.committed_truth_time_s,
+                self.control_activation_time_s,
+            )
+        ):
+            raise ValueError("control-interval times must be finite")
+        if self.interval_start_time_s > self.committed_truth_time_s:
+            raise ValueError("control interval starts after its committed truth boundary")
+        if self.control_activation_time_s > self.interval_start_time_s + 1.0e-12:
+            raise ValueError("control activation time cannot follow the interval start")
+        names = tuple(name for name, _ in self.controls_at_interval_start)
+        if names != tuple(sorted(names)) or len(set(names)) != len(names):
+            raise ValueError("control-interval controls must be uniquely sorted")
+        if any(not math.isfinite(value) for _, value in self.controls_at_interval_start):
+            raise ValueError("control-interval values must be finite")
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Return JSON-safe accepted-interval provenance."""
+
+        return {
+            "interval_start_time_s": self.interval_start_time_s,
+            "committed_truth_time_s": self.committed_truth_time_s,
+            "control_activation_time_s": self.control_activation_time_s,
+            "controls_at_interval_start": dict(self.controls_at_interval_start),
+            "solver_stage_control_mutation_detected": self.solver_stage_control_mutation_detected,
+            "claim_boundary": (
+                "This is accepted-interval control provenance. It is not a held semantic action trace when "
+                "solver-stage control mutation is detected."
+            ),
+        }
+        ####
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object]) -> ControlIntervalRecord:
+        """Restore one serialized accepted-interval provenance record."""
+
+        controls = payload.get("controls_at_interval_start")
+        if not isinstance(controls, Mapping):
+            raise ValueError("control-interval controls must be a mapping")
+        return cls(
+            float(cast(float | int | str, payload["interval_start_time_s"])),
+            float(cast(float | int | str, payload["committed_truth_time_s"])),
+            float(cast(float | int | str, payload["control_activation_time_s"])),
+            tuple(sorted((str(name), float(cast(float | int | str, value))) for name, value in controls.items())),
+            bool(payload["solver_stage_control_mutation_detected"]),
+        )
         ####
     ####
 
@@ -226,7 +355,11 @@ class RuntimeVehicle:
     parameters: Mapping[str, float] = field(default_factory=dict)
     control_values: Mapping[str, float] = field(default_factory=dict)
     control_values_time_s: float | None = None
+    committed_control_resolver: CommittedControlResolver | None = None
+    committed_control_names: frozenset[str] = field(default_factory=frozenset)
     load_evaluation_history: list[LoadEvaluationRecord] = field(default_factory=list)
+    control_evaluation_history: list[ControlEvaluationRecord] = field(default_factory=list)
+    control_interval_history: list[ControlIntervalRecord] = field(default_factory=list)
     table_evaluators: Mapping[str, Callable[[Mapping[str, float]], float]] = field(default_factory=dict)
     environment_evaluator: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
     event_handlers: Mapping[str, Callable[[RuntimeState], RuntimeState]] = field(default_factory=dict)
@@ -288,6 +421,104 @@ class RuntimeVehicle:
         if control_time_s is None:
             raise RuntimeError("RuntimeVehicle control timestamp is unavailable")
         self.load_evaluation_history.append(LoadEvaluationRecord(state_time_s, control_time_s, phase))
+        ####
+
+    def effective_control_values(self, values: Mapping[str, float] | None = None) -> dict[str, float]:
+        """Return declared control coordinates after an evaluator's local update."""
+
+        effective = dict(self.control_values)
+        if values is not None:
+            for name in effective:
+                if name in values and name not in self.committed_control_names:
+                    effective[name] = float(values[name])
+        return effective
+        ####
+
+    def resolve_committed_controls(self) -> None:
+        """Resolve state-derived controls once at the current truth boundary.
+
+        A resolver is intentionally evaluated only immediately before an
+        accepted integration interval starts.  Its result becomes part of the
+        vehicle's control mapping and is re-applied after every environment
+        refresh, so an RK stage cannot silently replace the held command with
+        a value calculated from speculative state.  Resolver callbacks are
+        executable model code and are therefore reattached by lowering rather
+        than serialized as checkpoint data.
+        """
+
+        if self.committed_control_resolver is None:
+            return
+        resolved = self.committed_control_resolver(self.state)
+        normalized: dict[str, float] = {}
+        for name, value in resolved.items():
+            if not isinstance(name, str) or not name:
+                raise ValueError("committed control resolver returned an empty or non-string control name")
+            numeric = float(value)
+            if not math.isfinite(numeric):
+                raise ValueError(f"committed control resolver returned a non-finite value for {name!r}")
+            normalized[name] = numeric
+        if normalized:
+            self.control_values = {**self.control_values, **normalized}
+            self.committed_control_names = frozenset((*self.committed_control_names, *normalized))
+            self.control_values_time_s = self.state.time
+        ####
+
+    def record_control_evaluation(
+        self,
+        state_time_s: float,
+        phase: ControlEvaluationPhase,
+        values: Mapping[str, float] | None = None,
+    ) -> None:
+        """Retain the native control vector at one private evaluation point."""
+
+        control_time_s = self.control_values_time_s
+        if control_time_s is None:
+            raise RuntimeError("RuntimeVehicle control timestamp is unavailable")
+        controls = tuple(sorted((str(name), float(value)) for name, value in self.effective_control_values(values).items()))
+        self.control_evaluation_history.append(
+            ControlEvaluationRecord(state_time_s, control_time_s, phase, controls)
+        )
+        ####
+
+    def record_control_interval(
+        self,
+        interval_start_time_s: float,
+        committed_truth_time_s: float,
+        controls_at_interval_start: Mapping[str, float],
+        *,
+        evaluation_history_start: int,
+    ) -> None:
+        """Record one accepted integration interval without asserting hold semantics."""
+
+        control_time_s = self.control_values_time_s
+        if control_time_s is None:
+            raise RuntimeError("RuntimeVehicle control timestamp is unavailable")
+        evaluations = self.control_evaluation_history[evaluation_history_start:]
+        initial = tuple(sorted((str(name), float(value)) for name, value in controls_at_interval_start.items()))
+        solver_stage_mutation = any(
+            record.phase == "solver_stage" and record.controls != initial
+            for record in evaluations
+        )
+        self.control_interval_history.append(
+            ControlIntervalRecord(
+                interval_start_time_s,
+                committed_truth_time_s,
+                control_time_s,
+                initial,
+                solver_stage_mutation,
+            )
+        )
+        ####
+
+    def discard_control_provenance_after(self, time_s: float) -> None:
+        """Drop speculative provenance after an event-refined accepted boundary."""
+
+        self.control_evaluation_history = [
+            record for record in self.control_evaluation_history if record.state_time_s <= time_s + 1.0e-12
+        ]
+        self.control_interval_history = [
+            record for record in self.control_interval_history if record.committed_truth_time_s <= time_s + 1.0e-12
+        ]
         ####
     ####
 
@@ -421,6 +652,14 @@ class RuntimeProblem:
             clone.history = retained
             clone.load_evaluation_history = [
                 record for record in source.load_evaluation_history if record.state_time_s <= bounded_time + 1.0e-12
+            ]
+            clone.control_evaluation_history = [
+                record for record in source.control_evaluation_history if record.state_time_s <= bounded_time + 1.0e-12
+            ]
+            clone.control_interval_history = [
+                record
+                for record in source.control_interval_history
+                if record.committed_truth_time_s <= bounded_time + 1.0e-12
             ]
             if clone.control_values_time_s is None:
                 raise RuntimeError(f"vehicle {name!r} has no control activation timestamp to clone")

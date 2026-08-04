@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, cast
 
 from taoryx.control import SegmentController, VehicleObservation
 
-from .common import Derivative, RuntimeProblem, RuntimeState
+from .common import ControlEvaluationRecord, ControlIntervalRecord, Derivative, RuntimeProblem, RuntimeState
 from .engine import get_next_time_step, integrate_active_vehicles
 
 if TYPE_CHECKING:
@@ -694,6 +694,8 @@ def _interactive_problem_payload(problem: RuntimeProblem) -> dict[str, object]:
                 "fired_events": sorted(vehicle.fired_events),
                 "control_values": _json_safe(vehicle.control_values),
                 "control_values_time_s": vehicle.control_values_time_s,
+                "control_evaluation_history": [record.as_dict() for record in vehicle.control_evaluation_history],
+                "control_interval_history": [record.as_dict() for record in vehicle.control_interval_history],
                 "parameters": _json_safe(vehicle.parameters),
                 "step_size": vehicle.step_size,
                 "integrator": vehicle.integrator,
@@ -750,6 +752,16 @@ def _restore_interactive_problem(problem: RuntimeProblem, payload: Mapping[str, 
         vehicle.fired_events = {str(value) for value in cast(Sequence[object], vehicle_payload.get("fired_events", ())) }
         vehicle.control_values = {str(key): _as_float(value) for key, value in cast(Mapping[str, object], vehicle_payload.get("control_values", {})).items()}
         vehicle.control_values_time_s = _as_float(vehicle_payload.get("control_values_time_s", vehicle.state.time))
+        vehicle.control_evaluation_history = [
+            ControlEvaluationRecord.from_dict(item)
+            for item in cast(Sequence[object], vehicle_payload.get("control_evaluation_history", ()))
+            if isinstance(item, Mapping)
+        ]
+        vehicle.control_interval_history = [
+            ControlIntervalRecord.from_dict(item)
+            for item in cast(Sequence[object], vehicle_payload.get("control_interval_history", ()))
+            if isinstance(item, Mapping)
+        ]
         vehicle.parameters = {str(key): _as_float(value) for key, value in cast(Mapping[str, object], vehicle_payload.get("parameters", {})).items()}
         vehicle.step_size = float(cast(float | int | str, vehicle_payload["step_size"]))
         vehicle.integrator = str(vehicle_payload["integrator"])

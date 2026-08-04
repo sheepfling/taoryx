@@ -15,6 +15,7 @@ import re
 import tempfile
 from collections.abc import Mapping
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import NoReturn
 
@@ -405,7 +406,36 @@ class X15SourceDirectWrenchPlant:
 
 
 def build_x15_source_direct_wrench_plant() -> X15SourceDirectWrenchPlant:
-    """Load the source deck and construct its local direct-wrench bridge."""
+    """Construct one caller-owned facade over the cached immutable source setup.
+
+    The source deck, tables, and frozen source controls are invariant within a
+    Python process.  Loading them repeatedly is both expensive and unrelated
+    to the requested composition.  Return a fresh small facade so callers do
+    not share mutable dictionaries, while the source evaluator remains cached
+    beneath it.
+    """
+
+    template = _cached_x15_source_direct_wrench_plant()
+    return X15SourceDirectWrenchPlant(
+        vehicle=template.vehicle,
+        base_state=template.base_state,
+        attitude=template.attitude,
+        source_controls=dict(template.source_controls),
+        limits=template.limits,
+        reference_state=dict(template.reference_state),
+    )
+    ####
+
+
+@lru_cache(maxsize=1)
+def _cached_x15_source_direct_wrench_plant() -> X15SourceDirectWrenchPlant:
+    """Load the immutable source deck/table setup once per process.
+
+    ``environment_evaluator`` is used only as a pure function of the supplied
+    state and frozen source controls.  Runtime execution never advances this
+    retained vehicle object, so sharing it cannot leak truth state between
+    preflight, lowering, batch, or episode checks.
+    """
 
     source = PROBLEM.read_text(encoding="utf-8")
     with tempfile.TemporaryDirectory(prefix="taoryx-x15-direct-wrench-adapter-") as directory:
@@ -488,6 +518,7 @@ def build_x15_source_direct_wrench_adapter(tier: FidelityTier) -> StandardFamily
     ####
 
 
+@lru_cache(maxsize=1)
 def build_x15_local_direct_wrench_screen_config() -> LocalDirectWrenchScreenConfig:
     """Return the source-declared X-15 local bridge-screen contract.
 
@@ -495,6 +526,13 @@ def build_x15_local_direct_wrench_screen_config() -> LocalDirectWrenchScreenConf
     operating condition remains the local unpowered release/glide load point;
     the explicit load-cancellation bias is not a physical source-effector
     trim and the resulting witness is not an X-15 trajectory mission.
+
+    The contract is frozen and source-pinned, so a process-local cache is
+    safe.  Several Product 3 checks intentionally ask for this exact screen
+    during preflight, batch execution, episode opening, and parity replay;
+    reparsing the same source tables for each of those checks provides no
+    additional evidence and makes the catalog-wide witness audit needlessly
+    slow.
     """
 
     plant = build_x15_source_direct_wrench_plant()

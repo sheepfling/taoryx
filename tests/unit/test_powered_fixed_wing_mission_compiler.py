@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -73,6 +74,28 @@ def test_compiler_reports_clipping_instead_of_silently_exceeding_capability() ->
     assert compiled.route.straight_length_m > intent.minimum_straight_length_m
     assert len(compiled.diagnostics) == 3
     assert "does not validate controller" in compiled.manifest()["nonclaim"]
+    ####
+
+
+def test_compiler_preserves_a_larger_requested_turn_radius_and_reports_a_tighter_one() -> None:
+    capability, baseline_intent = load_powered_fixed_wing_mission_profiles(PROFILES)["x8-cruise"]
+
+    larger_radius = compile_powered_fixed_wing_racetrack(
+        capability,
+        replace(baseline_intent, requested_turn_radius_m=600.0),
+    )
+    tighter_radius = compile_powered_fixed_wing_racetrack(
+        capability,
+        replace(baseline_intent, requested_turn_radius_m=20.0),
+    )
+
+    assert larger_radius.route.turn_radius_m == pytest.approx(600.0)
+    assert tighter_radius.route.turn_radius_m == pytest.approx(
+        baseline_intent.turn_radius_margin
+        * capability.nominal_speed_m_s**2
+        / (9.80665 * math.tan(math.radians(10.0)))
+    )
+    assert any("requested turn radius" in item for item in tighter_radius.diagnostics)
     ####
 
 

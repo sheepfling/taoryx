@@ -16,17 +16,14 @@ from pathlib import Path
 from typing import Any
 
 from taoryx.airbreathing_control_mapping import x8_mapping_hypotheses, x8_source_mapping
-from taoryx.contracts import Vector3
-from taoryx.control_allocation import EffectorLimits
 from taoryx.generic_tuning import LinearAuthorityRequirement, linear_authority_preflight
-from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.physical_lqr import (
     design_physical_wrench_lqr,
     project_linearization_to_wrench,
     validate_nonlinear_wrench_lqr,
 )
-from taoryx.runtime.program import LoadedProgram
-from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant, local_rigid_body_plant_from_vehicle
+from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant
+from taoryx.source_table_fixed_wing import build_x8_source_table_plant
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBLEM = ROOT / "examples/generated/vehicles/skywalker_x8_table_coordinate_trim_6dof.prb"
@@ -45,51 +42,9 @@ CONTROL_MAPPING_STATUS = TABLE_ROOT.parent / "cruise_class_uav_skywalker_x8/cont
 
 
 def build_plant() -> RuntimeRigidBodyLocalPlant:
-    """Build the table-backed source-trim local plant with declared actuator limits."""
+    """Build the runtime-owned pinned source-table local plant."""
 
-    program = LoadedProgram.load(PROBLEM, TABLES, profile=GrammarProfile.TAORYX)
-    return local_rigid_body_plant_from_vehicle(
-        "skywalker-x8-table-coordinate-plant",
-        "source-trim-local-v1",
-        program.case().vehicles["1"],
-        inertia_kg_m2=Vector3(0.325, 0.140, 0.400),
-        reference_length_m=0.36,
-        effector_limits={
-            "collective-elevon-deg": EffectorLimits(
-                "collective-elevon-deg",
-                -20.0,
-                20.0,
-                "deg",
-                rate_limit_per_s=120.0,
-                time_constant_s=0.05,
-            ),
-            "differential-elevon-deg": EffectorLimits(
-                "differential-elevon-deg",
-                -20.0,
-                20.0,
-                "deg",
-                rate_limit_per_s=120.0,
-                time_constant_s=0.05,
-            ),
-            "throttle": EffectorLimits(
-                "throttle",
-                0.0,
-                1.0,
-                "fraction",
-                time_constant_s=0.2,
-            ),
-        },
-        effectiveness_steps={
-            "collective-elevon-deg": 0.1,
-            "differential-elevon-deg": 0.1,
-            "throttle": 0.005,
-        },
-        allocation_wrench_weights={
-            "moment_x_nm": 1.0,
-            "moment_y_nm": 1.0,
-            "moment_z_nm": 0.0,
-        },
-    )
+    return build_x8_source_table_plant()
     ####
 
 

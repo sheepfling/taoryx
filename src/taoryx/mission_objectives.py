@@ -13,6 +13,20 @@ from collections.abc import Mapping, Sequence, Set
 from dataclasses import dataclass, field
 from typing import Literal
 
+from .truth_objective_value_spaces import (
+    load_truth_objective_channel_value_space_catalog,
+    truth_objective_channel_contract,
+)
+from .value_space import (
+    ValueSpaceSpec,
+    boolean,
+    finite_set,
+    positive_half_line,
+    signed_value_space_error,
+    unit_vector_sphere,
+    validate_value_space_value,
+)
+
 ObjectiveType = Literal[
     "fly_over",
     "dwell",
@@ -37,20 +51,6 @@ TransitionReason = Literal[
     "UNCLASSIFIED",
 ]
 
-_CHANNEL_UNITS = {
-    "north_m": "m",
-    "east_m": "m",
-    "altitude_m": "m",
-    "speed_m_s": "m/s",
-    "horizontal_speed_m_s": "m/s",
-    "vertical_speed_m_s": "m/s",
-    "local_roll_deg": "deg",
-    "local_pitch_deg": "deg",
-    "local_heading_deg": "deg",
-    "heading_deg": "deg",
-    "flight_path_angle_deg": "deg",
-}
-
 _OBJECTIVE_TYPES = frozenset(
     {
         "fly_over",
@@ -64,6 +64,86 @@ _OBJECTIVE_TYPES = frozenset(
         "touchdown",
     }
 )
+
+
+def objective_channel_value_space(channel: str) -> ValueSpaceSpec:
+    """Return the topology contract for a public truth-objective channel.
+
+    Every target, tolerance, and emitted objective metric must resolve through
+    the versioned catalog. A new family extends this explicit vocabulary before
+    publishing a new objective dimension; it cannot silently fall back to an
+    unspecified scalar in model units.
+    """
+
+    contract = truth_objective_channel_contract(channel)
+    if contract is None:
+        raise ValueError(
+            f"truth-objective channel {channel!r} is not declared in the objective value-space catalog"
+        )
+    return contract.value_space
+    ####
+
+
+def _objective_channel_contract(channel: str) -> dict[str, object]:
+    contract = truth_objective_channel_contract(channel)
+    if contract is None:
+        raise ValueError(f"truth-objective channel {channel!r} has no declared unit/topology contract")
+    return {
+        "unit": contract.canonical_unit,
+        "value_space": objective_channel_value_space(channel).as_dict(),
+        "value_space_source": "truth_objective_channel_value_space_catalog",
+    }
+    ####
+
+
+def truth_objective_topology_schema() -> dict[str, object]:
+    """Return the versioned topology contract for truth-objective inputs.
+
+    Objective targets are intentionally mapping-shaped because different
+    physical objective types use different combinations of truth channels.
+    This schema makes the topology of each *declared* target channel explicit
+    without pretending that every objective must use the same coordinates.
+    """
+
+    return {
+        "schema": "taoryx.truth-objective-topology/v1alpha1",
+        "channel_value_space_catalog": {
+            "status": "pass",
+            "declared_channel_count": len(load_truth_objective_channel_value_space_catalog()),
+            "claim_boundary": (
+                "This covers only the generic declared objective vocabulary. A family-owned target channel remains "
+                "explicitly outside this catalog until its unit and value space are promoted."
+            ),
+        },
+        "objective_type": {
+            "value_space": finite_set().as_dict(),
+            "allowed_values": sorted(_OBJECTIVE_TYPES),
+        },
+        "target_channel_policy": {
+            "mapping_value_space": "per-channel declaration",
+            "declared_channels": {
+                channel: _objective_channel_contract(channel)
+                for channel in sorted(load_truth_objective_channel_value_space_catalog())
+            },
+            "unknown_channel_policy": "reject; add a unit/topology contract to the versioned catalog before publication",
+        },
+        "tolerance": {
+            "value_space": positive_half_line().as_dict(),
+            "rule": "finite positive scalar in the target channel's canonical unit",
+        },
+        "dwell_s": {"value_space": positive_half_line().as_dict(), "unit": "s"},
+        "required": {"value_space": boolean().as_dict()},
+        "event_id": {"value_space": finite_set(event=True).as_dict()},
+        "gate_normal": {"value_space": unit_vector_sphere().as_dict()},
+        "crossing_direction": {"value_space": finite_set().as_dict(), "allowed_values": [-1, 1]},
+        "window_start_s": {"value_space": positive_half_line().as_dict(), "unit": "s"},
+        "window_end_s": {"value_space": positive_half_line().as_dict(), "unit": "s"},
+        "claim_boundary": (
+            "This is the semantic topology contract for independently evaluated truth objectives. "
+            "It does not declare every family-specific target channel or qualify any objective evaluation."
+        ),
+    }
+    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,14 +171,53 @@ class TruthObjectiveSpec:
             raise ValueError("truth objective dwell_s must be finite and non-negative")
         if set(self.target) - set(self.tolerance) and self.objective_type not in {"event", "fly_by_gate"}:
             raise ValueError(f"truth objective {self.id!r} has target channels without tolerances")
-        if any(float(value) <= 0.0 or not math.isfinite(float(value)) for value in self.tolerance.values()):
-            raise ValueError(f"truth objective {self.id!r} tolerances must be finite and positive")
+        for channel, value in self.target.items():
+            if truth_objective_channel_contract(channel) is None:
+                raise ValueError(f"truth objective {self.id!r} target channel {channel!r} has no declared unit/topology contract")
+            numeric = _finite(value)
+            if numeric is None:
+                raise ValueError(f"truth objective {self.id!r} target {channel!r} must be finite")
+            validate_value_space_value(
+                objective_channel_value_space(channel),
+                numeric,
+                context=f"truth objective {self.id!r} target {channel!r}",
+            )
+        for channel, value in self.tolerance.items():
+            if truth_objective_channel_contract(channel) is None:
+                raise ValueError(f"truth objective {self.id!r} tolerance channel {channel!r} has no declared unit/topology contract")
+            if float(value) <= 0.0 or not math.isfinite(float(value)):
+                raise ValueError(f"truth objective {self.id!r} tolerances must be finite and positive")
         if self.gate_normal is not None:
-            norm = math.sqrt(sum(float(value) ** 2 for value in self.gate_normal))
-            if not math.isfinite(norm) or norm <= 0.0:
-                raise ValueError(f"truth objective {self.id!r} gate_normal must be nonzero")
+            try:
+                validate_value_space_value(
+                    unit_vector_sphere(),
+                    self.gate_normal,
+                    context=f"truth objective {self.id!r} gate_normal",
+                )
+            except ValueError as error:
+                raise ValueError(f"truth objective {self.id!r} gate_normal must be a finite unit vector") from error
         if self.crossing_direction not in {-1, 1}:
             raise ValueError(f"truth objective {self.id!r} crossing_direction must be -1 or 1")
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Return the portable objective contract, including value topology."""
+
+        return {
+            "id": self.id,
+            "objective_type": self.objective_type,
+            "target": dict(self.target),
+            "tolerance": dict(self.tolerance),
+            "channel_contracts": {channel: _objective_channel_contract(channel) for channel in self.target},
+            "dwell_s": self.dwell_s,
+            "required": self.required,
+            "event_id": self.event_id,
+            "gate_normal": None if self.gate_normal is None else list(self.gate_normal),
+            "gate_normal_value_space": None if self.gate_normal is None else unit_vector_sphere().as_dict(),
+            "crossing_direction": self.crossing_direction,
+            "window_start_s": self.window_start_s,
+            "window_end_s": self.window_end_s,
+        }
         ####
 
 
@@ -158,15 +277,10 @@ def _finite(value: object) -> float | None:
 
 
 def _channel_units(channel: str) -> str:
-    if channel in _CHANNEL_UNITS:
-        return _CHANNEL_UNITS[channel]
-    if channel.endswith("_deg") or channel.endswith("_degrees"):
-        return "deg"
-    if channel.endswith("_m_s"):
-        return "m/s"
-    if channel.endswith("_m"):
-        return "m"
-    return "model units"
+    contract = truth_objective_channel_contract(channel)
+    if contract is None:
+        raise ValueError(f"truth-objective channel {channel!r} has no declared unit/topology contract")
+    return contract.canonical_unit
 
 
 def _metric_number(metric: object, key: str) -> float:
@@ -185,7 +299,7 @@ def _metric_snapshot(row: Mapping[str, object], spec: TruthObjectiveSpec) -> tup
         limit = float(spec.tolerance[channel]) if channel in spec.tolerance else None
         if actual is None or limit is None:
             return False, None, ()
-        error = abs(actual - float(target))
+        error = abs(signed_value_space_error(objective_channel_value_space(channel), actual, float(target)))
         metrics.append(
             {
                 "channel": channel,
@@ -195,6 +309,7 @@ def _metric_snapshot(row: Mapping[str, object], spec: TruthObjectiveSpec) -> tup
                 "error": error,
                 "margin": limit - error,
                 "units": _channel_units(channel),
+                "value_space": objective_channel_value_space(channel).as_dict(),
             }
         )
     normalized = [_metric_number(metric, "error") / _metric_number(metric, "limit") for metric in metrics]
@@ -240,7 +355,7 @@ def _residual(row: Mapping[str, object], spec: TruthObjectiveSpec) -> tuple[bool
         tolerance = float(spec.tolerance[channel]) if channel in spec.tolerance else None
         if actual is None or tolerance is None:
             return False, None, None, None
-        error = abs(actual - float(target))
+        error = abs(signed_value_space_error(objective_channel_value_space(channel), actual, float(target)))
         physical.append(error)
         normalized.append(error / tolerance)
         margins.append(tolerance - error)
@@ -435,7 +550,8 @@ def _evaluate_gate(spec: TruthObjectiveSpec, rows: Sequence[Mapping[str, object]
                     "limit": corridor_limit,
                     "error": lateral,
                     "margin": corridor_limit - lateral,
-                    "units": "m",
+                    "units": _channel_units("gate_lateral_error"),
+                    "value_space": objective_channel_value_space("gate_lateral_error").as_dict(),
                 }
             )
         if altitude_limit is not None:
@@ -448,7 +564,8 @@ def _evaluate_gate(spec: TruthObjectiveSpec, rows: Sequence[Mapping[str, object]
                     "limit": altitude_limit,
                     "error": altitude_error,
                     "margin": altitude_limit - altitude_error,
-                    "units": "m",
+                    "units": _channel_units("gate_altitude_error"),
+                    "value_space": objective_channel_value_space("gate_altitude_error").as_dict(),
                 }
             )
         if speed_limit is not None:
@@ -464,7 +581,8 @@ def _evaluate_gate(spec: TruthObjectiveSpec, rows: Sequence[Mapping[str, object]
                     "limit": speed_limit,
                     "error": speed_error,
                     "margin": speed_limit - speed_error,
-                    "units": "m/s",
+                    "units": _channel_units("gate_speed_error"),
+                    "value_space": objective_channel_value_space("gate_speed_error").as_dict(),
                 }
             )
         return tuple(metrics)

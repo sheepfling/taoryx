@@ -254,29 +254,18 @@
           "metrics": {
             "bounded_replay": {
               "effectivity_rank": 4,
-              "residual_norm": 2.998416303520215e-13,
+              "residual_norm": 2.0590470300251253e-11,
               "saturated_effectors": [],
               "status": "feasible"
             },
             "computed_rank": 4,
-            "condition_number": 20.18332572097007,
+            "condition_number": 20.183325720949885,
             "matrix_columns": 4,
             "matrix_rows": 4,
             "matrix_source": "sample",
             "nonzero_column_count": 4,
             "sign_probe": {
               "aileron_deg": {
-                "negative_axes": [
-                  "total_moment_x_nm",
-                  "total_moment_z_nm"
-                ],
-                "positive_axes": [],
-                "zero_axes": [
-                  "total_force_x_n",
-                  "total_moment_y_nm"
-                ]
-              },
-              "elevator_deg": {
                 "negative_axes": [
                   "total_moment_y_nm"
                 ],
@@ -286,6 +275,17 @@
                 "zero_axes": [
                   "total_moment_x_nm",
                   "total_moment_z_nm"
+                ]
+              },
+              "elevator_deg": {
+                "negative_axes": [
+                  "total_moment_x_nm",
+                  "total_moment_z_nm"
+                ],
+                "positive_axes": [],
+                "zero_axes": [
+                  "total_force_x_n",
+                  "total_moment_y_nm"
                 ]
               },
               "rudder_deg": {
@@ -313,10 +313,10 @@
               }
             },
             "singular_values": [
-              114030.1229722287,
-              13192.253428005366,
+              114030.12297211464,
+              13192.253428006823,
               9539.672342686805,
-              5649.719206273012
+              5649.719206273011
             ]
           },
           "stage_id": "effectivity",
@@ -462,11 +462,13 @@
           ],
           "findings": [],
           "metrics": {
-            "automatic_lowering_eligible_profiles": [],
+            "automatic_lowering_eligible_profiles": [
+              "f16.rigid_body_6dof.v1"
+            ],
             "profile_count": 4
           },
           "stage_id": "fidelity",
-          "status": "development"
+          "status": "passed"
         },
         {
           "claim": "declared controller profiles, plant/effectiveness references, and physical control-path claims pass structural preflight",
@@ -484,6 +486,46 @@
             }
           ],
           "metrics": {
+            "authority_preflights": {
+              "f16.local_lqr_trim_hold.v1": {
+                "blockers": [],
+                "metrics": {
+                  "control_dimension": 4.0,
+                  "controllability_condition_number": 3637.1093340126586,
+                  "controllability_rank": 6.0,
+                  "required_controllability_rank": 6.0,
+                  "required_state_count": 6.0,
+                  "state_dimension": 6.0,
+                  "uncontrolled_fraction.p_rad_s": 5.100810282606986e-16,
+                  "uncontrolled_fraction.q_rad_s": 1.2224796483011553e-15,
+                  "uncontrolled_fraction.r_rad_s": 4.453295285766624e-16,
+                  "uncontrolled_fraction.u_m_s": 3.3101223149477577e-16,
+                  "uncontrolled_fraction.v_m_s": 5.528248485592227e-16,
+                  "uncontrolled_fraction.w_m_s": 3.634020853430438e-16
+                },
+                "reason": "f16-local-trim-hold-body-axis-authority found every declared required state controllable before gain synthesis",
+                "status": "passed"
+              },
+              "f16.local_physical_wrench_lqr.v1": {
+                "blockers": [],
+                "metrics": {
+                  "control_dimension": 4.0,
+                  "controllability_condition_number": 3637.1093340126586,
+                  "controllability_rank": 6.0,
+                  "required_controllability_rank": 6.0,
+                  "required_state_count": 6.0,
+                  "state_dimension": 6.0,
+                  "uncontrolled_fraction.p_rad_s": 5.100810282606986e-16,
+                  "uncontrolled_fraction.q_rad_s": 1.2224796483011553e-15,
+                  "uncontrolled_fraction.r_rad_s": 4.453295285766624e-16,
+                  "uncontrolled_fraction.u_m_s": 3.3101223149477577e-16,
+                  "uncontrolled_fraction.v_m_s": 5.528248485592227e-16,
+                  "uncontrolled_fraction.w_m_s": 3.634020853430438e-16
+                },
+                "reason": "f16-local-physical-wrench-body-axis-authority found every declared required state controllable before gain synthesis",
+                "status": "passed"
+              }
+            },
             "canonical_control_count": 5,
             "profiles_checked": 2
           },
@@ -536,13 +578,13 @@
           ],
           "metrics": {
             "estimated_duration_s_by_realization": {
-              "f16-s119-direct-wrench": 1408.1865661383833,
-              "f16-s119-point-mass": 1408.1865661383833,
-              "f16-s119-pseudo-6dof": 1408.1865661383833,
-              "f16-s119-surfaces": 1408.1865661383833
+              "f16-s119-direct-wrench": 1308.1865661383836,
+              "f16-s119-point-mass": 1308.1865661383836,
+              "f16-s119-pseudo-6dof": 1308.1865661383836,
+              "f16-s119-surfaces": 1308.1865661383836
             },
-            "estimated_duration_s_max": 1408.1865661383833,
-            "estimated_duration_s_min": 1408.1865661383833,
+            "estimated_duration_s_max": 1308.1865661383836,
+            "estimated_duration_s_min": 1308.1865661383836,
             "realization_count": 4
           },
           "stage_id": "mission",
@@ -552,29 +594,7 @@
       "status": "development_ready_with_gates"
     },
     {
-      "blockers": [
-        {
-          "code": "profile-not-declared",
-          "hint": "Add a named profile or explicitly remove this tier from the family support contract.",
-          "message": "expected profile for 'rigid_body_6dof' is not declared",
-          "path": "/Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/families/reference_hl20_mod_k/family.yaml:fidelity_profiles",
-          "severity": "error"
-        },
-        {
-          "code": "profile-not-declared",
-          "hint": "Add a named profile or explicitly remove this tier from the family support contract.",
-          "message": "expected profile for 'rigid_body_6dof' is not declared",
-          "path": "/Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/families/reference_hl20_mod_k/family.yaml:fidelity_profiles",
-          "severity": "error"
-        },
-        {
-          "code": "mission-binding-missing",
-          "hint": "Declare a family mission binding before running or estimating a flagship mission.",
-          "message": "no reusable mission binding is declared for this family",
-          "path": "families/reference_hl20_mod_k/qualification/racetrack-binding.yaml",
-          "severity": "error"
-        }
-      ],
+      "blockers": [],
       "caveats": [
         {
           "code": "allocation-evidence-not-numeric",
@@ -617,39 +637,38 @@
           "message": "no controller profiles are declared",
           "path": "families/reference_hl20_mod_k/controllers",
           "severity": "info"
+        },
+        {
+          "code": "mission-runtime-planned",
+          "hint": "Keep translation evidence separate until a family-owned runtime, truth objectives, and terminal evaluator are bound.",
+          "message": "mission binding status is 'semantic_translation_available_runtime_planned'",
+          "path": "families/reference_hl20_mod_k/qualification/mission-binding.yaml",
+          "severity": "warning"
         }
       ],
       "claim_boundary": "provider-neutral integration evidence; not flight, operational, or family qualification",
       "current_tier": "T2_source_plant_ready",
       "display_name": "HL-20 Mod K source-grounded reference family",
       "family_id": "reference_hl20_mod_k",
-      "next_gate": "alpha3_allocator_and_reduction_equivalence",
+      "next_gate": "hl20_repository_verification_and_closure",
       "physical_family": "unpowered_lifting_body",
       "promotion_eligible": false,
       "schema_version": "taoryx.vehicle-integration-pipeline/v1",
       "stages": [
         {
           "claim": "family manifest, source import record, and integration record are discoverable and readiness-valid",
-          "error_count": 1,
+          "error_count": 0,
           "evidence": [
             "families/reference_hl20_mod_k/family.yaml",
             "families/reference_hl20_mod_k/plant/daveml-import.json",
             "families/reference_hl20_mod_k/qualification/integration-record.yaml"
           ],
-          "findings": [
-            {
-              "code": "profile-not-declared",
-              "hint": "Add a named profile or explicitly remove this tier from the family support contract.",
-              "message": "expected profile for 'rigid_body_6dof' is not declared",
-              "path": "/Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/families/reference_hl20_mod_k/family.yaml:fidelity_profiles",
-              "severity": "error"
-            }
-          ],
+          "findings": [],
           "metrics": {
-            "readiness_status": "blocked"
+            "readiness_status": "ready_for_runtime_probes"
           },
           "stage_id": "intake",
-          "status": "blocked"
+          "status": "passed"
         },
         {
           "claim": "frames, geometry, envelopes, aerodynamic conventions, and semantic IDs agree across source records",
@@ -770,25 +789,17 @@
         },
         {
           "claim": "each declared fidelity is explicit, and automatic lowering is permitted only by qualified evidence",
-          "error_count": 1,
+          "error_count": 0,
           "evidence": [
             "families/reference_hl20_mod_k/family.yaml"
           ],
-          "findings": [
-            {
-              "code": "profile-not-declared",
-              "hint": "Add a named profile or explicitly remove this tier from the family support contract.",
-              "message": "expected profile for 'rigid_body_6dof' is not declared",
-              "path": "/Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/families/reference_hl20_mod_k/family.yaml:fidelity_profiles",
-              "severity": "error"
-            }
-          ],
+          "findings": [],
           "metrics": {
             "automatic_lowering_eligible_profiles": [],
             "profile_count": 4
           },
           "stage_id": "fidelity",
-          "status": "blocked"
+          "status": "development"
         },
         {
           "claim": "declared controller profiles, plant/effectiveness references, and physical control-path claims pass structural preflight",
@@ -813,25 +824,38 @@
         },
         {
           "claim": "mission binding, realization IDs, route geometry, phase order, and capability-based time estimates pass preflight",
-          "error_count": 1,
-          "evidence": [],
+          "error_count": 0,
+          "evidence": [
+            "families/reference_hl20_mod_k/qualification/mission-binding.yaml",
+            "examples/vehicle_composition/hl20_glide_energy_capability_3dof_compose.yaml",
+            "examples/vehicle_composition/hl20_glide_energy_capability_pseudo6dof_compose.yaml"
+          ],
           "findings": [
             {
-              "code": "mission-binding-missing",
-              "hint": "Declare a family mission binding before running or estimating a flagship mission.",
-              "message": "no reusable mission binding is declared for this family",
-              "path": "families/reference_hl20_mod_k/qualification/racetrack-binding.yaml",
-              "severity": "error"
+              "code": "mission-runtime-planned",
+              "hint": "Keep translation evidence separate until a family-owned runtime, truth objectives, and terminal evaluator are bound.",
+              "message": "mission binding status is 'semantic_translation_available_runtime_planned'",
+              "path": "families/reference_hl20_mod_k/qualification/mission-binding.yaml",
+              "severity": "warning"
             }
           ],
           "metrics": {
-            "estimated_duration_s": null
+            "composition_ids_by_fidelity": {
+              "point_mass_3dof": "hl20-glide-energy-capability-3dof-v1",
+              "pseudo_6dof": "hl20-glide-energy-capability-pseudo6dof-v1"
+            },
+            "estimated_duration_s": null,
+            "preflight_status_by_fidelity": {
+              "point_mass_3dof": "translation_ready",
+              "pseudo_6dof": "translation_ready"
+            },
+            "realization_count": 2
           },
           "stage_id": "mission",
-          "status": "blocked"
+          "status": "development"
         }
       ],
-      "status": "blocked"
+      "status": "development_ready_with_gates"
     }
   ],
   "schema_version": "taoryx.vehicle-integration-pipeline/v1"

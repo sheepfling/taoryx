@@ -28,7 +28,7 @@ from .composition_episode import (
     open_vehicle_composition_episode,
 )
 from .vehicle_composition import CompiledVehicleComposition
-from .vehicle_interface import VehicleInterfaceContract
+from .vehicle_interface import VehicleInterfaceContract, project_authority_action_values
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,6 +64,7 @@ class CompositionPolicyTrace:
     final_observation: ObservationFrame
     final_status: StatusFrame
     stopped_by_policy: bool
+    integration_step_s: float | None = None
 
     def as_dict(self) -> dict[str, object]:
         """Return the complete semantic action and committed-truth trace."""
@@ -81,6 +82,7 @@ class CompositionPolicyTrace:
             "final_observation": self.final_observation.as_dict(),
             "final_status": self.final_status.as_dict(),
             "stopped_by_policy": self.stopped_by_policy,
+            "integration_step_s": self.integration_step_s,
         }
         ####
     ####
@@ -163,12 +165,19 @@ def run_composition_policy(
                 observation,
                 episode.status_frame(),
                 True,
+                _episode_integration_step(episode),
             )
+        projected_values = project_authority_action_values(
+            contract,
+            authority_profile_id,
+            decision.values,
+            context=f"policy decision for authority profile {authority_profile_id!r}",
+        )
         frame = ActionFrame(
             contract.id,
             contract.fingerprint,
             authority_profile_id,
-            decision.values,
+            projected_values,
             decision.duration_s,
         )
         step = episode.step_frame(frame)
@@ -240,7 +249,11 @@ def replay_serialized_composition_policy_trace(
     trace_identity = _text(payload, "composition_identity_sha256")
     if trace_composition_id != composition.id or trace_identity != composition.identity_sha256:
         raise ValueError("policy trace composition identity disagrees with the requested replay composition")
-    episode = open_vehicle_composition_episode(composition, seed=seed)
+    episode = open_vehicle_composition_episode(
+        composition,
+        seed=seed,
+        integration_step_s=_serialized_integration_step(payload),
+    )
     try:
         contract = episode.interface_contract
         if _text(payload, "interface_id") != contract.id or _text(payload, "interface_fingerprint_sha256") != contract.fingerprint:
@@ -323,6 +336,30 @@ def _text(payload: Mapping[str, object], key: str) -> str:
     if not isinstance(value, str) or not value:
         raise ValueError(f"policy trace {key} must be nonempty text")
     return value
+    ####
+
+
+def _episode_integration_step(episode: VehicleCompositionEpisode) -> float | None:
+    """Capture an explicitly declared native substep when a witness owns one."""
+
+    value = getattr(episode, "integration_step_s", None)
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int | float) or value <= 0.0:
+        raise ValueError("episode integration_step_s must be a positive numeric value when exposed")
+    return float(value)
+    ####
+
+
+def _serialized_integration_step(payload: Mapping[str, object]) -> float:
+    """Read an optional persisted substep without imposing one on legacy traces."""
+
+    value = payload.get("integration_step_s")
+    if value is None:
+        return 0.02
+    if isinstance(value, bool) or not isinstance(value, int | float) or value <= 0.0:
+        raise ValueError("policy trace integration_step_s must be positive numeric or null")
+    return float(value)
     ####
 
 

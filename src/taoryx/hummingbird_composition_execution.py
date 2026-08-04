@@ -15,6 +15,11 @@ import math
 from dataclasses import dataclass, replace
 from pathlib import Path
 
+from .composition_control_trace import BatchControlSample, build_committed_control_trace, control_trace_summary
+from .composition_evaluation import build_composition_trajectory_evaluation
+from .composition_graph_evidence import GraphOutcome
+from .composition_graph_runtime import GraphSegmentExecution, execute_compiled_mission_graph
+from .composition_resource_ledger import build_committed_resource_ledger, resource_ledger_summary
 from .composition_sensor_trace import BatchTruthSample, build_declared_sensor_trace
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .hummingbird_mission_translation import (
@@ -23,7 +28,8 @@ from .hummingbird_mission_translation import (
     compile_hummingbird_pseudo_mission,
 )
 from .trajectory import HummingbirdPseudo6DOFCommand, HummingbirdPseudo6DOFModel, HummingbirdPseudo6DOFState
-from .vehicle_composition import CompiledVehicleComposition
+from .variant_runtime_evidence import build_variant_runtime_evidence
+from .vehicle_composition import CompiledMissionGraphNode, CompiledVehicleComposition
 from .vehicle_execution_preflight import VehicleExecutionPreflight, preflight_vehicle_composition
 
 _POSITION_TOLERANCE_M = 0.18
@@ -47,6 +53,7 @@ class HummingbirdCompositionExecution:
     controller_transitions: tuple[dict[str, object], ...]
     sensor_trace: dict[str, object] | None
     status_trace: dict[str, object]
+    control_trace: dict[str, object]
     claim_boundary: str
 
     @property
@@ -54,12 +61,7 @@ class HummingbirdCompositionExecution:
         """Return the hard conjunction for this nominal source-owned run."""
 
         transitions_valid = all(item["reason"] in {"CAPTURED", "DWELL_COMPLETE", "EVENT_COMPLETE"} for item in self.controller_transitions)
-        return (
-            bool(self.runtime["hard_gates_passed"])
-            and bool(self.envelope["pass"])
-            and bool(self.truth_evaluation["mission_pass"])
-            and transitions_valid
-        )
+        return bool(self.runtime["hard_gates_passed"]) and bool(self.envelope["pass"]) and bool(self.truth_evaluation["mission_pass"]) and transitions_valid
         ####
 
     def as_dict(self) -> dict[str, object]:
@@ -78,10 +80,12 @@ class HummingbirdCompositionExecution:
             "controller_transitions": list(self.controller_transitions),
             "sensor_trace": _sensor_trace_summary(self.sensor_trace),
             "status_trace": status_trace_summary(self.status_trace),
+            "control_trace": control_trace_summary(self.control_trace),
             "mission_pass": self.mission_pass,
             "claim_boundary": self.claim_boundary,
         }
         ####
+
     ####
 
 
@@ -110,19 +114,44 @@ def execute_hummingbird_pseudo_composition(
         raise ValueError(f"execution output directory must be empty: {destination}")
     destination.mkdir(parents=True, exist_ok=True)
 
-    model = HummingbirdPseudo6DOFModel()
+    model = HummingbirdPseudo6DOFModel(mass_kg=plan.initial_mass_kg)
     state = _initial_state(model, plan)
-    initial_sensor_sample = _hummingbird_sensor_sample(state, execution_status="ready")
+    initial_sensor_sample = _hummingbird_sensor_sample(state, execution_status="ready", mass_kg=model.mass_kg)
     rows: list[dict[str, object]] = []
     transitions: list[dict[str, object]] = []
-    successful = True
-    for segment in plan.segments:
-        state, segment_rows, transition = _run_segment(model, state, segment, dt_s)
+    segments_by_instance = {segment.instance_id: segment for segment in plan.segments}
+
+    def execute_segment(
+        node: CompiledMissionGraphNode,
+        current_state: HummingbirdPseudo6DOFState,
+    ) -> GraphSegmentExecution[HummingbirdPseudo6DOFState, tuple[list[dict[str, object]], dict[str, object]]]:
+        segment = segments_by_instance.get(node.instance_id)
+        if segment is None:
+            raise RuntimeError(f"Hummingbird graph refers to unknown segment {node.instance_id!r}")
+        terminal_state, segment_rows, transition = _run_segment(model, current_state, segment, dt_s)
+        return GraphSegmentExecution(
+            segment_id=segment.segment_id,
+            outcome=_outcome_for_transition_reason(str(transition["reason"])),
+            committed_time_s=_number(transition["time_s"]),
+            terminal_state=terminal_state,
+            payload=(segment_rows, transition),
+        )
+        ####
+
+    graph_run = execute_compiled_mission_graph(composition, state, execute_segment)
+    for step in graph_run.steps:
+        segment_rows, transition = step.execution.payload
         rows.extend(segment_rows)
+        transition.update(
+            {
+                "graph_outcome": step.dispatch.outcome,
+                "graph_transition_status": step.dispatch.transition_status,
+                "next_instance_id": step.dispatch.next_instance_id,
+                "state_transfer": step.dispatch.state_transfer,
+            }
+        )
         transitions.append(transition)
-        if transition["reason"] not in {"CAPTURED", "DWELL_COMPLETE", "EVENT_COMPLETE"}:
-            successful = False
-            break
+    successful = all(step.execution.outcome == "success" for step in graph_run.steps)
 
     finite = _finite_rows(rows)
     envelope = _envelope_report(rows, model, plan)
@@ -139,19 +168,31 @@ def execute_hummingbird_pseudo_composition(
             _hummingbird_sensor_sample(
                 _state_from_row(row),
                 execution_status="completed" if index == len(rows) - 1 else "active",
+                mass_kg=model.mass_kg,
             )
         )
     sensor_trace = build_declared_sensor_trace(composition, tuple(sensor_samples))
     status_trace = build_committed_status_trace(composition, tuple(sensor_samples))
+    resource_ledger = build_committed_resource_ledger(composition, status_trace)
+    control_trace = build_committed_control_trace(composition, _control_samples(initial_sensor_sample.time_s, rows))
+    variant_runtime_evidence = build_variant_runtime_evidence(
+        composition,
+        status_trace,
+        consumed_native_inputs={"HummingbirdPseudo6DOFModel.mass_kg": model.mass_kg},
+    )
     runtime: dict[str, object] = {
         "adapter_id": "taoryx.multirotor.aggregate_thrust_pseudo6dof.v1",
         "response_profile_id": model.profile_id,
         "control_realization": "aggregate_thrust_vector_surrogate",
         "physical_motor_allocation": False,
+        "initial_mass_kg": model.mass_kg,
         "dt_s": dt_s,
         "duration_s": _number(rows[-1]["time_s"]) if rows else 0.0,
         "numerical_valid": finite,
-        "hard_gates_passed": successful and finite and bool(envelope["pass"]),
+        "hard_gates_passed": successful and finite and bool(envelope["pass"]) and variant_runtime_evidence["status"] in {"pass", "not_applicable"},
+        "mission_graph_execution": graph_run.evidence.as_dict(),
+        "variant_runtime_evidence": variant_runtime_evidence,
+        "resource_ledger": resource_ledger_summary(resource_ledger),
     }
     result = HummingbirdCompositionExecution(
         composition=composition,
@@ -164,6 +205,7 @@ def execute_hummingbird_pseudo_composition(
         controller_transitions=tuple(transitions),
         sensor_trace=sensor_trace,
         status_trace=status_trace,
+        control_trace=control_trace,
         claim_boundary=(
             "This is a source-owned nominal Hummingbird pseudo-6DOF mission using a bounded aggregate "
             "thrust-vector and attitude-response model. It proves only the declared hover/yaw/translation/contact "
@@ -176,14 +218,42 @@ def execute_hummingbird_pseudo_composition(
     _write_json(destination / "preflight.json", preflight.as_dict())
     _write_json(destination / "plan.json", plan.manifest())
     _write_json(destination / "runtime_report.json", runtime)
+    _write_json(destination / "mission_graph_execution.json", runtime["mission_graph_execution"])
+    _write_json(destination / "variant_runtime_evidence.json", runtime["variant_runtime_evidence"])
     _write_json(destination / "envelope_report.json", envelope)
     _write_json(destination / "controller_transitions.json", list(transitions))
     _write_json(destination / "objective_report.json", evaluation)
     if sensor_trace is not None:
         _write_json(destination / "sensor_observations.json", sensor_trace)
     _write_json(destination / "status_trace.json", status_trace)
+    _write_json(destination / "resource_ledger.json", resource_ledger)
+    _write_json(destination / "semantic_action_trace.json", control_trace)
+    _write_json(
+        destination / "evaluation.json",
+        build_composition_trajectory_evaluation(
+            composition,
+            preflight,
+            evaluation,
+            runtime=runtime,
+            envelope=envelope,
+            claim_boundary=result.claim_boundary,
+            status_trace=status_trace,
+            control_trace=control_trace,
+        ).as_dict(),
+    )
     _write_json(destination / "execution.json", result.as_dict())
     return result
+    ####
+
+
+def _outcome_for_transition_reason(reason: str) -> GraphOutcome:
+    """Map controller diagnostics to the only graph outcomes this runner emits."""
+
+    if reason in {"CAPTURED", "DWELL_COMPLETE", "EVENT_COMPLETE"}:
+        return "success"
+    if reason == "TIMEOUT_SKIP":
+        return "timeout"
+    return "abort"
     ####
 
 
@@ -511,7 +581,9 @@ def _captured(
 
 
 def _ground_settled(state: HummingbirdPseudo6DOFState, target_world: tuple[float, float, float]) -> bool:
-    return state.contact and _distance(state.position_m, target_world) <= _GROUND_POSITION_TOLERANCE_M and _norm(state.velocity_m_s) <= _GROUND_SPEED_TOLERANCE_M_S
+    return (
+        state.contact and _distance(state.position_m, target_world) <= _GROUND_POSITION_TOLERANCE_M and _norm(state.velocity_m_s) <= _GROUND_SPEED_TOLERANCE_M_S
+    )
     ####
 
 
@@ -537,6 +609,7 @@ def _hummingbird_sensor_sample(
     state: HummingbirdPseudo6DOFState,
     *,
     execution_status: str,
+    mass_kg: float,
 ) -> BatchTruthSample:
     """Return the same raw observation layout used by the Hummingbird episode."""
 
@@ -550,6 +623,7 @@ def _hummingbird_sensor_sample(
             "attitude_rad": list(state.attitude_rad),
             "body_rate_rad_s": list(state.attitude_rate_rad_s),
             "battery_fraction": state.battery_fraction,
+            "mass_kg": mass_kg,
             "aggregate_thrust_n": state.thrust_n,
             "contact": state.contact,
             "control_realization": "aggregate_thrust_vector_surrogate",
@@ -557,6 +631,41 @@ def _hummingbird_sensor_sample(
         },
         execution_status=execution_status,
     )
+    ####
+
+
+def _control_samples(
+    initial_time_s: float,
+    rows: list[dict[str, object]],
+) -> tuple[BatchControlSample, ...]:
+    """Bind held aggregate-response commands to their committed truth rows.
+
+    Hummingbird's pseudo-6DOF interface publishes no physical effector channel,
+    so ``achieved_effectors`` remains empty. The aggregate thrust response is
+    available in the status trace instead and must not be relabeled as motor
+    allocation.
+    """
+
+    samples: list[BatchControlSample] = []
+    interval_start_time_s = initial_time_s
+    for row in rows:
+        committed_truth_time_s = _number(row["time_s"])
+        samples.append(
+            BatchControlSample(
+                interval_start_time_s=interval_start_time_s,
+                committed_truth_time_s=committed_truth_time_s,
+                requested_actions={
+                    "attitude.roll.command": _number(row["commanded_roll_rad"]),
+                    "attitude.pitch.command": _number(row["commanded_pitch_rad"]),
+                    "attitude.yaw.command": _number(row["commanded_yaw_rad"]),
+                    "propulsion.command.fraction": _number(row["commanded_thrust_ratio"]),
+                    "propulsion.enable": bool(row["motors_enabled"]),
+                },
+                achieved_effectors={},
+            )
+        )
+        interval_start_time_s = committed_truth_time_s
+    return tuple(samples)
     ####
 
 
@@ -587,9 +696,7 @@ def _envelope_report(
     tilt_margin = math.inf
     battery_margin = math.inf
     translation_speed_margin = math.inf
-    speed_limit_by_instance = {
-        segment.instance_id: segment.maximum_speed_m_s for segment in plan.segments if segment.maximum_speed_m_s is not None
-    }
+    speed_limit_by_instance = {segment.instance_id: segment.maximum_speed_m_s for segment in plan.segments if segment.maximum_speed_m_s is not None}
     for row in rows:
         body_rate = _three(row["body_rate_rad_s"])
         attitude = _three(row["achieved_attitude_rad"])
@@ -599,13 +706,7 @@ def _envelope_report(
         speed_limit = speed_limit_by_instance.get(str(row["segment_instance_id"]))
         if speed_limit is not None:
             translation_speed_margin = min(translation_speed_margin, speed_limit - _norm(_three(row["velocity_m_s"])))
-    passed = (
-        bool(rows)
-        and rate_margin >= -1.0e-9
-        and tilt_margin >= -1.0e-9
-        and battery_margin >= -1.0e-9
-        and translation_speed_margin >= -1.0e-9
-    )
+    passed = bool(rows) and rate_margin >= -1.0e-9 and tilt_margin >= -1.0e-9 and battery_margin >= -1.0e-9 and translation_speed_margin >= -1.0e-9
     return {
         "pass": passed,
         "minimum_margins": {
@@ -693,12 +794,7 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
         writer = csv.DictWriter(stream, fieldnames=columns)
         writer.writeheader()
         for row in rows:
-            writer.writerow(
-                {
-                    key: json.dumps(value, separators=(",", ":")) if isinstance(value, list | dict) else value
-                    for key, value in row.items()
-                }
-            )
+            writer.writerow({key: json.dumps(value, separators=(",", ":")) if isinstance(value, list | dict) else value for key, value in row.items()})
     ####
 
 

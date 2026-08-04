@@ -6,12 +6,12 @@ from taoryx.family_adapter import (
     validate_family_adapter,
 )
 from taoryx.hl20_adapter import build_hl20_source_surface_adapter
+from taoryx.source_table_fixed_wing import build_x8_source_table_plant
 from tools.validate_hummingbird_physical_lqr import build_plant as build_hummingbird_plant
-from tools.validate_x8_physical_lqr import build_plant as build_x8_plant
 
 
 def test_x8_source_table_plant_uses_the_common_surface_adapter_contract() -> None:
-    plant = build_x8_plant()
+    plant = build_x8_source_table_plant()
     descriptor = descriptor_from_control_plant(
         plant,
         family_id="skywalker_x8",

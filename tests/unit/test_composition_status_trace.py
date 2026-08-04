@@ -7,6 +7,7 @@ from typing import cast
 
 import pytest
 
+from taoryx.composition_resource_ledger import build_committed_resource_ledger, validate_committed_resource_ledger
 from taoryx.composition_sensor_trace import BatchTruthSample
 from taoryx.composition_status_trace import build_committed_status_trace, validate_committed_status_trace
 from taoryx.vehicle_composition import CompiledVehicleComposition, compile_vehicle_composition, load_vehicle_composition_request
@@ -52,9 +53,7 @@ def test_batch_status_trace_projects_declared_x15_resources_without_interpolatio
     assert terminal["resources.booster.attached"] is False
     assert terminal["resources.booster.propellant.consumed"] == pytest.approx(2000.0)
     assert terminal["velocity.speed"] == pytest.approx((500.0**2 + 5.0**2) ** 0.5)
-    validate_committed_status_trace(
-        _composition("x15_staged_booster_reachability_pseudo6dof_compose.yaml"), trace
-    )
+    validate_committed_status_trace(_composition("x15_staged_booster_reachability_pseudo6dof_compose.yaml"), trace)
     ####
 
 
@@ -109,4 +108,37 @@ def test_batch_status_trace_validator_rejects_a_malformed_declared_value() -> No
 
     with pytest.raises(ValueError, match="resources.booster.propellant.consumed.*finite scalar"):
         validate_committed_status_trace(composition, trace)
+    ####
+
+
+def test_committed_resource_ledger_copies_declared_samples_without_resource_inference() -> None:
+    composition = _composition("x15_staged_booster_reachability_pseudo6dof_compose.yaml")
+    status_trace = build_committed_status_trace(
+        composition,
+        (_x15_sample(0.0, phase="boost"), _x15_sample(25.0, phase="glide")),
+    )
+
+    ledger = build_committed_resource_ledger(composition, status_trace)
+
+    assert ledger["schema"] == "taoryx.composition-resource-ledger/v1alpha1"
+    assert ledger["sampling"] == "committed_truth_boundary_only"
+    summaries = cast(list[dict[str, object]], ledger["summaries"])
+    propellant = next(item for item in summaries if item["id"] == "resources.booster.propellant.consumed")
+    assert propellant["trend"] == "nondecreasing"
+    assert propellant["initial_value"] == pytest.approx(0.0)
+    assert propellant["final_value"] == pytest.approx(2000.0)
+    validate_committed_resource_ledger(composition, ledger, status_trace=status_trace)
+    ####
+
+
+def test_committed_resource_ledger_rejects_a_sample_detached_from_status_truth() -> None:
+    composition = _composition("x15_staged_booster_reachability_pseudo6dof_compose.yaml")
+    status_trace = build_committed_status_trace(composition, (_x15_sample(0.0, phase="boost"),))
+    ledger = build_committed_resource_ledger(composition, status_trace)
+    samples = cast(list[dict[str, object]], ledger["samples"])
+    values = cast(dict[str, object], samples[0]["values"])
+    values["resources.mass.total"] = -1.0
+
+    with pytest.raises(ValueError, match="disagrees with the composition status trace"):
+        validate_committed_resource_ledger(composition, ledger, status_trace=status_trace)
     ####

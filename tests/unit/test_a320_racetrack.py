@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import replace
 from pathlib import Path
 
@@ -13,10 +14,12 @@ from taoryx.powered_fixed_wing_mission_compiler import (
 )
 from taoryx.racetrack_template import load_racetrack_template_catalog
 from taoryx.trajectory import (
+    A320GuidanceOverride,
     A320OpenAPModel,
     A320OpenAPOperatingPoint,
     A320Pseudo6DOFModel,
     A320RacetrackRunner,
+    A320RacetrackStepper,
 )
 from taoryx.trajectory.pseudo6dof_profiles import load_pseudo6dof_catalog
 from tools.validate_a320_racetrack import run_case
@@ -91,6 +94,72 @@ def test_a320_pseudo6dof_can_use_shared_catalog_response_law() -> None:
 
     assert run.numerical_valid is True
     assert {row["response_profile_id"] for row in run.rows} == {profile.id}
+    ####
+
+
+def test_a320_stepper_owns_committed_state_without_telemetry_replay() -> None:
+    catalog = load_racetrack_template_catalog(ROOT / "verification/racetrack_templates.yaml")
+    route = catalog.get("a320-openap-3dof")
+    model = A320OpenAPModel.from_repository(ROOT)
+    trim = model.trim_level_flight(A320OpenAPOperatingPoint(10500.0, 0.78, 60000.0))
+    runner = A320RacetrackRunner(model, trim, route, "point_mass_3dof", dt_s=0.2)
+    stepper = A320RacetrackStepper(runner)
+
+    first = stepper.current_row()
+    rows = stepper.step(2.0)
+    committed = stepper.current_row()
+
+    assert first["time_s"] == 0.0
+    assert len(rows) == 10
+    assert math.isclose(stepper.state.time_s, 2.0, abs_tol=1.0e-12)
+    assert math.isclose(float(committed["time_s"]), 2.0, abs_tol=1.0e-12)
+    assert float(committed["east_m"]) > float(first["east_m"])
+    assert stepper.state.numerical_valid is True
+    ####
+
+
+def test_a320_stepper_default_path_matches_the_batch_runner_at_shared_boundaries() -> None:
+    catalog = load_racetrack_template_catalog(ROOT / "verification/racetrack_templates.yaml")
+    route = catalog.get("a320-openap-3dof")
+    model = A320OpenAPModel.from_repository(ROOT)
+    trim = model.trim_level_flight(A320OpenAPOperatingPoint(10500.0, 0.78, 60000.0))
+    runner = A320RacetrackRunner(model, trim, route, "point_mass_3dof", dt_s=0.2)
+
+    batch_rows = runner.run(duration_s=2.0).rows
+    stepper_rows = A320RacetrackStepper(runner).step(2.0)
+
+    assert len(batch_rows) >= len(stepper_rows)
+    for batch, stepped in zip(batch_rows, stepper_rows):
+        for channel in ("time_s", "north_m", "east_m", "altitude_m", "speed_m_s", "mass_kg"):
+            assert math.isclose(float(batch[channel]), float(stepped[channel]), abs_tol=1.0e-12)
+    ####
+
+
+def test_a320_pseudo_stepper_applies_held_guidance_without_surface_claim() -> None:
+    catalog = load_racetrack_template_catalog(ROOT / "verification/racetrack_templates.yaml")
+    route = catalog.get("a320-openap-pseudo6dof")
+    model = A320Pseudo6DOFModel.from_repository(ROOT)
+    trim = model.trim_pseudo6dof(A320OpenAPOperatingPoint(10500.0, 0.78, 60000.0))
+    stepper = A320RacetrackStepper(
+        A320RacetrackRunner(model, trim, route, "pseudo_6dof_kinematic_bridge", dt_s=0.2)
+    )
+
+    rows = stepper.step(
+        2.0,
+        A320GuidanceOverride(
+            heading_rad=0.0,
+            flight_path_angle_rad=0.05,
+            bank_angle_rad=0.15,
+        ),
+    )
+    committed = stepper.current_row(A320GuidanceOverride(heading_rad=0.0, bank_angle_rad=0.15))
+
+    assert len(rows) == 10
+    assert float(committed["route_heading_command_deg"]) == 0.0
+    assert float(committed["route_bank_command_deg"]) > 0.0
+    assert float(committed["route_bank_achieved_deg"]) != 0.0
+    assert committed["allocation_status"] == "surrogate_policy_overlay"
+    assert stepper.state.numerical_valid is True
     ####
 
 

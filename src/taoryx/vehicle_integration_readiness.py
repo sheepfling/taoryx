@@ -12,7 +12,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import yaml
 
@@ -21,12 +21,8 @@ from .vehicle_registry import ROOT
 
 SUPPORTED_FAMILIES = ROOT / "verification/supported_reference_families.yaml"
 FAMILY_ROOT = ROOT / "families"
-STANDARD_PROFILES: tuple[tuple[FidelityTier, str], ...] = tuple(
-    (tier, runtime_fidelity_for(tier)) for tier in CANONICAL_FIDELITY_TIERS
-)
-QUALIFIED_STATUSES = frozenset(
-    {"equivalence_passed", "multi_fidelity_qualified", "qualified", "runtime_replay_qualification_passed"}
-)
+STANDARD_PROFILES: tuple[tuple[FidelityTier, str], ...] = tuple((tier, runtime_fidelity_for(tier)) for tier in CANONICAL_FIDELITY_TIERS)
+QUALIFIED_STATUSES = frozenset({"equivalence_passed", "multi_fidelity_qualified", "qualified", "runtime_replay_qualification_passed"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,6 +46,7 @@ class IntegrationReadinessFinding:
             "hint": self.hint,
         }
         ####
+
     ####
 
 
@@ -80,7 +77,7 @@ class FidelityProfileReadiness:
             "profile_id": self.profile_id,
             "tier": self.tier or self.runtime_fidelity,
             "runtime_fidelity": self.runtime_fidelity,
-            "control_realization": control_realization_for(cast(FidelityTier, self.tier)) if self.tier in CANONICAL_FIDELITY_TIERS else "unspecified",
+            "control_realization": (control_realization_for(self.tier) if self.tier in CANONICAL_FIDELITY_TIERS else "unspecified"),
             "declared": self.declared,
             "declared_status": self.declared_status,
             "metadata_ready": self.metadata_ready,
@@ -89,6 +86,7 @@ class FidelityProfileReadiness:
             "findings": [item.as_dict() for item in self.findings],
         }
         ####
+
     ####
 
 
@@ -129,6 +127,7 @@ class VehicleIntegrationReadinessReport:
             "profiles": [profile.as_dict() for profile in self.profiles],
         }
         ####
+
     ####
 
 
@@ -187,18 +186,46 @@ def _check_manifest(manifest_path: Path, family_id: str, manifest: Mapping[str, 
             _finding(findings, "error", code, f"{manifest_path}:{path}", f"required manifest field {path!r} is missing", hint)
     bindings = manifest.get("bindings")
     if not isinstance(bindings, Sequence) or isinstance(bindings, (str, bytes)) or not bindings:
-        _finding(findings, "error", "bindings-missing", f"{manifest_path}:bindings", "no family binding files are declared", "Declare canonical controls, observations, envelope, source lock, and qualification bindings.")
+        _finding(
+            findings,
+            "error",
+            "bindings-missing",
+            f"{manifest_path}:bindings",
+            "no family binding files are declared",
+            "Declare canonical controls, observations, envelope, source lock, and qualification bindings.",
+        )
     else:
         for binding in bindings:
             binding_path = ROOT / manifest_path.parent.relative_to(ROOT) / str(binding)
             if not binding_path.is_file():
-                _finding(findings, "error", "binding-artifact-missing", str(binding_path.relative_to(ROOT)), f"declared binding {binding!r} does not exist", "Create the binding artifact or correct its relative path.")
+                _finding(
+                    findings,
+                    "error",
+                    "binding-artifact-missing",
+                    str(binding_path.relative_to(ROOT)),
+                    f"declared binding {binding!r} does not exist",
+                    "Create the binding artifact or correct its relative path.",
+                )
     layers = manifest.get("layers")
     if not isinstance(layers, Mapping) or not layers:
-        _finding(findings, "warning", "layer-evidence-missing", f"{manifest_path}:layers", "no layer evidence map is declared", "Add trim, linearization, controls, reductions, and scenario evidence references as they become available.")
+        _finding(
+            findings,
+            "warning",
+            "layer-evidence-missing",
+            f"{manifest_path}:layers",
+            "no layer evidence map is declared",
+            "Add trim, linearization, controls, reductions, and scenario evidence references as they become available.",
+        )
     source_status = str(_lookup(manifest, "source.availability"))
     if source_status not in {"local_corpus_input_verified", "source_package_verified", "available"}:
-        _finding(findings, "warning", "source-availability-unverified", f"{manifest_path}:source.availability", f"source availability is declared as {source_status!r}", "Verify the source payload before runtime replay.")
+        _finding(
+            findings,
+            "warning",
+            "source-availability-unverified",
+            f"{manifest_path}:source.availability",
+            f"source availability is declared as {source_status!r}",
+            "Verify the source payload before runtime replay.",
+        )
     return findings
     ####
 
@@ -212,15 +239,43 @@ def _profile_report(
 ) -> FidelityProfileReadiness:
     findings: list[IntegrationReadinessFinding] = []
     if profile is None:
-        _finding(findings, "error", "profile-not-declared", f"{manifest_path}:fidelity_profiles", f"expected profile for {runtime_fidelity!r} is not declared", "Add a named profile or explicitly remove this tier from the family support contract.")
+        _finding(
+            findings,
+            "error",
+            "profile-not-declared",
+            f"{manifest_path}:fidelity_profiles",
+            f"expected profile for {runtime_fidelity!r} is not declared",
+            "Add a named profile or explicitly remove this tier from the family support contract.",
+        )
         return FidelityProfileReadiness(profile_id, runtime_fidelity, False, "not_declared", False, False, tuple(findings), tier)
     status = str(profile.get("status", "undeclared_status"))
     if not _present(profile.get("equations")):
-        _finding(findings, "error", "profile-equations-missing", f"{manifest_path}:fidelity_profiles.{profile_id}.equations", "profile has no equation declaration", "List the equations actually executed by this fidelity realization.")
+        _finding(
+            findings,
+            "error",
+            "profile-equations-missing",
+            f"{manifest_path}:fidelity_profiles.{profile_id}.equations",
+            "profile has no equation declaration",
+            "List the equations actually executed by this fidelity realization.",
+        )
     if not _present(profile.get("data_contract")):
-        _finding(findings, "error", "profile-data-contract-missing", f"{manifest_path}:fidelity_profiles.{profile_id}.data_contract", "profile has no data contract", "Declare the minimum inputs and evidence expected by this fidelity.")
+        _finding(
+            findings,
+            "error",
+            "profile-data-contract-missing",
+            f"{manifest_path}:fidelity_profiles.{profile_id}.data_contract",
+            "profile has no data contract",
+            "Declare the minimum inputs and evidence expected by this fidelity.",
+        )
     if not _present(profile.get("omitted_physics")):
-        _finding(findings, "warning", "profile-nonclaims-missing", f"{manifest_path}:fidelity_profiles.{profile_id}.omitted_physics", "omitted physics are not listed", "List omitted physics so automatic lowering and reports remain honest.")
+        _finding(
+            findings,
+            "warning",
+            "profile-nonclaims-missing",
+            f"{manifest_path}:fidelity_profiles.{profile_id}.omitted_physics",
+            "omitted physics are not listed",
+            "List omitted physics so automatic lowering and reports remain honest.",
+        )
     metadata_ready = not any(item.severity == "error" for item in findings)
     return FidelityProfileReadiness(
         profile_id,
@@ -240,10 +295,14 @@ def validate_vehicle_integration_readiness(family_id: str) -> VehicleIntegration
 
     registry = _load_yaml(SUPPORTED_FAMILIES)
     entries = registry.get("families")
-    entry = next(
-        (item for item in entries if isinstance(item, Mapping) and str(item.get("id")) == family_id),
-        None,
-    ) if isinstance(entries, list) else None
+    entry = (
+        next(
+            (item for item in entries if isinstance(item, Mapping) and str(item.get("id")) == family_id),
+            None,
+        )
+        if isinstance(entries, list)
+        else None
+    )
     if not isinstance(entry, Mapping):
         raise KeyError(f"unknown supported reference family {family_id!r}")
     manifest_label = str(entry.get("manifest", ""))
@@ -255,23 +314,15 @@ def validate_vehicle_integration_readiness(family_id: str) -> VehicleIntegration
     declared_profiles = manifest.get("fidelity_profiles")
 
     def select_profile(runtime: str, expected_label: FidelityTier) -> Mapping[str, Any] | None:
-        candidates = [
-            item
-            for item in declared_profiles
-            if isinstance(item, Mapping) and str(item.get("runtime_fidelity")) == runtime
-        ] if isinstance(declared_profiles, list) else []
+        candidates = (
+            [item for item in declared_profiles if isinstance(item, Mapping) and str(item.get("runtime_fidelity")) == runtime]
+            if isinstance(declared_profiles, list)
+            else []
+        )
         if runtime == "rigid_body_6dof":
-            preferred = [
-                item
-                for item in candidates
-                if str(item.get("control_realization", "")) == control_realization_for(expected_label)
-            ]
+            preferred = [item for item in candidates if str(item.get("control_realization", "")) == control_realization_for(expected_label)]
             if not preferred:
-                preferred = [
-                    item
-                    for item in candidates
-                    if expected_label.removeprefix("rigid_body_6dof_") in str(item.get("profile_id", ""))
-                ]
+                preferred = [item for item in candidates if expected_label.removeprefix("rigid_body_6dof_") in str(item.get("profile_id", ""))]
             if preferred:
                 return preferred[0]
             if expected_label != "rigid_body_6dof":
@@ -281,19 +332,12 @@ def validate_vehicle_integration_readiness(family_id: str) -> VehicleIntegration
     profile_reports: list[FidelityProfileReadiness] = []
     for expected_label, runtime in STANDARD_PROFILES:
         profile = select_profile(runtime, expected_label)
-        profile_id = (
-            str(profile.get("profile_id", f"{family_id}.{expected_label}"))
-            if profile is not None
-            else f"{family_id}.{expected_label}"
-        )
+        profile_id = str(profile.get("profile_id", f"{family_id}.{expected_label}")) if profile is not None else f"{family_id}.{expected_label}"
         profile_reports.append(_profile_report(manifest_path, profile_id, expected_label, runtime, profile))
     profiles = tuple(profile_reports)
     all_errors = any(item.severity == "error" for item in findings) or any(profile.errors for profile in profiles)
     status = "blocked" if all_errors else "ready_for_runtime_probes"
-    if not all_errors and (
-        any(item.findings for item in profiles)
-        or any(item.severity == "warning" for item in findings)
-    ):
+    if not all_errors and (any(item.findings for item in profiles) or any(item.severity == "warning" for item in findings)):
         status = "ready_with_warnings"
     return VehicleIntegrationReadinessReport(
         family_id,

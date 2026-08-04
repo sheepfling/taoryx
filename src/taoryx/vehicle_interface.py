@@ -23,6 +23,12 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
 from .fidelity_contracts import FidelityTier
+from .interface_channel_value_spaces import interface_channel_value_space_profile, value_space_for_interface_channel_profile
+from .value_space import (
+    ValueSpaceSpec,
+    default_value_space_for_value_type,
+    validate_value_space_value,
+)
 from .vehicle_composition_registry import resolved_control_realization_for
 from .vehicle_execution_bindings import bindings_for_family
 
@@ -63,6 +69,27 @@ ProvenanceKind = Literal["source_backed", "derived", "engineering_surrogate", "s
 SCHEMA_ID = "taoryx.vehicle-interface/v1alpha1"
 
 
+def _declared_value_space(
+    identifier: str,
+    value_type: InterfaceValueType,
+    canonical_unit: str | None,
+    lower: float | None,
+    upper: float | None,
+) -> ValueSpaceSpec:
+    """Return the centrally reviewed value-space declaration for one channel.
+
+    Public registry channels resolve from the versioned interface-channel
+    catalog. The primitive fallback exists only for standalone fixtures and
+    is never accepted by the public interface topology audit.
+    """
+
+    profile = interface_channel_value_space_profile(identifier)
+    if profile is not None:
+        return value_space_for_interface_channel_profile(profile, canonical_unit=canonical_unit)
+    return default_value_space_for_value_type(value_type)
+    ####
+
+
 @dataclass(frozen=True, slots=True)
 class InterfaceChannel:
     """One stable semantic channel and its exact native binding boundary."""
@@ -81,6 +108,7 @@ class InterfaceChannel:
     sampling: SamplingSemantics = "truth_boundary"
     binding: Mapping[str, object] = field(default_factory=dict)
     claim_boundary: str = ""
+    value_space: ValueSpaceSpec | None = None
 
     def __post_init__(self) -> None:
         if not self.id.strip() or not self.description.strip():
@@ -93,16 +121,47 @@ class InterfaceChannel:
             raise ValueError(f"interface channel {self.id!r} has inverted bounds")
         if self.availability == "available" and not self.claim_boundary.strip():
             raise ValueError(f"available channel {self.id!r} requires a claim boundary")
+        if self.value_space is None:
+            object.__setattr__(
+                self,
+                "value_space",
+                _declared_value_space(self.id, self.value_type, self.canonical_unit, self.lower, self.upper),
+            )
+        value_space = self.value_space
+        if value_space is None:
+            raise ValueError(f"interface channel {self.id!r} requires a value-space declaration")
+        expected_representation = {
+            "scalar": "scalar",
+            "vector3": "vector3",
+            "vector4": "vector4",
+            "boolean": "boolean",
+            "enum": "string",
+            "event": "string",
+        }[self.value_type]
+        if not value_space.representation.startswith(expected_representation):
+            raise ValueError(
+                f"interface channel {self.id!r} has {self.value_type!r} storage but "
+                f"value-space representation {value_space.representation!r}"
+            )
         ####
     ####
 
     def as_dict(self) -> dict[str, object]:
         """Return the channel as a serialized interface-schema entry."""
 
+        value_space = self.value_space
+        if value_space is None:
+            raise ValueError(f"interface channel {self.id!r} is missing its value-space declaration")
         return {
             "id": self.id,
             "kind": self.kind,
             "value_type": self.value_type,
+            "value_space": value_space.as_dict(),
+            "value_space_source": (
+                "interface_channel_value_space_catalog"
+                if interface_channel_value_space_profile(self.id) is not None
+                else "ad_hoc_primitive_fallback"
+            ),
             "canonical_unit": self.canonical_unit,
             "frame": self.frame,
             "lower": self.lower,
@@ -423,18 +482,21 @@ def _parameter_channel(
     return InterfaceChannel(
         id=f"{id_prefix}.{parameter.id}",
         kind="parameter",
-        value_type="vector3" if parameter.id.endswith("_ned_m") else "scalar",
+        value_type=parameter.value_type,
         canonical_unit=parameter.canonical_unit,
         description=parameter.description,
         scope=scope,
+        lower=parameter.hard_bounds[0],
+        upper=parameter.hard_bounds[1],
         availability="available",
         provenance="derived",
         sampling="reset_only" if scope == "episode_reset" else "segment_transition",
-        binding=binding,
+        binding={**binding, "options": list(parameter.options)} if parameter.options else binding,
         claim_boundary=(
             "This is a declared composition input. Coupled physics, trim, and "
             "qualification requirements remain the selected family adapter's responsibility."
         ),
+        value_space=parameter.value_space,
     )
     ####
 
@@ -472,6 +534,59 @@ def _action_contract(
                 tuple(item.id for item in hummingbird_channels),
                 "Bounded roll, pitch, yaw, and aggregate-thrust response command.",
                 "Pseudo-6DOF body-motion response only; no individual rotor, motor, or moment-balance claim.",
+            ),
+        )
+
+    if family_id in {"a320_openap_3dof", "f16_s119"} and fidelity in {"point_mass_3dof", "pseudo_6dof"}:
+        available = "available" if episode_runnable else "unavailable_at_runtime"
+        maximum_speed_m_s = 300.0 if family_id == "a320_openap_3dof" else 500.0
+        guidance_channels: tuple[InterfaceChannel, ...] = (
+            _action(
+                "guidance.speed.command",
+                "m/s",
+                50.0,
+                maximum_speed_m_s,
+                "Held kinematic speed target for the declared reduced response law.",
+                "speed_m_s",
+                available,
+            ),
+            _action(
+                "guidance.flight_path_angle.command",
+                "deg",
+                -20.0,
+                20.0,
+                "Held kinematic flight-path-angle target for the declared reduced response law.",
+                "flight_path_angle_deg",
+                available,
+            ),
+            _action(
+                "guidance.heading.command",
+                "deg",
+                0.0,
+                360.0,
+                "Held kinematic heading target in the local navigation frame.",
+                "heading_deg",
+                available,
+            ),
+            _action(
+                "guidance.bank.command",
+                "deg",
+                -60.0,
+                60.0,
+                "Held bank or lift-vector target; realized only by the selected response-law tier.",
+                "bank_angle_deg",
+                available,
+            ),
+        )
+        return guidance_channels, (
+            AuthorityProfile(
+                "kinematic_guidance",
+                "kinematic",
+                available,
+                tuple(item.id for item in guidance_channels),
+                "Bounded speed, flight-path, heading, and bank intent for a reduced fixed-wing plant.",
+                "This is point-mass or named response-law guidance only; it does not establish physical surfaces, "
+                "actuator dynamics, allocation, or moment balance.",
             ),
         )
 
@@ -709,7 +824,23 @@ def _status_contract(
                 _status("contact.state", None, "Declared ground-contact state.", "contact", runtime_availability, value_type="boolean"),
             )
         )
-        resources.append(
+        resources.extend(
+            (
+            InterfaceChannel(
+                "resources.mass.total",
+                "resource",
+                "scalar",
+                "kg",
+                "Modeled total mass retained by the aggregate-thrust pseudo-6DOF plant.",
+                availability=runtime_availability,
+                provenance="engineering_surrogate",
+                sampling="truth_boundary",
+                binding={"episode_value": "mass_kg"},
+                claim_boundary=(
+                    "This is the configured aggregate model mass. It does not establish a payload distribution, "
+                    "inertia update, fuel mass flow, or a complete mass-property ledger."
+                ),
+            ),
             InterfaceChannel(
                 "resources.battery.fraction_remaining",
                 "resource",
@@ -723,6 +854,7 @@ def _status_contract(
                 sampling="truth_boundary",
                 binding={"episode_value": "battery_fraction"},
                 claim_boundary="This is the pseudo-plant reserve model; it is not a cell-voltage or motor-current claim.",
+            ),
             )
         )
         status.append(_status("propulsion.output.thrust.aggregate", "N", "Achieved aggregate thrust in the pseudo response law.", "aggregate_thrust_n", runtime_availability))
@@ -1110,7 +1242,7 @@ def _status_contract(
                 binding={"batch_report": "runtime.control_realization"},
             )
         )
-    elif family_id == "x15" and fidelity == "rigid_body_6dof_direct_wrench":
+    elif family_id in {"x15", "hl20_mod_k"} and fidelity == "rigid_body_6dof_direct_wrench":
         status.extend(
             (
                 _status(
@@ -1216,7 +1348,7 @@ def _status_contract(
                 _status(
                     "control.physical_effector_allocation",
                     None,
-                    "Whether the selected control path allocates the direct-wrench request to physical X-15 effectors.",
+                    "Whether the selected control path allocates the direct-wrench request to physical effectors.",
                     "physical_effector_allocation",
                     runtime_availability,
                     value_type="boolean",
@@ -1594,6 +1726,8 @@ def validate_interface_channel_value(
     value: object,
     *,
     context: str,
+    enforce_bounds: bool = True,
+    enforce_value_space: bool = True,
 ) -> None:
     """Reject a projected value that contradicts one declared semantic channel.
 
@@ -1607,28 +1741,112 @@ def validate_interface_channel_value(
         if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
             raise ValueError(f"{context}: channel {channel.id!r} requires a finite scalar")
         numeric = float(value)
-        if channel.lower is not None and numeric < channel.lower:
+        if enforce_bounds and channel.lower is not None and numeric < channel.lower:
             raise ValueError(f"{context}: channel {channel.id!r} is below its declared lower bound")
-        if channel.upper is not None and numeric > channel.upper:
+        if enforce_bounds and channel.upper is not None and numeric > channel.upper:
             raise ValueError(f"{context}: channel {channel.id!r} exceeds its declared upper bound")
-        return
-    if channel.value_type in {"vector3", "vector4"}:
+    elif channel.value_type in {"vector3", "vector4"}:
         expected_size = 3 if channel.value_type == "vector3" else 4
         if not isinstance(value, list | tuple) or len(value) != expected_size:
             raise ValueError(f"{context}: channel {channel.id!r} requires a {channel.value_type}")
         for item in value:
             if isinstance(item, bool) or not isinstance(item, int | float) or not math.isfinite(float(item)):
                 raise ValueError(f"{context}: channel {channel.id!r} requires finite vector components")
-        return
-    if channel.value_type == "boolean":
+    elif channel.value_type == "boolean":
         if not isinstance(value, bool):
             raise ValueError(f"{context}: channel {channel.id!r} requires a boolean")
-        return
-    if channel.value_type in {"enum", "event"}:
+    elif channel.value_type in {"enum", "event"}:
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f"{context}: channel {channel.id!r} requires a non-empty string")
-        return
-    raise ValueError(f"{context}: channel {channel.id!r} has an unsupported value type")
+    else:
+        raise ValueError(f"{context}: channel {channel.id!r} has an unsupported value type")
+    if channel.value_space is None:
+        raise ValueError(f"{context}: channel {channel.id!r} has no declared value space")
+    if enforce_value_space:
+        validate_value_space_value(channel.value_space, value, context=f"{context}: channel {channel.id!r}")
+    ####
+
+
+def validate_authority_action_values(
+    contract: VehicleInterfaceContract,
+    authority_profile_id: str,
+    values: Mapping[str, object],
+    *,
+    context: str = "semantic action",
+    enforce_bounds: bool = True,
+) -> AuthorityProfile:
+    """Validate one public action payload against its selected authority.
+
+    This is the common semantic boundary for every future batch, episode, or
+    policy adapter. It checks authority availability, membership, declared
+    primitive bounds, and value-space invariants before an implementation maps
+    the request into native controls, a wrench bridge, or physical effectors.
+    Partial payloads remain valid when the selected authority permits held
+    commands; a caller never receives undeclared action coordinates.
+    """
+
+    profile = contract.authority_profile(authority_profile_id)
+    if profile.availability != "available":
+        raise ValueError(f"authority profile {profile.id!r} is {profile.availability}, not executable")
+    unknown = sorted(set(values) - set(profile.action_ids))
+    if unknown:
+        raise ValueError(f"{context} contains values outside {profile.id!r}: {', '.join(unknown)}")
+    channels = {channel.id: channel for channel in contract.action_channels}
+    for identifier, value in values.items():
+        channel = channels[identifier]
+        if channel.availability != "available":
+            raise ValueError(f"{context}: action channel {identifier!r} is {channel.availability}, not executable")
+        validate_interface_channel_value(
+            channel,
+            value,
+            context=context,
+            enforce_bounds=enforce_bounds,
+            enforce_value_space=enforce_bounds,
+        )
+    return profile
+    ####
+
+
+def project_authority_action_values(
+    contract: VehicleInterfaceContract,
+    authority_profile_id: str,
+    values: Mapping[str, object],
+    *,
+    context: str = "semantic action",
+) -> dict[str, object]:
+    """Project a finite semantic command into its declared scalar bounds.
+
+    Policy and interactive callers may propose a command outside the portable
+    action interval.  That proposal remains useful diagnostic evidence, but
+    the plant must receive the bounded command declared by the interface.  The
+    projection is explicit and deterministic; unsupported coordinates and
+    malformed values remain errors rather than being silently repaired.
+    """
+
+    validate_authority_action_values(
+        contract,
+        authority_profile_id,
+        values,
+        context=context,
+        enforce_bounds=False,
+    )
+    channels = {channel.id: channel for channel in contract.action_channels}
+    projected: dict[str, object] = {}
+    for identifier, value in values.items():
+        channel = channels[identifier]
+        if channel.value_type != "scalar":
+            projected[identifier] = value
+            continue
+        if isinstance(value, bool) or not isinstance(value, int | float):
+            raise AssertionError(f"validated scalar action {identifier!r} lost its numeric representation")
+        numeric = float(value)
+        if channel.lower is not None:
+            numeric = max(channel.lower, numeric)
+        if channel.upper is not None:
+            numeric = min(channel.upper, numeric)
+        projected[identifier] = numeric
+    validate_authority_action_values(contract, authority_profile_id, projected, context=context)
+    return projected
     ####
 
 
@@ -1776,6 +1994,10 @@ def validate_vehicle_interface_contract(contract: VehicleInterfaceContract) -> t
         *contract.diagnostic_channels,
     )
     for channel in channels:
+        if channel.value_space is None:
+            findings.append(f"{channel.id}: channel has no declared value space")
+        elif channel.availability in {"available", "available_in_batch"} and channel.value_space.topology == "topology_pending":
+            findings.append(f"{channel.id}: available channel remains topology_pending")
         if channel.availability in {"available", "available_in_batch"} and not channel.binding:
             findings.append(f"{channel.id}: available channel has no native or runtime binding")
         if channel.kind == "effector" and channel.availability == "available" and "native_effector" not in channel.binding:
@@ -1917,6 +2139,7 @@ __all__ = [
     "AuthorityKind",
     "AuthorityProfile",
     "build_vehicle_interface_catalog_report",
+    "project_authority_action_values",
     "project_committed_status_values",
     "InterfaceAvailability",
     "InterfaceChannel",
@@ -1929,6 +2152,7 @@ __all__ = [
     "bind_declared_sensor_profile",
     "interface_contract_for_composition",
     "resolve_vehicle_interface_contract",
+    "validate_authority_action_values",
     "validate_interface_channel_value",
     "validate_projected_status_values",
     "validate_vehicle_interface_contract",

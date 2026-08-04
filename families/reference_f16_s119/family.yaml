@@ -159,4 +159,4 @@ claims:
 nonclaims:
   - production F-16 training or operational fidelity
   - actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone
-next_gate: alpha3_hl20_reduction_equivalence_and_multi_point_control_review
+next_gate: multi_point_scheduled_control_and_r1_robustness_review

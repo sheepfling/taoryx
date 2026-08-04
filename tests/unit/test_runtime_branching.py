@@ -38,6 +38,8 @@ def test_runtime_problem_clone_interpolates_and_branches_independently() -> None
     assert branch.vehicles["test"].state.time == pytest.approx(1.5)
     assert branch.vehicles["test"].state.values == pytest.approx((3.0,))
     assert len(branch.vehicles["test"].history) == 3
+    assert all(record.committed_truth_time_s <= 1.5 for record in branch.vehicles["test"].control_interval_history)
+    assert all(record.state_time_s <= 1.5 for record in branch.vehicles["test"].control_evaluation_history)
 
     branch.vehicles["test"].control_values = {"rate": 4.0}
     compute_trajectories(branch, max_steps=2)
@@ -67,6 +69,32 @@ def test_runtime_problem_clone_never_carries_a_future_control_timestamp() -> Non
     compute_trajectories(branch, max_steps=1)
     assert branch.vehicles["test"].state.time == pytest.approx(2.0)
 ####
+
+
+def test_runtime_problem_clone_retains_committed_control_resolver_ownership() -> None:
+    """A branch re-resolves an owned command from its own accepted truth."""
+
+    vehicle = RuntimeVehicle(
+        "resolved",
+        RuntimeState(0.0, (0.0,), value_names=("x",)),
+        derivative=lambda state: (state.named["rate"],),
+        step_size=1.0,
+        committed_control_resolver=lambda state: {"rate": 1.0 + state.values[0]},
+    )
+    problem = RuntimeProblem({"resolved": vehicle}, final_time=2.0)
+    compute_trajectories(problem, max_steps=3)
+
+    branch = problem.clone_at(1.0)
+
+    cloned = branch.vehicles["resolved"]
+    assert cloned.committed_control_names == {"rate"}
+    assert cloned.control_values_time_s == pytest.approx(1.0)
+    compute_trajectories(branch, max_steps=1)
+
+    assert cloned.state.values == pytest.approx((3.0,))
+    assert dict(cloned.control_interval_history[-1].controls_at_interval_start) == {"rate": 2.0}
+    assert cloned.control_interval_history[-1].solver_stage_control_mutation_detected is False
+    ####
 
 
 def test_problem_file_lowers_custom_stash_and_time_varying_control(tmp_path: Path) -> None:

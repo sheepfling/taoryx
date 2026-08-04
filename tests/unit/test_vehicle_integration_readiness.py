@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import json
+
+import pytest
+
+from taoryx.runtime.cli import main
 from taoryx.vehicle_integration_readiness import (
     validate_all_vehicle_integration_readiness,
     validate_vehicle_integration_readiness,
@@ -39,4 +44,21 @@ def test_all_supported_reference_families_have_reports() -> None:
 
     reports = validate_all_vehicle_integration_readiness()
     assert {report.family_id for report in reports} == {"reference_f16_s119", "reference_hl20_mod_k"}
+    ####
+
+
+def test_product_three_cli_exposes_source_readiness_without_promoting_a_family(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A composition author can discover source onboarding gaps from the public CLI."""
+
+    exit_code = main(["vehicle", "integration", "readiness", "reference_f16_s119"])
+
+    assert exit_code == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["schema"] == "taoryx.vehicle-integration-command/v1alpha1"
+    assert payload["command"] == "readiness"
+    assert "does not execute a source plant" in payload["claim_boundary"]
+    assert payload["reports"][0]["family_id"] == "reference_f16_s119"
+    assert payload["reports"][0]["status"] == "ready_for_runtime_probes"
     ####

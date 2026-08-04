@@ -16,6 +16,10 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from .composition_control_trace import build_uncontrolled_committed_control_trace, control_trace_summary
+from .composition_evaluation import build_composition_trajectory_evaluation
+from .composition_graph_evidence import unobserved_mission_graph_execution
+from .composition_resource_ledger import build_committed_resource_ledger, resource_ledger_summary
 from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .passive_tumbling_mission_translation import PassiveTumblingMissionPlan, compile_passive_tumbling_mission
@@ -37,6 +41,7 @@ class PassiveTumblingCompositionExecution:
     truth_evaluation: dict[str, object]
     transitions: tuple[dict[str, object], ...]
     status_trace: dict[str, object]
+    semantic_action_trace: dict[str, object]
     claim_boundary: str
 
     @property
@@ -66,10 +71,12 @@ class PassiveTumblingCompositionExecution:
             "truth_evaluation": self.truth_evaluation,
             "controller_transitions": list(self.transitions),
             "status_trace": status_trace_summary(self.status_trace),
+            "semantic_action_trace": control_trace_summary(self.semantic_action_trace),
             "mission_pass": self.mission_pass,
             "claim_boundary": self.claim_boundary,
         }
         ####
+
     ####
 
 
@@ -117,7 +124,19 @@ def execute_passive_tumbling_composition(
         "numerical_valid": finite,
         "hard_gates_passed": finite and bool(envelope["pass"]),
     }
+    mission_graph_execution = unobserved_mission_graph_execution(
+        composition,
+        "The passive release simulation has no controller or graph-transition dispatcher to observe.",
+    ).as_dict()
+    runtime["mission_graph_execution"] = mission_graph_execution
     status_trace = build_committed_status_trace(composition, _status_samples(trajectory.telemetry))
+    semantic_action_trace = build_uncontrolled_committed_control_trace(
+        composition,
+        tuple(_telemetry_number(row, "time_s") for row in trajectory.telemetry),
+    )
+    resource_ledger = build_committed_resource_ledger(composition, status_trace)
+    runtime["resource_ledger"] = resource_ledger_summary(resource_ledger)
+    runtime["semantic_action_trace"] = control_trace_summary(semantic_action_trace)
     execution = PassiveTumblingCompositionExecution(
         composition=composition,
         preflight=preflight,
@@ -128,6 +147,7 @@ def execute_passive_tumbling_composition(
         truth_evaluation=truth_evaluation,
         transitions=transitions,
         status_trace=status_trace,
+        semantic_action_trace=semantic_action_trace,
         claim_boundary=(
             "The composition proves only the declared passive-cylinder release-to-impact witness. "
             "Its 3DOF result uses an orientation-averaged area policy; its pseudo-6DOF result reuses native "
@@ -140,10 +160,25 @@ def execute_passive_tumbling_composition(
     _write_json(destination / "preflight.json", preflight.as_dict())
     _write_json(destination / "plan.json", plan.manifest())
     _write_json(destination / "runtime_report.json", runtime)
+    _write_json(destination / "mission_graph_execution.json", mission_graph_execution)
     _write_json(destination / "envelope_report.json", envelope)
     _write_json(destination / "controller_transitions.json", list(transitions))
     _write_json(destination / "objective_report.json", truth_evaluation)
     _write_json(destination / "status_trace.json", status_trace)
+    _write_json(destination / "semantic_action_trace.json", semantic_action_trace)
+    _write_json(destination / "resource_ledger.json", resource_ledger)
+    _write_json(
+        destination / "evaluation.json",
+        build_composition_trajectory_evaluation(
+            composition,
+            preflight,
+            truth_evaluation,
+            runtime=runtime,
+            envelope=envelope,
+            claim_boundary=execution.claim_boundary,
+            status_trace=status_trace,
+        ).as_dict(),
+    )
     _write_json(destination / "execution.json", execution.as_dict())
     return execution
     ####
@@ -160,9 +195,8 @@ def _truth_evaluation(
     first = states[0]
     terminal = trajectory.terminal
     finite = _finite_trajectory(trajectory)
-    release_pass = (
-        math.isclose(first.position_m[2], plan.vehicle.initial_altitude_m, abs_tol=1.0e-9)
-        and math.isclose(first.speed_m_s, plan.vehicle.initial_speed_m_s, abs_tol=1.0e-9)
+    release_pass = math.isclose(first.position_m[2], plan.vehicle.initial_altitude_m, abs_tol=1.0e-9) and math.isclose(
+        first.speed_m_s, plan.vehicle.initial_speed_m_s, abs_tol=1.0e-9
     )
     observed_area_policies = sorted({str(row.get("projected_area_policy")) for row in telemetry})
     area_policy_pass = observed_area_policies == [plan.area_policy]
@@ -173,10 +207,7 @@ def _truth_evaluation(
     else:
         rotation_pass = area_policy_pass
         rotation_requirement = "orientation_averaged_area_policy_declared"
-    impact_pass = (
-        trajectory.termination is EnvelopeTermination.GROUND_CONTACT
-        and terminal.position_m[2] <= plan.impact_plane_altitude_m
-    )
+    impact_pass = trajectory.termination is EnvelopeTermination.GROUND_CONTACT and terminal.position_m[2] <= plan.impact_plane_altitude_m
     objectives = (
         _objective("release_state", release_pass, first.time_s, "altitude_and_speed_at_declared_release"),
         _objective("passive_descent", area_policy_pass and rotation_pass, terminal.time_s, rotation_requirement),
@@ -255,9 +286,7 @@ def _transitions(
         {
             "segment_instance_id": segment.instance_id,
             "segment_id": segment.segment_id,
-            "reason": "EVENT_COMPLETE"
-            if all(result_by_id.get(identifier) == "PASS" for identifier in objective_map[segment.segment_id])
-            else "TIMEOUT_SKIP",
+            "reason": "EVENT_COMPLETE" if all(result_by_id.get(identifier) == "PASS" for identifier in objective_map[segment.segment_id]) else "TIMEOUT_SKIP",
             "controller_capture_diagnostic": False,
             "source": "independent_passive_truth_evaluation",
             "required_truth_objectives": list(objective_map[segment.segment_id]),
@@ -296,10 +325,7 @@ def _envelope_report(trajectory: DetachedBodyTrajectory, plan: PassiveTumblingMi
 def _finite_trajectory(trajectory: DetachedBodyTrajectory) -> bool:
     """Check all accepted passive-body truth states before promoting a result."""
 
-    return all(
-        all(math.isfinite(value) for value in (*state.position_m, *state.velocity_m_s, state.mass_kg))
-        for state in trajectory.states
-    )
+    return all(all(math.isfinite(value) for value in (*state.position_m, *state.velocity_m_s, state.mass_kg)) for state in trajectory.states)
     ####
 
 
@@ -320,12 +346,7 @@ def _write_csv(path: Path, rows: tuple[dict[str, object], ...]) -> None:
         writer = csv.DictWriter(stream, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
-            writer.writerow(
-                {
-                    key: json.dumps(value, sort_keys=True) if isinstance(value, dict | list | tuple) else value
-                    for key, value in row.items()
-                }
-            )
+            writer.writerow({key: json.dumps(value, sort_keys=True) if isinstance(value, dict | list | tuple) else value for key, value in row.items()})
     ####
 
 

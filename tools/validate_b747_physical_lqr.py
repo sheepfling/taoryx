@@ -18,23 +18,21 @@ import math
 from pathlib import Path
 from typing import Any
 
-from taoryx.contracts import Vector3
-from taoryx.control_allocation import EffectorEffectiveness, EffectorLimits
+from taoryx.control_allocation import EffectorEffectiveness
 from taoryx.generic_tuning import (
     GenericLqrProfile,
     LinearAuthorityRequirement,
     linear_authority_preflight,
     tune_lqr_profiles,
 )
-from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.physical_lqr import (
     PhysicalWrenchLqrDesign,
     WrenchLinearizationProjection,
     project_linearization_to_wrench,
     validate_nonlinear_wrench_lqr,
 )
-from taoryx.runtime.program import LoadedProgram
-from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant, local_rigid_body_plant_from_vehicle
+from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant
+from taoryx.source_table_fixed_wing import build_b747_condition3_source_table_plant
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBLEM = ROOT / "examples/generated/vehicles/b747_condition3_surface_trim_6dof.prb"
@@ -75,32 +73,9 @@ _SURFACE_NAMES = ("elevator-deg", "aileron-deg", "rudder-deg")
 
 
 def build_plant() -> RuntimeRigidBodyLocalPlant:
-    """Build the condition-3 source-table plant with actual controls."""
+    """Build the runtime-owned condition-3 source-table plant."""
 
-    program = LoadedProgram.load(PROBLEM, TABLES, profile=GrammarProfile.TAORYX)
-    limits = {
-        "elevator-deg": EffectorLimits("elevator-deg", -10.0, 10.0, "deg"),
-        "aileron-deg": EffectorLimits("aileron-deg", -10.0, 10.0, "deg"),
-        "rudder-deg": EffectorLimits("rudder-deg", -15.0, 15.0, "deg"),
-        "throttle": EffectorLimits("throttle", 0.0, 1.0, "fraction"),
-    }
-    return local_rigid_body_plant_from_vehicle(
-        "b747-condition3-source-table-plant",
-        "nasa-cr-2144-condition3-local-v1",
-        program.case().vehicles["1"],
-        inertia_kg_m2=Vector3(24_675_886.7, 44_877_574.1, 67_384_152.0),
-        reference_length_m=8.324088,
-        effector_limits=limits,
-        effectiveness_steps={
-            "elevator-deg": 0.1,
-            "aileron-deg": 0.1,
-            "rudder-deg": 0.1,
-            "throttle": 0.005,
-        },
-        allocation_wrench_weights={name: 1.0 for name in _WRENCH_NAMES},
-        allocation_regularization=1.0e-14,
-        allocation_feasibility_tolerance=1.0e-3,
-    )
+    return build_b747_condition3_source_table_plant()
     ####
 
 

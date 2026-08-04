@@ -17,7 +17,14 @@ from ..racetrack_guidance import RacetrackGuidanceReference, racetrack_reference
 from .a320_adapter import A320OpenAPControlPlant, A320Pseudo6DOFControlPlant
 from .a320_openap import A320OpenAPEnvelopeError, A320OpenAPModel, A320OpenAPOperatingPoint, A320OpenAPResult
 from .a320_pseudo6dof import A320Pseudo6DOFModel, A320Pseudo6DOFOperatingPoint, A320Pseudo6DOFResult
-from .a320_racetrack import A320RacetrackMode, A320RacetrackRun, A320RacetrackRunner
+from .a320_racetrack import (
+    A320GuidanceOverride,
+    A320RacetrackMode,
+    A320RacetrackRun,
+    A320RacetrackRunner,
+    A320RacetrackStepper,
+    A320RacetrackStepperState,
+)
 from .authority import ArbitrationResult, ControlArbitrator, ControlAuthorityError, ControlDecision
 from .catalog import FamilyCatalog, load_family_catalog
 from .collections import (
@@ -133,7 +140,14 @@ from .evaluation import (
 from .f16_operating_points import F16OperatingPoint, runtime_trim_result, solve_f16_source_trim
 from .f16_racetrack import F16RacetrackMode, F16RacetrackNavigationState, F16RacetrackRun, F16RacetrackRunner
 from .f16_reduced_adapter import F16PointMassControlPlant, F16Pseudo6DOFControlPlant, build_f16_reduced_control_plant
-from .f16_reduced_racetrack import F16ReducedRacetrackMode, F16ReducedRacetrackRun, F16ReducedRacetrackRunner
+from .f16_reduced_racetrack import (
+    F16GuidanceOverride,
+    F16ReducedRacetrackMode,
+    F16ReducedRacetrackRun,
+    F16ReducedRacetrackRunner,
+    F16ReducedRacetrackStepper,
+    F16ReducedRacetrackStepperState,
+)
 from .f16_reductions import F16AttitudeResponsePseudo6DOFModel, F16PointMass3DOFModel
 from .f16_reference import (
     F16ReferencePhysicalPlant,
@@ -321,6 +335,9 @@ __all__ = [
     "F16ReducedRacetrackMode",
     "F16ReducedRacetrackRun",
     "F16ReducedRacetrackRunner",
+    "F16ReducedRacetrackStepper",
+    "F16ReducedRacetrackStepperState",
+    "F16GuidanceOverride",
     "runtime_trim_result",
     "solve_f16_source_trim",
     "load_f16_reference_plant",
@@ -354,6 +371,9 @@ __all__ = [
     "A320RacetrackMode",
     "A320RacetrackRun",
     "A320RacetrackRunner",
+    "A320RacetrackStepper",
+    "A320RacetrackStepperState",
+    "A320GuidanceOverride",
     "AxisResponseProfile",
     "AxisResponseState",
     "AutomaticLoweringReport",

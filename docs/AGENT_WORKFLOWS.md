@@ -17,6 +17,11 @@ ordering, and truth-isolated decision ports.
 
 ## First orientation
 
+For a product-level tour before choosing a contributor workflow, read the
+[three-product showcase guide](THREE_PRODUCT_SHOWCASE.md). It connects the
+language successor, simulation/stepping runtime, and vehicle/mission
+composition layer through the commands and artifacts used in this repository.
+
 ```text
 .tbl/.prb source -> parse/validate -> lower -> runtime model -> artifact/plots
                                       ^                  ^
@@ -44,6 +49,36 @@ ordering, and truth-isolated decision ports.
 | Build plots | [Telemetry](architecture/telemetry.md) | `RunArtifact`, `render_run_artifact_plots(...)` |
 | Add control above trim | [Controller stack](architecture/controller-stack.md), [Control contracts](architecture/control-contracts.md), and [LQR](extensions/lqr.md) | `TrimSpec`, `solve_trim`, controller/allocator |
 | Add an airbreathing vehicle mission | [Mission-composition automation](plan/mission-composition-automation.md) | `compile_powered_fixed_wing_racetrack(...)` |
+| Add a vehicle or topology | [Generic family integration playbook](plan/generic-family-integration-playbook.md) | `taoryx vehicle intake existing-family ...` or `taoryx vehicle intake new-topology ...` |
+| Expose a parameter, control, status, or objective value | [Public value-space contract](architecture/public-value-spaces.md) | `taoryx vehicle topology-report` |
+| Demonstrate the three products | [Three-product showcase guide](THREE_PRODUCT_SHOWCASE.md) | `taoryx vehicle maturity-report` → `catalog` → `mission inspect`/`mission create`/`mission validate` → `preflight` → `run` |
+
+### Product 3 verification ladder
+
+Use the narrowest audit that proves the change you made. These are separate
+evidence levels, not interchangeable green checks:
+
+```bash
+# Fast declaration and value-space/catalog audit.
+taoryx vehicle topology-report
+taoryx vehicle maturity-report
+
+# Compile every declared endpoint witness, preflight it, lower it, and open
+# each advertised episode at its committed-truth boundary.
+taoryx vehicle maturity-report --check-execution-witnesses
+
+# Execute every batch witness and replay every registered batch/episode pair.
+# This is intentionally slower because it exercises actual source-owned
+# factories and artifact contracts.
+taoryx vehicle maturity-report \
+  --check-execution-witnesses \
+  --execute-batch-witnesses \
+  --execute-parity-witnesses
+```
+
+The last command proves only the declared composition/execution and parity
+contracts. It does not promote a direct-wrench screen, replay, pseudo-6DOF
+response law, or nominal mission to physical-effector or family qualification.
 
 ## Grammar validation
 

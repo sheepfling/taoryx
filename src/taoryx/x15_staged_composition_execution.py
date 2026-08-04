@@ -15,6 +15,10 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from .composition_control_trace import build_uncontrolled_committed_control_trace, control_trace_summary
+from .composition_evaluation import build_composition_trajectory_evaluation
+from .composition_graph_evidence import unobserved_mission_graph_execution
+from .composition_resource_ledger import build_committed_resource_ledger, resource_ledger_summary
 from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .reachability_envelope import TrajectoryResult, simulate_rocket_glide
@@ -37,6 +41,7 @@ class X15StagedReachabilityCompositionExecution:
     truth_evaluation: dict[str, object]
     controller_transitions: tuple[dict[str, object], ...]
     status_trace: dict[str, object]
+    semantic_action_trace: dict[str, object]
     claim_boundary: str
 
     @property
@@ -44,12 +49,7 @@ class X15StagedReachabilityCompositionExecution:
         """Return the hard conjunction appropriate to this open-loop witness."""
 
         transitions_valid = all(item["reason"] == "EVENT_COMPLETE" for item in self.controller_transitions)
-        return (
-            bool(self.runtime["hard_gates_passed"])
-            and bool(self.envelope["pass"])
-            and bool(self.truth_evaluation["mission_pass"])
-            and transitions_valid
-        )
+        return bool(self.runtime["hard_gates_passed"]) and bool(self.envelope["pass"]) and bool(self.truth_evaluation["mission_pass"]) and transitions_valid
         ####
 
     def as_dict(self) -> dict[str, object]:
@@ -67,10 +67,12 @@ class X15StagedReachabilityCompositionExecution:
             "truth_evaluation": self.truth_evaluation,
             "controller_transitions": list(self.controller_transitions),
             "status_trace": status_trace_summary(self.status_trace),
+            "semantic_action_trace": control_trace_summary(self.semantic_action_trace),
             "mission_pass": self.mission_pass,
             "claim_boundary": self.claim_boundary,
         }
         ####
+
     ####
 
 
@@ -134,7 +136,19 @@ def execute_x15_staged_reachability_composition(
         "numerical_valid": finite,
         "hard_gates_passed": source_preflight.passed and finite and bool(envelope["pass"]),
     }
+    mission_graph_execution = unobserved_mission_graph_execution(
+        composition,
+        "The open-loop staged reachability witness records phase evidence but does not emit committed controller graph dispatches.",
+    ).as_dict()
+    runtime["mission_graph_execution"] = mission_graph_execution
     status_trace = build_committed_status_trace(composition, _status_samples(trajectory.telemetry))
+    semantic_action_trace = build_uncontrolled_committed_control_trace(
+        composition,
+        tuple(_status_time(row) for row in trajectory.telemetry),
+    )
+    resource_ledger = build_committed_resource_ledger(composition, status_trace)
+    runtime["resource_ledger"] = resource_ledger_summary(resource_ledger)
+    runtime["semantic_action_trace"] = control_trace_summary(semantic_action_trace)
     result = X15StagedReachabilityCompositionExecution(
         composition=composition,
         preflight=preflight,
@@ -145,6 +159,7 @@ def execute_x15_staged_reachability_composition(
         truth_evaluation=truth_evaluation,
         controller_transitions=transitions,
         status_trace=status_trace,
+        semantic_action_trace=semantic_action_trace,
         claim_boundary=(
             "The composition executes a local-frame X-15-scaled reduced staging witness using retained source "
             "mass, speed, cutoff, and release anchors. It proves the declared open-loop event and corridor "
@@ -159,10 +174,25 @@ def execute_x15_staged_reachability_composition(
     _write_json(destination / "source_provenance.json", evidence["source"])
     _write_json(destination / "fidelity_evidence.json", evidence)
     _write_json(destination / "runtime_report.json", runtime)
+    _write_json(destination / "mission_graph_execution.json", mission_graph_execution)
     _write_json(destination / "envelope_report.json", envelope)
     _write_json(destination / "controller_transitions.json", list(transitions))
     _write_json(destination / "objective_report.json", truth_evaluation)
     _write_json(destination / "status_trace.json", status_trace)
+    _write_json(destination / "semantic_action_trace.json", semantic_action_trace)
+    _write_json(destination / "resource_ledger.json", resource_ledger)
+    _write_json(
+        destination / "evaluation.json",
+        build_composition_trajectory_evaluation(
+            composition,
+            preflight,
+            truth_evaluation,
+            runtime=runtime,
+            envelope=envelope,
+            claim_boundary=result.claim_boundary,
+            status_trace=status_trace,
+        ).as_dict(),
+    )
     _write_json(destination / "execution.json", result.as_dict())
     return result
     ####
@@ -206,11 +236,7 @@ def _phase_transitions(
     objectives = evaluation.get("required_objectives")
     if not isinstance(objectives, list):
         raise ValueError("X-15 truth evaluation has no required-objective list")
-    results = {
-        str(item.get("id")): str(item.get("truth_result"))
-        for item in objectives
-        if isinstance(item, Mapping)
-    }
+    results = {str(item.get("id")): str(item.get("truth_result")) for item in objectives if isinstance(item, Mapping)}
     objective_map = {
         "booster_powered": ("booster_burn_and_cutoff",),
         "booster_coast_release": ("booster_release",),
@@ -239,10 +265,7 @@ def _phase_transitions(
 def _finite_trajectory(trajectory: TrajectoryResult) -> bool:
     """Check all accepted parent truth states for numerical integrity."""
 
-    return all(
-        all(math.isfinite(value) for value in (*state.position_m, *state.velocity_m_s, state.mass_kg))
-        for state in trajectory.states
-    )
+    return all(all(math.isfinite(value) for value in (*state.position_m, *state.velocity_m_s, state.mass_kg)) for state in trajectory.states)
     ####
 
 
@@ -322,12 +345,7 @@ def _write_csv(path: Path, rows: tuple[dict[str, object], ...]) -> None:
         writer = csv.DictWriter(stream, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
-            writer.writerow(
-                {
-                    key: json.dumps(value, sort_keys=True) if isinstance(value, dict | list | tuple) else value
-                    for key, value in row.items()
-                }
-            )
+            writer.writerow({key: json.dumps(value, sort_keys=True) if isinstance(value, dict | list | tuple) else value for key, value in row.items()})
     ####
 
 

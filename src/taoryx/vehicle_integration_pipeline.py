@@ -700,13 +700,16 @@ def _sha256(path: Path) -> str:
 
 
 def _packet_candidates(manifest_path: Path, manifest: ReferenceFamilyManifest, record: Mapping[str, Any], import_record: DAVEMLFamilyImport, contract_path: Path) -> tuple[Path, ...]:
+    mission_binding_path = manifest_path.parent / "qualification/mission-binding.yaml"
+    if not mission_binding_path.is_file():
+        mission_binding_path = manifest_path.parent / "qualification/racetrack-binding.yaml"
     candidates: list[Path] = [
         manifest_path,
         manifest_path.parent / "plant/daveml-import.json",
         manifest_path.parent / "qualification/integration-record.yaml",
         manifest_path.parent / "qualification/trim-recipe.yaml",
         manifest_path.parent / "qualification/operating-points.yaml",
-        manifest_path.parent / "qualification/racetrack-binding.yaml",
+        mission_binding_path,
         contract_path,
     ]
     controller_paths = tuple(manifest_path.parent.glob("controllers/*.yaml"))
@@ -743,15 +746,22 @@ def _packet_candidates(manifest_path: Path, manifest: ReferenceFamilyManifest, r
         source_evidence = _evidence_path(recipe.get("source_evidence")) if isinstance(recipe, Mapping) else None
         if source_evidence is not None:
             candidates.append(source_evidence)
-    mission_binding_path = manifest_path.parent / "qualification/racetrack-binding.yaml"
     if mission_binding_path.is_file():
         try:
             mission_binding = _read_yaml(mission_binding_path)
         except (OSError, ValueError, yaml.YAMLError):
             mission_binding = {}
-        source_catalog = _evidence_path(mission_binding.get("source_catalog")) if isinstance(mission_binding, Mapping) else None
-        if source_catalog is not None:
-            candidates.append(source_catalog)
+        if isinstance(mission_binding, Mapping):
+            source_catalog = _evidence_path(mission_binding.get("source_catalog"))
+            if source_catalog is not None:
+                candidates.append(source_catalog)
+            realizations = mission_binding.get("realizations")
+            if isinstance(realizations, list):
+                for realization in realizations:
+                    if isinstance(realization, Mapping):
+                        composition_path = _evidence_path(realization.get("composition"))
+                        if composition_path is not None:
+                            candidates.append(composition_path)
     source_package = ROOT / import_record.package.path
     if source_package.is_file():
         candidates.append(source_package)

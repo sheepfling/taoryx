@@ -13,10 +13,15 @@ from __future__ import annotations
 import csv
 import json
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal, cast
 
+from .composition_control_trace import BatchControlSample, build_committed_control_trace, control_trace_summary
+from .composition_evaluation import build_composition_trajectory_evaluation
+from .composition_graph_evidence import unobserved_mission_graph_execution
+from .composition_resource_ledger import build_committed_resource_ledger, resource_ledger_summary
 from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .mission_objectives import TruthObjectiveSpec, evaluate_truth_objectives
@@ -34,6 +39,7 @@ from .trajectory import (
     load_pseudo6dof_catalog,
 )
 from .trim import TrimResult, TrimSpec
+from .variant_runtime_evidence import build_variant_runtime_evidence
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import VehicleExecutionPreflight, compile_powered_fixed_wing_racetrack_from_composition, preflight_vehicle_composition
 
@@ -57,6 +63,7 @@ class ReducedFixedWingCompositionExecution:
     trim: dict[str, object]
     provenance: dict[str, object]
     status_trace: dict[str, object]
+    control_trace: dict[str, object]
     claim_boundary: str
 
     @property
@@ -82,10 +89,12 @@ class ReducedFixedWingCompositionExecution:
             "trim": self.trim,
             "provenance": self.provenance,
             "status_trace": status_trace_summary(self.status_trace),
+            "control_trace": control_trace_summary(self.control_trace),
             "mission_pass": self.mission_pass,
             "claim_boundary": self.claim_boundary,
         }
         ####
+
     ####
 
 
@@ -120,12 +129,29 @@ def execute_reduced_fixed_wing_composition(
     else:
         raise ValueError(f"reduced fixed-wing executor has no adapter for family {composition.family_id!r}")
 
+    status_trace = build_committed_status_trace(composition, _status_samples(rows))
+    resource_ledger = build_committed_resource_ledger(composition, status_trace)
+    control_trace = build_committed_control_trace(composition, _control_samples(rows))
+    runtime["mission_graph_execution"] = unobserved_mission_graph_execution(
+        composition,
+        "The reduced fixed-wing batch runner emits truth telemetry and independent objectives but no committed controller graph dispatches.",
+    ).as_dict()
+    variant_runtime_evidence = build_variant_runtime_evidence(
+        composition,
+        status_trace,
+        consumed_native_inputs=_variant_native_inputs(runtime),
+    )
+    runtime["variant_runtime_evidence"] = variant_runtime_evidence
+    runtime["resource_ledger"] = resource_ledger_summary(resource_ledger)
+    runtime["hard_gates_passed"] = bool(runtime["hard_gates_passed"]) and variant_runtime_evidence["status"] in {
+        "pass",
+        "not_applicable",
+    }
     truth_evaluation = evaluate_truth_objectives(
         _objective_specs(proposal.route),
         rows,
         hard_gates_passed=bool(runtime["hard_gates_passed"]) and bool(envelope["pass"]),
     )
-    status_trace = build_committed_status_trace(composition, _status_samples(rows))
     result = ReducedFixedWingCompositionExecution(
         composition=composition,
         preflight=preflight,
@@ -137,6 +163,7 @@ def execute_reduced_fixed_wing_composition(
         trim=trim,
         provenance=provenance,
         status_trace=status_trace,
+        control_trace=control_trace,
         claim_boundary=claim_boundary,
     )
     _write_csv(destination / "truth_telemetry.csv", rows)
@@ -144,13 +171,48 @@ def execute_reduced_fixed_wing_composition(
     _write_json(destination / "preflight.json", preflight.as_dict())
     _write_json(destination / "proposal.json", proposal.manifest())
     _write_json(destination / "runtime_report.json", runtime)
+    _write_json(destination / "mission_graph_execution.json", runtime["mission_graph_execution"])
+    _write_json(destination / "variant_runtime_evidence.json", runtime["variant_runtime_evidence"])
     _write_json(destination / "envelope_report.json", envelope)
     _write_json(destination / "objective_report.json", truth_evaluation)
     _write_json(destination / "trim.json", trim)
     _write_json(destination / "model_provenance.json", provenance)
     _write_json(destination / "status_trace.json", status_trace)
+    _write_json(destination / "resource_ledger.json", resource_ledger)
+    _write_json(destination / "semantic_action_trace.json", control_trace)
+    _write_json(
+        destination / "evaluation.json",
+        build_composition_trajectory_evaluation(
+            composition,
+            preflight,
+            truth_evaluation,
+            runtime=runtime,
+            envelope=envelope,
+            claim_boundary=claim_boundary,
+            status_trace=status_trace,
+            control_trace=control_trace,
+        ).as_dict(),
+    )
     _write_json(destination / "execution.json", result.as_dict())
     return result
+    ####
+
+
+def _variant_native_inputs(runtime: Mapping[str, object]) -> dict[str, object]:
+    """Return the exact native adapter inputs this executor consumed.
+
+    The mapping is deliberately explicit.  It is not reconstructed from a
+    semantic initialization after the run, since that would only prove that
+    the request contained a value—not that the adapter received it.
+    """
+
+    operating_point = runtime.get("native_operating_point")
+    if not isinstance(operating_point, Mapping):
+        return {}
+    mass_kg = operating_point.get("mass_kg")
+    if isinstance(mass_kg, int | float) and not isinstance(mass_kg, bool):
+        return {"A320OpenAPOperatingPoint.mass_kg": mass_kg}
+    return {}
     ####
 
 
@@ -176,12 +238,11 @@ def _run_a320(
         model = A320Pseudo6DOFModel.from_repository(_ROOT)
         trim = model.trim_pseudo6dof(operating_point)
         _, response_profile = load_pseudo6dof_catalog(_ROOT / "verification/pseudo6dof_profiles.yaml").for_family("a320_openap_3dof")
-    actual_speed = model.evaluate(operating_point).true_airspeed_mps if isinstance(model, A320OpenAPModel) else model.openap.evaluate(operating_point).true_airspeed_mps
+    actual_speed = (
+        model.evaluate(operating_point).true_airspeed_mps if isinstance(model, A320OpenAPModel) else model.openap.evaluate(operating_point).true_airspeed_mps
+    )
     if not math.isclose(actual_speed, route.speed_m_s, abs_tol=1.0e-6):
-        raise ValueError(
-            "A320 native operating point does not reproduce the capability-route speed: "
-            f"{actual_speed:.9g} != {route.speed_m_s:.9g} m/s"
-        )
+        raise ValueError(f"A320 native operating point does not reproduce the capability-route speed: {actual_speed:.9g} != {route.speed_m_s:.9g} m/s")
     run = A320RacetrackRunner(
         model,
         trim,
@@ -246,9 +307,7 @@ def _a320_operating_point_for_speed(
     point = A320OpenAPOperatingPoint(altitude_m, 0.5 * (lower + upper), mass_kg)
     achieved_speed = model.evaluate(point).true_airspeed_mps
     if not math.isclose(achieved_speed, target_speed_m_s, abs_tol=1.0e-6):
-        raise ValueError(
-            f"A320 semantic speed {target_speed_m_s:.9g} m/s is outside the current OpenAP Mach conversion domain"
-        )
+        raise ValueError(f"A320 semantic speed {target_speed_m_s:.9g} m/s is outside the current OpenAP Mach conversion domain")
     return point
     ####
 
@@ -265,10 +324,7 @@ def _run_f16(
     observed_mach = float(source.evaluate_loads(trim.state, trim.controls, altitude_m=0.0)["mach"])
     requested_mach = _input_number(composition.initialization.inputs, "mach")
     if not math.isclose(requested_mach, observed_mach, abs_tol=1.0e-9):
-        raise ValueError(
-            "F-16 reduced racetrack is pinned to its source trim Mach; "
-            f"requested {requested_mach:.12g}, expected {observed_mach:.12g}"
-        )
+        raise ValueError(f"F-16 reduced racetrack is pinned to its source trim Mach; requested {requested_mach:.12g}, expected {observed_mach:.12g}")
     model: F16PointMass3DOFModel | F16AttitudeResponsePseudo6DOFModel
     if mode == "point_mass_3dof":
         model = F16PointMass3DOFModel(source, trim, trim_pitch_rad)
@@ -350,9 +406,7 @@ def _reduced_mode(composition: CompiledVehicleComposition) -> _ReducedMode:
     try:
         return mapping[composition.fidelity]
     except KeyError as error:
-        raise ValueError(
-            f"reduced fixed-wing executor supports only 3DOF/pseudo-6DOF, not {composition.fidelity!r}"
-        ) from error
+        raise ValueError(f"reduced fixed-wing executor supports only 3DOF/pseudo-6DOF, not {composition.fidelity!r}") from error
     ####
 
 
@@ -429,12 +483,7 @@ def _f16_envelope(rows: list[dict[str, float | int | str]]) -> dict[str, object]
 def _finite_rows(rows: list[dict[str, float | int | str]]) -> bool:
     """Reject a run with a non-finite numeric evidence channel."""
 
-    return all(
-        math.isfinite(float(value))
-        for row in rows
-        for value in row.values()
-        if isinstance(value, int | float)
-    )
+    return all(math.isfinite(float(value)) for row in rows for value in row.values() if isinstance(value, int | float))
     ####
 
 
@@ -449,6 +498,40 @@ def _status_samples(rows: list[dict[str, float | int | str]]) -> tuple[BatchTrut
         )
         for index, row in enumerate(rows)
     )
+    ####
+
+
+def _control_samples(rows: list[dict[str, float | int | str]]) -> tuple[BatchControlSample, ...]:
+    """Bind racetrack guidance references to their committed truth intervals.
+
+    The common reduced fixed-wing interface exposes speed, flight-path,
+    heading, and bank as semantic guidance. Neither the point-mass nor named
+    attitude-response tiers declare physical effectors, so the trace records
+    no achieved surface allocation even where a source model exposes internal
+    surrogate coordinates.
+    """
+
+    samples: list[BatchControlSample] = []
+    interval_start_time_s: float | None = None
+    for row in rows:
+        committed_truth_time_s = _status_time(row)
+        if interval_start_time_s is None:
+            interval_start_time_s = committed_truth_time_s
+        samples.append(
+            BatchControlSample(
+                interval_start_time_s=interval_start_time_s,
+                committed_truth_time_s=committed_truth_time_s,
+                requested_actions={
+                    "guidance.speed.command": _row_number(row, "route_speed_command_m_s"),
+                    "guidance.flight_path_angle.command": _row_number(row, "route_flight_path_command_deg"),
+                    "guidance.heading.command": _canonical_heading_deg(_row_number(row, "route_heading_command_deg")),
+                    "guidance.bank.command": _row_number(row, "route_bank_command_deg"),
+                },
+                achieved_effectors={},
+            )
+        )
+        interval_start_time_s = committed_truth_time_s
+    return tuple(samples)
     ####
 
 
@@ -473,6 +556,28 @@ def _status_time(row: dict[str, float | int | str]) -> float:
     if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
         raise ValueError("reduced fixed-wing status telemetry time_s must be finite numeric")
     return float(value)
+    ####
+
+
+def _row_number(row: Mapping[str, float | int | str], key: str) -> float:
+    """Read one finite numeric guidance value without coercing text telemetry."""
+
+    value = row.get(key)
+    if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
+        raise ValueError(f"reduced fixed-wing telemetry {key!r} must be finite numeric")
+    return float(value)
+    ####
+
+
+def _canonical_heading_deg(value: float) -> float:
+    """Project one periodic heading into the interface's [0, 360) chart.
+
+    This changes representation only: ``-0.1`` and ``359.9`` degrees remain
+    the same point on the declared circular value space. It must not be used
+    for non-periodic flight-path, bank, or rate channels.
+    """
+
+    return value % 360.0
     ####
 
 

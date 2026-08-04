@@ -5,8 +5,13 @@ from __future__ import annotations
 import math
 
 from taoryx.direct_wrench import DIRECT_WRENCH_NAMES
-from taoryx.hl20_adapter import build_hl20_local_direct_wrench_screen_config, build_hl20_source_direct_wrench_adapter
+from taoryx.hl20_adapter import (
+    build_hl20_local_direct_wrench_screen_config,
+    build_hl20_mach2_authority_probe_config,
+    build_hl20_source_direct_wrench_adapter,
+)
 from taoryx.hl20_reachability import HL20_FIXED_MASS_KG
+from taoryx.local_direct_wrench import run_local_direct_wrench_screen
 
 
 def _state() -> dict[str, float]:
@@ -68,7 +73,7 @@ def test_hl20_direct_wrench_changes_local_acceleration() -> None:
 def test_hl20_local_direct_wrench_config_reveals_insufficient_declared_force_authority() -> None:
     """Do not silently widen the bridge merely to call the local screen trimmed."""
 
-    config = build_hl20_local_direct_wrench_screen_config()
+    config = build_hl20_mach2_authority_probe_config()
     bias = config.balancing_wrench(config.reference_state)
 
     assert any(
@@ -76,3 +81,27 @@ def test_hl20_local_direct_wrench_config_reveals_insufficient_declared_force_aut
         or float(bias[name]) > float(config.limits.upper[name])
         for name in DIRECT_WRENCH_NAMES
     )
+
+
+def test_hl20_local_direct_wrench_screen_fails_at_the_equilibrium_gate() -> None:
+    """A non-equilibrium local screen must not be presented as an LQR success."""
+
+    screen = run_local_direct_wrench_screen(build_hl20_mach2_authority_probe_config())
+
+    assert screen.equilibrium_pass is False
+    assert screen.equilibrium_projection.status == "partially_achievable"
+    assert screen.equilibrium_derivative_norm > screen.config.equilibrium_derivative_norm_limit
+    assert screen.mission_pass is False
+    assert screen.as_dict()["evaluation"]["equilibrium"]["passed"] is False
+
+
+def test_hl20_source_feasible_local_direct_wrench_screen_passes_without_widening_limits() -> None:
+    """The public local screen uses a source-domain point the bridge can hold."""
+
+    screen = run_local_direct_wrench_screen(build_hl20_local_direct_wrench_screen_config())
+
+    assert screen.config.id == "hl20-source-mach0p5-local-direct-wrench-v1"
+    assert screen.equilibrium_pass is True
+    assert screen.equilibrium_projection.status == "feasible"
+    assert screen.observed_statuses == ("feasible",)
+    assert screen.mission_pass is True

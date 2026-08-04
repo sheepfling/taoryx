@@ -15,6 +15,9 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from .composition_control_trace import BatchControlSample, build_committed_control_trace, control_trace_summary
+from .composition_graph_evidence import unobserved_mission_graph_execution
+from .composition_resource_ledger import build_committed_resource_ledger
 from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .local_direct_wrench import LocalDirectWrenchScreenExecution, run_local_direct_wrench_screen
@@ -22,9 +25,9 @@ from .local_direct_wrench_mission_translation import (
     LocalDirectWrenchScreenMissionPlan,
     compile_local_direct_wrench_screen_mission,
 )
+from .local_direct_wrench_screen_registry import resolve_local_direct_wrench_screen_definition
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import VehicleExecutionPreflight, preflight_vehicle_composition
-from .x15_adapter import build_x15_local_direct_wrench_screen_config
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,7 +39,9 @@ class LocalDirectWrenchCompositionExecution:
     plan: LocalDirectWrenchScreenMissionPlan
     output_dir: Path
     screen: LocalDirectWrenchScreenExecution
+    mission_graph_execution: dict[str, object]
     status_trace: dict[str, object]
+    semantic_action_trace: dict[str, object]
     claim_boundary: str
 
     @property
@@ -45,6 +50,7 @@ class LocalDirectWrenchCompositionExecution:
 
         return self.screen.mission_pass
         ####
+
     ####
 
     def as_dict(self) -> dict[str, object]:
@@ -65,10 +71,13 @@ class LocalDirectWrenchCompositionExecution:
                 "control_realization": "direct_wrench_screen",
                 "physical_effector_allocation": False,
             },
+            "mission_graph_execution": self.mission_graph_execution,
             "status_trace": status_trace_summary(self.status_trace),
+            "semantic_action_trace": control_trace_summary(self.semantic_action_trace),
             "claim_boundary": self.claim_boundary,
         }
         ####
+
     ####
 
 
@@ -82,15 +91,16 @@ def execute_local_direct_wrench_composition(
     if preflight.status != "translation_ready":
         details = "; ".join(preflight.diagnostics) or "no local direct-wrench translator"
         raise ValueError(f"cannot execute composition {composition.id!r}: {preflight.status}: {details}")
-    if composition.family_id != "x15" or composition.mission != "x15_local_direct_wrench_screen_v1":
+    definition = resolve_local_direct_wrench_screen_definition(composition)
+    if definition is None:
         raise ValueError("no source-local direct-wrench screen factory is registered for this composition")
 
-    config = build_x15_local_direct_wrench_screen_config()
+    config = definition.config_factory()
     plan = compile_local_direct_wrench_screen_mission(
         composition,
-        family_id="x15",
-        mission_id="x15_local_direct_wrench_screen_v1",
-        initialization_id="source_release_glide_local_point",
+        family_id=definition.family_id,
+        mission_id=definition.mission_id,
+        initialization_id=definition.initialization_id,
         screen_config_id=config.id,
     )
     destination = Path(output_dir)
@@ -99,20 +109,23 @@ def execute_local_direct_wrench_composition(
     destination.mkdir(parents=True, exist_ok=True)
 
     screen = run_local_direct_wrench_screen(config)
+    mission_graph_execution = unobserved_mission_graph_execution(
+        composition,
+        "The local direct-wrench screen has no mission graph dispatcher; it is not a navigation execution.",
+    ).as_dict()
     status_trace = build_committed_status_trace(composition, _status_samples(screen))
+    semantic_action_trace = _direct_wrench_control_trace(composition, screen)
+    resource_ledger = build_committed_resource_ledger(composition, status_trace)
     result = LocalDirectWrenchCompositionExecution(
         composition=composition,
         preflight=preflight,
         plan=plan,
         output_dir=destination,
         screen=screen,
+        mission_graph_execution=mission_graph_execution,
         status_trace=status_trace,
-        claim_boundary=(
-            "This is a local X-15 source-load direct-wrench LQR recovery screen. It proves only the declared "
-            "source-local derivative, explicit bounded wrench projection, and local error-recovery result. It does "
-            "not prove X-15 flight trim, release, propulsion scheduling, navigation, terminal handoff, physical "
-            "stabilator/rudder/RCS allocation, or vehicle-family qualification."
-        ),
+        semantic_action_trace=semantic_action_trace,
+        claim_boundary=definition.claim_boundary,
     )
     _write_json(destination / "composition.json", composition.model_dump(mode="json", by_alias=True))
     _write_json(destination / "preflight.json", preflight.as_dict())
@@ -120,7 +133,10 @@ def execute_local_direct_wrench_composition(
     _write_json(destination / "local_screen.json", screen.as_dict())
     _write_json(destination / "truth_telemetry.json", list(screen.rows))
     _write_json(destination / "objective_report.json", _screen_evaluation(screen))
+    _write_json(destination / "mission_graph_execution.json", mission_graph_execution)
     _write_json(destination / "status_trace.json", status_trace)
+    _write_json(destination / "semantic_action_trace.json", semantic_action_trace)
+    _write_json(destination / "resource_ledger.json", resource_ledger)
     _write_json(destination / "execution.json", result.as_dict())
     return result
     ####
@@ -136,6 +152,18 @@ def _screen_evaluation(screen: LocalDirectWrenchScreenExecution) -> dict[str, ob
         "kind": "local_controller_recovery_screen",
         "screen_pass": screen.mission_pass,
         "requirements": [
+            {
+                "id": "equilibrium_wrench_feasible",
+                "actual": screen.equilibrium_projection.status,
+                "limit": "feasible",
+                "passed": screen.equilibrium_projection.status == "feasible",
+            },
+            {
+                "id": "equilibrium_reference_derivative",
+                "actual": screen.equilibrium_derivative_norm,
+                "limit": screen.config.equilibrium_derivative_norm_limit,
+                "passed": screen.equilibrium_derivative_norm <= screen.config.equilibrium_derivative_norm_limit,
+            },
             {"id": "closed_loop_hurwitz", "passed": screen.lqr.hurwitz},
             {
                 "id": "final_error_fraction",
@@ -145,11 +173,43 @@ def _screen_evaluation(screen: LocalDirectWrenchScreenExecution) -> dict[str, ob
             },
             {"id": "all_requests_feasible", "actual": list(statuses), "passed": statuses == ("feasible",)},
         ],
-        "claim_boundary": (
-            "The result assesses one local screen only. It is not an independent route, terminal, or physical-effector "
-            "mission evaluation."
-        ),
+        "claim_boundary": ("The result assesses one local screen only. It is not an independent route, terminal, or physical-effector mission evaluation."),
     }
+    ####
+
+
+def _direct_wrench_control_trace(
+    composition: CompiledVehicleComposition,
+    screen: LocalDirectWrenchScreenExecution,
+) -> dict[str, object]:
+    """Project the actual held total-wrench requests from the local screen.
+
+    This is intentionally an action trace for the explicitly declared direct
+    wrench bridge, not evidence of an actuator allocation. The local screen's
+    own accepted rows are the authority for both requested values and timing.
+    """
+
+    samples: list[BatchControlSample] = []
+    previous_time: float | None = None
+    for index, row in enumerate(screen.rows):
+        time_s = _number(row, "time_s")
+        wrench = _mapping(row.get("wrench"), "screen wrench")
+        requested = _mapping(wrench.get("requested_wrench"), "requested wrench")
+        samples.append(
+            BatchControlSample(
+                interval_start_time_s=time_s if previous_time is None else previous_time,
+                committed_truth_time_s=time_s,
+                requested_actions={
+                    "wrench.force.command": [_number(requested, name) for name in ("force_x_n", "force_y_n", "force_z_n")],
+                    "wrench.moment.command": [
+                        _number(requested, name) for name in ("moment_x_nm", "moment_y_nm", "moment_z_nm")
+                    ],
+                },
+                achieved_effectors={},
+            )
+        )
+        previous_time = time_s
+    return build_committed_control_trace(composition, samples)
     ####
 
 

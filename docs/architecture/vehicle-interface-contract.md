@@ -112,6 +112,7 @@ serialized fields should contain at least:
 | kind | parameter, action, effector, status, observation, resource, or diagnostic. |
 | value type | scalar, vector, enum, boolean, or structured event. |
 | canonical unit and frame | Unit plus reference frame where applicable. |
+| value space | Mathematical topology, representation, equivalence, error, normalization, and permitted interpolation rule. |
 | bounds | Hard lower/upper bounds and, where known, qualified and safe-extended bounds. |
 | default and transform | Default, normalization, and optimizer/RL transform where applicable. |
 | availability | available, available_in_batch, not_applicable, not_available, planned, or unavailable_at_runtime. |
@@ -124,6 +125,70 @@ Bounds are not merely UI hints. A hard-bound violation is rejected or
 explicitly projected according to the variant-resolution policy; a qualified
 range boundary changes the evidence classification. Projection is recorded
 with the original request and projection distance.
+
+### Value-space semantics
+
+Every channel declares its mathematical value space in addition
+to its storage shape. `scalar`, `vector3`, and `vector4` only say how a value
+is serialized; they do not say which algebra is valid.
+
+| Example | Storage type | Value space | Consequence |
+| --- | --- | --- | --- |
+| `flight.heading.command` | scalar | periodic \(S^1\) angle | Use shortest wrapped-angle error. \(179^\circ\) and \(-179^\circ\) are close. |
+| `body_rate.z` | scalar | linear tangent scalar | Use ordinary signed difference in rad/s. |
+| `attitude.quaternion` | vector4 | unit-quaternion representation of \(SO(3)\) | Preserve unit norm, identify \(q\) and \(-q\), use a geodesic/log-map attitude error. |
+| `attitude.euler` | vector3 | declared Euler coordinate chart of \(SO(3)\) | Record order and singularity; do not treat all components as globally linear. |
+| `flight.alpha` or `effector.elevon_left.command` | scalar | bounded interval | Clamp/project at declared physical limits; do not wrap. |
+| `position.ned` or `wrench.moment.command` | vector3 | Cartesian \(\mathbb{R}^3\) in named frame | Use component-wise operations in that frame. |
+| `guidance.los.unit_vector` | vector3 | unit sphere \(S^2\) | Normalize and measure angular/geodesic error. |
+| `resources.battery.soc` | scalar | bounded fraction \([0,1]\) | Use bounded fraction transforms. |
+| `phase.mode` | enum | finite discrete set | Hold/discrete transition only; never interpolate. |
+
+The serialized `value_space` descriptor includes:
+
+```text
+kind, topology, representation, period/equivalence when applicable,
+error_rule, interpolation_rule, normalization_rule, and coordinate chart.
+```
+
+`InterfaceChannel` now emits this descriptor for every public channel and
+rejects values that violate immediately testable representation invariants,
+including quaternion unit norm and bounded fractions. The independent
+truth-objective layer publishes the same descriptor for each target channel
+and uses its declared error rule during evaluation: heading targets use a
+wrapped \(S^1\) error and fly-by gate normals are constrained to unit
+directions on \(S^2\). Current resolved interfaces use the versioned
+[`interface_channel_value_space_catalog.yaml`](../../verification/interface_channel_value_space_catalog.yaml)
+instead of a code-level identifier switch. The catalog explicitly assigns each
+public action, effector, status, observation, resource, diagnostic, and
+composition-parameter channel to a profile; `topology-report` fails when any
+resolved public channel is absent. Registry-owned input and objective
+declarations publish the corresponding descriptors at their own boundaries.
+The generic objective vocabulary is separately versioned in
+[`truth_objective_channel_value_space_catalog.yaml`](../../verification/truth_objective_channel_value_space_catalog.yaml),
+so the independent evaluator does not decide a heading's circular semantics
+from a local identifier list. Authors must not infer periodicity or quaternion
+semantics from a unit or identifier alone.
+
+`taoryx vehicle topology-report` is the catalog-wide conformance gate. It
+audits the registry’s initialization, segment, and variant inputs alongside
+every resolved interface channel, observation binding, and the generic
+truth-objective schema. It fails on a missing or `topology_pending` public
+surface, while deliberately making no claim about execution or qualification.
+
+This contract applies to parameters and controls as well as status and
+observations. It determines controller errors, action validation, optimizer
+transforms, sensor residuals, terminal-objective checks, replay comparisons,
+and the only permissible interpretation of any explicitly derived resampling.
+Before a semantic action frame maps to a native control, TAORYX validates the
+selected profile's channel type, hard bounds, and declared value-space
+invariant. A fraction outside \([0,1]\), an invalid quaternion, or a malformed
+discrete value is rejected at the interface boundary; it is not silently
+converted to a native command. A native low-level actuator may separately
+apply its declared physical saturation, but that realization is logged as an
+achieved command rather than changing what the caller requested.
+It does not relax the committed-truth rule: sensor values are captured at
+declared truth boundaries, not interpolated from later truth states.
 
 ## Parameter scopes
 
@@ -370,6 +435,15 @@ against each channel's declared scalar/vector/boolean/enum shape and scalar
 bounds; malformed values are a failed artifact boundary, never a renderer-side
 repair.
 
+Every normal batch executor also emits `resource_ledger.json`. It is a
+composition- and interface-fingerprint-bound subset of the committed status
+trace: each declared resource channel carries only its emitted samples,
+descriptor, and a descriptive constant/nondecreasing/nonincreasing/variable
+trend. The ledger does not integrate mass flow, infer battery energy, or treat
+a monotonic trace as a physical depletion validation. The result catalog
+rebuilds and compares a supplied ledger against `status_trace.json`; an
+altered resource value is invalid evidence rather than a new resource model.
+
 The current reduced A320 and F-16 adapters additionally project common local
 navigation hooks (`position.north`, `position.east`, `position.altitude`,
 `velocity.speed`, flight path, heading, dynamic pressure, and modeled total
@@ -393,6 +467,25 @@ replay of one declared scripted or RL-style semantic action stream through the
 same episode kernel; it does not establish agreement with a separately
 compiled batch mission, physical actuator realization, robustness, or mission
 qualification.
+
+### Native control provenance is not a semantic action trace
+
+Language-backed TAOS execution can optionally retain
+`control_provenance.json` (`taoryx.runtime-control-provenance/v1alpha1`).  It
+records accepted interval counts, controller-evaluation timing, native control
+names, and whether any solver-stage evaluation changed the visible control
+vector.  It also lists the native names owned by a committed-boundary resolver.
+This artifact exists to diagnose the migration to committed-boundary
+sample-and-hold controllers.  Provenance alone does not assert that a semantic
+command was held through an interval and is never accepted in place of
+`semantic_action_trace.json`.  A public action trace becomes available only
+when the selected controller resolves every declared semantic action at a
+committed truth boundary, holds it unchanged until the next accepted boundary,
+and emits the identity-bound trace from those accepted intervals.  The X8
+point-mass racetrack is the first language-backed witness: its native route
+references are resolved at each committed boundary, while its published
+semantic trace remains limited to the separately declared throttle/elevon
+bridge actions.
 
 Composition-backed boards must retain this selected profile as well as the
 resolved interface fingerprint. `build_showcase_run_artifact_for_composition`
@@ -565,10 +658,27 @@ I0 and I1 now have an executable first slice:
 I2 is implemented for the active interactive witnesses while preserving the
 legacy EpisodeChannel API. X8/B747 and Hummingbird episodes now accept an
 ActionFrame, and emit an ObservationFrame and StatusFrame on every accepted
-external truth boundary. The contract maps the source-runtime X8 and B747
-altitude, speed, and mass values into SI and retains their original
-source-unit values only in the raw sidecar. Hummingbird maps bounded
+external truth boundary. `episode-info` now serializes the same explicit
+`value_space` descriptor for each legacy native action and observation channel
+as the semantic interface: native headings/yaw are circles, attitude is a
+roll/pitch/yaw product space, vector telemetry is Cartesian, fractions are
+unit intervals, nonnegative magnitudes are half-lines, and booleans remain
+discrete. A newly added native channel must declare a `ValueSpaceSpec` or be
+added to the centrally reviewed mapping; callers may not infer topology from
+its unit or spelling. The contract maps the source-runtime X8 and B747
+altitude, speed, and mass values into SI and retains their original source-unit
+values only in the raw sidecar. Hummingbird maps bounded
 body-motion/aggregate-thrust commands and its engineering battery reserve.
+
+The native debug mapping is not a generic name heuristic. For the retained
+source-table X8/B747 records it explicitly declares source-degree headings and
+longitude as (S^1) circles with period (360), source angle quantities as
+bounded coordinates, known positive source magnitudes such as speed, mass,
+fuel, dynamic pressure, time, and thrust as half-lines, throttle as a unit
+interval, and source state/segment flags as discrete numeric codes. The
+canonical interface remains preferred for a portable policy; the legacy
+schema is still fully typed so diagnostic consumers cannot accidentally apply
+linear heading arithmetic or interpolate a state code.
 Each frame step also records the requested semantic action, the actually
 applied native action, and the mapped applied semantic action after limiting,
 so response-law saturation cannot be hidden behind a clean canonical request.

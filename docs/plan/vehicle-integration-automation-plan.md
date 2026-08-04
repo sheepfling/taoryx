@@ -14,6 +14,13 @@ require family knowledge and source interpretation. The target is that Taoryx
 asks for the missing declarations, generates the worklist, runs all generic
 checks, and refuses unsupported promotion without manual bookkeeping.
 
+The F-16 and HL-20 work also exposed a planning-metadata discipline: a
+family's public `next_gate` must identify that family, not a copied neighbor.
+The source-integration pipeline publishes this value directly to authors, so a
+named-family mismatch is treated as a manifest defect and regression-tested.
+Stage-local integration-record gates may remain more granular; they are not
+silently substituted for the public family next gate.
+
 ## Current baseline
 
 The F-16 integration demonstrates the complete vertical slice at one local
@@ -54,25 +61,28 @@ unlabeled plausible constants.
 
 ## Milestone A — Vehicle intake and data readiness
 
-Add a provider-neutral intake command, initially exposed as:
+Add a provider-neutral intake and source-readiness surface:
 
 ```text
-taoryx vehicle intake <source-package> --family <family-id>
-taoryx vehicle readiness <family-id>
+taoryx vehicle intake existing-family ...
+taoryx vehicle intake new-topology ...
+taoryx vehicle integration readiness <family-id>
 ```
 
-The first repository implementation is available during this transition as:
+The author-facing implementation is now available as:
 
 ```text
-.venv/bin/python tools/validate_vehicle_integration_readiness.py \
-  --family reference_f16_s119
-.venv/bin/python tools/dev.py integration-readiness
+taoryx vehicle integration readiness reference_f16_s119
+taoryx vehicle integration pipeline reference_f16_s119
+taoryx vehicle integration pipeline reference_hl20_mod_k --allow-blocked
 ```
 
 It currently consumes the supported source-family registry and family
 manifests. The F-16 report is `ready_for_runtime_probes`; the HL-20 report
-intentionally blocks on its undeclared direct-wrench profile. Neither result
-promotes a runtime tier or silently lowers fidelity.
+exposes its semantic glide mission and the separately planned runtime gate.
+Neither result promotes a runtime tier or silently lowers fidelity. The
+lower-level validation scripts remain CI/developer entry points, while the
+Product 3 CLI is the author-facing projection of the same evidence.
 
 The intake record should generate or validate:
 
@@ -112,9 +122,10 @@ The report distinguishes `passed`, `development`, `planned`,
 `not_applicable`, and `blocked`.  A source replay can therefore pass while a
 surface allocator or mission overlay remains development evidence.  For the
 current pilots, F-16 reaches `T2_source_plant_ready` with development gates;
-HL-20 reaches the same plant tier but remains blocked by its undeclared
-expected direct-wrench profile.  That distinction is intentional: the
-pipeline does not invent a reduction or silently inherit a missing profile.
+HL-20 reaches the same plant tier with a translation-ready semantic mission
+but an explicitly planned runtime. That distinction is intentional: the
+pipeline does not invent a reduction, native mission plant, or silently
+inherit a missing profile.
 
 The packet writer copies the family manifest, import record, integration
 record, operational contract, declared bindings, referenced evidence, and the
@@ -158,10 +169,15 @@ Controller and mission preflight is now also available:
 This checks controller profile identity, linearization/effectiveness
 references, canonical control bindings, unresolved direct-wrench paths, mission
 realization IDs, phase order, route geometry, and a capability-based duration
-estimate.  It does not solve gains or execute a plant.  The F-16 currently
-reports development preflight with a 1,408.2 s racetrack estimate; the HL-20
-is blocked because it has no reusable mission binding and correctly reports no
-controller profiles as not applicable.
+estimate where that family owns one. It also accepts a generic
+`semantic_composition` mission binding: checked-in witnesses must compile to
+the declared public composition family/mission/fidelity and reproduce their
+expected semantic-preflight status. It does not solve gains or execute a
+plant. The F-16 currently reports development preflight with its racetrack
+estimate; the HL-20 reports two translation-ready reduced intent witnesses but
+remains development because no high-altitude runtime, truth objectives, or
+terminal evaluator is bound. Its absent controller profiles remain explicitly
+not applicable.
 
 Numeric effectivity and overlay preflight is now a separate reusable stage:
 
@@ -398,8 +414,9 @@ The long-running workflow should converge on this sequence:
 
 ```bash
 # 1. Intake and readiness
-taoryx vehicle intake <source-package> --family <family-id>
-taoryx vehicle readiness <family-id>
+taoryx vehicle intake existing-family ...
+taoryx vehicle integration readiness <family-id>
+taoryx vehicle integration pipeline <family-id>
 
 # 2. Convention and source diagnostics
 taoryx vehicle diagnose <family-id> --stage conventions
@@ -424,7 +441,8 @@ taoryx vehicle qualify <family-id> --profile development
 taoryx vehicle report <family-id>
 ```
 
-During the transition, the implemented readiness command is:
+The lower-level CI/developer counterpart remains available when a repository
+artifact is required rather than a Product 3 authoring report:
 
 ```bash
 .venv/bin/python tools/validate_vehicle_integration_readiness.py \

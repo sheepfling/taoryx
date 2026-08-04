@@ -19,6 +19,24 @@ are verified independently from truth telemetry.
 A controller transition is diagnostic evidence. It cannot create a physical
 objective pass.
 
+## Objective value spaces
+
+Objective channels declare their mathematical value space in addition to their
+units. This is part of the independent evaluator, not a plotting convention:
+
+| Objective value | Space | Evaluation rule |
+| --- | --- | --- |
+| Position, altitude, speed, vertical speed, roll, pitch, and rates | linear scalar / Cartesian coordinates | Ordinary difference in the declared unit and frame. |
+| Heading or local heading | periodic circle \(S^1\) | Shortest wrapped difference; \(179^\circ\) and \(-179^\circ\) differ by \(2^\circ\), not \(358^\circ\). |
+| Fly-by gate normal | unit sphere \(S^2\) | Must be a finite unit direction; crossing direction is evaluated against that oriented normal. |
+| Event/mode/contact label | finite set | Exact occurrence or transition semantics; never interpolated. |
+
+Every serialized objective now includes a `channel_contracts` map with unit,
+value-space descriptor, and migration provenance. The truth evaluator uses the
+same descriptor to calculate the error shown in the objective table. This
+prevents a display or final-state check from quietly using a different metric
+than the authored mission contract.
+
 ## Objective vocabulary
 
 The evaluator supports these explicit objective types:

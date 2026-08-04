@@ -15,12 +15,13 @@ import math
 from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .fidelity_contracts import FidelityTier, runtime_fidelity_for
+from .value_space import validate_value_space_value
 from .vehicle_composition_registry import (
     CompositionParameter,
     InitializationContract,
@@ -28,6 +29,7 @@ from .vehicle_composition_registry import (
     ResolvedVehicleComposition,
     ResolvedVehicleCompositionCatalog,
     SegmentContract,
+    VariantParameterBinding,
     load_resolved_vehicle_composition_catalog,
     resolved_control_realization_for,
 )
@@ -90,6 +92,62 @@ class MissionSelection(BaseModel):
 ####
 
 
+MissionTransitionKind = Literal["success", "abort", "resource_limit", "envelope_limit", "timeout"]
+StateTransferKind = Literal["previous_terminal_truth_state", "declared_physical_transition"]
+
+
+class MissionTransitionSelection(BaseModel):
+    """One explicit semantic graph edge or named terminal outcome.
+
+    ``target_instance_id: null`` is a declared terminal outcome for this
+    trigger. It is never an implicit timeout-as-success shortcut.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    target_instance_id: str | None = None
+    state_transfer: StateTransferKind = "previous_terminal_truth_state"
+####
+
+
+class MissionGraphNodeSelection(BaseModel):
+    """Transitions owned by one selected segment instance."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    instance_id: str = Field(min_length=1)
+    success_transition: MissionTransitionSelection | None = None
+    abort_transition: MissionTransitionSelection | None = None
+    resource_limit_transition: MissionTransitionSelection | None = None
+    envelope_limit_transition: MissionTransitionSelection | None = None
+    timeout_transition: MissionTransitionSelection | None = None
+####
+
+
+class MissionGraphSelection(BaseModel):
+    """Caller-authored graph over the request's named segment instances.
+
+    The first graph slice supports acyclic typed transitions and validates
+    them before execution. Native translators still advertise whether they
+    can realize anything beyond the template's legacy success sequence.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    entry_instance_id: str = Field(min_length=1)
+    nodes: tuple[MissionGraphNodeSelection, ...] = Field(min_length=1)
+####
+
+
+class VariantSelection(BaseModel):
+    """Optional bounded configuration values applied before initialization."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    inputs: dict[str, CompositionValue] = Field(default_factory=dict)
+####
+
+
 class DeclaredSensorChannelError(BaseModel):
     """A portable scalar measurement transform, declared rather than inferred."""
 
@@ -144,6 +202,8 @@ class VehicleCompositionRequest(BaseModel):
     initialization: InitializationSelection
     mission: MissionSelection
     segments: tuple[SegmentSelection, ...] = Field(min_length=1)
+    mission_graph: MissionGraphSelection | None = None
+    variant: VariantSelection = Field(default_factory=VariantSelection)
     observation: ObservationSelection = Field(default_factory=ObservationSelection)
 ####
 
@@ -171,6 +231,62 @@ class CompiledInitialization(BaseModel):
 ####
 
 
+class CompiledVariantRuntimeBinding(BaseModel):
+    """One immutable runtime modifier trace and declared coupling boundary.
+
+    The binding retains the public scalar topology used during resolution.
+    This prevents a downstream runtime, UI, or optimization client from
+    retaining only a native input path while losing the bounds and transform
+    that make the supplied value meaningful.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    runtime_adapter_id: str
+    runtime_input_path: str
+    target_initialization_id: str
+    target_parameter_id: str
+    compatible_fidelities: tuple[FidelityTier, ...]
+    value_space: dict[str, object]
+    transform: Literal["identity", "log", "logit"]
+    hard_lower: float | None
+    hard_upper: float | None
+    coupling_group: str
+    coupling_policy: Literal["exclusive", "composable"]
+    derived_status_channels: tuple[str, ...]
+    status_derivation_relation: Literal["equal_to_target", "not_asserted"]
+    resource_derivation: Literal["runtime_adapter_owned", "not_represented", "planned"]
+    derivation_claim_boundary: str
+####
+
+
+class CompiledVariantProjection(BaseModel):
+    """One explicit optimizer/input repair performed by a declared policy."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    requested_value: float
+    resolved_value: float
+    normalized_distance: float
+    constraints: tuple[str, ...]
+####
+
+
+class CompiledVariantResolution(BaseModel):
+    """Immutable record of runtime-bound modifier application."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    inputs: dict[str, ResolvedCompositionValue] = Field(default_factory=dict)
+    runtime_bindings: dict[str, CompiledVariantRuntimeBinding] = Field(default_factory=dict)
+    projections: dict[str, CompiledVariantProjection] = Field(default_factory=dict)
+    invalidations: tuple[str, ...] = ()
+    resolution_policy: Literal["reject_invalid", "project_to_valid", "mixed"] = "reject_invalid"
+    qualification: Literal["baseline", "qualified", "extended"] = "baseline"
+    qualification_findings: tuple[str, ...] = ()
+####
+
+
 class CompiledSegment(BaseModel):
     """Validated ordered semantic segment and its truth-state handoff rule."""
 
@@ -184,6 +300,48 @@ class CompiledSegment(BaseModel):
     required_control_intents: tuple[str, ...]
     permitted_transition_events: tuple[str, ...]
     state_transfer: str
+####
+
+
+class CompiledMissionTransition(BaseModel):
+    """Resolved graph edge with a named trigger and state-transfer rule."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    target_instance_id: str | None = None
+    state_transfer: StateTransferKind = "previous_terminal_truth_state"
+####
+
+
+class CompiledMissionGraphNode(BaseModel):
+    """One resolved segment node and all named outcome transitions."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    instance_id: str
+    segment_id: str
+    success_transition: CompiledMissionTransition | None = None
+    abort_transition: CompiledMissionTransition | None = None
+    resource_limit_transition: CompiledMissionTransition | None = None
+    envelope_limit_transition: CompiledMissionTransition | None = None
+    timeout_transition: CompiledMissionTransition | None = None
+####
+
+
+class CompiledMissionGraph(BaseModel):
+    """Immutable graph carried with the resolved composition artifact."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    schema_id: str = Field(default="taoryx.mission-graph/v1alpha1", alias="schema", serialization_alias="schema")
+    status: Literal[
+        "linear_sequence_only",
+        "authored_linear_sequence_lowered",
+        "authored_graph_not_lowered",
+    ]
+    entry_instance_id: str
+    nodes: tuple[CompiledMissionGraphNode, ...]
+    claim_boundary: str
 ####
 
 
@@ -224,11 +382,13 @@ class CompiledVehicleComposition(BaseModel):
     runtime_fidelity: str
     control_realization: str
     composition_status: str
+    variant: CompiledVariantResolution = Field(default_factory=CompiledVariantResolution)
     initialization: CompiledInitialization
     mission: str
     backing_templates: tuple[str, ...]
     qualification_missions: tuple[str, ...]
     segments: tuple[CompiledSegment, ...]
+    mission_graph: CompiledMissionGraph | None = None
     observation: CompiledObservation = Field(default_factory=lambda: CompiledObservation(profile_id="truth_debug"))
     native_adapter_handoff: dict[str, Any]
     identity_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
@@ -329,11 +489,12 @@ def compile_vehicle_composition(
             field="segments",
         )
 
+    resolved_variant, initialization_inputs = _resolve_variant_inputs(vehicle, initialization, request)
     compiled_initialization = CompiledInitialization(
         id=initialization.id,
         status=initialization.status,
         description=initialization.description,
-        inputs=_resolve_inputs(initialization.parameters, request.initialization.inputs, f"initialization:{initialization.id}"),
+        inputs=_resolve_inputs(initialization.parameters, initialization_inputs, f"initialization:{initialization.id}"),
     )
     compiled_segments: list[CompiledSegment] = []
     seen_instances: set[str] = set()
@@ -362,6 +523,7 @@ def compile_vehicle_composition(
             )
         )
 
+    compiled_graph = _compile_mission_graph(request.mission_graph, tuple(compiled_segments))
     statuses = [mission.status, initialization.status, *(segment.status for segment in compiled_segments)]
     status = _aggregate_status(statuses)
     compiled_observation = _resolve_observation(request.observation, vehicle.family.family_id, request.fidelity)
@@ -386,11 +548,13 @@ def compile_vehicle_composition(
         runtime_fidelity=runtime_fidelity_for(request.fidelity),
         control_realization=resolved_control_realization_for(vehicle.family.family_id, request.fidelity),
         composition_status=status,
+        variant=resolved_variant,
         initialization=compiled_initialization,
         mission=mission.id,
         backing_templates=mission.backing_templates,
         qualification_missions=mission.qualification_missions,
         segments=tuple(compiled_segments),
+        mission_graph=compiled_graph,
         observation=compiled_observation,
         native_adapter_handoff=adapter_handoff,
         identity_sha256="0" * 64,
@@ -399,6 +563,206 @@ def compile_vehicle_composition(
         json.dumps(draft.canonical_payload(), sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
     return draft.model_copy(update={"identity_sha256": digest})
+    ####
+
+
+def _compile_mission_graph(
+    selection: MissionGraphSelection | None,
+    segments: tuple[CompiledSegment, ...],
+) -> CompiledMissionGraph:
+    """Validate a typed acyclic graph over resolved segment instances.
+
+    Existing template-owned requests remain a linear sequence. An explicitly
+    authored graph can be composed and inspected now. A caller-authored graph
+    may execute only when it is exactly the template's existing success chain;
+    all branches and alternate state handoffs retain a distinct blocked status.
+    """
+
+    instance_ids = tuple(segment.instance_id for segment in segments)
+    known_ids = set(instance_ids)
+    if selection is None:
+        nodes = tuple(
+            CompiledMissionGraphNode(
+                instance_id=segment.instance_id,
+                segment_id=segment.id,
+                success_transition=(
+                    None
+                    if index + 1 == len(segments)
+                    else CompiledMissionTransition(target_instance_id=segments[index + 1].instance_id)
+                ),
+            )
+            for index, segment in enumerate(segments)
+        )
+        return CompiledMissionGraph(
+            status="linear_sequence_only",
+            entry_instance_id=segments[0].instance_id,
+            nodes=nodes,
+            claim_boundary=(
+                "This graph is the exact template-owned success sequence accepted by current native translators. "
+                "No caller-configurable branch, fallback, abort, resource, envelope, or timeout semantics are active."
+            ),
+        )
+
+    selected_nodes = {node.instance_id: node for node in selection.nodes}
+    if len(selected_nodes) != len(selection.nodes):
+        raise VehicleCompositionError("duplicate-mission-graph-node", "mission graph has duplicate instance IDs", field="mission_graph.nodes")
+    if set(selected_nodes) != known_ids:
+        missing = sorted(known_ids - set(selected_nodes))
+        unknown = sorted(set(selected_nodes) - known_ids)
+        raise VehicleCompositionError(
+            "mission-graph-node-set-mismatch",
+            f"graph nodes must exactly match selected segments; missing={missing!r}, unknown={unknown!r}",
+            field="mission_graph.nodes",
+        )
+    if selection.entry_instance_id not in known_ids:
+        raise VehicleCompositionError(
+            "unknown-mission-graph-entry",
+            f"unknown entry instance {selection.entry_instance_id!r}",
+            field="mission_graph.entry_instance_id",
+        )
+
+    def resolve_transition(
+        transition: MissionTransitionSelection | None,
+        *,
+        field: str,
+    ) -> CompiledMissionTransition | None:
+        if transition is None:
+            return None
+        if transition.target_instance_id is not None and transition.target_instance_id not in known_ids:
+            raise VehicleCompositionError(
+                "unknown-mission-graph-target",
+                f"unknown target instance {transition.target_instance_id!r}",
+                field=field,
+            )
+        return CompiledMissionTransition(
+            target_instance_id=transition.target_instance_id,
+            state_transfer=transition.state_transfer,
+        )
+
+    compiled_nodes: list[CompiledMissionGraphNode] = []
+    for segment in segments:
+        node = selected_nodes[segment.instance_id]
+        prefix = f"mission_graph.nodes.{node.instance_id}"
+        compiled_nodes.append(
+            CompiledMissionGraphNode(
+                instance_id=segment.instance_id,
+                segment_id=segment.id,
+                success_transition=resolve_transition(node.success_transition, field=f"{prefix}.success_transition"),
+                abort_transition=resolve_transition(node.abort_transition, field=f"{prefix}.abort_transition"),
+                resource_limit_transition=resolve_transition(node.resource_limit_transition, field=f"{prefix}.resource_limit_transition"),
+                envelope_limit_transition=resolve_transition(node.envelope_limit_transition, field=f"{prefix}.envelope_limit_transition"),
+                timeout_transition=resolve_transition(node.timeout_transition, field=f"{prefix}.timeout_transition"),
+            )
+        )
+
+    adjacency = {
+        node.instance_id: tuple(
+            transition.target_instance_id
+            for transition in (
+                node.success_transition,
+                node.abort_transition,
+                node.resource_limit_transition,
+                node.envelope_limit_transition,
+                node.timeout_transition,
+            )
+            if transition is not None and transition.target_instance_id is not None
+        )
+        for node in compiled_nodes
+    }
+    reachable: set[str] = set()
+    stack = [selection.entry_instance_id]
+    while stack:
+        current = stack.pop()
+        if current in reachable:
+            continue
+        reachable.add(current)
+        stack.extend(adjacency[current])
+    if reachable != known_ids:
+        raise VehicleCompositionError(
+            "unreachable-mission-graph-node",
+            f"mission graph has unreachable selected segment(s): {sorted(known_ids - reachable)!r}",
+            field="mission_graph",
+        )
+    active: set[str] = set()
+    visited: set[str] = set()
+
+    def visit(node_id: str) -> None:
+        if node_id in active:
+            raise VehicleCompositionError(
+                "cyclic-mission-graph",
+                "caller-authored mission graphs must be acyclic until a bounded loop contract is declared",
+                field="mission_graph",
+            )
+        if node_id in visited:
+            return
+        active.add(node_id)
+        for target in adjacency[node_id]:
+            visit(target)
+        active.remove(node_id)
+        visited.add(node_id)
+
+    visit(selection.entry_instance_id)
+    exact_linear = _is_exact_template_success_sequence(
+        selection.entry_instance_id,
+        tuple(compiled_nodes),
+        segments,
+    )
+    return CompiledMissionGraph(
+        status="authored_linear_sequence_lowered" if exact_linear else "authored_graph_not_lowered",
+        entry_instance_id=selection.entry_instance_id,
+        nodes=tuple(compiled_nodes),
+        claim_boundary=(
+            "This caller-authored graph is an exact projection of the template-owned success sequence and adds "
+            "no branch, fallback, timeout, or alternate state-transfer semantics. Current native translators may "
+            "execute that sequence."
+            if exact_linear
+            else "This caller-authored graph passed semantic node, transition, reachability, and acyclicity validation. "
+            "No current native translator has opted in to execute its branch or alternate state-transfer semantics; "
+            "preflight and lowering must remain blocked."
+        ),
+    )
+    ####
+
+
+def _is_exact_template_success_sequence(
+    entry_instance_id: str,
+    nodes: tuple[CompiledMissionGraphNode, ...],
+    segments: tuple[CompiledSegment, ...],
+) -> bool:
+    """Return whether a caller graph adds no executable semantics to a template.
+
+    Native adapters currently consume the ordered segment sequence and always
+    transfer the previous committed truth state. A graph is lowerable only if
+    it describes exactly that already-supported behavior.
+    """
+
+    if entry_instance_id != segments[0].instance_id:
+        return False
+    for index, (node, segment) in enumerate(zip(nodes, segments, strict=True)):
+        if node.instance_id != segment.instance_id or node.segment_id != segment.id:
+            return False
+        if any(
+            transition is not None
+            for transition in (
+                node.abort_transition,
+                node.resource_limit_transition,
+                node.envelope_limit_transition,
+                node.timeout_transition,
+            )
+        ):
+            return False
+        expected_target = None if index + 1 == len(segments) else segments[index + 1].instance_id
+        transition = node.success_transition
+        if expected_target is None:
+            if transition is not None:
+                return False
+        elif (
+            transition is None
+            or transition.target_instance_id != expected_target
+            or transition.state_transfer != "previous_terminal_truth_state"
+        ):
+            return False
+    return True
     ####
 
 
@@ -567,6 +931,200 @@ def _mission(vehicle: ResolvedVehicleComposition, identifier: str) -> MissionTem
     ####
 
 
+def _resolve_variant_numeric_value(
+    binding: VariantParameterBinding,
+    requested_value: float,
+) -> tuple[float, CompiledVariantProjection | None]:
+    """Apply one declared hard-bound policy without hiding any repair.
+
+    ``project_to_valid`` is intentionally scalar and hard-bound limited for
+    this first variant resolver.  It is a useful policy for optimizers that
+    occasionally propose a slightly invalid continuous candidate, but it may
+    never repair a non-finite value, a wrong unit, or a topology violation that
+    lacks a declared finite bound.
+    """
+
+    lower = binding.hard_lower
+    upper = binding.hard_upper
+    resolved = requested_value
+    constraints: list[str] = []
+    if lower is not None and resolved < lower:
+        constraints.append("hard_lower")
+        resolved = lower
+    if upper is not None and resolved > upper:
+        constraints.append("hard_upper")
+        resolved = upper
+    if not constraints:
+        return (resolved, None)
+    if binding.resolution_policy == "reject_invalid":
+        raise VehicleCompositionError(
+            "variant-hard-bound-violation",
+            f"value {requested_value!r} is outside [{lower!r}, {upper!r}]",
+            field=f"variant.inputs.{binding.id}",
+        )
+    if lower is not None and upper is not None and upper > lower:
+        normalized_distance = abs(resolved - requested_value) / (upper - lower)
+    else:
+        scale = max(1.0, abs(resolved))
+        normalized_distance = abs(resolved - requested_value) / scale
+    return (
+        resolved,
+        CompiledVariantProjection(
+            requested_value=requested_value,
+            resolved_value=resolved,
+            normalized_distance=normalized_distance,
+            constraints=tuple(constraints),
+        ),
+    )
+    ####
+
+
+def _resolve_variant_inputs(
+    vehicle: ResolvedVehicleComposition,
+    initialization: InitializationContract,
+    request: VehicleCompositionRequest,
+) -> tuple[CompiledVariantResolution, dict[str, CompositionValue]]:
+    """Apply only declared runtime-bound variant values to initialization.
+
+    A variant is not a generic mapping merge. Each supplied ID must identify a
+    binding owned by the selected family, point at the selected initialization,
+    satisfy hard bounds, and be declared runnable. The resulting value is
+    still validated against the target initialization parameter below.
+    """
+
+    supplied = request.variant.inputs
+    bindings = {item.id: item for item in vehicle.declaration.variant_parameters}
+    unknown = sorted(set(supplied) - set(bindings))
+    if unknown:
+        raise VehicleCompositionError("unknown-variant-input", f"undeclared variant input(s): {', '.join(unknown)}", field="variant.inputs")
+    values = dict(request.initialization.inputs)
+    applied: dict[str, ResolvedCompositionValue] = {}
+    runtime_bindings: dict[str, CompiledVariantRuntimeBinding] = {}
+    projections: dict[str, CompiledVariantProjection] = {}
+    invalidations: set[str] = set()
+    qualification_findings: list[str] = []
+    qualification: Literal["baseline", "qualified", "extended"] = "baseline"
+    resolution_policies: set[Literal["reject_invalid", "project_to_valid"]] = set()
+    active_coupling_groups: dict[str, tuple[str, Literal["exclusive", "composable"]]] = {}
+    for identifier, value in supplied.items():
+        binding: VariantParameterBinding = bindings[identifier]
+        if binding.status != "runnable":
+            raise VehicleCompositionError("variant-not-runnable", f"variant {identifier!r} is not bound to an executable runtime adapter", field=f"variant.inputs.{identifier}")
+        if request.fidelity not in binding.compatible_fidelities:
+            raise VehicleCompositionError(
+                "variant-fidelity-incompatible",
+                f"variant {identifier!r} is not declared for fidelity {request.fidelity!r}; "
+                f"supported={list(binding.compatible_fidelities)!r}",
+                field=f"variant.inputs.{identifier}",
+            )
+        if binding.target_initialization_id != initialization.id:
+            raise VehicleCompositionError(
+                "variant-initialization-incompatible",
+                f"variant {identifier!r} targets initialization {binding.target_initialization_id!r}, not {initialization.id!r}",
+                field=f"variant.inputs.{identifier}",
+            )
+        coupling_group = binding.coupling_group
+        if coupling_group is not None:
+            prior = active_coupling_groups.get(coupling_group)
+            if prior is not None and (prior[1] == "exclusive" or binding.coupling_policy == "exclusive"):
+                raise VehicleCompositionError(
+                    "variant-coupling-conflict",
+                    f"variant {identifier!r} conflicts with {prior[0]!r} in exclusive coupling group {coupling_group!r}",
+                    field=f"variant.inputs.{identifier}",
+                )
+            active_coupling_groups[coupling_group] = (identifier, binding.coupling_policy)
+        if binding.canonical_unit is None and value.unit is not None:
+            raise VehicleCompositionError("variant-unit-mismatch", "variant is unitless but a unit was supplied", field=f"variant.inputs.{identifier}")
+        if binding.canonical_unit is not None and value.unit not in {None, binding.canonical_unit}:
+            raise VehicleCompositionError(
+                "variant-unit-mismatch",
+                f"expected canonical unit {binding.canonical_unit!r}, received {value.unit!r}",
+                field=f"variant.inputs.{identifier}",
+            )
+        if isinstance(value.value, bool) or not isinstance(value.value, int | float):
+            raise VehicleCompositionError("variant-type-mismatch", "variant input must be a finite numeric scalar", field=f"variant.inputs.{identifier}")
+        numeric = float(value.value)
+        if not math.isfinite(numeric):
+            raise VehicleCompositionError("variant-type-mismatch", "variant input must be finite", field=f"variant.inputs.{identifier}")
+        resolved_numeric, projection = _resolve_variant_numeric_value(binding, numeric)
+        try:
+            validate_value_space_value(binding.value_space, resolved_numeric, context=f"variant.inputs.{identifier}")
+        except ValueError as error:
+            raise VehicleCompositionError("variant-value-space-mismatch", str(error), field=f"variant.inputs.{identifier}") from error
+        target = binding.target_parameter_id
+        if target in values:
+            raise VehicleCompositionError(
+                "variant-target-conflict",
+                f"variant {identifier!r} and initialization both supply {target!r}",
+                field=f"variant.inputs.{identifier}",
+            )
+        resolved_input = CompositionValue(value=resolved_numeric, unit=value.unit)
+        values[target] = resolved_input
+        applied[identifier] = ResolvedCompositionValue(value=resolved_numeric, canonical_unit=binding.canonical_unit, input_unit=value.unit)
+        resolution_policies.add(binding.resolution_policy)
+        if projection is not None:
+            projections[identifier] = projection
+        if binding.transform not in {"identity", "log", "logit"}:
+            raise VehicleCompositionError(
+                "variant-transform-not-runtime-bindable",
+                f"runtime-bound numeric variant {identifier!r} cannot use transform {binding.transform!r}",
+                field=f"variant.inputs.{identifier}",
+            )
+        runtime_bindings[identifier] = CompiledVariantRuntimeBinding(
+            runtime_adapter_id=binding.runtime_adapter_id or "",
+            runtime_input_path=binding.runtime_input_path or "",
+            target_initialization_id=binding.target_initialization_id,
+            target_parameter_id=target,
+            compatible_fidelities=binding.compatible_fidelities,
+            value_space=binding.value_space.as_dict(),
+            transform=binding.transform,
+            hard_lower=binding.hard_lower,
+            hard_upper=binding.hard_upper,
+            coupling_group=binding.coupling_group or "",
+            coupling_policy=binding.coupling_policy,
+            derived_status_channels=binding.derived_status_channels,
+            status_derivation_relation=binding.status_derivation_relation,
+            resource_derivation=binding.resource_derivation,
+            derivation_claim_boundary=binding.derivation_claim_boundary,
+        )
+        if binding.requires_retrim:
+            invalidations.add(f"retrim:{target}")
+        if binding.requires_requalification:
+            invalidations.add(f"requalification:{target}")
+        if binding.qualified_lower is None or binding.qualified_upper is None:
+            qualification = "extended"
+            qualification_findings.append(
+                f"{identifier}: hard-valid runtime binding has no declared qualified range"
+            )
+        elif resolved_numeric < binding.qualified_lower or resolved_numeric > binding.qualified_upper:
+            qualification = "extended"
+            qualification_findings.append(
+                f"{identifier}: resolved value {resolved_numeric!r} is outside qualified range "
+                f"[{binding.qualified_lower!r}, {binding.qualified_upper!r}]"
+            )
+    if applied and qualification == "baseline":
+        qualification = "qualified"
+    return (
+        CompiledVariantResolution(
+            inputs=applied,
+            runtime_bindings=runtime_bindings,
+            projections=projections,
+            invalidations=tuple(sorted(invalidations)),
+            resolution_policy=(
+                "reject_invalid"
+                if not resolution_policies
+                else next(iter(resolution_policies))
+                if len(resolution_policies) == 1
+                else "mixed"
+            ),
+            qualification=qualification,
+            qualification_findings=tuple(qualification_findings),
+        ),
+        values,
+    )
+    ####
+
+
 def _resolve_inputs(
     parameters: tuple[CompositionParameter, ...],
     values: Mapping[str, CompositionValue],
@@ -598,6 +1156,39 @@ def _resolve_inputs(
                 f"expected canonical unit {parameter.canonical_unit!r}, received {supplied.unit!r}",
                 field=f"{scope}.{parameter.id}",
             )
+        try:
+            validate_value_space_value(
+                parameter.value_space,
+                supplied.value,
+                context=f"{scope}.{parameter.id}",
+            )
+        except ValueError as error:
+            raise VehicleCompositionError(
+                "value-space-mismatch",
+                str(error),
+                field=f"{scope}.{parameter.id}",
+            ) from error
+        if parameter.options and supplied.value not in parameter.options:
+            raise VehicleCompositionError(
+                "option-mismatch",
+                f"expected one of {list(parameter.options)!r}, received {supplied.value!r}",
+                field=f"{scope}.{parameter.id}",
+            )
+        lower, upper = parameter.hard_bounds
+        if lower is not None or upper is not None:
+            if isinstance(supplied.value, bool) or not isinstance(supplied.value, int | float):
+                raise VehicleCompositionError(
+                    "bounds-type-mismatch",
+                    "a bounded parameter requires a finite scalar",
+                    field=f"{scope}.{parameter.id}",
+                )
+            numeric = float(supplied.value)
+            if not math.isfinite(numeric) or (lower is not None and numeric < lower) or (upper is not None and numeric > upper):
+                raise VehicleCompositionError(
+                    "hard-bound-violation",
+                    f"value {numeric!r} is outside [{lower!r}, {upper!r}]",
+                    field=f"{scope}.{parameter.id}",
+                )
         resolved[parameter.id] = ResolvedCompositionValue(
             value=supplied.value,
             canonical_unit=parameter.canonical_unit,
@@ -662,15 +1253,24 @@ def _aggregate_status(statuses: list[str]) -> str:
 __all__ = [
     "CompiledVehicleComposition",
     "CompiledDeclaredSensor",
+    "CompiledMissionGraph",
+    "CompiledMissionGraphNode",
+    "CompiledMissionTransition",
     "CompiledObservation",
     "CompositionValue",
     "DeclaredSensorChannelError",
     "DeclaredSensorSelection",
     "InitializationSelection",
     "MissionSelection",
+    "MissionGraphNodeSelection",
+    "MissionGraphSelection",
+    "MissionTransitionSelection",
     "ObservationSelection",
     "ResolvedCompositionValue",
     "SegmentSelection",
+    "VariantSelection",
+    "CompiledVariantRuntimeBinding",
+    "CompiledVariantResolution",
     "VehicleCompositionError",
     "VehicleCompositionRequest",
     "compile_vehicle_composition",

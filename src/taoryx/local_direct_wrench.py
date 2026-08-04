@@ -21,7 +21,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from .direct_wrench import DIRECT_WRENCH_NAMES, DirectWrenchLimits
+from .direct_wrench import DIRECT_WRENCH_NAMES, DirectWrenchLimits, DirectWrenchProjection
 from .runtime.lqr import LqrResult, solve_scaled_continuous_lqr
 
 LocalDerivative = Callable[[Mapping[str, float], Mapping[str, float]], Mapping[str, float]]
@@ -63,6 +63,7 @@ class LocalDirectWrenchScreenConfig:
     state_derivative_step: float = 1.0e-5
     control_derivative_step: float = 1.0e-5
     final_error_fraction_limit: float = 0.25
+    equilibrium_derivative_norm_limit: float = 1.0e-6
 
     def __post_init__(self) -> None:
         if not self.id or not self.plant_id:
@@ -90,6 +91,7 @@ class LocalDirectWrenchScreenConfig:
             ("state_derivative_step", self.state_derivative_step),
             ("control_derivative_step", self.control_derivative_step),
             ("final_error_fraction_limit", self.final_error_fraction_limit),
+            ("equilibrium_derivative_norm_limit", self.equilibrium_derivative_norm_limit),
         ):
             if not math.isfinite(value) or value <= 0.0:
                 raise ValueError(f"{label} must be finite and positive")
@@ -109,6 +111,10 @@ class LocalDirectWrenchScreenExecution:
     rows: tuple[dict[str, object], ...]
     initial_error_norm: float
     final_error_norm: float
+    equilibrium_projection: DirectWrenchProjection
+    equilibrium_derivative: Mapping[str, float]
+    equilibrium_derivative_norm: float
+    equilibrium_pass: bool
     mission_pass: bool
 
     @property
@@ -151,6 +157,16 @@ class LocalDirectWrenchScreenExecution:
             },
             "evaluation": {
                 "mission_pass": self.mission_pass,
+                "equilibrium": {
+                    "passed": self.equilibrium_pass,
+                    "requested_balancing_wrench": dict(self.equilibrium_projection.requested),
+                    "achieved_balancing_wrench": dict(self.equilibrium_projection.achieved),
+                    "projection_status": self.equilibrium_projection.status,
+                    "projection_residual_norm": self.equilibrium_projection.residual_norm,
+                    "reference_derivative": dict(self.equilibrium_derivative),
+                    "reference_derivative_normalized_norm": self.equilibrium_derivative_norm,
+                    "reference_derivative_normalized_norm_limit": self.config.equilibrium_derivative_norm_limit,
+                },
                 "initial_error_norm": self.initial_error_norm,
                 "final_error_norm": self.final_error_norm,
                 "final_error_fraction": self.final_error_norm / max(self.initial_error_norm, 1.0e-12),
@@ -178,6 +194,22 @@ def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> Loc
     state = _named_values(config.initial_state, config.state_names, "initial state")
     bias = _named_values(config.balancing_wrench(reference), DIRECT_WRENCH_NAMES, "balancing wrench")
     zero_wrench = {name: 0.0 for name in DIRECT_WRENCH_NAMES}
+    equilibrium_projection = config.limits.project(bias, zero_wrench, 1.0)
+    equilibrium_derivative = _named_values(
+        config.source_derivative(reference, equilibrium_projection.achieved),
+        config.state_names,
+        "reference source derivative",
+    )
+    equilibrium_derivative_norm = _error_norm(
+        equilibrium_derivative,
+        {name: 0.0 for name in config.state_names},
+        config.state_names,
+        config.state_scales,
+    )
+    equilibrium_pass = (
+        equilibrium_projection.status == "feasible"
+        and equilibrium_derivative_norm <= config.equilibrium_derivative_norm_limit
+    )
 
     def derivative_with_feedback(
         candidate_state: Mapping[str, float],
@@ -268,6 +300,7 @@ def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> Loc
     statuses = {str(_mapping(row["wrench"], "wrench")["status"]) for row in rows}
     mission_pass = (
         math.isfinite(final_error)
+        and equilibrium_pass
         and lqr.hurwitz
         and final_error < initial_error * config.final_error_fraction_limit
         and statuses == {"feasible"}
@@ -281,6 +314,10 @@ def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> Loc
         rows=tuple(rows),
         initial_error_norm=initial_error,
         final_error_norm=final_error,
+        equilibrium_projection=equilibrium_projection,
+        equilibrium_derivative=equilibrium_derivative,
+        equilibrium_derivative_norm=equilibrium_derivative_norm,
+        equilibrium_pass=equilibrium_pass,
         mission_pass=mission_pass,
     )
     ####

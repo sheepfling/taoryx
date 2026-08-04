@@ -40,6 +40,53 @@ class F16ReducedRacetrackRun:
     failure: str | None
 
 
+@dataclass(frozen=True, slots=True)
+class F16GuidanceOverride:
+    """One held reduced-fidelity F-16 guidance request in SI/radians."""
+
+    speed_m_s: float | None = None
+    flight_path_angle_rad: float | None = None
+    heading_rad: float | None = None
+    bank_angle_rad: float | None = None
+
+    def __post_init__(self) -> None:
+        values = (
+            self.speed_m_s,
+            self.flight_path_angle_rad,
+            self.heading_rad,
+            self.bank_angle_rad,
+        )
+        if not all(value is None or math.isfinite(value) for value in values):
+            raise ValueError("F-16 guidance overrides must be finite when specified")
+        if self.speed_m_s is not None and self.speed_m_s <= 0.0:
+            raise ValueError("F-16 guidance speed override must be positive")
+        ####
+    ####
+
+
+@dataclass(slots=True)
+class F16ReducedRacetrackStepperState:
+    """Mutable state owned by :class:`F16ReducedRacetrackStepper` only."""
+
+    time_s: float
+    north_m: float
+    east_m: float
+    altitude_m: float
+    speed_m_s: float
+    heading_rad: float
+    flight_path_angle_rad: float
+    roll_rad: float
+    pitch_rad: float
+    yaw_rad: float
+    p_rad_s: float
+    q_rad_s: float
+    r_rad_s: float
+    controls: dict[str, float]
+    numerical_valid: bool = True
+    failure: str | None = None
+    ####
+
+
 def _clamp(value: float, lower: float, upper: float) -> float:
     return min(upper, max(lower, value))
     ####
@@ -195,6 +242,7 @@ class F16ReducedRacetrackRunner:
             "east_m": east_m,
             "altitude_m": altitude_m,
             "speed_m_s": speed_m_s,
+            "mass_kg": self.model.source.mass_kg,
             "phase_index": reference.phase_index,
             "route_leg_index": reference.route_leg_index,
             "phase": reference.phase,
@@ -365,5 +413,293 @@ class F16ReducedRacetrackRunner:
         return F16ReducedRacetrackRun(self.mode, tuple(rows), numerical_valid, failure)
         ####
 
-__all__ = ["F16ReducedRacetrackMode", "F16ReducedRacetrackRun", "F16ReducedRacetrackRunner"]
+class F16ReducedRacetrackStepper:
+    """Stateful source-owned F-16 reduced-flight stepper.
+
+    The existing runner remains the autonomous batch reference. This class
+    owns the equivalent trim-derived state for accepted external action
+    boundaries. It accepts kinematic guidance only and never turns the F-16
+    source controls sampled for diagnostics into physical allocation evidence.
+    """
+
+    def __init__(self, runner: F16ReducedRacetrackRunner, *, horizon_s: float | None = None) -> None:
+        self.runner = runner
+        self.horizon_s = runner.route.horizon_s if horizon_s is None else float(horizon_s)
+        if not math.isfinite(self.horizon_s) or self.horizon_s <= 0.0:
+            raise ValueError("F-16 stepper horizon must be finite and positive")
+        self._state = self._initial_state()
+        ####
+
+    @property
+    def state(self) -> F16ReducedRacetrackStepperState:
+        """Return a copy of committed state without mutable control aliases."""
+
+        return replace(self._state, controls=dict(self._state.controls))
+        ####
+
+    @property
+    def completed(self) -> bool:
+        return not self._state.numerical_valid or self._state.time_s >= self.horizon_s - 1.0e-12
+        ####
+
+    def reset(self) -> F16ReducedRacetrackStepperState:
+        self._state = self._initial_state()
+        return self.state
+        ####
+
+    def restore(self, snapshot: F16ReducedRacetrackStepperState) -> F16ReducedRacetrackStepperState:
+        """Restore a validated composition-owned state snapshot."""
+
+        numeric = (
+            snapshot.time_s,
+            snapshot.north_m,
+            snapshot.east_m,
+            snapshot.altitude_m,
+            snapshot.speed_m_s,
+            snapshot.heading_rad,
+            snapshot.flight_path_angle_rad,
+            snapshot.roll_rad,
+            snapshot.pitch_rad,
+            snapshot.yaw_rad,
+            snapshot.p_rad_s,
+            snapshot.q_rad_s,
+            snapshot.r_rad_s,
+            *snapshot.controls.values(),
+        )
+        if not 0.0 <= snapshot.time_s <= self.horizon_s or not all(math.isfinite(value) for value in numeric):
+            raise ValueError("F-16 stepper checkpoint is outside the declared finite state space")
+        self._state = replace(snapshot, controls=dict(snapshot.controls))
+        return self.state
+        ####
+
+    def current_row(self, override: F16GuidanceOverride | None = None) -> dict[str, float | int | str]:
+        """Return current committed telemetry without advancing or interpolation."""
+
+        state = self._state
+        reference = self._reference(override)
+        observables = self.runner._source_observables(
+            state.speed_m_s,
+            state.flight_path_angle_rad,
+            state.controls,
+            state.altitude_m,
+        )
+        return self.runner._sample(
+            state.time_s,
+            state.north_m,
+            state.east_m,
+            state.altitude_m,
+            state.speed_m_s,
+            state.heading_rad,
+            state.flight_path_angle_rad,
+            reference,
+            observables,
+            state.controls,
+            roll_rad=state.roll_rad,
+            pitch_rad=state.pitch_rad,
+            yaw_rad=state.yaw_rad if self.runner.mode == "pseudo_6dof_kinematic_bridge" else None,
+            p_rad_s=state.p_rad_s,
+            q_rad_s=state.q_rad_s,
+            r_rad_s=state.r_rad_s,
+        )
+        ####
+
+    def step(
+        self,
+        duration_s: float,
+        override: F16GuidanceOverride | None = None,
+    ) -> tuple[dict[str, float | int | str], ...]:
+        """Advance held guidance through exact source-owned inner steps."""
+
+        if not math.isfinite(duration_s) or duration_s <= 0.0:
+            raise ValueError("F-16 step duration must be finite and positive")
+        if self.completed:
+            return ()
+        target_time = min(self.horizon_s, self._state.time_s + duration_s)
+        rows: list[dict[str, float | int | str]] = []
+        while self._state.time_s < target_time - 1.0e-12 and self._state.numerical_valid:
+            rows.append(self.current_row(override))
+            self._advance_one(min(self.runner.dt_s, target_time - self._state.time_s), override)
+        return tuple(rows)
+        ####
+
+    def _initial_state(self) -> F16ReducedRacetrackStepperState:
+        return F16ReducedRacetrackStepperState(
+            0.0,
+            self.runner.initial_north_offset_m,
+            self.runner.initial_east_offset_m,
+            float(self.runner.route.low_altitude_m) + self.runner.initial_altitude_offset_m,
+            max(1.0, float(self.runner.route.speed_m_s) + self.runner.initial_speed_offset_m_s),
+            _wrap(math.pi / 2.0 + self.runner.initial_heading_offset_rad),
+            _clamp(self.runner.initial_flight_path_offset_rad, -0.8, 0.8),
+            self.runner.initial_bank_offset_rad if self.runner.mode == "pseudo_6dof_kinematic_bridge" else 0.0,
+            self.runner.trim_pitch_rad + _clamp(self.runner.initial_flight_path_offset_rad, -0.8, 0.8),
+            _wrap(math.pi / 2.0 + self.runner.initial_heading_offset_rad),
+            0.0,
+            0.0,
+            0.0,
+            dict(self.runner.trim.controls),
+        )
+        ####
+
+    def _reference(self, override: F16GuidanceOverride | None) -> RacetrackGuidanceReference:
+        state = self._state
+        reference = self.runner._reference(state.time_s, state.north_m, state.east_m)
+        if override is None:
+            return reference
+        return replace(
+            reference,
+            speed_m_s=reference.speed_m_s if override.speed_m_s is None else override.speed_m_s,
+            flight_path_angle_rad=(
+                reference.flight_path_angle_rad
+                if override.flight_path_angle_rad is None
+                else _clamp(override.flight_path_angle_rad, -0.8, 0.8)
+            ),
+            heading_rad=reference.heading_rad if override.heading_rad is None else _wrap(override.heading_rad),
+            bank_rad=reference.bank_rad if override.bank_angle_rad is None else _clamp(override.bank_angle_rad, -1.2, 1.2),
+        )
+        ####
+
+    def _advance_one(self, dt_s: float, override: F16GuidanceOverride | None) -> None:
+        state = self._state
+        try:
+            reference = self._reference(override)
+            speed_error = reference.speed_m_s - state.speed_m_s
+            speed_acceleration = _clamp(
+                speed_error / self.runner.speed_time_constant_s,
+                -self.runner.maximum_speed_acceleration_mps2,
+                self.runner.maximum_speed_acceleration_mps2,
+            )
+            speed_next = max(1.0, state.speed_m_s + speed_acceleration * dt_s)
+            heading_error = _wrap(reference.heading_rad - state.heading_rad)
+            heading_rate = _clamp(
+                heading_error / self.runner.heading_time_constant_s,
+                -self.runner.maximum_turn_rate_rad_s,
+                self.runner.maximum_turn_rate_rad_s,
+            )
+            gamma_error = reference.flight_path_angle_rad - state.flight_path_angle_rad
+            gamma_rate = _clamp(
+                gamma_error / self.runner.flight_path_time_constant_s,
+                -self.runner.maximum_flight_path_rate_rad_s,
+                self.runner.maximum_flight_path_rate_rad_s,
+            )
+            heading_next = _wrap(state.heading_rad + heading_rate * dt_s)
+            gamma_next = _clamp(state.flight_path_angle_rad + gamma_rate * dt_s, -0.8, 0.8)
+            altitude_next = state.altitude_m + state.speed_m_s * math.sin(state.flight_path_angle_rad) * dt_s
+            north_next = state.north_m + state.speed_m_s * math.cos(state.flight_path_angle_rad) * math.cos(state.heading_rad) * dt_s
+            east_next = state.east_m + state.speed_m_s * math.cos(state.flight_path_angle_rad) * math.sin(state.heading_rad) * dt_s
+            controls = dict(state.controls)
+            controls["throttle_fraction"] = _clamp(
+                float(self.runner.trim.controls["throttle_fraction"]) + 0.01 * speed_error,
+                0.0,
+                1.0,
+            )
+            roll_rad, pitch_rad, yaw_rad = state.roll_rad, state.pitch_rad, state.yaw_rad
+            p_rad_s, q_rad_s, r_rad_s = state.p_rad_s, state.q_rad_s, state.r_rad_s
+            if self.runner.mode == "pseudo_6dof_kinematic_bridge":
+                roll_rad, pitch_rad, yaw_rad, p_rad_s, q_rad_s, r_rad_s = self._advance_pseudo_response(
+                    reference,
+                    dt_s,
+                    roll_rad,
+                    pitch_rad,
+                    yaw_rad,
+                    p_rad_s,
+                    q_rad_s,
+                    r_rad_s,
+                )
+            time_s = min(self.horizon_s, state.time_s + dt_s)
+            numeric = (
+                time_s,
+                north_next,
+                east_next,
+                altitude_next,
+                speed_next,
+                heading_next,
+                gamma_next,
+                roll_rad,
+                pitch_rad,
+                yaw_rad,
+                p_rad_s,
+                q_rad_s,
+                r_rad_s,
+            )
+            if not all(math.isfinite(value) for value in numeric):
+                raise FloatingPointError("reduced F-16 stepper state became non-finite")
+            self._state = F16ReducedRacetrackStepperState(
+                time_s,
+                north_next,
+                east_next,
+                altitude_next,
+                speed_next,
+                heading_next,
+                gamma_next,
+                roll_rad,
+                pitch_rad,
+                yaw_rad,
+                p_rad_s,
+                q_rad_s,
+                r_rad_s,
+                controls,
+            )
+        except (FloatingPointError, ValueError, KeyError) as error:
+            self._state = replace(state, numerical_valid=False, failure=str(error))
+        ####
+
+    def _advance_pseudo_response(
+        self,
+        reference: RacetrackGuidanceReference,
+        dt_s: float,
+        roll_rad: float,
+        pitch_rad: float,
+        yaw_rad: float,
+        p_rad_s: float,
+        q_rad_s: float,
+        r_rad_s: float,
+    ) -> tuple[float, float, float, float, float, float]:
+        roll_target = reference.bank_rad
+        pitch_target = self.runner.trim_pitch_rad + reference.flight_path_angle_rad
+        yaw_target = reference.heading_rad
+        if self.runner.response_profile is None:
+            roll_rate_target = _wrap(roll_target - roll_rad) / self.runner.attitude_time_constant_s
+            pitch_rate_target = _wrap(pitch_target - pitch_rad) / self.runner.attitude_time_constant_s
+            yaw_rate_target = _wrap(yaw_target - yaw_rad) / self.runner.attitude_time_constant_s
+            p_rad_s = _slew(p_rad_s, _clamp(roll_rate_target, -0.5, 0.5), self.runner.attitude_time_constant_s, dt_s)
+            q_rad_s = _slew(q_rad_s, _clamp(pitch_rate_target, -0.5, 0.5), self.runner.attitude_time_constant_s, dt_s)
+            r_rad_s = _slew(r_rad_s, _clamp(yaw_rate_target, -0.5, 0.5), self.runner.attitude_time_constant_s, dt_s)
+            return (
+                roll_rad + p_rad_s * dt_s,
+                pitch_rad + q_rad_s * dt_s,
+                _wrap(yaw_rad + r_rad_s * dt_s),
+                p_rad_s,
+                q_rad_s,
+                r_rad_s,
+            )
+        roll_state = step_bounded_axis_response(
+            self.runner.response_profile.response["roll"], AxisResponseState(roll_rad, p_rad_s), roll_target, dt_s
+        )
+        pitch_state = step_bounded_axis_response(
+            self.runner.response_profile.response["pitch"], AxisResponseState(pitch_rad, q_rad_s), pitch_target, dt_s
+        )
+        yaw_state = step_bounded_axis_response(
+            self.runner.response_profile.response["yaw"], AxisResponseState(yaw_rad, r_rad_s), yaw_target, dt_s
+        )
+        return (
+            roll_state.angle_rad,
+            pitch_state.angle_rad,
+            _wrap(yaw_state.angle_rad),
+            roll_state.rate_rad_s,
+            pitch_state.rate_rad_s,
+            yaw_state.rate_rad_s,
+        )
+        ####
+    ####
+
+
+__all__ = [
+    "F16GuidanceOverride",
+    "F16ReducedRacetrackMode",
+    "F16ReducedRacetrackRun",
+    "F16ReducedRacetrackRunner",
+    "F16ReducedRacetrackStepper",
+    "F16ReducedRacetrackStepperState",
+]
 ####

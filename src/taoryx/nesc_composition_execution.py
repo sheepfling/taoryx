@@ -14,6 +14,10 @@ import math
 from dataclasses import dataclass
 from pathlib import Path
 
+from .composition_control_trace import build_uncontrolled_committed_control_trace, control_trace_summary
+from .composition_evaluation import build_composition_trajectory_evaluation
+from .composition_graph_evidence import unobserved_mission_graph_execution
+from .composition_resource_ledger import build_committed_resource_ledger, resource_ledger_summary
 from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .mission_objectives import ControllerTransition, TruthObjectiveSpec, evaluate_truth_objectives
@@ -36,21 +40,15 @@ class NescReplayCompositionExecution:
     truth_evaluation: dict[str, object]
     controller_transitions: tuple[dict[str, object], ...]
     status_trace: dict[str, object]
+    semantic_action_trace: dict[str, object]
     claim_boundary: str
 
     @property
     def mission_pass(self) -> bool:
         """Return the hard conjunction applicable to an immutable replay."""
 
-        transitions_valid = all(
-            item["reason"] == "EVENT_COMPLETE" for item in self.controller_transitions
-        )
-        return (
-            bool(self.runtime["hard_gates_passed"])
-            and bool(self.envelope["pass"])
-            and bool(self.truth_evaluation["mission_pass"])
-            and transitions_valid
-        )
+        transitions_valid = all(item["reason"] == "EVENT_COMPLETE" for item in self.controller_transitions)
+        return bool(self.runtime["hard_gates_passed"]) and bool(self.envelope["pass"]) and bool(self.truth_evaluation["mission_pass"]) and transitions_valid
         ####
 
     def as_dict(self) -> dict[str, object]:
@@ -68,10 +66,12 @@ class NescReplayCompositionExecution:
             "truth_evaluation": self.truth_evaluation,
             "controller_transitions": list(self.controller_transitions),
             "status_trace": status_trace_summary(self.status_trace),
+            "semantic_action_trace": control_trace_summary(self.semantic_action_trace),
             "mission_pass": self.mission_pass,
             "claim_boundary": self.claim_boundary,
         }
         ####
+
     ####
 
 
@@ -123,7 +123,19 @@ def execute_nesc_source_replay_composition(
         "duration_s": _number(rows[-1], "time_s") if rows else 0.0,
         "hard_gates_passed": finite and bool(envelope["pass"]) and all(source_checks.values()),
     }
+    mission_graph_execution = unobserved_mission_graph_execution(
+        composition,
+        "The pinned source-history replay records source phase evidence but does not emit committed controller graph dispatches.",
+    ).as_dict()
+    runtime["mission_graph_execution"] = mission_graph_execution
     status_trace = build_committed_status_trace(composition, _status_samples(rows))
+    semantic_action_trace = build_uncontrolled_committed_control_trace(
+        composition,
+        tuple(_number(row, "time_s") for row in rows),
+    )
+    resource_ledger = build_committed_resource_ledger(composition, status_trace)
+    runtime["resource_ledger"] = resource_ledger_summary(resource_ledger)
+    runtime["semantic_action_trace"] = control_trace_summary(semantic_action_trace)
     result = NescReplayCompositionExecution(
         composition=composition,
         preflight=preflight,
@@ -134,6 +146,7 @@ def execute_nesc_source_replay_composition(
         truth_evaluation=truth_evaluation,
         controller_transitions=tuple(transitions),
         status_trace=status_trace,
+        semantic_action_trace=semantic_action_trace,
         claim_boundary=(
             "This is a source-owned NESC translation-history replay with optional named pseudo-6DOF attitude "
             "response. It proves the pinned source sequence, resource history, and endpoint only. It does not "
@@ -146,11 +159,26 @@ def execute_nesc_source_replay_composition(
     _write_json(destination / "preflight.json", preflight.as_dict())
     _write_json(destination / "plan.json", plan.manifest())
     _write_json(destination / "runtime_report.json", runtime)
+    _write_json(destination / "mission_graph_execution.json", mission_graph_execution)
     _write_json(destination / "envelope_report.json", envelope)
     _write_json(destination / "controller_transitions.json", list(transitions))
     _write_json(destination / "objective_report.json", truth_evaluation)
     _write_json(destination / "source_provenance.json", provenance)
     _write_json(destination / "status_trace.json", status_trace)
+    _write_json(destination / "semantic_action_trace.json", semantic_action_trace)
+    _write_json(destination / "resource_ledger.json", resource_ledger)
+    _write_json(
+        destination / "evaluation.json",
+        build_composition_trajectory_evaluation(
+            composition,
+            preflight,
+            truth_evaluation,
+            runtime=runtime,
+            envelope=envelope,
+            claim_boundary=result.claim_boundary,
+            status_trace=status_trace,
+        ).as_dict(),
+    )
     _write_json(destination / "execution.json", result.as_dict())
     return result
     ####
@@ -318,14 +346,7 @@ def _envelope_report(rows: list[dict[str, object]]) -> dict[str, object]:
     maximum_position_error = max((_number(row, "position_error_m") for row in rows), default=math.inf)
     replay_position_margin = 0.2 - maximum_position_error
     return {
-        "pass": (
-            bool(rows)
-            and finite
-            and min(mass_values, default=-1.0) > 0.0
-            and mass_monotone
-            and ordered_phases
-            and replay_position_margin >= 0.0
-        ),
+        "pass": (bool(rows) and finite and min(mass_values, default=-1.0) > 0.0 and mass_monotone and ordered_phases and replay_position_margin >= 0.0),
         "minimum_margins": {
             "mass_kg": min(mass_values, default=-1.0),
             "replay_position_error_margin_m": replay_position_margin,

@@ -6,10 +6,16 @@ import argparse
 import base64
 import json
 import math
+import shlex
+from collections.abc import Mapping
 from html import escape
 from pathlib import Path
 
+from taoryx.batch_episode_parity_dispatch import verify_serialized_declared_batch_episode_parity
+from taoryx.composition_episode import open_vehicle_composition_episode
 from taoryx.composition_policy import replay_composition_policy_trace_file
+from taoryx.composition_result_catalog import index_composition_results, write_composition_release_catalog
+from taoryx.hl20_source_release_composition_execution import execute_hl20_source_booster_release_composition
 from taoryx.hummingbird_composition_execution import execute_hummingbird_pseudo_composition
 from taoryx.integration import available_integrator_descriptions, available_integrators
 from taoryx.language.grammar_contracts import GrammarProfile
@@ -19,6 +25,7 @@ from taoryx.local_direct_wrench_composition_execution import execute_local_direc
 from taoryx.nesc_composition_execution import execute_nesc_source_replay_composition
 from taoryx.outputs import RunArtifact
 from taoryx.passive_tumbling_composition_execution import execute_passive_tumbling_composition
+from taoryx.product_three_maturity import build_product_three_maturity_report
 from taoryx.reachability_catalog import ReachabilityCatalog, load_reachability_catalog
 from taoryx.reachability_envelope import (
     ReachabilityFidelity,
@@ -46,17 +53,39 @@ from taoryx.trajectory import (
     load_family_catalog,
     resolve_case,
 )
+from taoryx.trajectory.evaluation import TrajectoryEvaluation
 from taoryx.trajectory.resolution import ResolutionError
 from taoryx.vehicle_composition import (
+    CompiledVehicleComposition,
     VehicleCompositionError,
     compile_vehicle_composition,
     load_compiled_vehicle_composition,
     load_vehicle_composition_request,
     resolve_vehicle_composition_interface_contract,
 )
-from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
-from taoryx.vehicle_execution_bindings import resolve_vehicle_execution_binding
-from taoryx.vehicle_execution_preflight import preflight_vehicle_composition
+from taoryx.vehicle_composition_registry import (
+    ResolvedVehicleCompositionCatalog,
+    build_vehicle_composition_topology_report,
+    load_resolved_vehicle_composition_catalog,
+)
+from taoryx.vehicle_execution_bindings import VehicleExecutionBinding, resolve_vehicle_execution_binding
+from taoryx.vehicle_execution_preflight import build_semantic_preflight_handler_report, preflight_vehicle_composition
+from taoryx.vehicle_integration_intake import (
+    ExistingFamilyIntakeRequest,
+    NewTopologyIntakeRequest,
+    StrategySelectionError,
+    build_existing_family_intake_blueprint,
+    build_new_topology_intake_scaffold,
+)
+from taoryx.vehicle_integration_pipeline import (
+    validate_all_vehicle_integration_pipelines,
+    validate_vehicle_integration_pipeline,
+    write_vehicle_integration_packet,
+)
+from taoryx.vehicle_integration_readiness import (
+    validate_all_vehicle_integration_readiness,
+    validate_vehicle_integration_readiness,
+)
 from taoryx.vehicle_interface import build_vehicle_interface_catalog_report, resolve_vehicle_interface_contract, validate_vehicle_interface_contract
 from taoryx.vehicle_runtime_lowering import lower_vehicle_composition
 from taoryx.visualization import render_run_artifact_html, render_run_artifact_plots
@@ -124,10 +153,7 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument(
         "--integrator",
         choices=tuple(item.value for item in available_integrators()),
-        help=(
-            "integration backend: euler for fast tests, rk4 for fixed-step runs, "
-            "or scipy-* if installed"
-        ),
+        help=("integration backend: euler for fast tests, rk4 for fixed-step runs, or scipy-* if installed"),
     )
     scenario = subparsers.add_parser("scenario", help="compile and inspect resolved scenario caches")
     scenario_subparsers = scenario.add_subparsers(dest="scenario_command", required=True)
@@ -204,7 +230,9 @@ def main(argv: list[str] | None = None) -> int:
     reachability_x15.add_argument("--horizon-s", type=float, default=120.0)
     reachability_x15.add_argument("--dpi", type=int, default=140)
     _add_reachability_criteria_arguments(reachability_x15)
-    reachability_x15_native = reachability_subparsers.add_parser("x15-native-replay", help="replay selected X-15 envelope points through native rigid-body cases")
+    reachability_x15_native = reachability_subparsers.add_parser(
+        "x15-native-replay", help="replay selected X-15 envelope points through native rigid-body cases"
+    )
     reachability_x15_native.add_argument("envelope", type=Path)
     reachability_x15_native.add_argument("--output-dir", type=Path, required=True)
     reachability_x15_native.add_argument("--max-points", type=int, default=4)
@@ -226,13 +254,211 @@ def main(argv: list[str] | None = None) -> int:
     family_schema.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
     vehicle = subparsers.add_parser("vehicle", help="inspect the unified vehicle-to-trajectory composition registry")
     vehicle_subparsers = vehicle.add_subparsers(dest="vehicle_command", required=True)
+    vehicle_catalog = vehicle_subparsers.add_parser(
+        "catalog",
+        help="export the versioned discovery document for all registered vehicles",
+    )
+    vehicle_catalog.add_argument(
+        "--detail",
+        choices=("summary", "full"),
+        default="summary",
+        help="summary lists discoverable identities; full embeds every composition descriptor",
+    )
     vehicle_subparsers.add_parser("list", help="list registered vehicles, families, tiers, and mission templates")
+    vehicle_release_catalog = vehicle_subparsers.add_parser(
+        "release-catalog",
+        help="build a hash-bound inventory from existing valid result packets without rerunning them",
+    )
+    vehicle_release_catalog.add_argument("directory", type=Path, help="root directory containing normalized result packets")
+    vehicle_release_catalog.add_argument("--output", type=Path, required=True, help="destination release-catalog JSON path")
     vehicle_subparsers.add_parser(
         "interface-report",
         help="validate every registered vehicle/fidelity interface against its execution bindings",
     )
+    vehicle_subparsers.add_parser(
+        "topology-report",
+        help="audit public parameter, interface, observation, and objective value-space topology",
+    )
+    vehicle_subparsers.add_parser(
+        "semantic-preflight-handler-report",
+        help="audit catalog-declared semantic translators against installed preflight handlers",
+    )
+    vehicle_maturity_report = vehicle_subparsers.add_parser(
+        "maturity-report",
+        help="join Product 3 topology, authoring, execution, and parity coverage without evidence promotion",
+    )
+    vehicle_maturity_report.add_argument(
+        "--check-execution-witnesses",
+        action="store_true",
+        help="compile every checked-in endpoint witness and open declared episodes before reporting",
+    )
+    vehicle_maturity_report.add_argument(
+        "--execute-batch-witnesses",
+        action="store_true",
+        help=("also run every checked-in batch witness and verify its declared action-trace disposition; implies --check-execution-witnesses"),
+    )
+    vehicle_maturity_report.add_argument(
+        "--execute-parity-witnesses",
+        action="store_true",
+        help="replay one action trace through every exact pair with registered batch/episode parity evidence",
+    )
+    vehicle_maturity_report.add_argument(
+        "--results-dir",
+        type=Path,
+        help="optionally index existing normalized result artifacts as part of the maturity report",
+    )
     vehicle_inspect = vehicle_subparsers.add_parser("inspect", help="show one vehicle's composition contract")
     vehicle_inspect.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_describe = vehicle_subparsers.add_parser(
+        "describe",
+        help="export one vehicle's complete composition, interface, and execution descriptor",
+    )
+    vehicle_describe.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_missions = vehicle_subparsers.add_parser("missions", help="list one vehicle's declared mission templates")
+    vehicle_missions.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_segment = vehicle_subparsers.add_parser("segment", help="show one reusable segment contract")
+    vehicle_segment.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_segment.add_argument("segment_id", help="declared segment contract ID")
+    vehicle_parameters = vehicle_subparsers.add_parser("parameters", help="query public initialization or segment parameters")
+    vehicle_parameters.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_parameters.add_argument(
+        "--scope",
+        choices=("episode_reset", "segment", "variant_configuration"),
+        help="limit the query to one public parameter scope",
+    )
+    vehicle_authoring = vehicle_subparsers.add_parser(
+        "authoring",
+        help="show the Product 3 composition authoring worklist for one vehicle family",
+    )
+    vehicle_authoring.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_authoring_template = vehicle_subparsers.add_parser(
+        "authoring-template",
+        help="export a no-invented-default composition authoring kit for one mission and fidelity",
+    )
+    vehicle_authoring_template.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_authoring_template.add_argument("mission_id", help="declared mission template ID")
+    vehicle_authoring_template.add_argument(
+        "fidelity",
+        choices=(
+            "point_mass_3dof",
+            "pseudo_6dof",
+            "rigid_body_6dof_direct_wrench",
+            "rigid_body_6dof_surface_allocated",
+        ),
+    )
+    vehicle_mission = vehicle_subparsers.add_parser(
+        "mission",
+        help="inspect, author, or validate one reusable mission through the composition compiler",
+    )
+    vehicle_mission_subparsers = vehicle_mission.add_subparsers(dest="vehicle_mission_command", required=True)
+    vehicle_mission_inspect = vehicle_mission_subparsers.add_parser(
+        "inspect",
+        help="show one mission's selectable initialization, segment, graph, and fidelity contracts",
+    )
+    vehicle_mission_inspect.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_mission_inspect.add_argument("mission_id", help="declared mission template ID")
+    vehicle_mission_create = vehicle_mission_subparsers.add_parser(
+        "create",
+        help="export a no-invented-default composition authoring kit for one mission and fidelity",
+    )
+    vehicle_mission_create.add_argument("identifier", help="family ID or native vehicle registry ID")
+    vehicle_mission_create.add_argument("mission_id", help="declared mission template ID")
+    vehicle_mission_create.add_argument(
+        "fidelity",
+        choices=(
+            "point_mass_3dof",
+            "pseudo_6dof",
+            "rigid_body_6dof_direct_wrench",
+            "rigid_body_6dof_surface_allocated",
+        ),
+    )
+    vehicle_mission_create.add_argument("--output", type=Path, help="optional JSON path for the authoring kit")
+    vehicle_mission_validate = vehicle_mission_subparsers.add_parser(
+        "validate",
+        help="compile and inspect a mission composition request without running a vehicle",
+    )
+    vehicle_mission_validate.add_argument("request", type=Path, help="YAML or JSON vehicle composition request")
+    vehicle_mission_validate.add_argument(
+        "--compiled-output",
+        type=Path,
+        help="optional JSON path for the fingerprinted compiled composition",
+    )
+    vehicle_variant = vehicle_subparsers.add_parser(
+        "variant",
+        help="validate or resolve a bounded runtime-backed vehicle variant",
+    )
+    vehicle_variant_subparsers = vehicle_variant.add_subparsers(dest="vehicle_variant_command", required=True)
+    vehicle_variant_validate = vehicle_variant_subparsers.add_parser(
+        "validate",
+        help="validate a request's bounded variant and report its runtime provenance without running it",
+    )
+    vehicle_variant_validate.add_argument("request", type=Path, help="YAML or JSON vehicle composition request")
+    vehicle_variant_resolve = vehicle_variant_subparsers.add_parser(
+        "resolve",
+        help="resolve a request into an immutable compiled composition containing its variant manifest",
+    )
+    vehicle_variant_resolve.add_argument("request", type=Path, help="YAML or JSON vehicle composition request")
+    vehicle_variant_resolve.add_argument("--output", type=Path, required=True, help="compiled composition JSON output")
+    vehicle_subparsers.add_parser(
+        "authoring-all",
+        help="aggregate Product 3 authoring worklists without collapsing family-specific gaps",
+    )
+    vehicle_intake = vehicle_subparsers.add_parser(
+        "intake",
+        help="generate a non-promotable four-tier intake package for a new vehicle or topology",
+    )
+    vehicle_intake_subparsers = vehicle_intake.add_subparsers(dest="vehicle_intake_mode", required=True)
+    vehicle_intake_existing = vehicle_intake_subparsers.add_parser(
+        "existing-family",
+        help="select an explicit existing-family strategy and export its data/adapter work package",
+    )
+    vehicle_intake_existing.add_argument("--family-id", required=True)
+    vehicle_intake_existing.add_argument("--physical-family", required=True)
+    vehicle_intake_existing.add_argument("--mission-overlay", required=True)
+    vehicle_intake_existing.add_argument("--adapter-id", required=True)
+    vehicle_intake_existing.add_argument("--strategy-id")
+    vehicle_intake_existing.add_argument("--output", type=Path)
+    vehicle_intake_new = vehicle_intake_subparsers.add_parser(
+        "new-topology",
+        help="export a strategy-definition scaffold without inventing a new vehicle model",
+    )
+    vehicle_intake_new.add_argument("--family-id", required=True)
+    vehicle_intake_new.add_argument("--physical-family", required=True)
+    vehicle_intake_new.add_argument("--strategy-id", required=True)
+    vehicle_intake_new.add_argument("--topology-summary", required=True)
+    vehicle_intake_new.add_argument("--output", type=Path)
+    vehicle_integration = vehicle_subparsers.add_parser(
+        "integration",
+        help="report source-family onboarding readiness and staged promotion evidence",
+    )
+    vehicle_integration_subparsers = vehicle_integration.add_subparsers(dest="vehicle_integration_command", required=True)
+    vehicle_integration_readiness = vehicle_integration_subparsers.add_parser(
+        "readiness",
+        help="check source-manifest and four-tier metadata readiness without executing a plant",
+    )
+    vehicle_integration_readiness.add_argument("family", help="supported source family ID or 'all'")
+    vehicle_integration_readiness.add_argument("--output", type=Path, help="optional JSON report destination")
+    vehicle_integration_pipeline = vehicle_integration_subparsers.add_parser(
+        "pipeline",
+        help="report staged source-family integration evidence and explicit promotion gates",
+    )
+    vehicle_integration_pipeline.add_argument("family", help="supported source family ID or 'all'")
+    vehicle_integration_pipeline.add_argument("--output", type=Path, help="optional JSON report destination")
+    vehicle_integration_pipeline.add_argument(
+        "--packet-dir",
+        type=Path,
+        help="optionally write one reproducible source-integration packet per selected family",
+    )
+    vehicle_integration_pipeline.add_argument(
+        "--exclude-source-package",
+        action="store_true",
+        help="when writing packets, retain source hashes but do not copy pinned source packages",
+    )
+    vehicle_integration_pipeline.add_argument(
+        "--allow-blocked",
+        action="store_true",
+        help="return success after reporting blockers; never changes any evidence or promotion status",
+    )
     vehicle_schema = vehicle_subparsers.add_parser("schema", help="export one vehicle composition schema section")
     vehicle_schema.add_argument("identifier", help="family ID or native vehicle registry ID")
     vehicle_schema.add_argument("kind", choices=("initialization", "segments", "missions"))
@@ -266,11 +492,31 @@ def main(argv: list[str] | None = None) -> int:
     )
     vehicle_compose.add_argument("request", type=Path, help="YAML or JSON vehicle composition request")
     vehicle_compose.add_argument("--output", type=Path, help="write the compiled semantic scenario as JSON")
+    vehicle_validate_examples = vehicle_subparsers.add_parser(
+        "validate-examples",
+        help="compile and inspect every checked-in composition witness without running a vehicle",
+    )
+    vehicle_validate_examples.add_argument(
+        "--directory",
+        type=Path,
+        default=Path("examples/vehicle_composition"),
+        help="directory containing YAML or JSON composition requests",
+    )
+    vehicle_validate_examples.add_argument(
+        "--require-preflight",
+        action="store_true",
+        help="return failure unless every witness is translation-ready",
+    )
     vehicle_lower = vehicle_subparsers.add_parser(
         "lower",
         help="bind a compiled semantic scenario to its declared native adapter without fallback",
     )
     vehicle_lower.add_argument("composition", type=Path, help="compiled vehicle composition JSON")
+    vehicle_results = vehicle_subparsers.add_parser(
+        "results",
+        help="index normalized evaluation artifacts below one output directory",
+    )
+    vehicle_results.add_argument("directory", type=Path, help="directory to scan recursively for evaluation.json")
     vehicle_preflight = vehicle_subparsers.add_parser(
         "preflight",
         help="fail closed when a semantic composition cannot map to its declared native mission translator",
@@ -296,6 +542,29 @@ def main(argv: list[str] | None = None) -> int:
     vehicle_replay_policy.add_argument("composition", type=Path, help="compiled vehicle composition JSON")
     vehicle_replay_policy.add_argument("trace", type=Path, help="persisted composition policy trace JSON")
     vehicle_replay_policy.add_argument("--output", type=Path, help="optional replay verdict JSON path")
+    vehicle_batch_episode_parity = vehicle_subparsers.add_parser(
+        "batch-episode-parity",
+        help="compare one persisted semantic action trace through its exact declared batch and episode paths",
+    )
+    vehicle_batch_episode_parity.add_argument("composition", type=Path, help="compiled vehicle composition JSON")
+    vehicle_batch_episode_parity.add_argument("trace", type=Path, help="persisted composition policy trace JSON")
+    vehicle_batch_episode_parity.add_argument("--output", type=Path, help="optional parity verdict JSON path")
+    vehicle_episode_info = vehicle_subparsers.add_parser(
+        "episode-info",
+        help="open one declared episode factory and export its initial committed-truth frame",
+    )
+    vehicle_episode_info.add_argument("composition", type=Path, help="compiled vehicle composition JSON")
+    vehicle_episode_info.add_argument("--seed", type=int, help="optional declared episode seed")
+    vehicle_result = vehicle_subparsers.add_parser(
+        "result",
+        help="read and validate one normalized Product 3 evaluation artifact",
+    )
+    vehicle_result.add_argument("output_dir", type=Path, help="composition-run artifact directory")
+    vehicle_result.add_argument(
+        "--composition",
+        type=Path,
+        help="optional compiled composition to fingerprint-bind to the evaluation",
+    )
     case = subparsers.add_parser("case", help="resolve and inspect Alpha 2 case intents")
     case_subparsers = case.add_subparsers(dest="case_command", required=True)
     case_validate = case_subparsers.add_parser("validate", help="validate a case intent")
@@ -455,12 +724,8 @@ def _a320_pseudo_smoke(arguments: argparse.Namespace) -> int:
             rudder_rad=0.01,
         )
         performance = model.evaluate(point)
-        roundtrip = json.loads(
-            Path("families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json").read_text(encoding="utf-8")
-        )
-        runtime_qualification = json.loads(
-            Path("families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json").read_text(encoding="utf-8")
-        )
+        roundtrip = json.loads(Path("families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json").read_text(encoding="utf-8"))
+        runtime_qualification = json.loads(Path("families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json").read_text(encoding="utf-8"))
         result = {
             "schema_version": "taoryx.daveml-cli-composite-smoke/v1",
             "status": "verified" if roundtrip.get("status") == "verified" and runtime_qualification.get("status") == "verified" else "failed",
@@ -711,12 +976,7 @@ def _reachability_command(arguments: argparse.Namespace) -> int:
                     ]
                 )
             else:
-                _print_json(
-                    {
-                        name: {"meaning": semantic.meaning}
-                        for name, semantic in sorted(catalog.study_semantics.items())
-                    }
-                )
+                _print_json({name: {"meaning": semantic.meaning} for name, semantic in sorted(catalog.study_semantics.items())})
         elif arguments.kind == "profile":
             _print_json(catalog.profile(arguments.identifier).model_dump(mode="json"))
         elif arguments.kind == "family":
@@ -758,6 +1018,10 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
     """Handle user-facing vehicle/fidelity/trajectory composition discovery."""
 
     try:
+        if arguments.vehicle_command == "intake":
+            return _vehicle_intake_command(arguments)
+        if arguments.vehicle_command == "integration":
+            return _vehicle_integration_command(arguments)
         catalog = load_resolved_vehicle_composition_catalog()
         if arguments.vehicle_command == "compose":
             compiled = compile_vehicle_composition(load_vehicle_composition_request(arguments.request), catalog=catalog)
@@ -765,6 +1029,142 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
                 compiled.write_json(arguments.output)
             _print_json(compiled.model_dump(mode="json", by_alias=True))
             return 0
+        if arguments.vehicle_command == "mission":
+            if arguments.vehicle_mission_command == "inspect":
+                vehicle = catalog.vehicle(arguments.identifier)
+                descriptor = vehicle.as_dict()
+                missions = descriptor.get("mission_templates")
+                if not isinstance(missions, list):
+                    raise VehicleCompositionError("invalid-registry", "mission templates are not a list")
+                matches = [item for item in missions if isinstance(item, Mapping) and item.get("id") == arguments.mission_id]
+                if len(matches) != 1:
+                    raise VehicleCompositionError(
+                        "unknown-mission",
+                        f"unknown mission {arguments.mission_id!r}",
+                        field="mission_id",
+                    )
+                mission = matches[0]
+                initialization_ids = mission.get("initialization_contracts")
+                segment_ids = mission.get("segment_sequence")
+                if not isinstance(initialization_ids, list) or not isinstance(segment_ids, list):
+                    raise VehicleCompositionError("invalid-registry", "mission has invalid initialization or segment references")
+                initializations = descriptor.get("initialization_contracts")
+                segments = descriptor.get("segment_contracts")
+                fidelities = descriptor.get("fidelities")
+                if not isinstance(initializations, list) or not isinstance(segments, list) or not isinstance(fidelities, Mapping):
+                    raise VehicleCompositionError("invalid-registry", "vehicle has invalid mission-contract records")
+                compatible_fidelities = mission.get("compatible_fidelities")
+                if not isinstance(compatible_fidelities, list):
+                    raise VehicleCompositionError("invalid-registry", "mission has invalid fidelity references")
+                _print_json(
+                    {
+                        "schema": "taoryx.vehicle-mission-inspection/v1alpha1",
+                        "vehicle_id": descriptor["vehicle_id"],
+                        "family_id": descriptor["family_id"],
+                        "mission_template": mission,
+                        "initialization_contracts": [item for item in initializations if isinstance(item, Mapping) and item.get("id") in initialization_ids],
+                        "segment_contracts": [item for item in segments if isinstance(item, Mapping) and item.get("id") in segment_ids],
+                        "fidelity_contracts": {fidelity: fidelities[fidelity] for fidelity in compatible_fidelities if fidelity in fidelities},
+                        "claim_boundary": (
+                            "Inspection exposes the declared semantic mission contract only. It does not choose "
+                            "authoring values, bind a native adapter, execute a plant, or qualify a result."
+                        ),
+                    }
+                )
+                return 0
+            if arguments.vehicle_mission_command == "create":
+                kit = catalog.vehicle(arguments.identifier).authoring_kit_dict(arguments.mission_id, arguments.fidelity)
+                _print_json(kit, arguments.output)
+                return 0
+            if arguments.vehicle_mission_command == "validate":
+                compiled = compile_vehicle_composition(load_vehicle_composition_request(arguments.request), catalog=catalog)
+                if arguments.compiled_output is not None:
+                    compiled.write_json(arguments.compiled_output)
+                interface = resolve_vehicle_composition_interface_contract(compiled, catalog=catalog)
+                findings = validate_vehicle_interface_contract(interface)
+                preflight = preflight_vehicle_composition(compiled)
+                lowering = lower_vehicle_composition(compiled)
+                mission_graph = compiled.mission_graph
+                if mission_graph is None:
+                    raise VehicleCompositionError("missing-mission-graph", "compiled composition is missing its mission graph")
+                _print_json(
+                    {
+                        "schema": "taoryx.vehicle-mission-validation/v1alpha1",
+                        "request": str(arguments.request),
+                        "composition": {
+                            "id": compiled.id,
+                            "identity_sha256": compiled.identity_sha256,
+                            "family_id": compiled.family_id,
+                            "mission_id": compiled.mission,
+                            "fidelity": compiled.fidelity,
+                            "mission_graph": mission_graph.model_dump(mode="json", by_alias=True),
+                        },
+                        "semantic_validation": "pass",
+                        "interface_validation": {
+                            "status": "pass" if not findings else "fail",
+                            "findings": list(findings),
+                        },
+                        "runtime_readiness": {
+                            "preflight_status": preflight.status,
+                            "lowering_status": lowering.status,
+                            "execution_binding": lowering.execution_binding,
+                        },
+                        "claim_boundary": (
+                            "Mission validation proves only immutable semantic compilation and interface conformance. "
+                            "A non-ready adapter, missing batch factory, or failed mission execution remains visible "
+                            "and cannot be promoted by this command."
+                        ),
+                    }
+                )
+                return 0 if not findings else 2
+            raise ValueError(f"unknown vehicle mission command {arguments.vehicle_mission_command!r}")
+        if arguments.vehicle_command == "variant":
+            compiled = compile_vehicle_composition(load_vehicle_composition_request(arguments.request), catalog=catalog)
+            if arguments.vehicle_variant_command == "resolve":
+                compiled.write_json(arguments.output)
+                _print_json(
+                    {
+                        "schema": "taoryx.vehicle-variant-resolution/v1alpha1",
+                        "request": str(arguments.request),
+                        "composition_id": compiled.id,
+                        "composition_identity_sha256": compiled.identity_sha256,
+                        "variant": compiled.variant.model_dump(mode="json"),
+                        "compiled_composition": str(arguments.output),
+                        "claim_boundary": (
+                            "Resolution creates an immutable semantic composition. It does not execute a runtime, "
+                            "retrim a plant, or requalify the selected vehicle."
+                        ),
+                    }
+                )
+                return 0
+            if arguments.vehicle_variant_command == "validate":
+                _print_json(
+                    {
+                        "schema": "taoryx.vehicle-variant-validation/v1alpha1",
+                        "request": str(arguments.request),
+                        "composition_id": compiled.id,
+                        "composition_identity_sha256": compiled.identity_sha256,
+                        "variant": compiled.variant.model_dump(mode="json"),
+                        "resulting_initialization_inputs": {
+                            identifier: value.model_dump(mode="json") for identifier, value in compiled.initialization.inputs.items()
+                        },
+                        "status": "valid",
+                        "claim_boundary": (
+                            "Validation proves bounded semantic resolution and named runtime binding only. It does not "
+                            "execute the runtime, establish trim, or promote qualification."
+                        ),
+                    }
+                )
+                return 0
+            raise ValueError(f"unknown vehicle variant command {arguments.vehicle_variant_command!r}")
+        if arguments.vehicle_command == "validate-examples":
+            report = _validate_vehicle_composition_examples(
+                arguments.directory,
+                catalog=catalog,
+                require_preflight=arguments.require_preflight,
+            )
+            _print_json(report)
+            return 0 if report["status"] == "pass" else 2
         if arguments.vehicle_command == "interface-composition":
             composition = load_compiled_vehicle_composition(arguments.composition)
             contract = resolve_vehicle_composition_interface_contract(composition, catalog=catalog)
@@ -822,10 +1222,14 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
                     arguments.output_dir,
                     max_steps=arguments.max_steps,
                 )
-                payload = language_execution.as_dict()
-                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
-                    arguments.output_dir,
-                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                payload = _finalize_vehicle_batch_execution_payload(
+                    language_execution.as_dict(),
+                    output_dir=arguments.output_dir,
+                    composition=composition,
+                    binding=binding,
+                    composition_path=arguments.composition,
+                    max_steps=arguments.max_steps,
+                    catalog=catalog,
                 )
                 _print_json(payload)
                 return 0 if language_execution.mission_pass else 1
@@ -833,10 +1237,14 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
                 if arguments.max_steps is not None:
                     raise ValueError("--max-steps is not available for this reduced fixed-wing adapter yet")
                 reduced_execution = execute_reduced_fixed_wing_composition(composition, arguments.output_dir)
-                payload = reduced_execution.as_dict()
-                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
-                    arguments.output_dir,
-                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                payload = _finalize_vehicle_batch_execution_payload(
+                    reduced_execution.as_dict(),
+                    output_dir=arguments.output_dir,
+                    composition=composition,
+                    binding=binding,
+                    composition_path=arguments.composition,
+                    max_steps=arguments.max_steps,
+                    catalog=catalog,
                 )
                 _print_json(payload)
                 return 0 if reduced_execution.mission_pass else 1
@@ -844,10 +1252,14 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
                 if arguments.max_steps is not None:
                     raise ValueError("--max-steps is not available for the Hummingbird pseudo batch adapter yet")
                 hummingbird_execution = execute_hummingbird_pseudo_composition(composition, arguments.output_dir)
-                payload = hummingbird_execution.as_dict()
-                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
-                    arguments.output_dir,
-                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                payload = _finalize_vehicle_batch_execution_payload(
+                    hummingbird_execution.as_dict(),
+                    output_dir=arguments.output_dir,
+                    composition=composition,
+                    binding=binding,
+                    composition_path=arguments.composition,
+                    max_steps=arguments.max_steps,
+                    catalog=catalog,
                 )
                 _print_json(payload)
                 return 0 if hummingbird_execution.mission_pass else 1
@@ -855,21 +1267,44 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
                 if arguments.max_steps is not None:
                     raise ValueError("--max-steps is not available for the NESC source-replay adapter")
                 nesc_execution = execute_nesc_source_replay_composition(composition, arguments.output_dir)
-                payload = nesc_execution.as_dict()
-                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
-                    arguments.output_dir,
-                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                payload = _finalize_vehicle_batch_execution_payload(
+                    nesc_execution.as_dict(),
+                    output_dir=arguments.output_dir,
+                    composition=composition,
+                    binding=binding,
+                    composition_path=arguments.composition,
+                    max_steps=arguments.max_steps,
+                    catalog=catalog,
                 )
                 _print_json(payload)
                 return 0 if nesc_execution.mission_pass else 1
+            if binding.factory_id == "hl20_source_booster_release_replay.v1":
+                if arguments.max_steps is not None:
+                    raise ValueError("--max-steps is not available for the HL-20 source-release replay adapter")
+                hl20_execution = execute_hl20_source_booster_release_composition(composition, arguments.output_dir)
+                payload = _finalize_vehicle_batch_execution_payload(
+                    hl20_execution.as_dict(),
+                    output_dir=arguments.output_dir,
+                    composition=composition,
+                    binding=binding,
+                    composition_path=arguments.composition,
+                    max_steps=arguments.max_steps,
+                    catalog=catalog,
+                )
+                _print_json(payload)
+                return 0 if hl20_execution.mission_pass else 1
             if binding.factory_id == "x15_staged_reachability.v1":
                 if arguments.max_steps is not None:
                     raise ValueError("--max-steps is not available for the X-15 staged reachability adapter")
                 x15_execution = execute_x15_staged_reachability_composition(composition, arguments.output_dir)
-                payload = x15_execution.as_dict()
-                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
-                    arguments.output_dir,
-                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                payload = _finalize_vehicle_batch_execution_payload(
+                    x15_execution.as_dict(),
+                    output_dir=arguments.output_dir,
+                    composition=composition,
+                    binding=binding,
+                    composition_path=arguments.composition,
+                    max_steps=arguments.max_steps,
+                    catalog=catalog,
                 )
                 _print_json(payload)
                 return 0 if x15_execution.mission_pass else 1
@@ -877,10 +1312,14 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
                 if arguments.max_steps is not None:
                     raise ValueError("--max-steps is not available for the local direct-wrench screen adapter")
                 local_screen_execution = execute_local_direct_wrench_composition(composition, arguments.output_dir)
-                payload = local_screen_execution.as_dict()
-                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
-                    arguments.output_dir,
-                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                payload = _finalize_vehicle_batch_execution_payload(
+                    local_screen_execution.as_dict(),
+                    output_dir=arguments.output_dir,
+                    composition=composition,
+                    binding=binding,
+                    composition_path=arguments.composition,
+                    max_steps=arguments.max_steps,
+                    catalog=catalog,
                 )
                 _print_json(payload)
                 return 0 if local_screen_execution.screen_pass else 1
@@ -888,10 +1327,14 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
                 if arguments.max_steps is not None:
                     raise ValueError("--max-steps is not available for the passive tumbling batch adapter")
                 tumbling_execution = execute_passive_tumbling_composition(composition, arguments.output_dir)
-                payload = tumbling_execution.as_dict()
-                payload["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
-                    arguments.output_dir,
-                    resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+                payload = _finalize_vehicle_batch_execution_payload(
+                    tumbling_execution.as_dict(),
+                    output_dir=arguments.output_dir,
+                    composition=composition,
+                    binding=binding,
+                    composition_path=arguments.composition,
+                    max_steps=arguments.max_steps,
+                    catalog=catalog,
                 )
                 _print_json(payload)
                 return 0 if tumbling_execution.mission_pass else 1
@@ -901,11 +1344,148 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
             replay_report = replay_composition_policy_trace_file(composition, arguments.trace)
             _print_json(replay_report.as_dict(), arguments.output)
             return 0
+        if arguments.vehicle_command == "batch-episode-parity":
+            composition = load_compiled_vehicle_composition(arguments.composition)
+            trace_payload = json.loads(arguments.trace.read_text(encoding="utf-8"))
+            if not isinstance(trace_payload, Mapping):
+                raise ValueError("policy trace JSON must contain one object")
+            parity_report = verify_serialized_declared_batch_episode_parity(composition, trace_payload)
+            _print_json(parity_report.as_dict(), arguments.output)
+            return 0 if parity_report.status == "pass" else 1
+        if arguments.vehicle_command == "episode-info":
+            composition = load_compiled_vehicle_composition(arguments.composition)
+            binding = resolve_vehicle_execution_binding(composition, "episode")
+            episode = open_vehicle_composition_episode(composition, seed=arguments.seed)
+            try:
+                initial_truth = episode.reset(seed=arguments.seed)
+                initial_status = episode.status_frame()
+                initial_observation = episode.observe_frame(composition.observation.profile_id)
+                _print_json(
+                    {
+                        "schema": "taoryx.vehicle-composition-episode-info/v1alpha1",
+                        "composition_id": composition.id,
+                        "composition_identity_sha256": composition.identity_sha256,
+                        "execution_binding": binding.model_dump(mode="json"),
+                        "claim_boundary": episode.claim_boundary,
+                        "interface": {
+                            "id": episode.interface_contract.id,
+                            "fingerprint_sha256": episode.interface_contract.fingerprint,
+                        },
+                        "action_schema": [channel.as_dict() for channel in episode.action_schema],
+                        "observation_schema": [channel.as_dict() for channel in episode.observation_schema],
+                        "initial_truth": initial_truth.as_dict(),
+                        "initial_status": initial_status.as_dict(),
+                        "initial_observation": initial_observation.as_dict(),
+                    }
+                )
+            finally:
+                episode.close()
+            return 0
+        if arguments.vehicle_command == "result":
+            evaluation_path = arguments.output_dir / "evaluation.json"
+            if not evaluation_path.is_file():
+                result_catalog = index_composition_results(arguments.output_dir)
+                catalog_records = result_catalog.get("records")
+                if not isinstance(catalog_records, list):
+                    raise ValueError("local controller screen catalog has invalid record payload")
+                screen_records = [
+                    record
+                    for record in catalog_records
+                    if isinstance(record, Mapping)
+                    and record.get("record_kind") == "local_controller_screen"
+                    and record.get("status") == "valid"
+                    and record.get("output_directory") == "."
+                ]
+                if result_catalog["status"] != "pass" or len(screen_records) != 1:
+                    raise ValueError("result directory has no normalized evaluation.json and does not contain exactly one valid local controller screen result")
+                screen_record = screen_records[0]
+                if arguments.composition is not None:
+                    composition = load_compiled_vehicle_composition(arguments.composition)
+                    provenance = screen_record.get("composition_provenance")
+                    if not isinstance(provenance, Mapping):
+                        raise ValueError("local controller screen has no composition provenance")
+                    if provenance.get("composition_id") != composition.id:
+                        raise ValueError("local controller screen composition identity does not match the supplied composition")
+                    if provenance.get("composition_identity_sha256") != composition.identity_sha256:
+                        raise ValueError("local controller screen composition fingerprint does not match the supplied composition")
+                _print_json(
+                    {
+                        "schema": "taoryx.vehicle-composition-result/v1alpha1",
+                        "output_directory": str(arguments.output_dir),
+                        "record_kind": "local_controller_screen",
+                        "result": screen_record,
+                        "claim_boundary": (
+                            "This is a verified local controller-screen record. It is not a normalized mission "
+                            "evaluation, terminal result, physical-effector allocation result, or qualification."
+                        ),
+                    }
+                )
+                return 0
+            payload = json.loads(evaluation_path.read_text(encoding="utf-8"))
+            evaluation = TrajectoryEvaluation.model_validate(payload)
+            composition_identity_sha256: str | None = None
+            if arguments.composition is not None:
+                composition = load_compiled_vehicle_composition(arguments.composition)
+                composition_identity_sha256 = composition.identity_sha256
+                if evaluation.scenario_id != composition.id:
+                    raise ValueError(
+                        f"evaluation scenario identity does not match the supplied compiled composition: {evaluation.scenario_id!r} != {composition.id!r}"
+                    )
+                if evaluation.scenario_contract_sha256 != composition.identity_sha256:
+                    raise ValueError("evaluation composition fingerprint does not match the supplied compiled composition")
+            artifact_names = (
+                "execution.json",
+                "mission_graph_execution.json",
+                "objective_report.json",
+                "status_trace.json",
+                "vehicle_interface.json",
+                "telemetry.csv",
+                "truth_telemetry.csv",
+            )
+            _print_json(
+                {
+                    "schema": "taoryx.vehicle-composition-result/v1alpha1",
+                    "output_directory": str(arguments.output_dir),
+                    "composition_identity_sha256": composition_identity_sha256,
+                    "evaluation": evaluation.as_dict(),
+                    "artifacts": {name: str(arguments.output_dir / name) for name in artifact_names if (arguments.output_dir / name).is_file()},
+                }
+            )
+            return 0
+        if arguments.vehicle_command == "results":
+            report = index_composition_results(arguments.directory)
+            _print_json(report)
+            return 0 if report["status"] in {"pass", "empty"} else 2
+        if arguments.vehicle_command == "release-catalog":
+            report = write_composition_release_catalog(arguments.directory, arguments.output)
+            _print_json(report)
+            return 0
+        if arguments.vehicle_command == "catalog":
+            _print_json(catalog.as_dict(detail=arguments.detail))
+            return 0
         if arguments.vehicle_command == "list":
             _print_json(catalog.list_dict())
             return 0
         if arguments.vehicle_command == "interface-report":
             report = build_vehicle_interface_catalog_report(catalog)
+            _print_json(report)
+            return 0 if report["status"] == "pass" else 2
+        if arguments.vehicle_command == "topology-report":
+            report = build_vehicle_composition_topology_report(catalog)
+            _print_json(report)
+            return 0 if report["status"] == "pass" else 2
+        if arguments.vehicle_command == "semantic-preflight-handler-report":
+            report = build_semantic_preflight_handler_report(catalog)
+            _print_json(report)
+            return 0 if report["status"] == "pass" else 2
+        if arguments.vehicle_command == "maturity-report":
+            report = build_product_three_maturity_report(
+                catalog,
+                check_execution_witnesses=arguments.check_execution_witnesses,
+                execute_batch_witnesses=arguments.execute_batch_witnesses,
+                execute_parity_witnesses=arguments.execute_parity_witnesses,
+                results_directory=arguments.results_dir,
+            )
             _print_json(report)
             return 0 if report["status"] == "pass" else 2
         if arguments.vehicle_command == "interface":
@@ -921,15 +1501,50 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
                 }
             )
             return 0 if not findings else 2
+        if arguments.vehicle_command == "parameters":
+            _print_json(catalog.vehicle(arguments.identifier).parameter_dict(arguments.scope))
+            return 0
+        if arguments.vehicle_command == "authoring":
+            _print_json(catalog.vehicle(arguments.identifier).authoring_worklist_dict())
+            return 0
+        if arguments.vehicle_command == "authoring-template":
+            _print_json(catalog.vehicle(arguments.identifier).authoring_kit_dict(arguments.mission_id, arguments.fidelity))
+            return 0
+        if arguments.vehicle_command == "authoring-all":
+            _print_json(catalog.authoring_worklist_dict())
+            return 0
         payload = catalog.vehicle(arguments.identifier).as_dict()
-        if arguments.vehicle_command == "inspect":
+        if arguments.vehicle_command in {"inspect", "describe"}:
             _print_json(payload)
+        elif arguments.vehicle_command == "missions":
+            _print_json(
+                {
+                    "vehicle_id": payload["vehicle_id"],
+                    "family_id": payload["family_id"],
+                    "mission_templates": payload["mission_templates"],
+                }
+            )
+        elif arguments.vehicle_command == "segment":
+            segment_contracts = payload["segment_contracts"]
+            if not isinstance(segment_contracts, list):
+                raise VehicleCompositionError("invalid-registry", "segment contracts are not a list")
+            matches = [item for item in segment_contracts if isinstance(item, Mapping) and item.get("id") == arguments.segment_id]
+            if len(matches) != 1:
+                raise VehicleCompositionError("unknown-segment", f"unknown segment {arguments.segment_id!r}", field="segment_id")
+            _print_json(
+                {
+                    "vehicle_id": payload["vehicle_id"],
+                    "family_id": payload["family_id"],
+                    "segment_contract": matches[0],
+                }
+            )
         elif arguments.vehicle_command == "endpoints":
             _print_json(
                 {
                     "vehicle_id": payload["vehicle_id"],
                     "family_id": payload["family_id"],
                     "execution_bindings": payload["execution_bindings"],
+                    "batch_episode_parity": payload["batch_episode_parity"],
                 }
             )
         else:
@@ -950,6 +1565,176 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
     except (OSError, KeyError, TypeError, ValueError, VehicleCompositionError) as error:
         print(f"error: vehicle-registry-failed: {error}")
         return 2
+    ####
+
+
+def _vehicle_intake_command(arguments: argparse.Namespace) -> int:
+    """Export the existing intake generator through the Product 3 CLI.
+
+    The result selects a declared topology strategy but remains a
+    non-promotable intake artifact. It never fabricates source mappings,
+    control authority, trim, or a registry entry.
+    """
+
+    try:
+        if arguments.vehicle_intake_mode == "existing-family":
+            payload = build_existing_family_intake_blueprint(
+                ExistingFamilyIntakeRequest(
+                    family_id=arguments.family_id,
+                    physical_family=arguments.physical_family,
+                    mission_overlay=arguments.mission_overlay,
+                    adapter_id=arguments.adapter_id,
+                    strategy_id=arguments.strategy_id,
+                )
+            ).as_dict()
+        else:
+            payload = build_new_topology_intake_scaffold(
+                NewTopologyIntakeRequest(
+                    family_id=arguments.family_id,
+                    physical_family=arguments.physical_family,
+                    proposed_strategy_id=arguments.strategy_id,
+                    topology_summary=arguments.topology_summary,
+                )
+            ).as_dict()
+        _print_json(payload, arguments.output)
+        return 0
+    except (OSError, StrategySelectionError, ValueError) as error:
+        print(f"error: vehicle-intake-failed: {error}")
+        return 2
+    ####
+
+
+def _vehicle_integration_command(arguments: argparse.Namespace) -> int:
+    """Expose source-family onboarding gates through the Product 3 CLI.
+
+    This command intentionally reuses the provider-neutral integration records
+    rather than treating a composition-registry entry as proof that a source
+    plant is trim-ready, runnable, or qualified.  It makes the missing work
+    visible to a vehicle author at the same public surface used for intake and
+    composition discovery.
+    """
+
+    try:
+        if arguments.vehicle_integration_command == "readiness":
+            reports = (
+                validate_all_vehicle_integration_readiness()
+                if arguments.family == "all"
+                else (validate_vehicle_integration_readiness(arguments.family),)
+            )
+            payload = {
+                "schema": "taoryx.vehicle-integration-command/v1alpha1",
+                "command": "readiness",
+                "family": arguments.family,
+                "claim_boundary": (
+                    "Metadata readiness only. This does not execute a source plant, establish trim, "
+                    "bind controls, or promote any fidelity or qualification claim."
+                ),
+                "reports": [report.as_dict() for report in reports],
+            }
+            _print_json(payload, arguments.output)
+            return 0 if all(not report.errors for report in reports) else 1
+
+        pipeline_reports = (
+            validate_all_vehicle_integration_pipelines()
+            if arguments.family == "all"
+            else (validate_vehicle_integration_pipeline(arguments.family),)
+        )
+        if arguments.packet_dir is not None:
+            for report in pipeline_reports:
+                packet_path = arguments.packet_dir / report.family_id if arguments.family == "all" else arguments.packet_dir
+                write_vehicle_integration_packet(
+                    report.family_id,
+                    packet_path,
+                    include_source_package=not arguments.exclude_source_package,
+                )
+        payload = {
+            "schema": "taoryx.vehicle-integration-command/v1alpha1",
+            "command": "pipeline",
+            "family": arguments.family,
+            "claim_boundary": (
+                "Staged provider-neutral integration evidence only. It does not execute a mission, prove "
+                "physical allocation, or qualify a vehicle family."
+            ),
+            "reports": [report.as_dict() for report in pipeline_reports],
+        }
+        _print_json(payload, arguments.output)
+        return 0 if arguments.allow_blocked or all(not report.blockers for report in pipeline_reports) else 1
+    except (OSError, KeyError, TypeError, ValueError) as error:
+        print(f"error: vehicle-integration-failed: {error}")
+        return 2
+    ####
+
+
+def _validate_vehicle_composition_examples(
+    directory: Path,
+    *,
+    catalog: ResolvedVehicleCompositionCatalog,
+    require_preflight: bool,
+) -> dict[str, object]:
+    """Return a deterministic authoring report for all composition fixtures.
+
+    This validates only semantic composition and declared binding readiness.
+    It intentionally does not run simulations, treat a translation-ready
+    adapter as qualification, or suppress a preflight gap found in a witness.
+    """
+
+    if not directory.is_dir():
+        raise ValueError(f"composition example directory does not exist: {directory}")
+    paths = tuple(sorted((*directory.glob("*.yaml"), *directory.glob("*.yml"), *directory.glob("*.json"))))
+    if not paths:
+        raise ValueError(f"composition example directory contains no YAML or JSON requests: {directory}")
+    records: list[dict[str, object]] = []
+    all_passed = True
+    for path in paths:
+        try:
+            composition = compile_vehicle_composition(load_vehicle_composition_request(path), catalog=catalog)
+            contract = resolve_vehicle_composition_interface_contract(composition, catalog=catalog)
+            interface_findings = validate_vehicle_interface_contract(contract)
+            lowering = lower_vehicle_composition(composition)
+            preflight = preflight_vehicle_composition(composition)
+            ready = preflight.status == "translation_ready"
+            runtime_bound = lowering.status in {"adapter_bound", "factory_bound"}
+            record_passed = not interface_findings and (not require_preflight or (ready and runtime_bound))
+            all_passed = all_passed and record_passed
+            records.append(
+                {
+                    "path": str(path),
+                    "composition_id": composition.id,
+                    "composition_identity_sha256": composition.identity_sha256,
+                    "family_id": composition.family_id,
+                    "fidelity": composition.fidelity,
+                    "composition_status": "pass" if record_passed else "fail",
+                    "interface_validation": {
+                        "status": "pass" if not interface_findings else "fail",
+                        "findings": list(interface_findings),
+                    },
+                    "lowering_status": lowering.status,
+                    "lowering_execution_binding": lowering.execution_binding,
+                    "preflight_status": preflight.status,
+                    "preflight_translator_id": preflight.translator_id,
+                }
+            )
+        except (OSError, VehicleCompositionError, ValueError, KeyError, TypeError) as error:
+            all_passed = False
+            records.append(
+                {
+                    "path": str(path),
+                    "composition_status": "fail",
+                    "error": str(error),
+                }
+            )
+    return {
+        "schema": "taoryx.vehicle-composition-example-validation/v1alpha1",
+        "directory": str(directory),
+        "require_preflight": require_preflight,
+        "status": "pass" if all_passed else "fail",
+        "examples": records,
+        "claim_boundary": (
+            "This report compiles composition requests, validates their declared interface, and reports lowering "
+            "and preflight readiness. With --require-preflight, an example must also bind a generic adapter or its "
+            "exact declared batch factory. It does not execute a plant, evaluate truth objectives, or qualify a family."
+        ),
+    }
     ####
 
 
@@ -977,6 +1762,92 @@ def _write_vehicle_interface_artifact(
         "path": str(destination),
         "interface_id": contract.id,
         "fingerprint_sha256": contract.fingerprint,
+    }
+    ####
+
+
+def _finalize_vehicle_batch_execution_payload(
+    payload: Mapping[str, object],
+    *,
+    output_dir: Path,
+    composition: CompiledVehicleComposition,
+    binding: VehicleExecutionBinding,
+    composition_path: Path,
+    max_steps: int | None,
+    catalog: ResolvedVehicleCompositionCatalog,
+) -> dict[str, object]:
+    """Attach common public-run artifacts after one family-owned executor returns.
+
+    Family executors own the plant, truth evaluation, and detailed artifacts.
+    The CLI owns two cross-family Product 3 records: the resolved interface
+    and the exact invocation that produced this packet.  Keeping this here
+    prevents the same provenance boilerplate from drifting across every
+    source-owned batch factory.
+    """
+
+    result = dict(payload)
+    result["vehicle_interface_artifact"] = _write_vehicle_interface_artifact(
+        output_dir,
+        resolve_vehicle_composition_interface_contract(composition, catalog=catalog),
+    )
+    result["reproduction_artifact"] = _write_vehicle_batch_reproduction_artifact(
+        output_dir,
+        composition=composition,
+        binding=binding,
+        composition_path=composition_path,
+        max_steps=max_steps,
+    )
+    return result
+    ####
+
+
+def _write_vehicle_batch_reproduction_artifact(
+    output_dir: Path,
+    *,
+    composition: CompiledVehicleComposition,
+    binding: VehicleExecutionBinding,
+    composition_path: Path,
+    max_steps: int | None,
+) -> dict[str, object]:
+    """Write an identity-bound public batch command without inventing a run.
+
+    The source and output paths are intentionally recorded exactly as supplied
+    to the CLI.  A copied packet may later need those files restored, but its
+    provenance remains inspectable rather than being replaced by a generic
+    example command.
+    """
+
+    command = [
+        "taoryx",
+        "vehicle",
+        "run",
+        str(composition_path),
+        "--output-dir",
+        str(output_dir),
+    ]
+    if max_steps is not None:
+        command.extend(("--max-steps", str(max_steps)))
+    destination = output_dir / "reproduction.txt"
+    destination.write_text(
+        "\n".join(
+            (
+                "# TAORYX Product 3 public batch reproduction record",
+                f"# composition_id: {composition.id}",
+                f"# composition_identity_sha256: {composition.identity_sha256}",
+                f"# execution_factory_id: {binding.factory_id}",
+                f"# execution_mode: {binding.execution_mode}",
+                shlex.join(command),
+                "",
+            )
+        ),
+        encoding="utf-8",
+    )
+    return {
+        "path": str(destination),
+        "composition_id": composition.id,
+        "composition_identity_sha256": composition.identity_sha256,
+        "factory_id": binding.factory_id,
+        "execution_mode": binding.execution_mode,
     }
     ####
 
@@ -1084,6 +1955,8 @@ def _inspect_table(arguments: argparse.Namespace) -> int:
     except (OSError, KeyError, TypeError, ValueError) as error:
         print(f"error: table-inspect-failed: {error}")
         return 2
+
+
 ####
 
 
@@ -1095,6 +1968,8 @@ def _parse_query(values: list[str]) -> dict[str, float]:
             raise ValueError(f"invalid query {item!r}; expected AXIS=VALUE")
         query[name.casefold()] = float(raw_value)
     return query
+
+
 ####
 
 
@@ -1122,6 +1997,8 @@ def _write_table_html(path: Path, payload: dict[str, object], table: TableInspec
         f"<html><head><meta charset='utf-8'><title>TAORYX Table Explorer</title></head><body><h1>TAORYX Table Explorer</h1><pre>{body}</pre>{probe_json}{image}</body></html>\n",
         encoding="utf-8",
     )
+
+
 ####
 ####
 

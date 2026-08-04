@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+
 def rows(path: Path) -> list[dict[str, str]]:
     with path.open("r", newline="", encoding="utf-8") as handle:
         return list(csv.DictReader(handle))

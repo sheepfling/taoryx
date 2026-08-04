@@ -19,6 +19,8 @@ import yaml
 
 from .generic_tuning import LinearAuthorityRequirement, linear_authority_preflight
 from .racetrack_template import resolve_racetrack_binding
+from .vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
+from .vehicle_execution_preflight import preflight_vehicle_composition
 from .vehicle_registry import ROOT
 
 PreflightStatus = Literal["passed", "development", "planned", "blocked", "not_applicable"]
@@ -408,9 +410,182 @@ def _estimate_racetrack(template_id: str, binding_id: str, binding: Mapping[str,
     ####
 
 
+def _semantic_composition_mission_preflight(
+    family_id: str,
+    binding_path: Path,
+    binding: Mapping[str, Any],
+) -> MissionPreflightResult:
+    """Validate a reusable mission through checked-in semantic witnesses.
+
+    A family mission need not be a fixed-wing racetrack.  This binding form
+    verifies that each retained composition witness compiles to the declared
+    family, mission, fidelity, phase order, and semantic-preflight status. It
+    deliberately stops before runtime execution: a translated plan is not a
+    plant, controller, truth-objective result, or qualification claim.
+    """
+
+    findings: list[PreflightFinding] = []
+    evidence = [_relative(binding_path)]
+    mission_id = str(binding.get("mission_id", "")) or None
+    expected_family = str(binding.get("family", ""))
+    composition_family_id = str(binding.get("composition_family_id", ""))
+    if expected_family != family_id:
+        _finding(
+            findings,
+            "error",
+            "mission-binding-family-mismatch",
+            _relative(binding_path),
+            f"semantic mission binding belongs to {expected_family!r}, not {family_id!r}",
+            "Bind each reusable mission record to exactly one source family.",
+        )
+    if not composition_family_id:
+        _finding(
+            findings,
+            "error",
+            "mission-binding-composition-family-missing",
+            _relative(binding_path),
+            "semantic mission binding does not declare its public composition family ID",
+            "Declare composition_family_id explicitly; source-family and public composition identities may differ.",
+        )
+    if mission_id is None:
+        _finding(
+            findings,
+            "error",
+            "mission-binding-id-missing",
+            _relative(binding_path),
+            "semantic mission binding has no mission_id",
+            "Declare the exact public mission template ID.",
+        )
+    phase_order = binding.get("phase_order")
+    if not isinstance(phase_order, list) or not phase_order or not all(isinstance(item, str) and item for item in phase_order):
+        _finding(
+            findings,
+            "error",
+            "mission-phase-order-missing",
+            _relative(binding_path),
+            "semantic mission binding has no ordered phase contract",
+            "Declare the characteristic mission lifecycle in order.",
+        )
+        phase_order = []
+    realizations = binding.get("realizations")
+    if not isinstance(realizations, list) or not realizations:
+        _finding(
+            findings,
+            "error",
+            "mission-realizations-missing",
+            _relative(binding_path),
+            "semantic mission binding declares no checked-in composition witnesses",
+            "Bind one or more exact composition requests and expected semantic-preflight dispositions.",
+        )
+        realizations = []
+
+    preflight_status_by_fidelity: dict[str, str] = {}
+    composition_ids: dict[str, str] = {}
+    for index, realization in enumerate(realizations):
+        path = f"{_relative(binding_path)}:realizations[{index}]"
+        if not isinstance(realization, Mapping):
+            _finding(findings, "error", "mission-realization-invalid", path, "mission realization must be a mapping", "Declare fidelity, composition, and expected_preflight_status.")
+            continue
+        fidelity = str(realization.get("fidelity", ""))
+        expected_status = str(realization.get("expected_preflight_status", ""))
+        composition_value = realization.get("composition")
+        composition_path = _path_from_value(composition_value)
+        if not fidelity or expected_status not in {"translation_ready", "blocked", "not_applicable"}:
+            _finding(
+                findings,
+                "error",
+                "mission-realization-contract-invalid",
+                path,
+                "mission realization must declare a fidelity and canonical expected_preflight_status",
+                "Use one explicit fidelity and one of translation_ready, blocked, or not_applicable.",
+            )
+            continue
+        if composition_path is None or not composition_path.is_file():
+            _finding(
+                findings,
+                "error",
+                "mission-composition-witness-missing",
+                path,
+                "mission realization does not resolve to a checked-in composition witness",
+                "Add the composition request or correct its repository-relative path.",
+            )
+            continue
+        evidence.append(_relative(composition_path))
+        try:
+            composition = compile_vehicle_composition(load_vehicle_composition_request(composition_path))
+            preflight = preflight_vehicle_composition(composition)
+        except (OSError, TypeError, ValueError) as error:
+            _finding(
+                findings,
+                "error",
+                "mission-composition-witness-invalid",
+                _relative(composition_path),
+                f"mission composition witness could not compile/preflight: {error}",
+                "Repair the request or its declared family capability/translator binding.",
+            )
+            continue
+        if composition.family_id != composition_family_id or composition.mission != mission_id or composition.fidelity != fidelity:
+            _finding(
+                findings,
+                "error",
+                "mission-composition-witness-mismatch",
+                _relative(composition_path),
+                "compiled witness identity does not match the binding family, mission, and fidelity",
+                "Keep the witness and binding composition_family_id, mission_id, and fidelity aligned; do not reuse a nearby family request.",
+            )
+        actual_phase_order = [segment.id for segment in composition.segments]
+        if actual_phase_order != phase_order:
+            _finding(
+                findings,
+                "error",
+                "mission-composition-phase-order-mismatch",
+                _relative(composition_path),
+                f"compiled witness phases {actual_phase_order!r} do not match binding phase order {phase_order!r}",
+                "Update the binding only when the semantic mission contract intentionally changes.",
+            )
+        if preflight.status != expected_status:
+            _finding(
+                findings,
+                "error",
+                "mission-preflight-status-mismatch",
+                _relative(composition_path),
+                f"semantic preflight is {preflight.status!r}, expected {expected_status!r}",
+                "Repair the capability/translator declaration or update an intentional expectation with review.",
+            )
+        preflight_status_by_fidelity[fidelity] = preflight.status
+        composition_ids[fidelity] = composition.id
+
+    declared_status = str(binding.get("status", ""))
+    if "planned" in declared_status.lower() or "development" in declared_status.lower():
+        _finding(
+            findings,
+            "warning",
+            "mission-runtime-planned",
+            _relative(binding_path),
+            f"mission binding status is {declared_status!r}",
+            "Keep translation evidence separate until a family-owned runtime, truth objectives, and terminal evaluator are bound.",
+        )
+    status = _status_from_findings(findings, empty="passed")
+    return MissionPreflightResult(
+        family_id,
+        status,
+        mission_id,
+        tuple(dict.fromkeys(evidence)),
+        tuple(findings),
+        {
+            "realization_count": len(preflight_status_by_fidelity),
+            "preflight_status_by_fidelity": preflight_status_by_fidelity,
+            "composition_ids_by_fidelity": composition_ids,
+            "estimated_duration_s": None,
+        },
+    )
+    ####
+
+
 def _mission_preflight(family_id: str) -> MissionPreflightResult:
     family_dir = ROOT / "families" / family_id
-    binding_path = family_dir / "qualification/racetrack-binding.yaml"
+    semantic_binding_path = family_dir / "qualification/mission-binding.yaml"
+    binding_path = semantic_binding_path if semantic_binding_path.is_file() else family_dir / "qualification/racetrack-binding.yaml"
     findings: list[PreflightFinding] = []
     if not binding_path.is_file():
         _finding(findings, "error", "mission-binding-missing", _relative(binding_path), "no reusable mission binding is declared for this family", "Declare a family mission binding before running or estimating a flagship mission.")
@@ -420,6 +595,8 @@ def _mission_preflight(family_id: str) -> MissionPreflightResult:
     except (OSError, ValueError, yaml.YAMLError) as error:
         _finding(findings, "error", "mission-binding-load-failed", _relative(binding_path), str(error), "Repair the mission binding YAML before preflight.")
         return MissionPreflightResult(family_id, "blocked", None, (_relative(binding_path),), tuple(findings), {"estimated_duration_s": None})
+    if str(binding.get("kind", "")) == "semantic_composition":
+        return _semantic_composition_mission_preflight(family_id, binding_path, binding)
     template_path = _path_from_value(binding.get("source_catalog"))
     evidence = [_relative(binding_path)]
     if template_path is None or not template_path.is_file():

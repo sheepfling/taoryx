@@ -10,11 +10,11 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import yaml
 
-from .fidelity_contracts import CANONICAL_FIDELITY_TIERS, FidelityTier, control_realization_for
+from .fidelity_contracts import CANONICAL_FIDELITY_TIERS, control_realization_for
 from .vehicle_registry import ROOT
 
 CATALOG = ROOT / "verification/fidelity_data_requirements.yaml"
@@ -59,6 +59,7 @@ class ReadinessFinding:
             "message": self.message,
             "paths": list(self.paths),
         }
+
     ####
 
 
@@ -76,7 +77,7 @@ class FidelityReadinessReport:
     def control_realization(self) -> str:
         """Return the canonical realization represented by this readiness tier."""
 
-        return control_realization_for(cast(FidelityTier, self.tier)) if self.tier in CANONICAL_FIDELITY_TIERS else "unspecified"
+        return control_realization_for(self.tier) if self.tier in CANONICAL_FIDELITY_TIERS else "unspecified"
         ####
 
     @property
@@ -84,6 +85,7 @@ class FidelityReadinessReport:
         """Return missing required data."""
 
         return tuple(item for item in self.findings if item.status == "missing" and item.severity == "required")
+
     ####
 
     @property
@@ -91,6 +93,7 @@ class FidelityReadinessReport:
         """Return missing recommended data or unresolved evidence checks."""
 
         return tuple(item for item in self.findings if item.status in {"missing", "not_checked"} and item.severity == "recommended")
+
     ####
 
     @property
@@ -102,6 +105,7 @@ class FidelityReadinessReport:
         if self.warnings:
             return "partial"
         return "ready_for_runtime_probes"
+
     ####
 
     def as_dict(self) -> dict[str, Any]:
@@ -118,6 +122,7 @@ class FidelityReadinessReport:
             "warning_count": len(self.warnings),
             "findings": [item.as_dict() for item in self.findings],
         }
+
     ####
 
 
@@ -209,7 +214,11 @@ def _check(requirement: Mapping[str, Any], vehicle: Mapping[str, Any]) -> tuple[
         return ("present" if ok else "missing", "mapping is populated" if ok else "mapping is empty or absent", paths)
     if kind == "value_in":
         ok = bool(values) and values[0] in requirement.get("values", ())
-        return ("present" if ok else "missing", "value is in the allowed set" if ok else f"value {values[0] if values else None!r} is not in the allowed set", paths)
+        return (
+            "present" if ok else "missing",
+            "value is in the allowed set" if ok else f"value {values[0] if values else None!r} is not in the allowed set",
+            paths,
+        )
     if kind == "value_not_in":
         ok = bool(values) and _present(values[0]) and values[0] not in requirement.get("values", ())
         return ("present" if ok else "missing", "value is explicitly non-empty" if ok else "value is absent or disallowed", paths)
@@ -243,7 +252,11 @@ def _check(requirement: Mapping[str, Any], vehicle: Mapping[str, Any]) -> tuple[
         names = _table_names(vehicle)
         tokens = [str(token).lower() for token in requirement.get("tokens", ())]
         ok = any(token in name for name in names for token in tokens)
-        return ("present" if ok else "missing", "a matching control or propulsion table is bound" if ok else "no bound table matches the required family data", paths)
+        return (
+            "present" if ok else "missing",
+            "a matching control or propulsion table is bound" if ok else "no bound table matches the required family data",
+            paths,
+        )
     if kind == "table_token_all_group":
         names = _table_names(vehicle)
         groups = requirement.get("token_groups", ())

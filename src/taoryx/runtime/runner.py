@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
 from taoryx.language.expressions import NumberExpression
@@ -15,7 +16,7 @@ from taoryx.language.models import Assignment, EarthBlock, ProblemDocument, Tabl
 from taoryx.outputs import RunArtifact, build_run_artifact
 
 from .engine import ExecutionResult
-from .lowering import execute_lowered, lower_problem_document, problem_unit_settings
+from .lowering import LoweredDocument, execute_lowered, lower_problem_document, problem_unit_settings
 from .sensor_scenario import SensorScenarioRuntime, SensorScenarioSpec, attach_sensor_scenario, render_sensor_scenario_plots
 from .table_binding import bind_runtime_tables
 
@@ -68,11 +69,20 @@ def run_files(
     seed: int | None = None,
     profile: GrammarProfile | str = GrammarProfile.TAOS96,
     sensor_spec: str | Path | SensorScenarioSpec | None = None,
+    control_provenance: Literal["none", "summary", "intervals", "full"] = "none",
 ) -> RunReport:
     """Ingest, lower, execute, and write products for one `.prb` file.
 
     ``sensor_spec`` is an explicit optional sidecar binding. Omitting it keeps
     the historical clock-only and unsensorized execution path unchanged.
+
+    ``control_provenance`` optionally writes an accepted-interval ledger from
+    the native runtime.  It is deliberately not a Product 3 semantic-action
+    trace: solver-stage controller mutation makes an interval ineligible for a
+    held-command claim.  ``summary`` exposes only counts and the claim
+    boundary; ``intervals`` retains accepted-interval records without
+    solver-stage detail; ``full`` also retains every underlying control
+    evaluation for diagnosis.
     """
 
     problem = Path(problem_path)
@@ -153,6 +163,8 @@ def run_files(
                 diagnostics.append(_error(problem, "unsupported-runtime-feature", f"runtime execution does not yet implement *{feature} semantics"))
             return RunReport(str(problem), tuple(map(str, table_paths)), len(lowered.cases), (), tuple(diagnostics), ())
         results = execute_lowered(lowered, output_dir=str(destination), max_steps=max_steps, integrator=integrator)
+        if control_provenance != "none":
+            _write_control_provenance(destination / "control_provenance.json", lowered, detail=control_provenance)
         incomplete = tuple(result.stop_reason for result in results if not result.completed)
         if incomplete:
             diagnostics.append(
@@ -233,6 +245,60 @@ def run_files(
         for case in lowered.cases
     )
     return RunReport(str(problem), tuple(map(str, table_paths)), len(lowered.cases), results, tuple(diagnostics), outputs, artifacts, metadata)
+####
+
+
+def _write_control_provenance(
+    destination: Path,
+    lowered: LoweredDocument,
+    *,
+    detail: Literal["summary", "intervals", "full"],
+) -> None:
+    """Write native control-evaluation evidence without overstating it.
+
+    This intentionally lives beside runtime products rather than the
+    composition action-trace artifact.  A public semantic trace requires a
+    controller to resolve commands at accepted truth boundaries and hold those
+    commands across every solver stage.  Resolver-owned native commands now
+    have that runtime guarantee, while legacy mutable controls remain
+    diagnostic-only.  The artifact is useful for making that distinction
+    visible and for demonstrating exactly why a trace is withheld.
+    """
+
+    cases: list[dict[str, object]] = []
+    for case in lowered.cases:
+        vehicles: dict[str, object] = {}
+        for vehicle_id, vehicle in sorted(case.problem.vehicles.items()):
+            intervals = vehicle.control_interval_history
+            evaluations = vehicle.control_evaluation_history
+            solver_stage_mutation_count = sum(item.solver_stage_control_mutation_detected for item in intervals)
+            summary: dict[str, object] = {
+                "accepted_interval_count": len(intervals),
+                "solver_stage_mutation_interval_count": solver_stage_mutation_count,
+                "held_command_eligible_interval_count": len(intervals) - solver_stage_mutation_count,
+                "control_evaluation_count": len(evaluations),
+                "solver_stage_evaluation_count": sum(item.phase == "solver_stage" for item in evaluations),
+                "committed_truth_evaluation_count": sum(item.phase == "committed_truth" for item in evaluations),
+                "declared_native_control_names": sorted(vehicle.control_values),
+                "committed_resolver_control_names": sorted(vehicle.committed_control_names),
+            }
+            if detail in {"intervals", "full"}:
+                summary["control_interval_records"] = [item.as_dict() for item in intervals]
+            if detail == "full":
+                summary["control_evaluation_records"] = [item.as_dict() for item in evaluations]
+            vehicles[vehicle_id] = summary
+        cases.append({"case_index": case.index, "vehicles": vehicles})
+    payload = {
+        "schema": "taoryx.runtime-control-provenance/v1alpha1",
+        "detail": detail,
+        "cases": cases,
+        "claim_boundary": (
+            "This artifact preserves native runtime control-evaluation and accepted-interval provenance. "
+            "It is not a semantic_action_trace and does not establish that a command was resolved at an "
+            "accepted truth boundary and held unchanged throughout its interval."
+        ),
+    }
+    destination.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 ####
 
 

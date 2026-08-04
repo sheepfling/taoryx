@@ -21,6 +21,10 @@ from typing import Any, cast
 
 import yaml
 
+from .composition_control_trace import BatchControlSample, build_committed_control_trace, control_trace_summary
+from .composition_evaluation import build_composition_trajectory_evaluation
+from .composition_graph_evidence import unobserved_mission_graph_execution
+from .composition_resource_ledger import build_committed_resource_ledger
 from .composition_sensor_trace import BatchTruthSample, build_declared_sensor_trace
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .language.grammar_contracts import GrammarProfile
@@ -28,7 +32,8 @@ from .language_backed_racetrack import materialize_powered_fixed_wing_compositio
 from .mission_objectives import TruthObjectiveSpec, evaluate_truth_objectives
 from .racetrack_template import load_racetrack_template_catalog
 from .runtime.runner import RunReport, run_files
-from .vehicle_composition import CompiledVehicleComposition
+from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
+from .vehicle_execution_bindings import resolve_vehicle_execution_binding
 from .vehicle_execution_preflight import VehicleExecutionPreflight, preflight_vehicle_composition
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -47,8 +52,11 @@ class LanguageBackedCompositionExecution:
     numerical_valid: bool
     envelope: dict[str, object]
     truth_evaluation: dict[str, object]
+    mission_graph_execution: dict[str, object]
     sensor_trace: dict[str, object] | None
     status_trace: dict[str, object]
+    control_provenance: dict[str, object]
+    semantic_action_trace: dict[str, object] | None
 
     @property
     def mission_pass(self) -> bool:
@@ -91,8 +99,11 @@ class LanguageBackedCompositionExecution:
             "numerical_valid": self.numerical_valid,
             "envelope": self.envelope,
             "truth_evaluation": self.truth_evaluation,
+            "mission_graph_execution": self.mission_graph_execution,
             "sensor_trace": _sensor_trace_summary(self.sensor_trace),
             "status_trace": status_trace_summary(self.status_trace),
+            "control_provenance": self.control_provenance,
+            "semantic_action_trace": None if self.semantic_action_trace is None else control_trace_summary(self.semantic_action_trace),
             "mission_pass": self.mission_pass,
             "claim_boundary": (
                 "This is one composed, language-backed nominal mission execution. It does not promote a family "
@@ -101,6 +112,7 @@ class LanguageBackedCompositionExecution:
             ),
         }
         ####
+
     ####
 
 
@@ -133,6 +145,11 @@ def execute_powered_fixed_wing_composition(
             max_steps=int(mission["max_steps"]) if max_steps is None else max_steps,
             integrator=str(mission.get("integrator", "rk4")),
             profile=GrammarProfile.TAORYX,
+            control_provenance="intervals",
+        )
+        control_provenance = _load_control_provenance(destination / "runtime" / "control_provenance.json")
+        semantic_action_trace = (
+            _language_backed_semantic_action_trace(composition, control_provenance) if _emits_language_backed_semantic_action_trace(composition) else None
         )
 
         states = tuple(next(iter(runtime.results[0].states.values()), ())) if runtime.results else ()
@@ -148,6 +165,12 @@ def execute_powered_fixed_wing_composition(
         )
         sensor_trace = build_declared_sensor_trace(composition, _fixed_wing_sensor_samples(rows))
         status_trace = build_committed_status_trace(composition, _fixed_wing_sensor_samples(rows))
+        resource_ledger = build_committed_resource_ledger(composition, status_trace)
+        mission_graph_execution = unobserved_mission_graph_execution(
+            composition,
+            "The language-backed batch runner emits truth telemetry and independent objectives but no committed "
+            "controller segment-transition dispatches for this composition.",
+        ).as_dict()
 
     _write_csv(destination / "truth_telemetry.csv", rows)
     _write_json(destination / "composition.json", composition.model_dump(mode="json", by_alias=True))
@@ -155,9 +178,14 @@ def execute_powered_fixed_wing_composition(
     _write_json(destination / "proposal.json", materialized.proposal.manifest())
     _write_json(destination / "envelope_report.json", envelope)
     _write_json(destination / "objective_report.json", truth_evaluation)
+    _write_json(destination / "mission_graph_execution.json", mission_graph_execution)
+    _write_json(destination / "control_provenance.json", control_provenance)
+    if semantic_action_trace is not None:
+        _write_json(destination / "semantic_action_trace.json", semantic_action_trace)
     if sensor_trace is not None:
         _write_json(destination / "sensor_observations.json", sensor_trace)
     _write_json(destination / "status_trace.json", status_trace)
+    _write_json(destination / "resource_ledger.json", resource_ledger)
     result = LanguageBackedCompositionExecution(
         composition=composition,
         preflight=preflight,
@@ -168,12 +196,116 @@ def execute_powered_fixed_wing_composition(
         numerical_valid=numerical_valid,
         envelope=envelope,
         truth_evaluation=truth_evaluation,
+        mission_graph_execution=mission_graph_execution,
         sensor_trace=sensor_trace,
         status_trace=status_trace,
+        control_provenance=control_provenance,
+        semantic_action_trace=semantic_action_trace,
     )
     _write_json(destination / "runtime_report.json", result.runtime_summary())
+    _write_json(
+        destination / "evaluation.json",
+        build_composition_trajectory_evaluation(
+            composition,
+            preflight,
+            truth_evaluation,
+            runtime={
+                **result.runtime_summary(),
+                "numerical_valid": numerical_valid,
+                "hard_gates_passed": result.mission_pass,
+                "mission_graph_execution": mission_graph_execution,
+            },
+            envelope=envelope,
+            claim_boundary=str(result.as_dict()["claim_boundary"]),
+            status_trace=status_trace,
+        ).as_dict(),
+    )
     _write_json(destination / "execution.json", result.as_dict())
     return result
+    ####
+
+
+def _load_control_provenance(path: Path) -> dict[str, object]:
+    """Load the runtime-owned control ledger without turning it into an action trace."""
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("runtime control provenance is not a JSON object")
+    if payload.get("schema") != "taoryx.runtime-control-provenance/v1alpha1":
+        raise ValueError("runtime control provenance has an unsupported schema")
+    return cast(dict[str, object], payload)
+    ####
+
+
+def _emits_language_backed_semantic_action_trace(composition: CompiledVehicleComposition) -> bool:
+    """Return the binding-declared action-trace capability for this run.
+
+    The execution-binding registry—not a family-specific conditional in this
+    executor—is the promotion authority. The trace builder still fail-closes
+    if an interval omits a public action or a solver stage changes it.
+    """
+
+    return resolve_vehicle_execution_binding(composition, "batch").batch_action_trace == "emits_committed_interval_trace"
+    ####
+
+
+def _language_backed_semantic_action_trace(
+    composition: CompiledVehicleComposition,
+    provenance: dict[str, object],
+) -> dict[str, object]:
+    """Project held native bridge controls into the exact composition contract.
+
+    The autonomous racetrack reference remains mission guidance, not an
+    invented external action.  This trace contains only the public bridge
+    actions (for example X8 throttle and elevon coordinates) actually held by
+    the native runtime across each accepted integration interval.
+    """
+
+    if provenance.get("detail") not in {"intervals", "full"}:
+        raise ValueError("language-backed semantic action trace requires accepted interval controls")
+    cases = provenance.get("cases")
+    if not isinstance(cases, list) or len(cases) != 1 or not isinstance(cases[0], dict):
+        raise ValueError("language-backed semantic action trace requires exactly one runtime case")
+    vehicles = cases[0].get("vehicles")
+    if not isinstance(vehicles, dict) or len(vehicles) != 1:
+        raise ValueError("language-backed semantic action trace requires exactly one runtime vehicle")
+    vehicle = next(iter(vehicles.values()))
+    if not isinstance(vehicle, dict):
+        raise ValueError("language-backed runtime control provenance has an invalid vehicle record")
+    intervals = vehicle.get("control_interval_records")
+    if not isinstance(intervals, list) or not intervals:
+        raise ValueError("language-backed runtime control provenance has no accepted intervals")
+    contract = resolve_vehicle_composition_interface_contract(composition)
+    action_bindings = {
+        channel.id: channel.binding.get("native_action") for channel in contract.action_channels if channel.availability in {"available", "available_in_batch"}
+    }
+    if any(not isinstance(native, str) or not native for native in action_bindings.values()):
+        raise ValueError("language-backed semantic actions require declared native-control bindings")
+    samples: list[BatchControlSample] = []
+    for index, interval in enumerate(intervals):
+        if not isinstance(interval, dict):
+            raise ValueError(f"language-backed control interval {index} is not an object")
+        if interval.get("solver_stage_control_mutation_detected") is True:
+            raise ValueError("language-backed runtime changed a public bridge control during a solver stage; semantic action tracing is forbidden")
+        controls = interval.get("controls_at_interval_start")
+        if not isinstance(controls, dict):
+            raise ValueError(f"language-backed control interval {index} has no native control mapping")
+        requested: dict[str, object] = {}
+        for action_id, native_name in action_bindings.items():
+            assert isinstance(native_name, str)
+            value = controls.get(native_name)
+            if isinstance(value, bool) or not isinstance(value, int | float):
+                raise ValueError(f"language-backed control interval {index} omits declared bridge action {action_id!r}")
+            requested[action_id] = float(value)
+        samples.append(
+            BatchControlSample(
+                float(interval["interval_start_time_s"]),
+                float(interval["committed_truth_time_s"]),
+                requested,
+                {},
+            )
+        )
+    return build_committed_control_trace(composition, samples)
     ####
 
 
@@ -311,11 +443,7 @@ def _evaluate_envelope(mission: dict[str, Any], rows: tuple[dict[str, object], .
         channel = str(bound["channel"])
         minimum = float(bound["minimum"])
         maximum = float(bound["maximum"])
-        violations = [
-            {"time_s": row.get("time_s"), "value": row.get(channel)}
-            for row in rows
-            if _outside_envelope(row.get(channel), minimum, maximum)
-        ]
+        violations = [{"time_s": row.get("time_s"), "value": row.get(channel)} for row in rows if _outside_envelope(row.get(channel), minimum, maximum)]
         checks.append({"channel": channel, "minimum": minimum, "maximum": maximum, "violations": violations, "pass": not violations})
     return {"schema_version": 1, "checks": checks, "pass": all(bool(check["pass"]) for check in checks)}
     ####

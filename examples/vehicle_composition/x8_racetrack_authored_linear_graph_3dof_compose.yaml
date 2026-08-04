@@ -1,0 +1,67 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: x8-racetrack-authored-linear-graph-3dof-v1
+vehicle: skywalker_x8
+fidelity: point_mass_3dof
+initialization:
+  id: airborne_trim
+  inputs:
+    north_m: {value: 0.0, unit: m}
+    east_m: {value: 0.0, unit: m}
+    altitude_m: {value: 178.0, unit: m}
+    speed_m_s: {value: 17.9, unit: m/s}
+    heading_deg: {value: 90.0, unit: deg}
+mission:
+  id: powered_fixed_wing_racetrack_v1
+segments:
+  - id: trim_hold
+    instance_id: trim-hold
+    inputs:
+      duration_s: {value: 20.0, unit: s}
+  - id: climb_level_gate
+    instance_id: climb-level
+    inputs:
+      target_altitude_m: {value: 188.0, unit: m}
+      climb_rate_m_s: {value: 0.5, unit: m/s}
+      gate_center_ned_m: {value: [0.0, 1000.0, -188.0], unit: m}
+      corridor_m: {value: 100.0, unit: m}
+  - id: fly_by_turn
+    instance_id: left-turn
+    inputs:
+      turn_direction: {value: left}
+      turn_radius_m: {value: 203.8258680187507, unit: m}
+      bank_limit_deg: {value: 10.0, unit: deg}
+      gate_center_ned_m: {value: [407.6517360375014, 1000.0, -188.0], unit: m}
+  - id: descent_level_gate
+    instance_id: descent-level
+    inputs:
+      target_altitude_m: {value: 178.0, unit: m}
+      descent_rate_m_s: {value: 0.3, unit: m/s}
+      gate_center_ned_m: {value: [407.6517360375014, 0.0, -178.0], unit: m}
+  - id: fly_by_turn
+    instance_id: right-turn
+    inputs:
+      turn_direction: {value: right}
+      turn_radius_m: {value: 203.8258680187507, unit: m}
+      bank_limit_deg: {value: 10.0, unit: deg}
+      gate_center_ned_m: {value: [0.0, 0.0, -178.0], unit: m}
+  - id: terminal_state_gate
+    instance_id: terminal-gate
+    inputs:
+      target_ned_m: {value: [0.0, 0.0, -178.0], unit: m}
+      target_altitude_m: {value: 178.0, unit: m}
+      target_speed_m_s: {value: 17.9, unit: m/s}
+      target_heading_deg: {value: 90.0, unit: deg}
+mission_graph:
+  entry_instance_id: trim-hold
+  nodes:
+    - instance_id: trim-hold
+      success_transition: {target_instance_id: climb-level}
+    - instance_id: climb-level
+      success_transition: {target_instance_id: left-turn}
+    - instance_id: left-turn
+      success_transition: {target_instance_id: descent-level}
+    - instance_id: descent-level
+      success_transition: {target_instance_id: right-turn}
+    - instance_id: right-turn
+      success_transition: {target_instance_id: terminal-gate}
+    - instance_id: terminal-gate

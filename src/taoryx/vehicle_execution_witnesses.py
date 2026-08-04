@@ -8,17 +8,25 @@ preflight, and resolves that exact factory without borrowing another family.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import shlex
 import tempfile
 from collections.abc import Mapping
 from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
+from typing import Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .vehicle_composition import CompiledVehicleComposition, compile_vehicle_composition, load_vehicle_composition_request
+from .vehicle_composition_registry import (
+    ResolvedVehicleCompositionCatalog,
+    load_resolved_vehicle_composition_catalog,
+    mission_graph_execution_contract,
+)
 from .vehicle_execution_bindings import (
     ExecutionOperation,
     VehicleExecutionBinding,
@@ -27,6 +35,7 @@ from .vehicle_execution_bindings import (
 )
 from .vehicle_execution_preflight import preflight_vehicle_composition
 from .vehicle_registry import ROOT
+from .vehicle_runtime_lowering import lower_vehicle_composition
 
 VEHICLE_EXECUTION_WITNESSES = ROOT / "verification/vehicle_execution_witnesses.yaml"
 
@@ -41,6 +50,46 @@ class VehicleExecutionWitness(BaseModel):
     operation: ExecutionOperation
 
 
+class VehicleVariantWitness(BaseModel):
+    """One checked-in composition that exercises runtime-bound variants."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    composition: str = Field(min_length=1)
+    variant_ids: tuple[str, ...] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_unique_variant_ids(self) -> VehicleVariantWitness:
+        if len(self.variant_ids) != len(set(self.variant_ids)):
+            raise ValueError(f"variant witness {self.id!r} has duplicate variant IDs")
+        return self
+        ####
+
+
+class VehicleGraphExtensionWitness(BaseModel):
+    """One family-owned non-success graph capability exercised by a public run.
+
+    This is deliberately separate from the one-witness-per-endpoint matrix.
+    It proves a registered endpoint accepts and reports a declared graph
+    extension; it neither duplicates an endpoint witness nor turns recovery
+    behavior into a successful mission qualification claim.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    composition: str = Field(min_length=1)
+    required_transition_kind: Literal["timeout", "abort", "resource_limit", "envelope_limit"]
+    expected_observed_outcome: Literal["success", "abort", "resource_limit", "envelope_limit", "timeout"] = "success"
+
+
+####
+
+
+####
+
+
 class VehicleExecutionWitnessCatalog(BaseModel):
     """Versioned witness mapping for the public execution-binding matrix."""
 
@@ -50,14 +99,26 @@ class VehicleExecutionWitnessCatalog(BaseModel):
     version: int = Field(ge=1)
     description: str = Field(min_length=1)
     witnesses: tuple[VehicleExecutionWitness, ...] = Field(min_length=1)
+    variant_witnesses: tuple[VehicleVariantWitness, ...] = ()
+    graph_extension_witnesses: tuple[VehicleGraphExtensionWitness, ...] = ()
 
     @model_validator(mode="after")
     def validate_unique_ids(self) -> VehicleExecutionWitnessCatalog:
         ids = tuple(item.id for item in self.witnesses)
         if len(ids) != len(set(ids)):
             raise ValueError("execution witness catalog has duplicate IDs")
+        variant_ids = tuple(item.id for item in self.variant_witnesses)
+        if len(variant_ids) != len(set(variant_ids)):
+            raise ValueError("execution witness catalog has duplicate variant-witness IDs")
+        graph_extension_ids = tuple(item.id for item in self.graph_extension_witnesses)
+        if len(graph_extension_ids) != len(set(graph_extension_ids)):
+            raise ValueError("execution witness catalog has duplicate graph-extension witness IDs")
+        all_ids = (*ids, *variant_ids, *graph_extension_ids)
+        if len(all_ids) != len(set(all_ids)):
+            raise ValueError("execution witness catalog reuses an ID across witness categories")
         return self
         ####
+
     ####
 
 
@@ -92,10 +153,9 @@ def validate_vehicle_execution_witnesses(
 
     witness_catalog = catalog or load_vehicle_execution_witness_catalog()
     binding_catalog = load_vehicle_execution_binding_catalog()
+    composition_catalog = load_resolved_vehicle_composition_catalog()
     runnable = tuple(item for item in binding_catalog.bindings if item.status == "runnable")
-    binding_by_key: dict[tuple[str, str, str, ExecutionOperation], VehicleExecutionBinding] = {
-        _binding_key(item): item for item in runnable
-    }
+    binding_by_key: dict[tuple[str, str, str, ExecutionOperation], VehicleExecutionBinding] = {_binding_key(item): item for item in runnable}
     witness_keys: dict[tuple[str, str, str, ExecutionOperation], str] = {}
     records: list[dict[str, object]] = []
     errors: list[str] = []
@@ -106,7 +166,10 @@ def validate_vehicle_execution_witnesses(
             errors.append(f"{witness.id}: composition request is missing: {witness.composition}")
             continue
         try:
-            composition = compile_vehicle_composition(load_vehicle_composition_request(source))
+            composition = compile_vehicle_composition(
+                load_vehicle_composition_request(source),
+                catalog=composition_catalog,
+            )
         except (TypeError, ValueError) as error:
             errors.append(f"{witness.id}: composition does not compile: {error}")
             continue
@@ -127,14 +190,32 @@ def validate_vehicle_execution_witnesses(
         preflight = preflight_vehicle_composition(composition)
         if preflight.status != "translation_ready":
             errors.append(f"{witness.id}: expected translation_ready preflight, got {preflight.status}")
+        capability_preflight = _validate_concrete_capability_preflight(
+            preflight,
+            composition,
+            context=witness.id,
+            errors=errors,
+        )
+        lowering = lower_vehicle_composition(composition, preflight_result=preflight)
+        if lowering.status not in {"adapter_bound", "factory_bound"}:
+            errors.append(f"{witness.id}: expected a runtime binding after preflight, got {lowering.status}")
         episode_opened = False
+        episode_contract: dict[str, object] | None = None
         batch_execution: dict[str, object] | None = None
         if witness.operation == "episode":
             try:
-                from .composition_episode import open_vehicle_composition_episode
+                from .composition_episode import (
+                    open_vehicle_composition_episode,
+                    validate_vehicle_composition_episode_contract,
+                )
 
                 episode = open_vehicle_composition_episode(composition)
-                episode.observe_frame()
+                episode_contract = validate_vehicle_composition_episode_contract(episode)
+                if episode_contract["status"] != "pass":
+                    raw_findings = episode_contract.get("findings", [])
+                    findings = raw_findings if isinstance(raw_findings, list | tuple) else [raw_findings]
+                    detail = "; ".join(str(item) for item in findings)
+                    errors.append(f"{witness.id}: episode semantic-contract validation failed: {detail}")
                 episode.close()
                 episode_opened = True
             except (TypeError, ValueError) as error:
@@ -143,7 +224,7 @@ def validate_vehicle_execution_witnesses(
             batch_execution = _execute_batch_witness(
                 witness.id,
                 composition,
-                factory_id=resolved.factory_id,
+                binding=resolved,
             )
             if batch_execution["status"] != "pass":
                 errors.append(f"{witness.id}: public batch execution failed: {batch_execution['detail']}")
@@ -156,8 +237,13 @@ def validate_vehicle_execution_witnesses(
                 "fidelity": composition.fidelity,
                 "operation": witness.operation,
                 "factory_id": resolved.factory_id,
+                "batch_action_trace_disposition": resolved.batch_action_trace,
                 "preflight_status": preflight.status,
+                "capability_preflight": capability_preflight,
+                "lowering_status": lowering.status,
+                "lowering_execution_binding": lowering.execution_binding,
                 "episode_opened": episode_opened if witness.operation == "episode" else None,
+                "episode_contract": episode_contract,
                 "batch_execution": batch_execution,
             }
         )
@@ -168,25 +254,379 @@ def validate_vehicle_execution_witnesses(
     for witness_key in sorted(witness_keys):
         if witness_key not in binding_by_key:
             errors.append(f"composition witness targets an unavailable endpoint: {_format_key(witness_key)}")
+    variant_report = validate_vehicle_variant_witnesses(
+        witness_catalog,
+        composition_catalog=composition_catalog,
+        execute_batch=execute_batch,
+    )
+    variant_errors = variant_report["errors"]
+    variant_records = variant_report["records"]
+    if not isinstance(variant_errors, list) or not all(isinstance(item, str) for item in variant_errors):
+        raise ValueError("variant witness report has invalid errors")
+    if not isinstance(variant_records, list):
+        raise ValueError("variant witness report has invalid records")
+    errors.extend(variant_errors)
+    graph_extension_report = validate_vehicle_graph_extension_witnesses(
+        witness_catalog,
+        composition_catalog=composition_catalog,
+        execute_batch=execute_batch,
+    )
+    graph_extension_errors = graph_extension_report["errors"]
+    graph_extension_records = graph_extension_report["records"]
+    if not isinstance(graph_extension_errors, list) or not all(isinstance(item, str) for item in graph_extension_errors):
+        raise ValueError("graph-extension witness report has invalid errors")
+    if not isinstance(graph_extension_records, list):
+        raise ValueError("graph-extension witness report has invalid records")
+    errors.extend(graph_extension_errors)
     return {
         "schema": "taoryx.vehicle-execution-witness-report/v1alpha1",
         "status": "pass" if not errors else "fail",
         "runnable_binding_count": len(runnable),
         "witness_count": len(witness_catalog.witnesses),
+        "runnable_variant_count": variant_report["runnable_variant_count"],
+        "variant_witness_count": len(witness_catalog.variant_witnesses),
+        "graph_extension_witness_count": len(witness_catalog.graph_extension_witnesses),
         "batch_execution_smoke": execute_batch,
         "records": records,
+        "variant_records": variant_records,
+        "graph_extension_records": graph_extension_records,
         "errors": errors,
         "claim_boundary": (
-            "This verifies exact composition-to-endpoint discoverability and interactive endpoint construction. "
-            "When batch_execution_smoke is enabled, it also exercises the public batch artifact seam. "
+            "This verifies exact composition-to-endpoint discoverability, runtime-bound variant witnesses, declared family graph-extension witnesses, semantic preflight, runtime lowering, and interactive endpoint construction. "
+            "When batch_execution_smoke is enabled, it also verifies that each batch artifact matches its declared action-trace disposition and can form a hash-bound release packet with a verified reproduction identity. "
             "Neither mode establishes numerical parity or promotes qualification evidence."
         ),
     }
     ####
 
 
+def validate_vehicle_variant_witnesses(
+    catalog: VehicleExecutionWitnessCatalog | None = None,
+    *,
+    composition_catalog: ResolvedVehicleCompositionCatalog | None = None,
+    execute_batch: bool = False,
+) -> dict[str, object]:
+    """Validate every runnable variant has one exact composed witness.
+
+    The default proves composition, semantic preflight, and declared runtime
+    handoff for a bounded modifier. With ``execute_batch`` it also runs the
+    exact public batch endpoint and requires the generated packet's runtime
+    evidence and normalized result-catalog record to validate. Neither mode
+    establishes retrim validity or qualification.
+    """
+
+    witness_catalog = catalog or load_vehicle_execution_witness_catalog()
+    resolved_catalog = composition_catalog or load_resolved_vehicle_composition_catalog()
+    runnable_variants = {
+        (vehicle.family.family_id, variant.id)
+        for vehicle in resolved_catalog.vehicles
+        for variant in vehicle.declaration.variant_parameters
+        if variant.status == "runnable"
+    }
+    witnessed_variants: dict[tuple[str, str], str] = {}
+    records: list[dict[str, object]] = []
+    errors: list[str] = []
+    for witness in witness_catalog.variant_witnesses:
+        source = ROOT / witness.composition
+        if not source.is_file():
+            errors.append(f"{witness.id}: variant composition request is missing: {witness.composition}")
+            continue
+        try:
+            composition = compile_vehicle_composition(
+                load_vehicle_composition_request(source),
+                catalog=resolved_catalog,
+            )
+        except (TypeError, ValueError) as error:
+            errors.append(f"{witness.id}: variant composition does not compile: {error}")
+            continue
+        declared = tuple(sorted(witness.variant_ids))
+        actual = tuple(sorted(composition.variant.inputs))
+        if actual != declared:
+            errors.append(f"{witness.id}: declared variant IDs {declared!r} do not match composition inputs {actual!r}")
+        for identifier in actual:
+            variant_key = (composition.family_id, identifier)
+            if variant_key in witnessed_variants:
+                errors.append(f"{witness.id}: duplicates variant witness {witnessed_variants[variant_key]!r} for {variant_key!r}")
+            witnessed_variants[variant_key] = witness.id
+            if variant_key not in runnable_variants:
+                errors.append(f"{witness.id}: composition selects an undeclared runnable variant {variant_key!r}")
+        preflight = preflight_vehicle_composition(composition)
+        capability_preflight = _validate_concrete_capability_preflight(
+            preflight,
+            composition,
+            context=witness.id,
+            errors=errors,
+        )
+        lowering = lower_vehicle_composition(composition, preflight_result=preflight)
+        if preflight.status != "translation_ready":
+            errors.append(f"{witness.id}: variant composition expected translation_ready preflight, got {preflight.status}")
+        if lowering.status not in {"adapter_bound", "factory_bound"}:
+            errors.append(f"{witness.id}: variant composition expected a runtime binding, got {lowering.status}")
+        batch_binding: VehicleExecutionBinding | None = None
+        try:
+            batch_binding = resolve_vehicle_execution_binding(composition, "batch")
+        except ValueError as error:
+            errors.append(f"{witness.id}: runnable variant has no public batch endpoint: {error}")
+        batch_execution: dict[str, object] | None = None
+        if execute_batch and batch_binding is not None:
+            try:
+                batch_execution = _execute_batch_witness(witness.id, composition, binding=batch_binding)
+                if batch_execution["status"] != "pass":
+                    errors.append(f"{witness.id}: variant batch execution failed: {batch_execution['detail']}")
+            except ValueError as error:
+                errors.append(f"{witness.id}: variant batch execution is invalid: {error}")
+        records.append(
+            {
+                "id": witness.id,
+                "composition": witness.composition,
+                "family_id": composition.family_id,
+                "variant_ids": list(actual),
+                "runtime_bindings": {identifier: binding.model_dump(mode="json") for identifier, binding in composition.variant.runtime_bindings.items()},
+                "invalidations": list(composition.variant.invalidations),
+                "preflight_status": preflight.status,
+                "capability_preflight": capability_preflight,
+                "lowering_status": lowering.status,
+                "batch_factory_id": None if batch_binding is None else batch_binding.factory_id,
+                "batch_execution": batch_execution,
+            }
+        )
+    for variant_key in sorted(runnable_variants):
+        if variant_key not in witnessed_variants:
+            errors.append(f"runnable variant has no composition witness: {variant_key[0]}/{variant_key[1]}")
+    return {
+        "schema": "taoryx.vehicle-variant-witness-report/v1alpha1",
+        "status": "pass" if not errors else "fail",
+        "runnable_variant_count": len(runnable_variants),
+        "variant_witness_count": len(witness_catalog.variant_witnesses),
+        "batch_execution_smoke": execute_batch,
+        "records": records,
+        "errors": errors,
+        "claim_boundary": (
+            "This verifies the composed semantic handoff for every advertised runtime-bound variant. "
+            "When batch_execution_smoke is enabled, it also verifies declared native-input consumption/status "
+            "evidence and release-packet/reproduction conformance through the selected public batch endpoint. Neither mode establishes retrim validity or qualification."
+        ),
+    }
+    ####
+
+
+def validate_vehicle_graph_extension_witnesses(
+    catalog: VehicleExecutionWitnessCatalog | None = None,
+    *,
+    composition_catalog: ResolvedVehicleCompositionCatalog | None = None,
+    execute_batch: bool = False,
+) -> dict[str, object]:
+    """Validate declared non-success graph extensions without generic branches.
+
+    A graph-extension witness is not another endpoint witness. It proves that
+    one family-owned composed graph exposes a declared alternate transition,
+    preflights and lowers through that same family translator, and—when batch
+    smoke is requested—emits observed graph evidence from the public runner.
+    The nominal public run may still follow success edges; the required
+    alternate transition remains a declared recovery capability, not a hidden
+    timeout-as-success assertion.
+    """
+
+    witness_catalog = catalog or load_vehicle_execution_witness_catalog()
+    resolved_catalog = composition_catalog or load_resolved_vehicle_composition_catalog()
+    records: list[dict[str, object]] = []
+    errors: list[str] = []
+    for witness in witness_catalog.graph_extension_witnesses:
+        source = ROOT / witness.composition
+        if not source.is_file():
+            errors.append(f"{witness.id}: graph-extension composition request is missing: {witness.composition}")
+            continue
+        try:
+            composition = compile_vehicle_composition(
+                load_vehicle_composition_request(source),
+                catalog=resolved_catalog,
+            )
+        except (TypeError, ValueError) as error:
+            errors.append(f"{witness.id}: graph-extension composition does not compile: {error}")
+            continue
+        graph = composition.mission_graph
+        if graph is None:
+            errors.append(f"{witness.id}: graph-extension composition has no compiled mission graph")
+            continue
+        graph_contract = mission_graph_execution_contract(
+            composition.family_id,
+            composition.mission,
+            composition.fidelity,
+        )
+        if graph_contract.get("status") != "family_extension_declared":
+            errors.append(f"{witness.id}: selected family/mission/fidelity has no declared graph execution extension")
+        transition_kinds = graph_contract.get("supported_transition_kinds")
+        if not isinstance(transition_kinds, list) or witness.required_transition_kind not in transition_kinds:
+            errors.append(
+                f"{witness.id}: graph extension does not declare required {witness.required_transition_kind!r} transition support"
+            )
+        if graph.status in {"linear_sequence_only", "authored_linear_sequence_lowered"}:
+            errors.append(f"{witness.id}: graph-extension witness is only a linear success sequence")
+        if not any(
+            _graph_transition_for_kind(node, witness.required_transition_kind) is not None
+            for node in graph.nodes
+        ):
+            errors.append(
+                f"{witness.id}: compiled graph has no declared {witness.required_transition_kind!r} transition"
+            )
+        preflight = preflight_vehicle_composition(composition)
+        capability_preflight = _validate_concrete_capability_preflight(
+            preflight,
+            composition,
+            context=witness.id,
+            errors=errors,
+        )
+        lowering = lower_vehicle_composition(composition, preflight_result=preflight)
+        if preflight.status != "translation_ready":
+            errors.append(f"{witness.id}: graph-extension composition expected translation_ready preflight, got {preflight.status}")
+        if lowering.status not in {"adapter_bound", "factory_bound"}:
+            errors.append(f"{witness.id}: graph-extension composition expected a runtime binding, got {lowering.status}")
+        batch_binding: VehicleExecutionBinding | None = None
+        try:
+            batch_binding = resolve_vehicle_execution_binding(composition, "batch")
+        except ValueError as error:
+            errors.append(f"{witness.id}: graph-extension composition has no public batch endpoint: {error}")
+        batch_execution: dict[str, object] | None = None
+        if execute_batch and batch_binding is not None:
+            batch_execution = _execute_batch_witness(witness.id, composition, binding=batch_binding)
+            if batch_execution.get("status") != "pass":
+                errors.append(f"{witness.id}: graph-extension batch execution failed: {batch_execution.get('detail')}")
+            graph_execution = batch_execution.get("graph_execution")
+            if not isinstance(graph_execution, Mapping):
+                errors.append(f"{witness.id}: graph-extension batch execution did not retain graph evidence")
+            else:
+                if graph_execution.get("observation_status") != "observed":
+                    errors.append(f"{witness.id}: graph-extension batch execution did not observe graph dispatches")
+                outcomes = graph_execution.get("outcomes")
+                if not isinstance(outcomes, list) or witness.expected_observed_outcome not in outcomes:
+                    errors.append(
+                        f"{witness.id}: observed graph outcomes do not include {witness.expected_observed_outcome!r}"
+                    )
+        records.append(
+            {
+                "id": witness.id,
+                "composition": witness.composition,
+                "family_id": composition.family_id,
+                "mission": composition.mission,
+                "fidelity": composition.fidelity,
+                "graph_status": graph.status,
+                "required_transition_kind": witness.required_transition_kind,
+                "supported_transition_kinds": transition_kinds,
+                "preflight_status": preflight.status,
+                "capability_preflight": capability_preflight,
+                "lowering_status": lowering.status,
+                "batch_factory_id": None if batch_binding is None else batch_binding.factory_id,
+                "batch_execution": batch_execution,
+            }
+        )
+    return {
+        "schema": "taoryx.vehicle-graph-extension-witness-report/v1alpha1",
+        "status": "pass" if not errors else "fail",
+        "graph_extension_witness_count": len(witness_catalog.graph_extension_witnesses),
+        "batch_execution_smoke": execute_batch,
+        "records": records,
+        "errors": errors,
+        "claim_boundary": (
+            "This verifies declared family-owned alternate graph-transition support and observed graph evidence. "
+            "It does not turn a recovery edge into mission success or promote the family to qualification."
+        ),
+    }
+    ####
+
+
+def _validate_concrete_capability_preflight(
+    preflight: object,
+    composition: CompiledVehicleComposition,
+    *,
+    context: str,
+    errors: list[str],
+) -> dict[str, object] | None:
+    """Validate the family-owned feasibility evidence behind endpoint readiness.
+
+    ``translation_ready`` is not accepted as a bare boolean for an advertised
+    runtime endpoint.  The witness must retain the exact capability adapter,
+    feasibility label, selection identity, and fingerprint of the derived
+    mission that the selected semantic translator consumed.
+    """
+
+    status = getattr(preflight, "status", None)
+    if status != "translation_ready":
+        return None
+    capability = getattr(preflight, "capability_estimate", None)
+    derived_mission = getattr(preflight, "derived_mission", None)
+    translator_id = getattr(preflight, "translator_id", None)
+    if not isinstance(capability, Mapping):
+        errors.append(f"{context}: translation-ready preflight omitted concrete capability evidence")
+        return None
+    if not isinstance(derived_mission, Mapping):
+        errors.append(f"{context}: translation-ready preflight omitted its derived mission")
+        return None
+    expected = {
+        "schema": "taoryx.concrete-capability-preflight/v1alpha1",
+        "composition_id": composition.id,
+        "composition_identity_sha256": composition.identity_sha256,
+        "family_id": composition.family_id,
+        "mission_id": composition.mission,
+        "fidelity": composition.fidelity,
+        "semantic_translator_id": translator_id,
+    }
+    for key, value in expected.items():
+        if capability.get(key) != value:
+            errors.append(
+                f"{context}: concrete capability preflight {key!r} is {capability.get(key)!r}, expected {value!r}"
+            )
+    feasibility = capability.get("feasibility")
+    if not isinstance(capability.get("adapter_id"), str) or not str(capability["adapter_id"]).strip():
+        errors.append(f"{context}: concrete capability preflight has no capability adapter ID")
+    if feasibility not in {
+        "feasible",
+        "likely_feasible",
+        "unknown",
+        "likely_infeasible",
+        "certainly_infeasible",
+    }:
+        errors.append(f"{context}: concrete capability preflight has invalid feasibility {feasibility!r}")
+    try:
+        encoded = json.dumps(
+            derived_mission,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        ).encode("utf-8")
+    except (TypeError, ValueError) as error:
+        errors.append(f"{context}: derived mission is not fingerprintable: {error}")
+    else:
+        observed = capability.get("derived_mission_sha256")
+        expected_sha256 = hashlib.sha256(encoded).hexdigest()
+        if observed != expected_sha256:
+            errors.append(
+                f"{context}: concrete capability preflight has mismatched derived-mission fingerprint "
+                f"{observed!r}, expected {expected_sha256!r}"
+            )
+    return {
+        "adapter_id": capability.get("adapter_id"),
+        "feasibility": feasibility,
+        "derived_mission_sha256": capability.get("derived_mission_sha256"),
+    }
+    ####
+
+
 def _binding_key(binding: VehicleExecutionBinding) -> tuple[str, str, str, ExecutionOperation]:
     return (binding.family_id, binding.mission, binding.fidelity, binding.operation)
+    ####
+
+
+def _graph_transition_for_kind(node: object, kind: str) -> object | None:
+    """Return only the explicitly declared edge for one graph outcome."""
+
+    field_by_kind = {
+        "timeout": "timeout_transition",
+        "abort": "abort_transition",
+        "resource_limit": "resource_limit_transition",
+        "envelope_limit": "envelope_limit_transition",
+    }
+    field = field_by_kind.get(kind)
+    return None if field is None else getattr(node, field, None)
     ####
 
 
@@ -200,7 +640,7 @@ def _execute_batch_witness(
     witness_id: str,
     composition: CompiledVehicleComposition,
     *,
-    factory_id: str | None,
+    binding: VehicleExecutionBinding,
 ) -> dict[str, object]:
     """Run one exact batch witness through the public CLI without log leakage.
 
@@ -220,7 +660,7 @@ def _execute_batch_witness(
         composition.write_json(composition_path)
         stdout = StringIO()
         arguments = ["vehicle", "run", str(composition_path), "--output-dir", str(output_dir)]
-        bounded_translation_smoke = factory_id == "language_backed_powered_fixed_wing.v1"
+        bounded_translation_smoke = binding.factory_id == "language_backed_powered_fixed_wing.v1"
         if bounded_translation_smoke:
             arguments.extend(("--max-steps", "8"))
         with redirect_stdout(stdout):
@@ -228,10 +668,11 @@ def _execute_batch_witness(
         execution_path = output_dir / "execution.json"
         interface_path = output_dir / "vehicle_interface.json"
         status_trace_path = output_dir / "status_trace.json"
-        if not execution_path.is_file() or not interface_path.is_file() or not status_trace_path.is_file():
+        resource_ledger_path = output_dir / "resource_ledger.json"
+        if not execution_path.is_file() or not interface_path.is_file() or not status_trace_path.is_file() or not resource_ledger_path.is_file():
             return {
                 "status": "fail",
-                "detail": "vehicle run omitted execution, interface, or committed status-trace artifact",
+                "detail": "vehicle run omitted execution, interface, committed status-trace, or resource-ledger artifact",
             }
         try:
             from .composition_status_trace import validate_committed_status_trace
@@ -242,6 +683,32 @@ def _execute_batch_witness(
             validate_committed_status_trace(composition, trace_payload)
         except (OSError, ValueError, json.JSONDecodeError) as error:
             return {"status": "fail", "detail": f"invalid committed status trace: {error}"}
+        resource_ledger_evidence = _validate_batch_resource_ledger_artifact(composition, output_dir)
+        if resource_ledger_evidence["status"] != "pass":
+            return {"status": "fail", "detail": str(resource_ledger_evidence["detail"])}
+        action_trace_evidence = _validate_batch_action_trace_artifact(
+            composition,
+            output_dir,
+            binding.batch_action_trace,
+        )
+        if action_trace_evidence["status"] != "pass":
+            return {"status": "fail", "detail": str(action_trace_evidence["detail"])}
+        result_catalog_evidence = _validate_batch_result_catalog(output_dir, binding)
+        if result_catalog_evidence["status"] != "pass":
+            return {"status": "fail", "detail": str(result_catalog_evidence["detail"])}
+        graph_execution_evidence = _graph_execution_summary(output_dir)
+        if graph_execution_evidence["status"] != "pass":
+            return {"status": "fail", "detail": str(graph_execution_evidence["detail"])}
+        reproduction_evidence = _validate_batch_reproduction_artifact(
+            composition,
+            output_dir,
+            binding=binding,
+        )
+        if reproduction_evidence["status"] != "pass":
+            return {"status": "fail", "detail": str(reproduction_evidence["detail"])}
+        release_packet_evidence = _validate_batch_release_packet(output_dir)
+        if release_packet_evidence["status"] != "pass":
+            return {"status": "fail", "detail": str(release_packet_evidence["detail"])}
         if exit_code != 0 and not bounded_translation_smoke:
             return {"status": "fail", "detail": f"vehicle run returned {exit_code}"}
         if exit_code not in {0, 1}:
@@ -256,6 +723,28 @@ def _execute_batch_witness(
                 "mode": "bounded_translation_smoke",
                 "max_steps": 8,
                 "mission_pass": bool(payload.get("mission_pass")),
+                "action_trace": action_trace_evidence,
+                "resource_ledger": resource_ledger_evidence,
+                "result_catalog": result_catalog_evidence,
+                "graph_execution": graph_execution_evidence,
+                "reproduction": reproduction_evidence,
+                "release_packet": release_packet_evidence,
+            }
+        if binding.factory_id == "local_direct_wrench_screen.v1":
+            control_screen = payload.get("control_screen")
+            if not isinstance(control_screen, Mapping) or control_screen.get("screen_pass") is not True:
+                return {"status": "fail", "detail": "local controller screen did not pass its declared screen contract"}
+            return {
+                "status": "pass",
+                "detail": "local controller screen completed and emitted execution/interface/status artifacts",
+                "mode": "local_controller_screen",
+                "screen_pass": True,
+                "action_trace": action_trace_evidence,
+                "resource_ledger": resource_ledger_evidence,
+                "result_catalog": result_catalog_evidence,
+                "graph_execution": graph_execution_evidence,
+                "reproduction": reproduction_evidence,
+                "release_packet": release_packet_evidence,
             }
         if not bool(payload.get("mission_pass")):
             return {"status": "fail", "detail": "nominal batch execution did not pass its mission contract"}
@@ -264,7 +753,258 @@ def _execute_batch_witness(
             "detail": "public vehicle run completed and emitted execution/interface/status artifacts",
             "mode": "complete_nominal_mission",
             "mission_pass": True,
+            "action_trace": action_trace_evidence,
+            "resource_ledger": resource_ledger_evidence,
+            "result_catalog": result_catalog_evidence,
+            "graph_execution": graph_execution_evidence,
+            "reproduction": reproduction_evidence,
+            "release_packet": release_packet_evidence,
         }
+    ####
+
+
+def _graph_execution_summary(output_dir: Path) -> dict[str, object]:
+    """Project already-validated graph evidence for a public witness report."""
+
+    path = output_dir / "mission_graph_execution.json"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError("mission graph execution artifact is not a JSON object")
+        observation_status = payload.get("observation_status")
+        graph_status = payload.get("graph_status")
+        dispatches = payload.get("dispatches")
+        if observation_status not in {"observed", "unobserved"}:
+            raise ValueError("mission graph execution artifact has invalid observation status")
+        if not isinstance(graph_status, str) or not graph_status:
+            raise ValueError("mission graph execution artifact has invalid graph status")
+        if not isinstance(dispatches, list):
+            raise ValueError("mission graph execution artifact has invalid dispatches")
+        outcomes: list[str] = []
+        for index, dispatch in enumerate(dispatches):
+            if not isinstance(dispatch, Mapping) or not isinstance(dispatch.get("outcome"), str):
+                raise ValueError(f"mission graph execution dispatch {index} has invalid outcome")
+            outcomes.append(str(dispatch["outcome"]))
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        return {"status": "fail", "detail": f"invalid mission graph execution artifact: {error}"}
+    return {
+        "status": "pass",
+        "artifact": "mission_graph_execution.json",
+        "observation_status": observation_status,
+        "graph_status": graph_status,
+        "dispatch_count": len(dispatches),
+        "outcomes": outcomes,
+    }
+    ####
+
+
+def _validate_batch_reproduction_artifact(
+    composition: CompiledVehicleComposition,
+    output_dir: Path,
+    *,
+    binding: VehicleExecutionBinding,
+) -> dict[str, object]:
+    """Require a fingerprint-bound command that can recreate a batch packet."""
+
+    path = output_dir / "reproduction.txt"
+    if not path.is_file():
+        return {"status": "fail", "detail": "vehicle run omitted reproduction.txt"}
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as error:
+        return {"status": "fail", "detail": f"could not read reproduction.txt: {error}"}
+    metadata = {
+        "composition_id": composition.id,
+        "composition_identity_sha256": composition.identity_sha256,
+        "execution_factory_id": binding.factory_id,
+        "execution_mode": binding.execution_mode,
+    }
+    for key, expected in metadata.items():
+        needle = f"# {key}: {expected}"
+        if needle not in lines:
+            return {"status": "fail", "detail": f"reproduction.txt is missing {needle!r}"}
+    commands = [line for line in lines if line and not line.startswith("#")]
+    if len(commands) != 1:
+        return {"status": "fail", "detail": "reproduction.txt must contain exactly one command"}
+    try:
+        command = shlex.split(commands[0])
+    except ValueError as error:
+        return {"status": "fail", "detail": f"reproduction.txt command is invalid: {error}"}
+    if command[:3] != ["taoryx", "vehicle", "run"] or "--output-dir" not in command:
+        return {
+            "status": "fail",
+            "detail": "reproduction.txt does not contain a public 'taoryx vehicle run ... --output-dir ...' command",
+        }
+    return {"status": "pass", "artifact": "reproduction.txt", "command": commands[0]}
+    ####
+
+
+def _validate_batch_release_packet(output_dir: Path) -> dict[str, object]:
+    """Require every generated batch packet to be release-catalog ready.
+
+    A one-packet release catalog is a packaging-contract check only. It proves
+    that raw public-run artifacts have coherent identity and release sidecars;
+    it neither evaluates numerical robustness nor promotes mission evidence.
+    """
+
+    from .composition_result_catalog import build_composition_release_catalog, validate_composition_release_catalog
+
+    try:
+        catalog = build_composition_release_catalog(output_dir.parent)
+        errors = validate_composition_release_catalog(output_dir.parent, catalog)
+        if errors:
+            raise ValueError("; ".join(errors))
+        if catalog.get("result_packet_count") != 1:
+            raise ValueError("generated witness root must contain exactly one release packet")
+        packets = catalog.get("packets")
+        if not isinstance(packets, list) or len(packets) != 1 or not isinstance(packets[0], Mapping):
+            raise ValueError("release catalog has no single packet record")
+        identity = packets[0].get("execution_identity")
+        if not isinstance(identity, Mapping):
+            raise ValueError("release packet has no execution identity")
+        reproduction = identity.get("reproduction")
+        if not isinstance(reproduction, Mapping) or reproduction.get("status") != "verified":
+            raise ValueError("release packet has no verified reproduction identity")
+    except ValueError as error:
+        return {"status": "fail", "detail": f"batch packet is not release-catalog ready: {error}"}
+    return {
+        "status": "pass",
+        "schema": catalog["schema"],
+        "result_packet_count": 1,
+        "reproduction_identity": "verified",
+        "claim_boundary": "Release packet conformance only; it is not a qualification result.",
+    }
+    ####
+
+
+def _validate_batch_action_trace_artifact(
+    composition: CompiledVehicleComposition,
+    output_dir: Path,
+    disposition: str,
+) -> dict[str, object]:
+    """Verify that a batch witness matches its declared action-evidence tier."""
+
+    path = output_dir / "semantic_action_trace.json"
+    if disposition == "emits_committed_interval_trace":
+        if not path.is_file():
+            return {
+                "status": "fail",
+                "detail": "binding declares committed action trace but vehicle run omitted semantic_action_trace.json",
+            }
+        try:
+            from .composition_control_trace import validate_committed_control_trace_against_status
+
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            status_path = output_dir / "status_trace.json"
+            status_payload = json.loads(status_path.read_text(encoding="utf-8"))
+            if not isinstance(payload, Mapping) or not isinstance(status_payload, Mapping):
+                return {"status": "fail", "detail": "semantic action trace or status trace artifact is not a JSON object"}
+            validate_committed_control_trace_against_status(
+                composition,
+                payload,
+                status_trace=status_payload,
+            )
+        except (OSError, ValueError, json.JSONDecodeError) as error:
+            return {"status": "fail", "detail": f"invalid committed action trace: {error}"}
+        return {
+            "status": "pass",
+            "disposition": disposition,
+            "artifact": "semantic_action_trace.json",
+        }
+    if path.exists():
+        return {
+            "status": "fail",
+            "detail": f"binding declares {disposition!r} but vehicle run emitted semantic_action_trace.json",
+        }
+    return {
+        "status": "pass",
+        "disposition": disposition,
+        "artifact": None,
+    }
+    ####
+
+
+def _validate_batch_resource_ledger_artifact(
+    composition: CompiledVehicleComposition,
+    output_dir: Path,
+) -> dict[str, object]:
+    """Require an exact committed resource ledger for every batch endpoint."""
+
+    ledger_path = output_dir / "resource_ledger.json"
+    status_path = output_dir / "status_trace.json"
+    if not ledger_path.is_file():
+        return {"status": "fail", "detail": "vehicle run omitted resource_ledger.json"}
+    try:
+        from .composition_resource_ledger import validate_committed_resource_ledger
+
+        ledger_payload = json.loads(ledger_path.read_text(encoding="utf-8"))
+        status_payload = json.loads(status_path.read_text(encoding="utf-8"))
+        if not isinstance(ledger_payload, Mapping) or not isinstance(status_payload, Mapping):
+            return {"status": "fail", "detail": "resource ledger or status trace artifact is not a JSON object"}
+        validate_committed_resource_ledger(composition, ledger_payload, status_trace=status_payload)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        return {"status": "fail", "detail": f"invalid committed resource ledger: {error}"}
+    summaries = ledger_payload.get("summaries")
+    return {
+        "status": "pass",
+        "artifact": "resource_ledger.json",
+        "resource_count": len(summaries) if isinstance(summaries, list) else 0,
+    }
+    ####
+
+
+def _validate_batch_result_catalog(
+    output_dir: Path,
+    binding: VehicleExecutionBinding,
+) -> dict[str, object]:
+    """Require a batch packet to satisfy the public result-catalog contract.
+
+    This validates output packet interoperability, not mission qualification.
+    A bounded translation smoke may legitimately produce a partial normalized
+    mission evaluation; the catalog still has to recognize its identity,
+    interface, graph-evidence, and declared action-evidence boundaries. The
+    direct-wrench screen is intentionally indexed as its separate local-screen
+    record kind rather than being coerced into a mission evaluation.
+    """
+
+    from .composition_result_catalog import index_composition_results
+
+    report = index_composition_results(output_dir.parent)
+    if report.get("status") != "pass":
+        return {
+            "status": "fail",
+            "detail": f"batch packet failed normalized result-catalog validation: {report.get('errors')!r}",
+        }
+    records = report.get("records")
+    if not isinstance(records, list) or len(records) != 1 or not isinstance(records[0], Mapping):
+        return {"status": "fail", "detail": "batch packet did not produce exactly one normalized catalog record"}
+    record = records[0]
+    expected_kind = "local_controller_screen" if binding.factory_id == "local_direct_wrench_screen.v1" else "mission_evaluation"
+    if record.get("record_kind") != expected_kind or record.get("status") != "valid":
+        return {
+            "status": "fail",
+            "detail": (
+                "batch packet normalized catalog record has unexpected kind/status: "
+                f"{record.get('record_kind')!r}/{record.get('status')!r}; expected {expected_kind!r}/'valid'"
+            ),
+        }
+    graph_execution = record.get("graph_execution_evidence")
+    if not isinstance(graph_execution, Mapping) or graph_execution.get("status") != "verified":
+        observed_status = None if not isinstance(graph_execution, Mapping) else graph_execution.get("status")
+        return {
+            "status": "fail",
+            "detail": (
+                "batch packet omitted or invalidated mission-graph execution evidence: "
+                f"observed status {observed_status!r}"
+            ),
+        }
+    return {
+        "status": "pass",
+        "record_kind": expected_kind,
+        "outcome": record.get("outcome"),
+        "graph_observation_status": graph_execution.get("observation_status"),
+        "claim_boundary": "The batch packet is consumable by the normalized result catalog; this is not qualification.",
+    }
     ####
 
 
@@ -272,6 +1012,12 @@ __all__ = [
     "VEHICLE_EXECUTION_WITNESSES",
     "VehicleExecutionWitness",
     "VehicleExecutionWitnessCatalog",
+    "VehicleGraphExtensionWitness",
+    "VehicleVariantWitness",
+    "_validate_batch_result_catalog",
+    "_validate_batch_resource_ledger_artifact",
     "load_vehicle_execution_witness_catalog",
     "validate_vehicle_execution_witnesses",
+    "validate_vehicle_graph_extension_witnesses",
+    "validate_vehicle_variant_witnesses",
 ]

@@ -2,11 +2,14 @@
 
 **Status:** Active reprioritization decision  
 **Scope:** successor language, executable simulation platform, and vehicle/mission composition  
+**User-facing guide:** [Three-product showcase guide](../THREE_PRODUCT_SHOWCASE.md)
 **Companion plans:** [TAORYX successor roadmap](taoryx-successor-roadmap.md),
 [Composable scenario runtime](composable-scenario-runtime.md),
 [Mission composition and vehicle-onboarding automation](mission-composition-automation.md),
 [Vehicle-integration automation](vehicle-integration-automation-plan.md), and
-[Horizontal vehicle integration](horizontal-vehicle-integration.md).
+[Horizontal vehicle integration](horizontal-vehicle-integration.md). The
+Product 3 maturity sequence is tracked separately in
+[Product 3 maturity plan](product-three-maturity.md).
 
 ## Decision
 
@@ -113,19 +116,36 @@ In place:
 - a registry of current families, fidelity slots, source/evidence status,
   initialization contracts, segment schemas, mission templates, parameters,
   and blockers;
-- `taoryx vehicle list`, `inspect`, and `schema` discovery commands;
+- versioned `taoryx vehicle catalog --detail summary|full`, plus focused
+  `list`, `describe`, `inspect`, `schema`, `parameters`, `endpoints`,
+  `authoring`, and interface discovery commands;
 - `taoryx vehicle compose`, which creates an immutable semantic handoff and
   rejects incompatible vehicle/fidelity/init/segment combinations; and
 - `taoryx vehicle lower`, which binds only the declared native adapter and
   returns a structured blocker instead of substituting a generic plant.
+- `taoryx vehicle episode-info`, which opens only a declared interactive
+  factory and exports its reset-time committed truth, and `taoryx vehicle
+  result`, which validates the common `evaluation.json` envelope and can bind
+  it to an exact compiled-composition fingerprint.
 
 Remaining gap:
 
-- the common airbreather translators are executable, but the planned X-15
-  high-energy and HL-20 energy-glide bindings still need their own
-  source-bounded release/trim, phase, controller, and evaluation adapters.
-  They must remain blocked until those adapters exist; adapter registration
-  alone is never a run.
+- the common airbreather translators are executable. The X-15 high-energy
+  binding still needs its own source-bounded release/trim, phase, controller,
+  and evaluation adapter. The HL-20 energy-glide binding now has an exact
+  semantic intent translator, but still needs its native runtime, trim,
+  controller, and evaluation adapter. Both remain non-runnable until those
+  execution pieces exist; translator registration alone is never a run.
+
+The HL-20 now has an earlier, deliberately narrower Product 3 capability
+step: its point-mass and pseudo-6DOF glide-energy composition exposes a
+source-bound release-energy and signed bank-reversal estimate. It can reject a
+handoff energy target above the unpowered release state. It now lowers the
+composition into an exact release/trim/opposing-bank/energy-handoff plan, but
+remains non-runnable without a native runtime, trim, control, or
+truth-objective claim. This is the intended staging pattern for a new family:
+make the composition and its feasibility assumptions inspectable first, then
+promote only through a source-owned execution adapter.
 
 Active progress:
 
@@ -152,15 +172,19 @@ Active progress:
 This is continuous work, not a feature tranche.
 
 - Keep language/profile validation, source provenance, canonical units/frames,
-  accepted-truth timing, control realization labels, and artifact schema as
+  accepted-truth timing, value-space topology, control realization labels, and artifact schema as
   release gates.
 - Maintain the four-tier fidelity vocabulary and fail-closed lowering.
 - Fix regressions or contradictions in existing qualification evidence before
   broadening claims.
 
 **Exit condition:** every subsequent milestone uses the same resolved-case,
-truth, control, and artifact contracts.  No product-specific alternate result
-format is introduced.
+truth, control, value-space, and artifact contracts. No product-specific
+alternate result format is introduced. Public fields must declare their
+topology and operation rules as specified by the
+[public value-space contract](../architecture/public-value-spaces.md); a
+heading cannot silently be treated as a linear scalar merely because both are
+stored in degrees.
 
 ### P1 — make one semantic airbreather mission executable end to end
 
@@ -412,11 +436,12 @@ advertised batch channel is unbound, while the sensor trace remains a separate
 selected-observation artifact. This proves artifact-interface consistency, not
 batch/step parity, robustness, physical-effector behavior, or qualification.
 
-The A320 and F-16 reduced batch bindings now project the same local-navigation
-and total-mass hooks as a portable status trace, with pseudo-6DOF attitude and
-rate values explicitly labeled as response-law surrogates. They do not gain an
-episode binding, a physical control-surface claim, or a fuel-system ledger by
-publishing those batch-only hooks.
+The A320 and F-16 reduced bindings project the same local-navigation and
+total-mass hooks as a portable status trace, with pseudo-6DOF attitude and
+rate values explicitly labeled as response-law surrogates. Both also expose a
+source-owned kinematic-guidance episode and registered action-trace parity
+witness. Neither gains a physical control-surface claim or fuel-system ledger
+from those reduced-fidelity hooks.
 
 ### P4 — onboard the next physical families through the same path
 
@@ -539,7 +564,7 @@ family or claiming a release-qualified controller envelope.
 | Vehicle and mission composition | A caller can discover a registered family/fidelity interface, compile/preflight a bounded composition, resolve one exact batch or episode factory, execute it through the source-owned path, and inspect standard truth/status/provenance artifacts. | Catalog validation plus checked-in witnesses for every advertised runnable endpoint. |
 
 At the current baseline, the catalog contains **nine families**, **36 resolved
-vehicle-interface contracts**, and **22 checked-in runnable composition
+vehicle-interface contracts**, and **26 checked-in runnable composition
 endpoints**.  The endpoint gate exercises composition, preflight, factory
 resolution, episode construction where advertised, and optional batch artifact
 smoke without introducing a fallback plant or controller.
@@ -585,6 +610,7 @@ Use these terms consistently:
 | `declared` | Registry/documentation says a configuration exists. |
 | `composable` | A request compiles and validates semantically. |
 | `adapter_bound` | The exact selected adapter constructed; no fallback occurred. |
+| `factory_bound` | An exact semantic translator and source-owned batch factory are declared; generic adapter conformance has not been claimed. |
 | `executable` | Semantic segments translated into and completed by the native runtime. |
 | `evaluated` | Independent truth objectives and terminal conditions were computed. |
 | `qualified` | Declared evidence, control, numerical, and robustness gates passed. |
