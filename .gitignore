@@ -218,6 +218,12 @@ tempCodeRunnerFile.py
 
 # Marimo
 marimo/_static/
+
+# Oversized generated showcase telemetry is retained locally but is not a
+# source artifact suitable for a GitHub repository. Keep the manifest and
+# summary evidence tracked while storing the raw replay payload locally.
+verification/alpha3_hummingbird_native_pad_to_pad/hummingbird-pad-to-pad-altitude-yaw-individual-rotor-v1/truth_telemetry.csv
+verification/alpha3_hummingbird_native_pad_to_pad/hummingbird-pad-to-pad-altitude-yaw-individual-rotor-v1.zip
 marimo/_lsp/
 __marimo__/
 
