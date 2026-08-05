@@ -16,79 +16,29 @@ import math
 from pathlib import Path
 from typing import Any
 
-from taoryx.contracts import Vector3
-from taoryx.control_allocation import EffectorLimits
-from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.physical_lqr import (
     design_physical_wrench_lqr,
     project_linearization_to_wrench,
     validate_nonlinear_wrench_lqr,
 )
-from taoryx.runtime.program import LoadedProgram
-from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant, local_rigid_body_plant_from_vehicle
+from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant
+from taoryx.source_table_multirotor import (
+    HUMMINGBIRD_SOURCE_ASSETS,
+    HUMMINGBIRD_SOURCE_PROBLEM,
+    HUMMINGBIRD_SOURCE_TABLES,
+    build_hummingbird_individual_rotor_source_table_plant,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
-PROBLEM = ROOT / "examples/generated/vehicles/hummingbird_individual_rotor_hover_6dof.prb"
-TABLE_ROOT = ROOT / "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables"
-TABLES = tuple(
-    TABLE_ROOT / name
-    for name in (
-        "hummingbird_cx.tbl",
-        "hummingbird_cy.tbl",
-        "hummingbird_cz.tbl",
-        "hummingbird_cmx.tbl",
-        "hummingbird_cmy.tbl",
-        "hummingbird_cmz.tbl",
-    )
-)
-SOURCE_ROOT = TABLE_ROOT.parent / "quadcopter_hummingbird"
-SOURCE_ASSETS = (
-    SOURCE_ROOT / "VALIDITY.md",
-    SOURCE_ROOT / "scripts/wrench_evaluator.py",
-    SOURCE_ROOT / "controls/control_allocation_matrix.csv",
-    SOURCE_ROOT / "controls/differential_speed_response.csv",
-    SOURCE_ROOT / "geometry_mass/parameters.csv",
-    SOURCE_ROOT / "geometry_mass/rotor_positions.csv",
-    SOURCE_ROOT / "propulsion/rotor_static_map.csv",
-)
+PROBLEM = HUMMINGBIRD_SOURCE_PROBLEM
+TABLES = HUMMINGBIRD_SOURCE_TABLES
+SOURCE_ASSETS = HUMMINGBIRD_SOURCE_ASSETS
 
 
 def build_plant() -> RuntimeRigidBodyLocalPlant:
-    """Build the source-hover local plant with four physical motor effectors."""
+    """Build the runtime-owned source-hover local plant."""
 
-    program = LoadedProgram.load(PROBLEM, TABLES, profile=GrammarProfile.TAORYX)
-    limits = {
-        f"rotor-{index}-speed": EffectorLimits(
-            f"rotor-{index}-speed",
-            0.0,
-            1500.0,
-            "rad/s",
-            # RotorPy supplies a first-order motor time constant but not a
-            # separate hard slew-rate bound.  Do not fabricate one.
-            time_constant_s=0.005,
-        )
-        for index in range(1, 5)
-    }
-    return local_rigid_body_plant_from_vehicle(
-        "hummingbird-individual-rotor-source-plant",
-        "rotorpy-hover-local-v1",
-        program.case().vehicles["1"],
-        inertia_kg_m2=Vector3(0.00365, 0.00368, 0.00703),
-        reference_length_m=0.34,
-        effector_limits=limits,
-        effectiveness_steps={name: 1.0 for name in limits},
-        allocation_wrench_weights={
-            "moment_x_nm": 1.0,
-            "moment_y_nm": 1.0,
-            "moment_z_nm": 1.0,
-        },
-        # Rotor-speed effectiveness is on the order of 1e-4 N m/(rad/s).
-        # Retain a trim preference only to resolve the one redundant rotor
-        # direction; the regularizer must not turn an otherwise exact local
-        # wrench request into a false infeasibility report.
-        allocation_regularization=1.0e-16,
-        allocation_feasibility_tolerance=1.0e-6,
-    )
+    return build_hummingbird_individual_rotor_source_table_plant()
     ####
 
 

@@ -109,6 +109,17 @@ Remaining product work:
   nonlinear validation evidence; it remains a labeled screen or bridge until
   then.
 
+The current consumer-facing maturity tranche is tracked in the
+[Product 2 maturity plan](product-two-maturity.md) and its
+[onboarding guide](../PRODUCT_TWO_ONBOARDING.md). The immediate gate is not
+another unqualified model count: a new engineer must be able to discover a
+source scenario or composition request, identify its exact fidelity and
+operation type, run the narrowest setup/preflight diagnostics, step the same
+resolved model at accepted truth boundaries, and inspect a named normalized
+artifact. The staged-rocket, NESC pseudo-6DOF, HL-20 release, X-15-scaled
+booster, synthetic California–Hawaii, and interactive stepping paths are the
+regression set for this gate.
+
 ### Product 3 — vehicle and mission composition
 
 In place:

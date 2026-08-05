@@ -93,10 +93,15 @@ taoryx run path/to/mission.prb path/to/aero.tbl \
   --profile taoryx \
   --integrator rk4 \
   --max-steps 20000 \
-  --output-dir artifacts/runs/example
-
-taoryx artifact inspect artifacts/runs/example
+  --output-dir artifacts/runs/example \
+  --report artifacts/runs/example/run-report.json \
+  --artifact artifacts/runs/example/run-artifact.json
+taoryx artifact inspect artifacts/runs/example/run-artifact.json
 ```
+
+The complete Product 2 scenario map, pseudo-6DOF recipes, California–Hawaii
+distinctions, and external stepping example are in the [Product 2 onboarding
+guide](PRODUCT_TWO_ONBOARDING.md).
 
 ### Interactive and AI/RL stepping
 

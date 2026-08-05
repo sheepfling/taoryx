@@ -39,6 +39,7 @@ def test_cli_run_ingests_problem_and_table_and_writes_report(tmp_path: Path, cap
     problem, table = _write_runtime_inputs(tmp_path)
     output_dir = tmp_path / "output"
     report_path = tmp_path / "reports" / "run.json"
+    artifact_path = tmp_path / "reports" / "artifact.json"
 
     exit_code = main(
         [
@@ -49,6 +50,8 @@ def test_cli_run_ingests_problem_and_table_and_writes_report(tmp_path: Path, cap
             str(output_dir),
             "--report",
             str(report_path),
+            "--artifact",
+            str(artifact_path),
             "--json",
             "--max-steps",
             "20",
@@ -59,6 +62,8 @@ def test_cli_run_ingests_problem_and_table_and_writes_report(tmp_path: Path, cap
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["cases"] == 1
     assert report["exit_code"] == 0
+    assert report["normalized_artifact"] == str(artifact_path)
+    assert json.loads(artifact_path.read_text(encoding="utf-8"))["schema_version"] == 1
     assert (output_dir / "result.dat").exists()
     assert json.loads(capsys.readouterr().out)["outputs"]
 ####

@@ -4,6 +4,10 @@ Showcases are polished demonstrations of the runtime and its extensions.
 They are separate from the smaller parser and numerical fixtures under
 `examples/mission_families/`.
 
+For a scenario-by-scenario Product 2 map—including the California–Hawaii,
+HL-20, X-15, and staged-rocket paths—start with
+[`docs/PRODUCT_TWO_ONBOARDING.md`](../../docs/PRODUCT_TWO_ONBOARDING.md).
+
 Each showcase should contain:
 
 - `README.md` — narrative and claim boundary;

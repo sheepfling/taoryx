@@ -10,6 +10,7 @@ import shlex
 from collections.abc import Mapping
 from html import escape
 from pathlib import Path
+from typing import TypedDict
 
 from taoryx.batch_episode_parity_dispatch import verify_serialized_declared_batch_episode_parity
 from taoryx.composition_episode import open_vehicle_composition_episode
@@ -97,6 +98,34 @@ from .optimization_runtime import available_optimizers
 from .runner import run_files
 
 
+class _ArtifactInspectionVehicle(TypedDict):
+    """Typed diagnostic projection for one artifact vehicle."""
+
+    vehicle_id: str
+    name: str
+    kind: str
+    dynamics: str
+    sample_count: int
+    time_start_s: float | None
+    time_end_s: float | None
+    channels: list[str]
+    segments: list[str]
+
+
+class _ArtifactInspectionPayload(TypedDict):
+    """Typed diagnostic projection for a normalized run artifact."""
+
+    schema: str
+    artifact_schema_version: int
+    problem: str
+    scenario_identity: str | None
+    vehicles: list[_ArtifactInspectionVehicle]
+    event_count: int
+    command_count: int
+    termination: dict[str, object]
+    claim_boundary: str
+
+
 def _add_reachability_criteria_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--min-speed-m-s", type=float)
     parser.add_argument("--max-speed-m-s", type=float)
@@ -145,6 +174,11 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("tables", type=Path, nargs="*")
     run.add_argument("--output-dir", type=Path, default=Path("."))
     run.add_argument("--report", type=Path)
+    run.add_argument(
+        "--artifact",
+        type=Path,
+        help="write the first normalized RunArtifact as JSON for inspection or plotting",
+    )
     run.add_argument("--json", action="store_true")
     run.add_argument("--max-steps", type=int, default=100000)
     run.add_argument("--seed", type=int, help="base seed for *random sampling")
@@ -172,6 +206,9 @@ def main(argv: list[str] | None = None) -> int:
     artifact_html.add_argument("--output", type=Path, required=True)
     artifact_html.add_argument("--vehicle")
     artifact_html.add_argument("--channel", action="append", default=[])
+    artifact_inspect = artifact_subparsers.add_parser("inspect", help="summarize one normalized run artifact")
+    artifact_inspect.add_argument("path", type=Path)
+    artifact_inspect.add_argument("--json", action="store_true")
     artifact_plot = artifact_subparsers.add_parser("plot", help="render static PNG plots from a run artifact")
     artifact_plot.add_argument("path", type=Path)
     artifact_plot.add_argument("--output-dir", type=Path, required=True)
@@ -642,15 +679,30 @@ def main(argv: list[str] | None = None) -> int:
         profile=arguments.profile,
         sensor_spec=arguments.sensor_spec,
     )
+    normalized_artifact: Path | None = None
+    if arguments.artifact:
+        if not report.artifacts:
+            print("error: artifact-write-failed: runtime did not produce a normalized RunArtifact")
+            return report.exit_code if report.exit_code != 0 else 2
+        try:
+            normalized_artifact = report.artifacts[0].write_json(arguments.artifact)
+        except (OSError, TypeError, ValueError) as error:
+            print(f"error: artifact-write-failed: {error}")
+            return 2
+        if not arguments.json:
+            print(f"artifact: {normalized_artifact}")
+    report_payload = report.as_dict()
+    if normalized_artifact is not None:
+        report_payload["normalized_artifact"] = str(normalized_artifact)
     if arguments.report:
         try:
             arguments.report.parent.mkdir(parents=True, exist_ok=True)
-            arguments.report.write_text(json.dumps(report.as_dict(), indent=2) + "\n", encoding="utf-8")
+            arguments.report.write_text(json.dumps(report_payload, indent=2) + "\n", encoding="utf-8")
         except OSError as error:
             print(f"error: report-write-failed: {error}")
             return 2
     if arguments.json:
-        print(json.dumps(report.as_dict(), indent=2))
+        print(json.dumps(report_payload, indent=2))
     else:
         for diagnostic in report.diagnostics:
             location = diagnostic.location
@@ -1909,6 +1961,24 @@ def _render_artifact(arguments: argparse.Namespace) -> int:
 
     try:
         artifact = RunArtifact.model_validate_json(arguments.path.read_text(encoding="utf-8"))
+        if arguments.artifact_command == "inspect":
+            payload = _artifact_inspection_payload(artifact)
+            if arguments.json:
+                print(json.dumps(payload, indent=2, sort_keys=True))
+            else:
+                print(f"problem: {artifact.problem}")
+                print(f"schema_version: {artifact.schema_version}")
+                for vehicle in payload["vehicles"]:
+                    print(
+                        "vehicle: "
+                        f"{vehicle['vehicle_id']} dynamics={vehicle['dynamics']} "
+                        f"samples={vehicle['sample_count']} "
+                        f"time={vehicle['time_start_s']}..{vehicle['time_end_s']} s"
+                    )
+                    print("  channels: " + ", ".join(vehicle["channels"]))
+                print(f"events: {payload['event_count']}")
+                print(f"commands: {payload['command_count']}")
+            return 0
         if arguments.artifact_command == "html":
             render_run_artifact_html(
                 artifact,
@@ -1929,6 +1999,40 @@ def _render_artifact(arguments: argparse.Namespace) -> int:
         print(f"error: artifact-render-failed: {error}")
         return 2
     return 0
+
+
+def _artifact_inspection_payload(artifact: RunArtifact) -> _ArtifactInspectionPayload:
+    """Return a compact diagnostic projection of one normalized artifact."""
+
+    vehicles: list[_ArtifactInspectionVehicle] = [
+        {
+            "vehicle_id": vehicle_id,
+            "name": vehicle.name,
+            "kind": vehicle.kind.value,
+            "dynamics": vehicle.dynamics.value,
+            "sample_count": len(vehicle.times),
+            "time_start_s": vehicle.times[0] if vehicle.times else None,
+            "time_end_s": vehicle.times[-1] if vehicle.times else None,
+            "channels": sorted(vehicle.channels),
+            "segments": [segment.title for segment in vehicle.segments],
+        }
+        for vehicle_id, vehicle in sorted(artifact.vehicles.items())
+    ]
+    return {
+        "schema": "taoryx.runtime-artifact-inspection/v1alpha1",
+        "artifact_schema_version": artifact.schema_version,
+        "problem": artifact.problem,
+        "scenario_identity": artifact.scenario_identity,
+        "vehicles": vehicles,
+        "event_count": len(artifact.events),
+        "command_count": len(artifact.commands),
+        "termination": artifact.termination,
+        "claim_boundary": (
+            "This is an artifact-shape and telemetry-presence inspection. It does not establish model validity, "
+            "controller quality, physical-effector behavior, or vehicle qualification."
+        ),
+    }
+    ####
 
 
 def _inspect_table(arguments: argparse.Namespace) -> int:

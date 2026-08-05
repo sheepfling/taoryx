@@ -5,91 +5,36 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Any
 
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from taoryx.control_allocation import EffectorLimits
 from taoryx.physical_lqr import (
     design_physical_wrench_lqr,
     project_linearization_to_wrench,
     validate_nonlinear_wrench_lqr,
 )
-from taoryx.trajectory import F16ReferencePhysicalPlant, load_f16_reference_plant
-from taoryx.trim import TrimResult, TrimSpec
+from taoryx.source_f16 import build_f16_source_physical_plant
 
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def _limits(payload: dict[str, Any]) -> dict[str, EffectorLimits]:
-    """Resolve the bounded development actuator profile."""
-
-    names = {
-        "elevator": "elevator_deg",
-        "aileron": "aileron_deg",
-        "rudder": "rudder_deg",
-        "throttle": "throttle_fraction",
-    }
-    limits: dict[str, EffectorLimits] = {}
-    dynamics = payload.get("dynamics", {})
-    default_time_constant = float(dynamics.get("time_constant_s", 0.0))
-    for source_name, values in payload["limits"].items():
-        position = values.get("position")
-        if position is None:
-            position = [values["lower"], values["upper"]]
-        rate = values.get("rate_per_s", values.get("rate_limit_per_s"))
-        unit = values.get("unit", "fraction" if source_name == "throttle" else "deg")
-        limits[names[source_name]] = EffectorLimits(
-            names[source_name],
-            float(position[0]),
-            float(position[1]),
-            str(unit),
-            float(rate) if rate is not None else None,
-            float(values.get("time_constant_s", default_time_constant)),
-        )
-    return limits
-    ####
 
 
 def main() -> int:
     """Run one explicitly local physical-wrench recovery case."""
 
-    linearization = json.loads(
-        (ROOT / "verification/f16_runtime_linearization_evidence.json").read_text(encoding="utf-8")
-    )
     actuator_profile = yaml.safe_load(
         (ROOT / "families/reference_f16_s119/actuators/reference-first-order-v1.yaml").read_text(encoding="utf-8")
     )
     controller_profile = yaml.safe_load(
         (ROOT / "families/reference_f16_s119/controllers/local-physical-wrench-lqr-v1.yaml").read_text(encoding="utf-8")
     )
-    state = {name: float(value) for name, value in linearization["trim_state"].items()}
-    controls = {name: float(value) for name, value in linearization["trim_controls"].items()}
+    adapter = build_f16_source_physical_plant()
+    trim = adapter.trim_result
+    state = dict(trim.state)
+    controls = dict(trim.controls)
     state_names = tuple(controller_profile["state_names"])
     control_names = tuple(controller_profile["effector_names"])
-    trim_pitch_rad = float(linearization["metadata"]["trim_pitch_rad"])
-    trim_spec = TrimSpec(
-        state_names=state_names,
-        control_names=control_names,
-        residual_names=state_names,
-        state_initial=state,
-        control_initial=controls,
-        operating_point={"trim_pitch_rad": trim_pitch_rad},
-    )
-    trim = TrimResult(trim_spec, state, controls, {name: 0.0 for name in state}, 0.0, True, 1, "source trim", 0, 0.0)
-    source = load_f16_reference_plant(
-        ROOT / "families/reference_f16_s119/plant/daveml-import.json",
-        ROOT / "resources/aerospace/daveml/official-conformance-v1/atmos_76.dml",
-    )
-    adapter = F16ReferencePhysicalPlant(
-        source,
-        trim,
-        trim_pitch_rad,
-        0.0,
-        _limits(actuator_profile),
-    )
     effectiveness = adapter.effectiveness(state, controls)
     projection = project_linearization_to_wrench(
         adapter.linearize(trim, {"state_step": 1.0e-5, "control_step": 1.0e-5}),

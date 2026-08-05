@@ -14,6 +14,59 @@ require family knowledge and source interpretation. The target is that Taoryx
 asks for the missing declarations, generates the worklist, runs all generic
 checks, and refuses unsupported promotion without manual bookkeeping.
 
+## Product 3 work-package alignment
+
+This integration plan is the source-intake and plant/controller half of the
+Product 3 package register in
+[Product 3 maturity](product-three-maturity.md#product-3-next-phase-work-packages).
+Use the shared IDs in commits, issue titles, packets, and maturity reports:
+
+| Integration responsibility | Product 3 package | Concrete output |
+| --- | --- | --- |
+| Source-owned runtime plant and adapter operation probes | `P3-RUN-01` | Factory, registry binding, operation probe, developer/runtime reuse test, and nonclaim record. |
+| Data/fidelity readiness and automatic lowering decision | `P3-RUN-02` | Per-family/fidelity checklist, provenance record, blocker report, and F-16/HL-20/A320/NESC onboarding regression. |
+| Trim, effectivity, controller, actuator, and operating-point evidence | `P3-RUN-01` + `P3-RUN-02` | Trim recipe, derivative/effectivity report, allocator/actuator evidence, and local validity envelope. |
+| Mission timing, authority, graph, and terminal preflight | `P3-COMP-01` | Capability estimate, compiled graph, objective contract, and independent truth-evaluation disposition. |
+| Coupled mass/resource/configuration variation | `P3-COMP-02` | Resolved variant, derivation/invalidation report, runtime provenance, and requalification requirement. |
+| Batch/episode/action/status parity and normalized result | `P3-EXEC-01` | Committed-boundary traces, parity witness, result/evaluation packet, and reproduction manifest. |
+| User-facing vehicle/mission authoring flow | `P3-AUTH-01` | Queryable descriptors, authoring template, compile/preflight output, and exact actionable blocker. |
+
+The integration pipeline remains the authoritative diagnostic sequence:
+
+```text
+intake → conventions → plant → effectivity → trim → operating_points
+       → fidelity → controller → mission → packet/promotion
+```
+
+Each stage must write one of the shared statuses `passed`, `development`,
+`planned`, `not_applicable`, or `blocked`, plus its evidence path and next
+action. A stage may depend on a family adapter, but the checklist, hashing,
+diagnostic, packet, and promotion plumbing are shared. This is the concrete
+definition of “automatic integration”: family physics remain authored; the
+discovery, verification, and delivery process does not.
+
+### Required integration packet contents
+
+Every family onboarding packet must contain:
+
+- source and operational manifests with hashes and evidence classes;
+- state, control, effector, resource, observation, frame, and timing schemas;
+- the four-tier data requirement matrix and automatic-lowering decision;
+- trim unknowns, residual equations, operating-point catalog, and continuation
+  result;
+- effectivity and actuator limits, or an explicit not-applicable/blocker
+  record;
+- controller path, requested/achieved authority, saturation, and direct-wrench
+  boundary;
+- mission geometry, preflight time/authority estimate, graph/objective result,
+  and terminal nonclaim;
+- regeneration command, local-input hashes, and negative-control evidence; and
+- the exact promotion decision and remaining work-package IDs.
+
+The packet is incomplete if one of these sections is represented only by a
+plot or a prose assertion. The machine-readable report must retain the
+decision, and the human summary must link to the same artifact.
+
 The F-16 and HL-20 work also exposed a planning-metadata discipline: a
 family's public `next_gate` must identify that family, not a copied neighbor.
 The source-integration pipeline publishes this value directly to authors, so a
@@ -28,6 +81,13 @@ operating condition: source replay, trim, runtime linearization, local LQR,
 bounded surface allocation, nonlinear route evidence, reductions, and a
 self-contained packet. It remains local development evidence rather than
 family or release qualification.
+
+The first runtime-ownership tranche is now complete for the X8, B747,
+Hummingbird, and F-16 local plants. Their validation tools import the same
+source-owned builders that the runtime registry probes, so construction drift
+is no longer the remaining blocker for these four families. Mission
+translation, resource modeling, gain scheduling, operating-point continuation,
+and envelope qualification remain separate gates.
 
 The principal manual seams are:
 

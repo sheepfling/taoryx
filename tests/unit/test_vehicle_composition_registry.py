@@ -12,6 +12,7 @@ import taoryx.product_three_maturity as product_three_maturity
 import taoryx.runtime.cli as runtime_cli
 import taoryx.vehicle_execution_preflight as execution_preflight
 import taoryx.vehicle_execution_witnesses as execution_witnesses
+from taoryx.family_adapter_registry import AdapterRegistrationError
 from taoryx.fidelity_contracts import CANONICAL_FIDELITY_TIERS
 from taoryx.language_backed_execution import execute_powered_fixed_wing_composition
 from taoryx.parameter_value_spaces import (
@@ -1899,8 +1900,8 @@ def test_runtime_lowering_binds_an_available_source_adapter() -> None:
     ####
 
 
-@pytest.mark.parametrize("family_id", ("skywalker_x8", "b747"))
-def test_runtime_registry_owns_the_source_table_fixed_wing_adapter_and_operation_probes(family_id: str) -> None:
+@pytest.mark.parametrize("family_id", ("skywalker_x8", "b747", "hummingbird", "f16_s119"))
+def test_runtime_registry_owns_source_table_adapters_and_operation_probes(family_id: str) -> None:
     """Developer LQR scripts and Product 3 use the same physical plant seam."""
 
     registry = build_vehicle_runtime_adapter_registry()
@@ -1920,4 +1921,14 @@ def test_runtime_registry_owns_the_source_table_fixed_wing_adapter_and_operation
         else:
             assert operations["effectiveness"] == "not_applicable"
             assert operations["allocate"] == "not_applicable"
+    ####
+
+
+def test_runtime_registry_fails_closed_for_unadvertised_lower_tiers() -> None:
+    """A local 6-DOF factory must not masquerade as a lower-fidelity product."""
+
+    registry = build_vehicle_runtime_adapter_registry()
+    for family_id in ("skywalker_x8", "b747", "hummingbird", "f16_s119"):
+        with pytest.raises(AdapterRegistrationError, match="tier"):
+            registry.build(family_id, "pseudo_6dof")
     ####

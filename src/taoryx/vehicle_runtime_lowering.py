@@ -25,10 +25,12 @@ from .family_adapter_registry import AdapterRegistrationError, FamilyAdapterRegi
 from .fidelity_contracts import FidelityTier
 from .hl20_adapter import build_hl20_source_adapter
 from .nesc_adapter import build_nesc_replay_adapter
+from .source_f16 import build_f16_source_physical_plant
 from .source_table_fixed_wing import (
     build_b747_condition3_source_table_plant,
     build_x8_source_table_plant,
 )
+from .source_table_multirotor import build_hummingbird_individual_rotor_source_table_plant
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_composition_registry import mission_graph_execution_contract
 from .vehicle_execution_bindings import VehicleExecutionBindingError, resolve_vehicle_execution_binding
@@ -61,12 +63,84 @@ def _source_local_probe(adapter: StandardFamilyAdapter) -> AdapterProbeCase:
     ####
 
 
+def _source_or_trim_probe(adapter: StandardFamilyAdapter) -> AdapterProbeCase:
+    """Probe a source-local plant or a source-owned resolved trim point."""
+
+    plant = adapter.plant
+    if plant is None:
+        raise ValueError(f"{adapter.describe().family_id}: adapter has no plant")
+    if hasattr(plant, "source_local_state") and hasattr(plant, "source_effectors"):
+        return _source_local_probe(adapter)
+    if not hasattr(plant, "trim_result"):
+        raise ValueError(f"{adapter.describe().family_id}: plant has no source operating point")
+    trim = getattr(plant, "trim_result")
+    state = dict(trim.state)
+    effectors = dict(trim.controls)
+    environment: dict[str, float | str] = {}
+    for name in ("altitude_m", "trim_pitch_rad"):
+        if hasattr(plant, name):
+            environment[name] = float(getattr(plant, name))
+    return AdapterProbeCase(
+        state=state,
+        effectors=effectors,
+        environment=environment,
+        trim_target=state,
+        trim_initial_guess=effectors,
+        previous_effectors=effectors,
+    )
+    ####
+
+
 def _source_table_fixed_wing_factory(
     builder: Callable[[], object],
     *,
     family_id: str,
+    adapter_id: str = "taoryx.fixed_wing.source_table.v1",
+    physical_family: str = "powered_fixed_wing",
+    effector_attribute: str = "effector_limits",
+    omitted_physics: tuple[str, ...] = (
+        "family-specific mission and resource providers",
+        "gain-scheduled or envelope-wide closed-loop validation",
+    ),
 ) -> Callable[[FidelityTier], StandardFamilyAdapter]:
     """Bind one pinned source-table plant without a family-level fallback."""
+
+    @lru_cache(maxsize=1)
+    def plant() -> object:
+        return builder()
+        ####
+
+    @lru_cache(maxsize=None)
+    def build(tier: FidelityTier) -> StandardFamilyAdapter:
+        source_plant = plant()
+        control_names = getattr(source_plant, "control_names", ())
+        limits = getattr(source_plant, effector_attribute, None)
+        if not control_names or not isinstance(limits, dict):
+            raise ValueError(f"{family_id}: source-table plant has no declared control limits")
+        descriptor = descriptor_from_control_plant(
+            source_plant,  # type: ignore[arg-type]
+            family_id=family_id,
+            adapter_id=adapter_id,
+            physical_family=physical_family,
+            tier=tier,
+            control_units={name: limits[name].unit for name in control_names},
+            evidence_status="development",
+            omitted_physics=omitted_physics,
+        )
+        return StandardFamilyAdapter.from_control_plant(descriptor, source_plant)  # type: ignore[arg-type]
+        ####
+
+    return build
+    ####
+
+
+def _source_table_multirotor_factory(
+    builder: Callable[[], object],
+    *,
+    family_id: str,
+    adapter_id: str,
+) -> Callable[[FidelityTier], StandardFamilyAdapter]:
+    """Bind one pinned multirotor source plant without family fallback."""
 
     @lru_cache(maxsize=1)
     def plant() -> object:
@@ -83,14 +157,15 @@ def _source_table_fixed_wing_factory(
         descriptor = descriptor_from_control_plant(
             source_plant,  # type: ignore[arg-type]
             family_id=family_id,
-            adapter_id="taoryx.fixed_wing.source_table.v1",
-            physical_family="powered_fixed_wing",
+            adapter_id=adapter_id,
+            physical_family="multirotor",
             tier=tier,
             control_units={name: limits[name].unit for name in control_names},
             evidence_status="development",
             omitted_physics=(
-                "family-specific mission and resource providers",
-                "gain-scheduled or envelope-wide closed-loop validation",
+                "mission and position-control providers",
+                "battery and voltage resource model",
+                "blade-resolved and dynamic-inflow rotor physics",
             ),
         )
         return StandardFamilyAdapter.from_control_plant(descriptor, source_plant)  # type: ignore[arg-type]
@@ -216,11 +291,12 @@ def lower_vehicle_composition(
 def build_vehicle_runtime_adapter_registry() -> FamilyAdapterRegistry:
     """Return the central, explicitly scoped runtime adapter registry.
 
-    The source-backed X8, B747, X-15, HL-20, and NESC adapters are safe to
-    construct directly from ``src``. Other current witnesses still live in
-    qualification tools or lack a mission translator; they remain explicitly
-    development registrations rather than being imported through tool scripts
-    or silently represented by a different family.
+    The source-backed X8, B747, Hummingbird, F-16, X-15, HL-20, and NESC
+    adapters are safe to construct directly from ``src``. Other current
+    witnesses still live in qualification tools or lack a mission translator;
+    they remain explicitly development registrations rather than being
+    imported through tool scripts or silently represented by a different
+    family.
     """
 
     registrations = (
@@ -282,14 +358,33 @@ def build_vehicle_runtime_adapter_registry() -> FamilyAdapterRegistry:
         FamilyAdapterRegistration(
             "f16_s119",
             "taoryx.fixed_wing.daveml.v1",
-            "development",
-            note="source/reduced witness factories remain in qualification tooling pending runtime extraction",
+            "available",
+            _source_table_fixed_wing_factory(
+                build_f16_source_physical_plant,
+                family_id="f16_s119",
+                adapter_id="taoryx.fixed_wing.daveml.v1",
+                effector_attribute="effectors",
+                omitted_physics=(
+                    "mission translation and gain scheduling",
+                    "full-flight-envelope and release qualification",
+                ),
+            ),
+            probe_factory=_source_or_trim_probe,
+            supported_tiers=("rigid_body_6dof_direct_wrench", "rigid_body_6dof_surface_allocated"),
+            note="runtime-owned source-backed first operating point; mission and schedule gates remain separate",
         ),
         FamilyAdapterRegistration(
             "hummingbird",
             "taoryx.multirotor.native_quad_x.v1",
-            "development",
-            note="native rotor witness factory remains in qualification tooling pending runtime extraction",
+            "available",
+            _source_table_multirotor_factory(
+                build_hummingbird_individual_rotor_source_table_plant,
+                family_id="hummingbird",
+                adapter_id="taoryx.multirotor.native_quad_x.v1",
+            ),
+            probe_factory=_source_local_probe,
+            supported_tiers=("rigid_body_6dof_direct_wrench", "rigid_body_6dof_surface_allocated"),
+            note="runtime-owned individual-rotor local plant; mission and resource providers remain separate gates",
         ),
     )
     return FamilyAdapterRegistry(registrations)

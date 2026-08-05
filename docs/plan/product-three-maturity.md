@@ -119,13 +119,13 @@ capability-derived composition can preflight and run through the
 language-backed factory without being misleadingly reported as `blocked`.
 Neither status means the vehicle was executed, evaluated, or qualified.
 
-The local source-table plants used to exercise the physical X8 and B747
-control seams are runtime-owned rather than tool-owned. The developer LQR
-evidence scripts import the same pinned builders that the Product 3 adapter
-registry binds, and both pass the same operation probes at their exact source
-operating point. This removes construction drift without promoting a local
-trim witness into a runnable racetrack, gain-scheduled controller, or
-envelope-wide qualification claim.
+The local source plants used to exercise the physical X8, B747, Hummingbird,
+and F-16 control seams are runtime-owned rather than tool-owned. The
+developer evidence scripts import the same pinned builders that the Product 3
+adapter registry binds, and all four pass the same operation probes at their
+exact source operating point. This removes construction drift without
+promoting a local trim witness into a runnable racetrack, gain-scheduled
+controller, or envelope-wide qualification claim.
 
 The execution-witness gate now enforces that relationship for every advertised
 runnable endpoint: its checked-in composition must compile, preflight, lower
@@ -1683,6 +1683,90 @@ gate—not proof that a mass, fuel, or payload modifier is physically qualified.
 It also aggregates declared `fidelity_promotion_blocker_counts` separately
 from planned endpoint blockers, allowing progress to be measured by retiring
 source/model gates rather than merely by adding runnable factory names.
+
+## Product 3 next-phase work packages
+
+The M0–M6 milestones above describe capabilities. The work packages below are
+the execution units used by issues, commits, validation reports, and release
+reviews. A package is not complete because a command exists: its deliverables,
+verification evidence, and explicit nonclaims must all be present.
+
+### Package register
+
+| ID | Owner surface | Objective | Depends on | Primary deliverables | Exit evidence |
+| --- | --- | --- | --- | --- | --- |
+| `P3-RUN-01` | Runtime/family adapters | Make each advertised plant construction source-owned and reusable by runtime, tools, and witnesses. | M0 | Source-owned factory; registry binding; generic operation probe; developer-tool reuse; no-fallback test; claim/nonclaim record. | The declared adapter builds and passes the operations required by its tier; no runtime module imports a developer-only plant; the maturity report names the exact remaining blocker. |
+| `P3-RUN-02` | Integration/verification | Turn missing vehicle data and fidelity prerequisites into a generated, fail-closed checklist. | `P3-RUN-01` | Per-family/fidelity data matrix; provenance/hash record; trim/effectivity/resource/frame/timing requirements; automatic-lowering decision; actionable diagnostics. | All nine families have explicit `passed`, `development`, `planned`, `not_applicable`, or `blocked` records with no silent unknowns; F-16, HL-20, A320, and NESC are retained as onboarding regressions. |
+| `P3-COMP-01` | Composition/mission graph | Make mission templates reusable across vehicles while keeping objective truth independent from controller transitions. | M0, M2, M3 | Versioned mission templates; segment/objective/terminal schemas; graph transitions; capability and timing preflight; source-owned batch/episode binding. | Every advertised endpoint has an immutable composition identity, preflight result, and explicit branch/timeout behavior; no controller transition can certify a missed objective. |
+| `P3-COMP-02` | Variants/resources | Add only coupled, source-owned vehicle variation that the runtime actually consumes. | `P3-RUN-01`, `P3-RUN-02` | Variant schema; derivation/invalidation graph; resource and mass coupling; fingerprints; re-trim/requalification declarations; rejection/projection evidence. | No accepted variant has inconsistent mass, resource, inertia, or units; every applied value appears in runtime provenance and committed status; unsupported families remain undiscoverable as executable variants. |
+| `P3-EXEC-01` | Execution/evaluation | Make batch, episode, status, action, and evaluation contracts uniform and reproducible. | M4, `P3-RUN-01` | Action/status trace contract; parity registry; normalized result/evaluation; resource ledger; graph execution packet; release/reproduction manifest. | Current advertised endpoints retain their registered parity witnesses; committed timestamps agree; new endpoints cannot be promoted without the same witness and artifact set. |
+| `P3-AUTH-01` | Product 3 authoring/catalog | Give users one discoverable path from vehicle metadata and bounded parameters to a compiled trajectory. | `P3-COMP-01`, `P3-COMP-02`, `P3-EXEC-01` | Catalog/describe/schema/interface/endpoints projections; authoring kit; parameter and value-space topology; compose/lower/materialize/run/preflight surfaces; blocker report. | A user can query a vehicle, select valid parameters and segments, compile a trajectory without editing code, and receive either an executable binding or a precise blocker. |
+
+### Dependency and release sequence
+
+```text
+P3-RUN-02 ─┐
+           ├──> P3-COMP-02 ─┐
+P3-RUN-01 ─┼──> P3-EXEC-01 ─┼──> P3-AUTH-01
+           └──> P3-COMP-01 ─┘
+```
+
+The sequence is deliberately incremental:
+
+1. **R0 — Baseline contract:** preserve the current catalog, topology,
+   committed-truth, graph, parity, and fail-closed evidence. This is the
+   starting baseline, not a new qualification claim.
+2. **R1 — Runtime ownership:** the X8, B747, Hummingbird, and F-16
+   source-backed witnesses now use runtime-owned factories and generic
+   operation probes. The next tranche is not another construction fork: it is
+   extending the same data/trim/mission evidence to additional operating
+   points. This does not promote any local witness to family or envelope
+   qualification.
+3. **R2 — Automatic integration:** execute `P3-RUN-02` through the F-16,
+   HL-20, A320, and NESC pilots. The expected output is a complete worklist,
+   including blocked and not-applicable tiers, rather than forced promotion.
+4. **R3 — Composition breadth:** complete `P3-COMP-01` and `P3-COMP-02` for
+   the reusable powered-fixed-wing racetrack, Hummingbird graph, and one
+   source-owned bounded variant. Expand only after the runtime consumes the
+   selected modifier or graph branch.
+5. **R4 — Product 3 maturity gate:** complete `P3-EXEC-01` and `P3-AUTH-01`,
+   then publish the catalog maturity matrix, endpoint/parity matrix, variant
+   matrix, and exact family/tier blockers as one release packet.
+
+### Per-family deliverable queue
+
+The queue below is the minimum next artifact for each current family. It is
+not a promise that every family will receive every fidelity tier.
+
+| Family | Current useful evidence | Next concrete deliverable | Promotion boundary |
+| --- | --- | --- | --- |
+| X8 | Source-table local direct-wrench and surface-allocation witnesses; fixed-wing composition seam. | Runtime-owned racetrack plant/controller packet using actual elevons and throttle, with requested/achieved wrench and objective evidence. | Do not call the local witness family-qualified or schedule-qualified. |
+| B747 | Source-table local direct-wrench and surface-allocation witnesses; transport composition path. | Scaled transport racetrack packet at declared operating points, with actual surface allocation, trim residuals, and schedule-transition evidence. | Cruise/local evidence does not imply takeoff, landing, or full-envelope qualification. |
+| Hummingbird | Pseudo-6DOF route/graph, grounded-mass variant, and runtime-owned four-rotor local plant with operation probes. | Native mission/controller/resource packet with yaw authority, altitude gates, individual effector telemetry, contact, and post-touchdown settle. | The local hover plant proves construction, trim, linearization, and allocation seams only; it does not prove waypoint, battery, or envelope qualification. |
+| F-16 | Source replay, local trim/LQR/surface path, reduction scaffolding, and runtime-owned first-operating-point factory with probes. | Remaining six-point residual/schedule continuation and fixed-wing racetrack reduction comparison using the same runtime-owned source construction. | Local T5 evidence is not family or envelope qualification. |
+| X-15 | Source/replay and local direct-wrench bridge evidence. | Phase-scheduled powered/coast/atmospheric composition with explicit release, cutoff, energy, and handoff artifacts. | Direct-wrench evidence does not imply physical surface or full mission qualification. |
+| HL-20 | Source replay and semantic point-mass/pseudo path. | Source-owned glide runtime with trim/gravity, opposing-bank crossrange, energy corridor, and terminal handoff. | No landing/contact or native high-altitude claim until those gates pass. |
+| A320 | 3DOF and pseudo mission pilot; mass variant witness. | Calibrated named attitude-response model across additional operating points with retained source/overlay boundary. | Composite pseudo effectivity is development evidence, not physical actuator qualification. |
+| NESC rocket | 3DOF/source replay and variable-mass lineage. | Staged pseudo attitude/gimbal/separation contract, or an explicit not-applicable record where no attitude reduction is supportable. | A source replay with no controls is not a controlled pseudo-6DOF result. |
+| Passive/tumbling body | Passive 3DOF projected-area baseline and rigid-body rotational path. | Shared passive-family packet: average/steady projected-area policy for 3DOF, native rigid-body reuse for pseudo-6DOF, and rotational invariants. | No controllability or actuator tier is advertised; 3DOF cannot prove tumble. |
+
+### Package completion checklist
+
+Each package is complete only when its release review can point to all of the
+following committed artifacts:
+
+- a versioned manifest naming family, vehicle, fidelity, plant, interface,
+  mission, and evidence class;
+- a machine-readable input/data requirement and provenance report;
+- a deterministic diagnostic or operation probe with a retained result;
+- an independent objective/evaluation report, when a mission is involved;
+- a reproducibility command and hashes for all local source inputs;
+- a negative-control or fail-closed test for the principal failure mode; and
+- an explicit list of what the package does **not** prove.
+
+The package owner must update the maturity report and the integration worklist
+in the same change. A green unit test without the corresponding registry,
+manifest, and documentation projection is incomplete Product 3 work.
 
 ## Product 3 success measures
 

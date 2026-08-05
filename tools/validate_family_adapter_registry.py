@@ -3,8 +3,10 @@
 
 The horizontal YAML registry names every supported family.  This executable
 registry intentionally contains only the adapters that can be constructed by
-the current runtime slice; the remaining registrations are marked ``planned``
-so the report distinguishes missing integration work from a failed witness.
+the current runtime slice; its X8, B747, Hummingbird, and F-16 source
+witnesses use the same factories as the Product 3 runtime registry.  The
+remaining registrations are marked ``planned`` so the report distinguishes
+missing integration work from a failed witness.
 """
 
 from __future__ import annotations
@@ -21,9 +23,6 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-import yaml
-
-from taoryx.control_allocation import EffectorLimits
 from taoryx.family_adapter import (
     AdapterChannel,
     FamilyAdapterDescriptor,
@@ -40,15 +39,18 @@ from taoryx.fidelity_contracts import FidelityTier
 from taoryx.hl20_adapter import build_hl20_source_adapter
 from taoryx.horizontal_fidelity import load_horizontal_registry, validate_horizontal_fidelity
 from taoryx.nesc_adapter import build_nesc_replay_adapter
+from taoryx.source_f16 import build_f16_source_physical_plant
+from taoryx.source_table_fixed_wing import (
+    build_b747_condition3_source_table_plant,
+    build_x8_source_table_plant,
+)
+from taoryx.source_table_multirotor import build_hummingbird_individual_rotor_source_table_plant
 from taoryx.trajectory import (
     A320OpenAPControlPlant,
     A320OpenAPModel,
     A320Pseudo6DOFControlPlant,
     A320Pseudo6DOFModel,
     F16ReferencePhysicalPlant,
-    load_f16_reference_plant,
-    runtime_trim_result,
-    solve_f16_source_trim,
 )
 from taoryx.trajectory.f16_reduced_adapter import F16PointMassControlPlant, F16Pseudo6DOFControlPlant
 from taoryx.trajectory.f16_reductions import F16AttitudeResponsePseudo6DOFModel, F16PointMass3DOFModel
@@ -59,24 +61,10 @@ from taoryx.x15_adapter import (
     build_x15_source_direct_wrench_plant,
 )
 
-try:
-    from validate_b747_physical_lqr import build_plant as build_b747_plant
-    from validate_hummingbird_physical_lqr import build_plant as build_hummingbird_plant
-    from validate_x8_physical_lqr import build_plant as build_x8_plant
-except ModuleNotFoundError:
-    from tools.validate_b747_physical_lqr import build_plant as build_b747_plant
-    from tools.validate_hummingbird_physical_lqr import build_plant as build_hummingbird_plant
-    from tools.validate_x8_physical_lqr import build_plant as build_x8_plant
-
 OUTPUT = ROOT / "verification/alpha3_horizontal_fidelity/adapter_registry.json"
-F16_CATALOG = ROOT / "families/reference_f16_s119/qualification/operating-points.yaml"
-F16_SIDECAR = ROOT / "families/reference_f16_s119/plant/daveml-import.json"
-F16_ATMOSPHERE = ROOT / "resources/aerospace/daveml/official-conformance-v1/atmos_76.dml"
-F16_ACTUATORS = ROOT / "families/reference_f16_s119/actuators/reference-first-order-v1.yaml"
-
-_SURFACE = "rigid_body_6dof_surface_allocated"
-_DIRECT = "rigid_body_6dof_direct_wrench"
-_PSEUDO = "pseudo_6dof"
+_SURFACE: FidelityTier = "rigid_body_6dof_surface_allocated"
+_DIRECT: FidelityTier = "rigid_body_6dof_direct_wrench"
+_PSEUDO: FidelityTier = "pseudo_6dof"
 
 
 def _controlled_factory(
@@ -206,7 +194,7 @@ def _build_hummingbird_adapter(tier: FidelityTier) -> StandardFamilyAdapter:
             omitted_physics=("individual rotor allocation", "rotor inflow", "physical motor dynamics"),
         )(tier)
     return _controlled_factory(
-        build_hummingbird_plant,
+        build_hummingbird_individual_rotor_source_table_plant,
         family_id="hummingbird",
         adapter_id="taoryx.multirotor.native_quad_x.v1",
         physical_family="multirotor",
@@ -214,60 +202,11 @@ def _build_hummingbird_adapter(tier: FidelityTier) -> StandardFamilyAdapter:
     ####
 
 
-def _f16_limits() -> dict[str, EffectorLimits]:
-    """Load the declared local F-16 actuator overlay."""
-
-    payload = yaml.safe_load(F16_ACTUATORS.read_text(encoding="utf-8"))
-    names = {
-        "elevator": "elevator_deg",
-        "aileron": "aileron_deg",
-        "rudder": "rudder_deg",
-        "throttle": "throttle_fraction",
-    }
-    dynamics = payload.get("dynamics", {})
-    default_time_constant = float(dynamics.get("time_constant_s", 0.0))
-    limits: dict[str, EffectorLimits] = {}
-    for source_name, values in payload["limits"].items():
-        position = values.get("position")
-        if position is None:
-            position = [values["lower"], values["upper"]]
-        rate = values.get("rate_per_s", values.get("rate_limit_per_s"))
-        name = names[source_name]
-        limits[name] = EffectorLimits(
-            name,
-            float(position[0]),
-            float(position[1]),
-            str(values.get("unit", "fraction" if source_name == "throttle" else "deg")),
-            float(rate) if rate is not None else None,
-            float(values.get("time_constant_s", default_time_constant)),
-        )
-    return limits
-    ####
-
-
 @lru_cache(maxsize=1)
 def _build_f16_plant() -> F16ReferencePhysicalPlant:
-    """Build the first source-backed F-16 physical operating-point plant."""
+    """Build the runtime-owned source-backed F-16 plant."""
 
-    catalog = yaml.safe_load(F16_CATALOG.read_text(encoding="utf-8"))
-    point = catalog["points"][0]
-    source = load_f16_reference_plant(F16_SIDECAR, F16_ATMOSPHERE)
-    resolved = solve_f16_source_trim(
-        source,
-        point_id=str(point["id"]),
-        altitude_m=float(point["environment"]["geometric_altitude_m"]),
-        true_airspeed_m_s=float(point["environment"]["true_airspeed_m_s"]),
-        initial_alpha_deg=float(point["state"]["alpha_deg"]),
-        initial_elevator_deg=float(point["controls"]["elevator_deg"]),
-        initial_throttle_fraction=float(point["controls"]["throttle_fraction"]),
-    )
-    return F16ReferencePhysicalPlant(
-        source,
-        runtime_trim_result(resolved),
-        resolved.trim_pitch_rad,
-        resolved.altitude_m,
-        _f16_limits(),
-    )
+    return build_f16_source_physical_plant()
     ####
 
 
@@ -330,6 +269,7 @@ def _reduced_or_source_probe(adapter: StandardFamilyAdapter) -> AdapterProbeCase
 def _build_a320_adapter(tier: FidelityTier) -> StandardFamilyAdapter:
     """Build the executable A320 tier that has a real reduced-order product."""
 
+    plant: A320OpenAPControlPlant | A320Pseudo6DOFControlPlant
     if tier == "point_mass_3dof":
         plant = A320OpenAPControlPlant(A320OpenAPModel.from_repository(ROOT))
         state_units = {"altitude_m": "m", "mach": "1", "mass_kg": "kg", "range_m": "m"}
@@ -492,7 +432,7 @@ def build_registry() -> FamilyAdapterRegistry:
             "taoryx.fixed_wing.source_table.v1",
             "available",
             _controlled_factory(
-                build_x8_plant,
+                build_x8_source_table_plant,
                 family_id="skywalker_x8",
                 adapter_id="taoryx.fixed_wing.source_table.v1",
                 physical_family="powered_fixed_wing",
@@ -506,7 +446,7 @@ def build_registry() -> FamilyAdapterRegistry:
             "taoryx.fixed_wing.source_table.v1",
             "available",
             _controlled_factory(
-                build_b747_plant,
+                build_b747_condition3_source_table_plant,
                 family_id="b747",
                 adapter_id="taoryx.fixed_wing.source_table.v1",
                 physical_family="powered_fixed_wing",
@@ -657,7 +597,7 @@ def build_report() -> dict[str, object]:
     """Build the reproducible registry/conformance artifact."""
 
     registry = build_registry()
-    tiers = {
+    tiers: dict[str, FidelityTier] = {
         "skywalker_x8": _SURFACE,
         "b747": _SURFACE,
         "hummingbird": _SURFACE,

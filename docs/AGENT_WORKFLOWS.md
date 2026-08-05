@@ -22,6 +22,11 @@ For a product-level tour before choosing a contributor workflow, read the
 language successor, simulation/stepping runtime, and vehicle/mission
 composition layer through the commands and artifacts used in this repository.
 
+For the consumer or junior-engineer path through Product 2, read the
+[Product 2 onboarding guide](PRODUCT_TWO_ONBOARDING.md). It is the scenario
+index for source `.prb`/`.tbl` cases, pseudo-6DOF compositions, the
+California–Hawaii variants, external time stepping, and the diagnostic ladder.
+
 ```text
 .tbl/.prb source -> parse/validate -> lower -> runtime model -> artifact/plots
                                       ^                  ^
@@ -46,6 +51,7 @@ composition layer through the commands and artifacts used in this repository.
 | Apply typed scenario changes | [Scenario runtime](architecture/README.md) | `ScenarioCompiler`, `ScenarioRequest` |
 | Run a trajectory | [Runtime architecture](architecture/README.md) | `run_files(...)` or `LoadedProgram` |
 | Drive timesteps | [Interactive engine](architecture/interactive-engine.md) | `InteractiveSession.step(...)` |
+| Find and run Product 2 scenarios | [Product 2 onboarding](PRODUCT_TWO_ONBOARDING.md) | `taoryx run ...` / `taoryx vehicle compose → preflight → lower → run` |
 | Build plots | [Telemetry](architecture/telemetry.md) | `RunArtifact`, `render_run_artifact_plots(...)` |
 | Add control above trim | [Controller stack](architecture/controller-stack.md), [Control contracts](architecture/control-contracts.md), and [LQR](extensions/lqr.md) | `TrimSpec`, `solve_trim`, controller/allocator |
 | Add an airbreathing vehicle mission | [Mission-composition automation](plan/mission-composition-automation.md) | `compile_powered_fixed_wing_racetrack(...)` |

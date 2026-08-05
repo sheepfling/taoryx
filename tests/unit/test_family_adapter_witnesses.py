@@ -7,7 +7,7 @@ from taoryx.family_adapter import (
 )
 from taoryx.hl20_adapter import build_hl20_source_surface_adapter
 from taoryx.source_table_fixed_wing import build_x8_source_table_plant
-from tools.validate_hummingbird_physical_lqr import build_plant as build_hummingbird_plant
+from taoryx.source_table_multirotor import build_hummingbird_individual_rotor_source_table_plant
 
 
 def test_x8_source_table_plant_uses_the_common_surface_adapter_contract() -> None:
@@ -32,7 +32,7 @@ def test_x8_source_table_plant_uses_the_common_surface_adapter_contract() -> Non
 
 
 def test_hummingbird_source_rotor_plant_uses_the_same_surface_adapter_contract() -> None:
-    plant = build_hummingbird_plant()
+    plant = build_hummingbird_individual_rotor_source_table_plant()
     descriptor = descriptor_from_control_plant(
         plant,
         family_id="hummingbird",

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -40,4 +41,20 @@ def test_artifact_plot_cli_consumes_json_artifact(tmp_path: Path, capsys) -> Non
     assert list(output.glob("*.png"))
     assert (output / "plot-manifest.json").exists()
     assert "artifact plot" in capsys.readouterr().out
+    ####
+
+
+def test_artifact_inspect_cli_reports_telemetry_shape(tmp_path: Path, capsys) -> None:
+    scenario = ScenarioCompiler().compile(
+        ROOT / "examples/chapter04/ballistic-reentry.prb",
+        table_paths=(ROOT / "examples/chapter04/ballistic-reentry.tbl",),
+    )
+    artifact_path = tmp_path / "artifact.json"
+    scenario.run(output_dir=tmp_path / "run", max_steps=20_000)[0].write_json(artifact_path)
+
+    assert main(["artifact", "inspect", str(artifact_path), "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["schema"] == "taoryx.runtime-artifact-inspection/v1alpha1"
+    assert payload["vehicles"]
+    assert payload["vehicles"][0]["sample_count"] > 0
     ####
