@@ -10,7 +10,7 @@ import shlex
 from collections.abc import Mapping
 from html import escape
 from pathlib import Path
-from typing import TypedDict
+from typing import TypedDict, cast
 
 from taoryx.batch_episode_parity_dispatch import verify_serialized_declared_batch_episode_parity
 from taoryx.composition_episode import open_vehicle_composition_episode
@@ -27,6 +27,18 @@ from taoryx.nesc_composition_execution import execute_nesc_source_replay_composi
 from taoryx.outputs import RunArtifact
 from taoryx.passive_tumbling_composition_execution import execute_passive_tumbling_composition
 from taoryx.product_three_maturity import build_product_three_maturity_report
+from taoryx.product_two_bundle import build_product_two_bundle, write_composition_run_artifact
+from taoryx.product_two_catalog import ProductTwoScenario, load_product_two_catalog
+from taoryx.product_two_contracts import ProductTwoStatus
+from taoryx.product_two_doctor import doctor_scenario
+from taoryx.product_two_manifest import (
+    ProductTwoManifestCompatibilityError,
+    artifact_inventory,
+    build_product_two_run_manifest,
+    default_runtime_identity,
+    read_product_two_run_manifest,
+    source_input_record,
+)
 from taoryx.reachability_catalog import ReachabilityCatalog, load_reachability_catalog
 from taoryx.reachability_envelope import (
     ReachabilityFidelity,
@@ -189,8 +201,31 @@ def main(argv: list[str] | None = None) -> int:
         choices=tuple(item.value for item in available_integrators()),
         help=("integration backend: euler for fast tests, rk4 for fixed-step runs, or scipy-* if installed"),
     )
-    scenario = subparsers.add_parser("scenario", help="compile and inspect resolved scenario caches")
+    scenario = subparsers.add_parser("scenario", help="discover, validate, bundle, or compile Product 2 scenarios")
     scenario_subparsers = scenario.add_subparsers(dest="scenario_command", required=True)
+    scenario_list = scenario_subparsers.add_parser("list", help="list canonical Product 2 scenarios")
+    scenario_list.add_argument("--catalog", type=Path, default=Path("verification/product_two_scenario_catalog.yaml"))
+    scenario_list.add_argument("--json", action="store_true")
+    scenario_search = scenario_subparsers.add_parser("search", help="search canonical Product 2 scenarios")
+    scenario_search.add_argument("query")
+    scenario_search.add_argument("--catalog", type=Path, default=Path("verification/product_two_scenario_catalog.yaml"))
+    scenario_search.add_argument("--json", action="store_true")
+    scenario_show = scenario_subparsers.add_parser("show", help="show one canonical Product 2 scenario")
+    scenario_show.add_argument("identifier")
+    scenario_show.add_argument("--catalog", type=Path, default=Path("verification/product_two_scenario_catalog.yaml"))
+    scenario_show.add_argument("--json", action="store_true")
+    scenario_bundle = scenario_subparsers.add_parser("bundle", help="collect one scenario into a reproducible evidence bundle")
+    scenario_bundle.add_argument("identifier")
+    scenario_bundle.add_argument("--catalog", type=Path, default=Path("verification/product_two_scenario_catalog.yaml"))
+    scenario_bundle.add_argument("--output-dir", type=Path, required=True)
+    scenario_bundle.add_argument("--no-run", action="store_true")
+    scenario_bundle.add_argument("--no-plots", action="store_true")
+    scenario_bundle.add_argument("--json", action="store_true")
+    scenario_manifest = scenario_subparsers.add_parser("manifest", help="validate a Product 2 run manifest")
+    scenario_manifest_subparsers = scenario_manifest.add_subparsers(dest="scenario_manifest_command", required=True)
+    scenario_manifest_validate = scenario_manifest_subparsers.add_parser("validate", help="validate schema, required fields, and run identity")
+    scenario_manifest_validate.add_argument("path", type=Path)
+    scenario_manifest_validate.add_argument("--json", action="store_true")
     compile_scenario = scenario_subparsers.add_parser("compile", help="validate source and write a resolved scenario cache")
     compile_scenario.add_argument("problem", type=Path)
     compile_scenario.add_argument("tables", type=Path, nargs="*")
@@ -199,6 +234,10 @@ def main(argv: list[str] | None = None) -> int:
     compile_scenario.add_argument("--seed", type=int)
     compile_scenario.add_argument("--integrator")
     compile_scenario.add_argument("--json", action="store_true")
+    doctor = subparsers.add_parser("doctor", help="run the ordered Product 2 setup diagnostic ladder")
+    doctor.add_argument("identifier")
+    doctor.add_argument("--catalog", type=Path, default=Path("verification/product_two_scenario_catalog.yaml"))
+    doctor.add_argument("--json", action="store_true")
     artifact = subparsers.add_parser("artifact", help="inspect normalized run artifacts")
     artifact_subparsers = artifact.add_subparsers(dest="artifact_command", required=True)
     artifact_html = artifact_subparsers.add_parser("html", help="render a run artifact as standalone HTML")
@@ -209,6 +248,9 @@ def main(argv: list[str] | None = None) -> int:
     artifact_inspect = artifact_subparsers.add_parser("inspect", help="summarize one normalized run artifact")
     artifact_inspect.add_argument("path", type=Path)
     artifact_inspect.add_argument("--json", action="store_true")
+    artifact_validate = artifact_subparsers.add_parser("validate", help="validate one normalized run artifact against its schema")
+    artifact_validate.add_argument("path", type=Path)
+    artifact_validate.add_argument("--json", action="store_true")
     artifact_plot = artifact_subparsers.add_parser("plot", help="render static PNG plots from a run artifact")
     artifact_plot.add_argument("path", type=Path)
     artifact_plot.add_argument("--output-dir", type=Path, required=True)
@@ -640,7 +682,9 @@ def main(argv: list[str] | None = None) -> int:
     daveml_composite.add_argument("--output", type=Path)
     arguments = parser.parse_args(argv)
     if arguments.command == "scenario":
-        return _compile_scenario(arguments)
+        return _scenario_command(arguments)
+    if arguments.command == "doctor":
+        return _doctor_command(arguments)
     if arguments.command == "artifact":
         return _render_artifact(arguments)
     if arguments.command == "table":
@@ -701,6 +745,12 @@ def main(argv: list[str] | None = None) -> int:
         except OSError as error:
             print(f"error: report-write-failed: {error}")
             return 2
+    try:
+        run_manifest = _write_source_run_manifest(arguments, report, normalized_artifact)
+        report_payload["run_manifest"] = str(run_manifest)
+    except (OSError, TypeError, ValueError) as error:
+        print(f"error: run-manifest-write-failed: {error}")
+        return 2
     if arguments.json:
         print(json.dumps(report_payload, indent=2))
     else:
@@ -712,6 +762,52 @@ def main(argv: list[str] | None = None) -> int:
         for output in report.outputs:
             print(f"output: {output}")
     return report.exit_code
+
+
+def _write_source_run_manifest(arguments: argparse.Namespace, report: object, artifact_path: Path | None) -> Path:
+    """Write the common Product 2 manifest for a file-oriented source run."""
+
+    from taoryx.runtime.runner import RunReport
+
+    if not isinstance(report, RunReport):
+        raise TypeError("source run manifest requires a RunReport")
+    artifact = report.artifacts[0] if report.artifacts else None
+    scenario_id = artifact.scenario_identity if artifact is not None and artifact.scenario_identity else Path(arguments.problem).stem
+    accepted_times = [time for item in report.artifacts for vehicle in item.vehicles.values() for time in vehicle.times]
+    source_inputs = []
+    missing_inputs: list[str] = []
+    for path, role in [(arguments.problem, "problem"), *((path, "table") for path in arguments.tables)]:
+        if Path(path).is_file():
+            source_inputs.append(source_input_record(path, role=role))
+        else:
+            missing_inputs.append(str(path))
+    termination = {
+        "completed": report.status is ProductTwoStatus.PASSED,
+        "reason": report.results[0].stop_reason if report.results else "no_execution_result",
+        "diagnostics": [item.code for item in report.diagnostics],
+    }
+    if missing_inputs:
+        termination["missing_inputs"] = missing_inputs
+    manifest = build_product_two_run_manifest(
+        scenario_id=scenario_id,
+        status=report.status,
+        expected_disposition=report.status,
+        operation="batch",
+        fidelity="source_runtime",
+        realization="source_runtime",
+        source_inputs=tuple(source_inputs),
+        runtime=default_runtime_identity(),
+        integration={"profile": arguments.profile, "integrator": arguments.integrator, "max_steps": arguments.max_steps, "seed": arguments.seed},
+        time={"requested_duration_s": None, "accepted_start_s": min(accepted_times) if accepted_times else None, "accepted_end_s": max(accepted_times) if accepted_times else None},
+        termination=termination,
+        artifacts=artifact_inventory(arguments.output_dir),
+        claim_boundary=(
+            "This manifest identifies one source-runtime execution and its normalized artifacts. It does not prove "
+            "numerical qualification, physical-effector behavior, historical fidelity, or mission capability."
+        ),
+        reproduction_command=("taoryx", "run", str(arguments.problem), *(str(path) for path in arguments.tables)),
+    )
+    return manifest.write_json(Path(arguments.output_dir) / "run-manifest.json")
 
 
 def _daveml_command(arguments: argparse.Namespace) -> int:
@@ -848,6 +944,118 @@ def _a320_openap_smoke(arguments: argparse.Namespace) -> int:
         arguments.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["status"] == "verified" else 2
+
+
+def _scenario_command(arguments: argparse.Namespace) -> int:
+    """Handle Product 2 discovery, manifest, bundle, and source compilation commands."""
+
+    try:
+        if arguments.scenario_command == "compile":
+            return _compile_scenario(arguments)
+        if arguments.scenario_command == "manifest" and arguments.scenario_manifest_command == "validate":
+            manifest = read_product_two_run_manifest(arguments.path)
+            payload = manifest.model_dump(mode="json", by_alias=True)
+            if arguments.json:
+                _print_json(payload)
+            else:
+                print(f"valid: {manifest.scenario_id} ({manifest.run_identity})")
+            return 0
+        catalog = load_product_two_catalog(arguments.catalog)
+        if arguments.scenario_command == "list":
+            rows = [_scenario_summary(item) for item in catalog.scenarios]
+            if arguments.json:
+                _print_json({"schema": catalog.schema_id, "schema_version": catalog.schema_version, "scenarios": rows})
+            else:
+                for row in rows:
+                    print(f"{row['id']}: {row['title']} [{row['fidelity']}, {row['operation']}, expected={row['expected_disposition']}]")
+            return 0
+        if arguments.scenario_command == "search":
+            rows = [_scenario_summary(item) for item in catalog.search(arguments.query)]
+            if arguments.json:
+                _print_json({"query": arguments.query, "matches": rows})
+            else:
+                for row in rows:
+                    print(f"{row['id']}: {row['title']}")
+            return 0
+        if arguments.scenario_command == "show":
+            scenario = catalog.find(arguments.identifier)
+            if arguments.json:
+                _print_json(scenario.as_dict())
+            else:
+                print(f"id: {scenario.id}")
+                print(f"title: {scenario.title}")
+                print(f"description: {scenario.description}")
+                print(f"family: {scenario.family}")
+                print(f"fidelity: {scenario.fidelity}")
+                print(f"realization: {scenario.realization}")
+                print(f"operation: {scenario.operation}")
+                print(f"expected disposition: {scenario.expected_disposition.value}")
+                print("inputs:")
+                for item in scenario.inputs:
+                    print(f"  - {item.path} ({item.role})")
+                print("run command: " + " ".join(scenario.run_command))
+                print(f"claim boundary: {scenario.claim_boundary}")
+            return 0
+        if arguments.scenario_command == "bundle":
+            scenario = catalog.find(arguments.identifier)
+            result = build_product_two_bundle(
+                scenario,
+                arguments.output_dir,
+                run=not arguments.no_run,
+                plots=not arguments.no_plots,
+            )
+            if arguments.json:
+                _print_json(result)
+            else:
+                print(f"wrote Product 2 bundle: {arguments.output_dir}")
+                print(f"manifest: {result['manifest']}")
+            return 0 if result["status"] in {ProductTwoStatus.PASSED.value, ProductTwoStatus.INCOMPLETE.value} else 2
+        raise ValueError(f"unsupported scenario command: {arguments.scenario_command}")
+    except (OSError, KeyError, TypeError, ValueError, ProductTwoManifestCompatibilityError, RuntimeError) as error:
+        print(f"error: scenario-failed: {error}")
+        return 2
+    ####
+
+
+def _doctor_command(arguments: argparse.Namespace) -> int:
+    """Run and print one catalog scenario's ordered diagnostic ladder."""
+
+    try:
+        scenario = load_product_two_catalog(arguments.catalog).find(arguments.identifier)
+        report = doctor_scenario(scenario)
+        if arguments.json:
+            _print_json(report)
+        else:
+            print(f"scenario: {report['scenario_id']}")
+            print(f"status: {report['status']} (expected disposition: {report['expected_disposition']})")
+            for check in cast(list[dict[str, object]], report["checks"]):
+                print(f"{check['status']}: {check['id']} — {check['message']}")
+            for diagnostic in cast(list[dict[str, object]], report["diagnostics"]):
+                print(f"diagnostic: {diagnostic['code']} at {diagnostic['location']}: {diagnostic['message']}")
+        return 0 if report["status"] == ProductTwoStatus.PASSED.value else 2
+    except (OSError, KeyError, TypeError, ValueError) as error:
+        print(f"error: doctor-failed: {error}")
+        return 2
+    ####
+
+
+def _scenario_summary(scenario: ProductTwoScenario) -> dict[str, object]:
+    """Return the compact list/search projection."""
+
+    return {
+        "id": scenario.id,
+        "aliases": list(scenario.aliases),
+        "title": scenario.title,
+        "entrypoint": scenario.entrypoint,
+        "family": scenario.family,
+        "fidelity": scenario.fidelity,
+        "realization": scenario.realization,
+        "operation": scenario.operation,
+        "expected_disposition": scenario.expected_disposition.value,
+        "input_count": len(scenario.inputs),
+        "claim_boundary": scenario.claim_boundary,
+    }
+    ####
 
 
 def _compile_scenario(arguments: argparse.Namespace) -> int:
@@ -1673,7 +1881,7 @@ def _vehicle_integration_command(arguments: argparse.Namespace) -> int:
                 if arguments.family == "all"
                 else (validate_vehicle_integration_readiness(arguments.family),)
             )
-            payload = {
+            payload: dict[str, object] = {
                 "schema": "taoryx.vehicle-integration-command/v1alpha1",
                 "command": "readiness",
                 "family": arguments.family,
@@ -1849,7 +2057,53 @@ def _finalize_vehicle_batch_execution_payload(
         composition_path=composition_path,
         max_steps=max_steps,
     )
+    result["run_manifest"] = _write_composition_run_manifest(
+        output_dir,
+        composition=composition,
+        binding=binding,
+        composition_path=composition_path,
+        payload=result,
+        max_steps=max_steps,
+    )
     return result
+    ####
+
+
+def _write_composition_run_manifest(
+    output_dir: Path,
+    *,
+    composition: CompiledVehicleComposition,
+    binding: VehicleExecutionBinding,
+    composition_path: Path,
+    payload: Mapping[str, object],
+    max_steps: int | None,
+) -> dict[str, object]:
+    """Write the common Product 2 manifest for a composition-owned run."""
+
+    write_composition_run_artifact(output_dir, composition)
+    mission_pass = payload.get("mission_pass")
+    status = ProductTwoStatus.PASSED if mission_pass is True else ProductTwoStatus.INCOMPLETE
+    manifest = build_product_two_run_manifest(
+        scenario_id=composition.id,
+        status=status,
+        expected_disposition=ProductTwoStatus.DEVELOPMENT,
+        operation="composition_batch",
+        fidelity=str(composition.fidelity),
+        realization=composition.control_realization,
+        source_inputs=(source_input_record(composition_path, role="compiled_composition"),),
+        runtime=default_runtime_identity(),
+        integration={"factory_id": binding.factory_id, "execution_mode": binding.execution_mode, "max_steps": max_steps},
+        time={"requested_duration_s": None, "accepted_start_s": None, "accepted_end_s": None},
+        termination={"completed": status is ProductTwoStatus.PASSED, "reason": "mission_pass" if mission_pass is True else "mission_not_passed"},
+        artifacts=artifact_inventory(output_dir),
+        claim_boundary=(
+            "This manifest identifies one composition-owned execution packet. It does not prove numerical accuracy, "
+            "physical-effector behavior, vehicle qualification, or historical fidelity."
+        ),
+        reproduction_command=("taoryx", "vehicle", "run", str(composition_path), "--output-dir", str(output_dir)),
+    )
+    path = manifest.write_json(output_dir / "run-manifest.json")
+    return {"path": str(path), "run_identity": manifest.run_identity, "status": manifest.status.value}
     ####
 
 
@@ -1961,14 +2215,31 @@ def _render_artifact(arguments: argparse.Namespace) -> int:
 
     try:
         artifact = RunArtifact.model_validate_json(arguments.path.read_text(encoding="utf-8"))
-        if arguments.artifact_command == "inspect":
-            payload = _artifact_inspection_payload(artifact)
+        if arguments.artifact_command == "validate":
+            validation_payload: dict[str, object] = {
+                "schema": "taoryx.run-artifact/v1",
+                "path": str(arguments.path),
+                "status": "passed",
+                "scenario_identity": artifact.scenario_identity,
+                "vehicle_count": len(artifact.vehicles),
+                "claim_boundary": (
+                    "Schema validation proves the normalized artifact is structurally readable. It does not prove "
+                    "numerical accuracy, physical-effector behavior, or vehicle qualification."
+                ),
+            }
             if arguments.json:
-                print(json.dumps(payload, indent=2, sort_keys=True))
+                print(json.dumps(validation_payload, indent=2, sort_keys=True))
+            else:
+                print(f"valid artifact: {arguments.path}")
+            return 0
+        if arguments.artifact_command == "inspect":
+            inspection_payload = _artifact_inspection_payload(artifact)
+            if arguments.json:
+                print(json.dumps(inspection_payload, indent=2, sort_keys=True))
             else:
                 print(f"problem: {artifact.problem}")
                 print(f"schema_version: {artifact.schema_version}")
-                for vehicle in payload["vehicles"]:
+                for vehicle in inspection_payload["vehicles"]:
                     print(
                         "vehicle: "
                         f"{vehicle['vehicle_id']} dynamics={vehicle['dynamics']} "
@@ -1976,8 +2247,8 @@ def _render_artifact(arguments: argparse.Namespace) -> int:
                         f"time={vehicle['time_start_s']}..{vehicle['time_end_s']} s"
                     )
                     print("  channels: " + ", ".join(vehicle["channels"]))
-                print(f"events: {payload['event_count']}")
-                print(f"commands: {payload['command_count']}")
+                print(f"events: {inspection_payload['event_count']}")
+                print(f"commands: {inspection_payload['command_count']}")
             return 0
         if arguments.artifact_command == "html":
             render_run_artifact_html(

@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-08-06T15:05:19.446670+00:00",
+  "captured_at_utc": "2026-08-06T17:41:48.842672+00:00",
   "cases": [
     {
       "command": [
@@ -22,10 +22,10 @@
         "<output-dir>run-artifact.json"
       ],
       "description": "Small staged-rocket source batch smoke test.",
-      "elapsed_s": 2.411995,
+      "elapsed_s": 2.441119,
       "error": null,
       "expected_disposition": "passed",
-      "file_count": 4,
+      "file_count": 5,
       "files": [
         {
           "bytes": 39040,
@@ -38,9 +38,14 @@
           "sha256": "7bea94f6eee4ed42ba5d72edf694078fd8872d0399b3c7f7bdbdd446fc13a31b"
         },
         {
+          "bytes": 2274,
+          "path": "run-manifest.json",
+          "sha256": "3fb8b8523ad6bc0bd044aef55b08d16879a0a0bf0e1e556b1fa50da70fe38977"
+        },
+        {
           "bytes": 2245089,
           "path": "run-report.json",
-          "sha256": "3bc028aa945ddaf08a93d56098e53e14d4ecfdd413c88dd4e93fe3c84c00af6d"
+          "sha256": "67b27c860d635bedd9166d2d3cd7471149b0c6bfbc6a23b420801d03a6727d4c"
         },
         {
           "bytes": 8771,
@@ -60,7 +65,7 @@
             "run-artifact.json": "7bea94f6eee4ed42ba5d72edf694078fd8872d0399b3c7f7bdbdd446fc13a31b"
           }
         },
-        "repeat_run_elapsed_s": 2.378273,
+        "repeat_run_elapsed_s": 2.462391,
         "repeat_run_status": "passed",
         "repeatable": true
       },
@@ -68,7 +73,7 @@
         "run-artifact.json": "7bea94f6eee4ed42ba5d72edf694078fd8872d0399b3c7f7bdbdd446fc13a31b"
       },
       "return_code": 0,
-      "total_bytes": 4255031
+      "total_bytes": 4257305
     },
     {
       "command": [
@@ -93,10 +98,10 @@
         "<output-dir>run-artifact.json"
       ],
       "description": "Changing-mass source tables and separation example.",
-      "elapsed_s": 1.592116,
+      "elapsed_s": 1.641593,
       "error": null,
       "expected_disposition": "passed",
-      "file_count": 6,
+      "file_count": 7,
       "files": [
         {
           "bytes": 12784,
@@ -119,9 +124,14 @@
           "sha256": "21b4b922823d6be589ddcf973a8178704163e548835a0715a0d1e9e4b4dd5d3d"
         },
         {
+          "bytes": 3299,
+          "path": "run-manifest.json",
+          "sha256": "5aec620a6cd5fbfe006108aed4506029593e6b23112eece41c6ef736e02472e2"
+        },
+        {
           "bytes": 808401,
           "path": "run-report.json",
-          "sha256": "2bccc748b84c5184d53d7dc37a39eafd513a5a437d0d21cad318e97707b63049"
+          "sha256": "3f41f2708ca70be907a05ff445c196157cc476f59d1b4d839bb53377eb504850"
         },
         {
           "bytes": 5259,
@@ -141,7 +151,7 @@
             "run-artifact.json": "21b4b922823d6be589ddcf973a8178704163e548835a0715a0d1e9e4b4dd5d3d"
           }
         },
-        "repeat_run_elapsed_s": 1.583888,
+        "repeat_run_elapsed_s": 1.618517,
         "repeat_run_status": "passed",
         "repeatable": true
       },
@@ -149,7 +159,7 @@
         "run-artifact.json": "21b4b922823d6be589ddcf973a8178704163e548835a0715a0d1e9e4b4dd5d3d"
       },
       "return_code": 0,
-      "total_bytes": 1516817
+      "total_bytes": 1520116
     },
     {
       "command": [
@@ -175,10 +185,10 @@
         ]
       ],
       "description": "NESC staged source-history pseudo-6DOF witness.",
-      "elapsed_s": 4.162739,
+      "elapsed_s": 4.23866,
       "error": null,
       "expected_disposition": "development",
-      "file_count": 18,
+      "file_count": 20,
       "files": [
         {
           "bytes": 6338,
@@ -208,7 +218,7 @@
         {
           "bytes": 20966,
           "path": "run/execution.json",
-          "sha256": "ab350080c63394d902de5e9113d22d5869777a1be4d5cb46a0e46eb7230703e2"
+          "sha256": "2cb0cabf8b6556788f63f78f7b81bbdd6175eae8c0527c6da1e8c88629ddb8f3"
         },
         {
           "bytes": 998,
@@ -233,12 +243,22 @@
         {
           "bytes": 549,
           "path": "run/reproduction.txt",
-          "sha256": "1425dc8c8ff2f5c948b455cafc7b55423c6714bab4403ad72de14537061aec93"
+          "sha256": "6f12881177c16a7d7fb97cbc17c7512388e8e43d3d0f7ac50bdc96fb93ae331c"
         },
         {
           "bytes": 25232,
           "path": "run/resource_ledger.json",
           "sha256": "b1aea5ed1e3870666539ec2d50f228e296769d08fbf9b5141dee5d0561c30d00"
+        },
+        {
+          "bytes": 48957,
+          "path": "run/run-artifact.json",
+          "sha256": "0de63d9bb774acbb8881e873a4e569a00e20cc868e9a9ff97c3f55e34d8fd267"
+        },
+        {
+          "bytes": 5000,
+          "path": "run/run-manifest.json",
+          "sha256": "b0dae48f3ab056313f6cea6458da7e372fac7c72799e03a779d758fda3c96ce9"
         },
         {
           "bytes": 2029,
@@ -285,7 +305,7 @@
             "run/truth_telemetry.csv": "b739708dec01ff7be98b37766fc3de8643b9db3c240f44e8a4136c432cfdeae2"
           }
         },
-        "repeat_run_elapsed_s": 4.166421,
+        "repeat_run_elapsed_s": 4.308987,
         "repeat_run_status": "passed",
         "repeatable": true
       },
@@ -294,7 +314,7 @@
         "run/truth_telemetry.csv": "b739708dec01ff7be98b37766fc3de8643b9db3c240f44e8a4136c432cfdeae2"
       },
       "return_code": 0,
-      "total_bytes": 405126
+      "total_bytes": 459083
     },
     {
       "command": [
@@ -320,10 +340,10 @@
         ]
       ],
       "description": "X-15-scaled staged booster reachability witness.",
-      "elapsed_s": 5.200935,
+      "elapsed_s": 5.217063,
       "error": null,
       "expected_disposition": "development",
-      "file_count": 19,
+      "file_count": 21,
       "files": [
         {
           "bytes": 6671,
@@ -353,7 +373,7 @@
         {
           "bytes": 23617,
           "path": "run/execution.json",
-          "sha256": "0dfebc5e192fda132d804c550a53eed51fd72ec4af244fd1f5181eb26f3667ca"
+          "sha256": "626df6ca824268abf1e0b02338d9025e129e72fb6387ea356118fd9b6c609232"
         },
         {
           "bytes": 1211149,
@@ -383,12 +403,22 @@
         {
           "bytes": 568,
           "path": "run/reproduction.txt",
-          "sha256": "590ce635421d74c65db673afe10176e51ede740386eb765cd21826bf8275d139"
+          "sha256": "a1dcc337aed2bedfff6cf201fbe276d311befcc2c4f69c63b69ce247c919b3f6"
         },
         {
           "bytes": 197813,
           "path": "run/resource_ledger.json",
           "sha256": "205fd62a67692f975b54e4112efe74679e91291abb7e2899c5a6c8325b9fd594"
+        },
+        {
+          "bytes": 163541,
+          "path": "run/run-artifact.json",
+          "sha256": "d44af8bfe9d308bbd7431ca4ad9e9e7d856c07240655aa3e00adaed576fd38e0"
+        },
+        {
+          "bytes": 5212,
+          "path": "run/run-manifest.json",
+          "sha256": "c605cb08b8910877d896be10b469e25140c28fa91aa7e81fe456610800feb463"
         },
         {
           "bytes": 3147,
@@ -435,7 +465,7 @@
             "run/truth_telemetry.csv": "a6886127842835c3d3a671b6d4ed3549f81cb54bd7f9e14ea7d5eeba1a58c875"
           }
         },
-        "repeat_run_elapsed_s": 5.171162,
+        "repeat_run_elapsed_s": 5.214903,
         "repeat_run_status": "passed",
         "repeatable": true
       },
@@ -444,7 +474,7 @@
         "run/truth_telemetry.csv": "a6886127842835c3d3a671b6d4ed3549f81cb54bd7f9e14ea7d5eeba1a58c875"
       },
       "return_code": 0,
-      "total_bytes": 2870301
+      "total_bytes": 3039054
     },
     {
       "command": [
@@ -470,10 +500,10 @@
         ]
       ],
       "description": "HL-20 source-booster release pseudo-6DOF witness.",
-      "elapsed_s": 14.415942,
+      "elapsed_s": 14.453856,
       "error": null,
       "expected_disposition": "development",
-      "file_count": 18,
+      "file_count": 20,
       "files": [
         {
           "bytes": 6623,
@@ -503,7 +533,7 @@
         {
           "bytes": 22134,
           "path": "run/execution.json",
-          "sha256": "e0c6b514e80f7c67a7174f2ecd94c8e4a09e4029c033c6a7683c33902f188fd0"
+          "sha256": "2571dc1e12b1ba1040329cb0e244224ed380d2a659bc97ec491bb225cd544e31"
         },
         {
           "bytes": 1042,
@@ -528,12 +558,22 @@
         {
           "bytes": 606,
           "path": "run/reproduction.txt",
-          "sha256": "e31a3ede9e37bbc3d4f91e5351b1574037aca0952f6b07a71d9f880dd51a719f"
+          "sha256": "e1aa5b527e58ac8b418bb5cb8aec78a6d3055a0f81dedb3985041d24d79caee6"
         },
         {
           "bytes": 9198,
           "path": "run/resource_ledger.json",
           "sha256": "42c6a45c19af1d1f8af1fa89b2390d4bcb358bfcb7ee5065f01a5199d71eb5c5"
+        },
+        {
+          "bytes": 25937,
+          "path": "run/run-artifact.json",
+          "sha256": "a538f0fa0d342932f7e326629b8bb90285e2149e1f0ac0fac40f79c9eb899932"
+        },
+        {
+          "bytes": 5070,
+          "path": "run/run-manifest.json",
+          "sha256": "881fd3cefba1aacf38f225a2782a1c7c1ef16ff274573cc833e601508a993cf7"
         },
         {
           "bytes": 2212,
@@ -580,7 +620,7 @@
             "run/truth_telemetry.csv": "178f5966b199fd38ebf1bd79d0f5d7c347553a350f4f3a72045a8cab5cc99c47"
           }
         },
-        "repeat_run_elapsed_s": 14.377613,
+        "repeat_run_elapsed_s": 14.399402,
         "repeat_run_status": "passed",
         "repeatable": true
       },
@@ -589,7 +629,7 @@
         "run/truth_telemetry.csv": "178f5966b199fd38ebf1bd79d0f5d7c347553a350f4f3a72045a8cab5cc99c47"
       },
       "return_code": 0,
-      "total_bytes": 182940
+      "total_bytes": 213947
     },
     {
       "command": [
@@ -599,7 +639,7 @@
         "<output-dir>."
       ],
       "description": "HL-20 California-Hawaii four-tier release/glide bundle.",
-      "elapsed_s": 25.888917,
+      "elapsed_s": 25.794974,
       "error": null,
       "expected_disposition": "development",
       "file_count": 30,
@@ -769,7 +809,7 @@
             "composites/showcase-summary.json": "fdf3bb3d7808d244db6f3039f99931eb81594c0fdd4e1f176910b9b30251cef9"
           }
         },
-        "repeat_run_elapsed_s": 25.290529,
+        "repeat_run_elapsed_s": 25.404956,
         "repeat_run_status": "passed",
         "repeatable": true
       },
@@ -788,7 +828,7 @@
         "<output-dir>."
       ],
       "description": "Synthetic native rigid-body California-Hawaii route.",
-      "elapsed_s": 26.716833,
+      "elapsed_s": 26.826726,
       "error": null,
       "expected_disposition": "development",
       "file_count": 17,
@@ -801,7 +841,7 @@
         {
           "bytes": 8487,
           "path": "manifest.json",
-          "sha256": "83587ec870b860cf4e5a0c8a91802717003c42161cf236a73a53f1ac859a2720"
+          "sha256": "15a935660c2d0bf79d7d2a73579f7410dc0a0ebb5110f6208cba18540a64cbfd"
         },
         {
           "bytes": 700108,
@@ -811,7 +851,7 @@
         {
           "bytes": 334002,
           "path": "plots/.mplconfig/fontlist-v3.11.0.json",
-          "sha256": "8078fd443ce05804fd691af666e8f17bb8bb0e28ff17e0c153ce762442244250"
+          "sha256": "285a26b2e48963adaef56f3b0094c680980cf33f0a5139e3f2aa84363cb8eed0"
         },
         {
           "bytes": 39867,
@@ -891,7 +931,7 @@
             "realized_fidelity.json": "6444828f52eead5d3cbfaa0820ffd7247c85e99a0fadc0688aee9f9f5a858cd8"
           }
         },
-        "repeat_run_elapsed_s": 26.674207,
+        "repeat_run_elapsed_s": 26.735232,
         "repeat_run_status": "passed",
         "repeatable": true
       },
@@ -907,7 +947,7 @@
         "interactive-session-baseline"
       ],
       "description": "Two accepted external interactive steps over the synthetic route.",
-      "elapsed_s": 0.043563,
+      "elapsed_s": 0.045475,
       "error": null,
       "expected_disposition": "passed",
       "file_count": 1,
@@ -930,7 +970,7 @@
             "interactive-artifact.json": "ecccbd49d702fde0a6ea3a49e164b8157f6259b77a3094f49aff54dc981660b4"
           }
         },
-        "repeat_run_elapsed_s": 0.031183,
+        "repeat_run_elapsed_s": 0.032945,
         "repeat_run_status": "passed",
         "repeatable": true
       },
@@ -942,7 +982,7 @@
     }
   ],
   "claim_boundary": "This is a Product 2 execution, artifact-size, and repeatability baseline. It does not establish numerical qualification, physical-effector behavior, historical fidelity, or mission capability.",
-  "git_revision": "926639729171d95818bee52fccdb391af23f7aa3",
+  "git_revision": "84ebcb88ace76a0dd6c80c4ff1e108dc0ade766c",
   "runtime": {
     "executable": "/Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/.venv/bin/python",
     "platform": "macOS-26.6-arm64-arm-64bit",
@@ -957,5 +997,5 @@
     "out_of_envelope",
     "failed"
   ],
-  "working_tree_dirty": false
+  "working_tree_dirty": true
 }

@@ -164,6 +164,11 @@ Deliverables:
 - add `taoryx doctor <scenario-id>` to run validation, table inspection,
   compilation, resolution, preflight, lowering, and capability checks in order.
 
+Implementation: [`verification/product_two_scenario_catalog.yaml`](../../verification/product_two_scenario_catalog.yaml),
+the `taoryx scenario` discovery commands, and the
+[`product_two_doctor.py`](../../src/taoryx/product_two_doctor.py) diagnostic
+ladder.
+
 Exit gate: a new engineer can identify and validate each canonical scenario
 from one catalog entry, and every blocking diagnostic includes a stable code,
 location, remediation, and blocking status.
@@ -185,6 +190,11 @@ Deliverables:
 - add artifact schema validation and compatibility checks; and
 - add `taoryx scenario bundle <scenario-id>` to collect inputs, manifest,
   resolved request, provenance, reproduction command, telemetry, and plots.
+
+Implementation: [`product_two_manifest.py`](../../src/taoryx/product_two_manifest.py),
+[`product_two_bundle.py`](../../src/taoryx/product_two_bundle.py), and the
+`scenario bundle`, `scenario manifest validate`, and `artifact validate`
+commands.
 
 Exit gate: a bundle can be copied to another workspace and its reproduction
 command, artifact inspection, and claim boundary remain self-contained.

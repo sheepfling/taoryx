@@ -32,6 +32,18 @@ If the `taoryx` command is not on `PATH`, use `.venv/bin/taoryx`. If the
 `python` alias is unavailable, use `.venv/bin/python` for the commands below.
 Run all commands from the repository root.
 
+For the canonical Product 2 set, start with the machine-readable discovery
+surface instead of browsing the examples tree:
+
+```bash
+taoryx scenario list --json
+taoryx scenario search hl20 --json
+taoryx doctor hl20-source-release-pseudo6dof --json
+```
+
+The complete discovery, diagnostic, manifest, and bundle contract is in
+[Product 2 discovery and bundles](architecture/product-two-discovery-and-bundles.md).
+
 ## The five-minute first run
 
 Start with a small source-first staged rocket. It exercises parsing, table
