@@ -1,0 +1,961 @@
+{
+  "captured_at_utc": "2026-08-06T15:05:19.446670+00:00",
+  "cases": [
+    {
+      "command": [
+        ".venv/bin/python",
+        "-m",
+        "taoryx.runtime.cli",
+        "run",
+        "examples/mission_families/two_stage_ballistic_rocket/mission.prb",
+        "--profile",
+        "taos96",
+        "--integrator",
+        "rk4",
+        "--max-steps",
+        "20000",
+        "--output-dir",
+        "<output-dir>.",
+        "--report",
+        "<output-dir>run-report.json",
+        "--artifact",
+        "<output-dir>run-artifact.json"
+      ],
+      "description": "Small staged-rocket source batch smoke test.",
+      "elapsed_s": 2.411995,
+      "error": null,
+      "expected_disposition": "passed",
+      "file_count": 4,
+      "files": [
+        {
+          "bytes": 39040,
+          "path": "1.print",
+          "sha256": "07fab7d2352953605618efdd5b02aa0076e6e94830c78c8d68173c9bb5d8c1ef"
+        },
+        {
+          "bytes": 1962131,
+          "path": "run-artifact.json",
+          "sha256": "7bea94f6eee4ed42ba5d72edf694078fd8872d0399b3c7f7bdbdd446fc13a31b"
+        },
+        {
+          "bytes": 2245089,
+          "path": "run-report.json",
+          "sha256": "3bc028aa945ddaf08a93d56098e53e14d4ecfdd413c88dd4e93fe3c84c00af6d"
+        },
+        {
+          "bytes": 8771,
+          "path": "vehicle.dat",
+          "sha256": "10d00ceb229d2d0cbc23899efde79bb07c45cf561b7a4f2509dbb3df50b46567"
+        }
+      ],
+      "id": "two-stage-ballistic",
+      "observed_status": "passed",
+      "operation": "batch",
+      "repeatability": {
+        "comparison": {
+          "first": {
+            "run-artifact.json": "7bea94f6eee4ed42ba5d72edf694078fd8872d0399b3c7f7bdbdd446fc13a31b"
+          },
+          "second": {
+            "run-artifact.json": "7bea94f6eee4ed42ba5d72edf694078fd8872d0399b3c7f7bdbdd446fc13a31b"
+          }
+        },
+        "repeat_run_elapsed_s": 2.378273,
+        "repeat_run_status": "passed",
+        "repeatable": true
+      },
+      "repeatability_basis": {
+        "run-artifact.json": "7bea94f6eee4ed42ba5d72edf694078fd8872d0399b3c7f7bdbdd446fc13a31b"
+      },
+      "return_code": 0,
+      "total_bytes": 4255031
+    },
+    {
+      "command": [
+        ".venv/bin/python",
+        "-m",
+        "taoryx.runtime.cli",
+        "run",
+        "examples/vehicle_families/staged_rocket/two_stage_demo/mission.prb",
+        "examples/vehicle_families/staged_rocket/two_stage_demo/aero.tbl",
+        "examples/vehicle_families/staged_rocket/two_stage_demo/propulsion.tbl",
+        "--profile",
+        "taoryx",
+        "--integrator",
+        "rk4",
+        "--max-steps",
+        "20000",
+        "--output-dir",
+        "<output-dir>.",
+        "--report",
+        "<output-dir>run-report.json",
+        "--artifact",
+        "<output-dir>run-artifact.json"
+      ],
+      "description": "Changing-mass source tables and separation example.",
+      "elapsed_s": 1.592116,
+      "error": null,
+      "expected_disposition": "passed",
+      "file_count": 6,
+      "files": [
+        {
+          "bytes": 12784,
+          "path": "1.print",
+          "sha256": "5cd7ba5a32fa866f3702dfac8807c0eabbcf81abea796c4220f8ac902ae81ba5"
+        },
+        {
+          "bytes": 2585,
+          "path": "2.print",
+          "sha256": "dbfff52383522f28984f518298289966b8be950b92c4527bb6b1fc74241c6652"
+        },
+        {
+          "bytes": 573,
+          "path": "booster.dat",
+          "sha256": "989d2a527853abf0d79a64ce1ba4fd04cb172d9303b1692492a696e3805832e0"
+        },
+        {
+          "bytes": 687215,
+          "path": "run-artifact.json",
+          "sha256": "21b4b922823d6be589ddcf973a8178704163e548835a0715a0d1e9e4b4dd5d3d"
+        },
+        {
+          "bytes": 808401,
+          "path": "run-report.json",
+          "sha256": "2bccc748b84c5184d53d7dc37a39eafd513a5a437d0d21cad318e97707b63049"
+        },
+        {
+          "bytes": 5259,
+          "path": "stack.dat",
+          "sha256": "7eb500538cb38c130f3fcd71d50d66d0a8d67acadce9076f54290e265b03004c"
+        }
+      ],
+      "id": "two-stage-demo",
+      "observed_status": "passed",
+      "operation": "batch",
+      "repeatability": {
+        "comparison": {
+          "first": {
+            "run-artifact.json": "21b4b922823d6be589ddcf973a8178704163e548835a0715a0d1e9e4b4dd5d3d"
+          },
+          "second": {
+            "run-artifact.json": "21b4b922823d6be589ddcf973a8178704163e548835a0715a0d1e9e4b4dd5d3d"
+          }
+        },
+        "repeat_run_elapsed_s": 1.583888,
+        "repeat_run_status": "passed",
+        "repeatable": true
+      },
+      "repeatability_basis": {
+        "run-artifact.json": "21b4b922823d6be589ddcf973a8178704163e548835a0715a0d1e9e4b4dd5d3d"
+      },
+      "return_code": 0,
+      "total_bytes": 1516817
+    },
+    {
+      "command": [
+        [
+          ".venv/bin/python",
+          "-m",
+          "taoryx.runtime.cli",
+          "vehicle",
+          "compose",
+          "examples/vehicle_composition/nesc_staged_source_replay_pseudo6dof_compose.yaml",
+          "--output",
+          "<output-dir>composition.json"
+        ],
+        [
+          ".venv/bin/python",
+          "-m",
+          "taoryx.runtime.cli",
+          "vehicle",
+          "run",
+          "<output-dir>composition.json",
+          "--output-dir",
+          "<output-dir>run"
+        ]
+      ],
+      "description": "NESC staged source-history pseudo-6DOF witness.",
+      "elapsed_s": 4.162739,
+      "error": null,
+      "expected_disposition": "development",
+      "file_count": 18,
+      "files": [
+        {
+          "bytes": 6338,
+          "path": "composition.json",
+          "sha256": "36435ddc15f07be01dc0ba30fb3bf61db03b5ee8afedc3dbf001415fe2042897"
+        },
+        {
+          "bytes": 6338,
+          "path": "run/composition.json",
+          "sha256": "36435ddc15f07be01dc0ba30fb3bf61db03b5ee8afedc3dbf001415fe2042897"
+        },
+        {
+          "bytes": 1056,
+          "path": "run/controller_transitions.json",
+          "sha256": "7252f92766de27b6552d5aeaa61a6701ebd069b01fccdaba7b5e6cba7b2ae254"
+        },
+        {
+          "bytes": 429,
+          "path": "run/envelope_report.json",
+          "sha256": "b085398988c322bbe99797e4b98849d7bb10157b685f536dcc7c68462ac21465"
+        },
+        {
+          "bytes": 4264,
+          "path": "run/evaluation.json",
+          "sha256": "65b63dd118e60b2d106f04531cb250b871ef71ca58e0a327406b0c4d04d3e664"
+        },
+        {
+          "bytes": 20966,
+          "path": "run/execution.json",
+          "sha256": "ab350080c63394d902de5e9113d22d5869777a1be4d5cb46a0e46eb7230703e2"
+        },
+        {
+          "bytes": 998,
+          "path": "run/mission_graph_execution.json",
+          "sha256": "8b1093b9f16d3d6ee9e5bd6546170690b2a0f69ee411fa10eb6638cffc0dcbc2"
+        },
+        {
+          "bytes": 2719,
+          "path": "run/objective_report.json",
+          "sha256": "7f1dc4c01f8759cdea5a8451d3bdb2e3acfe3428519311a6c8964a312538daaf"
+        },
+        {
+          "bytes": 1484,
+          "path": "run/plan.json",
+          "sha256": "32ed5a3a22be3db18ba7bd62469dc8d1b8448f86fb2a109dee30ff98fd058ef1"
+        },
+        {
+          "bytes": 4634,
+          "path": "run/preflight.json",
+          "sha256": "603e69af215b2d03e2d7b6e81ae0116d58851ea2553d4672b9ffcd53bd1f0b86"
+        },
+        {
+          "bytes": 549,
+          "path": "run/reproduction.txt",
+          "sha256": "1425dc8c8ff2f5c948b455cafc7b55423c6714bab4403ad72de14537061aec93"
+        },
+        {
+          "bytes": 25232,
+          "path": "run/resource_ledger.json",
+          "sha256": "b1aea5ed1e3870666539ec2d50f228e296769d08fbf9b5141dee5d0561c30d00"
+        },
+        {
+          "bytes": 2029,
+          "path": "run/runtime_report.json",
+          "sha256": "ef07eff52b2d02853c0b674fc262972f4b1c9c00d427f9ab71d83baf7a8c9a6f"
+        },
+        {
+          "bytes": 34683,
+          "path": "run/semantic_action_trace.json",
+          "sha256": "de7ff199f4d0a2a1e18a04425126246d10f3731a943412b2d4bdb3fbfa546e17"
+        },
+        {
+          "bytes": 511,
+          "path": "run/source_provenance.json",
+          "sha256": "341aaa11b8437e87833f1df3fa4eaa55e6c1d8898473488e8d62cf55448ca827"
+        },
+        {
+          "bytes": 166427,
+          "path": "run/status_trace.json",
+          "sha256": "26bc9a7014596a927a3e3860cb1a9018be423cae8b7c7cb9c0e37ef695c80150"
+        },
+        {
+          "bytes": 101797,
+          "path": "run/truth_telemetry.csv",
+          "sha256": "b739708dec01ff7be98b37766fc3de8643b9db3c240f44e8a4136c432cfdeae2"
+        },
+        {
+          "bytes": 24672,
+          "path": "run/vehicle_interface.json",
+          "sha256": "c7041932840f1c41f4ae9a4cf32114d9533576c5c68a9eaad5b31ee58c84779a"
+        }
+      ],
+      "id": "nesc-pseudo6dof",
+      "observed_status": "passed",
+      "operation": "composition_batch",
+      "repeatability": {
+        "comparison": {
+          "first": {
+            "run/status_trace.json": "26bc9a7014596a927a3e3860cb1a9018be423cae8b7c7cb9c0e37ef695c80150",
+            "run/truth_telemetry.csv": "b739708dec01ff7be98b37766fc3de8643b9db3c240f44e8a4136c432cfdeae2"
+          },
+          "second": {
+            "run/status_trace.json": "26bc9a7014596a927a3e3860cb1a9018be423cae8b7c7cb9c0e37ef695c80150",
+            "run/truth_telemetry.csv": "b739708dec01ff7be98b37766fc3de8643b9db3c240f44e8a4136c432cfdeae2"
+          }
+        },
+        "repeat_run_elapsed_s": 4.166421,
+        "repeat_run_status": "passed",
+        "repeatable": true
+      },
+      "repeatability_basis": {
+        "run/status_trace.json": "26bc9a7014596a927a3e3860cb1a9018be423cae8b7c7cb9c0e37ef695c80150",
+        "run/truth_telemetry.csv": "b739708dec01ff7be98b37766fc3de8643b9db3c240f44e8a4136c432cfdeae2"
+      },
+      "return_code": 0,
+      "total_bytes": 405126
+    },
+    {
+      "command": [
+        [
+          ".venv/bin/python",
+          "-m",
+          "taoryx.runtime.cli",
+          "vehicle",
+          "compose",
+          "examples/vehicle_composition/x15_staged_booster_reachability_pseudo6dof_compose.yaml",
+          "--output",
+          "<output-dir>composition.json"
+        ],
+        [
+          ".venv/bin/python",
+          "-m",
+          "taoryx.runtime.cli",
+          "vehicle",
+          "run",
+          "<output-dir>composition.json",
+          "--output-dir",
+          "<output-dir>run"
+        ]
+      ],
+      "description": "X-15-scaled staged booster reachability witness.",
+      "elapsed_s": 5.200935,
+      "error": null,
+      "expected_disposition": "development",
+      "file_count": 19,
+      "files": [
+        {
+          "bytes": 6671,
+          "path": "composition.json",
+          "sha256": "ba89850f8d30a3f27d89f7325c14c99a81f9bc118a6fcc0e05a8f10f597aeb63"
+        },
+        {
+          "bytes": 6671,
+          "path": "run/composition.json",
+          "sha256": "ba89850f8d30a3f27d89f7325c14c99a81f9bc118a6fcc0e05a8f10f597aeb63"
+        },
+        {
+          "bytes": 1309,
+          "path": "run/controller_transitions.json",
+          "sha256": "68ba240b6d265c8bef4f0d9fc408d0a22f94e5d64faadfc65abcf9ceeeac385a"
+        },
+        {
+          "bytes": 609,
+          "path": "run/envelope_report.json",
+          "sha256": "ae1a9f36a5ab7d7aad2e732c2a20d67ecbd0ef5f7e6a05bdfe957ebde48eb051"
+        },
+        {
+          "bytes": 5825,
+          "path": "run/evaluation.json",
+          "sha256": "b0f2cbe3276e59336c78b954315086cbb37b4d04c4e4ce643c8caf7a48056334"
+        },
+        {
+          "bytes": 23617,
+          "path": "run/execution.json",
+          "sha256": "0dfebc5e192fda132d804c550a53eed51fd72ec4af244fd1f5181eb26f3667ca"
+        },
+        {
+          "bytes": 1211149,
+          "path": "run/fidelity_evidence.json",
+          "sha256": "617fed344f7020d0975f2b83564389f43798fd4b49ef9d0591d033009ff8b021"
+        },
+        {
+          "bytes": 1028,
+          "path": "run/mission_graph_execution.json",
+          "sha256": "089a2ef76267b2359294955f5052d579cff47d6ae35e51a39f3a0594bc00f63b"
+        },
+        {
+          "bytes": 2471,
+          "path": "run/objective_report.json",
+          "sha256": "8b44f46cb7db253fc707191d9dcf7053cda32c2f749d3a2b02a8b6bd2239cdbe"
+        },
+        {
+          "bytes": 1838,
+          "path": "run/plan.json",
+          "sha256": "d264e0314230b3e118b1df2f7d146321f142befb98e07eaab3de3c8f8322141c"
+        },
+        {
+          "bytes": 5064,
+          "path": "run/preflight.json",
+          "sha256": "222b0a373f3582691d83f3e6e05708ade8e7231e9617264f375736da00ea8b66"
+        },
+        {
+          "bytes": 568,
+          "path": "run/reproduction.txt",
+          "sha256": "590ce635421d74c65db673afe10176e51ede740386eb765cd21826bf8275d139"
+        },
+        {
+          "bytes": 197813,
+          "path": "run/resource_ledger.json",
+          "sha256": "205fd62a67692f975b54e4112efe74679e91291abb7e2899c5a6c8325b9fd594"
+        },
+        {
+          "bytes": 3147,
+          "path": "run/runtime_report.json",
+          "sha256": "e0f9dcade361a06886ce51ff40ffeb77a1d71fbb0bf6dfc14a71776784b0ef90"
+        },
+        {
+          "bytes": 142842,
+          "path": "run/semantic_action_trace.json",
+          "sha256": "37cede7c0506b1ef3e221141194baaf357b83b6408bd8b88c1ddd907ee11ed9d"
+        },
+        {
+          "bytes": 1905,
+          "path": "run/source_provenance.json",
+          "sha256": "99d97512bee10cc62abbdef3907689e6fbbe4710ff063f77feae15a451594c05"
+        },
+        {
+          "bytes": 813701,
+          "path": "run/status_trace.json",
+          "sha256": "d18c015efc409b6437dd96ab9d42a128e8f72a0ba6732b2ccd235ed5c8e7aa7b"
+        },
+        {
+          "bytes": 399993,
+          "path": "run/truth_telemetry.csv",
+          "sha256": "a6886127842835c3d3a671b6d4ed3549f81cb54bd7f9e14ea7d5eeba1a58c875"
+        },
+        {
+          "bytes": 44080,
+          "path": "run/vehicle_interface.json",
+          "sha256": "7095d2b17b0f483f20237e6dd7215ba00d83f16b5079eebd246a3fc089758d69"
+        }
+      ],
+      "id": "x15-staged-pseudo6dof",
+      "observed_status": "passed",
+      "operation": "composition_batch",
+      "repeatability": {
+        "comparison": {
+          "first": {
+            "run/status_trace.json": "d18c015efc409b6437dd96ab9d42a128e8f72a0ba6732b2ccd235ed5c8e7aa7b",
+            "run/truth_telemetry.csv": "a6886127842835c3d3a671b6d4ed3549f81cb54bd7f9e14ea7d5eeba1a58c875"
+          },
+          "second": {
+            "run/status_trace.json": "d18c015efc409b6437dd96ab9d42a128e8f72a0ba6732b2ccd235ed5c8e7aa7b",
+            "run/truth_telemetry.csv": "a6886127842835c3d3a671b6d4ed3549f81cb54bd7f9e14ea7d5eeba1a58c875"
+          }
+        },
+        "repeat_run_elapsed_s": 5.171162,
+        "repeat_run_status": "passed",
+        "repeatable": true
+      },
+      "repeatability_basis": {
+        "run/status_trace.json": "d18c015efc409b6437dd96ab9d42a128e8f72a0ba6732b2ccd235ed5c8e7aa7b",
+        "run/truth_telemetry.csv": "a6886127842835c3d3a671b6d4ed3549f81cb54bd7f9e14ea7d5eeba1a58c875"
+      },
+      "return_code": 0,
+      "total_bytes": 2870301
+    },
+    {
+      "command": [
+        [
+          ".venv/bin/python",
+          "-m",
+          "taoryx.runtime.cli",
+          "vehicle",
+          "compose",
+          "examples/vehicle_composition/hl20_source_booster_release_replay_pseudo6dof_compose.yaml",
+          "--output",
+          "<output-dir>composition.json"
+        ],
+        [
+          ".venv/bin/python",
+          "-m",
+          "taoryx.runtime.cli",
+          "vehicle",
+          "run",
+          "<output-dir>composition.json",
+          "--output-dir",
+          "<output-dir>run"
+        ]
+      ],
+      "description": "HL-20 source-booster release pseudo-6DOF witness.",
+      "elapsed_s": 14.415942,
+      "error": null,
+      "expected_disposition": "development",
+      "file_count": 18,
+      "files": [
+        {
+          "bytes": 6623,
+          "path": "composition.json",
+          "sha256": "db357d2277316a5426b20e61e5225c4a2a0e77d44ed2bf805c767a54f4cba1bf"
+        },
+        {
+          "bytes": 6623,
+          "path": "run/composition.json",
+          "sha256": "db357d2277316a5426b20e61e5225c4a2a0e77d44ed2bf805c767a54f4cba1bf"
+        },
+        {
+          "bytes": 1160,
+          "path": "run/controller_transitions.json",
+          "sha256": "574a2fa5902ce5dcc53136aa4de413393fe8e3809ce6fd56704bd72293296cc2"
+        },
+        {
+          "bytes": 304,
+          "path": "run/envelope_report.json",
+          "sha256": "1c96db164add21612ffa2d04f3052f2a87d91ed0b6e383e52e89d21fc4f275b6"
+        },
+        {
+          "bytes": 3910,
+          "path": "run/evaluation.json",
+          "sha256": "7398f46cf0e7be95f057689262aa35a7bd7258b10e672c4a9c369b72804792fb"
+        },
+        {
+          "bytes": 22134,
+          "path": "run/execution.json",
+          "sha256": "e0c6b514e80f7c67a7174f2ecd94c8e4a09e4029c033c6a7683c33902f188fd0"
+        },
+        {
+          "bytes": 1042,
+          "path": "run/mission_graph_execution.json",
+          "sha256": "e35a57d157c815f5b76880811ea046bd2929f3b7caaafb376fb1e838753d48a4"
+        },
+        {
+          "bytes": 2121,
+          "path": "run/objective_report.json",
+          "sha256": "ea765738dc80fc0abecbd73c1a484dfa466fe2c9e3943550be68d7d4a76469a5"
+        },
+        {
+          "bytes": 2047,
+          "path": "run/plan.json",
+          "sha256": "52824473b3db4f21ec28bbc7c30d6464d4d30343dee9d828dda53e1fbc3841fb"
+        },
+        {
+          "bytes": 5284,
+          "path": "run/preflight.json",
+          "sha256": "fb82eb61b8189addb050e44ba620afe354537a8cb0decddaefcab74b23583479"
+        },
+        {
+          "bytes": 606,
+          "path": "run/reproduction.txt",
+          "sha256": "e31a3ede9e37bbc3d4f91e5351b1574037aca0952f6b07a71d9f880dd51a719f"
+        },
+        {
+          "bytes": 9198,
+          "path": "run/resource_ledger.json",
+          "sha256": "42c6a45c19af1d1f8af1fa89b2390d4bcb358bfcb7ee5065f01a5199d71eb5c5"
+        },
+        {
+          "bytes": 2212,
+          "path": "run/runtime_report.json",
+          "sha256": "be3ad7f168f60a30f94b570225443f178decbf444f286bc002abed7c87b35303"
+        },
+        {
+          "bytes": 24379,
+          "path": "run/semantic_action_trace.json",
+          "sha256": "8f602374e31387e88b38c1ed009c996459a38a9cb506220161969bd9b3b8b498"
+        },
+        {
+          "bytes": 893,
+          "path": "run/source_provenance.json",
+          "sha256": "17ad6aba6c22e3670300862d7cb4023fe8287d4718bb779a6d367d1c922f1156"
+        },
+        {
+          "bytes": 20987,
+          "path": "run/status_trace.json",
+          "sha256": "ab69b88af8ea94ba051ffff82dfad65a53035be96e3fb2e3f7a4bdd4817fb361"
+        },
+        {
+          "bytes": 46548,
+          "path": "run/truth_telemetry.csv",
+          "sha256": "178f5966b199fd38ebf1bd79d0f5d7c347553a350f4f3a72045a8cab5cc99c47"
+        },
+        {
+          "bytes": 26869,
+          "path": "run/vehicle_interface.json",
+          "sha256": "83eb267c1290a6b8cf52dcce47072bebbd379c266e3d0a2d489bbda9c61ad526"
+        }
+      ],
+      "id": "hl20-source-release-pseudo6dof",
+      "observed_status": "passed",
+      "operation": "composition_batch",
+      "repeatability": {
+        "comparison": {
+          "first": {
+            "run/status_trace.json": "ab69b88af8ea94ba051ffff82dfad65a53035be96e3fb2e3f7a4bdd4817fb361",
+            "run/truth_telemetry.csv": "178f5966b199fd38ebf1bd79d0f5d7c347553a350f4f3a72045a8cab5cc99c47"
+          },
+          "second": {
+            "run/status_trace.json": "ab69b88af8ea94ba051ffff82dfad65a53035be96e3fb2e3f7a4bdd4817fb361",
+            "run/truth_telemetry.csv": "178f5966b199fd38ebf1bd79d0f5d7c347553a350f4f3a72045a8cab5cc99c47"
+          }
+        },
+        "repeat_run_elapsed_s": 14.377613,
+        "repeat_run_status": "passed",
+        "repeatable": true
+      },
+      "repeatability_basis": {
+        "run/status_trace.json": "ab69b88af8ea94ba051ffff82dfad65a53035be96e3fb2e3f7a4bdd4817fb361",
+        "run/truth_telemetry.csv": "178f5966b199fd38ebf1bd79d0f5d7c347553a350f4f3a72045a8cab5cc99c47"
+      },
+      "return_code": 0,
+      "total_bytes": 182940
+    },
+    {
+      "command": [
+        ".venv/bin/python",
+        "examples/showcases/hl20_california_to_hawaii/run_low_fidelity.py",
+        "--output-dir",
+        "<output-dir>."
+      ],
+      "description": "HL-20 California-Hawaii four-tier release/glide bundle.",
+      "elapsed_s": 25.888917,
+      "error": null,
+      "expected_disposition": "development",
+      "file_count": 30,
+      "files": [
+        {
+          "bytes": 11730,
+          "path": "bundle-manifest.json",
+          "sha256": "78af9ef534131a2e768282144816ab17d54f93c6f5cdf5b4be4eccb28cf29d6b"
+        },
+        {
+          "bytes": 5016,
+          "path": "composites/candidate-summary.csv",
+          "sha256": "54b1b80ae8023967c3dfda38752f0e3213d44e1bb9578c0f86e25664d6f30140"
+        },
+        {
+          "bytes": 322382,
+          "path": "composites/hl20-ca-hi-envelope-comparison.png",
+          "sha256": "2e4f62a94558f70e7205fe855da979c931cea684bb54b7051d3e57b0df26f34b"
+        },
+        {
+          "bytes": 1137355,
+          "path": "composites/hl20-ca-hi-flight-composite.png",
+          "sha256": "12363af0f049de9233af4043cfb4b15a3e3b8cdb7f897bfe8a51b5a6e70803e3"
+        },
+        {
+          "bytes": 980604,
+          "path": "composites/hl20-ca-hi-spent-booster-composite.png",
+          "sha256": "380408161bd4ba62c06327629322060bb91ef1af86eb9af4786f8bb636073ce3"
+        },
+        {
+          "bytes": 1807705,
+          "path": "composites/parent-telemetry-all-tiers.csv",
+          "sha256": "2eb5f9a18605f03ac0fb0b17a81411e6c025e8c1cf26c2da721f594560ae25d7"
+        },
+        {
+          "bytes": 2645,
+          "path": "composites/showcase-manifest.json",
+          "sha256": "06ad6aae7294732cdb385eebb64b91275c9b27af301c3663621ff770c2566386"
+        },
+        {
+          "bytes": 15412,
+          "path": "composites/showcase-summary.json",
+          "sha256": "fdf3bb3d7808d244db6f3039f99931eb81594c0fdd4e1f176910b9b30251cef9"
+        },
+        {
+          "bytes": 1063277,
+          "path": "composites/spent-booster-telemetry.csv",
+          "sha256": "5dcec35aef23ea5a29e7e331a7fd0657975d547d351204775459622547fbfbe4"
+        },
+        {
+          "bytes": 673822,
+          "path": "composites/surface-allocation.csv",
+          "sha256": "73232aa436474d660d6ad6cb3e696829b4de9c1d13a0011c353c3f39c12372af"
+        },
+        {
+          "bytes": 51983,
+          "path": "plots/capability_footprint.png",
+          "sha256": "c5bb39668b8f4077a892caf442af7bee65086e16186a4ae594ba65fa031d855a"
+        },
+        {
+          "bytes": 32124,
+          "path": "plots/deployment-timeline.png",
+          "sha256": "0b6c35d86dd5a681bdffb5ce59c7bf2b5fbe1f808b37618b5ad1e406e09e50eb"
+        },
+        {
+          "bytes": 32124,
+          "path": "plots/event_timeline.png",
+          "sha256": "0b6c35d86dd5a681bdffb5ce59c7bf2b5fbe1f808b37618b5ad1e406e09e50eb"
+        },
+        {
+          "bytes": 30007,
+          "path": "plots/exploration_coverage.png",
+          "sha256": "ba5a765016c1ff01e1698263cedfca227e91143861f5bc2da342e1122f970c63"
+        },
+        {
+          "bytes": 101962,
+          "path": "plots/fidelity-progression.png",
+          "sha256": "d6d298ab5f858811117d5b1e57069241c337ea082267c86d687cc8d6616e81cc"
+        },
+        {
+          "bytes": 101962,
+          "path": "plots/fidelity_comparison.png",
+          "sha256": "d6d298ab5f858811117d5b1e57069241c337ea082267c86d687cc8d6616e81cc"
+        },
+        {
+          "bytes": 132083,
+          "path": "plots/flown-trajectories.png",
+          "sha256": "d73f6bfb01c0f09003fa88cf1f34822eae4da9832d60e402b1029a1c56d23400"
+        },
+        {
+          "bytes": 1801,
+          "path": "plots/plot-manifest.json",
+          "sha256": "e80f09e57d1fca2cf9ae226eb035cac545bc0f63a39aa9ecd96b7ef063583b3b"
+        },
+        {
+          "bytes": 88549,
+          "path": "plots/projected-area.png",
+          "sha256": "408a869aeba0f3d9860080e0289c8bca9b9e6a52fa8a2206c511c6770be5d367"
+        },
+        {
+          "bytes": 88549,
+          "path": "plots/projected_area.png",
+          "sha256": "408a869aeba0f3d9860080e0289c8bca9b9e6a52fa8a2206c511c6770be5d367"
+        },
+        {
+          "bytes": 30007,
+          "path": "plots/search-coverage.png",
+          "sha256": "ba5a765016c1ff01e1698263cedfca227e91143861f5bc2da342e1122f970c63"
+        },
+        {
+          "bytes": 109788,
+          "path": "plots/telemetry_hl20-synthetic-spent-booster.csv",
+          "sha256": "e40305da98500b958b5f803ef667f7d64f9f8fbff4dfa8b39eba079fa956ca38"
+        },
+        {
+          "bytes": 185180,
+          "path": "plots/telemetry_parent.csv",
+          "sha256": "33fefcb37fdf0e7b5a6b061545c002f55a3e60b760216150f0f3ac348fc0897f"
+        },
+        {
+          "bytes": 51983,
+          "path": "plots/terminal-capability.png",
+          "sha256": "c5bb39668b8f4077a892caf442af7bee65086e16186a4ae594ba65fa031d855a"
+        },
+        {
+          "bytes": 76089,
+          "path": "plots/trajectory_children.png",
+          "sha256": "b774652d8047d56521f6479d4bf171d5e9e937c7a4a848a39056523e9851c04a"
+        },
+        {
+          "bytes": 114176,
+          "path": "plots/trajectory_parent.png",
+          "sha256": "e2073ffdb58710c95f48bd3a9482ed3cf79235418944d7073178141413945850"
+        },
+        {
+          "bytes": 1271271,
+          "path": "point_mass_3dof.json",
+          "sha256": "1fadb238f26ebe15bec6f193ac46e46f3363de7a028a0242f3df8cf4cc0b6d8e"
+        },
+        {
+          "bytes": 2279166,
+          "path": "pseudo_6dof.json",
+          "sha256": "dd2258c15c7e1d58fea660d5acb828b253a14098f25fccc612a926d3705943eb"
+        },
+        {
+          "bytes": 3945134,
+          "path": "rigid_body_6dof.json",
+          "sha256": "a33f79db6751631fe64843dc9106277a1897f38342ad8f90eb309a22f90ba4de"
+        },
+        {
+          "bytes": 4421670,
+          "path": "rigid_body_6dof_surface_allocated.json",
+          "sha256": "d52c4482ab86ee8de319d06a3930638f3fb5b9848d42fd5b4f586779439ed1c6"
+        }
+      ],
+      "id": "hl20-four-fidelity",
+      "observed_status": "passed",
+      "operation": "batch",
+      "repeatability": {
+        "comparison": {
+          "first": {
+            "bundle-manifest.json": "78af9ef534131a2e768282144816ab17d54f93c6f5cdf5b4be4eccb28cf29d6b",
+            "composites/showcase-summary.json": "fdf3bb3d7808d244db6f3039f99931eb81594c0fdd4e1f176910b9b30251cef9"
+          },
+          "second": {
+            "bundle-manifest.json": "78af9ef534131a2e768282144816ab17d54f93c6f5cdf5b4be4eccb28cf29d6b",
+            "composites/showcase-summary.json": "fdf3bb3d7808d244db6f3039f99931eb81594c0fdd4e1f176910b9b30251cef9"
+          }
+        },
+        "repeat_run_elapsed_s": 25.290529,
+        "repeat_run_status": "passed",
+        "repeatable": true
+      },
+      "repeatability_basis": {
+        "bundle-manifest.json": "78af9ef534131a2e768282144816ab17d54f93c6f5cdf5b4be4eccb28cf29d6b",
+        "composites/showcase-summary.json": "fdf3bb3d7808d244db6f3039f99931eb81594c0fdd4e1f176910b9b30251cef9"
+      },
+      "return_code": 0,
+      "total_bytes": 19165556
+    },
+    {
+      "command": [
+        ".venv/bin/python",
+        "examples/showcases/california_to_hawaii/run_showcase.py",
+        "--output-dir",
+        "<output-dir>."
+      ],
+      "description": "Synthetic native rigid-body California-Hawaii route.",
+      "elapsed_s": 26.716833,
+      "error": null,
+      "expected_disposition": "development",
+      "file_count": 17,
+      "files": [
+        {
+          "bytes": 523,
+          "path": "claim.json",
+          "sha256": "c163bff8d7f8a010ac6a2b0c9af2cd72ceaf953f5d121b745bf89fb850b7566a"
+        },
+        {
+          "bytes": 8487,
+          "path": "manifest.json",
+          "sha256": "83587ec870b860cf4e5a0c8a91802717003c42161cf236a73a53f1ac859a2720"
+        },
+        {
+          "bytes": 700108,
+          "path": "native-run/1.print",
+          "sha256": "3d05b63e239f5d9672a2bde4ca4ed16f46610d0c68fd73bda1ee42cb21c93254"
+        },
+        {
+          "bytes": 334002,
+          "path": "plots/.mplconfig/fontlist-v3.11.0.json",
+          "sha256": "8078fd443ce05804fd691af666e8f17bb8bb0e28ff17e0c153ce762442244250"
+        },
+        {
+          "bytes": 39867,
+          "path": "plots/altitude_mach.png",
+          "sha256": "2ce1e8936f4674ed138aa3645d65c45d77655882a1d35705acca110adac681d2"
+        },
+        {
+          "bytes": 50047,
+          "path": "plots/altitude_range.png",
+          "sha256": "e784869f07da08aa03c6515c1e235e9b0be73123b19a86a617212aa3599236d0"
+        },
+        {
+          "bytes": 43275,
+          "path": "plots/attitude_rates.png",
+          "sha256": "942b124795715f2638212aabb7759854a254d59da85b841caa125303238021c2"
+        },
+        {
+          "bytes": 48690,
+          "path": "plots/forces_torques.png",
+          "sha256": "287e1e4fc742e43e5285d189d146ffd3ab476928bf0604af424dd4a1102ab2f4"
+        },
+        {
+          "bytes": 59162,
+          "path": "plots/guidance_response.png",
+          "sha256": "1ac3ae304c4e973d325a5bf4bc7b958f085611554ee29f1d4253b5c4691c4d0d"
+        },
+        {
+          "bytes": 36799,
+          "path": "plots/mass_propulsion.png",
+          "sha256": "50e783d78cc645a7e38ec4efe2c505f0096cb1efc484f081c6ca35cee88d3e8c"
+        },
+        {
+          "bytes": 38251,
+          "path": "plots/orientation.png",
+          "sha256": "5089ad3b2870bcfabbd6184920a12d13df1456c17da2875c284452f7a4c03bc2"
+        },
+        {
+          "bytes": 51589,
+          "path": "plots/route_map.png",
+          "sha256": "bb339780c0b53e96d85c4d465894af6ed2df42b1d68993a4c51d9d5fb6899d54"
+        },
+        {
+          "bytes": 18618,
+          "path": "plots/thermal_exposure.png",
+          "sha256": "bda55ca91c12edef877c79755ed00e6a25141c0bbd3611574005fcce2b03d363"
+        },
+        {
+          "bytes": 1146,
+          "path": "realized_fidelity.json",
+          "sha256": "6444828f52eead5d3cbfaa0820ffd7247c85e99a0fadc0688aee9f9f5a858cd8"
+        },
+        {
+          "bytes": 20230423,
+          "path": "run.json",
+          "sha256": "ab950c33278732a841fc14a1118a7e8181076d0f25178b30777dfd82eba41e35"
+        },
+        {
+          "bytes": 119054336,
+          "path": "run.sqlite",
+          "sha256": "038f9b6ea2a2f4821e19c251abc9376266224d92d6b9d3c4f26e9437a214e829"
+        },
+        {
+          "bytes": 36127,
+          "path": "summary.txt",
+          "sha256": "2fba0a6026774e3152b30d81a05a2441a1a106399c3515dad8cffd1cbd1f9771"
+        }
+      ],
+      "id": "synthetic-california-hawaii",
+      "observed_status": "passed",
+      "operation": "batch",
+      "repeatability": {
+        "comparison": {
+          "first": {
+            "realized_fidelity.json": "6444828f52eead5d3cbfaa0820ffd7247c85e99a0fadc0688aee9f9f5a858cd8"
+          },
+          "second": {
+            "realized_fidelity.json": "6444828f52eead5d3cbfaa0820ffd7247c85e99a0fadc0688aee9f9f5a858cd8"
+          }
+        },
+        "repeat_run_elapsed_s": 26.674207,
+        "repeat_run_status": "passed",
+        "repeatable": true
+      },
+      "repeatability_basis": {
+        "realized_fidelity.json": "6444828f52eead5d3cbfaa0820ffd7247c85e99a0fadc0688aee9f9f5a858cd8"
+      },
+      "return_code": 0,
+      "total_bytes": 140751450
+    },
+    {
+      "command": [
+        "python",
+        "interactive-session-baseline"
+      ],
+      "description": "Two accepted external interactive steps over the synthetic route.",
+      "elapsed_s": 0.043563,
+      "error": null,
+      "expected_disposition": "passed",
+      "file_count": 1,
+      "files": [
+        {
+          "bytes": 14310,
+          "path": "interactive-artifact.json",
+          "sha256": "ecccbd49d702fde0a6ea3a49e164b8157f6259b77a3094f49aff54dc981660b4"
+        }
+      ],
+      "id": "interactive-california-hawaii",
+      "observed_status": "passed",
+      "operation": "interactive",
+      "repeatability": {
+        "comparison": {
+          "first": {
+            "interactive-artifact.json": "ecccbd49d702fde0a6ea3a49e164b8157f6259b77a3094f49aff54dc981660b4"
+          },
+          "second": {
+            "interactive-artifact.json": "ecccbd49d702fde0a6ea3a49e164b8157f6259b77a3094f49aff54dc981660b4"
+          }
+        },
+        "repeat_run_elapsed_s": 0.031183,
+        "repeat_run_status": "passed",
+        "repeatable": true
+      },
+      "repeatability_basis": {
+        "interactive-artifact.json": "ecccbd49d702fde0a6ea3a49e164b8157f6259b77a3094f49aff54dc981660b4"
+      },
+      "return_code": 0,
+      "total_bytes": 14310
+    }
+  ],
+  "claim_boundary": "This is a Product 2 execution, artifact-size, and repeatability baseline. It does not establish numerical qualification, physical-effector behavior, historical fidelity, or mission capability.",
+  "git_revision": "926639729171d95818bee52fccdb391af23f7aa3",
+  "runtime": {
+    "executable": "/Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/.venv/bin/python",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.12.3"
+  },
+  "schema": "taoryx.product-two-baseline/v1alpha1",
+  "status_vocabulary": [
+    "passed",
+    "development",
+    "blocked",
+    "incomplete",
+    "out_of_envelope",
+    "failed"
+  ],
+  "working_tree_dirty": false
+}

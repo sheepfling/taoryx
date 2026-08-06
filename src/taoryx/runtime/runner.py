@@ -14,6 +14,7 @@ from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import Assignment, EarthBlock, ProblemDocument, TableDocument
 from taoryx.outputs import RunArtifact, build_run_artifact
+from taoryx.product_two_contracts import ProductTwoStatus, classify_runtime_outcome
 
 from .engine import ExecutionResult
 from .lowering import LoweredDocument, execute_lowered, lower_problem_document, problem_unit_settings
@@ -35,6 +36,17 @@ class RunReport:
     metadata: tuple[dict[str, object], ...] = ()
 
     @property
+    def status(self) -> ProductTwoStatus:
+        """Return the closed Product 2 outcome status for this source run."""
+
+        return classify_runtime_outcome(
+            has_errors=any(item.severity is Severity.ERROR for item in self.diagnostics),
+            execution_started=bool(self.results),
+            completed=all(result.completed for result in self.results),
+        )
+    ####
+
+    @property
     def exit_code(self) -> int:
         if any(item.severity is Severity.ERROR for item in self.diagnostics):
             return 2
@@ -53,6 +65,7 @@ class RunReport:
             "outputs": list(self.outputs),
             "artifacts": [artifact.model_dump(mode="json") for artifact in self.artifacts],
             "metadata": list(self.metadata),
+            "status": self.status.value,
             "exit_code": self.exit_code,
         }
     ####

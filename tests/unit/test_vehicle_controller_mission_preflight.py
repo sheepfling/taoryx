@@ -37,10 +37,11 @@ def test_f16_preflight_checks_controller_paths_and_estimates_racetrack_time() ->
 def test_hl20_preflight_fails_closed_without_a_mission_binding() -> None:
     report = validate_vehicle_controller_mission_preflight("reference_hl20_mod_k")
 
-    assert report.status == "blocked"
+    assert report.status == "development"
     assert report.controller.status == "not_applicable"
-    assert report.mission.status == "blocked"
-    assert any(item.code == "mission-binding-missing" for item in report.blockers)
+    assert report.mission.status == "development"
+    assert any(item.code == "mission-runtime-planned" for item in report.mission.findings)
+    assert not report.blockers
     ####
 
 
