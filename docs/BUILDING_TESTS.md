@@ -12,6 +12,40 @@ python -m tools.dev test-views
 
 Use `pytest --markers` to inspect the registered marker descriptions directly.
 
+## Choose the smallest useful tier
+
+The repository has three development tiers. The broad `test` task is a
+regression gate, not the inner loop: it still selects more than two thousand
+tests even though it excludes the explicitly marked `slow`, `artifact`, and
+`simple_aero` categories.
+
+```bash
+python -m tools.dev test-quick      # curated smoke/contracts; stop on first failure
+python -m tools.dev test-changed     # changed tests, or test-quick when no mapping exists
+python -m tools.dev test-parallel    # broad fast suite across workers, optional xdist
+python -m tools.dev test             # broad local regression suite
+python -m tools.dev check            # full handoff/release validation
+```
+
+For a focused edit, direct pytest selection is still the fastest option:
+
+```bash
+python -m pytest tests/unit/test_runtime_algorithms.py -q -x
+python -m pytest --lf -q -x
+```
+
+`test-changed` includes modified test files and uses imports from modified
+`src/taoryx` modules to find related tests. For changes with no reliable
+mapping—such as shared fixtures, project configuration, or documentation—it
+falls back to `test-quick`. This is a feedback aid, not a release-quality
+claim; run `test` or `check` before handoff as appropriate.
+
+`test-parallel` requires the development extra, which includes
+`pytest-xdist`. It uses `--dist loadfile` so tests from one file stay on one
+worker. Before relying on parallel execution, tests must write only to
+`tmp_path`, the shared `artifact_dir` fixture, or another worker-safe output
+root; fixed repository-root outputs can race.
+
 | Marker | Meaning |
 | --- | --- |
 | `grammar` | Parser, lexer, EBNF, corpus, and language-validation view |

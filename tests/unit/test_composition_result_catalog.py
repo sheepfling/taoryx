@@ -1,4 +1,4 @@
-"""Tests for discovery-only normalized Product 3 result catalogs."""
+"""Tests for discovery-only normalized Mission Composition result catalogs."""
 
 from __future__ import annotations
 
@@ -308,7 +308,7 @@ def test_result_catalog_binds_interface_and_variant_provenance_to_the_compositio
     (output_directory / "reproduction.txt").write_text(
         "\n".join(
             (
-                "# TAORYX Product 3 public batch reproduction record",
+                "# TAORYX Mission Composition public batch reproduction record",
                 f"# composition_id: {composition.id}",
                 f"# composition_identity_sha256: {composition.identity_sha256}",
                 f"# execution_factory_id: {binding.factory_id}",

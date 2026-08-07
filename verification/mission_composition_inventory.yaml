@@ -1,0 +1,318 @@
+schema: taoryx.mission-composition-inventory/v1
+version: 1
+description: >-
+  Authoritative disposition of vehicle, realization, component, generated-child,
+  and contract-fixture assets that can otherwise look like Mission Composition
+  models. Catalog membership is not execution availability; every published
+  operation remains fail-closed against the common executor registry.
+assets:
+  - id: skywalker_x8
+    classification: family
+    published_model_id: skywalker_x8
+    status: published
+    catalog_ids:
+      - verification/vehicle_models.yaml#skywalker_x8
+      - verification/vehicle_catalog.yaml#skywalker_x8
+      - verification/horizontal_fidelity_registry.yaml#skywalker_x8
+      - verification/vehicle_composition_registry.yaml#skywalker_x8
+  - id: b747
+    classification: family
+    published_model_id: b747
+    status: published
+    catalog_ids:
+      - verification/vehicle_models.yaml#b747
+      - verification/vehicle_catalog.yaml#b747
+      - verification/horizontal_fidelity_registry.yaml#b747
+      - verification/vehicle_composition_registry.yaml#b747
+  - id: a320_openap_3dof
+    classification: family
+    published_model_id: a320_openap_3dof
+    status: published
+    catalog_ids:
+      - verification/horizontal_fidelity_registry.yaml#a320_openap_3dof
+      - verification/vehicle_composition_registry.yaml#a320_openap_3dof
+      - verification/daveml_family_layer_dispositions.yaml#a320_openap_3dof
+  - id: a320_openap_jsbsim_pseudo6dof
+    classification: realization
+    parent_id: a320_openap_3dof
+    published_model_id: a320_openap_3dof
+    realization_id: jsbsim_surrogate_composite_pseudo6dof
+    status: published_blocked
+    catalog_ids:
+      - verification/daveml_family_layer_dispositions.yaml#a320_openap_jsbsim_pseudo6dof
+    exclusion_reason: >-
+      Source/runtime qualification exists for the family layer, but no exact
+      vehicle-composition mission binding is registered for this realization.
+  - id: f16_s119
+    classification: family
+    published_model_id: f16_s119
+    status: published
+    catalog_ids:
+      - verification/horizontal_fidelity_registry.yaml#f16_s119
+      - verification/vehicle_composition_registry.yaml#f16_s119
+  - id: reference_f16_s119
+    classification: realization
+    parent_id: f16_s119
+    published_model_id: f16_s119
+    realization_id: source_daveml_rigid_body
+    status: published_blocked
+    catalog_ids:
+      - verification/daveml_family_layer_dispositions.yaml#reference_f16_s119
+      - verification/reference_model_registry.yaml#reference_f16_s119
+      - verification/reference_family_catalog.yaml#reference_f16_s119
+    exclusion_reason: >-
+      The source plant is published as a realization, but full rigid-body
+      mission execution is not yet bound through the common runner.
+  - id: x15
+    classification: family
+    published_model_id: x15
+    status: published
+    catalog_ids:
+      - verification/vehicle_models.yaml#x15
+      - verification/vehicle_catalog.yaml#x15
+      - verification/horizontal_fidelity_registry.yaml#x15
+      - verification/vehicle_composition_registry.yaml#x15
+  - id: x15-booster
+    classification: stage_component
+    parent_id: x15
+    status: component
+    catalog_ids: []
+  - id: x15-spent-booster
+    classification: generated_child
+    parent_id: x15
+    status: generated
+    catalog_ids: []
+  - id: hummingbird
+    classification: family
+    published_model_id: hummingbird
+    status: published
+    catalog_ids:
+      - verification/vehicle_models.yaml#hummingbird
+      - verification/vehicle_catalog.yaml#hummingbird
+      - verification/horizontal_fidelity_registry.yaml#hummingbird
+      - verification/vehicle_composition_registry.yaml#hummingbird
+  - id: hl20_mod_k
+    classification: family
+    published_model_id: hl20_mod_k
+    status: published
+    catalog_ids:
+      - verification/horizontal_fidelity_registry.yaml#hl20_mod_k
+      - verification/vehicle_composition_registry.yaml#hl20_mod_k
+  - id: reference_hl20_mod_k
+    classification: realization
+    parent_id: hl20_mod_k
+    published_model_id: hl20_mod_k
+    realization_id: source_daveml_rigid_body
+    status: published_blocked
+    catalog_ids:
+      - verification/daveml_family_layer_dispositions.yaml#reference_hl20_mod_k
+      - verification/reference_model_registry.yaml#reference_hl20_mod_k
+      - verification/reference_family_catalog.yaml#reference_hl20_mod_k
+    exclusion_reason: >-
+      The source plant is published as a realization, while complete rigid-body
+      glide and surface-allocated missions remain blocked.
+  - id: hl20-synthetic-booster
+    classification: deployable_child
+    parent_id: hl20_mod_k
+    status: generated
+    catalog_ids: []
+  - id: hl20-synthetic-spent-booster
+    classification: generated_child
+    parent_id: hl20_mod_k
+    status: generated
+    catalog_ids: []
+  - id: reference_nesc_two_stage_rocket
+    classification: family
+    published_model_id: reference_nesc_two_stage_rocket
+    status: published
+    catalog_ids:
+      - verification/horizontal_fidelity_registry.yaml#reference_nesc_two_stage_rocket
+      - verification/vehicle_composition_registry.yaml#reference_nesc_two_stage_rocket
+      - verification/daveml_family_layer_dispositions.yaml#reference_nesc_two_stage_rocket
+      - verification/reference_model_registry.yaml#reference_nesc_two_stage_rocket
+      - verification/reference_family_catalog.yaml#reference_nesc_two_stage_rocket
+  - id: nesc-stage-1
+    classification: stage_component
+    parent_id: reference_nesc_two_stage_rocket
+    status: component
+    catalog_ids: []
+  - id: nesc-stage-2
+    classification: stage_component
+    parent_id: reference_nesc_two_stage_rocket
+    status: component
+    catalog_ids: []
+  - id: nesc-spent-stage
+    classification: generated_child
+    parent_id: reference_nesc_two_stage_rocket
+    status: blocked
+    catalog_ids: []
+    exclusion_reason: Source replay records separation lineage but not an independently propagated spent-stage history.
+  - id: tumbling_body
+    classification: family
+    published_model_id: tumbling_body
+    status: published
+    catalog_ids:
+      - verification/horizontal_fidelity_registry.yaml#tumbling_body
+      - verification/vehicle_composition_registry.yaml#tumbling_body
+  - id: tumbling_body.cylinder
+    classification: realization
+    parent_id: tumbling_body
+    published_model_id: tumbling_body
+    realization_id: cylinder
+    status: published
+    catalog_ids: []
+  - id: tumbling_body.sphere
+    classification: realization
+    parent_id: tumbling_body
+    published_model_id: tumbling_body
+    realization_id: sphere
+    status: published
+    catalog_ids: []
+  - id: tumbling_body.cone
+    classification: realization
+    parent_id: tumbling_body
+    published_model_id: tumbling_body
+    realization_id: cone
+    status: published
+    catalog_ids: []
+  - id: tumbling_body.triaxial_ellipsoid
+    classification: realization
+    parent_id: tumbling_body
+    published_model_id: tumbling_body
+    realization_id: triaxial_ellipsoid
+    status: published
+    catalog_ids: []
+  - id: simple_aero
+    classification: family
+    published_model_id: simple_aero
+    status: published
+    catalog_ids:
+      - verification/alpha2_family_catalog.yaml#simple_aero
+  - id: simple_aero.fixed_ld_point_mass
+    classification: realization
+    parent_id: simple_aero
+    published_model_id: simple_aero
+    realization_id: fixed_ld_point_mass
+    status: published
+    catalog_ids: []
+  - id: dual_launch_glider
+    classification: family
+    published_model_id: dual_launch_glider
+    status: published_blocked
+    catalog_ids:
+      - verification/alpha2_family_catalog.yaml#dual_launch_glider
+    exclusion_reason: >-
+      Both launch forms compile to native source, but no immutable vehicle-
+      composition declaration and exact native execution binding exist yet.
+  - id: dual_launch_glider.generated_native_problem
+    classification: realization
+    parent_id: dual_launch_glider
+    published_model_id: dual_launch_glider
+    realization_id: generated_native_problem
+    status: published_blocked
+    catalog_ids: []
+    exclusion_reason: >-
+      Portable authoring exists, but no exact common-runner batch or session
+      execution binding is registered for the generated native problem.
+  - id: dual_launch_glider.attached_booster
+    classification: stage_component
+    parent_id: dual_launch_glider
+    status: component
+    catalog_ids: []
+  - id: dual_launch_glider.released_glider
+    classification: deployable_child
+    parent_id: dual_launch_glider
+    status: blocked
+    catalog_ids: []
+    exclusion_reason: >-
+      Separation continuity is declared, but the generated native problem does
+      not yet return independently propagated attached-stack and released-glider histories.
+  - id: reference_ballistic_3dof
+    classification: debug_contract_fixture
+    published_model_id: reference_ballistic_3dof
+    status: debug_only
+    catalog_ids: []
+    exclusion_reason: Runnable analytical interface fixture published only by the separate reference provider.
+  - id: reference_constant_velocity_waypoint_3dof
+    classification: debug_contract_fixture
+    published_model_id: reference_constant_velocity_waypoint_3dof
+    status: debug_only
+    catalog_ids: []
+    exclusion_reason: Runnable analytical interface fixture published only by the separate reference provider.
+  - id: simple_aero_ladder
+    classification: debug_contract_fixture
+    status: excluded
+    catalog_ids:
+      - verification/alpha2_family_catalog.yaml#simple_aero_ladder
+    exclusion_reason: Synthetic fidelity-ladder contract fixture; not a production vehicle model.
+  - id: mission_composition_contract_probe
+    classification: debug_contract_fixture
+    published_model_id: contract_probe_vehicle
+    status: debug_only
+    catalog_ids: []
+    exclusion_reason: Separate debug provider used to exercise every portable contract node and child-lineage surface.
+  - id: contract_probe_child
+    classification: generated_child
+    parent_id: mission_composition_contract_probe
+    status: generated
+    catalog_ids: []
+  - id: contract_probe_grandchild
+    classification: generated_child
+    parent_id: contract_probe_child
+    status: generated
+    catalog_ids: []
+  - id: reference_satellite_wheel_primary
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#reference_satellite_wheel_primary]
+    exclusion_reason: Planned spacecraft attitude qualification anchor with no translational Mission Composition binding.
+  - id: reference_freeflyer_thruster_primary
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#reference_freeflyer_thruster_primary]
+    exclusion_reason: Planned spacecraft fixture with no vehicle-composition declaration or native trajectory binding.
+  - id: reference_satellite_hybrid
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#reference_satellite_hybrid]
+    exclusion_reason: Planned spacecraft follow-on fixture with no Mission Composition binding.
+  - id: spacecraft.6u_observer_rw.standard.v1
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#spacecraft.6u_observer_rw.standard.v1]
+    exclusion_reason: Planned parametric spacecraft asset outside the current atmospheric vehicle registry.
+  - id: spacecraft.6u_observer_rw.resilient.v1
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#spacecraft.6u_observer_rw.resilient.v1]
+    exclusion_reason: Planned parametric spacecraft asset outside the current atmospheric vehicle registry.
+  - id: spacecraft.agile_imager_rw.v1
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#spacecraft.agile_imager_rw.v1]
+    exclusion_reason: Planned attitude-only spacecraft asset outside the current trajectory registry.
+  - id: spacecraft.spheres_like_rcs.v1
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#spacecraft.spheres_like_rcs.v1]
+    exclusion_reason: Planned spacecraft RCS asset with no common trajectory binding.
+  - id: spacecraft.marco_like_hybrid.v1
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#spacecraft.marco_like_hybrid.v1]
+    exclusion_reason: Planned spacecraft hybrid asset with no common trajectory binding.
+  - id: spacecraft.6u_hybrid_deepspace.v1
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#spacecraft.6u_hybrid_deepspace.v1]
+    exclusion_reason: Compatibility alias for an excluded planned spacecraft model.
+  - id: surrogate.flight_dynamics.public_autonomous_roster.v1
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#surrogate.flight_dynamics.public_autonomous_roster.v1]
+    exclusion_reason: Evidence-bounded surrogate roster, not exact independently registered vehicle realizations.
+  - id: reference_a320
+    classification: explicit_exclusion
+    status: excluded
+    catalog_ids: [verification/reference_model_registry.yaml#reference_a320]
+    exclusion_reason: Intake-only source anchor blocked on a missing source package; OpenAP realizations are published separately.

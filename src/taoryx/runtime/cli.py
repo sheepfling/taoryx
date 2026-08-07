@@ -16,29 +16,11 @@ from taoryx.batch_episode_parity_dispatch import verify_serialized_declared_batc
 from taoryx.composition_episode import open_vehicle_composition_episode
 from taoryx.composition_policy import replay_composition_policy_trace_file
 from taoryx.composition_result_catalog import index_composition_results, write_composition_release_catalog
-from taoryx.hl20_source_release_composition_execution import execute_hl20_source_booster_release_composition
-from taoryx.hummingbird_composition_execution import execute_hummingbird_pseudo_composition
 from taoryx.integration import available_integrator_descriptions, available_integrators
 from taoryx.language.grammar_contracts import GrammarProfile
-from taoryx.language_backed_execution import execute_powered_fixed_wing_composition
 from taoryx.language_backed_racetrack import materialize_powered_fixed_wing_composition
-from taoryx.local_direct_wrench_composition_execution import execute_local_direct_wrench_composition
-from taoryx.nesc_composition_execution import execute_nesc_source_replay_composition
+from taoryx.mission_composition_maturity import build_mission_composition_maturity_report
 from taoryx.outputs import RunArtifact
-from taoryx.passive_tumbling_composition_execution import execute_passive_tumbling_composition
-from taoryx.product_three_maturity import build_product_three_maturity_report
-from taoryx.product_two_bundle import build_product_two_bundle, write_composition_run_artifact
-from taoryx.product_two_catalog import ProductTwoScenario, load_product_two_catalog
-from taoryx.product_two_contracts import ProductTwoStatus
-from taoryx.product_two_doctor import doctor_scenario
-from taoryx.product_two_manifest import (
-    ProductTwoManifestCompatibilityError,
-    artifact_inventory,
-    build_product_two_run_manifest,
-    default_runtime_identity,
-    read_product_two_run_manifest,
-    source_input_record,
-)
 from taoryx.reachability_catalog import ReachabilityCatalog, load_reachability_catalog
 from taoryx.reachability_envelope import (
     ReachabilityFidelity,
@@ -49,8 +31,19 @@ from taoryx.reachability_envelope import (
     run_reachability_envelope,
 )
 from taoryx.reachability_visualization import load_reachability_artifact, render_reachability_plot_bundle
-from taoryx.reduced_fixed_wing_execution import execute_reduced_fixed_wing_composition
 from taoryx.scenario import ScenarioCompileError, ScenarioCompiler
+from taoryx.simulation_runtime_bundle import build_simulation_runtime_bundle, write_composition_run_artifact
+from taoryx.simulation_runtime_catalog import SimulationRuntimeScenario, load_simulation_runtime_catalog
+from taoryx.simulation_runtime_contracts import SimulationRuntimeStatus
+from taoryx.simulation_runtime_doctor import doctor_scenario
+from taoryx.simulation_runtime_manifest import (
+    SimulationRuntimeManifestCompatibilityError,
+    artifact_inventory,
+    build_simulation_runtime_run_manifest,
+    default_runtime_identity,
+    read_simulation_runtime_run_manifest,
+    source_input_record,
+)
 from taoryx.table_explorer import InterpolationExplanation, TableInspection, explain_interpolation, inspect_table_file
 from taoryx.trajectory import (
     A320OpenAPModel,
@@ -68,6 +61,7 @@ from taoryx.trajectory import (
 )
 from taoryx.trajectory.evaluation import TrajectoryEvaluation
 from taoryx.trajectory.resolution import ResolutionError
+from taoryx.vehicle_batch_execution import execute_vehicle_composition_batch
 from taoryx.vehicle_composition import (
     CompiledVehicleComposition,
     VehicleCompositionError,
@@ -104,7 +98,6 @@ from taoryx.vehicle_runtime_lowering import lower_vehicle_composition
 from taoryx.visualization import render_run_artifact_html, render_run_artifact_plots
 from taoryx.x15_native_replay import write_x15_native_boundary_replay
 from taoryx.x15_reachability import write_x15_reachability_bundle
-from taoryx.x15_staged_composition_execution import execute_x15_staged_reachability_composition
 
 from .optimization_runtime import available_optimizers
 from .runner import run_files
@@ -201,27 +194,27 @@ def main(argv: list[str] | None = None) -> int:
         choices=tuple(item.value for item in available_integrators()),
         help=("integration backend: euler for fast tests, rk4 for fixed-step runs, or scipy-* if installed"),
     )
-    scenario = subparsers.add_parser("scenario", help="discover, validate, bundle, or compile Product 2 scenarios")
+    scenario = subparsers.add_parser("scenario", help="discover, validate, bundle, or compile Simulation Runtime scenarios")
     scenario_subparsers = scenario.add_subparsers(dest="scenario_command", required=True)
-    scenario_list = scenario_subparsers.add_parser("list", help="list canonical Product 2 scenarios")
-    scenario_list.add_argument("--catalog", type=Path, default=Path("verification/product_two_scenario_catalog.yaml"))
+    scenario_list = scenario_subparsers.add_parser("list", help="list canonical Simulation Runtime scenarios")
+    scenario_list.add_argument("--catalog", type=Path, default=Path("verification/simulation_runtime_scenario_catalog.yaml"))
     scenario_list.add_argument("--json", action="store_true")
-    scenario_search = scenario_subparsers.add_parser("search", help="search canonical Product 2 scenarios")
+    scenario_search = scenario_subparsers.add_parser("search", help="search canonical Simulation Runtime scenarios")
     scenario_search.add_argument("query")
-    scenario_search.add_argument("--catalog", type=Path, default=Path("verification/product_two_scenario_catalog.yaml"))
+    scenario_search.add_argument("--catalog", type=Path, default=Path("verification/simulation_runtime_scenario_catalog.yaml"))
     scenario_search.add_argument("--json", action="store_true")
-    scenario_show = scenario_subparsers.add_parser("show", help="show one canonical Product 2 scenario")
+    scenario_show = scenario_subparsers.add_parser("show", help="show one canonical Simulation Runtime scenario")
     scenario_show.add_argument("identifier")
-    scenario_show.add_argument("--catalog", type=Path, default=Path("verification/product_two_scenario_catalog.yaml"))
+    scenario_show.add_argument("--catalog", type=Path, default=Path("verification/simulation_runtime_scenario_catalog.yaml"))
     scenario_show.add_argument("--json", action="store_true")
     scenario_bundle = scenario_subparsers.add_parser("bundle", help="collect one scenario into a reproducible evidence bundle")
     scenario_bundle.add_argument("identifier")
-    scenario_bundle.add_argument("--catalog", type=Path, default=Path("verification/product_two_scenario_catalog.yaml"))
+    scenario_bundle.add_argument("--catalog", type=Path, default=Path("verification/simulation_runtime_scenario_catalog.yaml"))
     scenario_bundle.add_argument("--output-dir", type=Path, required=True)
     scenario_bundle.add_argument("--no-run", action="store_true")
     scenario_bundle.add_argument("--no-plots", action="store_true")
     scenario_bundle.add_argument("--json", action="store_true")
-    scenario_manifest = scenario_subparsers.add_parser("manifest", help="validate a Product 2 run manifest")
+    scenario_manifest = scenario_subparsers.add_parser("manifest", help="validate a Simulation Runtime run manifest")
     scenario_manifest_subparsers = scenario_manifest.add_subparsers(dest="scenario_manifest_command", required=True)
     scenario_manifest_validate = scenario_manifest_subparsers.add_parser("validate", help="validate schema, required fields, and run identity")
     scenario_manifest_validate.add_argument("path", type=Path)
@@ -234,9 +227,9 @@ def main(argv: list[str] | None = None) -> int:
     compile_scenario.add_argument("--seed", type=int)
     compile_scenario.add_argument("--integrator")
     compile_scenario.add_argument("--json", action="store_true")
-    doctor = subparsers.add_parser("doctor", help="run the ordered Product 2 setup diagnostic ladder")
+    doctor = subparsers.add_parser("doctor", help="run the ordered Simulation Runtime setup diagnostic ladder")
     doctor.add_argument("identifier")
-    doctor.add_argument("--catalog", type=Path, default=Path("verification/product_two_scenario_catalog.yaml"))
+    doctor.add_argument("--catalog", type=Path, default=Path("verification/simulation_runtime_scenario_catalog.yaml"))
     doctor.add_argument("--json", action="store_true")
     artifact = subparsers.add_parser("artifact", help="inspect normalized run artifacts")
     artifact_subparsers = artifact.add_subparsers(dest="artifact_command", required=True)
@@ -364,7 +357,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     vehicle_maturity_report = vehicle_subparsers.add_parser(
         "maturity-report",
-        help="join Product 3 topology, authoring, execution, and parity coverage without evidence promotion",
+        help="join Mission Composition topology, authoring, execution, and parity coverage without evidence promotion",
     )
     vehicle_maturity_report.add_argument(
         "--check-execution-witnesses",
@@ -407,7 +400,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     vehicle_authoring = vehicle_subparsers.add_parser(
         "authoring",
-        help="show the Product 3 composition authoring worklist for one vehicle family",
+        help="show the Mission Composition authoring worklist for one vehicle family",
     )
     vehicle_authoring.add_argument("identifier", help="family ID or native vehicle registry ID")
     vehicle_authoring_template = vehicle_subparsers.add_parser(
@@ -480,7 +473,7 @@ def main(argv: list[str] | None = None) -> int:
     vehicle_variant_resolve.add_argument("--output", type=Path, required=True, help="compiled composition JSON output")
     vehicle_subparsers.add_parser(
         "authoring-all",
-        help="aggregate Product 3 authoring worklists without collapsing family-specific gaps",
+        help="aggregate Mission Composition authoring worklists without collapsing family-specific gaps",
     )
     vehicle_intake = vehicle_subparsers.add_parser(
         "intake",
@@ -636,7 +629,7 @@ def main(argv: list[str] | None = None) -> int:
     vehicle_episode_info.add_argument("--seed", type=int, help="optional declared episode seed")
     vehicle_result = vehicle_subparsers.add_parser(
         "result",
-        help="read and validate one normalized Product 3 evaluation artifact",
+        help="read and validate one normalized Mission Composition evaluation artifact",
     )
     vehicle_result.add_argument("output_dir", type=Path, help="composition-run artifact directory")
     vehicle_result.add_argument(
@@ -765,7 +758,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _write_source_run_manifest(arguments: argparse.Namespace, report: object, artifact_path: Path | None) -> Path:
-    """Write the common Product 2 manifest for a file-oriented source run."""
+    """Write the common Simulation Runtime manifest for a file-oriented source run."""
 
     from taoryx.runtime.runner import RunReport
 
@@ -782,13 +775,13 @@ def _write_source_run_manifest(arguments: argparse.Namespace, report: object, ar
         else:
             missing_inputs.append(str(path))
     termination = {
-        "completed": report.status is ProductTwoStatus.PASSED,
+        "completed": report.status is SimulationRuntimeStatus.PASSED,
         "reason": report.results[0].stop_reason if report.results else "no_execution_result",
         "diagnostics": [item.code for item in report.diagnostics],
     }
     if missing_inputs:
         termination["missing_inputs"] = missing_inputs
-    manifest = build_product_two_run_manifest(
+    manifest = build_simulation_runtime_run_manifest(
         scenario_id=scenario_id,
         status=report.status,
         expected_disposition=report.status,
@@ -947,20 +940,20 @@ def _a320_openap_smoke(arguments: argparse.Namespace) -> int:
 
 
 def _scenario_command(arguments: argparse.Namespace) -> int:
-    """Handle Product 2 discovery, manifest, bundle, and source compilation commands."""
+    """Handle Simulation Runtime discovery, manifest, bundle, and source compilation commands."""
 
     try:
         if arguments.scenario_command == "compile":
             return _compile_scenario(arguments)
         if arguments.scenario_command == "manifest" and arguments.scenario_manifest_command == "validate":
-            manifest = read_product_two_run_manifest(arguments.path)
+            manifest = read_simulation_runtime_run_manifest(arguments.path)
             payload = manifest.model_dump(mode="json", by_alias=True)
             if arguments.json:
                 _print_json(payload)
             else:
                 print(f"valid: {manifest.scenario_id} ({manifest.run_identity})")
             return 0
-        catalog = load_product_two_catalog(arguments.catalog)
+        catalog = load_simulation_runtime_catalog(arguments.catalog)
         if arguments.scenario_command == "list":
             rows = [_scenario_summary(item) for item in catalog.scenarios]
             if arguments.json:
@@ -998,7 +991,7 @@ def _scenario_command(arguments: argparse.Namespace) -> int:
             return 0
         if arguments.scenario_command == "bundle":
             scenario = catalog.find(arguments.identifier)
-            result = build_product_two_bundle(
+            result = build_simulation_runtime_bundle(
                 scenario,
                 arguments.output_dir,
                 run=not arguments.no_run,
@@ -1007,11 +1000,11 @@ def _scenario_command(arguments: argparse.Namespace) -> int:
             if arguments.json:
                 _print_json(result)
             else:
-                print(f"wrote Product 2 bundle: {arguments.output_dir}")
+                print(f"wrote Simulation Runtime bundle: {arguments.output_dir}")
                 print(f"manifest: {result['manifest']}")
-            return 0 if result["status"] in {ProductTwoStatus.PASSED.value, ProductTwoStatus.INCOMPLETE.value} else 2
+            return 0 if result["status"] in {SimulationRuntimeStatus.PASSED.value, SimulationRuntimeStatus.INCOMPLETE.value} else 2
         raise ValueError(f"unsupported scenario command: {arguments.scenario_command}")
-    except (OSError, KeyError, TypeError, ValueError, ProductTwoManifestCompatibilityError, RuntimeError) as error:
+    except (OSError, KeyError, TypeError, ValueError, SimulationRuntimeManifestCompatibilityError, RuntimeError) as error:
         print(f"error: scenario-failed: {error}")
         return 2
     ####
@@ -1021,7 +1014,7 @@ def _doctor_command(arguments: argparse.Namespace) -> int:
     """Run and print one catalog scenario's ordered diagnostic ladder."""
 
     try:
-        scenario = load_product_two_catalog(arguments.catalog).find(arguments.identifier)
+        scenario = load_simulation_runtime_catalog(arguments.catalog).find(arguments.identifier)
         report = doctor_scenario(scenario)
         if arguments.json:
             _print_json(report)
@@ -1032,14 +1025,14 @@ def _doctor_command(arguments: argparse.Namespace) -> int:
                 print(f"{check['status']}: {check['id']} — {check['message']}")
             for diagnostic in cast(list[dict[str, object]], report["diagnostics"]):
                 print(f"diagnostic: {diagnostic['code']} at {diagnostic['location']}: {diagnostic['message']}")
-        return 0 if report["status"] == ProductTwoStatus.PASSED.value else 2
+        return 0 if report["status"] == SimulationRuntimeStatus.PASSED.value else 2
     except (OSError, KeyError, TypeError, ValueError) as error:
         print(f"error: doctor-failed: {error}")
         return 2
     ####
 
 
-def _scenario_summary(scenario: ProductTwoScenario) -> dict[str, object]:
+def _scenario_summary(scenario: SimulationRuntimeScenario) -> dict[str, object]:
     """Return the compact list/search projection."""
 
     return {
@@ -1475,130 +1468,22 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
             if arguments.max_steps is not None and arguments.max_steps <= 0:
                 raise ValueError("--max-steps must be positive")
             composition = load_compiled_vehicle_composition(arguments.composition)
-            binding = resolve_vehicle_execution_binding(composition, "batch")
-            if binding.factory_id == "language_backed_powered_fixed_wing.v1":
-                language_execution = execute_powered_fixed_wing_composition(
-                    composition,
-                    arguments.output_dir,
-                    max_steps=arguments.max_steps,
-                )
-                payload = _finalize_vehicle_batch_execution_payload(
-                    language_execution.as_dict(),
-                    output_dir=arguments.output_dir,
-                    composition=composition,
-                    binding=binding,
-                    composition_path=arguments.composition,
-                    max_steps=arguments.max_steps,
-                    catalog=catalog,
-                )
-                _print_json(payload)
-                return 0 if language_execution.mission_pass else 1
-            if binding.factory_id in {"reduced_fixed_wing_openap.v1", "reduced_fixed_wing_f16_source.v1"}:
-                if arguments.max_steps is not None:
-                    raise ValueError("--max-steps is not available for this reduced fixed-wing adapter yet")
-                reduced_execution = execute_reduced_fixed_wing_composition(composition, arguments.output_dir)
-                payload = _finalize_vehicle_batch_execution_payload(
-                    reduced_execution.as_dict(),
-                    output_dir=arguments.output_dir,
-                    composition=composition,
-                    binding=binding,
-                    composition_path=arguments.composition,
-                    max_steps=arguments.max_steps,
-                    catalog=catalog,
-                )
-                _print_json(payload)
-                return 0 if reduced_execution.mission_pass else 1
-            if binding.factory_id == "hummingbird_aggregate_thrust_pseudo_batch.v1":
-                if arguments.max_steps is not None:
-                    raise ValueError("--max-steps is not available for the Hummingbird pseudo batch adapter yet")
-                hummingbird_execution = execute_hummingbird_pseudo_composition(composition, arguments.output_dir)
-                payload = _finalize_vehicle_batch_execution_payload(
-                    hummingbird_execution.as_dict(),
-                    output_dir=arguments.output_dir,
-                    composition=composition,
-                    binding=binding,
-                    composition_path=arguments.composition,
-                    max_steps=arguments.max_steps,
-                    catalog=catalog,
-                )
-                _print_json(payload)
-                return 0 if hummingbird_execution.mission_pass else 1
-            if binding.factory_id == "nesc_source_replay.v1":
-                if arguments.max_steps is not None:
-                    raise ValueError("--max-steps is not available for the NESC source-replay adapter")
-                nesc_execution = execute_nesc_source_replay_composition(composition, arguments.output_dir)
-                payload = _finalize_vehicle_batch_execution_payload(
-                    nesc_execution.as_dict(),
-                    output_dir=arguments.output_dir,
-                    composition=composition,
-                    binding=binding,
-                    composition_path=arguments.composition,
-                    max_steps=arguments.max_steps,
-                    catalog=catalog,
-                )
-                _print_json(payload)
-                return 0 if nesc_execution.mission_pass else 1
-            if binding.factory_id == "hl20_source_booster_release_replay.v1":
-                if arguments.max_steps is not None:
-                    raise ValueError("--max-steps is not available for the HL-20 source-release replay adapter")
-                hl20_execution = execute_hl20_source_booster_release_composition(composition, arguments.output_dir)
-                payload = _finalize_vehicle_batch_execution_payload(
-                    hl20_execution.as_dict(),
-                    output_dir=arguments.output_dir,
-                    composition=composition,
-                    binding=binding,
-                    composition_path=arguments.composition,
-                    max_steps=arguments.max_steps,
-                    catalog=catalog,
-                )
-                _print_json(payload)
-                return 0 if hl20_execution.mission_pass else 1
-            if binding.factory_id == "x15_staged_reachability.v1":
-                if arguments.max_steps is not None:
-                    raise ValueError("--max-steps is not available for the X-15 staged reachability adapter")
-                x15_execution = execute_x15_staged_reachability_composition(composition, arguments.output_dir)
-                payload = _finalize_vehicle_batch_execution_payload(
-                    x15_execution.as_dict(),
-                    output_dir=arguments.output_dir,
-                    composition=composition,
-                    binding=binding,
-                    composition_path=arguments.composition,
-                    max_steps=arguments.max_steps,
-                    catalog=catalog,
-                )
-                _print_json(payload)
-                return 0 if x15_execution.mission_pass else 1
-            if binding.factory_id == "local_direct_wrench_screen.v1":
-                if arguments.max_steps is not None:
-                    raise ValueError("--max-steps is not available for the local direct-wrench screen adapter")
-                local_screen_execution = execute_local_direct_wrench_composition(composition, arguments.output_dir)
-                payload = _finalize_vehicle_batch_execution_payload(
-                    local_screen_execution.as_dict(),
-                    output_dir=arguments.output_dir,
-                    composition=composition,
-                    binding=binding,
-                    composition_path=arguments.composition,
-                    max_steps=arguments.max_steps,
-                    catalog=catalog,
-                )
-                _print_json(payload)
-                return 0 if local_screen_execution.screen_pass else 1
-            if binding.factory_id == "passive_tumbling_direct_release.v1":
-                if arguments.max_steps is not None:
-                    raise ValueError("--max-steps is not available for the passive tumbling batch adapter")
-                tumbling_execution = execute_passive_tumbling_composition(composition, arguments.output_dir)
-                payload = _finalize_vehicle_batch_execution_payload(
-                    tumbling_execution.as_dict(),
-                    output_dir=arguments.output_dir,
-                    composition=composition,
-                    binding=binding,
-                    composition_path=arguments.composition,
-                    max_steps=arguments.max_steps,
-                    catalog=catalog,
-                )
-                _print_json(payload)
-                return 0 if tumbling_execution.mission_pass else 1
-            raise ValueError(f"batch execution factory is declared but not implemented: {binding.factory_id!r}")
+            batch_execution = execute_vehicle_composition_batch(
+                composition,
+                arguments.output_dir,
+                max_steps=arguments.max_steps,
+            )
+            payload = _finalize_vehicle_batch_execution_payload(
+                batch_execution.as_dict(),
+                output_dir=arguments.output_dir,
+                composition=composition,
+                binding=batch_execution.binding,
+                composition_path=arguments.composition,
+                max_steps=arguments.max_steps,
+                catalog=catalog,
+            )
+            _print_json(payload)
+            return 0 if batch_execution.passed else 1
         if arguments.vehicle_command == "replay-policy":
             composition = load_compiled_vehicle_composition(arguments.composition)
             replay_report = replay_composition_policy_trace_file(composition, arguments.trace)
@@ -1739,7 +1624,7 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
             _print_json(report)
             return 0 if report["status"] == "pass" else 2
         if arguments.vehicle_command == "maturity-report":
-            report = build_product_three_maturity_report(
+            report = build_mission_composition_maturity_report(
                 catalog,
                 check_execution_witnesses=arguments.check_execution_witnesses,
                 execute_batch_witnesses=arguments.execute_batch_witnesses,
@@ -1829,7 +1714,7 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
 
 
 def _vehicle_intake_command(arguments: argparse.Namespace) -> int:
-    """Export the existing intake generator through the Product 3 CLI.
+    """Export the existing intake generator through the Mission Composition CLI.
 
     The result selects a declared topology strategy but remains a
     non-promotable intake artifact. It never fabricates source mappings,
@@ -1865,7 +1750,7 @@ def _vehicle_intake_command(arguments: argparse.Namespace) -> int:
 
 
 def _vehicle_integration_command(arguments: argparse.Namespace) -> int:
-    """Expose source-family onboarding gates through the Product 3 CLI.
+    """Expose source-family onboarding gates through the Mission Composition CLI.
 
     This command intentionally reuses the provider-neutral integration records
     rather than treating a composition-registry entry as proof that a source
@@ -2039,7 +1924,7 @@ def _finalize_vehicle_batch_execution_payload(
     """Attach common public-run artifacts after one family-owned executor returns.
 
     Family executors own the plant, truth evaluation, and detailed artifacts.
-    The CLI owns two cross-family Product 3 records: the resolved interface
+    The CLI owns two cross-family Mission Composition records: the resolved interface
     and the exact invocation that produced this packet.  Keeping this here
     prevents the same provenance boilerplate from drifting across every
     source-owned batch factory.
@@ -2078,15 +1963,15 @@ def _write_composition_run_manifest(
     payload: Mapping[str, object],
     max_steps: int | None,
 ) -> dict[str, object]:
-    """Write the common Product 2 manifest for a composition-owned run."""
+    """Write the common Simulation Runtime manifest for a composition-owned run."""
 
     write_composition_run_artifact(output_dir, composition)
     mission_pass = payload.get("mission_pass")
-    status = ProductTwoStatus.PASSED if mission_pass is True else ProductTwoStatus.INCOMPLETE
-    manifest = build_product_two_run_manifest(
+    status = SimulationRuntimeStatus.PASSED if mission_pass is True else SimulationRuntimeStatus.INCOMPLETE
+    manifest = build_simulation_runtime_run_manifest(
         scenario_id=composition.id,
         status=status,
-        expected_disposition=ProductTwoStatus.DEVELOPMENT,
+        expected_disposition=SimulationRuntimeStatus.DEVELOPMENT,
         operation="composition_batch",
         fidelity=str(composition.fidelity),
         realization=composition.control_realization,
@@ -2094,7 +1979,7 @@ def _write_composition_run_manifest(
         runtime=default_runtime_identity(),
         integration={"factory_id": binding.factory_id, "execution_mode": binding.execution_mode, "max_steps": max_steps},
         time={"requested_duration_s": None, "accepted_start_s": None, "accepted_end_s": None},
-        termination={"completed": status is ProductTwoStatus.PASSED, "reason": "mission_pass" if mission_pass is True else "mission_not_passed"},
+        termination={"completed": status is SimulationRuntimeStatus.PASSED, "reason": "mission_pass" if mission_pass is True else "mission_not_passed"},
         artifacts=artifact_inventory(output_dir),
         claim_boundary=(
             "This manifest identifies one composition-owned execution packet. It does not prove numerical accuracy, "
@@ -2137,7 +2022,7 @@ def _write_vehicle_batch_reproduction_artifact(
     destination.write_text(
         "\n".join(
             (
-                "# TAORYX Product 3 public batch reproduction record",
+                "# TAORYX Mission Composition public batch reproduction record",
                 f"# composition_id: {composition.id}",
                 f"# composition_identity_sha256: {composition.identity_sha256}",
                 f"# execution_factory_id: {binding.factory_id}",

@@ -111,9 +111,10 @@ python tools/aero_drag_analysis.py --all --output-dir build/aero-drag
 ## What To Read Next
 
 - [Agent workflows](docs/AGENT_WORKFLOWS.md)
-- [Product 2 onboarding: find, set up, step, and diagnose](docs/PRODUCT_TWO_ONBOARDING.md)
-- [Three-product showcase guide](docs/THREE_PRODUCT_SHOWCASE.md)
-- [Product 2 maturity plan](docs/plan/product-two-maturity.md)
+- [Mission Composition front door](docs/MISSION_COMPOSITION.md)
+- [Simulation Runtime onboarding: find, set up, step, and diagnose](docs/SIMULATION_RUNTIME_ONBOARDING.md)
+- [Authoring → Runtime → Composition showcase guide](docs/AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md)
+- [Simulation Runtime maturity plan](docs/plan/simulation-runtime-maturity.md)
 - [Manual build and provenance workflow](docs/BUILDING.md)
 - [Test selections and markers](docs/BUILDING_TESTS.md)
 - [Manual reconstruction notes](docs/manual/README.md)

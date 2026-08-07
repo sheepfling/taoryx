@@ -12,6 +12,17 @@ The source overlay is [vehicle_composition_registry.yaml](../../verification/veh
 It is validated against the horizontal fidelity registry and the unified
 family-manifest join before it can be inspected.
 
+Mission Composition projects this registry together with native execution
+bindings, Simple Aero, and dual-launch assets. The authoritative cross-catalog
+disposition is
+[mission_composition_inventory.yaml](../../verification/mission_composition_inventory.yaml),
+and the generated
+[family/realization matrix](mission-composition-coverage-matrix.md) records exact
+batch/session availability, normalized dynamics and control metadata,
+telemetry, spawned-child behavior, and blockers. Model-level readiness is only
+an index that at least one exact tuple is registered; it is never blanket
+permission to run every fidelity or mission.
+
 ## Discovering a vehicle
 
 ```bash
@@ -80,7 +91,7 @@ explicitly lacks accepted-interval command history; has not yet emitted the
 artifact; has no batch-action obligation; or is planned. Controls that happen
 to appear in a committed state/status row are not automatically a command
 trace: the runtime must retain the action held over the preceding accepted
-integration interval before Product 3 exposes it as requested-control
+integration interval before Mission Composition exposes it as requested-control
 evidence.
 
 An uncontrolled source replay or open-loop witness may emit this artifact with
@@ -130,7 +141,7 @@ for observed transitions.
 The X-15 local direct-wrench screen is a deliberately narrow registered
 batch/episode pair. Its replay witness compares one held semantic total-wrench
 stream through the source-local bounded projection and local derivative at
-each committed boundary. This supplies Product 2/3 stepping evidence for the
+each committed boundary. This supplies Runtime / Composition stepping evidence for the
 bridge tier only; it does not claim physical X-15 effectors, trim, release,
 or end-to-end flight behavior.
 
@@ -723,7 +734,7 @@ a temporary workspace, then execute the normal language-backed runtime. A320
 and F-16 bind the same resolved racetrack directly to their declared OpenAP or
 source-reduced execution adapter. Each path writes the compiled composition,
 preflight, runtime report, truth telemetry, independent objective report,
-envelope report, a normalized Product 3 `evaluation.json`, `status_trace.json`,
+envelope report, a normalized Mission Composition `evaluation.json`, `status_trace.json`,
 and stable `execution.json`; the reduced paths additionally write their trim
 and model-provenance artifacts. `evaluation.json` preserves an explicitly
 `unqualified` nominal outcome unless the selected family owns stronger
@@ -1086,7 +1097,7 @@ run; it deliberately does not fabricate the normal mission-evaluation fields.
 ## Intake before composition authoring
 
 `taoryx vehicle authoring-template` is for a declared catalog vehicle. Before
-that vehicle exists, start with the same discoverable Product 3 surface:
+that vehicle exists, start with the same discoverable Mission Composition surface:
 
 ```bash
 taoryx vehicle intake existing-family \
@@ -1175,10 +1186,12 @@ runtime adapter, controller, or qualification result.
 The passive tumbling family has a separate direct-release path. It intentionally
 has no controller or allocation profile: 3DOF uses a declared orientation-
 averaged projected area, and pseudo-6DOF explicitly reuses the native
-rigid-body passive-tumble equations. Both requests pin the current engineering
-cylinder fixture, its release state, and its body rates; a different geometry
-or release condition is a future bounded-variant request, not a silent model
-morph.
+rigid-body passive-tumble equations. Mission Composition publishes named
+`cylinder`, `sphere`, `cone`, and `triaxial_ellipsoid` realizations. The selected
+realization must match the typed `body_shape` parameter, and every named shape
+executes through the same direct-release factory for both available dynamics
+fidelities. Other geometry or release changes remain explicit bounded variants,
+not silent model morphs.
 
 ```bash
 taoryx vehicle compose \

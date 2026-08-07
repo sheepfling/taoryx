@@ -87,6 +87,8 @@ class VehicleTelemetry(BaseModel):
 
     vehicle_id: str
     name: str
+    model_id: str | None = None
+    parent_model_id: str | None = None
     kind: VehicleKind
     dynamics: DynamicsKind
     attitude_source: str | None = None
@@ -500,6 +502,8 @@ def _build_vehicle_telemetry(vehicle_id: str, vehicle: object, history: Sequence
     return VehicleTelemetry(
         vehicle_id=vehicle_id,
         name=str(getattr(vehicle, "name", vehicle_id)),
+        model_id=getattr(vehicle, "model_id", None),
+        parent_model_id=getattr(vehicle, "parent_model_id", None),
         kind=kind,
         dynamics=dynamics,
         attitude_source=attitude_source,

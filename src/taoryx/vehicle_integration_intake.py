@@ -189,7 +189,7 @@ class NewTopologyIntakeScaffold:
                 "family_inputs",
                 "non_tunable_blockers",
                 "exactly four canonical tier recipes",
-                "Product 3 interface-contract declaration",
+                "Mission Composition interface-contract declaration",
             ],
             "source_manifest_template": _source_manifest_template(self.request),
             "new_family_decision_record": _new_family_decision_record(self.request),
@@ -473,7 +473,7 @@ def _interface_contract_blueprint() -> dict[str, object]:
 
     A source manifest can describe a plant without telling a user, policy, or
     mission author what is safe to configure or observe. This checklist makes
-    that Product 3 boundary explicit before an author begins inventing a
+    that Mission Composition boundary explicit before an author begins inventing a
     vehicle-specific wrapper. It contains declaration work only; no item is
     interpreted as a supplied model property or a fidelity promotion.
     """
@@ -699,7 +699,7 @@ def _synthetic_conformance_witness_plan() -> list[dict[str, object]]:
 
 
 def validate_integration_intake_payload(payload: Mapping[str, object]) -> tuple[str, ...]:
-    """Return structural errors for one generated Product 3 intake document.
+    """Return structural errors for one generated Mission Composition intake document.
 
     Intake is intentionally non-promotable, but it must still be safe to hand
     to an integration author or an automation system.  This check verifies the

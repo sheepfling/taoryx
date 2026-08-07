@@ -8,18 +8,18 @@ from typing import Any, cast
 import pytest
 import yaml
 
-import taoryx.product_three_maturity as product_three_maturity
+import taoryx.mission_composition_maturity as mission_composition_maturity
 import taoryx.runtime.cli as runtime_cli
 import taoryx.vehicle_execution_preflight as execution_preflight
 import taoryx.vehicle_execution_witnesses as execution_witnesses
 from taoryx.family_adapter_registry import AdapterRegistrationError
 from taoryx.fidelity_contracts import CANONICAL_FIDELITY_TIERS
 from taoryx.language_backed_execution import execute_powered_fixed_wing_composition
+from taoryx.mission_composition_maturity import build_mission_composition_maturity_report
 from taoryx.parameter_value_spaces import (
     load_parameter_value_space_catalog,
     validate_parameter_value_space_coverage,
 )
-from taoryx.product_three_maturity import build_product_three_maturity_report
 from taoryx.reduced_fixed_wing_execution import execute_reduced_fixed_wing_composition
 from taoryx.runtime.cli import main
 from taoryx.trajectory.evaluation import TrajectoryEvaluation
@@ -724,7 +724,7 @@ def test_vehicle_cli_lists_and_exports_composition_sections(capsys: pytest.Captu
 
     assert main(["vehicle", "maturity-report"]) == 0
     maturity = json.loads(capsys.readouterr().out)
-    assert maturity["schema"] == "taoryx.product-three-maturity-report/v1alpha1"
+    assert maturity["schema"] == "taoryx.mission-composition-maturity-report/v1alpha1"
     assert maturity["topology"]["status"] == "pass"
     assert maturity["topology"]["canonical_channel_count"] > 0
     assert maturity["topology"]["resource_channel_count"] == 4
@@ -740,7 +740,7 @@ def test_vehicle_cli_lists_and_exports_composition_sections(capsys: pytest.Captu
         "runnable_variant_count": 2,
         "topology_runtime_backed_variant_count": 2,
         "claim_boundary": (
-            "This verifies that Product 3 discovery, authoring, and topology agree about declared runtime-bound "
+            "This verifies that Mission Composition discovery, authoring, and topology agree about declared runtime-bound "
             "variants. It does not prove the modifier's physical coupling, trim, or qualification beyond its "
             "separate runtime evidence."
         ),
@@ -828,13 +828,13 @@ def test_hl20_authoring_kit_distinguishes_signed_bank_intent_from_native_lowerin
     ####
 
 
-def test_product_three_maturity_report_keeps_coverage_and_evidence_distinct() -> None:
-    report = build_product_three_maturity_report()
+def test_mission_composition_maturity_report_keeps_coverage_and_evidence_distinct() -> None:
+    report = build_mission_composition_maturity_report()
 
     assert report["status"] == "pass"
     topology = cast(dict[str, object], report["topology"])
     assert topology["finding_count"] == 0
-    assert topology["interface_channel_count"] == 936
+    assert topology["interface_channel_count"] == 940
     execution = cast(dict[str, object], report["execution"])
     assert cast(dict[str, int], execution["runnable_operation_counts"])["episode"] >= 1
     release_packet_conformance = cast(dict[str, object], execution["release_packet_conformance"])
@@ -857,12 +857,12 @@ def test_product_three_maturity_report_keeps_coverage_and_evidence_distinct() ->
     assert integration["strategy_conformance_status"] == "pass"
     assert integration["tier_count"] == 36
     assert cast(dict[str, int], integration["work_status_counts"])["strategy_probe_ready"] >= 1
-    assert "not a Product 3 catalog failure" in str(integration["claim_boundary"])
+    assert "not a Mission Composition catalog failure" in str(integration["claim_boundary"])
     assert cast(dict[str, object], report["result_catalog"])["status"] == "not_supplied"
     ####
 
 
-def test_product_three_maturity_batch_smoke_implies_endpoint_witness_check(
+def test_mission_composition_maturity_batch_smoke_implies_endpoint_witness_check(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls: list[bool] = []
@@ -883,7 +883,7 @@ def test_product_three_maturity_batch_smoke_implies_endpoint_witness_check(
 
     monkeypatch.setattr(execution_witnesses, "validate_vehicle_execution_witnesses", fake_witness_check)
 
-    report = build_product_three_maturity_report(execute_batch_witnesses=True)
+    report = build_mission_composition_maturity_report(execute_batch_witnesses=True)
 
     assert report["status"] == "pass"
     assert calls == [True]
@@ -905,7 +905,7 @@ def test_product_three_maturity_batch_smoke_implies_endpoint_witness_check(
     ####
 
 
-def test_product_three_maturity_projects_family_graph_extension_witnesses(
+def test_mission_composition_maturity_projects_family_graph_extension_witnesses(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def fake_witness_check(*, execute_batch: bool = False) -> dict[str, object]:
@@ -933,14 +933,14 @@ def test_product_three_maturity_projects_family_graph_extension_witnesses(
 
     monkeypatch.setattr(execution_witnesses, "validate_vehicle_execution_witnesses", fake_witness_check)
 
-    static_report = build_product_three_maturity_report(check_execution_witnesses=True)
+    static_report = build_mission_composition_maturity_report(check_execution_witnesses=True)
     static_execution = cast(dict[str, object], static_report["execution"])
     static_graph = cast(dict[str, object], static_execution["graph_extension_conformance"])
     assert static_graph["status"] == "pass"
     assert static_graph["witness_count"] == 1
     assert static_graph["observed_execution_count"] is None
 
-    batch_report = build_product_three_maturity_report(execute_batch_witnesses=True)
+    batch_report = build_mission_composition_maturity_report(execute_batch_witnesses=True)
     batch_execution = cast(dict[str, object], batch_report["execution"])
     batch_graph = cast(dict[str, object], batch_execution["graph_extension_conformance"])
     assert batch_graph["status"] == "pass"
@@ -948,7 +948,7 @@ def test_product_three_maturity_projects_family_graph_extension_witnesses(
     ####
 
 
-def test_product_three_maturity_can_execute_registered_parity_witnesses(
+def test_mission_composition_maturity_can_execute_registered_parity_witnesses(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls: list[bool] = []
@@ -958,9 +958,9 @@ def test_product_three_maturity_can_execute_registered_parity_witnesses(
         return {"status": "pass", "registered_binding_count": 9}
         ####
 
-    monkeypatch.setattr(product_three_maturity, "validate_vehicle_execution_parity_witnesses", fake_parity_witnesses)
+    monkeypatch.setattr(mission_composition_maturity, "validate_vehicle_execution_parity_witnesses", fake_parity_witnesses)
 
-    report = build_product_three_maturity_report(execute_parity_witnesses=True)
+    report = build_mission_composition_maturity_report(execute_parity_witnesses=True)
 
     assert report["status"] == "pass"
     assert calls == [True]
@@ -969,8 +969,8 @@ def test_product_three_maturity_can_execute_registered_parity_witnesses(
     ####
 
 
-def test_product_three_maturity_report_can_index_retained_results_without_promoting_them(tmp_path: Path) -> None:
-    report = build_product_three_maturity_report(results_directory=tmp_path)
+def test_mission_composition_maturity_report_can_index_retained_results_without_promoting_them(tmp_path: Path) -> None:
+    report = build_mission_composition_maturity_report(results_directory=tmp_path)
 
     assert report["status"] == "pass"
     result_catalog = cast(dict[str, object], report["result_catalog"])
@@ -981,12 +981,12 @@ def test_product_three_maturity_report_can_index_retained_results_without_promot
     ####
 
 
-def test_product_three_maturity_report_fails_for_invalid_retained_evidence(tmp_path: Path) -> None:
+def test_mission_composition_maturity_report_fails_for_invalid_retained_evidence(tmp_path: Path) -> None:
     broken = tmp_path / "broken" / "evaluation.json"
     broken.parent.mkdir()
     broken.write_text("not-json", encoding="utf-8")
 
-    report = build_product_three_maturity_report(results_directory=tmp_path)
+    report = build_mission_composition_maturity_report(results_directory=tmp_path)
 
     assert report["status"] == "fail"
     result_catalog = cast(dict[str, object], report["result_catalog"])
@@ -995,18 +995,18 @@ def test_product_three_maturity_report_fails_for_invalid_retained_evidence(tmp_p
     ####
 
 
-def test_product_three_maturity_report_is_available_through_the_public_cli(capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
+def test_mission_composition_maturity_report_is_available_through_the_public_cli(capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     assert main(["vehicle", "maturity-report", "--results-dir", str(tmp_path)]) == 0
     payload = json.loads(capsys.readouterr().out)
 
-    assert payload["schema"] == "taoryx.product-three-maturity-report/v1alpha1"
+    assert payload["schema"] == "taoryx.mission-composition-maturity-report/v1alpha1"
     assert payload["status"] == "pass"
     assert payload["execution"]["execution_witnesses"]["status"] == "not_checked"
     assert payload["result_catalog"]["status"] == "empty"
     ####
 
 
-def test_product_three_maturity_cli_exposes_batch_witness_smoke(
+def test_mission_composition_maturity_cli_exposes_batch_witness_smoke(
     capsys: pytest.CaptureFixture[str],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1031,7 +1031,7 @@ def test_product_three_maturity_cli_exposes_batch_witness_smoke(
         return {"status": "pass", "schema": "test-maturity"}
         ####
 
-    monkeypatch.setattr(runtime_cli, "build_product_three_maturity_report", fake_maturity_report)
+    monkeypatch.setattr(runtime_cli, "build_mission_composition_maturity_report", fake_maturity_report)
 
     assert main(["vehicle", "maturity-report", "--execute-batch-witnesses"]) == 0
     assert json.loads(capsys.readouterr().out)["schema"] == "test-maturity"
@@ -1044,7 +1044,7 @@ def test_product_three_maturity_cli_exposes_batch_witness_smoke(
     ####
 
 
-def test_product_three_maturity_cli_exposes_parity_witness_smoke(
+def test_mission_composition_maturity_cli_exposes_parity_witness_smoke(
     capsys: pytest.CaptureFixture[str],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1069,7 +1069,7 @@ def test_product_three_maturity_cli_exposes_parity_witness_smoke(
         return {"status": "pass", "schema": "test-parity-maturity"}
         ####
 
-    monkeypatch.setattr(runtime_cli, "build_product_three_maturity_report", fake_maturity_report)
+    monkeypatch.setattr(runtime_cli, "build_mission_composition_maturity_report", fake_maturity_report)
 
     assert main(["vehicle", "maturity-report", "--execute-parity-witnesses"]) == 0
     assert json.loads(capsys.readouterr().out)["schema"] == "test-parity-maturity"
@@ -1902,7 +1902,7 @@ def test_runtime_lowering_binds_an_available_source_adapter() -> None:
 
 @pytest.mark.parametrize("family_id", ("skywalker_x8", "b747", "hummingbird", "f16_s119"))
 def test_runtime_registry_owns_source_table_adapters_and_operation_probes(family_id: str) -> None:
-    """Developer LQR scripts and Product 3 use the same physical plant seam."""
+    """Developer LQR scripts and Mission Composition use the same physical plant seam."""
 
     registry = build_vehicle_runtime_adapter_registry()
     for tier in ("rigid_body_6dof_direct_wrench", "rigid_body_6dof_surface_allocated"):

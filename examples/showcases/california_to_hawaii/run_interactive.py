@@ -37,7 +37,7 @@ def run(output_dir: Path, *, duration_s: float = 10.0) -> dict[str, object]:
     run_artifact = session.to_run_artifact()
     run_artifact_path = run_artifact.write_json(output_dir / "run-artifact.json")
     payload = {
-        "schema": "taoryx.product-two-interactive-witness/v1alpha1",
+        "schema": "taoryx.simulation-runtime-interactive-witness/v1alpha1",
         "status": session.status.value,
         "snapshot_count": len(snapshots),
         "accepted_intervals": [

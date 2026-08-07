@@ -14,7 +14,7 @@ from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import Assignment, EarthBlock, ProblemDocument, TableDocument
 from taoryx.outputs import RunArtifact, build_run_artifact
-from taoryx.product_two_contracts import ProductTwoStatus, classify_runtime_outcome
+from taoryx.simulation_runtime_contracts import SimulationRuntimeStatus, classify_runtime_outcome
 
 from .engine import ExecutionResult
 from .lowering import LoweredDocument, execute_lowered, lower_problem_document, problem_unit_settings
@@ -36,8 +36,8 @@ class RunReport:
     metadata: tuple[dict[str, object], ...] = ()
 
     @property
-    def status(self) -> ProductTwoStatus:
-        """Return the closed Product 2 outcome status for this source run."""
+    def status(self) -> SimulationRuntimeStatus:
+        """Return the closed Simulation Runtime outcome status for this source run."""
 
         return classify_runtime_outcome(
             has_errors=any(item.severity is Severity.ERROR for item in self.diagnostics),
@@ -90,7 +90,7 @@ def run_files(
     the historical clock-only and unsensorized execution path unchanged.
 
     ``control_provenance`` optionally writes an accepted-interval ledger from
-    the native runtime.  It is deliberately not a Product 3 semantic-action
+    the native runtime.  It is deliberately not a Mission Composition semantic-action
     trace: solver-stage controller mutation makes an interval ineligible for a
     held-command claim.  ``summary`` exposes only counts and the claim
     boundary; ``intervals`` retains accepted-interval records without
@@ -269,7 +269,7 @@ def _write_control_provenance(
 ) -> None:
     """Write native control-evaluation evidence without overstating it.
 
-    This intentionally lives beside runtime products rather than the
+    This intentionally lives beside runtime capabilities rather than the
     composition action-trace artifact.  A public semantic trace requires a
     controller to resolve commands at accepted truth boundaries and hold those
     commands across every solver stage.  Resolver-owned native commands now

@@ -1,4 +1,4 @@
-"""Index normalized Product 3 result artifacts without re-evaluating a run.
+"""Index normalized Mission Composition result artifacts without re-evaluating a run.
 
 Family executors own truth evaluation, numerical checks, and qualification.
 This module only validates their common ``evaluation.json`` envelope and
@@ -851,7 +851,7 @@ def _capability_preflight_evidence(
     """Validate optional concrete capability evidence without rerunning planning.
 
     This is a discovery-time integrity check over the preflight sidecar that
-    every current Product 3 batch executor emits.  It deliberately does not
+    every current Mission Composition batch executor emits.  It deliberately does not
     recompute a family capability estimate: a result packet must remain a
     provenance record for the exact planning decision that preceded that run,
     rather than silently being rewritten by current planner code.

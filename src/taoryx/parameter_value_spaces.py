@@ -1,4 +1,4 @@
-"""Explicit topology contracts for Product 3 composition parameters.
+"""Explicit topology contracts for Mission Composition parameters.
 
 The public vehicle-composition registry must not infer a mathematical space
 from a suffix such as ``_m``.  A coordinate in metres is signed; a duration in

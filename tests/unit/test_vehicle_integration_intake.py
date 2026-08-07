@@ -250,7 +250,7 @@ def test_intake_validator_rejects_a_noncanonical_execution_mode_vocabulary() -> 
     ####
 
 
-def test_product_three_vehicle_intake_cli_exports_existing_family_blueprint(
+def test_mission_composition_vehicle_intake_cli_exports_existing_family_blueprint(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     exit_code = main(
@@ -280,7 +280,7 @@ def test_product_three_vehicle_intake_cli_exports_existing_family_blueprint(
     ####
 
 
-def test_product_three_vehicle_intake_cli_exports_new_topology_scaffold(
+def test_mission_composition_vehicle_intake_cli_exports_new_topology_scaffold(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     exit_code = main(

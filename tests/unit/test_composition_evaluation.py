@@ -1,4 +1,4 @@
-"""Tests for conservative normalized Product 3 run-evidence projection."""
+"""Tests for conservative normalized Mission Composition run-evidence projection."""
 
 from __future__ import annotations
 

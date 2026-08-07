@@ -115,7 +115,7 @@ def test_hl20_packet_retains_generic_semantic_mission_binding_and_witnesses(tmp_
     ####
 
 
-def test_product_three_cli_reports_semantic_hl20_mission_without_promoting_runtime(
+def test_mission_composition_cli_reports_semantic_hl20_mission_without_promoting_runtime(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """A semantic mission remains development evidence when no runtime is bound."""
@@ -135,7 +135,7 @@ def test_product_three_cli_reports_semantic_hl20_mission_without_promoting_runti
     ####
 
 
-def test_product_three_cli_can_write_a_hash_bound_source_integration_packet(
+def test_mission_composition_cli_can_write_a_hash_bound_source_integration_packet(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:

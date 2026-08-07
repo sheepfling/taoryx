@@ -14,14 +14,14 @@ require family knowledge and source interpretation. The target is that Taoryx
 asks for the missing declarations, generates the worklist, runs all generic
 checks, and refuses unsupported promotion without manual bookkeeping.
 
-## Product 3 work-package alignment
+## Mission Composition work-package alignment
 
 This integration plan is the source-intake and plant/controller half of the
-Product 3 package register in
-[Product 3 maturity](product-three-maturity.md#product-3-next-phase-work-packages).
+Mission Composition package register in
+[Mission Composition maturity](mission-composition-maturity.md#mission-composition-next-phase-work-packages).
 Use the shared IDs in commits, issue titles, packets, and maturity reports:
 
-| Integration responsibility | Product 3 package | Concrete output |
+| Integration responsibility | Mission Composition package | Concrete output |
 | --- | --- | --- |
 | Source-owned runtime plant and adapter operation probes | `P3-RUN-01` | Factory, registry binding, operation probe, developer/runtime reuse test, and nonclaim record. |
 | Data/fidelity readiness and automatic lowering decision | `P3-RUN-02` | Per-family/fidelity checklist, provenance record, blocker report, and F-16/HL-20/A320/NESC onboarding regression. |
@@ -142,7 +142,7 @@ manifests. The F-16 report is `ready_for_runtime_probes`; the HL-20 report
 exposes its semantic glide mission and the separately planned runtime gate.
 Neither result promotes a runtime tier or silently lowers fidelity. The
 lower-level validation scripts remain CI/developer entry points, while the
-Product 3 CLI is the author-facing projection of the same evidence.
+Mission Composition CLI is the author-facing projection of the same evidence.
 
 The intake record should generate or validate:
 
@@ -502,7 +502,7 @@ taoryx vehicle report <family-id>
 ```
 
 The lower-level CI/developer counterpart remains available when a repository
-artifact is required rather than a Product 3 authoring report:
+artifact is required rather than a Mission Composition authoring report:
 
 ```bash
 .venv/bin/python tools/validate_vehicle_integration_readiness.py \

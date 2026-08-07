@@ -1,4 +1,4 @@
-"""Normalize family execution evidence into one Product 3 evaluation record.
+"""Normalize family execution evidence into one Mission Composition evaluation record.
 
 Family runners retain their source-appropriate telemetry, objective evaluator,
 and detailed evidence.  This module is intentionally a projection *after* the
@@ -84,7 +84,7 @@ def build_composition_trajectory_evaluation(
         achieved_controls=achieved_controls,
         resources=resources,
         claim_boundary=(
-            "This normalized Product 3 result projects the family-owned independent truth report and declared "
+            "This normalized Mission Composition result projects the family-owned independent truth report and declared "
             "runtime/envelope gates. It neither recomputes family physics nor promotes a nominal result beyond "
             "the selected fidelity/evidence tier. "
             + claim_boundary

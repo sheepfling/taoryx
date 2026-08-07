@@ -1,7 +1,7 @@
 schema: taoryx.interface-channel-value-space-catalog/v1alpha1
 version: 1
 description: >-
-  Explicit mathematical topology for every current public Product 2/3 vehicle
+  Explicit mathematical topology for every current public Runtime / Composition vehicle
   interface channel. Membership is semantic and does not infer a topology from
   the identifier, unit, or numeric bounds.
 profiles:
@@ -87,6 +87,7 @@ profiles:
     - control.wrench.status
     - execution.status
     - initialization.atmospheric_release.area_policy
+    - initialization.atmospheric_release.body_shape
     - phase.mode
     - segment.coast_terminal_state.terminal_kind
     - segment.fly_by_turn.turn_direction

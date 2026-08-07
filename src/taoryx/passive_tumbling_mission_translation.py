@@ -1,10 +1,10 @@
-"""Semantic lowering for the canonical passive tumbling-body release witness.
+"""Semantic lowering for the canonical passive tumbling-body release witnesses.
 
 The passive family intentionally has no controller, wrench, or allocation
 bridge.  This translator maps one declared atmospheric release into the
-existing detached-body propagation kernel and fixes a small engineering
-cylinder fixture.  It is a reproducible composition witness, not a claim that
-the fixture represents a particular spent stage or that averaged 3DOF drag
+existing detached-body propagation kernel and one of four named engineering
+geometry fixtures.  They are reproducible composition witnesses, not claims
+that a fixture represents a particular spent stage or that averaged 3DOF drag
 proves physical tumble.
 """
 
@@ -24,6 +24,7 @@ _CANONICAL_SPEED_M_S = 250.0
 _CANONICAL_HORIZON_S = 120.0
 _CANONICAL_BODY_RATE_RAD_S = (0.25, 0.4, 0.6)
 _CANONICAL_IMPACT_ALTITUDE_M = 0.0
+_CANONICAL_BODY_SHAPES = ("cylinder", "sphere", "cone", "triaxial_ellipsoid")
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,7 +49,7 @@ class PassiveTumblingMissionSegment:
 
 @dataclass(frozen=True, slots=True)
 class PassiveTumblingMissionPlan:
-    """Exact release-to-impact plan for the canonical cylinder witness."""
+    """Exact release-to-impact plan for one named passive-body witness."""
 
     fidelity: ReachabilityFidelity
     vehicle: RocketGlideVehicle
@@ -89,7 +90,7 @@ class PassiveTumblingMissionPlan:
             "area_policy": self.area_policy,
             "segments": [segment.manifest() for segment in self.segments],
             "claim_boundary": (
-                "This is a direct atmospheric release of a fixed engineering cylinder fixture. "
+                f"This is a direct atmospheric release of the named engineering {self.body.shape.value} fixture. "
                 "At point-mass 3DOF it uses orientation-averaged projected area and cannot prove tumble. "
                 "At pseudo-6DOF it reuses the native passive rigid-body equations, without a controller, "
                 "commanded wrench, or physical-effector allocation."
@@ -100,25 +101,80 @@ class PassiveTumblingMissionPlan:
 
 
 def canonical_passive_tumbling_body() -> DetachedBodyDefinition:
-    """Return the declared cylinder fixture used by passive deployment checks."""
+    """Return the legacy canonical cylinder fixture."""
+
+    return passive_tumbling_body("cylinder")
+    ####
+
+
+def passive_tumbling_body(shape: str) -> DetachedBodyDefinition:
+    """Build one named passive-body geometry with explicit mass properties."""
 
     mass_kg = 12.0
-    radius_m = 0.35
-    length_m = 2.0
-    inertia = Vector3(
-        0.5 * mass_kg * radius_m**2,
-        mass_kg * (3.0 * radius_m**2 + length_m**2) / 12.0,
-        mass_kg * (3.0 * radius_m**2 + length_m**2) / 12.0,
-    )
-    return DetachedBodyDefinition.cylinder(
-        "passive-cylinder-v1",
-        mass_kg=mass_kg,
-        radius_m=radius_m,
-        length_m=length_m,
-        tumbling_policy=TumblingPolicy.PASSIVE_TUMBLE,
-        inertia_kg_m2=inertia,
-        initial_angular_rate_body_rad_s=Vector3(*_CANONICAL_BODY_RATE_RAD_S),
-    )
+    angular_rate = Vector3(*_CANONICAL_BODY_RATE_RAD_S)
+    if shape == "cylinder":
+        radius_m = 0.35
+        length_m = 2.0
+        inertia = Vector3(
+            0.5 * mass_kg * radius_m**2,
+            mass_kg * (3.0 * radius_m**2 + length_m**2) / 12.0,
+            mass_kg * (3.0 * radius_m**2 + length_m**2) / 12.0,
+        )
+        return DetachedBodyDefinition.cylinder(
+            "passive-cylinder-v1",
+            mass_kg=mass_kg,
+            radius_m=radius_m,
+            length_m=length_m,
+            tumbling_policy=TumblingPolicy.PASSIVE_TUMBLE,
+            inertia_kg_m2=inertia,
+            initial_angular_rate_body_rad_s=angular_rate,
+        )
+    if shape == "sphere":
+        radius_m = 0.5
+        inertia_value = 0.4 * mass_kg * radius_m**2
+        return DetachedBodyDefinition.sphere(
+            "passive-sphere-v1",
+            mass_kg=mass_kg,
+            radius_m=radius_m,
+            tumbling_policy=TumblingPolicy.PASSIVE_TUMBLE,
+            inertia_kg_m2=Vector3(inertia_value, inertia_value, inertia_value),
+            initial_angular_rate_body_rad_s=angular_rate,
+        )
+    if shape == "cone":
+        radius_m = 0.45
+        height_m = 1.5
+        return DetachedBodyDefinition.cone(
+            "passive-cone-v1",
+            mass_kg=mass_kg,
+            base_radius_m=radius_m,
+            height_m=height_m,
+            tumbling_policy=TumblingPolicy.PASSIVE_TUMBLE,
+            inertia_kg_m2=Vector3(
+                0.3 * mass_kg * radius_m**2,
+                0.15 * mass_kg * (radius_m**2 + 4.0 * height_m**2),
+                0.15 * mass_kg * (radius_m**2 + 4.0 * height_m**2),
+            ),
+            initial_angular_rate_body_rad_s=angular_rate,
+        )
+    if shape == "triaxial_ellipsoid":
+        semi_axis_x_m = 0.8
+        semi_axis_y_m = 0.45
+        semi_axis_z_m = 0.3
+        return DetachedBodyDefinition.triaxial_ellipsoid(
+            "passive-triaxial-ellipsoid-v1",
+            mass_kg=mass_kg,
+            semi_axis_x_m=semi_axis_x_m,
+            semi_axis_y_m=semi_axis_y_m,
+            semi_axis_z_m=semi_axis_z_m,
+            tumbling_policy=TumblingPolicy.PASSIVE_TUMBLE,
+            inertia_kg_m2=Vector3(
+                mass_kg * (semi_axis_y_m**2 + semi_axis_z_m**2) / 5.0,
+                mass_kg * (semi_axis_x_m**2 + semi_axis_z_m**2) / 5.0,
+                mass_kg * (semi_axis_x_m**2 + semi_axis_y_m**2) / 5.0,
+            ),
+            initial_angular_rate_body_rad_s=angular_rate,
+        )
+    raise ValueError(f"unknown passive tumbling body shape {shape!r}; expected one of {_CANONICAL_BODY_SHAPES!r}")
     ####
 
 
@@ -153,9 +209,13 @@ def compile_passive_tumbling_mission(composition: CompiledVehicleComposition) ->
     _require_number(coast.inputs, "duration_s", _CANONICAL_HORIZON_S, "s")
     _require_number(descent.inputs, "impact_plane_altitude_m", _CANONICAL_IMPACT_ALTITUDE_M, "m")
 
-    body = canonical_passive_tumbling_body()
+    body_shape = _optional_text(initialization, "body_shape", default="cylinder")
+    if body_shape not in _CANONICAL_BODY_SHAPES:
+        raise ValueError(f"passive tumbling witness has no named geometry realization {body_shape!r}")
+    body = passive_tumbling_body(body_shape)
+    profile_shape = body_shape.replace("_", "-")
     vehicle = RocketGlideVehicle(
-        vehicle_id="taoryx-passive-cylinder-direct-release-v1",
+        vehicle_id=f"taoryx-passive-{profile_shape}-direct-release-v1",
         dry_mass_kg=body.mass_kg,
         propellant_mass_kg=0.0,
         thrust_n=0.0,
@@ -165,11 +225,11 @@ def compile_passive_tumbling_mission(composition: CompiledVehicleComposition) ->
         lift_to_drag=1.0,
         initial_speed_m_s=_CANONICAL_SPEED_M_S,
         initial_altitude_m=_CANONICAL_ALTITUDE_M,
-        aerodynamic_model_id="passive_cylinder_drag_surrogate_v1",
+        aerodynamic_model_id=f"passive_{body_shape}_drag_surrogate_v1",
         actuator_profile_id="none",
         mission_profile_id="passive_tumbling_direct_release_v1",
-        configuration_variant_id="canonical-cylinder-v1",
-        mass_property_profile_id="cylinder-inertia-analytic-v1",
+        configuration_variant_id=f"canonical-{profile_shape}-v1",
+        mass_property_profile_id=f"{profile_shape}-inertia-analytic-v1",
     )
     return PassiveTumblingMissionPlan(
         fidelity=fidelity,
@@ -236,9 +296,23 @@ def _require_text(inputs: Mapping[str, object], name: str, expected: str) -> Non
     ####
 
 
+def _optional_text(inputs: Mapping[str, object], name: str, *, default: str) -> str:
+    """Resolve one optional categorical input while preserving legacy requests."""
+
+    item = inputs.get(name)
+    if item is None:
+        return default
+    value = getattr(item, "value", None)
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"passive tumbling composition input {name!r} must be non-empty text")
+    return value
+    ####
+
+
 __all__ = [
     "PassiveTumblingMissionPlan",
     "PassiveTumblingMissionSegment",
     "canonical_passive_tumbling_body",
     "compile_passive_tumbling_mission",
+    "passive_tumbling_body",
 ]

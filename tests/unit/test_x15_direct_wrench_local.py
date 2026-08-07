@@ -79,7 +79,7 @@ def test_x15_local_screen_uses_the_shared_direct_wrench_execution_seam() -> None
 
 
 def test_x15_local_screen_configuration_is_reused_within_one_source_revision() -> None:
-    """Product 3 preflight and execution must reuse one immutable source setup."""
+    """Mission Composition preflight and execution must reuse one immutable source setup."""
 
     first = build_x15_local_direct_wrench_screen_config()
     second = build_x15_local_direct_wrench_screen_config()

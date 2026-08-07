@@ -666,7 +666,16 @@ vehicles:
         status: development
         description: Passive-body release with geometry, orientation, angular-rate, and atmospheric state declared.
         compatible_fidelities: [point_mass_3dof, pseudo_6dof]
-        parameters: [{id: altitude_m, canonical_unit: m, required: true, description: Release altitude.}, {id: speed_m_s, canonical_unit: m/s, required: true, description: Release speed.}, {id: quaternion_wxyz, canonical_unit: dimensionless, required: false, description: Initial attitude; the first direct-release witness accepts identity only.}, {id: body_rates_rad_s, canonical_unit: rad/s, required: true, description: Initial body rates; retained even for 3DOF so cross-tier requests are explicit.}, {id: area_policy, canonical_unit: null, required: true, description: "orientation_averaged_projected_area for 3DOF, or native_rigid_body_reuse_instantaneous_projected_area for pseudo-6DOF."}]
+        parameters:
+          - {id: altitude_m, canonical_unit: m, required: true, description: Release altitude.}
+          - {id: speed_m_s, canonical_unit: m/s, required: true, description: Release speed.}
+          - {id: quaternion_wxyz, canonical_unit: dimensionless, required: false, description: Initial attitude; the direct-release witness accepts identity only.}
+          - {id: body_rates_rad_s, canonical_unit: rad/s, required: true, description: Initial body rates; retained even for 3DOF so cross-tier requests are explicit.}
+          - id: body_shape
+            canonical_unit: null
+            required: false
+            description: Named passive-body geometry realization selected independently from dynamics fidelity.
+          - {id: area_policy, canonical_unit: null, required: true, description: "orientation_averaged_projected_area for 3DOF, or native_rigid_body_reuse_instantaneous_projected_area for pseudo-6DOF."}
     segment_contracts:
       - id: passive_coast
         status: development

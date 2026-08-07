@@ -1,6 +1,6 @@
 """Source-owned execution for X-15-scaled staged reachability compositions.
 
-This executor is intentionally a narrow bridge from the composition product to
+This executor is intentionally a narrow bridge from the Mission Composition layer to
 the retained reduced-order staging witness.  It does not wrap the synthetic
 California-to-Hawaii example and does not promote the local X-15 direct-wrench
 load bridge into an end-to-end mission controller.
@@ -35,6 +35,7 @@ class X15StagedReachabilityCompositionExecution:
     composition: CompiledVehicleComposition
     preflight: VehicleExecutionPreflight
     plan: X15StagedReachabilityMissionPlan
+    trajectory: TrajectoryResult
     output_dir: Path
     runtime: dict[str, object]
     envelope: dict[str, object]
@@ -153,6 +154,7 @@ def execute_x15_staged_reachability_composition(
         composition=composition,
         preflight=preflight,
         plan=plan,
+        trajectory=trajectory,
         output_dir=destination,
         runtime=runtime,
         envelope=envelope,

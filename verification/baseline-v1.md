@@ -2,7 +2,7 @@
 
 Status: Phase 0 governance baseline; review required before a release claim is widened.
 
-## Product boundary
+## Capability boundary
 
 TAOS is treated here as a three-degree-of-freedom point-mass simulator. Vehicle
 attitude is an input/result of guidance and aerodynamic/propulsive models. This

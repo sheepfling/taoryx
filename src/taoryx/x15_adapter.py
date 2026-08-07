@@ -528,7 +528,7 @@ def build_x15_local_direct_wrench_screen_config() -> LocalDirectWrenchScreenConf
     trim and the resulting witness is not an X-15 trajectory mission.
 
     The contract is frozen and source-pinned, so a process-local cache is
-    safe.  Several Product 3 checks intentionally ask for this exact screen
+    safe.  Several Mission Composition checks intentionally ask for this exact screen
     during preflight, batch execution, episode opening, and parity replay;
     reparsing the same source tables for each of those checks provides no
     additional evidence and makes the catalog-wide witness audit needlessly

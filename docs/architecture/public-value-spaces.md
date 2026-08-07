@@ -5,7 +5,7 @@ and objective value has both a unit and a **mathematical value space**. A unit
 alone is insufficient: heading and heading rate may both use degrees, but
 heading is periodic while heading rate is an ordinary signed scalar.
 
-This contract is part of Product 3 discovery and Product 2 stepping. It tells
+This contract is part of Mission Composition discovery and Simulation Runtime stepping. It tells
 authoring tools how to validate an input, controllers how to form an error,
 and AI/RL clients whether a value can be safely normalized, interpolated, or
 compared componentwise.
@@ -75,7 +75,7 @@ taoryx vehicle describe skywalker_x8
 taoryx vehicle interface-report
 
 # Catalog-wide completeness gate; it reports zero topology findings only when
-# every published Product 3 surface has an explicit reviewed contract.
+# every published Mission Composition surface has an explicit reviewed contract.
 taoryx vehicle topology-report
 ```
 
@@ -86,7 +86,7 @@ interpolation for events, modes, or booleans.
 
 ## Timing and control implications
 
-The topology contract does not authorize interpolation. Product 2 publishes
+The topology contract does not authorize interpolation. Simulation Runtime publishes
 truth at committed integration boundaries. A sensor, observer, or UI may
 sample only its declared committed status rows; a command is held across an
 explicit interval. `semantic_action_trace.json` is additionally checked
@@ -116,4 +116,4 @@ Before exposing a new field, the family author must answer:
 7. Which registry/catalog entry makes the decision machine-readable?
 
 A new field that cannot answer these questions stays private to its model
-until its Product 2/3 contract is ready.
+until its Runtime / Composition contract is ready.

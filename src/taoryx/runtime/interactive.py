@@ -714,6 +714,8 @@ class InteractiveSession:
             vehicles[name] = VehicleTelemetry(
                 vehicle_id=name,
                 name=name,
+                model_id=vehicle.model_id,
+                parent_model_id=vehicle.parent_model_id,
                 kind=vehicle.vehicle_kind,
                 dynamics=dynamics[vehicle.dynamics_mode.value],
                 attitude_source="interactive-controller" if vehicle.kinematic_state is not None else None,

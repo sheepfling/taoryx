@@ -1,0 +1,2189 @@
+{
+  "schema": "taoryx.mission-composition-completion/v1",
+  "provider_id": "taoryx.registry.mission-composition",
+  "provider_version": "1",
+  "status": "pass",
+  "completion_rule": "Every exact combination advertised as available executes through the common Mission Composition interface; all other combinations are explicitly blocked or unsupported.",
+  "inventory_status": "pass",
+  "advertisement_status": "pass",
+  "family_count": 11,
+  "realization_count": 45,
+  "registered_batch_tuple_count": 28,
+  "registered_interactive_tuple_count": 11,
+  "families": [
+    {
+      "model_id": "skywalker_x8",
+      "family_id": "skywalker_x8",
+      "name": "Skywalker X8 research surrogate",
+      "discovery_status": "common_runner_ready",
+      "inventory_status": "published",
+      "supported_missions": [
+        "powered_fixed_wing_racetrack_v1"
+      ],
+      "capabilities": [],
+      "optional_telemetry": [
+        "actuator.elevon.collective",
+        "actuator.elevon.differential",
+        "control.throttle.realized"
+      ],
+      "realizations": [
+        {
+          "model_id": "skywalker_x8",
+          "family_id": "skywalker_x8",
+          "realization_id": "point_mass_3dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "powered_fixed_wing_racetrack_v1/point_mass_3dof/point_mass_3dof/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "powered_fixed_wing_racetrack_v1/point_mass_3dof/point_mass_3dof/step"
+          ],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "actuator.elevon.collective",
+            "actuator.elevon.differential",
+            "control.throttle.realized"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        },
+        {
+          "model_id": "skywalker_x8",
+          "family_id": "skywalker_x8",
+          "realization_id": "pseudo_6dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "pseudo_6dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "powered_fixed_wing_racetrack_v1/pseudo_6dof/pseudo_6dof/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "powered_fixed_wing_racetrack_v1/pseudo_6dof/pseudo_6dof/step"
+          ],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "actuator.elevon.collective",
+            "actuator.elevon.differential",
+            "control.throttle.realized"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        },
+        {
+          "model_id": "skywalker_x8",
+          "family_id": "skywalker_x8",
+          "realization_id": "rigid_body_6dof_direct_wrench",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "direct_wrench",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "nonlinear_direct_wrench_mission",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: no exact batch execution binding is registered",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "skywalker_x8",
+          "family_id": "skywalker_x8",
+          "realization_id": "rigid_body_6dof_surface_allocated",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "actuator_allocated",
+          "actuator_types": [
+            "aerodynamic_surfaces"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "end_to_end_surface_allocated_racetrack",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch: no exact batch execution binding is registered",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
+          ]
+        }
+      ]
+    },
+    {
+      "model_id": "b747",
+      "family_id": "b747",
+      "name": "Boeing 747-100 research surrogate",
+      "discovery_status": "common_runner_ready",
+      "inventory_status": "published",
+      "supported_missions": [
+        "powered_fixed_wing_racetrack_v1"
+      ],
+      "capabilities": [],
+      "optional_telemetry": [
+        "actuator.elevator",
+        "control.throttle.realized"
+      ],
+      "realizations": [
+        {
+          "model_id": "b747",
+          "family_id": "b747",
+          "realization_id": "point_mass_3dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "powered_fixed_wing_racetrack_v1/point_mass_3dof/point_mass_3dof/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "powered_fixed_wing_racetrack_v1/point_mass_3dof/point_mass_3dof/step"
+          ],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "actuator.elevator",
+            "control.throttle.realized"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        },
+        {
+          "model_id": "b747",
+          "family_id": "b747",
+          "realization_id": "pseudo_6dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "pseudo_6dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "powered_fixed_wing_racetrack_v1/pseudo_6dof/pseudo_6dof/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "powered_fixed_wing_racetrack_v1/pseudo_6dof/pseudo_6dof/step"
+          ],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "actuator.elevator",
+            "control.throttle.realized"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        },
+        {
+          "model_id": "b747",
+          "family_id": "b747",
+          "realization_id": "rigid_body_6dof_direct_wrench",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "direct_wrench",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "nonlinear_direct_wrench_mission",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: no exact batch execution binding is registered",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "b747",
+          "family_id": "b747",
+          "realization_id": "rigid_body_6dof_surface_allocated",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "actuator_allocated",
+          "actuator_types": [
+            "aerodynamic_surfaces"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "end_to_end_surface_allocated_racetrack",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch: no exact batch execution binding is registered",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
+          ]
+        }
+      ]
+    },
+    {
+      "model_id": "a320_openap_3dof",
+      "family_id": "a320_openap_3dof",
+      "name": "a320_openap_3dof",
+      "discovery_status": "common_runner_ready",
+      "inventory_status": "published",
+      "supported_missions": [
+        "powered_fixed_wing_racetrack_v1"
+      ],
+      "capabilities": [],
+      "optional_telemetry": [
+        "aerodynamics.dynamic_pressure",
+        "control.throttle.realized",
+        "mass.fuel_flow",
+        "mass.total",
+        "propulsion.thrust"
+      ],
+      "realizations": [
+        {
+          "model_id": "a320_openap_3dof",
+          "family_id": "a320_openap_3dof",
+          "realization_id": "point_mass_3dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "powered_fixed_wing_racetrack_v1/point_mass_3dof/point_mass_3dof/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "powered_fixed_wing_racetrack_v1/point_mass_3dof/point_mass_3dof/step"
+          ],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.dynamic_pressure",
+            "control.throttle.realized",
+            "mass.fuel_flow",
+            "mass.total",
+            "propulsion.thrust"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        },
+        {
+          "model_id": "a320_openap_3dof",
+          "family_id": "a320_openap_3dof",
+          "realization_id": "pseudo_6dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "pseudo_6dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "powered_fixed_wing_racetrack_v1/pseudo_6dof/pseudo_6dof/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "powered_fixed_wing_racetrack_v1/pseudo_6dof/pseudo_6dof/step"
+          ],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.dynamic_pressure",
+            "control.throttle.realized",
+            "mass.fuel_flow",
+            "mass.total",
+            "propulsion.thrust"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        },
+        {
+          "model_id": "a320_openap_3dof",
+          "family_id": "a320_openap_3dof",
+          "realization_id": "rigid_body_6dof_direct_wrench",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "direct_wrench",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "participating_rigid_body_plant",
+            "physical_surface_effectivity"
+          ]
+        },
+        {
+          "model_id": "a320_openap_3dof",
+          "family_id": "a320_openap_3dof",
+          "realization_id": "rigid_body_6dof_surface_allocated",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "actuator_allocated",
+          "actuator_types": [
+            "aerodynamic_surfaces"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "participating_rigid_body_plant",
+            "physical_surface_effectivity"
+          ]
+        },
+        {
+          "model_id": "a320_openap_3dof",
+          "family_id": "a320_openap_3dof",
+          "realization_id": "jsbsim_surrogate_composite_pseudo6dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published_blocked",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "pseudo_6dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "exact_vehicle_composition_execution_binding"
+          ]
+        }
+      ]
+    },
+    {
+      "model_id": "f16_s119",
+      "family_id": "f16_s119",
+      "name": "F-16 S-119 source-grounded reference family",
+      "discovery_status": "common_runner_ready",
+      "inventory_status": "published",
+      "supported_missions": [
+        "powered_fixed_wing_racetrack_v1",
+        "fighter_subsonic_energy_maneuver_v1"
+      ],
+      "capabilities": [],
+      "optional_telemetry": [
+        "actuator.aileron",
+        "actuator.elevator",
+        "actuator.rudder",
+        "aerodynamics.angle_of_attack",
+        "aerodynamics.dynamic_pressure",
+        "aerodynamics.sideslip",
+        "control.throttle.realized",
+        "mass.total"
+      ],
+      "realizations": [
+        {
+          "model_id": "f16_s119",
+          "family_id": "f16_s119",
+          "realization_id": "point_mass_3dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "powered_fixed_wing_racetrack_v1/point_mass_3dof/point_mass_3dof/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "powered_fixed_wing_racetrack_v1/point_mass_3dof/point_mass_3dof/step"
+          ],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "actuator.aileron",
+            "actuator.elevator",
+            "actuator.rudder",
+            "aerodynamics.angle_of_attack",
+            "aerodynamics.dynamic_pressure",
+            "aerodynamics.sideslip",
+            "control.throttle.realized",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "fighter_subsonic_energy_maneuver_v1/point_mass_3dof/point_mass_3dof/batch: no exact batch execution binding is registered",
+            "fighter_subsonic_energy_maneuver_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "f16_s119",
+          "family_id": "f16_s119",
+          "realization_id": "pseudo_6dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1"
+          ],
+          "dynamics_fidelities": [
+            "pseudo_6dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "powered_fixed_wing_racetrack_v1/pseudo_6dof/pseudo_6dof/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "powered_fixed_wing_racetrack_v1/pseudo_6dof/pseudo_6dof/step"
+          ],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "actuator.aileron",
+            "actuator.elevator",
+            "actuator.rudder",
+            "aerodynamics.angle_of_attack",
+            "aerodynamics.dynamic_pressure",
+            "aerodynamics.sideslip",
+            "control.throttle.realized",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "fighter_subsonic_energy_maneuver_v1/pseudo_6dof/pseudo_6dof/batch: no exact batch execution binding is registered",
+            "fighter_subsonic_energy_maneuver_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "f16_s119",
+          "family_id": "f16_s119",
+          "realization_id": "rigid_body_6dof_direct_wrench",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1",
+            "fighter_subsonic_energy_maneuver_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "direct_wrench",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "nonlinear_energy_maneuver_mission",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: no exact batch execution binding is registered",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered",
+            "fighter_subsonic_energy_maneuver_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: no exact batch execution binding is registered",
+            "fighter_subsonic_energy_maneuver_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "f16_s119",
+          "family_id": "f16_s119",
+          "realization_id": "rigid_body_6dof_surface_allocated",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1",
+            "fighter_subsonic_energy_maneuver_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "actuator_allocated",
+          "actuator_types": [
+            "aerodynamic_surfaces"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "scheduled_surface_qualification",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch: no exact batch execution binding is registered",
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
+            "fighter_subsonic_energy_maneuver_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch: no exact batch execution binding is registered",
+            "fighter_subsonic_energy_maneuver_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "f16_s119",
+          "family_id": "f16_s119",
+          "realization_id": "source_daveml_rigid_body",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published_blocked",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "powered_fixed_wing_racetrack_v1",
+            "fighter_subsonic_energy_maneuver_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "provider_defined",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "complete_source_plant_mission_adapter"
+          ]
+        }
+      ]
+    },
+    {
+      "model_id": "x15",
+      "family_id": "x15",
+      "name": "North American X-15 research surrogate",
+      "discovery_status": "common_runner_ready",
+      "inventory_status": "published",
+      "supported_missions": [
+        "x15_local_direct_wrench_screen_v1",
+        "rocket_aircraft_high_energy_v1",
+        "x15_staged_booster_reachability_v1"
+      ],
+      "capabilities": [
+        "deployment",
+        "staging",
+        "dynamic_child_generation",
+        "submodels"
+      ],
+      "optional_telemetry": [
+        "aerodynamics.drag_force",
+        "control.feedback_norm",
+        "control.wrench.achieved.force.x",
+        "control.wrench.achieved.force.y",
+        "control.wrench.achieved.force.z",
+        "control.wrench.achieved.moment.x",
+        "control.wrench.achieved.moment.y",
+        "control.wrench.achieved.moment.z",
+        "control.wrench.requested.force.x",
+        "control.wrench.requested.force.y",
+        "control.wrench.requested.force.z",
+        "control.wrench.requested.moment.x",
+        "control.wrench.requested.moment.y",
+        "control.wrench.requested.moment.z",
+        "control.wrench.residual_norm",
+        "guidance.bank.command",
+        "mass.total"
+      ],
+      "realizations": [
+        {
+          "model_id": "x15",
+          "family_id": "x15",
+          "realization_id": "point_mass_3dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "x15_staged_booster_reachability_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof"
+          ],
+          "control_realization": "uncontrolled",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "x15_staged_booster_reachability_v1/point_mass_3dof/point_mass_3dof/batch"
+          ],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "dynamic_child_generation",
+            "submodels"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.drag_force",
+            "guidance.bank.command",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "available:spent_booster_release:independently_propagated:x15-spent-booster"
+          ],
+          "blockers": [
+            "rocket_aircraft_high_energy_v1/point_mass_3dof/point_mass_3dof/batch: no exact batch execution binding is registered",
+            "rocket_aircraft_high_energy_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered",
+            "x15_staged_booster_reachability_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "x15",
+          "family_id": "x15",
+          "realization_id": "pseudo_6dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "x15_staged_booster_reachability_v1"
+          ],
+          "dynamics_fidelities": [
+            "pseudo_6dof"
+          ],
+          "control_realization": "uncontrolled",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "x15_staged_booster_reachability_v1/pseudo_6dof/pseudo_6dof/batch"
+          ],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "dynamic_child_generation",
+            "submodels"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.drag_force",
+            "guidance.bank.command",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "available:spent_booster_release:independently_propagated:x15-spent-booster"
+          ],
+          "blockers": [
+            "rocket_aircraft_high_energy_v1/pseudo_6dof/pseudo_6dof/batch: no exact batch execution binding is registered",
+            "rocket_aircraft_high_energy_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered",
+            "x15_staged_booster_reachability_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "x15",
+          "family_id": "x15",
+          "realization_id": "rigid_body_6dof_direct_wrench",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "x15_local_direct_wrench_screen_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "direct_wrench",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "x15_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "x15_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step"
+          ],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "dynamic_child_generation",
+            "submodels"
+          ],
+          "optional_telemetry": [
+            "control.feedback_norm",
+            "control.wrench.achieved.force.x",
+            "control.wrench.achieved.force.y",
+            "control.wrench.achieved.force.z",
+            "control.wrench.achieved.moment.x",
+            "control.wrench.achieved.moment.y",
+            "control.wrench.achieved.moment.z",
+            "control.wrench.requested.force.x",
+            "control.wrench.requested.force.y",
+            "control.wrench.requested.force.z",
+            "control.wrench.requested.moment.x",
+            "control.wrench.requested.moment.y",
+            "control.wrench.requested.moment.z",
+            "control.wrench.residual_norm"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "rocket_aircraft_high_energy_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: release_to_powered_coast_phase_translator",
+            "rocket_aircraft_high_energy_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: source_bounded_high_energy_terminal_objectives",
+            "rocket_aircraft_high_energy_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: phase_scheduled_direct_wrench_controller",
+            "rocket_aircraft_high_energy_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "x15",
+          "family_id": "x15",
+          "realization_id": "rigid_body_6dof_surface_allocated",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "x15_local_direct_wrench_screen_v1",
+            "rocket_aircraft_high_energy_v1",
+            "x15_staged_booster_reachability_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "actuator_allocated",
+          "actuator_types": [
+            "mixed"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "dynamic_child_generation",
+            "submodels"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "source_trim_acceptance",
+            "stabilator_rudder_rcs_propulsion_effectivity",
+            "rocket_aircraft_high_energy_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch: no exact batch execution binding is registered",
+            "rocket_aircraft_high_energy_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
+          ]
+        }
+      ]
+    },
+    {
+      "model_id": "hummingbird",
+      "family_id": "hummingbird",
+      "name": "AscTec Hummingbird research surrogate",
+      "discovery_status": "common_runner_ready",
+      "inventory_status": "published",
+      "supported_missions": [
+        "multirotor_pad_box_yaw_recovery_land_v1"
+      ],
+      "capabilities": [],
+      "optional_telemetry": [
+        "angular_rate.body.x",
+        "attitude.commanded.roll",
+        "attitude.realized.roll",
+        "control.thrust.commanded_ratio",
+        "propulsion.thrust.realized",
+        "resources.battery_fraction"
+      ],
+      "realizations": [
+        {
+          "model_id": "hummingbird",
+          "family_id": "hummingbird",
+          "realization_id": "point_mass_3dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "multirotor_pad_box_yaw_recovery_land_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "translated_yaw_disturbance_landing_mission",
+            "multirotor_pad_box_yaw_recovery_land_v1/point_mass_3dof/point_mass_3dof/batch: no exact batch execution binding is registered",
+            "multirotor_pad_box_yaw_recovery_land_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "hummingbird",
+          "family_id": "hummingbird",
+          "realization_id": "pseudo_6dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "multirotor_pad_box_yaw_recovery_land_v1"
+          ],
+          "dynamics_fidelities": [
+            "pseudo_6dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "multirotor_pad_box_yaw_recovery_land_v1/pseudo_6dof/pseudo_6dof/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "multirotor_pad_box_yaw_recovery_land_v1/pseudo_6dof/pseudo_6dof/step"
+          ],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "angular_rate.body.x",
+            "attitude.commanded.roll",
+            "attitude.realized.roll",
+            "control.thrust.commanded_ratio",
+            "propulsion.thrust.realized",
+            "resources.battery_fraction"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        },
+        {
+          "model_id": "hummingbird",
+          "family_id": "hummingbird",
+          "realization_id": "rigid_body_6dof_direct_wrench",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "multirotor_pad_box_yaw_recovery_land_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "direct_wrench",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "direct_wrench_is_debug_comparator",
+            "multirotor_pad_box_yaw_recovery_land_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: no exact batch execution binding is registered",
+            "multirotor_pad_box_yaw_recovery_land_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "hummingbird",
+          "family_id": "hummingbird",
+          "realization_id": "rigid_body_6dof_surface_allocated",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "multirotor_pad_box_yaw_recovery_land_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "actuator_allocated",
+          "actuator_types": [
+            "rotors"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "battery_voltage_contact_and_full_envelope",
+            "multirotor_pad_box_yaw_recovery_land_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch: no exact batch execution binding is registered",
+            "multirotor_pad_box_yaw_recovery_land_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
+          ]
+        }
+      ]
+    },
+    {
+      "model_id": "hl20_mod_k",
+      "family_id": "hl20_mod_k",
+      "name": "HL-20 Mod K source-grounded reference family",
+      "discovery_status": "common_runner_ready",
+      "inventory_status": "published",
+      "supported_missions": [
+        "hl20_local_direct_wrench_screen_v1",
+        "hl20_source_booster_release_replay_v1",
+        "lifting_body_glide_energy_management_v1"
+      ],
+      "capabilities": [
+        "deployment",
+        "staging",
+        "dynamic_child_generation",
+        "submodels"
+      ],
+      "optional_telemetry": [
+        "control.feedback_norm",
+        "control.wrench.achieved.force.x",
+        "control.wrench.achieved.force.y",
+        "control.wrench.achieved.force.z",
+        "control.wrench.achieved.moment.x",
+        "control.wrench.achieved.moment.y",
+        "control.wrench.achieved.moment.z",
+        "control.wrench.requested.force.x",
+        "control.wrench.requested.force.y",
+        "control.wrench.requested.force.z",
+        "control.wrench.requested.moment.x",
+        "control.wrench.requested.moment.y",
+        "control.wrench.requested.moment.z",
+        "control.wrench.residual_norm",
+        "mass.total"
+      ],
+      "realizations": [
+        {
+          "model_id": "hl20_mod_k",
+          "family_id": "hl20_mod_k",
+          "realization_id": "point_mass_3dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "hl20_source_booster_release_replay_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof"
+          ],
+          "control_realization": "source_replay",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "hl20_source_booster_release_replay_v1/point_mass_3dof/point_mass_3dof/batch"
+          ],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "dynamic_child_generation",
+            "submodels"
+          ],
+          "optional_telemetry": [
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "available:synthetic_spent_booster_release:independently_propagated:hl20-synthetic-spent-booster"
+          ],
+          "blockers": [
+            "hl20_source_booster_release_replay_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered",
+            "lifting_body_glide_energy_management_v1/point_mass_3dof/point_mass_3dof/batch: no exact batch execution binding is registered",
+            "lifting_body_glide_energy_management_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "hl20_mod_k",
+          "family_id": "hl20_mod_k",
+          "realization_id": "pseudo_6dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "hl20_source_booster_release_replay_v1"
+          ],
+          "dynamics_fidelities": [
+            "pseudo_6dof"
+          ],
+          "control_realization": "source_replay",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "hl20_source_booster_release_replay_v1/pseudo_6dof/pseudo_6dof/batch"
+          ],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "dynamic_child_generation",
+            "submodels"
+          ],
+          "optional_telemetry": [
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "available:synthetic_spent_booster_release:independently_propagated:hl20-synthetic-spent-booster"
+          ],
+          "blockers": [
+            "hl20_source_booster_release_replay_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered",
+            "lifting_body_glide_energy_management_v1/pseudo_6dof/pseudo_6dof/batch: no exact batch execution binding is registered",
+            "lifting_body_glide_energy_management_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "hl20_mod_k",
+          "family_id": "hl20_mod_k",
+          "realization_id": "rigid_body_6dof_direct_wrench",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "hl20_local_direct_wrench_screen_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "direct_wrench",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "hl20_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch"
+          ],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "hl20_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step"
+          ],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "dynamic_child_generation",
+            "submodels"
+          ],
+          "optional_telemetry": [
+            "control.feedback_norm",
+            "control.wrench.achieved.force.x",
+            "control.wrench.achieved.force.y",
+            "control.wrench.achieved.force.z",
+            "control.wrench.achieved.moment.x",
+            "control.wrench.achieved.moment.y",
+            "control.wrench.achieved.moment.z",
+            "control.wrench.requested.force.x",
+            "control.wrench.requested.force.y",
+            "control.wrench.requested.force.z",
+            "control.wrench.requested.moment.x",
+            "control.wrench.requested.moment.y",
+            "control.wrench.requested.moment.z",
+            "control.wrench.residual_norm"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "lifting_body_glide_energy_management_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: declared_direct_wrench_authority_deficit_at_mach2_source_point",
+            "lifting_body_glide_energy_management_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: release_trim_and_gravity_state_binding",
+            "lifting_body_glide_energy_management_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: energy_glide_segment_translator",
+            "lifting_body_glide_energy_management_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: source_bounded_handoff_evaluator",
+            "lifting_body_glide_energy_management_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "hl20_mod_k",
+          "family_id": "hl20_mod_k",
+          "realization_id": "rigid_body_6dof_surface_allocated",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "hl20_local_direct_wrench_screen_v1",
+            "hl20_source_booster_release_replay_v1",
+            "lifting_body_glide_energy_management_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "actuator_allocated",
+          "actuator_types": [
+            "aerodynamic_surfaces"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "dynamic_child_generation",
+            "submodels"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "full_state_trim",
+            "closed_loop_glide_qualification",
+            "lifting_body_glide_energy_management_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch: release_trim_and_gravity_state_binding",
+            "lifting_body_glide_energy_management_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch: nonlinear_surface_control_mission_loop",
+            "lifting_body_glide_energy_management_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch: source_bounded_handoff_evaluator",
+            "lifting_body_glide_energy_management_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "hl20_mod_k",
+          "family_id": "hl20_mod_k",
+          "realization_id": "source_daveml_rigid_body",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published_blocked",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "hl20_local_direct_wrench_screen_v1",
+            "hl20_source_booster_release_replay_v1",
+            "lifting_body_glide_energy_management_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "provider_defined",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "dynamic_child_generation",
+            "submodels"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "complete_source_plant_mission_adapter"
+          ]
+        }
+      ]
+    },
+    {
+      "model_id": "reference_nesc_two_stage_rocket",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "name": "NASA/NESC Scenario 17 two-stage rocket reference family",
+      "discovery_status": "common_runner_ready",
+      "inventory_status": "published",
+      "supported_missions": [
+        "staged_rocket_launch_target_state_v1"
+      ],
+      "capabilities": [
+        "deployment",
+        "staging",
+        "multiple_stages",
+        "submodels"
+      ],
+      "optional_telemetry": [
+        "diagnostics.position_error",
+        "diagnostics.velocity_error",
+        "mass.total"
+      ],
+      "realizations": [
+        {
+          "model_id": "reference_nesc_two_stage_rocket",
+          "family_id": "reference_nesc_two_stage_rocket",
+          "realization_id": "point_mass_3dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "staged_rocket_launch_target_state_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof"
+          ],
+          "control_realization": "source_replay",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "staged_rocket_launch_target_state_v1/point_mass_3dof/point_mass_3dof/batch"
+          ],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "multiple_stages",
+            "submodels"
+          ],
+          "optional_telemetry": [
+            "diagnostics.position_error",
+            "diagnostics.velocity_error",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "declared:stage_separation_lineage:event_only:nesc-spent-stage"
+          ],
+          "blockers": [
+            "staged_rocket_launch_target_state_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered",
+            "deployment/stage_separation_lineage: independent spent-stage trajectory output is not registered by the source replay binding"
+          ]
+        },
+        {
+          "model_id": "reference_nesc_two_stage_rocket",
+          "family_id": "reference_nesc_two_stage_rocket",
+          "realization_id": "pseudo_6dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "staged_rocket_launch_target_state_v1"
+          ],
+          "dynamics_fidelities": [
+            "pseudo_6dof"
+          ],
+          "control_realization": "source_replay",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "staged_rocket_launch_target_state_v1/pseudo_6dof/pseudo_6dof/batch"
+          ],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "multiple_stages",
+            "submodels"
+          ],
+          "optional_telemetry": [
+            "diagnostics.position_error",
+            "diagnostics.velocity_error",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "declared:stage_separation_lineage:event_only:nesc-spent-stage"
+          ],
+          "blockers": [
+            "staged_rocket_launch_target_state_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered",
+            "deployment/stage_separation_lineage: independent spent-stage trajectory output is not registered by the source replay binding"
+          ]
+        },
+        {
+          "model_id": "reference_nesc_two_stage_rocket",
+          "family_id": "reference_nesc_two_stage_rocket",
+          "realization_id": "rigid_body_6dof_direct_wrench",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "staged_rocket_launch_target_state_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "direct_wrench",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "multiple_stages",
+            "submodels"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "declared:stage_separation_lineage:event_only:nesc-spent-stage"
+          ],
+          "blockers": [
+            "time_aligned_attitude_gimbal_effectivity",
+            "staged_rocket_launch_target_state_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch: no exact batch execution binding is registered",
+            "staged_rocket_launch_target_state_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered",
+            "deployment/stage_separation_lineage: independent spent-stage trajectory output is not registered by the source replay binding"
+          ]
+        },
+        {
+          "model_id": "reference_nesc_two_stage_rocket",
+          "family_id": "reference_nesc_two_stage_rocket",
+          "realization_id": "rigid_body_6dof_surface_allocated",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "staged_rocket_launch_target_state_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "actuator_allocated",
+          "actuator_types": [
+            "gimbals"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "multiple_stages",
+            "submodels"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "declared:stage_separation_lineage:event_only:nesc-spent-stage"
+          ],
+          "blockers": [
+            "time_aligned_attitude_gimbal_effectivity",
+            "staged_rocket_launch_target_state_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch: no exact batch execution binding is registered",
+            "staged_rocket_launch_target_state_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
+            "deployment/stage_separation_lineage: independent spent-stage trajectory output is not registered by the source replay binding"
+          ]
+        }
+      ]
+    },
+    {
+      "model_id": "tumbling_body",
+      "family_id": "tumbling_body",
+      "name": "tumbling_body",
+      "discovery_status": "common_runner_ready",
+      "inventory_status": "published",
+      "supported_missions": [
+        "tumbling_body_release_damping_impact_v1"
+      ],
+      "capabilities": [],
+      "optional_telemetry": [
+        "aerodynamics.drag_force",
+        "aerodynamics.projected_area",
+        "angular_rate.norm",
+        "mass.total"
+      ],
+      "realizations": [
+        {
+          "model_id": "tumbling_body",
+          "family_id": "tumbling_body",
+          "realization_id": "point_mass_3dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "tumbling_body_release_damping_impact_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof"
+          ],
+          "control_realization": "uncontrolled",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/point_mass_3dof/batch"
+          ],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.drag_force",
+            "aerodynamics.projected_area",
+            "angular_rate.norm",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "tumbling_body",
+          "family_id": "tumbling_body",
+          "realization_id": "pseudo_6dof",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "tumbling_body_release_damping_impact_v1"
+          ],
+          "dynamics_fidelities": [
+            "pseudo_6dof"
+          ],
+          "control_realization": "uncontrolled",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/pseudo_6dof/batch"
+          ],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.drag_force",
+            "aerodynamics.projected_area",
+            "angular_rate.norm",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "tumbling_body",
+          "family_id": "tumbling_body",
+          "realization_id": "rigid_body_6dof_direct_wrench",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "unsupported",
+          "supported_missions": [
+            "tumbling_body_release_damping_impact_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "direct_wrench",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "unsupported",
+          "batch_tuples": [],
+          "interactive_status": "unsupported",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "no exact native execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "tumbling_body",
+          "family_id": "tumbling_body",
+          "realization_id": "rigid_body_6dof_surface_allocated",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "unsupported",
+          "supported_missions": [
+            "tumbling_body_release_damping_impact_v1"
+          ],
+          "dynamics_fidelities": [
+            "rigid_body_6dof"
+          ],
+          "control_realization": "actuator_allocated",
+          "actuator_types": [
+            "provider_defined"
+          ],
+          "batch_status": "unsupported",
+          "batch_tuples": [],
+          "interactive_status": "unsupported",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "no exact native execution binding is registered"
+          ]
+        },
+        {
+          "model_id": "tumbling_body",
+          "family_id": "tumbling_body",
+          "realization_id": "cylinder",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "tumbling_body_release_damping_impact_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof",
+            "pseudo_6dof"
+          ],
+          "control_realization": "uncontrolled",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/cylinder/batch",
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/cylinder/batch"
+          ],
+          "interactive_status": "unsupported",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.drag_force",
+            "aerodynamics.projected_area",
+            "angular_rate.norm",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        },
+        {
+          "model_id": "tumbling_body",
+          "family_id": "tumbling_body",
+          "realization_id": "sphere",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "tumbling_body_release_damping_impact_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof",
+            "pseudo_6dof"
+          ],
+          "control_realization": "uncontrolled",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/sphere/batch",
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/sphere/batch"
+          ],
+          "interactive_status": "unsupported",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.drag_force",
+            "aerodynamics.projected_area",
+            "angular_rate.norm",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        },
+        {
+          "model_id": "tumbling_body",
+          "family_id": "tumbling_body",
+          "realization_id": "cone",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "tumbling_body_release_damping_impact_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof",
+            "pseudo_6dof"
+          ],
+          "control_realization": "uncontrolled",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/cone/batch",
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/cone/batch"
+          ],
+          "interactive_status": "unsupported",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.drag_force",
+            "aerodynamics.projected_area",
+            "angular_rate.norm",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        },
+        {
+          "model_id": "tumbling_body",
+          "family_id": "tumbling_body",
+          "realization_id": "triaxial_ellipsoid",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "tumbling_body_release_damping_impact_v1"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof",
+            "pseudo_6dof"
+          ],
+          "control_realization": "uncontrolled",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/triaxial_ellipsoid/batch",
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/triaxial_ellipsoid/batch"
+          ],
+          "interactive_status": "unsupported",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.drag_force",
+            "aerodynamics.projected_area",
+            "angular_rate.norm",
+            "mass.total"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": []
+        }
+      ]
+    },
+    {
+      "model_id": "simple_aero",
+      "family_id": "simple_aero",
+      "name": "Simple Aero Fixed-L/D 3-DOF Workflow",
+      "discovery_status": "common_runner_ready",
+      "inventory_status": "published",
+      "supported_missions": [
+        "fixed_ld_baseline",
+        "ballistic",
+        "cbcr",
+        "crossrange",
+        "marv",
+        "phugoid",
+        "range_extension",
+        "skip",
+        "slalom",
+        "weave"
+      ],
+      "capabilities": [
+        "custom_segments"
+      ],
+      "optional_telemetry": [
+        "aerodynamics.angle_of_attack",
+        "aerodynamics.dynamic_pressure",
+        "mass.total",
+        "propulsion.mass_flow",
+        "propulsion.throttle_command",
+        "propulsion.thrust"
+      ],
+      "realizations": [
+        {
+          "model_id": "simple_aero",
+          "family_id": "simple_aero",
+          "realization_id": "fixed_ld_point_mass",
+          "discovery_status": "common_runner_ready",
+          "inventory_status": "published",
+          "registry_status": "available",
+          "supported_missions": [
+            "fixed_ld_baseline",
+            "ballistic",
+            "cbcr",
+            "crossrange",
+            "marv",
+            "phugoid",
+            "range_extension",
+            "skip",
+            "slalom",
+            "weave"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "available",
+          "batch_tuples": [
+            "fixed_ld_baseline/point_mass_3dof/fixed_ld_point_mass/batch"
+          ],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "none"
+          ],
+          "optional_telemetry": [
+            "aerodynamics.angle_of_attack",
+            "aerodynamics.dynamic_pressure",
+            "mass.total",
+            "propulsion.mass_flow",
+            "propulsion.throttle_command",
+            "propulsion.thrust"
+          ],
+          "spawned_child_behavior": [
+            "none"
+          ],
+          "blockers": [
+            "fixed_ld_baseline/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
+            "ballistic/point_mass_3dof/fixed_ld_point_mass/batch: no family-specific Mission Composition configuration-to-runtime adapter is registered",
+            "ballistic/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
+            "cbcr/point_mass_3dof/fixed_ld_point_mass/batch: no family-specific Mission Composition configuration-to-runtime adapter is registered",
+            "cbcr/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
+            "crossrange/point_mass_3dof/fixed_ld_point_mass/batch: no family-specific Mission Composition configuration-to-runtime adapter is registered",
+            "crossrange/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
+            "marv/point_mass_3dof/fixed_ld_point_mass/batch: no family-specific Mission Composition configuration-to-runtime adapter is registered",
+            "marv/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
+            "phugoid/point_mass_3dof/fixed_ld_point_mass/batch: no family-specific Mission Composition configuration-to-runtime adapter is registered",
+            "phugoid/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
+            "range_extension/point_mass_3dof/fixed_ld_point_mass/batch: no family-specific Mission Composition configuration-to-runtime adapter is registered",
+            "range_extension/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
+            "skip/point_mass_3dof/fixed_ld_point_mass/batch: no family-specific Mission Composition configuration-to-runtime adapter is registered",
+            "skip/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
+            "slalom/point_mass_3dof/fixed_ld_point_mass/batch: no family-specific Mission Composition configuration-to-runtime adapter is registered",
+            "slalom/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
+            "weave/point_mass_3dof/fixed_ld_point_mass/batch: no family-specific Mission Composition configuration-to-runtime adapter is registered",
+            "weave/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered"
+          ]
+        }
+      ]
+    },
+    {
+      "model_id": "dual_launch_glider",
+      "family_id": "dual_launch_glider",
+      "name": "Dual-Launch Glider",
+      "discovery_status": "configuration_ready_execution_blocked",
+      "inventory_status": "published_blocked",
+      "supported_missions": [
+        "air_release_waypoint",
+        "attached_booster_waypoint"
+      ],
+      "capabilities": [
+        "deployment",
+        "staging",
+        "submodels"
+      ],
+      "optional_telemetry": [],
+      "realizations": [
+        {
+          "model_id": "dual_launch_glider",
+          "family_id": "dual_launch_glider",
+          "realization_id": "generated_native_problem",
+          "discovery_status": "configuration_ready_execution_blocked",
+          "inventory_status": "published_blocked",
+          "registry_status": "blocked",
+          "supported_missions": [
+            "air_release_waypoint",
+            "attached_booster_waypoint"
+          ],
+          "dynamics_fidelities": [
+            "point_mass_3dof",
+            "pseudo_6dof",
+            "rigid_body_6dof"
+          ],
+          "control_realization": "guidance_command",
+          "actuator_types": [
+            "not_applicable"
+          ],
+          "batch_status": "blocked",
+          "batch_tuples": [],
+          "interactive_status": "blocked",
+          "interactive_tuples": [],
+          "deployment_staging_capabilities": [
+            "deployment",
+            "staging",
+            "submodels"
+          ],
+          "optional_telemetry": [],
+          "spawned_child_behavior": [
+            "declared:booster_glider_separation:event_only:dual_launch_glider"
+          ],
+          "blockers": [
+            "immutable_vehicle_composition_binding",
+            "common_executor_adapter",
+            "air_release_waypoint/point_mass_3dof/generated_native_problem/batch: immutable_vehicle_composition_binding",
+            "air_release_waypoint/point_mass_3dof/generated_native_problem/batch: common_executor_adapter",
+            "air_release_waypoint/point_mass_3dof/generated_native_problem/step: immutable_vehicle_composition_binding",
+            "air_release_waypoint/point_mass_3dof/generated_native_problem/step: common_executor_adapter",
+            "air_release_waypoint/pseudo_6dof/generated_native_problem/batch: immutable_vehicle_composition_binding",
+            "air_release_waypoint/pseudo_6dof/generated_native_problem/batch: common_executor_adapter",
+            "air_release_waypoint/pseudo_6dof/generated_native_problem/step: immutable_vehicle_composition_binding",
+            "air_release_waypoint/pseudo_6dof/generated_native_problem/step: common_executor_adapter",
+            "air_release_waypoint/rigid_body_6dof_direct_wrench/generated_native_problem/batch: immutable_vehicle_composition_binding",
+            "air_release_waypoint/rigid_body_6dof_direct_wrench/generated_native_problem/batch: common_executor_adapter",
+            "air_release_waypoint/rigid_body_6dof_direct_wrench/generated_native_problem/step: immutable_vehicle_composition_binding",
+            "air_release_waypoint/rigid_body_6dof_direct_wrench/generated_native_problem/step: common_executor_adapter",
+            "attached_booster_waypoint/point_mass_3dof/generated_native_problem/batch: immutable_vehicle_composition_binding",
+            "attached_booster_waypoint/point_mass_3dof/generated_native_problem/batch: common_executor_adapter",
+            "attached_booster_waypoint/point_mass_3dof/generated_native_problem/step: immutable_vehicle_composition_binding",
+            "attached_booster_waypoint/point_mass_3dof/generated_native_problem/step: common_executor_adapter",
+            "attached_booster_waypoint/pseudo_6dof/generated_native_problem/batch: immutable_vehicle_composition_binding",
+            "attached_booster_waypoint/pseudo_6dof/generated_native_problem/batch: common_executor_adapter",
+            "attached_booster_waypoint/pseudo_6dof/generated_native_problem/step: immutable_vehicle_composition_binding",
+            "attached_booster_waypoint/pseudo_6dof/generated_native_problem/step: common_executor_adapter",
+            "attached_booster_waypoint/rigid_body_6dof_direct_wrench/generated_native_problem/batch: immutable_vehicle_composition_binding",
+            "attached_booster_waypoint/rigid_body_6dof_direct_wrench/generated_native_problem/batch: common_executor_adapter",
+            "attached_booster_waypoint/rigid_body_6dof_direct_wrench/generated_native_problem/step: immutable_vehicle_composition_binding",
+            "attached_booster_waypoint/rigid_body_6dof_direct_wrench/generated_native_problem/step: common_executor_adapter",
+            "deployment/booster_glider_separation: independent_parent_and_child_trajectory_binding"
+          ]
+        }
+      ]
+    }
+  ],
+  "future_physics_backlog": [
+    {
+      "id": "dual-launch-independent-execution",
+      "families": [
+        "dual_launch_glider"
+      ],
+      "category": "native_model",
+      "description": "Bind both launch forms to immutable native execution and return independently propagated attached-stack and released-glider histories.",
+      "dependency": "A participating dual-launch plant and accepted separation/terminal-guidance execution evidence."
+    },
+    {
+      "id": "a320-jsbsim-mission-binding",
+      "families": [
+        "a320_openap_3dof"
+      ],
+      "category": "native_model",
+      "description": "Bind the qualified JSBSim surrogate-composite realization to an exact Mission Composition mission.",
+      "dependency": "A reviewed immutable JSBSim mission adapter and result projector."
+    },
+    {
+      "id": "source-daveml-mission-bindings",
+      "families": [
+        "f16_s119",
+        "hl20_mod_k"
+      ],
+      "category": "native_model",
+      "description": "Execute the source DAVE-ML rigid-body plants through complete missions instead of local or reduced witnesses.",
+      "dependency": "Source-bounded initialization, controller, phase, and terminal-condition adapters."
+    },
+    {
+      "id": "x15-high-energy-mission",
+      "families": [
+        "x15"
+      ],
+      "category": "mission_physics",
+      "description": "Complete the end-to-end high-energy X-15 release, burn/coast, atmospheric handoff, and terminal mission.",
+      "dependency": "Phase-scheduled direct-wrench control and source-bounded high-energy terminal objectives."
+    },
+    {
+      "id": "hl20-high-energy-glide",
+      "families": [
+        "hl20_mod_k"
+      ],
+      "category": "mission_physics",
+      "description": "Complete the source-plant HL-20 high-energy glide and terminal mission.",
+      "dependency": "Validated glide guidance, surface allocation, and source-bounded terminal objectives."
+    },
+    {
+      "id": "physical-effector-allocation",
+      "families": [
+        "skywalker_x8",
+        "b747",
+        "a320_openap_3dof",
+        "f16_s119",
+        "x15",
+        "hl20_mod_k"
+      ],
+      "category": "control_allocation",
+      "description": "Promote applicable rigid-body missions from direct wrench or reduced guidance to aerodynamic-surface, mixed, or thrust-vector allocation.",
+      "dependency": "Source-backed effectiveness maps, signs, limits, rates, and schedule-wide authority evidence."
+    },
+    {
+      "id": "rotor-allocation-mission",
+      "families": [
+        "hummingbird"
+      ],
+      "category": "control_allocation",
+      "description": "Bind individual-rotor allocation and rigid-body dynamics to the complete hover/yaw mission.",
+      "dependency": "Source-backed rotor/motor effectiveness and accepted mission-level authority evidence."
+    },
+    {
+      "id": "rocket-gimbal-allocation",
+      "families": [
+        "reference_nesc_two_stage_rocket"
+      ],
+      "category": "control_allocation",
+      "description": "Replace source-history replay with a participating staged rocket and gimbal/thrust-vector allocation.",
+      "dependency": "Source-backed propulsion, mass, guidance, gimbal, and stage-transition dynamics."
+    },
+    {
+      "id": "independently-propagated-nesc-stages",
+      "families": [
+        "reference_nesc_two_stage_rocket"
+      ],
+      "category": "spawned_entity_physics",
+      "description": "Propagate separated NESC stages as first-class child trajectories rather than event-only lineage.",
+      "dependency": "Detached-stage mass, aerodynamic, attitude, and separation-state definitions."
+    },
+    {
+      "id": "remaining-simple-aero-segments",
+      "families": [
+        "simple_aero"
+      ],
+      "category": "segment_physics",
+      "description": "Add executable adapters for weave, pull-up, push-over, and other currently fixture-only Simple Aero segment templates.",
+      "dependency": "Segment-specific dynamics and acceptance evidence beyond the fixed-L/D baseline."
+    },
+    {
+      "id": "rigid-body-tumbling-realizations",
+      "families": [
+        "tumbling_body"
+      ],
+      "category": "mission_physics",
+      "description": "Promote named passive geometries from point-mass/pseudo-6-DOF witnesses to a qualified rigid-body 6-DOF contract.",
+      "dependency": "Shape-specific aerodynamic moments, damping evidence, and rigid-body qualification."
+    }
+  ],
+  "diagnostics": []
+}

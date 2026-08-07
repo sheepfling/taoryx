@@ -45,6 +45,8 @@ class FixedLD3DOFParameters(BaseModel):
 
     target_range_m: float = Field(default=100_000.0, gt=0.0)
     target_bearing_deg: float = Field(default=90.0, ge=-360.0, le=360.0)
+    target_latitude_deg: float | None = Field(default=None, ge=-90.0, le=90.0)
+    target_longitude_deg: float | None = Field(default=None, ge=-180.0, lt=180.0)
     initial_heading_offset_deg: float = Field(default=0.0, ge=-180.0, le=180.0)
     target_altitude_m: float = Field(default=0.0, ge=0.0)
     target_speed_m_s: float = Field(default=0.0, ge=0.0)
@@ -79,6 +81,8 @@ class FixedLD3DOFParameters(BaseModel):
             raise ValueError("apogee_altitude_m must exceed initial_altitude_m")
         if self.mass_flow_kg_s > 0.0 and self.thrust_n <= 0.0:
             raise ValueError("positive mass_flow_kg_s requires positive thrust_n")
+        if (self.target_latitude_deg is None) != (self.target_longitude_deg is None):
+            raise ValueError("target_latitude_deg and target_longitude_deg must be supplied together")
         return self
         ####
 
@@ -93,6 +97,8 @@ class DerivedFixedLDProfile(BaseModel):
     boost_duration_s: float
     coast_duration_s: float
     total_duration_s: float
+    target_range_m: float
+    target_bearing_deg: float
     target_latitude_deg: float
     target_longitude_deg: float
     assumptions: tuple[str, ...]
@@ -165,6 +171,38 @@ def _target_geodetic(
     ####
 
 
+def _target_range_bearing(
+    *,
+    target_latitude_deg: float,
+    target_longitude_deg: float,
+    launch_latitude_deg: float,
+    launch_longitude_deg: float,
+) -> tuple[float, float]:
+    """Return spherical-Earth range and initial bearing to an aimpoint."""
+
+    radius_m = 6_378_137.0
+    launch_lat = math.radians(launch_latitude_deg)
+    target_lat = math.radians(target_latitude_deg)
+    longitude_delta = math.radians(target_longitude_deg - launch_longitude_deg)
+    central_angle = math.acos(
+        max(
+            -1.0,
+            min(
+                1.0,
+                math.sin(launch_lat) * math.sin(target_lat)
+                + math.cos(launch_lat) * math.cos(target_lat) * math.cos(longitude_delta),
+            ),
+        )
+    )
+    bearing = math.atan2(
+        math.sin(longitude_delta) * math.cos(target_lat),
+        math.cos(launch_lat) * math.sin(target_lat)
+        - math.sin(launch_lat) * math.cos(target_lat) * math.cos(longitude_delta),
+    )
+    return radius_m * central_angle, _wrap_heading(math.degrees(bearing))
+    ####
+
+
 class SimpleAeroTrajectoryBuilder:
     """Build a reduced-order 3-DOF SimpleAero-style trajectory with few inputs."""
 
@@ -189,19 +227,33 @@ class SimpleAeroTrajectoryBuilder:
         coast_duration = p.coast_duration_s or math.sqrt(
             2.0 * (p.apogee_altitude_m - p.initial_altitude_m) / 9.80665
         )
-        initial_heading = _wrap_heading(p.target_bearing_deg + p.initial_heading_offset_deg)
-        target_latitude, target_longitude = _target_geodetic(
-            range_m=p.target_range_m,
-            bearing_deg=p.target_bearing_deg,
-            latitude_deg=p.launch_latitude_deg,
-            longitude_deg=p.launch_longitude_deg,
-        )
+        if p.target_latitude_deg is not None and p.target_longitude_deg is not None:
+            target_latitude = p.target_latitude_deg
+            target_longitude = p.target_longitude_deg
+            target_range, target_bearing = _target_range_bearing(
+                target_latitude_deg=target_latitude,
+                target_longitude_deg=target_longitude,
+                launch_latitude_deg=p.launch_latitude_deg,
+                launch_longitude_deg=p.launch_longitude_deg,
+            )
+        else:
+            target_range = p.target_range_m
+            target_bearing = p.target_bearing_deg
+            target_latitude, target_longitude = _target_geodetic(
+                range_m=target_range,
+                bearing_deg=target_bearing,
+                latitude_deg=p.launch_latitude_deg,
+                longitude_deg=p.launch_longitude_deg,
+            )
+        initial_heading = _wrap_heading(target_bearing + p.initial_heading_offset_deg)
         return DerivedFixedLDProfile(
             initial_heading_deg=initial_heading,
             lift_coefficient=p.drag_coefficient * p.lift_to_drag,
             boost_duration_s=boost_duration,
             coast_duration_s=coast_duration,
             total_duration_s=boost_duration + coast_duration + p.bank_duration_s + p.terminal_duration_s,
+            target_range_m=target_range,
+            target_bearing_deg=target_bearing,
             target_latitude_deg=target_latitude,
             target_longitude_deg=target_longitude,
             assumptions=(
@@ -310,7 +362,7 @@ class SimpleAeroTrajectoryBuilder:
 # Generated from taoryx.simple_aero_builder.  Replace numeric CA/CN and timing
 # assumptions with vehicle-specific tables before promotion.
 *runtime status vehicle={p.vehicle_id} family={p.family} vbo-mps={p.vbo_m_s:g} apogee-altitude-m={p.apogee_altitude_m:g} pitch-over-deg={p.pitch_over_angle_deg:g} initial-heading-offset-deg={p.initial_heading_offset_deg:g} fixed-lift-to-drag={p.lift_to_drag:g}
-*runtime status target range-m={p.target_range_m:g} bearing-deg={p.target_bearing_deg:g} latitude-deg={d.target_latitude_deg:g} longitude-deg={d.target_longitude_deg:g} altitude-m={p.target_altitude_m:g} velocity-mps={p.target_speed_m_s:g}
+*runtime status target range-m={d.target_range_m:g} bearing-deg={d.target_bearing_deg:g} latitude-deg={d.target_latitude_deg:g} longitude-deg={d.target_longitude_deg:g} altitude-m={p.target_altitude_m:g} velocity-mps={p.target_speed_m_s:g}
 
 *trajectory 1 {p.vehicle_id} start on 1
   *initial geodetic alt={p.initial_altitude_m:g} long={p.launch_longitude_deg:g} lat={p.launch_latitude_deg:g} vel={p.initial_speed_m_s:g} gama={p.pitch_over_angle_deg:g} psi={d.initial_heading_deg:g} time=0 mass={p.mass_kg:g}

@@ -32,7 +32,7 @@ from .hl20_source_release_mission_translation import (
 )
 from .mission_objectives import ControllerTransition, TruthObjectiveSpec, evaluate_truth_objectives
 from .reachability_aerodynamics import HL20_SOURCE_MODEL_ID
-from .reachability_envelope import ReachabilityFidelity
+from .reachability_envelope import ReachabilityFidelity, TrajectoryResult
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import VehicleExecutionPreflight, preflight_vehicle_composition
 
@@ -44,6 +44,7 @@ class HL20SourceReleaseCompositionExecution:
     composition: CompiledVehicleComposition
     preflight: VehicleExecutionPreflight
     plan: HL20SourceReleaseMissionPlan
+    trajectory: TrajectoryResult
     output_dir: Path
     runtime: dict[str, object]
     envelope: dict[str, object]
@@ -174,7 +175,17 @@ def execute_hl20_source_booster_release_composition(
     runtime["resource_ledger"] = resource_ledger_summary(resource_ledger)
     runtime["semantic_action_trace"] = control_trace_summary(action_trace)
     result = HL20SourceReleaseCompositionExecution(
-        composition, preflight, plan, destination, runtime, envelope, truth_evaluation, tuple(transitions), status_trace, action_trace
+        composition,
+        preflight,
+        plan,
+        trajectory,
+        destination,
+        runtime,
+        envelope,
+        truth_evaluation,
+        tuple(transitions),
+        status_trace,
+        action_trace,
     )
     _write_csv(destination / "truth_telemetry.csv", rows)
     _write_json(destination / "composition.json", composition.model_dump(mode="json", by_alias=True))

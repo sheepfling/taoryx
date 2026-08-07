@@ -4,7 +4,7 @@ These builders deliberately preserve the exact source problem, table set,
 inertia, limits, and local authority settings used by the qualification
 fixtures.  They do not infer a vehicle from its physical family and they do
 not create a generic fixed-wing substitute.  Keeping the construction here
-lets Product 3 lower a selected X8 or B747 composition through the same
+lets Mission Composition lower a selected X8 or B747 composition through the same
 source-owned plant that developer validation uses.
 """
 

@@ -231,6 +231,16 @@ python -m tools.dev check
 python -m pytest
 ```
 
+For everyday implementation work, use the smaller development tiers first:
+
+```bash
+python -m tools.dev test-quick
+python -m tools.dev test-changed
+```
+
+See [BUILDING_TESTS.md](BUILDING_TESTS.md) for focused, changed-test, and
+parallel execution guidance. The full commands above remain the handoff gate.
+
 The validation suite covers the reconstructed manual, source-page and figure
 registries, parser fixtures, equation provenance, PDF interoperability, and
 selected numerical relationships.

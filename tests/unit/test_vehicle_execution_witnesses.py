@@ -337,7 +337,7 @@ def test_batch_reproduction_gate_fails_closed_for_missing_or_mismatched_identity
     (tmp_path / "reproduction.txt").write_text(
         "\n".join(
             (
-                "# TAORYX Product 3 public batch reproduction record",
+                "# TAORYX Mission Composition public batch reproduction record",
                 f"# composition_id: {composition.id}",
                 "# composition_identity_sha256: " + "0" * 64,
                 f"# execution_factory_id: {binding.factory_id}",

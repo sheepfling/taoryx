@@ -4,7 +4,7 @@
 The horizontal YAML registry names every supported family.  This executable
 registry intentionally contains only the adapters that can be constructed by
 the current runtime slice; its X8, B747, Hummingbird, and F-16 source
-witnesses use the same factories as the Product 3 runtime registry.  The
+witnesses use the same factories as the Mission Composition runtime registry.  The
 remaining registrations are marked ``planned`` so the report distinguishes
 missing integration work from a failed witness.
 """

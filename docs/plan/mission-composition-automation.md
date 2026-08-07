@@ -1,7 +1,7 @@
 # Mission composition and vehicle-onboarding automation
 
-> **Priority:** This plan supplies P1/P2 of the
-> [three-product execution roadmap](three-product-execution-roadmap.md).
+> **Priority:** This plan supplies the Runtime and Composition portions of the
+> [Authoring → Runtime → Composition execution roadmap](authoring-runtime-composition-execution-roadmap.md).
 > Its next executable outcome is a fail-closed semantic-segment translator and
 > `vehicle compose` → `vehicle run` path, first for the X8 and then for the
 > shared airbreather template.  Registry visibility or adapter binding alone
@@ -9,17 +9,18 @@
 
 ## Decision
 
-Taoryx has three deliberately separate products:
+Taoryx has three deliberately separate functional layers:
 
-1. **Simulation runtime** — evaluates a resolved model at a declared fidelity.
-2. **Vehicle composition** — combines a family definition, model assets,
+1. **Model Authoring** — parses, validates, and lowers a source model while
+   preserving its meaning.
+2. **Simulation Runtime** — evaluates a resolved model at a declared fidelity.
+3. **Mission Composition** — combines a family definition, model assets,
    loadout, controls, resources, and evidence into an immutable vehicle
-   realization.
-3. **Mission composition and qualification** — converts a semantic mission
+   realization, then converts a semantic mission
    intent into feasible geometry, objectives, controller references, and a
    truth-evaluated artifact pack.
 
-The third product must not be a hand-tuned collection of waypoints.  It is the
+Mission Composition must not be a hand-tuned collection of waypoints. It is the
 bridge that lets a user run a vehicle coherently and lets a developer add a new
 vehicle without rediscovering route length, turn radius, horizon, and objective
 semantics by repeated simulation.
@@ -109,7 +110,7 @@ Problem generation must therefore project only scalar, grammar-supported
 runtime attributes.  It must never stringify an arbitrary YAML/Python mapping
 or list into a `key=value` directive.  Every generated native problem is
 parsed under its declared grammar profile as a regression gate.  This is a
-Product 1 syntax/integrity check, not evidence that structured actuator
+Model Authoring syntax/integrity check, not evidence that structured actuator
 metadata is active in the native plant.  A runtime capability is advertised
 only when a named native binding consumes it.
 

@@ -202,7 +202,7 @@ class ControlIntervalRecord:
     ``controls_at_interval_start`` is the exact control mapping visible when
     integration began. ``solver_stage_control_mutation_detected`` records that
     a private stage evaluation changed the mutable native control mapping. In
-    that case the record is expressly ineligible for Product 3's held-command
+    that case the record is expressly ineligible for Mission Composition's held-command
     action-trace artifact.
     """
 

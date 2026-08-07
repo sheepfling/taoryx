@@ -1,0 +1,62 @@
+schema: taoryx.mission-composition-physics-backlog/v1
+version: 1
+description: >-
+  Genuine model, physics, source-data, or qualification work intentionally
+  outside the Mission Composition integration contract. None of these items is
+  advertised as executable by the common interface.
+items:
+  - id: dual-launch-independent-execution
+    families: [dual_launch_glider]
+    category: native_model
+    description: Bind both launch forms to immutable native execution and return independently propagated attached-stack and released-glider histories.
+    dependency: A participating dual-launch plant and accepted separation/terminal-guidance execution evidence.
+  - id: a320-jsbsim-mission-binding
+    families: [a320_openap_3dof]
+    category: native_model
+    description: Bind the qualified JSBSim surrogate-composite realization to an exact Mission Composition mission.
+    dependency: A reviewed immutable JSBSim mission adapter and result projector.
+  - id: source-daveml-mission-bindings
+    families: [f16_s119, hl20_mod_k]
+    category: native_model
+    description: Execute the source DAVE-ML rigid-body plants through complete missions instead of local or reduced witnesses.
+    dependency: Source-bounded initialization, controller, phase, and terminal-condition adapters.
+  - id: x15-high-energy-mission
+    families: [x15]
+    category: mission_physics
+    description: Complete the end-to-end high-energy X-15 release, burn/coast, atmospheric handoff, and terminal mission.
+    dependency: Phase-scheduled direct-wrench control and source-bounded high-energy terminal objectives.
+  - id: hl20-high-energy-glide
+    families: [hl20_mod_k]
+    category: mission_physics
+    description: Complete the source-plant HL-20 high-energy glide and terminal mission.
+    dependency: Validated glide guidance, surface allocation, and source-bounded terminal objectives.
+  - id: physical-effector-allocation
+    families: [skywalker_x8, b747, a320_openap_3dof, f16_s119, x15, hl20_mod_k]
+    category: control_allocation
+    description: Promote applicable rigid-body missions from direct wrench or reduced guidance to aerodynamic-surface, mixed, or thrust-vector allocation.
+    dependency: Source-backed effectiveness maps, signs, limits, rates, and schedule-wide authority evidence.
+  - id: rotor-allocation-mission
+    families: [hummingbird]
+    category: control_allocation
+    description: Bind individual-rotor allocation and rigid-body dynamics to the complete hover/yaw mission.
+    dependency: Source-backed rotor/motor effectiveness and accepted mission-level authority evidence.
+  - id: rocket-gimbal-allocation
+    families: [reference_nesc_two_stage_rocket]
+    category: control_allocation
+    description: Replace source-history replay with a participating staged rocket and gimbal/thrust-vector allocation.
+    dependency: Source-backed propulsion, mass, guidance, gimbal, and stage-transition dynamics.
+  - id: independently-propagated-nesc-stages
+    families: [reference_nesc_two_stage_rocket]
+    category: spawned_entity_physics
+    description: Propagate separated NESC stages as first-class child trajectories rather than event-only lineage.
+    dependency: Detached-stage mass, aerodynamic, attitude, and separation-state definitions.
+  - id: remaining-simple-aero-segments
+    families: [simple_aero]
+    category: segment_physics
+    description: Add executable adapters for weave, pull-up, push-over, and other currently fixture-only Simple Aero segment templates.
+    dependency: Segment-specific dynamics and acceptance evidence beyond the fixed-L/D baseline.
+  - id: rigid-body-tumbling-realizations
+    families: [tumbling_body]
+    category: mission_physics
+    description: Promote named passive geometries from point-mass/pseudo-6-DOF witnesses to a qualified rigid-body 6-DOF contract.
+    dependency: Shape-specific aerodynamic moments, damping evidence, and rigid-body qualification.

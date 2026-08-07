@@ -221,11 +221,17 @@ class ParameterSpec(BaseModel):
 
         if self.id == "turn_direction":
             return ("left", "right")
+        if self.id == "cutoff_condition":
+            return ("declared_cutoff", "burnout")
+        if self.id == "terminal_kind":
+            return ("apogee", "impact", "reentry", "orbit")
         if self.id == "area_policy":
             return (
                 "orientation_averaged_projected_area",
                 "native_rigid_body_reuse_instantaneous_projected_area",
             )
+        if self.id == "body_shape":
+            return ("cylinder", "sphere", "cone", "triaxial_ellipsoid")
         return ()
         ####
 
@@ -803,7 +809,7 @@ def _variant_authoring_worklist(
     """Return the source-owned admission state for optional vehicle variants.
 
     A family declaration may have no safe mutable quantity at all.  This
-    routine makes that an explicit and useful Product 3 result instead of
+    routine makes that an explicit and useful Mission Composition result instead of
     inviting a caller to mutate an arbitrary nested model field.  A declared
     planned binding remains visible, but it cannot become runnable until the
     native runtime consumes its named input and emits the declared committed
@@ -1101,7 +1107,7 @@ class ResolvedVehicleComposition:
         ####
 
     def authoring_worklist_dict(self) -> dict[str, object]:
-        """Return actionable Product 3 work items for one catalog member.
+        """Return actionable Mission Composition work items for one catalog member.
 
         This joins the existing declarations instead of guessing a new plant:
         profile/interface evidence, semantic mission availability, graph
@@ -1235,7 +1241,7 @@ class ResolvedVehicleComposition:
             "parameter_contract_maturity": dict(parameter_maturity),
             "missions": mission_worklists,
             "claim_boundary": (
-                "This worklist joins declared Product 3 contracts and bindings. It identifies the next missing "
+                "This worklist joins declared Mission Composition contracts and bindings. It identifies the next missing "
                 "composition capability but does not inspect source equations, synthesize a runtime adapter, or "
                 "promote qualification. The variant worklist is an admission checklist: it never authorizes a "
                 "generic model-field override."
@@ -1628,7 +1634,7 @@ def load_resolved_vehicle_composition_catalog(
 def build_vehicle_composition_topology_report(
     catalog: ResolvedVehicleCompositionCatalog | None = None,
 ) -> dict[str, object]:
-    """Audit topology declarations across the public Product 3 surface.
+    """Audit topology declarations across the public Mission Composition surface.
 
     Interface validation alone does not cover registry-owned initialization,
     segment, and variant parameters. This report joins those public inputs

@@ -47,7 +47,7 @@ def test_all_supported_reference_families_have_reports() -> None:
     ####
 
 
-def test_product_three_cli_exposes_source_readiness_without_promoting_a_family(
+def test_mission_composition_cli_exposes_source_readiness_without_promoting_a_family(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """A composition author can discover source onboarding gaps from the public CLI."""

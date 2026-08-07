@@ -12,6 +12,7 @@ parameters:
   area_policy: {value_type: enum, profile: finite_set}
   bank_command_deg: {value_type: scalar, profile: bounded_interval}
   bank_limit_deg: {value_type: scalar, profile: bounded_interval}
+  body_shape: {value_type: enum, profile: finite_set}
   body_rates_rad_s: {value_type: vector3, profile: euclidean_vector3, frame: body}
   clearance_time_s: {value_type: scalar, profile: positive_half_line}
   climb_rate_m_s: {value_type: scalar, profile: positive_half_line}

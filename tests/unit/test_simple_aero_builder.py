@@ -29,6 +29,21 @@ def test_fixed_ld_builder_derives_heading_and_fixed_ld_coefficients() -> None:
     ####
 
 
+def test_fixed_ld_builder_accepts_an_explicit_geodetic_aimpoint() -> None:
+    build = build_fixed_ld_3dof(
+        launch_latitude_deg=35.8766,
+        launch_longitude_deg=14.4425,
+        target_latitude_deg=36.000975,
+        target_longitude_deg=-5.60999,
+    )
+
+    assert build.derived.target_latitude_deg == pytest.approx(36.000975)
+    assert build.derived.target_longitude_deg == pytest.approx(-5.60999)
+    assert build.derived.target_range_m > 0.0
+    assert -180.0 <= build.derived.target_bearing_deg < 180.0
+    ####
+
+
 def test_fixed_ld_builder_output_is_parser_compatible_and_writes_manifest(tmp_path) -> None:
     build = SimpleAeroTrajectoryBuilder(
         FixedLD3DOFParameters(
@@ -85,6 +100,7 @@ def test_fixed_ld_builder_runs_through_the_taoryx_point_mass_engine(tmp_path) ->
         {"initial_speed_m_s": 900.0, "vbo_m_s": 900.0},
         {"initial_altitude_m": 2_000.0, "apogee_altitude_m": 2_000.0},
         {"mass_flow_kg_s": 1.0, "thrust_n": 0.0},
+        {"target_latitude_deg": 10.0},
     ),
 )
 def test_fixed_ld_builder_rejects_inconsistent_profile(overrides: dict[str, float]) -> None:

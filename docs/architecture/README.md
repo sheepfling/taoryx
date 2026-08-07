@@ -5,10 +5,10 @@ The manual describes a trajectory-analysis system with several distinct
 responsibilities; the replacement should preserve those boundaries instead of
 turning the `.prb` parser into the simulator.
 
-For a user-facing tour of the three connected products—source/language,
-simulation/stepping, and vehicle/mission composition—start with the
-[three-product showcase guide](../THREE_PRODUCT_SHOWCASE.md). This page is
-the deeper reference for the runtime and its boundaries.
+For a user-facing tour of the three connected layers—Model Authoring,
+Simulation Runtime, and Mission Composition—start with the
+[Authoring → Runtime → Composition showcase guide](../AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md).
+This page is the deeper reference for the runtime and its boundaries.
 
 Use this section when you want the runtime shape, the table explorer / plotter
 boundary, the telemetry contract, or the analysis workspace in one place.
@@ -23,9 +23,15 @@ tracked in
 The common vehicle metadata, parameter, semantic control, resource, status,
 and AI/RL observation boundary is defined in
 [vehicle-interface-contract.md](vehicle-interface-contract.md).
-The portable Product 3 vehicle/trajectory plug-in publication, request, and
-standard result envelope is defined in
-[product-three-provider-api.md](product-three-provider-api.md).
+The portable Mission Composition vehicle/trajectory plug-in publication,
+request, and standard result envelope is defined in
+[Mission Composition Provider API](mission-composition-provider-api.md).
+The shortest consumer-facing route through that contract is the
+[Mission Composition front door](../MISSION_COMPOSITION.md).
+The generated
+[Mission Composition family/realization coverage matrix](mission-composition-coverage-matrix.md)
+is the current inventory, exact batch/session availability, telemetry,
+spawned-child, and blocker summary.
 The progressive point-mass, kinematic bridge, and two rigid-body control-
 realization tiers are described in
 [`dynamics-fidelity-ladder.md`](dynamics-fidelity-ladder.md).

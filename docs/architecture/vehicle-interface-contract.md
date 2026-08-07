@@ -339,7 +339,7 @@ effector channel, and its pseudo label never implies a response-law controller.
 
 ## Truth, observation, and sensor separation
 
-Product 2 must make the following distinction enforceable:
+Simulation Runtime must make the following distinction enforceable:
 
     plant truth at committed time t
       -> declared sensor/observation model at t

@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import zipfile
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Callable
 
@@ -17,6 +18,18 @@ SCRIPTS = ROOT / "scripts"
 TOOLS = ROOT / "tools"
 VENV_PYTHON = (
     ROOT / ".venv" / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
+)
+QUICK_TEST_PATHS = (
+    "tests/parser/test_lexical.py",
+    "tests/parser/test_expressions.py",
+    "tests/unit/test_simulation_runtime_contracts.py",
+    "tests/unit/test_simulation_runtime_quality.py",
+    "tests/unit/test_runtime_algorithms.py",
+    "tests/unit/test_runtime_cli.py",
+    "tests/unit/test_interactive_runtime.py",
+    "tests/unit/test_composition_policy.py",
+    "tests/unit/test_mission_composition_completion.py",
+    "tests/unit/test_tooling_entrypoints.py",
 )
 
 
@@ -90,6 +103,137 @@ def test() -> None:
     ####
 
 
+def test_quick() -> None:
+    """Run the curated inner-loop smoke and contract tests."""
+    run(
+        [
+            project_python(),
+            "-m",
+            "pytest",
+            *QUICK_TEST_PATHS,
+            "-q",
+            "-x",
+            "--basetemp",
+            ".pytest-quick",
+        ]
+    )
+    ####
+
+
+def _git_changed_paths() -> tuple[str, ...]:
+    """Return staged, unstaged, and untracked repository paths."""
+    commands = (
+        ("git", "diff", "--name-only", "--diff-filter=ACMR", "HEAD"),
+        ("git", "ls-files", "--others", "--exclude-standard"),
+    )
+    paths: set[str] = set()
+    for command in commands:
+        try:
+            output = subprocess.check_output(command, cwd=ROOT, text=True)
+        except (OSError, subprocess.CalledProcessError):
+            return ()
+        paths.update(line.strip() for line in output.splitlines() if line.strip())
+    return tuple(sorted(paths))
+    ####
+
+
+def _changed_test_paths(changed_paths: Iterable[str]) -> tuple[str, ...]:
+    """Map changed source/test files to a small, conservative pytest selection."""
+    changed = tuple(Path(path).as_posix() for path in changed_paths)
+    test_files = {
+        path.relative_to(ROOT).as_posix()
+        for path in (ROOT / "tests").rglob("test_*.py")
+        if path.is_file()
+    }
+    selected: set[str] = set()
+    source_paths = tuple(path for path in changed if path.startswith("src/taoryx/") and path.endswith(".py"))
+    for normalized in changed:
+        if normalized in test_files:
+            selected.add(normalized)
+        if normalized == "tests/conftest.py" or normalized == "pyproject.toml":
+            return QUICK_TEST_PATHS
+        if normalized == "tools/dev.py":
+            selected.add("tests/unit/test_tooling_entrypoints.py")
+        if normalized.startswith("src/taoryx/") and normalized.endswith(".py"):
+            stem = Path(normalized).stem
+            direct = f"tests/unit/test_{stem}.py"
+            if direct in test_files:
+                selected.add(direct)
+    for source in source_paths:
+        module = f"taoryx.{source.removeprefix('src/taoryx/').removesuffix('.py').replace('/', '.')}"
+        for test_path in test_files:
+            try:
+                contents = (ROOT / test_path).read_text(encoding="utf-8")
+            except OSError:
+                continue
+            if module in contents:
+                selected.add(test_path)
+    return tuple(sorted(selected)) or QUICK_TEST_PATHS
+    ####
+
+
+def test_changed() -> None:
+    """Run tests associated with current Git changes, falling back to smoke tests."""
+    changed_paths = _git_changed_paths()
+    selected = _changed_test_paths(changed_paths)
+    print("Changed-test selection:")
+    for path in selected:
+        print(f"  {path}")
+    if not changed_paths:
+        print("  (no Git changes detected; using the quick suite)")
+    run(
+        [
+            project_python(),
+            "-m",
+            "pytest",
+            *selected,
+            "-q",
+            "-x",
+            "-o",
+            "addopts=",
+            "--strict-markers",
+            "--basetemp",
+            ".pytest-changed",
+        ]
+    )
+    ####
+
+
+def _python_module_available(module: str) -> bool:
+    """Return whether the project interpreter can import an optional module."""
+    result = subprocess.run(
+        [project_python(), "-c", f"import {module}"],
+        cwd=ROOT,
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    return result.returncode == 0
+    ####
+
+
+def test_parallel() -> None:
+    """Run the default fast suite across workers when pytest-xdist is installed."""
+    if not _python_module_available("xdist"):
+        raise SystemExit("pytest-xdist is not installed; run `python -m pip install -e '.[dev]'` first")
+    run(
+        [
+            project_python(),
+            "-m",
+            "pytest",
+            "-n",
+            "auto",
+            "--dist",
+            "loadfile",
+            "-m",
+            "not slow and not artifact and not simple_aero",
+            "--basetemp",
+            ".pytest-parallel",
+        ]
+    )
+    ####
+
+
 def test_all() -> None:
     """Run every pytest category, including opt-in and artifact tests."""
     run([project_python(), "-m", "pytest", "-m", "", "--basetemp", ".pytest-all"])
@@ -138,6 +282,10 @@ def test_vehicle_family(family: str) -> None:
 
 def test_views() -> None:
     """Print the supported pytest views and cost-category selections."""
+    print("Inner-loop commands:")
+    print("  test-quick   curated smoke and contract suite")
+    print("  test-changed tests associated with current Git changes")
+    print("  test-parallel default fast suite with pytest-xdist when installed")
     print("Overlapping test views:")
     print("  grammar      parser, lexer, EBNF, corpus, and language validation")
     print("  equations    equation catalog, implementations, provenance, verification")
@@ -495,12 +643,19 @@ def check_vehicle_execution_witnesses() -> None:
     ####
 
 
-def check_product_two_quality() -> None:
-    """Build the Product 2 M4 report and execute the selected fixed-step cases."""
+def check_mission_composition_completion() -> None:
+    """Verify the production registry, common executors, and generated coverage matrix."""
+
+    run(tool_script("build_mission_composition_completion.py", "--check"))
+    ####
+
+
+def check_simulation_runtime_quality() -> None:
+    """Build the Simulation Runtime M4 report and execute the selected fixed-step cases."""
 
     run(
         tool_script(
-            "validate_product_two_quality.py",
+            "validate_simulation_runtime_quality.py",
             "--execute",
             "--scenario",
             "two-stage-ballistic",
@@ -509,7 +664,7 @@ def check_product_two_quality() -> None:
             "--scenario",
             "interactive-california-hawaii",
             "--output",
-            "artifacts/verification/product_two_quality/report.json",
+            "artifacts/verification/simulation_runtime_quality/report.json",
         )
     )
     ####
@@ -1252,7 +1407,8 @@ def check() -> None:
     check_supported_reference_families()
     check_vehicle_interfaces()
     check_vehicle_execution_witnesses()
-    check_product_two_quality()
+    check_mission_composition_completion()
+    check_simulation_runtime_quality()
     onboard_vehicles()
     pseudo6dof_profiles()
     horizontal_fidelity()
@@ -1290,6 +1446,9 @@ TASKS: dict[str, Callable[[], None]] = {
     "legacy-audit": legacy_audit,
     "legacy-close-check": legacy_close_check,
     "test": test,
+    "test-quick": test_quick,
+    "test-changed": test_changed,
+    "test-parallel": test_parallel,
     "test-all": test_all,
     "test-artifacts": lambda: test_category("artifact"),
     "test-algorithms": lambda: test_category("algorithms"),
@@ -1338,7 +1497,8 @@ TASKS: dict[str, Callable[[], None]] = {
     "check-vehicles": check_vehicle_models,
     "check-reference-families": check_supported_reference_families,
     "check-vehicle-interfaces": check_vehicle_interfaces,
-    "check-product-two-quality": check_product_two_quality,
+    "mission-composition-completion": check_mission_composition_completion,
+    "check-simulation-runtime-quality": check_simulation_runtime_quality,
     "onboard-vehicles": onboard_vehicles,
     "fidelity-readiness": fidelity_readiness,
     "pseudo6dof-profiles": pseudo6dof_profiles,

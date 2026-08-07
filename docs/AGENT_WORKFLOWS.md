@@ -17,13 +17,16 @@ ordering, and truth-isolated decision ports.
 
 ## First orientation
 
-For a product-level tour before choosing a contributor workflow, read the
-[three-product showcase guide](THREE_PRODUCT_SHOWCASE.md). It connects the
-language successor, simulation/stepping runtime, and vehicle/mission
-composition layer through the commands and artifacts used in this repository.
+For a layer-level tour before choosing a contributor workflow, read the
+[Authoring → Runtime → Composition showcase guide](AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md).
+It connects Model Authoring, Simulation Runtime, and Mission Composition
+through the commands and artifacts used in this repository.
 
-For the consumer or junior-engineer path through Product 2, read the
-[Product 2 onboarding guide](PRODUCT_TWO_ONBOARDING.md). It is the scenario
+For the consumer-facing entry point to provider discovery, typed setup, and
+variable-length mission sequences, read the [Mission Composition front door](MISSION_COMPOSITION.md).
+
+For the consumer or junior-engineer path through Simulation Runtime, read the
+[Simulation Runtime onboarding guide](SIMULATION_RUNTIME_ONBOARDING.md). It is the scenario
 index for source `.prb`/`.tbl` cases, pseudo-6DOF compositions, the
 California–Hawaii variants, external time stepping, and the diagnostic ladder.
 
@@ -33,11 +36,11 @@ California–Hawaii variants, external time stepping, and the diagnostic ladder.
                               composition patches   controls/controllers
 ```
 
-- The language layer preserves source text and reports diagnostics. Parsing
+- Model Authoring preserves source text and reports diagnostics. Parsing
   successfully does not imply executable runtime coverage.
-- The composition layer resolves typed overrides and scenario metadata. It is
+- Mission Composition resolves typed overrides and scenario metadata. It is
   a TAORYX extension, not historical TAOS syntax.
-- The runtime integrates the lowered model in batch or through an external
+- Simulation Runtime integrates the lowered model in batch or through an external
   timestep loop.
 - Artifacts are the common output boundary for telemetry, events, replay,
   reports, and plots.
@@ -51,16 +54,18 @@ California–Hawaii variants, external time stepping, and the diagnostic ladder.
 | Apply typed scenario changes | [Scenario runtime](architecture/README.md) | `ScenarioCompiler`, `ScenarioRequest` |
 | Run a trajectory | [Runtime architecture](architecture/README.md) | `run_files(...)` or `LoadedProgram` |
 | Drive timesteps | [Interactive engine](architecture/interactive-engine.md) | `InteractiveSession.step(...)` |
-| Find and run Product 2 scenarios | [Product 2 onboarding](PRODUCT_TWO_ONBOARDING.md) | `taoryx run ...` / `taoryx vehicle compose → preflight → lower → run` |
+| Find and run Simulation Runtime scenarios | [Simulation Runtime onboarding](SIMULATION_RUNTIME_ONBOARDING.md) | `taoryx run ...` / `taoryx vehicle compose → preflight → lower → run` |
 | Build plots | [Telemetry](architecture/telemetry.md) | `RunArtifact`, `render_run_artifact_plots(...)` |
 | Add control above trim | [Controller stack](architecture/controller-stack.md), [Control contracts](architecture/control-contracts.md), and [LQR](extensions/lqr.md) | `TrimSpec`, `solve_trim`, controller/allocator |
 | Add an airbreathing vehicle mission | [Mission-composition automation](plan/mission-composition-automation.md) | `compile_powered_fixed_wing_racetrack(...)` |
 | Add a vehicle or topology | [Generic family integration playbook](plan/generic-family-integration-playbook.md) | `taoryx vehicle intake existing-family ...` or `taoryx vehicle intake new-topology ...` |
 | Expose a parameter, control, status, or objective value | [Public value-space contract](architecture/public-value-spaces.md) | `taoryx vehicle topology-report` |
-| Demonstrate the three products | [Three-product showcase guide](THREE_PRODUCT_SHOWCASE.md) | `taoryx vehicle maturity-report` → `catalog` → `mission inspect`/`mission create`/`mission validate` → `preflight` → `run` |
-| Build a Product 3 plug-in | [Product 3 provider API](architecture/product-three-provider-api.md) | `ProductThreeProvider.metadata` → `prepare(request)` → `run(prepared)` |
+| Demonstrate the three layers | [Authoring → Runtime → Composition showcase guide](AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md) | `taoryx vehicle maturity-report` → `catalog` → `mission inspect`/`mission create`/`mission validate` → `preflight` → `run` |
+| Publish schema-driven Mission Composition | [Mission Composition Provider API](architecture/mission-composition-provider-api.md) | `list_models()` → `get_model_schema()` → `validate_configuration()` |
+| Execute a Mission Composition batch | [Mission Composition Provider API](architecture/mission-composition-provider-api.md) | `MissionCompositionRunRequest` → `MissionCompositionRunnerRegistry.run()` → trajectory or failure response |
+| Drive a Mission Composition episode | [Mission Composition Provider API](architecture/mission-composition-provider-api.md) | `MissionCompositionSessionManager.open()` → `inspect()` / `step()` / `reset()` → `close()` |
 
-### Product 3 verification ladder
+### Mission Composition verification ladder
 
 Use the narrowest audit that proves the change you made. These are separate
 evidence levels, not interchangeable green checks:
@@ -81,11 +86,18 @@ taoryx vehicle maturity-report \
   --check-execution-witnesses \
   --execute-batch-witnesses \
   --execute-parity-witnesses
+
+# Reconcile the authoritative asset inventory, every advertisement and exact
+# common batch/session registration, then verify the generated coverage matrix.
+python tools/dev.py mission-composition-completion
 ```
 
-The last command proves only the declared composition/execution and parity
-contracts. It does not promote a direct-wrench screen, replay, pseudo-6DOF
-response law, or nominal mission to physical-effector or family qualification.
+The maturity command proves only the declared composition/execution and parity
+contracts. The completion command additionally reconciles discovery and exact
+common-interface coverage. Neither promotes a direct-wrench screen, replay,
+pseudo-6DOF response law, or nominal mission to physical-effector or family
+qualification. The generated completion matrix lists every family and
+realization, including explicit blockers and intentionally deferred physics.
 
 ## Grammar validation
 
@@ -193,6 +205,40 @@ available. It does not prove a vehicle's thrust, aero tables, bank sign, alpha
 response, target closure, or terminal behavior. Reuse the phase contract and
 retune the vehicle-specific controls, tables, limits, and time-to-go values;
 never copy those values blindly from the Simple Aero surrogate.
+
+Inspect the same workflow through the provider-independent Mission Composition
+advertisement with:
+
+```bash
+PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_catalog.py \
+  --model simple_aero
+```
+
+Audit every registry-backed advertisement and run the common analytical
+trajectory interface with:
+
+```bash
+PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_catalog.py --audit
+PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_reference.py \
+  --output /tmp/mission-composition-trajectory.json
+PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_contract_probe.py \
+  --output /tmp/mission-composition-contract-probe.json
+```
+
+The audit proves configuration- and output-schema publication integrity. The
+reference run proves the typed configuration + requested core/telemetry
+selection → common runner → standardized trajectory/failure lifecycle. The
+contract probe additionally proves typed scalar/vector/structured telemetry,
+first-class spawned-entity relationships, and accepted-boundary initial-state
+snapshots. `python tools/dev.py mission-composition-completion` reconciles the
+authoritative inventory and exact common batch/session registrations with the
+generated coverage matrix. None of these commands promotes vehicle fidelity
+evidence.
+
+That schema exposes launch and endpoint geometry, initial mass and burnout
+checkpoints, fixed-L/D surrogate inputs, and the reviewed ballistic, phugoid,
+skip, slalom, and weave recipes. It declares only point-mass fidelity and does
+not promote fixture-ready maneuvers into vehicle execution claims.
 
 Before composing a Simple Aero phase into a vehicle route, run the isolated fixture
 ladder:
