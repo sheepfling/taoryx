@@ -23,6 +23,9 @@ tracked in
 The common vehicle metadata, parameter, semantic control, resource, status,
 and AI/RL observation boundary is defined in
 [vehicle-interface-contract.md](vehicle-interface-contract.md).
+The portable Product 3 vehicle/trajectory plug-in publication, request, and
+standard result envelope is defined in
+[product-three-provider-api.md](product-three-provider-api.md).
 The progressive point-mass, kinematic bridge, and two rigid-body control-
 realization tiers are described in
 [`dynamics-fidelity-ladder.md`](dynamics-fidelity-ladder.md).

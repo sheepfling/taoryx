@@ -166,6 +166,41 @@ def test_policy_trace_replays_the_same_semantic_action_stream_at_committed_bound
     assert replay.step_count == 1
     assert replay.final_time_s == pytest.approx(trace.final_status.time_s)
     assert replay.as_dict()["status"] == "pass"
+    parity = replay.as_dict()["batch_episode_parity"]
+    assert parity["availability"] == "registered"
+    assert parity["status"] == "pass"
+    assert parity["report"]["status"] == "pass"
+    ####
+
+
+def test_policy_replay_does_not_emit_parity_for_an_unregistered_pair(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    composition = _composition("x8_racetrack_capability_3dof_compose.yaml")
+    episode = open_vehicle_composition_episode(composition)
+    trace = run_composition_policy(
+        episode,
+        lambda observation, contract: None,
+        authority_profile_id="native_control_bridge",
+    )
+
+    monkeypatch.setattr(
+        "taoryx.composition_policy.batch_episode_parity_record",
+        lambda family_id, mission, fidelity: {
+            "family_id": family_id,
+            "mission": mission,
+            "fidelity": fidelity,
+            "availability": "not_registered",
+            "reason": "test disposition",
+        },
+    )
+
+    replay = replay_composition_policy_trace(composition, trace)
+    parity = replay.as_dict()["batch_episode_parity"]
+
+    assert replay.status == "pass"
+    assert parity["availability"] == "not_registered"
+    assert "report" not in parity
     ####
 
 
@@ -212,6 +247,8 @@ def test_persisted_policy_trace_replays_through_the_public_cli(
     payload = json.loads(report_path.read_text(encoding="utf-8"))
     assert payload["status"] == "pass"
     assert payload["composition_identity_sha256"] == composition.identity_sha256
+    assert payload["batch_episode_parity"]["availability"] == "registered"
+    assert payload["batch_episode_parity"]["report"]["status"] == "pass"
     assert replay_composition_policy_trace_file(composition, trace_path).step_count == 1
     ####
 

@@ -13,7 +13,7 @@ from taoryx.runtime.common import (
     RuntimeVehicle,
     SpawnRequest,
 )
-from taoryx.runtime.engine import compute_trajectories, get_next_time_step
+from taoryx.runtime.engine import compute_trajectories, get_next_step_boundary, get_next_time_step
 from taoryx.runtime.environment_runtime import evaluate_wind
 from taoryx.runtime.events import apply_state_discontinuity, refine_segment_final_condition
 from taoryx.runtime.expressions import evaluate_definition_program, evaluate_expression
@@ -130,6 +130,8 @@ def test_runtime_graph_rejects_cycles_and_steps_at_boundaries() -> None:
     first = RuntimeVehicle("a", RuntimeState(0.0, (0.0,)), lambda state: (1.0,), step_size=2.0)
     problem = build_runtime_problem((first,), print_times=(0.5,), final_time=1.0)
     assert get_next_time_step(problem, 2.0) == 0.5
+    assert get_next_step_boundary(problem, 2.0).reason == "print_cadence"
+    assert get_next_step_boundary(problem, 2.0).time == pytest.approx(0.5)
     truth_timed = build_runtime_problem((first,), required_truth_times=(0.25, 0.75), final_time=1.0)
     assert get_next_time_step(truth_timed, 2.0) == 0.25
     result = compute_trajectories(problem)

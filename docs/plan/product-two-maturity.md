@@ -223,6 +223,31 @@ Exit gate: a recorded action stream can be replayed deterministically, accepted
 
 Dependencies: M2 universal manifest and artifact identity.
 
+#### M3 completed implementation
+
+The M3 implementation is attached to the shared interactive runtime rather
+than a separate stepping kernel. `InteractiveSnapshot` records the requested
+duration, accepted truth interval, integration/output cadence metadata,
+accepted internal-boundary reasons, and event truncation. `AppliedCommand`
+records requested, bounded/applied, and accepted start/end values. Explicit
+`EventSpec.residual` functions are refined to an accepted boundary before a
+stop or signal is applied. Interactive artifacts and checkpoints carry a
+stable model fingerprint, command-stream hash, and replay identity.
+
+The deterministic composition replay report now also carries the registered
+batch/episode parity disposition. It invokes the centralized fail-closed
+adapter only when the exact family/mission/fidelity tuple is registered and
+nests the resulting parity report in `batch_episode_parity.report`. For
+unregistered or batch-only tuples it emits only the explicit disposition and
+never manufactures a parity report. The checked-in witness catalog is replayed
+through this same report path by
+`tools/validate_vehicle_execution_witnesses.py --execute-parity`, and
+`tools/dev.py check` exercises that gate.
+
+M3 exit evidence is therefore: deterministic action-stream replay, visible
+accepted intervals and event truncation, identity-bound checkpoints, and
+passing parity reports for all and only the 11 registered pairs.
+
 ### M4 — Numerical quality and fidelity gates
 
 Purpose: distinguish a runnable trajectory from a numerically trustworthy
@@ -244,6 +269,30 @@ pass, development, blocked, or bounded-failure disposition and no implicit
 promotion from a visual or nominally successful trajectory.
 
 Dependencies: M2 artifact fields and M3 accepted-boundary/replay records.
+
+#### M4 implementation slice
+
+The M4 contract is implemented in `taoryx.product_two_quality` and carried by
+the Product 2 scenario catalog. It emits
+`taoryx.product-two-numerical-quality/v1alpha1` reports with explicit fidelity
+lanes and claim boundaries, finite selected telemetry, event ordering, state
+continuity, declared mass/energy invariants, fixed-input repeatability, and
+coarse/fine step-and-integrator refinement. The catalog requires isolated
+NESC, X-15, HL-20, and synthetic CA–HI lanes and has two executable source
+refinement witnesses plus the interactive accepted-boundary witness.
+
+`tools/dev.py check` writes the suite report under the ignored
+`artifacts/verification/product_two_quality/` directory. The two source
+witnesses currently pass the numerical gates, including a declared accepted
+event-time bound for the spawned child in the changing-mass example. The
+remaining family-owned lanes are reported as `blocked` or `development` until
+their common Product 2 artifact adapters are declared; this is intentional and
+does not promote their nominal trajectories.
+
+M4 evidence is therefore: a typed catalog declaration, a machine-readable
+report for all eight canonical scenarios, passing selected repeatability and
+refinement checks, explicit fidelity-lane separation, and bounded dispositions
+for evidence that is not yet in the common artifact contract.
 
 ### M5 — Release and consumer operations
 

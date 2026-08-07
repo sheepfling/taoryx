@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import cast
 
@@ -28,6 +28,7 @@ from .composition_episode import (
     open_vehicle_composition_episode,
 )
 from .vehicle_composition import CompiledVehicleComposition
+from .vehicle_execution_bindings import batch_episode_parity_record
 from .vehicle_interface import VehicleInterfaceContract, project_authority_action_values
 
 
@@ -98,23 +99,28 @@ class CompositionPolicyReplayReport:
     interface_fingerprint_sha256: str
     step_count: int
     final_time_s: float
+    status: str = "pass"
+    batch_episode_parity: Mapping[str, object] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, object]:
         """Return a compact machine-readable deterministic replay verdict."""
 
         return {
             "schema": "taoryx.composition-policy-replay/v1alpha1",
-            "status": "pass",
+            "status": self.status,
             "composition_id": self.composition_id,
             "composition_identity_sha256": self.composition_identity_sha256,
             "interface_id": self.interface_id,
             "interface_fingerprint_sha256": self.interface_fingerprint_sha256,
             "step_count": self.step_count,
             "final_time_s": self.final_time_s,
+            "batch_episode_parity": dict(self.batch_episode_parity),
             "claim_boundary": (
                 "This verifies deterministic replay of one declared semantic action stream through the same "
-                "episode kernel. It does not establish batch parity, robustness, physical-effector realization, "
-                "or mission qualification."
+                "episode kernel. The batch_episode_parity field contains a parity report only when the exact "
+                "family/mission/fidelity pair is registered; all other pairs remain explicit non-parity "
+                "dispositions. This does not establish robustness, physical-effector realization, or mission "
+                "qualification."
             ),
         }
         ####
@@ -280,6 +286,8 @@ def replay_serialized_composition_policy_trace(
         )
         final_status = episode.status_frame()
         _require_equal_payload("final status", final_status.as_dict(), _mapping(payload.get("final_status"), "final_status"))
+        batch_episode_parity = _batch_episode_parity_report(composition, payload)
+        replay_status = "fail" if batch_episode_parity.get("status") == "fail" else "pass"
         return CompositionPolicyReplayReport(
             composition.id,
             composition.identity_sha256,
@@ -287,9 +295,30 @@ def replay_serialized_composition_policy_trace(
             contract.fingerprint,
             len(steps),
             final_status.time_s,
+            replay_status,
+            batch_episode_parity,
         )
     finally:
         episode.close()
+    ####
+
+
+def _batch_episode_parity_report(
+    composition: CompiledVehicleComposition,
+    payload: Mapping[str, object],
+) -> dict[str, object]:
+    """Attach exact parity evidence only for a registered composition pair."""
+
+    from .batch_episode_parity_dispatch import verify_serialized_declared_batch_episode_parity
+
+    disposition = batch_episode_parity_record(composition.family_id, composition.mission, composition.fidelity)
+    if disposition.get("availability") != "registered":
+        return disposition
+    report = verify_serialized_declared_batch_episode_parity(composition, payload)
+    result = dict(disposition)
+    result["status"] = report.status
+    result["report"] = report.as_dict()
+    return result
     ####
 
 

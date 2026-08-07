@@ -24,6 +24,10 @@ def refine_segment_final_condition(start: RuntimeState, end: RuntimeState, condi
     crossings: list[tuple[int, EventCrossing]] = []
     for condition_index, condition in enumerate(conditions):
         left_value, right_value = condition.function(start), condition.function(end)
+        if abs(right_value) <= tolerance and abs(left_value) > tolerance:
+            if left_value < 0.0 and right_value <= 0.0:
+                crossings.append((condition_index, EventCrossing(condition.name, end.time, right_value, condition.action)))
+                continue
         if abs(left_value) <= tolerance:
             if right_value <= left_value and abs(right_value) <= tolerance:
                 continue

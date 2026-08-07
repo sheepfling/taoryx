@@ -16,9 +16,8 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from .batch_episode_parity_dispatch import verify_serialized_declared_batch_episode_parity
 from .composition_episode import open_vehicle_composition_episode
-from .composition_policy import PolicyDecision, run_composition_policy
+from .composition_policy import PolicyDecision, replay_serialized_composition_policy_trace, run_composition_policy
 from .vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
 from .vehicle_execution_bindings import load_vehicle_batch_episode_parity_catalog
 from .vehicle_registry import ROOT
@@ -142,9 +141,17 @@ def validate_vehicle_execution_parity_witnesses(
                 )
             finally:
                 episode.close()
-            report = verify_serialized_declared_batch_episode_parity(composition, trace.as_dict())
-            if report.status != "pass":
-                errors.append(f"{witness.id}: parity report returned {report.status}")
+            replay_report = replay_serialized_composition_policy_trace(composition, trace.as_dict())
+            replay_payload = replay_report.as_dict()
+            parity_payload = replay_payload["batch_episode_parity"]
+            if not isinstance(parity_payload, Mapping):
+                errors.append(f"{witness.id}: replay report did not include a parity disposition")
+                parity_payload = {}
+            if replay_report.status != "pass":
+                errors.append(f"{witness.id}: replay report returned {replay_report.status}")
+            parity_report = parity_payload.get("report")
+            if not isinstance(parity_report, Mapping) or parity_report.get("status") != "pass":
+                errors.append(f"{witness.id}: parity report was not a passing registered report")
             records.append(
                 {
                     "id": witness.id,
@@ -154,8 +161,9 @@ def validate_vehicle_execution_parity_witnesses(
                     "fidelity": composition.fidelity,
                     "authority_profile_id": witness.authority_profile_id,
                     "action_count": len(witness.actions),
-                    "adapter_id": report.as_dict().get("adapter_id"),
-                    "status": report.status,
+                    "adapter_id": parity_report.get("adapter_id") if isinstance(parity_report, Mapping) else None,
+                    "replay_report": replay_payload,
+                    "status": replay_report.status,
                 }
             )
         except (TypeError, ValueError, RuntimeError) as error:

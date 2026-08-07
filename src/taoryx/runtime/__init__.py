@@ -16,7 +16,7 @@ from .common import (
     SpawnRequest,
     StepBoundary,
 )
-from .engine import ExecutionResult, run_taos
+from .engine import ExecutionResult, get_next_step_boundary, run_taos
 from .environment_runtime import (
     EnvironmentKeyframe,
     EnvironmentProvider,
@@ -37,6 +37,7 @@ from .guidance_control import (
     WindCompensatedPursuit,
 )
 from .interactive import (
+    AcceptedBoundaryRecord,
     AppliedCommand,
     ControlSpec,
     EventAction,
@@ -129,6 +130,7 @@ __all__ = [
     "ControlEvaluationRecord",
     "ControlIntervalRecord",
     "ExecutionResult",
+    "get_next_step_boundary",
     "EventCondition",
     "LoadEvaluationPhase",
     "LoadEvaluationRecord",
@@ -146,6 +148,7 @@ __all__ = [
     "ScheduledEnvironmentProvider",
     "StaticEnvironmentProvider",
     "AppliedCommand",
+    "AcceptedBoundaryRecord",
     "ControlSpec",
     "EventAction",
     "EventSpec",

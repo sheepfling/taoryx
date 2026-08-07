@@ -187,6 +187,7 @@ def _bundle_artifacts(output: Path) -> tuple[ProductTwoManifestArtifact, ...]:
 
 
 def _write_reproduction(output: Path, scenario: ProductTwoScenario, root: Path) -> tuple[str, ...]:
+    output.mkdir(parents=True, exist_ok=True)
     commands = [_replace_command(command, output, root) for command in scenario.setup_commands]
     commands.append(_replace_command(scenario.run_command, output, root))
     lines = [

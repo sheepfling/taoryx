@@ -489,9 +489,29 @@ def check_vehicle_interfaces() -> None:
 
 
 def check_vehicle_execution_witnesses() -> None:
-    """Validate every runnable endpoint has an exact checked-in request."""
+    """Validate endpoint requests and execute registered M3 parity replays."""
 
-    run(tool_script("validate_vehicle_execution_witnesses.py"))
+    run(tool_script("validate_vehicle_execution_witnesses.py", "--execute-parity"))
+    ####
+
+
+def check_product_two_quality() -> None:
+    """Build the Product 2 M4 report and execute the selected fixed-step cases."""
+
+    run(
+        tool_script(
+            "validate_product_two_quality.py",
+            "--execute",
+            "--scenario",
+            "two-stage-ballistic",
+            "--scenario",
+            "two-stage-demo",
+            "--scenario",
+            "interactive-california-hawaii",
+            "--output",
+            "artifacts/verification/product_two_quality/report.json",
+        )
+    )
     ####
 
 
@@ -1232,6 +1252,7 @@ def check() -> None:
     check_supported_reference_families()
     check_vehicle_interfaces()
     check_vehicle_execution_witnesses()
+    check_product_two_quality()
     onboard_vehicles()
     pseudo6dof_profiles()
     horizontal_fidelity()
@@ -1317,6 +1338,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "check-vehicles": check_vehicle_models,
     "check-reference-families": check_supported_reference_families,
     "check-vehicle-interfaces": check_vehicle_interfaces,
+    "check-product-two-quality": check_product_two_quality,
     "onboard-vehicles": onboard_vehicles,
     "fidelity-readiness": fidelity_readiness,
     "pseudo6dof-profiles": pseudo6dof_profiles,

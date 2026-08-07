@@ -23,6 +23,12 @@ def test_every_registered_batch_episode_pair_has_a_passing_replay_witness() -> N
     assert isinstance(records, list)
     assert len(records) == 11
     assert all(item["status"] == "pass" for item in records)
+    for item in records:
+        replay = item["replay_report"]
+        assert replay["status"] == "pass"
+        parity = replay["batch_episode_parity"]
+        assert parity["availability"] == "registered"
+        assert parity["report"]["status"] == "pass"
     ####
 
 

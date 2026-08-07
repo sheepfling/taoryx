@@ -43,6 +43,8 @@ taoryx doctor hl20-source-release-pseudo6dof --json
 
 The complete discovery, diagnostic, manifest, and bundle contract is in
 [Product 2 discovery and bundles](architecture/product-two-discovery-and-bundles.md).
+The numerical-quality and fidelity declaration contract is in
+[Product 2 quality gates](architecture/product-two-quality-gates.md).
 
 ## The five-minute first run
 
@@ -321,6 +323,11 @@ taoryx vehicle episode-info <compiled-composition.json> --seed 7
 taoryx vehicle replay-policy <compiled-composition.json> <policy-trace.json>
 ```
 
+The replay JSON includes the deterministic episode verdict and a
+`batch_episode_parity` disposition. A nested parity report appears only when
+the exact composition tuple is registered in the parity catalog; batch-only or
+unregistered compositions remain explicit non-parity results.
+
 Use `taoryx vehicle endpoints <family>` first. A batch-only model is not
 broken because it has no episode endpoint; do not invent an interactive path
 for a source-history replay.
@@ -365,6 +372,20 @@ For pseudo-6DOF, also look for the response-law identifier and omitted-physics
 list. A clean altitude or attitude plot is not evidence of a physical
 effector. The realization and the committed truth boundary must be visible in
 the artifact.
+
+To generate the M4 quality report for the selected canonical witnesses, run:
+
+```bash
+python tools/validate_product_two_quality.py --execute \
+  --scenario two-stage-ballistic \
+  --scenario two-stage-demo \
+  --scenario interactive-california-hawaii \
+  --output artifacts/verification/product_two_quality/report.json
+```
+
+The report covers all catalog scenarios. `blocked` and `development` entries
+identify lanes that still need a common artifact adapter; they are not
+promoted by a nominal trajectory or a plot.
 
 ## Product 2 maturity boundary
 

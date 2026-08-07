@@ -61,9 +61,36 @@ lifecycle only; a caller or player owns the external timing loop.
 
 ## Replay and artifacts
 
-Each accepted step records a `ReplayFrame` containing the requested command
-stream and duration. Replaying those frames re-applies bounds and slew limits,
-which tests the command semantics rather than merely copying final values.
+Each accepted external step records a `ReplayFrame` containing the requested
+command stream and duration. Replaying those frames re-applies bounds and slew
+limits, which tests the command semantics rather than merely copying final
+values. `InteractiveSession.command_stream_sha256` hashes that ordered stream;
+`InteractiveSession.replay_identity` binds it to the session's model
+fingerprint.
+
+`InteractiveSnapshot` separates the external request from accepted truth:
+
+- `requested_duration` is the duration supplied to `step`;
+- `accepted_duration` and `time_start`/`time_end` describe the committed truth
+  interval;
+- `commands` retain requested, bounded/applied, and accepted start/end values;
+- `accepted_boundaries` identify each internal interval and its reason, such as
+  `integration_cadence`, `print_cadence`, `sensor_clock`,
+  `requested_external_duration`, or `event_boundary`; and
+- `event_truncated` is true only when a stopping event shortens the external
+  request.
+
+Composition policy replay emits the same deterministic replay report used by
+the public `vehicle replay-policy` command. Its `batch_episode_parity`
+disposition is resolved from the exact family/mission/fidelity registry. A
+full parity report is nested there only when the pair is explicitly
+`registered`; runnable batch and episode endpoints, shared source code, or a
+successful episode replay never infer parity for an unregistered pair.
+
+An `EventSpec` may provide a scalar `residual` in addition to its boolean
+`predicate`. The runtime uses that residual to refine a crossing to an
+accepted truth boundary before applying the event. Predicate-only event specs
+remain end-of-boundary notifications and cannot claim sub-step event timing.
 
 `InteractiveSnapshot` is a human-readable step view. `InteractiveArtifact`
 serializes the session directly, while `InteractiveSession.to_run_artifact()`
@@ -96,11 +123,11 @@ resumed.case()  # continue with the same runtime model
 ```
 
 The checkpoint includes integrator/timing configuration, vehicle execution
-settings, source/table SHA-256 fingerprints, schema versioning, and is written
+settings, source/table SHA-256 fingerprints, schema versioning, the model
+fingerprint, and both command-stream and replay identities. It is written
 atomically. It deliberately serializes the program and state, not Python
-callback closures. Kinematic sidecar and interactive-session checkpoint
-support remain planned extensions; the current checkpoint contract rejects
-kinematic sidecars explicitly.
+callback closures. A loaded checkpoint verifies the stored identities before
+continuation; the caller still supplies the executable model and callbacks.
 
 The same `event` declarations are lowered into the batch `EventCondition`
 engine. Batch `stop` and `signal` rules therefore use the existing event

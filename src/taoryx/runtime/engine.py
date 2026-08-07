@@ -23,6 +23,7 @@ from .common import (
     RuntimeVehicle,
     SearchRestart,
     SpawnRequest,
+    StepBoundary,
     TransitionTruthPair,
     TransitionTruthSnapshot,
 )
@@ -40,8 +41,8 @@ class ExecutionResult:
     stop_reason: str | None = None
 
 
-def get_next_time_step(problem: RuntimeProblem, candidate_step: float, *, now: float | None = None) -> float:
-    """Shorten a candidate step at every required accepted-truth boundary.
+def get_next_step_boundary(problem: RuntimeProblem, candidate_step: float, *, now: float | None = None) -> StepBoundary:
+    """Return the next accepted-truth boundary and its scheduling reason.
 
     ``required_truth_times`` is the provider-neutral seam for future sensor
     schedulers.  It keeps IMU and other truth timestamps in the same minimum
@@ -52,15 +53,36 @@ def get_next_time_step(problem: RuntimeProblem, candidate_step: float, *, now: f
     if candidate_step <= 0.0:
         raise ValueError("candidate step must be positive")
     current = max((vehicle.state.time for vehicle in problem.active_vehicles()), default=0.0) if now is None else now
-    boundaries = [
-        boundary
-        for boundary in problem.print_times + problem.table_knots + problem.required_truth_times
-        if boundary > current
-    ]
-    boundaries.extend(clock.next_truth_time(current) for clock in problem.sensor_clocks)
+    boundaries: list[tuple[float, str]] = [(current + candidate_step, "integration_cadence")]
+    boundaries.extend((boundary, "print_cadence") for boundary in problem.print_times if boundary > current)
+    boundaries.extend((boundary, "table_knot") for boundary in problem.table_knots if boundary > current)
+    boundaries.extend((boundary, "required_truth_time") for boundary in problem.required_truth_times if boundary > current)
+    boundaries.extend((clock.next_truth_time(current), "sensor_clock") for clock in problem.sensor_clocks)
     if problem.final_time is not None and problem.final_time > current:
-        boundaries.append(problem.final_time)
-    return min([candidate_step, *(boundary - current for boundary in boundaries)])
+        boundaries.append((problem.final_time, "final_time"))
+    earliest = min(time for time, _reason in boundaries)
+    priority = {
+        "final_time": 0,
+        "print_cadence": 1,
+        "table_knot": 2,
+        "required_truth_time": 3,
+        "sensor_clock": 4,
+        "integration_cadence": 5,
+    }
+    reason = min(
+        (reason for time, reason in boundaries if math.isclose(time, earliest, rel_tol=0.0, abs_tol=1.0e-12)),
+        key=lambda item: priority[item],
+    )
+    return StepBoundary(earliest, reason)
+####
+
+
+def get_next_time_step(problem: RuntimeProblem, candidate_step: float, *, now: float | None = None) -> float:
+    """Shorten a candidate step at every required accepted-truth boundary."""
+
+    current = max((vehicle.state.time for vehicle in problem.active_vehicles()), default=0.0) if now is None else now
+    boundary = get_next_step_boundary(problem, candidate_step, now=now)
+    return candidate_step if boundary.reason == "integration_cadence" else boundary.time - current
 ####
 
 
@@ -359,7 +381,11 @@ def _current_event_crossings(vehicle: RuntimeVehicle) -> tuple[EventCrossing, ..
         EventCrossing(condition.name, vehicle.state.time, condition.function(vehicle.state), condition.action)
         for condition in vehicle.events
         if condition.action == "stop" or condition.name not in vehicle.fired_events
-        if (condition.predicate(vehicle.state) if condition.predicate is not None else condition.function(vehicle.state) >= 0.0)
+        if (
+            condition.predicate(vehicle.state)
+            if condition.predicate is not None
+            else condition.function(vehicle.state) >= -1.0e-12
+        )
     )
 ####
 

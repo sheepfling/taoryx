@@ -64,6 +64,13 @@ The reserved manifest identifier is
   numerical accuracy, physical-effector behavior, vehicle qualification, or
   historical fidelity.
 
+Numerical evidence is carried separately by the M4
+`taoryx.product-two-numerical-quality/v1alpha1` report described in
+[Product 2 numerical quality and fidelity gates](product-two-quality-gates.md).
+That report may classify a manifest-backed run as `development`, `blocked`, or
+`bounded-failure`; a completed manifest status never promotes the result by
+itself.
+
 ## M0 baseline evidence
 
 The canonical baseline report is

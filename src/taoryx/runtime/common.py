@@ -511,8 +511,11 @@ class RuntimeVehicle:
         ####
 
     def discard_control_provenance_after(self, time_s: float) -> None:
-        """Drop speculative provenance after an event-refined accepted boundary."""
+        """Drop speculative control/load provenance after event refinement."""
 
+        self.load_evaluation_history = [
+            record for record in self.load_evaluation_history if record.state_time_s <= time_s + 1.0e-12
+        ]
         self.control_evaluation_history = [
             record for record in self.control_evaluation_history if record.state_time_s <= time_s + 1.0e-12
         ]

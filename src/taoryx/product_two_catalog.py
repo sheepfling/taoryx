@@ -6,9 +6,10 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from taoryx.product_two_contracts import ProductTwoStatus
+from taoryx.product_two_quality import ProductTwoQualitySpec
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PRODUCT_TWO_CATALOG = ROOT / "verification/product_two_scenario_catalog.yaml"
@@ -51,7 +52,28 @@ class ProductTwoScenario(BaseModel):
     seed: int | None = None
     requested_duration_s: float | None = Field(default=None, gt=0.0)
     claim_boundary: str = Field(min_length=1)
+    quality: ProductTwoQualitySpec
     tags: tuple[str, ...] = ()
+
+    @model_validator(mode="after")
+    def require_pseudo6dof_declarations(self) -> ProductTwoScenario:
+        if "pseudo_6dof" in self.fidelity.casefold():
+            contract = self.quality.fidelity
+            missing = {
+                name
+                for name, value in (
+                    ("response_law", contract.response_law),
+                    ("omitted_physics", contract.omitted_physics),
+                    ("controls", contract.controls),
+                    ("envelope", contract.envelope),
+                    ("operation_availability", contract.operation_availability),
+                )
+                if not value
+            }
+            if missing:
+                raise ValueError(f"pseudo-6DOF scenario {self.id!r} is missing fidelity declarations: {', '.join(sorted(missing))}")
+        return self
+        ####
 
     def matches(self, query: str) -> bool:
         """Return whether a case-insensitive query matches discovery text."""

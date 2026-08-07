@@ -1603,7 +1603,7 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
             composition = load_compiled_vehicle_composition(arguments.composition)
             replay_report = replay_composition_policy_trace_file(composition, arguments.trace)
             _print_json(replay_report.as_dict(), arguments.output)
-            return 0
+            return 0 if replay_report.status == "pass" else 1
         if arguments.vehicle_command == "batch-episode-parity":
             composition = load_compiled_vehicle_composition(arguments.composition)
             trace_payload = json.loads(arguments.trace.read_text(encoding="utf-8"))

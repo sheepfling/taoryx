@@ -20,6 +20,7 @@ from taoryx.runtime import (
     RuntimeVehicle,
     StatusSpec,
 )
+from taoryx.runtime import interactive as interactive_runtime
 from taoryx.runtime.engine import compute_trajectories
 
 pytestmark = pytest.mark.algorithms
@@ -112,6 +113,14 @@ def test_accepted_control_interval_provenance_separates_held_commands_from_solve
     assert dict(interval.controls_at_interval_start) == {"fin_pitch": -0.2, "throttle": 0.6}
     assert interval.solver_stage_control_mutation_detected is False
     assert {record.phase for record in vehicle.control_evaluation_history} == {"solver_stage", "committed_truth"}
+    ####
+
+
+def test_model_identity_canonicalizes_nonfinite_values_and_unordered_sets() -> None:
+    first = interactive_runtime._identity_digest({"value": float("nan"), "items": frozenset(("a", "b"))})
+    second = interactive_runtime._identity_digest({"items": frozenset(("b", "a")), "value": float("nan")})
+
+    assert first == second
     ####
 
 
@@ -225,6 +234,57 @@ def test_command_stream_replay_is_deterministic() -> None:
     snapshots = replay.replay(first.command_history)
 
     assert [snapshot.as_dict() for snapshot in snapshots] == [snapshot.as_dict() for snapshot in first.snapshots]
+
+
+def test_explicit_event_residual_truncates_to_an_accepted_boundary() -> None:
+    session = InteractiveSession(
+        _problem(),
+        _controls(),
+        event_specs=(
+            EventSpec(
+                "terminal",
+                lambda state: state.named.get("downrange", 0.0) >= 0.05,
+                EventAction.STOP,
+                residual=lambda state: state.named.get("downrange", 0.0) - 0.05,
+            ),
+        ),
+    )
+
+    snapshot = session.step(0.1, {"throttle": 1.0})
+
+    assert snapshot.requested_duration == pytest.approx(0.1)
+    assert snapshot.accepted_duration == pytest.approx(0.05)
+    assert snapshot.time_end == pytest.approx(0.05)
+    assert snapshot.boundary_reason == "event_boundary"
+    assert snapshot.event_truncated is True
+    assert snapshot.accepted_boundaries[-1].reasons == ("event_boundary",)
+    assert snapshot.commands[0].accepted_start == pytest.approx(0.0)
+    assert snapshot.commands[0].accepted_end == pytest.approx(0.05)
+    assert snapshot.commands[0].accepted_duration == pytest.approx(0.05)
+    assert snapshot.runtime_events[0].time == pytest.approx(0.05)
+
+
+def test_signal_event_boundary_is_visible_without_shortening_external_step() -> None:
+    session = InteractiveSession(
+        _problem(),
+        _controls(),
+        event_specs=(
+            EventSpec(
+                "checkpoint",
+                lambda state: state.named.get("downrange", 0.0) >= 0.05,
+                EventAction.SIGNAL,
+                residual=lambda state: state.named.get("downrange", 0.0) - 0.05,
+            ),
+        ),
+    )
+
+    snapshot = session.step(0.1, {"throttle": 1.0})
+
+    assert snapshot.time_end == pytest.approx(0.1)
+    assert snapshot.event_truncated is False
+    assert snapshot.boundary_reasons == ("event_boundary", "requested_external_duration")
+    assert [boundary.time_end for boundary in snapshot.accepted_boundaries] == pytest.approx([0.05, 0.1])
+    assert snapshot.runtime_events[0].time == pytest.approx(0.05)
 ####
 
 
@@ -339,6 +399,9 @@ def test_interactive_checkpoint_restores_command_history_and_continues(tmp_path)
     assert restored.status is InteractiveStatus.PAUSED
     assert restored.time == pytest.approx(0.1)
     assert restored.command_history == first.command_history
+    assert restored.model_fingerprint == "demo-model-v1"
+    assert restored.command_stream_sha256 == first.command_stream_sha256
+    assert restored.replay_identity == first.replay_identity
     assert restored.problem.vehicles["player"].state.values == pytest.approx(first.problem.vehicles["player"].state.values)
     assert restored.problem.vehicles["player"].control_interval_history == first.problem.vehicles["player"].control_interval_history
     assert restored.problem.vehicles["player"].control_evaluation_history == first.problem.vehicles["player"].control_evaluation_history

@@ -19,7 +19,43 @@ scenarios:
     run_command: [taoryx, run, examples/mission_families/two_stage_ballistic_rocket/mission.prb, --profile, taos96, --integrator, rk4, --max-steps, "20000", --output-dir, "{output_dir}/run", --report, "{output_dir}/run/run-report.json", --artifact, "{output_dir}/run/run-artifact.json"]
     artifact_paths: [run/run-artifact.json, run/run-manifest.json, run/run-report.json]
     integrator: rk4
+    seed: 17
     claim_boundary: Synthetic point-mass source fixture; this proves runtime and artifact plumbing, not rigid-body attitude, engineering performance, or historical numerical equivalence.
+    quality:
+      fidelity:
+        lane: synthetic-staged-rocket
+        claim_boundary: Point-mass staged-rocket source fixture with changing-mass and phase-transition evidence only.
+        response_law: null
+        omitted_physics: [attitude dynamics, physical separation dynamics, active guidance]
+        controls: [open-loop propulsion schedule]
+        envelope: finite source-fixture ascent and ballistic return
+        operation_availability: [batch]
+      artifact_required: true
+      finite_telemetry: true
+      finite_channels: [position.altitude.geodetic, taos.vel, mass.total, position.ecfc.x, velocity.ecfc.x]
+      event_ordering: true
+      continuity_channels: {position.ecfc.x: 1000.0, velocity.ecfc.x: 1000.0}
+      repeatability:
+        enabled: true
+        channels: [position.altitude.geodetic, taos.vel, mass.total]
+        absolute_tolerance: 0.0
+        relative_tolerance: 0.0
+      refinement:
+        enabled: true
+        coarse_step_multiplier: 2.0
+        fine_step_multiplier: 1.0
+        coarse_integrator: rk4
+        fine_integrator: rk4
+        channels: [position.altitude.geodetic, taos.vel, mass.total]
+        max_absolute_error: 500.0
+        max_event_time_error_s: 1.0e-8
+      invariants:
+        - id: propellant-mass-balance
+          kind: mass_balance
+          required: true
+          tolerance: 2.0
+          mass_channel: mass.total
+          mass_rate_channel: taos.mdot
     tags: [staged-rocket, source, smoke]
 
   - id: two-stage-demo
@@ -44,7 +80,37 @@ scenarios:
     run_command: [taoryx, run, examples/vehicle_families/staged_rocket/two_stage_demo/mission.prb, examples/vehicle_families/staged_rocket/two_stage_demo/aero.tbl, examples/vehicle_families/staged_rocket/two_stage_demo/propulsion.tbl, --profile, taoryx, --integrator, rk4, --max-steps, "20000", --output-dir, "{output_dir}/run", --report, "{output_dir}/run/run-report.json", --artifact, "{output_dir}/run/run-artifact.json"]
     artifact_paths: [run/run-artifact.json, run/run-manifest.json, run/run-report.json]
     integrator: rk4
+    seed: 17
     claim_boundary: Synthetic source-table family example; this proves table binding, staged mass change, and artifact plumbing, not historical TAOS equivalence or vehicle qualification.
+    quality:
+      fidelity:
+        lane: synthetic-staged-rocket
+        claim_boundary: Source-table staged-rocket family with changing mass and inherited child-state evidence only.
+        response_law: null
+        omitted_physics: [attitude dynamics, physical separation dynamics, active guidance]
+        controls: [open-loop propulsion tables, open-loop rail schedule]
+        envelope: finite source-table staged flight and passive child coast
+        operation_availability: [batch]
+      artifact_required: true
+      finite_telemetry: true
+      finite_channels: [position.altitude.geodetic, taos.vel, mass.total, position.ecfc.x, velocity.ecfc.x]
+      event_ordering: true
+      continuity_channels: {position.ecfc.x: 1000.0, velocity.ecfc.x: 1000.0}
+      repeatability:
+        enabled: true
+        channels: [position.altitude.geodetic, taos.vel, mass.total]
+        absolute_tolerance: 0.0
+        relative_tolerance: 0.0
+      refinement:
+        enabled: true
+        coarse_step_multiplier: 2.0
+        fine_step_multiplier: 1.0
+        coarse_integrator: rk4
+        fine_integrator: rk4
+        channels: [position.altitude.geodetic, taos.vel, mass.total]
+        max_absolute_error: 500.0
+        max_event_time_error_s: 5.0e-2
+      invariants: []
     tags: [staged-rocket, tables, source]
 
   - id: nesc-pseudo6dof
@@ -68,6 +134,27 @@ scenarios:
     run_command: [taoryx, vehicle, run, "{output_dir}/composition.json", --output-dir, "{output_dir}/run"]
     artifact_paths: [composition.json, run/run-manifest.json, run/execution.json, run/truth_telemetry.csv, run/status_trace.json, run/reproduction.txt]
     claim_boundary: Retained NESC two-stage event and mass history plus a named attitude-response projection; no participating rocket plant, active guidance, gimbal, or physical separation dynamics claim.
+    quality:
+      fidelity:
+        lane: nesc
+        claim_boundary: NESC source-history translation plus named pseudo-6DOF attitude response; no participating rocket plant claim.
+        response_law: nesc-source-history-attitude-response
+        omitted_physics: [participating rocket plant, active guidance, gimbal dynamics, physical separation dynamics]
+        controls: [source-history replay, named attitude-response projection]
+        envelope: retained NESC source-history time span and ordered stage events
+        operation_availability: [composition_batch]
+      artifact_required: true
+      finite_telemetry: true
+      finite_channels: [mass_kg, speed_m_s]
+      event_ordering: true
+      continuity_channels: {}
+      repeatability:
+        enabled: true
+        channels: [mass_kg, speed_m_s]
+        absolute_tolerance: 0.0
+        relative_tolerance: 0.0
+      refinement: {enabled: false}
+      invariants: []
     tags: [nesc, staged-rocket, pseudo-6dof, source-history]
 
   - id: x15-staged-pseudo6dof
@@ -91,6 +178,27 @@ scenarios:
     run_command: [taoryx, vehicle, run, "{output_dir}/composition.json", --output-dir, "{output_dir}/run"]
     artifact_paths: [composition.json, run/run-manifest.json, run/execution.json, run/truth_telemetry.csv, run/status_trace.json, run/reproduction.txt]
     claim_boundary: X-15-scaled local-frame reduction with source-pinned staging and glide handoff; not a native X-15 controlled mission, synthetic CA–HI vehicle, or physical-effector claim.
+    quality:
+      fidelity:
+        lane: x15
+        claim_boundary: X-15-scaled local-frame reduction with source-pinned staged reachability evidence only.
+        response_law: x15-scaled-pseudo6dof-response
+        omitted_physics: [native X-15 aerodynamic plant, active guidance, physical effectors, source-exact mission controls]
+        controls: [open-loop launch command, source-pinned stage schedule]
+        envelope: local-frame boost, coast, glide, and passive-impact envelope
+        operation_availability: [composition_batch]
+      artifact_required: true
+      finite_telemetry: true
+      finite_channels: [mass_kg, speed_m_s]
+      event_ordering: true
+      continuity_channels: {}
+      repeatability:
+        enabled: true
+        channels: [mass_kg, speed_m_s]
+        absolute_tolerance: 0.0
+        relative_tolerance: 0.0
+      refinement: {enabled: false}
+      invariants: []
     tags: [x15, staged-booster, pseudo-6dof, reachability]
 
   - id: hl20-source-release-pseudo6dof
@@ -114,6 +222,27 @@ scenarios:
     run_command: [taoryx, vehicle, run, "{output_dir}/composition.json", --output-dir, "{output_dir}/run"]
     artifact_paths: [composition.json, run/run-manifest.json, run/execution.json, run/truth_telemetry.csv, run/status_trace.json, run/reproduction.txt]
     claim_boundary: Source-bound HL-20 release, bank, and contact sequence with a synthetic booster assumption; not a source-exact NASA trajectory, controller, landing, or California–Hawaii arrival claim.
+    quality:
+      fidelity:
+        lane: hl20
+        claim_boundary: Source-bound HL-20 release, bank, and contact sequence with a named pseudo-6DOF response law.
+        response_law: hl20-release-bank-response-law
+        omitted_physics: [synthetic booster plant, source-exact controller, thermal model, landing dynamics]
+        controls: [source-bound release schedule, bank-response profile]
+        envelope: source-bound release, glide, and contact envelope
+        operation_availability: [composition_batch]
+      artifact_required: true
+      finite_telemetry: true
+      finite_channels: [mass_kg, speed_m_s]
+      event_ordering: true
+      continuity_channels: {}
+      repeatability:
+        enabled: true
+        channels: [mass_kg, speed_m_s]
+        absolute_tolerance: 0.0
+        relative_tolerance: 0.0
+      refinement: {enabled: false}
+      invariants: []
     tags: [hl20, staged-booster, pseudo-6dof, source-bound]
 
   - id: hl20-four-fidelity
@@ -135,6 +264,27 @@ scenarios:
     run_command: [python, examples/showcases/hl20_california_to_hawaii/run_low_fidelity.py, --output-dir, "{output_dir}/run"]
     artifact_paths: [run/bundle-manifest.json, run/composites/showcase-summary.json, run/showcase-manifest.json]
     claim_boundary: Synthetic California–Hawaii route and booster assumptions compared across four fidelity labels; no target-hit, guidance, thermal, landing, or source-exact route claim.
+    quality:
+      fidelity:
+        lane: hl20
+        claim_boundary: HL-20 four-fidelity evidence ladder with separate tier labels and synthetic route assumptions.
+        response_law: hl20-ladder-pseudo-response
+        omitted_physics: [source-exact California–Hawaii route, target-hit validation, thermal qualification, landing qualification]
+        controls: [shared search-space launch command, release and glide overlays]
+        envelope: comparable boost, release, glide, terminal, and passive-child telemetry envelope
+        operation_availability: [batch]
+      artifact_required: false
+      finite_telemetry: true
+      finite_channels: [duration_s]
+      event_ordering: true
+      continuity_channels: {}
+      repeatability:
+        enabled: true
+        channels: [duration_s]
+        absolute_tolerance: 0.0
+        relative_tolerance: 0.0
+      refinement: {enabled: false}
+      invariants: []
     tags: [hl20, california-hawaii, fidelity-ladder, showcase]
 
   - id: synthetic-california-hawaii
@@ -159,6 +309,27 @@ scenarios:
     run_command: [python, examples/showcases/california_to_hawaii/run_showcase.py, --output-dir, "{output_dir}/run"]
     artifact_paths: [run/manifest.json, run/realized_fidelity.json, run/summary.txt, run/run.json]
     claim_boundary: Synthetic native rigid-body route using invented vehicle and assumptions; not HL-20, X-15, historical TAOS, or a validated flight-design result.
+    quality:
+      fidelity:
+        lane: synthetic-ca-hi
+        claim_boundary: Synthetic native rigid-body California–Hawaii route with invented vehicle and explicit nonqualification boundary.
+        response_law: null
+        omitted_physics: [validated flight data, source-exact vehicle model, target-hit validation, thermal qualification]
+        controls: [synthetic throttle schedule, route guidance overlay]
+        envelope: synthetic staged boost, coast, glide, terminal, and passive-impact route envelope
+        operation_availability: [batch]
+      artifact_required: false
+      finite_telemetry: true
+      finite_channels: [duration_s]
+      event_ordering: true
+      continuity_channels: {}
+      repeatability:
+        enabled: true
+        channels: [duration_s]
+        absolute_tolerance: 0.0
+        relative_tolerance: 0.0
+      refinement: {enabled: false}
+      invariants: []
     tags: [california-hawaii, native-6dof, synthetic, showcase]
 
   - id: interactive-california-hawaii
@@ -181,4 +352,25 @@ scenarios:
     artifact_paths: [run/interactive-artifact.json, run/run-artifact.json]
     requested_duration_s: 20.0
     claim_boundary: Two accepted external steps and their normalized telemetry over the synthetic route; no target-hit, guidance, physical-effector, or validated flight-design claim.
+    quality:
+      fidelity:
+        lane: synthetic-ca-hi
+        claim_boundary: Interactive accepted-boundary evidence over the synthetic California–Hawaii route.
+        response_law: null
+        omitted_physics: [target-hit validation, physical-effector qualification, validated flight-design result]
+        controls: [bounded external throttle command, bounded alpha command, bounded bank command]
+        envelope: two accepted external intervals over the synthetic route
+        operation_availability: [interactive]
+      artifact_required: true
+      finite_telemetry: true
+      finite_channels: [x, vx]
+      event_ordering: true
+      continuity_channels: {}
+      repeatability:
+        enabled: true
+        channels: [x, vx]
+        absolute_tolerance: 0.0
+        relative_tolerance: 0.0
+      refinement: {enabled: false}
+      invariants: []
     tags: [california-hawaii, interactive, stepping]

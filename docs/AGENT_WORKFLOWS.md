@@ -58,6 +58,7 @@ California–Hawaii variants, external time stepping, and the diagnostic ladder.
 | Add a vehicle or topology | [Generic family integration playbook](plan/generic-family-integration-playbook.md) | `taoryx vehicle intake existing-family ...` or `taoryx vehicle intake new-topology ...` |
 | Expose a parameter, control, status, or objective value | [Public value-space contract](architecture/public-value-spaces.md) | `taoryx vehicle topology-report` |
 | Demonstrate the three products | [Three-product showcase guide](THREE_PRODUCT_SHOWCASE.md) | `taoryx vehicle maturity-report` → `catalog` → `mission inspect`/`mission create`/`mission validate` → `preflight` → `run` |
+| Build a Product 3 plug-in | [Product 3 provider API](architecture/product-three-provider-api.md) | `ProductThreeProvider.metadata` → `prepare(request)` → `run(prepared)` |
 
 ### Product 3 verification ladder
 

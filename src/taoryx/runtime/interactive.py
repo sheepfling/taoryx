@@ -13,15 +13,16 @@ import math
 import os
 import tempfile
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import StrEnum
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from taoryx.control import SegmentController, VehicleObservation
 
-from .common import ControlEvaluationRecord, ControlIntervalRecord, Derivative, RuntimeProblem, RuntimeState
-from .engine import get_next_time_step, integrate_active_vehicles
+from .common import ControlEvaluationRecord, ControlIntervalRecord, Derivative, EventCondition, RuntimeProblem, RuntimeState
+from .engine import get_next_step_boundary, integrate_active_vehicles
+from .events import refine_segment_final_condition
 
 if TYPE_CHECKING:
     from taoryx.outputs import RunArtifact
@@ -80,7 +81,32 @@ class AppliedCommand:
     applied: float
     unit: str | None
     clamped: bool = False
-####
+    accepted_start: float | None = None
+    accepted_end: float | None = None
+
+    @property
+    def accepted_duration(self) -> float | None:
+        """Return the truth interval over which this command was accepted."""
+
+        if self.accepted_start is None or self.accepted_end is None:
+            return None
+        return self.accepted_end - self.accepted_start
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Return a stable requested/applied/accepted command record."""
+
+        return {
+            "name": self.name,
+            "requested": self.requested,
+            "applied": self.applied,
+            "unit": self.unit,
+            "clamped": self.clamped,
+            "accepted_start": self.accepted_start,
+            "accepted_end": self.accepted_end,
+            "accepted_duration": self.accepted_duration,
+        }
+    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,6 +155,7 @@ class EventSpec:
     signal: str | None = None
     once: bool = True
     source: str | None = None
+    residual: Callable[[RuntimeState], float] | None = None
 
     def __post_init__(self) -> None:
         if not self.name.strip():
@@ -168,9 +195,44 @@ class RuntimeEvent:
 
 
 @dataclass(frozen=True, slots=True)
+class AcceptedBoundaryRecord:
+    """One accepted internal truth interval inside an external step request."""
+
+    time_start: float
+    time_end: float
+    integration_cadence: float
+    integrator: str
+    reasons: tuple[str, ...]
+    print_cadence: float | None = None
+
+    @property
+    def accepted_duration(self) -> float:
+        return self.time_end - self.time_start
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "time_start": self.time_start,
+            "time_end": self.time_end,
+            "accepted_duration": self.accepted_duration,
+            "integration_cadence": self.integration_cadence,
+            "integrator": self.integrator,
+            "reasons": list(self.reasons),
+            "print_cadence": self.print_cadence,
+        }
+    ####
+####
+
+
+@dataclass(frozen=True, slots=True)
 class ReplayFrame:
     duration: float
     commands: Mapping[str, float]
+
+    def as_dict(self) -> dict[str, object]:
+        """Return the exact requested command frame used for replay identity."""
+
+        return {"duration": self.duration, "commands": dict(sorted(self.commands.items()))}
 ####
 
 
@@ -187,22 +249,33 @@ class InteractiveSnapshot:
     status: InteractiveStatus = InteractiveStatus.RUNNING
     runtime_events: tuple[RuntimeEvent, ...] = ()
     statuses: Mapping[str, Mapping[str, float]] = field(default_factory=dict)
+    requested_duration: float = 0.0
+    accepted_duration: float = 0.0
+    boundary_reason: str = "requested_external_duration"
+    boundary_reasons: tuple[str, ...] = ()
+    event_truncated: bool = False
+    accepted_boundaries: tuple[AcceptedBoundaryRecord, ...] = ()
+    integrator: str | None = None
+    integration_cadence: float | None = None
+    print_cadence: float | None = None
+    replay_identity: str | None = None
 
     def as_dict(self) -> dict[str, object]:
         return {
             "time_start": self.time_start,
             "time_end": self.time_end,
             "status": self.status.value,
-            "commands": [
-                {
-                    "name": command.name,
-                    "requested": command.requested,
-                    "applied": command.applied,
-                    "unit": command.unit,
-                    "clamped": command.clamped,
-                }
-                for command in self.commands
-            ],
+            "commands": [command.as_dict() for command in self.commands],
+            "requested_duration": self.requested_duration,
+            "accepted_duration": self.accepted_duration,
+            "boundary_reason": self.boundary_reason,
+            "boundary_reasons": list(self.boundary_reasons),
+            "event_truncated": self.event_truncated,
+            "accepted_boundaries": [boundary.as_dict() for boundary in self.accepted_boundaries],
+            "integrator": self.integrator,
+            "integration_cadence": self.integration_cadence,
+            "print_cadence": self.print_cadence,
+            "replay_identity": self.replay_identity,
             "events": list(self.events),
             "runtime_events": [event.as_dict() for event in self.runtime_events],
             "diagnostics": list(self.diagnostics),
@@ -228,6 +301,9 @@ class InteractiveArtifact:
     schema_version: int
     status: InteractiveStatus
     snapshots: tuple[InteractiveSnapshot, ...]
+    model_fingerprint: str | None = None
+    command_stream_sha256: str | None = None
+    replay_identity: str | None = None
 
     def write_json(self, path: str | Path) -> Path:
         destination = Path(path)
@@ -235,6 +311,9 @@ class InteractiveArtifact:
         payload = {
             "schema_version": self.schema_version,
             "status": self.status.value,
+            "model_fingerprint": self.model_fingerprint,
+            "command_stream_sha256": self.command_stream_sha256,
+            "replay_identity": self.replay_identity,
             "snapshots": [snapshot.as_dict() for snapshot in self.snapshots],
         }
         destination.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -261,6 +340,7 @@ class InteractiveSession:
     event_specs: tuple[EventSpec, ...] = ()
     output_subscriptions: tuple[OutputSubscription, ...] = ()
     event_history: list[RuntimeEvent] = field(default_factory=list)
+    model_fingerprint: str | None = None
     sensor_runtime: SensorScenarioRuntime | None = field(default=None, init=False, repr=False)
     _last_commands: dict[str, float] = field(init=False, repr=False)
     _fired_events: set[tuple[str, str]] = field(init=False, repr=False)
@@ -283,6 +363,13 @@ class InteractiveSession:
         if unknown_controllers:
             raise ValueError(f"segment controller references unknown vehicle(s): {', '.join(unknown_controllers)}")
         ####
+        self.model_fingerprint = self.model_fingerprint or _runtime_model_fingerprint(
+            self.problem,
+            controls=self.controls,
+            event_specs=self.event_specs,
+            control_model=self.control_model,
+            segment_controller_names=tuple(sorted(self.segment_controllers)),
+        )
         self._last_commands = {control.name: control.default for control in self.controls}
         self._fired_events = set()
         for vehicle in self.problem.vehicles.values():
@@ -309,6 +396,26 @@ class InteractiveSession:
         return max((vehicle.state.time for vehicle in self.problem.vehicles.values()), default=0.0)
     ####
 
+    @property
+    def command_stream_sha256(self) -> str:
+        """Hash the exact requested external command stream in order."""
+
+        return _identity_digest([frame.as_dict() for frame in self.command_history])
+        ####
+
+    @property
+    def replay_identity(self) -> str:
+        """Return the model- and command-stream-bound replay identity."""
+
+        return _identity_digest(
+            {
+                "schema": "taoryx.interactive-replay/v1alpha1",
+                "model_fingerprint": self.model_fingerprint,
+                "command_stream_sha256": self.command_stream_sha256,
+            }
+        )
+        ####
+
     def _normalize_commands(self, requested: Mapping[str, float], duration: float) -> tuple[AppliedCommand, ...]:
         known = {control.name: control for control in self.controls}
         unknown = sorted(set(requested) - set(known))
@@ -330,7 +437,13 @@ class InteractiveSession:
     ####
 
     def step(self, duration: float, commands: Mapping[str, float] | None = None) -> InteractiveSnapshot:
-        """Advance exactly ``duration`` using a boundary-applied command set."""
+        """Advance a requested duration using a boundary-applied command set.
+
+        The returned snapshot distinguishes the external duration request from
+        the accepted truth interval.  Explicit event residuals are refined to
+        an accepted boundary before the event is applied; predicate-only event
+        specs retain their historical end-of-boundary behavior.
+        """
 
         if self.status in {InteractiveStatus.INTERRUPTED, InteractiveStatus.COMPLETED, InteractiveStatus.FAILED}:
             raise RuntimeError(f"cannot step an interactive session in {self.status.value} state")
@@ -358,6 +471,8 @@ class InteractiveSession:
         self.status = InteractiveStatus.RUNNING
         events: list[str] = []
         runtime_events: list[RuntimeEvent] = []
+        accepted_boundaries: list[AcceptedBoundaryRecord] = []
+        stop_event_seen = False
         try:
             requested_end = start + duration
             final_time = self.problem.final_time
@@ -369,28 +484,90 @@ class InteractiveSession:
                     break
                 candidate_step = min(vehicle.step_size for vehicle in active)
                 remaining = target_end - self.time
-                accepted_step = min(get_next_time_step(self.problem, candidate_step, now=self.time), remaining)
+                scheduled_boundary = get_next_step_boundary(self.problem, candidate_step, now=self.time)
+                scheduled_step = (
+                    candidate_step
+                    if scheduled_boundary.reason == "integration_cadence"
+                    else scheduled_boundary.time - self.time
+                )
+                accepted_step = min(scheduled_step, remaining)
                 if accepted_step <= 1.0e-15:
                     raise RuntimeError("interactive session stalled before its requested accepted-truth boundary")
                 previous_states = {vehicle.name: vehicle.state for vehicle in active}
+                previous_step_sizes = {vehicle.name: vehicle.step_size for vehicle in active}
                 before_step = self.time
                 integrate_active_vehicles(self.problem, accepted_step)
                 if self.time <= before_step + 1.0e-15:
                     raise RuntimeError("interactive session integration produced no accepted time advance")
+
+                residual_crossings: list[tuple[str, EventSpec, float]] = []
+                for vehicle in active:
+                    for spec in self.event_specs:
+                        if spec.residual is None:
+                            continue
+                        key = (vehicle.name, spec.name)
+                        if spec.once and key in self._fired_events:
+                            continue
+                        condition = EventCondition(spec.name, spec.residual, action=spec.action.value, source=spec.source)
+                        crossing = refine_segment_final_condition(previous_states[vehicle.name], vehicle.state, (condition,))
+                        residual_crossings.extend((vehicle.name, spec, item.time) for item in crossing)
+
+                first_crossing_time = min((item[2] for item in residual_crossings), default=None)
+                event_boundary = first_crossing_time is not None and first_crossing_time < self.time - 1.0e-10
+                if event_boundary:
+                    assert first_crossing_time is not None
+                    for vehicle in active:
+                        vehicle.state = previous_states[vehicle.name]
+                        if vehicle.history and vehicle.history[-1].time > before_step + 1.0e-12:
+                            vehicle.history.pop()
+                        vehicle.discard_control_provenance_after(before_step)
+                        vehicle.step_size = previous_step_sizes[vehicle.name]
+                    restart_step = first_crossing_time - before_step
+                    if restart_step > 1.0e-15:
+                        integrate_active_vehicles(self.problem, restart_step)
+                    accepted_step = first_crossing_time - before_step
+                    boundary_reasons = ["event_boundary"]
+                else:
+                    boundary_reasons = []
+                    if scheduled_boundary.time <= target_end + 1.0e-12:
+                        boundary_reasons.append(scheduled_boundary.reason)
+                    if first_crossing_time is not None and abs(first_crossing_time - self.time) <= 1.0e-9:
+                        boundary_reasons.append("event_boundary")
+                    if target_end <= scheduled_boundary.time + 1.0e-12:
+                        boundary_reasons.append("requested_external_duration")
+                    if not boundary_reasons:
+                        boundary_reasons.append("requested_external_duration")
                 if self.problem.sensor_bus is not None:
                     self.problem.sensor_bus.accepted_step(self.problem, previous_states)
+                accepted_boundaries.append(
+                    AcceptedBoundaryRecord(
+                        before_step,
+                        self.time,
+                        candidate_step,
+                        _accepted_integrator(active),
+                        tuple(dict.fromkeys(boundary_reasons)),
+                        _print_cadence(active),
+                    )
+                )
                 for vehicle in self.problem.active_vehicles():
                     for event in vehicle.events:
                         if event.predicate is not None and event.predicate(vehicle.state):
                             events.append(f"{vehicle.name}:{event.name}")
                             if event.action == "stop":
                                 vehicle.active = False
+                                stop_event_seen = True
                 for vehicle in self.problem.vehicles.values():
                     for spec in self.event_specs:
                         key = (vehicle.name, spec.name)
                         if spec.once and key in self._fired_events:
                             continue
-                        if not spec.predicate(vehicle.state):
+                        crossing_at_boundary = any(
+                            candidate_vehicle == vehicle.name
+                            and candidate_spec.name == spec.name
+                            and abs(candidate_time - vehicle.state.time) <= 1.0e-9
+                            for candidate_vehicle, candidate_spec, candidate_time in residual_crossings
+                        )
+                        if not crossing_at_boundary and not spec.predicate(vehicle.state):
                             continue
                         runtime_event = RuntimeEvent(
                             spec.name,
@@ -407,7 +584,8 @@ class InteractiveSession:
                         self._fired_events.add(key)
                         if spec.action is EventAction.STOP:
                             vehicle.active = False
-                if events or any(event.action is EventAction.STOP for event in runtime_events):
+                            stop_event_seen = True
+                if stop_event_seen:
                     self.status = InteractiveStatus.COMPLETED
                     break
             if final_time is not None and self.time >= final_time - 1.0e-12:
@@ -418,6 +596,23 @@ class InteractiveSession:
         # Replay the requested stream, not only the bounded result. The
         # limiter must be re-applied so the replay verifies control semantics.
         self.command_history.append(ReplayFrame(duration, dict(requested_commands)))
+        accepted_commands = tuple(
+            replace(command, accepted_start=start, accepted_end=self.time)
+            for command in applied
+        )
+        aggregate_boundary_reasons = tuple(
+            dict.fromkeys(reason for boundary in accepted_boundaries for reason in boundary.reasons)
+        )
+        event_truncated = self.time < target_end - 1.0e-10 and "event_boundary" in aggregate_boundary_reasons
+        if event_truncated:
+            boundary_reason = "event_boundary"
+        elif final_time is not None and target_end < requested_end - 1.0e-12 and self.time >= target_end - 1.0e-12:
+            boundary_reason = "final_time"
+        else:
+            boundary_reason = "requested_external_duration"
+        integrators = tuple(dict.fromkeys(boundary.integrator for boundary in accepted_boundaries))
+        integration_cadences = tuple(boundary.integration_cadence for boundary in accepted_boundaries)
+        print_cadences = tuple(boundary.print_cadence for boundary in accepted_boundaries if boundary.print_cadence is not None)
         statuses = {
             vehicle.name: {
                 status.name: self._last_commands.get(
@@ -433,12 +628,22 @@ class InteractiveSession:
             start,
             self.time,
             {name: vehicle.state for name, vehicle in self.problem.vehicles.items()},
-            applied,
+            accepted_commands,
             tuple(events) + tuple(event.name for event in runtime_events),
             diagnostics=tuple(controller_diagnostics),
             status=self.status,
             runtime_events=tuple(runtime_events),
             statuses=statuses,
+            requested_duration=duration,
+            accepted_duration=self.time - start,
+            boundary_reason=boundary_reason,
+            boundary_reasons=aggregate_boundary_reasons,
+            event_truncated=event_truncated,
+            accepted_boundaries=tuple(accepted_boundaries),
+            integrator=integrators[0] if len(integrators) == 1 else ("mixed" if integrators else None),
+            integration_cadence=min(integration_cadences, default=None),
+            print_cadence=min(print_cadences, default=None),
+            replay_identity=self.replay_identity,
         )
         self.snapshots.append(snapshot)
         return snapshot
@@ -473,7 +678,14 @@ class InteractiveSession:
         ####
 
     def artifact(self) -> InteractiveArtifact:
-        return InteractiveArtifact(1, self.status, tuple(self.snapshots))
+        return InteractiveArtifact(
+            2,
+            self.status,
+            tuple(self.snapshots),
+            self.model_fingerprint,
+            self.command_stream_sha256,
+            self.replay_identity,
+        )
     ####
 
     def to_run_artifact(self) -> RunArtifact:
@@ -536,6 +748,24 @@ class InteractiveSession:
                     {"channels": list(subscription.channels), "sample_interval": subscription.sample_interval, "include_events": subscription.include_events}
                     for subscription in self.output_subscriptions
                 ],
+                "model_fingerprint": self.model_fingerprint,
+                "command_stream_sha256": self.command_stream_sha256,
+                "replay_identity": self.replay_identity,
+                "step_records": [
+                    {
+                        "time_start": snapshot.time_start,
+                        "time_end": snapshot.time_end,
+                        "requested_duration": snapshot.requested_duration,
+                        "accepted_duration": snapshot.accepted_duration,
+                        "boundary_reason": snapshot.boundary_reason,
+                        "boundary_reasons": list(snapshot.boundary_reasons),
+                        "event_truncated": snapshot.event_truncated,
+                        "commands": [command.as_dict() for command in snapshot.commands],
+                        "accepted_boundaries": [boundary.as_dict() for boundary in snapshot.accepted_boundaries],
+                        "replay_identity": snapshot.replay_identity,
+                    }
+                    for snapshot in self.snapshots
+                ],
             },
         )
     ####
@@ -561,15 +791,19 @@ class InteractiveSession:
         deliberately rebuilt by the caller rather than serialized as Python.
         """
 
+        if model_fingerprint is not None:
+            self.model_fingerprint = model_fingerprint
         payload: dict[str, object] = {
-            "schema_version": 1,
-            "model_fingerprint": model_fingerprint,
+            "schema_version": 2,
+            "model_fingerprint": self.model_fingerprint,
             "problem": _interactive_problem_payload(self.problem),
             "session": {
                 "status": self.status.value,
                 "last_commands": dict(self._last_commands),
                 "fired_events": [[vehicle, event] for vehicle, event in sorted(self._fired_events)],
-                "command_history": [{"duration": frame.duration, "commands": dict(frame.commands)} for frame in self.command_history],
+                "command_history": [frame.as_dict() for frame in self.command_history],
+                "command_stream_sha256": self.command_stream_sha256,
+                "replay_identity": self.replay_identity,
                 "snapshots": [_interactive_snapshot_payload(snapshot) for snapshot in self.snapshots],
                 "event_history": [event.as_dict() for event in self.event_history],
                 "controls": [_control_payload(control) for control in self.controls],
@@ -611,7 +845,7 @@ class InteractiveSession:
         """
 
         payload = json.loads(Path(path).read_text(encoding="utf-8"))
-        if payload.get("schema_version") != 1:
+        if payload.get("schema_version") not in {1, 2}:
             raise ValueError(f"unsupported TAORYX interactive checkpoint schema: {payload.get('schema_version')!r}")
         saved_integrity = payload.pop("integrity", None)
         if saved_integrity != _checkpoint_fingerprint(payload):
@@ -633,6 +867,7 @@ class InteractiveSession:
             status_specs=tuple(status_specs) if status_specs is not None else saved_statuses,
             event_specs=tuple(event_specs),
             output_subscriptions=tuple(output_subscriptions) if output_subscriptions is not None else saved_subscriptions,
+            model_fingerprint=str(saved_model) if saved_model is not None else model_fingerprint,
         )
         session.status = InteractiveStatus(str(session_payload.get("status", InteractiveStatus.PAUSED.value)))
         session._last_commands = {str(name): _as_float(value) for name, value in cast(Mapping[str, object], session_payload.get("last_commands", {})).items()}
@@ -647,6 +882,12 @@ class InteractiveSession:
         ]
         session.snapshots = [_interactive_snapshot_from_payload(cast(Mapping[str, object], item), problem) for item in cast(Sequence[object], session_payload.get("snapshots", ()))]
         session.event_history = [_runtime_event_from_payload(cast(Mapping[str, object], item)) for item in cast(Sequence[object], session_payload.get("event_history", ()))]
+        saved_stream = session_payload.get("command_stream_sha256")
+        if saved_stream is not None and str(saved_stream) != session.command_stream_sha256:
+            raise ValueError("interactive checkpoint command stream identity mismatch")
+        saved_replay = session_payload.get("replay_identity")
+        if saved_replay is not None and str(saved_replay) != session.replay_identity:
+            raise ValueError("interactive checkpoint replay identity mismatch")
         return session
     ####
 
@@ -795,15 +1036,22 @@ def _interactive_snapshot_payload(snapshot: InteractiveSnapshot) -> dict[str, ob
         "time_start": snapshot.time_start,
         "time_end": snapshot.time_end,
         "states": {name: _state_payload(state) for name, state in snapshot.states.items()},
-        "commands": [
-            {"name": command.name, "requested": command.requested, "applied": command.applied, "unit": command.unit, "clamped": command.clamped}
-            for command in snapshot.commands
-        ],
+        "commands": [command.as_dict() for command in snapshot.commands],
         "events": list(snapshot.events),
         "diagnostics": list(snapshot.diagnostics),
         "status": snapshot.status.value,
         "runtime_events": [event.as_dict() for event in snapshot.runtime_events],
         "statuses": {vehicle: dict(values) for vehicle, values in snapshot.statuses.items()},
+        "requested_duration": snapshot.requested_duration,
+        "accepted_duration": snapshot.accepted_duration,
+        "boundary_reason": snapshot.boundary_reason,
+        "boundary_reasons": list(snapshot.boundary_reasons),
+        "event_truncated": snapshot.event_truncated,
+        "accepted_boundaries": [boundary.as_dict() for boundary in snapshot.accepted_boundaries],
+        "integrator": snapshot.integrator,
+        "integration_cadence": snapshot.integration_cadence,
+        "print_cadence": snapshot.print_cadence,
+        "replay_identity": snapshot.replay_identity,
     }
     ####
 
@@ -824,8 +1072,21 @@ def _interactive_snapshot_from_payload(payload: Mapping[str, object], problem: R
             float(cast(float | int | str, item["applied"])),
             str(item["unit"]) if item.get("unit") is not None else None,
             bool(item.get("clamped", False)),
+            float(cast(float | int | str, item["accepted_start"])) if item.get("accepted_start") is not None else None,
+            float(cast(float | int | str, item["accepted_end"])) if item.get("accepted_end") is not None else None,
         )
         for item in (cast(Mapping[str, object], value) for value in cast(Sequence[object], payload.get("commands", ())))
+    )
+    accepted_boundaries = tuple(
+        AcceptedBoundaryRecord(
+            float(cast(float | int | str, item["time_start"])),
+            float(cast(float | int | str, item["time_end"])),
+            float(cast(float | int | str, item["integration_cadence"])),
+            str(item["integrator"]),
+            tuple(str(value) for value in cast(Sequence[object], item.get("reasons", ()))),
+            float(cast(float | int | str, item["print_cadence"])) if item.get("print_cadence") is not None else None,
+        )
+        for item in (cast(Mapping[str, object], value) for value in cast(Sequence[object], payload.get("accepted_boundaries", ())))
     )
     return InteractiveSnapshot(
         float(cast(float | int | str, payload["time_start"])),
@@ -837,6 +1098,16 @@ def _interactive_snapshot_from_payload(payload: Mapping[str, object], problem: R
         InteractiveStatus(str(payload.get("status", InteractiveStatus.RUNNING.value))),
         tuple(_runtime_event_from_payload(cast(Mapping[str, object], value)) for value in cast(Sequence[object], payload.get("runtime_events", ()))),
         {str(vehicle): {str(key): _as_float(value) for key, value in cast(Mapping[str, object], values).items()} for vehicle, values in cast(Mapping[str, object], payload.get("statuses", {})).items()},
+        float(cast(float | int | str, payload.get("requested_duration", 0.0))),
+        float(cast(float | int | str, payload.get("accepted_duration", 0.0))),
+        str(payload.get("boundary_reason", "requested_external_duration")),
+        tuple(str(value) for value in cast(Sequence[object], payload.get("boundary_reasons", ()))),
+        bool(payload.get("event_truncated", False)),
+        accepted_boundaries,
+        str(payload["integrator"]) if payload.get("integrator") is not None else None,
+        float(cast(float | int | str, payload["integration_cadence"])) if payload.get("integration_cadence") is not None else None,
+        float(cast(float | int | str, payload["print_cadence"])) if payload.get("print_cadence") is not None else None,
+        str(payload["replay_identity"]) if payload.get("replay_identity") is not None else None,
     )
     ####
 
@@ -890,6 +1161,163 @@ def _runtime_event_from_payload(payload: Mapping[str, object]) -> RuntimeEvent:
         int(cast(int | str, payload["segment_from"])) if payload.get("segment_from") is not None else None,
         int(cast(int | str, payload["segment_to"])) if payload.get("segment_to") is not None else None,
     )
+    ####
+
+
+def _accepted_integrator(vehicles: Sequence[object]) -> str:
+    """Return the integrator identity for one synchronized accepted interval."""
+
+    names = tuple(dict.fromkeys(str(getattr(vehicle, "integrator")) for vehicle in vehicles))
+    return names[0] if len(names) == 1 else ("mixed" if names else "unknown")
+    ####
+
+
+def _print_cadence(vehicles: Sequence[object]) -> float | None:
+    """Read the source-declared output cadence without treating it as ``dt``."""
+
+    cadences = [
+        float(value)
+        for vehicle in vehicles
+        for value in (getattr(vehicle, "state").named.get("_dtprnt"),)
+        if isinstance(value, (int, float)) and math.isfinite(float(value)) and float(value) > 0.0
+    ]
+    return min(cadences, default=None)
+    ####
+
+
+def _callable_identity(callback: object) -> object:
+    """Describe executable callbacks without including process-local addresses."""
+
+    if callback is None:
+        return None
+    module = getattr(callback, "__module__", type(callback).__module__)
+    name = getattr(callback, "__qualname__", type(callback).__qualname__)
+    code = getattr(callback, "__code__", None)
+    return {
+        "module": str(module),
+        "qualname": str(name),
+        "bytecode": code.co_code.hex() if code is not None else None,
+        "constants": _stable_identity_value(code.co_consts) if code is not None else None,
+    }
+    ####
+
+
+def _stable_identity_value(value: object) -> object:
+    """Convert model identity inputs into deterministic JSON-compatible data."""
+
+    if isinstance(value, float) and not math.isfinite(value):
+        return f"nonfinite:{value!r}"
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, Mapping):
+        return {str(key): _stable_identity_value(item) for key, item in sorted(value.items(), key=lambda item: str(item[0]))}
+    if isinstance(value, (set, frozenset)):
+        return [_stable_identity_value(item) for item in sorted(value, key=repr)]
+    if isinstance(value, (list, tuple)):
+        return [_stable_identity_value(item) for item in value]
+    if callable(value):
+        return _callable_identity(value)
+    enum_value = getattr(value, "value", None)
+    if enum_value is not None and isinstance(enum_value, (str, int, float, bool)):
+        return enum_value
+    return {"type": f"{type(value).__module__}.{type(value).__qualname__}"}
+    ####
+
+
+def _runtime_model_fingerprint(
+    problem: RuntimeProblem,
+    *,
+    controls: Sequence[ControlSpec] = (),
+    event_specs: Sequence[EventSpec] = (),
+    control_model: ControlModel | None = None,
+    segment_controller_names: Sequence[str] = (),
+) -> str:
+    """Derive a stable default fingerprint from the executable model contract."""
+
+    metadata = {
+        key: value
+        for key, value in problem.metadata.items()
+        if key not in {"tables", "_sensor_scenario_runtime"}
+    }
+    payload = {
+        "schema": "taoryx.interactive-model/v1alpha1",
+        "problem": {
+            "print_times": list(problem.print_times),
+            "table_knots": list(problem.table_knots),
+            "required_truth_times": list(problem.required_truth_times),
+            "sensor_clocks": [clock.to_metadata() for clock in problem.sensor_clocks],
+            "final_time": problem.final_time,
+            "metadata": _stable_identity_value(metadata),
+        },
+        "interactive_contract": {
+            "controls": [
+                {
+                    "name": control.name,
+                    "unit": control.unit,
+                    "default": control.default,
+                    "lower": control.lower,
+                    "upper": control.upper,
+                    "slew_rate": control.slew_rate,
+                    "modes": list(control.modes),
+                }
+                for control in controls
+            ],
+            "events": [
+                {
+                    "name": event.name,
+                    "action": event.action.value,
+                    "signal": event.signal,
+                    "once": event.once,
+                    "source": event.source,
+                    "predicate": _callable_identity(event.predicate),
+                    "residual": _callable_identity(event.residual),
+                }
+                for event in event_specs
+            ],
+            "control_model": _callable_identity(control_model),
+            "segment_controller_names": list(segment_controller_names),
+        },
+        "vehicles": [
+            {
+                "name": vehicle.name,
+                "model_id": vehicle.model_id,
+                "vehicle_kind": str(vehicle.vehicle_kind),
+                "dynamics_mode": str(vehicle.dynamics_mode),
+                "state": {
+                    "time": vehicle.state.time,
+                    "values": list(vehicle.state.values),
+                    "frame": str(vehicle.state.frame),
+                    "named": _stable_identity_value(vehicle.state.named),
+                    "value_names": list(vehicle.state.value_names),
+                },
+                "step_size": vehicle.step_size,
+                "integrator": vehicle.integrator,
+                "absolute_tolerance": vehicle.absolute_tolerance,
+                "relative_tolerance": vehicle.relative_tolerance,
+                "max_step_size": vehicle.max_step_size,
+                "dependencies": list(vehicle.dependencies),
+                "parameters": _stable_identity_value(vehicle.parameters),
+                "control_values": _stable_identity_value(vehicle.control_values),
+                "events": [
+                    {"name": event.name, "action": event.action, "signal": event.signal, "source": event.source}
+                    for event in vehicle.events
+                ],
+                "derivative": _callable_identity(vehicle.derivative),
+                "point_mass_derivative": _callable_identity(vehicle.point_mass_derivative),
+                "environment_evaluator": _callable_identity(vehicle.environment_evaluator),
+            }
+            for vehicle in problem.vehicles.values()
+        ],
+    }
+    return _identity_digest(payload)
+    ####
+
+
+def _identity_digest(payload: object) -> str:
+    """Hash canonical JSON for replay and model identities."""
+
+    canonical = json.dumps(_stable_identity_value(payload), sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
     ####
 
 
