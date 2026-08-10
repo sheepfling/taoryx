@@ -17,12 +17,13 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Literal
 
 import numpy as np
 
 from .direct_wrench import DIRECT_WRENCH_NAMES, DirectWrenchLimits, DirectWrenchProjection
-from .runtime.lqr import LqrResult, solve_scaled_continuous_lqr
+from .runtime.lqr import LqiController, LqiResult, LqrResult, solve_scaled_continuous_lqr
 
 LocalDerivative = Callable[[Mapping[str, float], Mapping[str, float]], Mapping[str, float]]
 LocalWrenchBias = Callable[[Mapping[str, float]], Mapping[str, float]]
@@ -60,10 +61,17 @@ class LocalDirectWrenchScreenConfig:
     control_cost_weights: tuple[float, ...]
     dt_s: float
     duration_s: float
+    resource_values: Mapping[str, float] = field(default_factory=dict)
     state_derivative_step: float = 1.0e-5
     control_derivative_step: float = 1.0e-5
     final_error_fraction_limit: float = 0.25
     equilibrium_derivative_norm_limit: float = 1.0e-6
+    controller_method: Literal["lqr", "lqi"] = "lqr"
+    lqi_result: LqiResult | None = None
+    lqi_campaign_id: str | None = None
+    integral_lower: Mapping[str, float] = field(default_factory=dict)
+    integral_upper: Mapping[str, float] = field(default_factory=dict)
+    assessment_state_names: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.id or not self.plant_id:
@@ -85,6 +93,13 @@ class LocalDirectWrenchScreenConfig:
                 raise ValueError(f"{label} must contain six positive finite wrench values")
         _named_values(self.reference_state, self.state_names, "reference state")
         _named_values(self.initial_state, self.state_names, "initial state")
+        if self.assessment_state_names and (
+            len(set(self.assessment_state_names)) != len(self.assessment_state_names)
+            or set(self.assessment_state_names) - set(self.state_names)
+        ):
+            raise ValueError("assessment state names must be unique declared screen states")
+        if any(not identifier or not math.isfinite(float(value)) or float(value) < 0.0 for identifier, value in self.resource_values.items()):
+            raise ValueError("resource_values must use nonempty names and finite nonnegative values")
         for label, value in (
             ("dt_s", self.dt_s),
             ("duration_s", self.duration_s),
@@ -95,6 +110,28 @@ class LocalDirectWrenchScreenConfig:
         ):
             if not math.isfinite(value) or value <= 0.0:
                 raise ValueError(f"{label} must be finite and positive")
+        if self.controller_method == "lqr":
+            if self.lqi_result is not None or self.lqi_campaign_id is not None or self.integral_lower or self.integral_upper:
+                raise ValueError("an LQR direct-wrench screen cannot declare LQI data")
+        else:
+            if self.lqi_result is None or self.lqi_campaign_id is None or not self.lqi_campaign_id.strip():
+                raise ValueError("an LQI direct-wrench screen requires a campaign ID and solved LQI result")
+            if tuple(self.lqi_result.state_names) != self.state_names:
+                raise ValueError("LQI state names must match the direct-wrench screen state order")
+            if tuple(self.lqi_result.control_names) != DIRECT_WRENCH_NAMES:
+                raise ValueError("LQI control names must match canonical direct-wrench axes")
+            if not self.lqi_result.hurwitz:
+                raise ValueError("LQI direct-wrench screen requires a Hurwitz controller result")
+            if set(self.lqi_result.output_names) - set(self.state_names):
+                raise ValueError("LQI output names must be selected direct-wrench screen states")
+            for label, bounds in (("integral lower", self.integral_lower), ("integral upper", self.integral_upper)):
+                if set(bounds) - set(self.lqi_result.output_names):
+                    raise ValueError(f"{label} bounds identify unknown LQI outputs")
+                if any(not math.isfinite(float(value)) for value in bounds.values()):
+                    raise ValueError(f"{label} bounds must be finite")
+            for name in self.lqi_result.output_names:
+                if float(self.integral_lower.get(name, -math.inf)) > float(self.integral_upper.get(name, math.inf)):
+                    raise ValueError("LQI integral bounds must be ordered")
         ####
     ####
 
@@ -108,6 +145,8 @@ class LocalDirectWrenchScreenExecution:
     a_matrix: np.ndarray
     b_matrix: np.ndarray
     lqr: LqrResult
+    controller_method: Literal["lqr", "lqi"]
+    lqi: LqiResult | None
     rows: tuple[dict[str, object], ...]
     initial_error_norm: float
     final_error_norm: float
@@ -124,6 +163,18 @@ class LocalDirectWrenchScreenExecution:
         return tuple(sorted({str(_mapping(row["wrench"], "wrench")["status"]) for row in self.rows}))
         ####
 
+    @property
+    def integrators_exercised(self) -> bool:
+        """Return whether the selected LQI screen accumulated a visible error."""
+
+        if self.lqi is None:
+            return False
+        return any(
+            any(abs(float(value)) > 1.0e-12 for value in _mapping(row["integral_error"], "integral error").values())
+            for row in self.rows
+        )
+        ####
+
     def as_dict(self) -> dict[str, object]:
         """Return a stable machine-readable execution record."""
 
@@ -134,10 +185,18 @@ class LocalDirectWrenchScreenExecution:
             "fidelity": "rigid_body_6dof_direct_wrench",
             "control_realization": "direct_wrench",
             "physical_effector_allocation": False,
+            "controller": {
+                "method": self.controller_method,
+                "lqi_campaign_id": self.config.lqi_campaign_id,
+                "integral_output_names": list(self.lqi.output_names) if self.lqi is not None else [],
+                "integrators_exercised": self.integrators_exercised,
+            },
             "state_names": list(self.config.state_names),
+            "assessment_state_names": list(self.config.assessment_state_names or self.config.state_names),
             "direct_wrench_names": list(DIRECT_WRENCH_NAMES),
             "reference_state": dict(self.config.reference_state),
             "initial_state": dict(self.config.initial_state),
+            "resource_values": dict(self.config.resource_values),
             "bias_wrench": dict(self.bias_wrench),
             "limits": {
                 "lower": dict(self.config.limits.lower),
@@ -175,6 +234,8 @@ class LocalDirectWrenchScreenExecution:
                 "dt_s": self.config.dt_s,
                 "duration_s": self.config.duration_s,
                 "wrench_statuses_observed": list(self.observed_statuses),
+                "integrators_exercised": self.integrators_exercised,
+                "assessment_state_names": list(self.config.assessment_state_names or self.config.state_names),
             },
             "telemetry": list(self.rows),
             "claim_boundary": (
@@ -188,7 +249,7 @@ class LocalDirectWrenchScreenExecution:
 
 
 def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> LocalDirectWrenchScreenExecution:
-    """Run one bounded LQR recovery witness against a supplied local plant."""
+    """Run one bounded LQR or source-selected LQI recovery witness."""
 
     reference = _named_values(config.reference_state, config.state_names, "reference state")
     state = _named_values(config.initial_state, config.state_names, "initial state")
@@ -250,29 +311,54 @@ def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> Loc
         b_matrix[:, column] = (
             _state_array(plus_value, config.state_names) - _state_array(minus_value, config.state_names)
         ) / (2.0 * config.control_derivative_step)
-    lqr = solve_scaled_continuous_lqr(
-        a_matrix.tolist(),
-        b_matrix.tolist(),
-        np.diag(config.state_cost_weights).tolist(),
-        np.diag(config.control_cost_weights).tolist(),
-        state_scales=config.state_scales,
-        control_scales=config.control_scales,
-        state_names=config.state_names,
-        control_names=DIRECT_WRENCH_NAMES,
-    )
+    lqi = config.lqi_result
+    if config.controller_method == "lqr":
+        lqr = solve_scaled_continuous_lqr(
+            a_matrix.tolist(),
+            b_matrix.tolist(),
+            np.diag(config.state_cost_weights).tolist(),
+            np.diag(config.control_cost_weights).tolist(),
+            state_scales=config.state_scales,
+            control_scales=config.control_scales,
+            state_names=config.state_names,
+            control_names=DIRECT_WRENCH_NAMES,
+        )
+        lqi_controller: LqiController | None = None
+    else:
+        if lqi is None:
+            raise RuntimeError("validated LQI screen configuration has no LQI result")
+        lqr = lqi.design
+        lqi_controller = LqiController(
+            lqi,
+            state_trim=reference,
+            control_trim=bias,
+            output_trim={name: reference[name] for name in lqi.output_names},
+            lower=config.limits.lower,
+            upper=config.limits.upper,
+            integral_lower=config.integral_lower,
+            integral_upper=config.integral_upper,
+        )
 
-    initial_error = _error_norm(state, reference, config.state_names, config.state_scales)
+    assessment_names, assessment_scales = _assessment_axes(config)
+    initial_error = _error_norm(state, reference, assessment_names, assessment_scales)
     previous = dict(zero_wrench)
     rows: list[dict[str, object]] = []
     steps = int(round(config.duration_s / config.dt_s))
     for index in range(steps + 1):
         time_s = index * config.dt_s
         error = _state_array(state, config.state_names) - _state_array(reference, config.state_names)
-        feedback = {
-            name: float(value)
-            for name, value in zip(DIRECT_WRENCH_NAMES, -np.asarray(lqr.gain) @ error, strict=True)
-        }
-        requested = {name: bias[name] + feedback[name] for name in DIRECT_WRENCH_NAMES}
+        if lqi_controller is None:
+            feedback = {
+                name: float(value)
+                for name, value in zip(DIRECT_WRENCH_NAMES, -np.asarray(lqr.gain) @ error, strict=True)
+            }
+            requested = {name: bias[name] + feedback[name] for name in DIRECT_WRENCH_NAMES}
+            integral_error: Mapping[str, float] = {}
+        else:
+            command = lqi_controller.command(state, reference, dt=config.dt_s)
+            requested = _named_values(command.controls, DIRECT_WRENCH_NAMES, "LQI requested wrench")
+            feedback = {name: requested[name] - bias[name] for name in DIRECT_WRENCH_NAMES}
+            integral_error = lqi_controller.integral_error
         projection = config.limits.project(requested, previous, config.dt_s)
         derivative = _named_values(
             config.source_derivative(state, projection.achieved),
@@ -284,9 +370,10 @@ def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> Loc
             "state": dict(state),
             "reference_state": dict(reference),
             "feedback_error": {name: state[name] - reference[name] for name in config.state_names},
-            "feedback_norm": _error_norm(state, reference, config.state_names, config.state_scales),
+            "feedback_norm": _error_norm(state, reference, assessment_names, assessment_scales),
             "bias_wrench": dict(bias),
             "feedback_wrench": feedback,
+            "integral_error": dict(integral_error),
             "wrench": projection.as_dict(),
         }
         rows.append(row)
@@ -296,7 +383,7 @@ def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> Loc
         if any(not math.isfinite(value) for value in state.values()):
             raise RuntimeError(f"local direct-wrench screen {config.id!r} produced a nonfinite state")
         previous = dict(projection.achieved)
-    final_error = _error_norm(state, reference, config.state_names, config.state_scales)
+    final_error = _error_norm(state, reference, assessment_names, assessment_scales)
     statuses = {str(_mapping(row["wrench"], "wrench")["status"]) for row in rows}
     mission_pass = (
         math.isfinite(final_error)
@@ -304,6 +391,7 @@ def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> Loc
         and lqr.hurwitz
         and final_error < initial_error * config.final_error_fraction_limit
         and statuses == {"feasible"}
+        and (lqi is None or any(abs(float(value)) > 1.0e-12 for row in rows for value in _mapping(row["integral_error"], "integral error").values()))
     )
     return LocalDirectWrenchScreenExecution(
         config=config,
@@ -311,6 +399,8 @@ def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> Loc
         a_matrix=a_matrix,
         b_matrix=b_matrix,
         lqr=lqr,
+        controller_method=config.controller_method,
+        lqi=lqi,
         rows=tuple(rows),
         initial_error_norm=initial_error,
         final_error_norm=final_error,
@@ -327,6 +417,15 @@ def _state_array(values: Mapping[str, float], names: tuple[str, ...]) -> np.ndar
     """Return one ordered local state vector."""
 
     return np.asarray([float(values[name]) for name in names], dtype=float)
+    ####
+
+
+def _assessment_axes(config: LocalDirectWrenchScreenConfig) -> tuple[tuple[str, ...], tuple[float, ...]]:
+    """Return the declared local-screen objective without hiding controller state."""
+
+    names = config.assessment_state_names or config.state_names
+    scales_by_name = dict(zip(config.state_names, config.state_scales, strict=True))
+    return names, tuple(scales_by_name[name] for name in names)
     ####
 
 

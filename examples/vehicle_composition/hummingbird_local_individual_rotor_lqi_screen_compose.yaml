@@ -1,0 +1,13 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: hummingbird-local-individual-rotor-lqi-screen-v1
+vehicle: hummingbird
+fidelity: rigid_body_6dof_surface_allocated
+initialization:
+  id: source_individual_rotor_hover_local_point
+segments:
+  - id: individual_rotor_hover_lqi_screen
+    instance_id: 01-individual_rotor_hover_lqi_screen
+observation:
+  profile_id: truth_debug
+mission:
+  id: hummingbird_local_individual_rotor_lqi_screen_v1

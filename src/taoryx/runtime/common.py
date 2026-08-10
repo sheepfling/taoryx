@@ -448,7 +448,21 @@ class RuntimeVehicle:
 
         if self.committed_control_resolver is None:
             return
-        resolved = self.committed_control_resolver(self.state)
+        # A step request updates ``control_values`` immediately before this
+        # resolver runs.  Present that held action at the committed truth
+        # boundary as well as during derivative refresh.  Route resolvers can
+        # then deliberately elect an externally requested guidance mode
+        # without having to read mutable vehicle internals or wait one
+        # integration interval for the command to appear in ``state.named``.
+        resolver_state = RuntimeState(
+            self.state.time,
+            self.state.values,
+            self.state.frame,
+            {**self.state.named, **self.control_values},
+            self.state.value_names,
+            self.state.segment_endpoints,
+        )
+        resolved = self.committed_control_resolver(resolver_state)
         normalized: dict[str, float] = {}
         for name, value in resolved.items():
             if not isinstance(name, str) or not name:

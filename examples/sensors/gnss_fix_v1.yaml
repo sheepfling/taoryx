@@ -1,0 +1,21 @@
+schema_version: 1
+scenario_id: gnss_fix_v1
+sensor:
+  name: gnss
+  vehicle: vehicle
+  provider:
+    kind: gnss-fix
+    config:
+      position_bias_eci_m: [0.5, -0.25, 0.75]
+      velocity_bias_eci_mps: [0.01, -0.01, 0.02]
+      position_stddev_m: 2.5
+      velocity_stddev_mps: 0.08
+      outage_probability: 0.01
+  cadence_s: 1.0
+  sample: instantaneous
+  delivery_s: 0.15
+  truth: boundary
+  rate_policy: split
+  seed: 42
+truth:
+  mode: translation-only

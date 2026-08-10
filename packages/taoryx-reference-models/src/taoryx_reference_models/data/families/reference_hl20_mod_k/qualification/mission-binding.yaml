@@ -1,0 +1,25 @@
+schema: taoryx.mission-binding/v1alpha1
+kind: semantic_composition
+family: reference_hl20_mod_k
+composition_family_id: hl20_mod_k
+mission_id: lifting_body_glide_energy_management_v1
+phase_order:
+  - trim_capture
+  - glide_bank_reversal
+  - glide_bank_reversal
+  - energy_handoff
+realizations:
+  - fidelity: point_mass_3dof
+    composition: examples/vehicle_composition/hl20_glide_energy_capability_3dof_compose.yaml
+    expected_preflight_status: translation_ready
+  - fidelity: pseudo_6dof
+    composition: examples/vehicle_composition/hl20_glide_energy_capability_pseudo6dof_compose.yaml
+    expected_preflight_status: translation_ready
+status: semantic_translation_available_runtime_planned
+claim_boundary: >-
+  The two retained compositions prove only that the public HL-20 release,
+  trim, opposing-bank, and energy-handoff intent compiles and lowers through
+  the declared reduced-fidelity semantic translator. They do not establish a
+  high-altitude runtime, aerodynamic trim, crossrange closure, terminal
+  success, direct-wrench control, physical-surface allocation, or family
+  qualification.

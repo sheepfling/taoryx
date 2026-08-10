@@ -1,0 +1,57 @@
+kind: taoryx.trim-recipe/v1alpha1
+schema_version: 1
+family: reference_f16_s119
+recipe_id: f16-s119-force-moment-equilibrium-v1
+adapter: taoryx.adapters.reference_f16_s119.daveml_equilibrium
+claim_boundary: >-
+  Source-backed force/moment equilibrium worklist for fixed-altitude and
+  fixed-airspeed operating points; the generic layer does not claim to solve
+  or validate the F-16 plant without the family adapter.
+operating_point_catalog: operating-points.yaml
+source_evidence: verification/daveml_f16_equilibrium_trim_evidence.json
+variables:
+  - name: alpha_deg
+    role: state
+    unit: deg
+    initial: 6.0
+    bounds: [0.0, 15.0]
+    point_path: state.alpha_deg
+  - name: elevator_deg
+    role: control
+    unit: deg
+    initial: 0.0
+    bounds: [-24.0, 24.0]
+    point_path: controls.elevator_deg
+  - name: power_pct
+    role: control
+    unit: percent
+    initial: 50.0
+    bounds: [0.0, 100.0]
+    point_path: controls.source_powerLeverAngle_pct
+solver:
+  method: bounded_least_squares
+  residual_tolerance: 1.0e-6
+  max_iterations: 100
+  evaluator_owned_by_adapter: true
+continuation:
+  strategy: ordered_catalog_with_previous_solution_seed
+  ordering: geometric_altitude_m
+  fallback: declared_initial_guess
+fixed_inputs:
+  beta_rad: 0.0
+  body_rates_rad_s: 0.0
+  turn_rate_rad_s: 0.0
+  flight_path_angle_rad: 0.0
+residuals:
+  - name: force_x_n
+    unit: N
+    scale: 10000.0
+    tolerance: 1.0e-6
+  - name: force_z_n
+    unit: N
+    scale: 10000.0
+    tolerance: 1.0e-6
+  - name: moment_y_nm
+    unit: N*m
+    scale: 10000.0
+    tolerance: 1.0e-6

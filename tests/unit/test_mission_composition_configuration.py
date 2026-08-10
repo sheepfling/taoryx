@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import pytest
+from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
+from taoryx.trajectory.simple_aero_mission_composition import build_simple_aero_prepared_configuration
 
 from taoryx.fidelity_contracts import CANONICAL_FIDELITY_TIERS
 from taoryx.language import parse_problem_text
@@ -23,8 +25,6 @@ from taoryx.trajectory.configuration_contract import (
     validate_configuration_instance,
 )
 from taoryx.trajectory.mission_composition import ExampleMissionCompositionProvider
-from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
-from taoryx.trajectory.simple_aero_mission_composition import build_simple_aero_prepared_configuration
 from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
 
 
@@ -121,12 +121,8 @@ def _simple_aero_configuration(
                     ),
                 ),
                 "endpoint_state": empty,
-                "vehicle_surrogate": ConfigurationGroupValue(
-                    values={"vehicle.mass.initial": _parameter(1000.0, "kg")}
-                ),
-                "trajectory_checkpoints": ConfigurationGroupValue(
-                    values={"mission.burnout_speed": _parameter(1200.0, "m/s")}
-                ),
+                "vehicle_surrogate": ConfigurationGroupValue(values={"vehicle.mass.initial": _parameter(1000.0, "kg")}),
+                "trajectory_checkpoints": ConfigurationGroupValue(values={"mission.burnout_speed": _parameter(1200.0, "m/s")}),
                 "segments": ConfigurationSequenceValue(
                     items=(
                         ConfigurationChoiceValue(selected="powered_ascent", value=empty),
@@ -193,7 +189,10 @@ def test_simple_aero_advertises_endpoints_parameters_segments_and_fidelity_bound
     baseline = next(item for item in model.mission_templates if item.id == "fixed_ld_baseline")
     weave = next(item for item in model.mission_templates if item.id == "weave")
     assert next(item for item in baseline.operations if item.operation == "batch").status == "available"
-    assert next(item for item in weave.operations if item.operation == "batch").status == "blocked"
+    weave_batch = next(item for item in weave.operations if item.operation == "batch")
+    assert weave.status == "runnable"
+    assert weave_batch.status == "available"
+    assert weave_batch.execution_mode == "build_simple_aero_prepared_configuration_then_taoryx_batch"
     ####
 
 
@@ -223,12 +222,17 @@ def test_simple_aero_fixed_ld_baseline_compiles_from_geodetic_configuration() ->
     ####
 
 
-def test_simple_aero_builder_rejects_fixture_template_without_execution_adapter() -> None:
+def test_simple_aero_builder_lowers_fixture_template_through_the_common_fixed_ld_adapter() -> None:
     provider = RegistryMissionCompositionProvider()
     prepared = provider.validate_configuration(_simple_aero_configuration(provider))
 
-    with pytest.raises(ConfigurationContractError, match="execution-template-unavailable"):
-        build_simple_aero_prepared_configuration(prepared)
+    build = build_simple_aero_prepared_configuration(prepared)
+    document = parse_problem_text(build.problem_text, profile=GrammarProfile.TAORYX)
+
+    assert not [item for item in document.diagnostics if item.severity.value == "error"]
+    assert "*segment 3 weave" in build.problem_text
+    assert "source Simple Aero segment weave; lowered to fixed-L/D bank_maneuver" in build.problem_text
+    assert "*fly bankgd=0" in build.problem_text
     ####
 
 
@@ -273,6 +277,36 @@ def test_common_model_metadata_keeps_fidelity_evidence_and_transitions_separate(
     nesc_mission = provider.model("reference_nesc_two_stage_rocket").mission_templates[0]
     point_mass_operations = {item.operation: item.status for item in nesc_mission.operations if item.fidelity == "point_mass_3dof"}
     assert point_mass_operations == {"validate": "available", "batch": "available", "step": "blocked"}
+    ####
+
+
+def test_every_realization_publishes_complete_generic_control_metadata() -> None:
+    provider = RegistryMissionCompositionProvider()
+
+    for model in provider.list_models():
+        for realization in model.realizations:
+            controls = realization.controls
+            assert controls.claim_boundary
+            assert controls.authorities
+            assert type(controls).model_validate_json(controls.model_dump_json()) == controls
+            if "step" in realization.operations:
+                step_actions = tuple(item for item in controls.channels if item.channel_kind == "action" and "step" in item.operations)
+                assert step_actions
+                assert all(item.native_channel_id for item in step_actions)
+
+    simple_aero = provider.model("simple_aero").realizations[0].controls
+    assert simple_aero.status == "internally_generated"
+    assert {item.id for item in simple_aero.channels} == {"command.bank", "command.throttle"}
+    assert {item.resolution for item in simple_aero.intents} == {"provider_internal"}
+
+    f16_surface = next(item for item in provider.model("f16_s119").realizations if item.id == "rigid_body_6dof_surface_allocated")
+    assert f16_surface.controls.status == "blocked"
+    assert {item.native_channel_id for item in f16_surface.controls.channels} >= {
+        "control.elevator",
+        "control.aileron",
+        "control.rudder",
+        "control.throttle",
+    }
     ####
 
 

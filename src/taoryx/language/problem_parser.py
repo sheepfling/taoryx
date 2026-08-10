@@ -136,7 +136,18 @@ _AERO_COEFFICIENT_SETS = (
 )
 _FORMAT_RE = re.compile(r"^[ef]\.\d+$", re.IGNORECASE)
 _RUNTIME_ATTRIBUTE_RE = re.compile(r"(?P<name>[A-Za-z_][A-Za-z0-9_.-]*)=(?P<value>\"[^\"]*\"|'[^']*'|[^\s]+)")
-_SENSOR_KINDS = {"imu", "accelerometer", "gyroscope", "magnetometer", "gps", "camera", "radar", "custom"}
+_SENSOR_KINDS = {
+    "imu",
+    "accelerometer",
+    "gyroscope",
+    "magnetometer",
+    "gps",
+    "gnss",
+    "camera",
+    "infrared",
+    "radar",
+    "custom",
+}
 _SENSOR_ATTRIBUTES = {"kind", "cadence-s", "phase-s", "sample", "delivery-s", "truth", "rate-policy", "frame", "mount", "source", "enabled", "units"}
 _SENSOR_SAMPLE_MODES = {"instantaneous", "interval"}
 _SENSOR_TRUTH_POLICIES = {"boundary", "accepted-segment"}

@@ -1,0 +1,10 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: x15-local-direct-wrench-lqi-screen-v1
+vehicle: x15
+fidelity: rigid_body_6dof_direct_wrench
+initialization:
+  id: source_release_glide_local_point
+mission:
+  id: x15_local_direct_wrench_lqi_screen_v1
+segments:
+  - id: local_wrench_lqi_recovery_screen

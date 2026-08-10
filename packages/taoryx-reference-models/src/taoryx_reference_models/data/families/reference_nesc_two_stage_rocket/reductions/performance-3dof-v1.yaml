@@ -1,0 +1,18 @@
+schema_version: 1
+kind: taoryx.reference-reduction-contract/v1
+family: reference_nesc_two_stage_rocket
+reduction_id: nesc-performance-3dof-v1
+qualification_class: derived_exact
+status: verified_bounded_replay
+parent:
+  family_id: reference_nesc_two_stage_rocket
+  fidelity: rigid_body_6dof
+  manifest: families/reference_nesc_two_stage_rocket/family.yaml
+  source_package_sha256: 204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e
+preserves: [variable_mass_translation, atmosphere, gravity, aerodynamic_force_tables, propulsion_stage_schedule, staging_events]
+omits: [attitude_dynamics, aerodynamic_moments, body_rates]
+comparison:
+  required_evidence: [stage_event_times, altitude_history, velocity_history, mass_history]
+  pass_rule: reduction_must_match_parent_at_source_staging_checkpoints
+  evidence_artifact: verification/daveml_nesc_reduction_qualification.json
+nonclaims: [participating_simulation_equivalence, attitude_fidelity, guidance]

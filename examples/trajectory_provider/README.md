@@ -1,6 +1,6 @@
 # Mission Composition provider example
 
-This directory has three complementary Mission Composition walkthroughs.
+This directory has four complementary Mission Composition walkthroughs.
 
 `mission_composition_catalog.py` exercises the self-describing configuration
 contract for all nine canonical vehicle families and the Simple Aero workflow:
@@ -60,4 +60,17 @@ structured failure:
 PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_contract_probe.py
 PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_contract_probe.py \
   --output /tmp/mission-composition-contract-probe.json
+```
+
+`mission_composition_consumer_models.py` is the end-to-end smoke path for the
+three leading deterministic consumer fixtures: basic ballistic, two-leg
+waypoint, and the full-contract debug probe. It discovers the installed
+providers, authors the two reference configurations, revalidates each prepared
+configuration through the common consumer seam, and emits all three standard
+responses:
+
+```bash
+PYTHONPATH=src:packages/taoryx-daveml/src:packages/taoryx-simple-aero/src:packages/taoryx-reference-models/src:packages/taoryx-reachability/src \
+  python3 examples/trajectory_provider/mission_composition_consumer_models.py \
+  --output /tmp/mission-composition-consumer-models.json
 ```

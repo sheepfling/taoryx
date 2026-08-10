@@ -1,0 +1,10 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: hummingbird-local-direct-wrench-screen-v1
+vehicle: hummingbird
+fidelity: rigid_body_6dof_direct_wrench
+initialization:
+  id: source_individual_rotor_hover_local_point
+mission:
+  id: hummingbird_local_direct_wrench_screen_v1
+segments:
+  - id: local_wrench_recovery_screen

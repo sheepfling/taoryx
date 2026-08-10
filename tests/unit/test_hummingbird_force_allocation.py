@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import math
 
+from taoryx.source_table_multirotor import build_hummingbird_local_vertical_force_lqi_design
+
 from tools.validate_hummingbird_physical_lqr import build_plant
 
 
@@ -56,4 +58,31 @@ def test_hummingbird_force_request_is_allocated_through_rotors_and_reports_resid
     )
     assert "direct_force" not in step.actuator.actual_positions
     assert "direct_moment" not in step.actuator.actual_positions
+    ####
+
+
+def test_hummingbird_vertical_lqi_design_selects_collective_force_and_attitude_axes() -> None:
+    """Vertical LQI uses the rank-four physical rotor wrench subset."""
+
+    design = build_hummingbird_local_vertical_force_lqi_design()
+
+    assert design.result.hurwitz is True
+    assert design.projection.wrench_names == (
+        "force_z_n",
+        "moment_x_nm",
+        "moment_y_nm",
+        "moment_z_nm",
+    )
+    assert design.result.output_names == (
+        "roll_error_rad",
+        "pitch_error_rad",
+        "yaw_error_rad",
+        "w_m_s",
+    )
+    assert design.projection.effector_names == (
+        "rotor-1-speed",
+        "rotor-2-speed",
+        "rotor-3-speed",
+        "rotor-4-speed",
+    )
     ####

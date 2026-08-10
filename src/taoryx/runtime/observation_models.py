@@ -8,11 +8,13 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from copy import deepcopy
+from dataclasses import replace
 from typing import Annotated, Any, Literal, Protocol, TypeAlias, cast
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, field_validator
 
+from taoryx.sensor_api import SensorSampleRequest
 from taoryx.sensors import ImuIncrement, MeasurementPacket, TruthPoint, TruthSegment
 
 
@@ -115,20 +117,14 @@ def _replace_imu(packet: MeasurementPacket[Any], transform: Callable[[ImuIncreme
         return packet
     if not isinstance(packet.payload, ImuIncrement):
         return packet
-    return MeasurementPacket(
-        packet.sampled_at_s,
-        packet.available_at_s,
-        packet.interval_start_s,
-        transform(packet.payload),
-        packet.valid,
-    )
+    return replace(packet, payload=transform(packet.payload))
 
 
 class _ScaleMisalignmentTransform:
     def __init__(self, config: ScaleMisalignmentConfig) -> None:
         self.config = config
-        self.accelerometer_matrix = np.asarray(config.accelerometer_matrix, dtype=float)
-        self.gyroscope_matrix = np.asarray(config.gyroscope_matrix, dtype=float)
+        self.accelerometer_matrix: np.ndarray = np.asarray(config.accelerometer_matrix, dtype=float)
+        self.gyroscope_matrix: np.ndarray = np.asarray(config.gyroscope_matrix, dtype=float)
 
     def apply(self, packet: MeasurementPacket[Any]) -> MeasurementPacket[Any]:
         return _replace_imu(
@@ -152,8 +148,8 @@ class _ScaleMisalignmentTransform:
 class _BiasTransform:
     def __init__(self, config: BiasConfig) -> None:
         self.config = config
-        self.accelerometer_bias = np.asarray(config.accelerometer_bias_mps2, dtype=float)
-        self.gyroscope_bias = np.asarray(config.gyroscope_bias_radps, dtype=float)
+        self.accelerometer_bias: np.ndarray = np.asarray(config.accelerometer_bias_mps2, dtype=float)
+        self.gyroscope_bias: np.ndarray = np.asarray(config.gyroscope_bias_radps, dtype=float)
 
     def apply(self, packet: MeasurementPacket[Any]) -> MeasurementPacket[Any]:
         return _replace_imu(
@@ -237,7 +233,7 @@ class _DropoutTransform:
         self.count += 1
         if (self.count - 1 - self.config.phase) % self.config.every_n != 0:
             return packet
-        return MeasurementPacket(packet.sampled_at_s, packet.available_at_s, packet.interval_start_s, None, valid=False)
+        return replace(packet, payload=None, valid=False, invalid_reason="observation-dropout")
 
     def reset(self) -> None:
         self.count = 0
@@ -284,6 +280,16 @@ class ObservationPipeline:
         packet = sampler(segment) if callable(sampler) else cast(Any, self.base_model).sample(segment.end)
         return self._apply(packet)
 
+    def sample_request(self, request: SensorSampleRequest) -> MeasurementPacket[Any]:
+        sampler = getattr(self.base_model, "sample_request", None)
+        if not callable(sampler):
+            if request.point is not None:
+                return self._apply(cast(Any, self.base_model).sample(request.point.host))
+            segment = cast(Any, request.segment)
+            return self.sample_segment(TruthSegment(segment.start.host, segment.end.host))
+        return self._apply(sampler(request))
+        ####
+
     def _apply(self, packet: MeasurementPacket[Any]) -> MeasurementPacket[Any]:
         for transform in self.transforms:
             packet = transform.apply(packet)
@@ -303,10 +309,19 @@ class ObservationPipeline:
         payload: dict[str, object] = {
             "schema_version": 1,
             "observation_model": self.config.model_dump(mode="json"),
-            "base_model": None if not callable(model_snapshot) else model_snapshot().model_dump(mode="json"),
+            "base_model": None if not callable(model_snapshot) else self._checkpoint_value(model_snapshot()),
             "transforms": [self._transform_snapshot(transform) for transform in self.transforms],
         }
         return payload
+
+    @staticmethod
+    def _checkpoint_value(value: object) -> object:
+        if isinstance(value, BaseModel):
+            return value.model_dump(mode="json")
+        if isinstance(value, Mapping):
+            return dict(value)
+        raise TypeError("sensor observation checkpoint value must be a mapping or Pydantic model")
+        ####
 
     def restore(self, checkpoint: Mapping[str, object]) -> None:
         if int(cast(Any, checkpoint.get("schema_version", 0))) != 1:
@@ -317,7 +332,14 @@ class ObservationPipeline:
             current = getattr(self.base_model, "snapshot", lambda: None)()
             if current is None:
                 raise ValueError("base model does not expose a checkpoint type")
-            restore(type(current).model_validate(model_checkpoint))
+            if isinstance(current, BaseModel):
+                restore(type(current).model_validate(model_checkpoint))
+            elif isinstance(current, Mapping):
+                if not isinstance(model_checkpoint, Mapping):
+                    raise ValueError("base-model observation checkpoint must be a mapping")
+                restore(model_checkpoint)
+            else:
+                raise TypeError("base sensor model checkpoint has an unsupported type")
         transform_states = checkpoint.get("transforms", ())
         if not isinstance(transform_states, Sequence) or isinstance(transform_states, (str, bytes)):
             raise ValueError("observation transform checkpoint is missing transforms")

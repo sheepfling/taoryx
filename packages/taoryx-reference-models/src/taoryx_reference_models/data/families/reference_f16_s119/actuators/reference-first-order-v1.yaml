@@ -1,0 +1,24 @@
+schema_version: 1
+kind: taoryx.reference-actuator-profile/v1alpha1
+family: reference_f16_s119
+profile_id: f16.reference_first_order.v1
+evidence: taoryx_engineering_assumption
+status: verified_overlay
+channels: [elevator, aileron, rudder, throttle]
+dynamics:
+  type: first_order_position_with_rate_limit
+  time_constant_s: 0.08
+  sample_period_s: 0.01
+  latency_s: 0.0
+limits:
+  elevator: {position: [-25.0, 25.0], rate_per_s: 60.0}
+  aileron: {position: [-21.0, 21.0], rate_per_s: 80.0}
+  rudder: {position: [-30.0, 30.0], rate_per_s: 80.0}
+  throttle: {position: [0.0, 1.0], rate_per_s: 2.5}
+qualification_probe:
+  duration_s: 1.0
+  input_profile: bounded_multichannel_pulse_with_saturation_probe
+qualification_required:
+  - command_to_achieved_trace
+  - rate_and_latency_report
+  - saturation_and_health_report

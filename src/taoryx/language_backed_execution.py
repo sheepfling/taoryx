@@ -15,6 +15,7 @@ import json
 import math
 import shutil
 import tempfile
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -54,7 +55,7 @@ class LanguageBackedCompositionExecution:
     truth_evaluation: dict[str, object]
     mission_graph_execution: dict[str, object]
     sensor_trace: dict[str, object] | None
-    status_trace: dict[str, object]
+    status_trace: dict[str, object] | None
     control_provenance: dict[str, object]
     semantic_action_trace: dict[str, object] | None
 
@@ -65,11 +66,27 @@ class LanguageBackedCompositionExecution:
         return self.numerical_valid and bool(self.envelope["pass"]) and bool(self.truth_evaluation["mission_pass"])
         ####
 
+    @property
+    def execution_limit_reason(self) -> str | None:
+        """Return a non-error runtime cap that left an otherwise inspectable prefix.
+
+        The generic runtime uses exit code one when a case is incomplete and
+        exit code two for a diagnostic error.  A caller-supplied step cap is
+        therefore a distinct execution disposition, not numerical failure.
+        """
+
+        incomplete = tuple(result for result in self.runtime.results if not result.completed)
+        if self.runtime.exit_code == 1 and incomplete and all(result.stop_reason == "max_steps" for result in incomplete):
+            return "max_steps"
+        return None
+        ####
+
     def runtime_summary(self) -> dict[str, object]:
         """Return compact runtime provenance without duplicating telemetry."""
 
         return {
             "exit_code": self.runtime.exit_code,
+            "execution_limit_reason": self.execution_limit_reason,
             "cases": self.runtime.cases,
             "results": [
                 {
@@ -97,11 +114,12 @@ class LanguageBackedCompositionExecution:
             "output_dir": str(self.output_dir),
             "runtime": self.runtime_summary(),
             "numerical_valid": self.numerical_valid,
+            "execution_limit_reason": self.execution_limit_reason,
             "envelope": self.envelope,
             "truth_evaluation": self.truth_evaluation,
             "mission_graph_execution": self.mission_graph_execution,
             "sensor_trace": _sensor_trace_summary(self.sensor_trace),
-            "status_trace": status_trace_summary(self.status_trace),
+            "status_trace": None if self.status_trace is None else status_trace_summary(self.status_trace),
             "control_provenance": self.control_provenance,
             "semantic_action_trace": None if self.semantic_action_trace is None else control_trace_summary(self.semantic_action_trace),
             "mission_pass": self.mission_pass,
@@ -147,9 +165,13 @@ def execute_powered_fixed_wing_composition(
             profile=GrammarProfile.TAORYX,
             control_provenance="intervals",
         )
-        control_provenance = _load_control_provenance(destination / "runtime" / "control_provenance.json")
+        control_provenance_path = destination / "runtime" / "control_provenance.json"
+        control_provenance_available = control_provenance_path.is_file()
+        control_provenance = _load_control_provenance(control_provenance_path) if control_provenance_available else _unavailable_control_provenance(runtime)
         semantic_action_trace = (
-            _language_backed_semantic_action_trace(composition, control_provenance) if _emits_language_backed_semantic_action_trace(composition) else None
+            _language_backed_semantic_action_trace(composition, control_provenance)
+            if control_provenance_available and _emits_language_backed_semantic_action_trace(composition)
+            else None
         )
 
         states = tuple(next(iter(runtime.results[0].states.values()), ())) if runtime.results else ()
@@ -163,9 +185,10 @@ def execute_powered_fixed_wing_composition(
             rows,
             hard_gates_passed=numerical_valid and bool(envelope["pass"]),
         )
-        sensor_trace = build_declared_sensor_trace(composition, _fixed_wing_sensor_samples(rows))
-        status_trace = build_committed_status_trace(composition, _fixed_wing_sensor_samples(rows))
-        resource_ledger = build_committed_resource_ledger(composition, status_trace)
+        samples = _fixed_wing_sensor_samples(rows)
+        sensor_trace = build_declared_sensor_trace(composition, samples) if samples else None
+        status_trace = build_committed_status_trace(composition, samples) if samples else None
+        resource_ledger = build_committed_resource_ledger(composition, status_trace) if status_trace is not None else None
         mission_graph_execution = unobserved_mission_graph_execution(
             composition,
             "The language-backed batch runner emits truth telemetry and independent objectives but no committed "
@@ -184,8 +207,10 @@ def execute_powered_fixed_wing_composition(
         _write_json(destination / "semantic_action_trace.json", semantic_action_trace)
     if sensor_trace is not None:
         _write_json(destination / "sensor_observations.json", sensor_trace)
-    _write_json(destination / "status_trace.json", status_trace)
-    _write_json(destination / "resource_ledger.json", resource_ledger)
+    if status_trace is not None:
+        _write_json(destination / "status_trace.json", status_trace)
+    if resource_ledger is not None:
+        _write_json(destination / "resource_ledger.json", resource_ledger)
     result = LanguageBackedCompositionExecution(
         composition=composition,
         preflight=preflight,
@@ -212,6 +237,7 @@ def execute_powered_fixed_wing_composition(
             runtime={
                 **result.runtime_summary(),
                 "numerical_valid": numerical_valid,
+                "execution_limit_reason": result.execution_limit_reason,
                 "hard_gates_passed": result.mission_pass,
                 "mission_graph_execution": mission_graph_execution,
             },
@@ -234,6 +260,29 @@ def _load_control_provenance(path: Path) -> dict[str, object]:
     if payload.get("schema") != "taoryx.runtime-control-provenance/v1alpha1":
         raise ValueError("runtime control provenance has an unsupported schema")
     return cast(dict[str, object], payload)
+    ####
+
+
+def _unavailable_control_provenance(runtime: RunReport) -> dict[str, object]:
+    """Preserve an early source-runtime failure as a result, not an exception.
+
+    A malformed or failed native problem can return a valid ``RunReport``
+    before lowering reaches the accepted-interval ledger writer.  Composition
+    must retain that runtime failure and its diagnostics instead of treating a
+    missing optional ledger as a second, unrelated executor failure.
+    """
+
+    return {
+        "schema": "taoryx.runtime-control-provenance/v1alpha1",
+        "status": "not_available",
+        "detail": "not_available",
+        "cases": [],
+        "runtime_diagnostics": [item.model_dump(mode="json") for item in runtime.diagnostics],
+        "claim_boundary": (
+            "No accepted-interval control provenance was produced because the source runtime did not complete "
+            "the lowering/execution path. No semantic action trace or controller-action claim is available."
+        ),
+    }
     ####
 
 
@@ -277,10 +326,29 @@ def _language_backed_semantic_action_trace(
         raise ValueError("language-backed runtime control provenance has no accepted intervals")
     contract = resolve_vehicle_composition_interface_contract(composition)
     action_bindings = {
-        channel.id: channel.binding.get("native_action") for channel in contract.action_channels if channel.availability in {"available", "available_in_batch"}
+        channel.id: channel
+        for channel in contract.action_channels
+        if channel.availability in {"available", "available_in_batch"}
     }
-    if any(not isinstance(native, str) or not native for native in action_bindings.values()):
+    if any(not isinstance(channel.binding.get("native_action"), str) or not channel.binding.get("native_action") for channel in action_bindings.values()):
         raise ValueError("language-backed semantic actions require declared native-control bindings")
+    if not action_bindings:
+        samples_without_public_actions: list[BatchControlSample] = []
+        for index, interval in enumerate(intervals):
+            if not isinstance(interval, dict):
+                raise ValueError(f"language-backed control interval {index} is not an object")
+            samples_without_public_actions.append(
+                BatchControlSample(
+                    float(interval["interval_start_time_s"]),
+                    float(interval["committed_truth_time_s"]),
+                    {},
+                    {},
+                )
+            )
+        return build_committed_control_trace(
+            composition,
+            samples_without_public_actions,
+        )
     samples: list[BatchControlSample] = []
     for index, interval in enumerate(intervals):
         if not isinstance(interval, dict):
@@ -291,12 +359,13 @@ def _language_backed_semantic_action_trace(
         if not isinstance(controls, dict):
             raise ValueError(f"language-backed control interval {index} has no native control mapping")
         requested: dict[str, object] = {}
-        for action_id, native_name in action_bindings.items():
+        for action_id, channel in action_bindings.items():
+            native_name = channel.binding.get("native_action")
             assert isinstance(native_name, str)
             value = controls.get(native_name)
             if isinstance(value, bool) or not isinstance(value, int | float):
                 raise ValueError(f"language-backed control interval {index} omits declared bridge action {action_id!r}")
-            requested[action_id] = float(value)
+            requested[action_id] = float(value) >= 0.5 if channel.value_type == "boolean" else float(value)
         samples.append(
             BatchControlSample(
                 float(interval["interval_start_time_s"]),
@@ -398,6 +467,8 @@ def _fixed_wing_sensor_samples(rows: tuple[dict[str, object], ...]) -> tuple[Bat
 
     samples: list[BatchTruthSample] = []
     for index, row in enumerate(rows):
+        kinematic_attitude_deg = _kinematic_attitude_from_row(row)
+        kinematic_body_rate_rad_s = _kinematic_body_rate_from_row(row)
         raw = {
             "1": {
                 "alt": row.get("alt"),
@@ -405,6 +476,13 @@ def _fixed_wing_sensor_samples(rows: tuple[dict[str, object], ...]) -> tuple[Bat
                 "gama": row.get("gama"),
                 "psi": row.get("psi"),
                 "mass": row.get("mass"),
+                "guidance_override_active": row.get("guidance_override_active"),
+                "kinematic_roll_deg": kinematic_attitude_deg[0],
+                "kinematic_pitch_deg": kinematic_attitude_deg[1],
+                "kinematic_yaw_deg": kinematic_attitude_deg[2],
+                "kinematic_body_rate_p_rad_s": kinematic_body_rate_rad_s[0],
+                "kinematic_body_rate_q_rad_s": kinematic_body_rate_rad_s[1],
+                "kinematic_body_rate_r_rad_s": kinematic_body_rate_rad_s[2],
             }
         }
         samples.append(
@@ -453,6 +531,40 @@ def _number(value: object | None, default: float) -> float:
     """Convert one optional runtime scalar without weakening typed artifacts."""
 
     return default if value is None else float(cast(Any, value))
+    ####
+
+
+def _kinematic_attitude_from_row(row: Mapping[str, object]) -> tuple[float, float, float]:
+    """Return emitted Euler attitude or reconstruct the initial kinematic sidecar."""
+
+    direct = tuple(row.get(name) for name in ("kinematic_roll_deg", "kinematic_pitch_deg", "kinematic_yaw_deg"))
+    if all(isinstance(value, int | float) and not isinstance(value, bool) and math.isfinite(float(value)) for value in direct):
+        return cast(tuple[float, float, float], tuple(float(cast(float, value)) for value in direct))
+    quaternion = tuple(row.get(name) for name in ("qw", "qx", "qy", "qz"))
+    if not all(isinstance(value, int | float) and not isinstance(value, bool) and math.isfinite(float(value)) for value in quaternion):
+        return (0.0, 0.0, 0.0)
+    qw, qx, qy, qz = (float(cast(float, value)) for value in quaternion)
+    roll = math.atan2(2.0 * (qw * qx + qy * qz), 1.0 - 2.0 * (qx * qx + qy * qy))
+    pitch = math.asin(max(-1.0, min(1.0, 2.0 * (qw * qy - qz * qx))))
+    yaw = math.atan2(2.0 * (qw * qz + qx * qy), 1.0 - 2.0 * (qy * qy + qz * qz))
+    return (math.degrees(roll), math.degrees(pitch), math.degrees(yaw))
+    ####
+
+
+def _kinematic_body_rate_from_row(row: Mapping[str, object]) -> tuple[float, float, float]:
+    """Return emitted kinematic body rates or the initial zero-rate sidecar."""
+
+    values = tuple(
+        row.get(name)
+        for name in (
+            "kinematic_body_rate_p_rad_s",
+            "kinematic_body_rate_q_rad_s",
+            "kinematic_body_rate_r_rad_s",
+        )
+    )
+    if all(isinstance(value, int | float) and not isinstance(value, bool) and math.isfinite(float(value)) for value in values):
+        return cast(tuple[float, float, float], tuple(float(cast(float, value)) for value in values))
+    return (0.0, 0.0, 0.0)
     ####
 
 

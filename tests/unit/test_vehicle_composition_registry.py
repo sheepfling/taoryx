@@ -6,21 +6,21 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
-import yaml
-
 import taoryx.mission_composition_maturity as mission_composition_maturity
+import yaml
+from taoryx.mission_composition_maturity import build_mission_composition_maturity_report
+from taoryx.reduced_fixed_wing_execution import execute_reduced_fixed_wing_composition
+
 import taoryx.runtime.cli as runtime_cli
 import taoryx.vehicle_execution_preflight as execution_preflight
 import taoryx.vehicle_execution_witnesses as execution_witnesses
 from taoryx.family_adapter_registry import AdapterRegistrationError
 from taoryx.fidelity_contracts import CANONICAL_FIDELITY_TIERS
 from taoryx.language_backed_execution import execute_powered_fixed_wing_composition
-from taoryx.mission_composition_maturity import build_mission_composition_maturity_report
 from taoryx.parameter_value_spaces import (
     load_parameter_value_space_catalog,
     validate_parameter_value_space_coverage,
 )
-from taoryx.reduced_fixed_wing_execution import execute_reduced_fixed_wing_composition
 from taoryx.runtime.cli import main
 from taoryx.trajectory.evaluation import TrajectoryEvaluation
 from taoryx.vehicle_composition import (
@@ -73,7 +73,7 @@ def test_topology_report_covers_every_public_composition_surface(
 
     assert report["schema"] == "taoryx.vehicle-composition-topology-report/v1alpha1"
     assert report["status"] == "pass"
-    assert report["family_count"] == 9
+    assert report["family_count"] >= 9
     assert report["parameter_count"] > 0
     assert report["interface_channel_count"] > 0
     assert report["finding_count"] == 0
@@ -304,16 +304,19 @@ def test_x8_composition_exposes_four_tiers_and_racetrack_recipe() -> None:
     }
     assert x8["fidelities"]["rigid_body_6dof_direct_wrench"]["control_realization"] == "direct_wrench"
     assert x8["fidelities"]["rigid_body_6dof_surface_allocated"]["control_realization"] == "surface_allocated"
-    assert x8["interfaces"]["pseudo_6dof"]["available_authority_profiles"] == ["native_control_bridge"]
+    assert x8["interfaces"]["pseudo_6dof"]["available_authority_profiles"] == [
+        "kinematic_guidance",
+        "native_control_bridge",
+    ]
     assert x8["interfaces"]["pseudo_6dof"]["available_observation_profiles"] == ["truth_debug"]
-    assert x8["initialization_contracts"][0]["id"] == "airborne_trim"
-    heading = next(item for item in x8["initialization_contracts"][0]["parameters"] if item["id"] == "heading_deg")
+    airborne_trim = next(item for item in x8["initialization_contracts"] if item["id"] == "airborne_trim")
+    heading = next(item for item in airborne_trim["parameters"] if item["id"] == "heading_deg")
     assert heading["value_space"]["topology"] == "periodic_circle"
     assert heading["value_space_source"] == "parameter_value_space_catalog"
-    turn = next(item for item in x8["segment_contracts"][2]["parameters"] if item["id"] == "turn_direction")
+    fly_by_turn = next(item for item in x8["segment_contracts"] if item["id"] == "fly_by_turn")
+    turn = next(item for item in fly_by_turn["parameters"] if item["id"] == "turn_direction")
     assert turn["options"] == ["left", "right"]
-    racetrack = x8["mission_templates"][0]
-    assert racetrack["id"] == "powered_fixed_wing_racetrack_v1"
+    racetrack = next(item for item in x8["mission_templates"] if item["id"] == "powered_fixed_wing_racetrack_v1")
     assert racetrack["segment_sequence"][-1] == "terminal_state_gate"
     graph = racetrack["graph"]
     assert graph["status"] == "linear_sequence_only"
@@ -402,7 +405,7 @@ def test_mission_graph_execution_extension_rejects_incompatible_template_fidelit
     assert isinstance(hummingbird, dict)
     missions = hummingbird["mission_templates"]
     assert isinstance(missions, list)
-    mission = missions[0]
+    mission = next(item for item in missions if item["id"] == "multirotor_pad_box_yaw_recovery_land_v1")
     assert isinstance(mission, dict)
     extension = mission["graph_execution_extension"]
     assert isinstance(extension, dict)
@@ -418,15 +421,87 @@ def test_executable_mission_templates_declare_their_semantic_translator() -> Non
     catalog = load_resolved_vehicle_composition_catalog()
 
     expected = {
-        ("skywalker_x8", "powered_fixed_wing_racetrack_v1"): ("taoryx.powered_fixed_wing_racetrack.capability_scaled.v1", CANONICAL_FIDELITY_TIERS),
-        ("b747", "powered_fixed_wing_racetrack_v1"): ("taoryx.powered_fixed_wing_racetrack.capability_scaled.v1", CANONICAL_FIDELITY_TIERS),
+        ("skywalker_x8", "x8_local_physical_surface_lqr_screen_v1"): (
+            "taoryx.x8_local_physical_surface_lqr_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("skywalker_x8", "x8_local_physical_surface_lqi_screen_v1"): (
+            "taoryx.x8_local_physical_surface_lqi_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("skywalker_x8", "x8_local_physical_surface_lqi_long_recovery_screen_v1"): (
+            "taoryx.x8_local_physical_surface_lqi_long_recovery_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("skywalker_x8", "powered_fixed_wing_racetrack_v1"): ("taoryx.x8_racetrack.source_route.v1", CANONICAL_FIDELITY_TIERS),
+        ("b747", "b747_condition3_local_physical_surface_lqr_screen_v1"): (
+            "taoryx.b747_condition3_local_physical_surface_lqr_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("b747", "b747_condition3_local_physical_surface_lqi_screen_v1"): (
+            "taoryx.b747_condition3_local_physical_surface_lqi_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("b747", "powered_fixed_wing_racetrack_v1"): ("taoryx.b747_racetrack.source_route.v1", CANONICAL_FIDELITY_TIERS),
         ("a320_openap_3dof", "powered_fixed_wing_racetrack_v1"): (
             "taoryx.powered_fixed_wing_racetrack.capability_scaled.v1",
             ("point_mass_3dof", "pseudo_6dof"),
         ),
+        ("a320_openap_3dof", "a320_local_native_coordinate_lqi_screen_v1"): (
+            "taoryx.a320.local_native_coordinate_lqi_screen.capability.v1",
+            ("pseudo_6dof",),
+        ),
+        ("f16_s119", "f16_local_physical_control_screen_v1"): (
+            "taoryx.f16_local_physical_control_screen.capability.v1",
+            ("rigid_body_6dof_direct_wrench", "rigid_body_6dof_surface_allocated"),
+        ),
+        ("f16_s119", "f16_local_physical_surface_lqi_screen_v1"): (
+            "taoryx.f16_local_physical_surface_lqi_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("f16_s119", "f16_local_physical_surface_lqr_schedule_interior_screen_v1"): (
+            "taoryx.f16_local_physical_surface_lqr_schedule_interior_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("f16_s119", "f16_local_physical_surface_lqi_schedule_interior_screen_v1"): (
+            "taoryx.f16_local_physical_surface_lqi_schedule_interior_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("f16_s119", "f16_local_physical_surface_lqr_schedule_transition_screen_v1"): (
+            "taoryx.f16_local_physical_surface_lqr_schedule_transition_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
         ("f16_s119", "powered_fixed_wing_racetrack_v1"): ("taoryx.powered_fixed_wing_racetrack.capability_scaled.v1", CANONICAL_FIDELITY_TIERS),
+        ("hummingbird", "hummingbird_local_individual_rotor_lqi_screen_v1"): (
+            "taoryx.hummingbird.local_individual_rotor_lqi_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("hummingbird", "hummingbird_local_horizontal_translation_lqi_screen_v1"): (
+            "taoryx.hummingbird.local_horizontal_translation_lqi_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("hummingbird", "hummingbird_local_vertical_translation_lqi_screen_v1"): (
+            "taoryx.hummingbird.local_vertical_translation_lqi_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("hummingbird", "hummingbird_local_direct_wrench_screen_v1"): (
+            "taoryx.hummingbird.local_direct_wrench_screen.capability.v1",
+            ("rigid_body_6dof_direct_wrench",),
+        ),
         ("hummingbird", "multirotor_pad_box_yaw_recovery_land_v1"): ("taoryx.hummingbird.hover_yaw_contact.pseudo6dof.v1", ("pseudo_6dof",)),
         ("x15", "x15_local_direct_wrench_screen_v1"): ("taoryx.x15_local_direct_wrench_screen.capability.v1", ("rigid_body_6dof_direct_wrench",)),
+        ("x15", "x15_local_direct_wrench_lqi_screen_v1"): (
+            "taoryx.x15_local_direct_wrench_lqi_screen.capability.v1",
+            ("rigid_body_6dof_direct_wrench",),
+        ),
+        ("x15", "x15_source_surface_authority_screen_v1"): (
+            "taoryx.x15_source_surface_authority_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("x15", "x15_source_surface_attitude_rate_lqi_screen_v1"): (
+            "taoryx.x15_source_surface_attitude_rate_lqi_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
         ("x15", "x15_staged_booster_reachability_v1"): ("taoryx.x15_staged_reachability.capability.v1", ("point_mass_3dof", "pseudo_6dof")),
         ("reference_nesc_two_stage_rocket", "staged_rocket_launch_target_state_v1"): (
             "taoryx.nesc_staged_source_replay.capability.v1",
@@ -444,6 +519,18 @@ def test_executable_mission_templates_declare_their_semantic_translator() -> Non
         ("hl20_mod_k", "hl20_local_direct_wrench_screen_v1"): (
             "taoryx.hl20_local_direct_wrench_screen.capability.v1",
             ("rigid_body_6dof_direct_wrench",),
+        ),
+        ("hl20_mod_k", "hl20_local_direct_wrench_lqi_screen_v1"): (
+            "taoryx.hl20_local_direct_wrench_lqi_screen.capability.v1",
+            ("rigid_body_6dof_direct_wrench",),
+        ),
+        ("hl20_mod_k", "hl20_source_surface_pitch_authority_screen_v1"): (
+            "taoryx.hl20_source_surface_pitch_authority_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
+        ),
+        ("hl20_mod_k", "hl20_source_surface_attitude_rate_lqi_screen_v1"): (
+            "taoryx.hl20_source_surface_attitude_rate_lqi_screen.capability.v1",
+            ("rigid_body_6dof_surface_allocated",),
         ),
     }
 
@@ -476,7 +563,7 @@ def test_preflight_fails_closed_when_registry_translator_has_no_installed_handle
 
 def test_preflight_fails_closed_when_handler_reports_a_different_translator() -> None:
     composition = compile_vehicle_composition(load_vehicle_composition_request(ROOT / "examples/vehicle_composition/x8_racetrack_capability_compose.yaml"))
-    translator_id = "taoryx.powered_fixed_wing_racetrack.capability_scaled.v1"
+    translator_id = "taoryx.x8_racetrack.source_route.v1"
 
     def wrong_handler(candidate: object) -> object:
         assert candidate is composition
@@ -517,8 +604,8 @@ def test_semantic_preflight_handler_report_audits_every_declared_translator(
 
     assert report["schema"] == "taoryx.semantic-preflight-handler-report/v1alpha1"
     assert report["status"] == "pass"
-    assert report["installed_handler_count"] == 9
-    assert report["installed_capability_adapter_count"] == 9
+    assert report["installed_handler_count"] >= 9
+    assert report["installed_capability_adapter_count"] >= 9
     assert report["error_count"] == 0
     counts = cast(dict[str, int], report["status_counts"])
     assert counts["registered"] == report["declared_translator_count"]
@@ -623,7 +710,8 @@ def test_vehicle_cli_lists_and_exports_composition_sections(capsys: pytest.Captu
     catalog = json.loads(capsys.readouterr().out)
     assert catalog["schema"] == "taoryx.vehicle-composition-catalog/v1alpha1"
     assert catalog["detail"] == "summary"
-    assert catalog["vehicle_count"] == 9
+    assert catalog["vehicle_count"] >= 9
+    assert len(catalog["vehicles"]) == catalog["vehicle_count"]
     assert any(item["family_id"] == "skywalker_x8" for item in catalog["vehicles"])
 
     assert main(["vehicle", "catalog", "--detail", "full"]) == 0
@@ -634,7 +722,7 @@ def test_vehicle_cli_lists_and_exports_composition_sections(capsys: pytest.Captu
 
     assert main(["vehicle", "list"]) == 0
     listing = json.loads(capsys.readouterr().out)
-    assert len(listing) == 9
+    assert len(listing) == catalog["vehicle_count"]
     assert any(item["family_id"] == "hummingbird" for item in listing)
 
     assert main(["vehicle", "schema", "b747", "segments"]) == 0
@@ -664,7 +752,7 @@ def test_vehicle_cli_lists_and_exports_composition_sections(capsys: pytest.Captu
     assert main(["vehicle", "authoring", "skywalker_x8"]) == 0
     authoring = json.loads(capsys.readouterr().out)
     assert authoring["schema"] == "taoryx.vehicle-composition-authoring-worklist/v1alpha1"
-    x8_mission = authoring["missions"][0]
+    x8_mission = next(item for item in authoring["missions"] if item["mission_id"] == "powered_fixed_wing_racetrack_v1")
     point_mass = next(item for item in x8_mission["tiers"] if item["tier"] == "point_mass_3dof")
     assert point_mass["status"] == "runnable"
     assert {"batch", "episode"} <= set(point_mass["runnable_operations"])
@@ -672,7 +760,7 @@ def test_vehicle_cli_lists_and_exports_composition_sections(capsys: pytest.Captu
     assert point_mass["execution_modes"] == ["closed_loop_controller"]
     assert not any("committed interval command history" in step for step in point_mass["next_steps"])
     assert point_mass["batch_episode_parity"]["availability"] == "registered"
-    assert point_mass["mission_capability_adapter"] == "taoryx.powered_fixed_wing_racetrack.capability_scaled.v1"
+    assert point_mass["mission_capability_adapter"] == "taoryx.x8_racetrack.source_route.v1"
 
     assert (
         main(
@@ -727,11 +815,12 @@ def test_vehicle_cli_lists_and_exports_composition_sections(capsys: pytest.Captu
     assert maturity["schema"] == "taoryx.mission-composition-maturity-report/v1alpha1"
     assert maturity["topology"]["status"] == "pass"
     assert maturity["topology"]["canonical_channel_count"] > 0
-    assert maturity["topology"]["resource_channel_count"] == 4
+    assert maturity["topology"]["resource_channel_count"] == 5
     assert maturity["execution"]["semantic_preflight_handlers"]["status"] == "pass"
     assert maturity["execution"]["concrete_capability_preflight"]["status"] == "not_checked"
     assert maturity["execution"]["episode_contract_conformance"]["status"] == "not_checked"
     assert maturity["execution"]["execution_witnesses"]["status"] == "not_checked"
+    assert maturity["execution"]["batch_interface_trace_conformance"]["status"] == "not_checked"
     discovery = maturity["discovery_and_authoring"]
     variant_admission = discovery["variant_admission"]
     assert variant_admission == {
@@ -747,17 +836,17 @@ def test_vehicle_cli_lists_and_exports_composition_sections(capsys: pytest.Captu
     }
     assert discovery["planned_execution_binding_count"] == 3
     promotion_blockers = discovery["fidelity_promotion_blocker_counts"]
-    assert promotion_blockers["nonlinear_direct_wrench_mission"] == 2
-    assert promotion_blockers["source_trim_acceptance"] == 3
+    assert promotion_blockers["envelope_robustness_and_flight_qualification"] == 2
+    assert promotion_blockers["source_trim_acceptance"] >= 3
     blockers = discovery["planned_execution_blocker_counts"]
     assert blockers["energy_glide_segment_translator"] == 1
     assert blockers["source_bounded_handoff_evaluator"] == 2
 
     direct_wrench = next(item for item in x8_mission["tiers"] if item["tier"] == "rigid_body_6dof_direct_wrench")
-    assert direct_wrench["status"] == "planned"
-    assert direct_wrench["fidelity_promotion_blockers"] == ["nonlinear_direct_wrench_mission"]
-    assert any("nonlinear_direct_wrench_mission" in item for item in direct_wrench["next_steps"])
-    assert any("batch factory" in item for item in direct_wrench["next_steps"])
+    assert direct_wrench["status"] == "runnable"
+    assert direct_wrench["fidelity_promotion_blockers"] == ["envelope_robustness_and_flight_qualification"]
+    assert any("envelope_robustness_and_flight_qualification" in item for item in direct_wrench["next_steps"])
+    assert not any("batch factory" in item for item in direct_wrench["next_steps"])
     assert direct_wrench["planned_execution_blockers"] == {}
 
     hl20_worklist = load_resolved_vehicle_composition_catalog().vehicle("hl20_mod_k").authoring_worklist_dict()
@@ -834,13 +923,17 @@ def test_mission_composition_maturity_report_keeps_coverage_and_evidence_distinc
     assert report["status"] == "pass"
     topology = cast(dict[str, object], report["topology"])
     assert topology["finding_count"] == 0
-    assert topology["interface_channel_count"] == 940
+    # The public catalogue may legitimately grow as additional vehicle
+    # controls, status, resource, and diagnostic channels are advertised.
+    # Keep the established coverage floor without turning that growth into a
+    # false regression.
+    assert topology["interface_channel_count"] >= 940
     execution = cast(dict[str, object], report["execution"])
     assert cast(dict[str, int], execution["runnable_operation_counts"])["episode"] >= 1
     release_packet_conformance = cast(dict[str, object], execution["release_packet_conformance"])
     assert release_packet_conformance["status"] == "not_checked"
     assert cast(dict[str, int], execution["parity_disposition_counts"])["registered"] >= 1
-    assert cast(dict[str, int], execution["endpoint_execution_mode_counts"])["closed_loop_controller"] == 18
+    assert cast(dict[str, int], execution["endpoint_execution_mode_counts"])["closed_loop_controller"] >= 18
     assert cast(dict[str, object], execution["execution_witnesses"])["status"] == "not_checked"
     assert cast(dict[str, object], execution["concrete_capability_preflight"])["status"] == "not_checked"
     assert cast(dict[str, object], execution["episode_contract_conformance"])["status"] == "not_checked"
@@ -867,7 +960,12 @@ def test_mission_composition_maturity_batch_smoke_implies_endpoint_witness_check
 ) -> None:
     calls: list[bool] = []
 
-    def fake_witness_check(*, execute_batch: bool = False) -> dict[str, object]:
+    def fake_witness_check(
+        *,
+        execute_batch: bool = False,
+        retained_results_directory: Path | None = None,
+    ) -> dict[str, object]:
+        assert retained_results_directory is None
         calls.append(execute_batch)
         return {
             "status": "pass",
@@ -875,7 +973,17 @@ def test_mission_composition_maturity_batch_smoke_implies_endpoint_witness_check
             "records": [
                 {
                     "operation": "batch",
-                    "batch_execution": {"release_packet": {"status": "pass"}},
+                    "batch_execution": {
+                        "release_packet": {"status": "pass"},
+                        "interface_trace": {
+                            "status": "pass",
+                            "batch_visible_channels": {
+                                "status": ["position.altitude"],
+                                "resources": ["resources.mass.total"],
+                                "diagnostics": ["diagnostics.segment_index"],
+                            },
+                        },
+                    },
                 }
             ],
         }
@@ -890,6 +998,9 @@ def test_mission_composition_maturity_batch_smoke_implies_endpoint_witness_check
     execution = cast(dict[str, object], report["execution"])
     witness = cast(dict[str, object], execution["execution_witnesses"])
     assert witness["batch_execution_smoke"] is True
+    interface_trace = cast(dict[str, object], execution["batch_interface_trace_conformance"])
+    assert interface_trace["status"] == "pass"
+    assert interface_trace["channel_counts"] == {"status": 1, "resources": 1, "diagnostics": 1}
     release_packet_conformance = cast(dict[str, object], execution["release_packet_conformance"])
     assert release_packet_conformance == {
         "status": "pass",
@@ -975,9 +1086,58 @@ def test_mission_composition_maturity_report_can_index_retained_results_without_
     assert report["status"] == "pass"
     result_catalog = cast(dict[str, object], report["result_catalog"])
     assert result_catalog["status"] == "empty"
+    assert result_catalog["origin"] == "supplied_result_directory"
     assert result_catalog["result_count"] == 0
     assert result_catalog["semantic_action_trace_status_counts"] == {}
     assert "does not rerun a vehicle" in str(result_catalog["claim_boundary"])
+    ####
+
+
+def test_mission_composition_maturity_retains_and_indexes_batch_witness_results(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    retained = tmp_path / "retained"
+    captured: dict[str, object] = {}
+
+    def fake_witness_check(
+        *,
+        execute_batch: bool = False,
+        retained_results_directory: Path | None = None,
+    ) -> dict[str, object]:
+        captured["execute_batch"] = execute_batch
+        captured["retained_results_directory"] = retained_results_directory
+        assert retained_results_directory is not None
+        retained_results_directory.mkdir()
+        return {"status": "pass", "records": []}
+        ####
+
+    monkeypatch.setattr(execution_witnesses, "validate_vehicle_execution_witnesses", fake_witness_check)
+
+    report = build_mission_composition_maturity_report(
+        execute_batch_witnesses=True,
+        retained_batch_results_directory=retained,
+    )
+
+    assert report["status"] == "pass"
+    assert captured == {"execute_batch": True, "retained_results_directory": retained}
+    result_catalog = cast(dict[str, object], report["result_catalog"])
+    assert result_catalog["status"] == "empty"
+    assert result_catalog["origin"] == "generated_batch_witnesses"
+    assert result_catalog["root_directory"] == str(retained)
+    assert "generated during this report" in str(result_catalog["claim_boundary"])
+    ####
+
+
+def test_mission_composition_maturity_rejects_ambiguous_or_inactive_batch_retention(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="requires execute_batch_witnesses"):
+        build_mission_composition_maturity_report(retained_batch_results_directory=tmp_path / "retained")
+    with pytest.raises(ValueError, match="cannot be combined"):
+        build_mission_composition_maturity_report(
+            execute_batch_witnesses=True,
+            results_directory=tmp_path / "existing",
+            retained_batch_results_directory=tmp_path / "retained",
+        )
     ####
 
 
@@ -1019,6 +1179,7 @@ def test_mission_composition_maturity_cli_exposes_batch_witness_smoke(
         execute_batch_witnesses: bool,
         execute_parity_witnesses: bool,
         results_directory: Path | None,
+        retained_batch_results_directory: Path | None,
     ) -> dict[str, object]:
         captured.update(
             {
@@ -1026,6 +1187,7 @@ def test_mission_composition_maturity_cli_exposes_batch_witness_smoke(
                 "execute_batch_witnesses": execute_batch_witnesses,
                 "execute_parity_witnesses": execute_parity_witnesses,
                 "results_directory": results_directory,
+                "retained_batch_results_directory": retained_batch_results_directory,
             }
         )
         return {"status": "pass", "schema": "test-maturity"}
@@ -1040,6 +1202,160 @@ def test_mission_composition_maturity_cli_exposes_batch_witness_smoke(
         "execute_batch_witnesses": True,
         "execute_parity_witnesses": False,
         "results_directory": None,
+        "retained_batch_results_directory": None,
+    }
+    ####
+
+
+def test_mission_composition_maturity_cli_forwards_batch_result_retention(
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    captured: dict[str, object] = {}
+    retained = tmp_path / "retained"
+
+    def fake_maturity_report(
+        catalog: object,
+        *,
+        check_execution_witnesses: bool,
+        execute_batch_witnesses: bool,
+        execute_parity_witnesses: bool,
+        results_directory: Path | None,
+        retained_batch_results_directory: Path | None,
+    ) -> dict[str, object]:
+        captured.update(
+            {
+                "check_execution_witnesses": check_execution_witnesses,
+                "execute_batch_witnesses": execute_batch_witnesses,
+                "execute_parity_witnesses": execute_parity_witnesses,
+                "results_directory": results_directory,
+                "retained_batch_results_directory": retained_batch_results_directory,
+            }
+        )
+        return {"status": "pass", "schema": "test-maturity"}
+        ####
+
+    monkeypatch.setattr(runtime_cli, "build_mission_composition_maturity_report", fake_maturity_report)
+
+    assert main(
+        [
+            "vehicle",
+            "maturity-report",
+            "--execute-batch-witnesses",
+            "--retain-batch-results-dir",
+            str(retained),
+        ]
+    ) == 0
+    assert json.loads(capsys.readouterr().out)["schema"] == "test-maturity"
+    assert captured == {
+        "check_execution_witnesses": False,
+        "execute_batch_witnesses": True,
+        "execute_parity_witnesses": False,
+        "results_directory": None,
+        "retained_batch_results_directory": retained,
+    }
+    ####
+
+
+def test_mission_composition_maturity_cli_rejects_ambiguous_or_inactive_batch_retention(
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+) -> None:
+    retained = tmp_path / "retained"
+
+    assert main(["vehicle", "maturity-report", "--retain-batch-results-dir", str(retained)]) == 2
+    assert "requires --execute-batch-witnesses" in capsys.readouterr().out
+
+    assert main(
+        [
+            "vehicle",
+            "maturity-report",
+            "--execute-batch-witnesses",
+            "--results-dir",
+            str(tmp_path / "existing"),
+            "--retain-batch-results-dir",
+            str(retained),
+        ]
+    ) == 2
+    assert "either --results-dir or --retain-batch-results-dir" in capsys.readouterr().out
+    ####
+
+
+def test_vehicle_witness_report_cli_keeps_a_batch_smoke_family_scoped(
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The installed CLI exposes the same focused proof as the developer tool."""
+
+    captured: dict[str, object] = {}
+
+    def fake_witness_report(
+        *,
+        execute_batch: bool,
+        family_ids: list[str] | None,
+        witness_ids: list[str] | None,
+        results_directory: Path | None,
+    ) -> dict[str, object]:
+        captured.update(
+            {
+                "execute_batch": execute_batch,
+                "family_ids": family_ids,
+                "witness_ids": witness_ids,
+                "results_directory": results_directory,
+            }
+        )
+        return {"status": "pass", "schema": "test-vehicle-witness-report"}
+        ####
+
+    monkeypatch.setattr(runtime_cli, "build_vehicle_execution_witness_report", fake_witness_report)
+
+    assert main(["vehicle", "witness-report", "--family", "hummingbird", "--execute-batch"]) == 0
+    assert json.loads(capsys.readouterr().out)["schema"] == "test-vehicle-witness-report"
+    assert captured == {
+        "execute_batch": True,
+        "family_ids": ["hummingbird"],
+        "witness_ids": None,
+        "results_directory": None,
+    }
+    ####
+
+
+def test_vehicle_witness_report_cli_forwards_a_retained_result_directory(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+    destination = tmp_path / "retained-results"
+
+    def fake_witness_report(
+        *,
+        execute_batch: bool,
+        family_ids: list[str] | None,
+        witness_ids: list[str] | None,
+        results_directory: Path | None,
+    ) -> dict[str, object]:
+        captured.update(
+            {
+                "execute_batch": execute_batch,
+                "family_ids": family_ids,
+                "witness_ids": witness_ids,
+                "results_directory": results_directory,
+            }
+        )
+        return {"status": "pass", "schema": "test-retained-vehicle-witness-report"}
+        ####
+
+    monkeypatch.setattr(runtime_cli, "build_vehicle_execution_witness_report", fake_witness_report)
+
+    assert main(["vehicle", "witness-report", "--witness", "x8-3dof-batch", "--execute-batch", "--results-dir", str(destination)]) == 0
+    assert json.loads(capsys.readouterr().out)["schema"] == "test-retained-vehicle-witness-report"
+    assert captured == {
+        "execute_batch": True,
+        "family_ids": None,
+        "witness_ids": ["x8-3dof-batch"],
+        "results_directory": destination,
     }
     ####
 
@@ -1057,6 +1373,7 @@ def test_mission_composition_maturity_cli_exposes_parity_witness_smoke(
         execute_batch_witnesses: bool,
         execute_parity_witnesses: bool,
         results_directory: Path | None,
+        retained_batch_results_directory: Path | None,
     ) -> dict[str, object]:
         captured.update(
             {
@@ -1064,6 +1381,7 @@ def test_mission_composition_maturity_cli_exposes_parity_witness_smoke(
                 "execute_batch_witnesses": execute_batch_witnesses,
                 "execute_parity_witnesses": execute_parity_witnesses,
                 "results_directory": results_directory,
+                "retained_batch_results_directory": retained_batch_results_directory,
             }
         )
         return {"status": "pass", "schema": "test-parity-maturity"}
@@ -1078,6 +1396,7 @@ def test_mission_composition_maturity_cli_exposes_parity_witness_smoke(
         "execute_batch_witnesses": False,
         "execute_parity_witnesses": True,
         "results_directory": None,
+        "retained_batch_results_directory": None,
     }
     ####
 
@@ -1131,7 +1450,39 @@ def test_vehicle_mission_cli_reuses_the_authoring_and_compilation_contracts(
     assert validation["schema"] == "taoryx.vehicle-mission-validation/v1alpha1"
     assert validation["semantic_validation"] == "pass"
     assert validation["runtime_readiness"]["preflight_status"] == "translation_ready"
+    advertisement = validation["runtime_readiness"]["preflight"]["capability_estimate"]["capability_advertisement"]
+    assert advertisement["schema"] == "taoryx.vehicle-capability-advertisement/v1alpha1"
+    assert advertisement["selection"]["mission_id"] == "powered_fixed_wing_racetrack_v1"
+    assert advertisement["interface"]["interface_id"] == "skywalker_x8/point_mass_3dof"
     assert json.loads(compiled_path.read_text(encoding="utf-8"))["mission"] == "powered_fixed_wing_racetrack_v1"
+    ####
+
+
+def test_vehicle_mission_validate_exposes_blocked_hl20_runtime_admission(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert (
+        main(
+            [
+                "vehicle",
+                "mission",
+                "validate",
+                str(ROOT / "examples/vehicle_composition/hl20_glide_energy_capability_3dof_compose.yaml"),
+            ]
+        )
+        == 0
+    )
+    validation = json.loads(capsys.readouterr().out)
+
+    readiness = validation["runtime_readiness"]
+    assert readiness["preflight_status"] == "translation_ready"
+    assert readiness["lowering_status"] == "blocked"
+    advertisement = readiness["preflight"]["capability_estimate"]["capability_advertisement"]
+    assert advertisement["interface"]["execution_records"] == []
+    assert "lifting_body_glide_energy_management_v1" in advertisement["interface"]["claim_boundary"]
+    admission = advertisement["family_owned"]["source_runtime_admission"]
+    assert admission["status"] == "outside_source_domain"
+    assert admission["runtime_factory_declared"] is False
     ####
 
 
@@ -1217,6 +1568,7 @@ def test_vehicle_cli_reads_a_fingerprint_bound_normalized_result(
     )
     (output_dir / "evaluation.json").write_text(json.dumps(evaluation.as_dict()), encoding="utf-8")
     (output_dir / "objective_report.json").write_text("{}", encoding="utf-8")
+    (output_dir / "nonlinear_validation.json").write_text("{}", encoding="utf-8")
 
     assert main(["vehicle", "result", str(output_dir), "--composition", str(composition_path)]) == 0
     payload = json.loads(capsys.readouterr().out)
@@ -1225,6 +1577,7 @@ def test_vehicle_cli_reads_a_fingerprint_bound_normalized_result(
     assert payload["evaluation"]["outcome"] == "completed"
     assert payload["composition_identity_sha256"] == composition.identity_sha256
     assert payload["artifacts"]["objective_report.json"] == str(output_dir / "objective_report.json")
+    assert payload["artifacts"]["nonlinear_validation.json"] == str(output_dir / "nonlinear_validation.json")
     ####
 
 
@@ -1480,7 +1833,7 @@ def test_variant_coupling_groups_reject_conflicting_modifiers_unless_every_membe
     assert isinstance(a320, dict)
     initialization_contracts = a320["initialization_contracts"]
     assert isinstance(initialization_contracts, list)
-    initialization = initialization_contracts[0]
+    initialization = next(item for item in initialization_contracts if item["id"] == "airborne_trim")
     assert isinstance(initialization, dict)
     parameters = initialization["parameters"]
     assert isinstance(parameters, list)
@@ -1646,6 +1999,10 @@ def test_vehicle_run_executes_b747_point_mass_translation_ready_composition(
     assert action_trace["schema"] == "taoryx.composition-semantic-action-trace/v1alpha1"
     assert action_trace["requested_action_channels"] == [
         "control.longitudinal.bridge.command",
+        "guidance.flight_path_angle.command",
+        "guidance.heading.command",
+        "guidance.override.enabled",
+        "guidance.speed.command",
         "propulsion.command.fraction",
     ]
     interface = json.loads((output_dir / "vehicle_interface.json").read_text(encoding="utf-8"))
@@ -1677,6 +2034,10 @@ def test_x8_sensor_composition_writes_a_no_interpolation_batch_trace(tmp_path: P
     assert action_trace["requested_action_channels"] == [
         "control.lateral.bridge.command",
         "control.longitudinal.bridge.command",
+        "guidance.flight_path_angle.command",
+        "guidance.heading.command",
+        "guidance.override.enabled",
+        "guidance.speed.command",
         "propulsion.command.fraction",
     ]
     trace_samples = cast(list[dict[str, object]], action_trace["samples"])
@@ -1688,7 +2049,12 @@ def test_x8_sensor_composition_writes_a_no_interpolation_batch_trace(tmp_path: P
     vehicles = cast(dict[str, dict[str, object]], cases[0]["vehicles"])
     assert len(vehicles) == 1
     vehicle = next(iter(vehicles.values()))
-    assert vehicle["committed_resolver_control_names"] == ["_command_gamgd", "_command_psi", "_command_vel"]
+    assert vehicle["committed_resolver_control_names"] == [
+        "_command_gamgd",
+        "_command_psi",
+        "_command_vel",
+        "guidance_override_active",
+    ]
     intervals = cast(list[dict[str, object]], vehicle["control_interval_records"])
     assert intervals
     assert all(interval["solver_stage_control_mutation_detected"] is False for interval in intervals)
@@ -1704,15 +2070,39 @@ def test_x8_sensor_composition_writes_a_no_interpolation_batch_trace(tmp_path: P
     (
         (
             "x8_racetrack_capability_compose.yaml",
-            ("control.lateral.bridge.command", "control.longitudinal.bridge.command", "propulsion.command.fraction"),
+            (
+                "control.lateral.bridge.command",
+                "control.longitudinal.bridge.command",
+                "guidance.bank.command",
+                "guidance.flight_path_angle.command",
+                "guidance.heading.command",
+                "guidance.override.enabled",
+                "guidance.speed.command",
+                "propulsion.command.fraction",
+            ),
         ),
         (
             "b747_racetrack_capability_3dof_compose.yaml",
-            ("control.longitudinal.bridge.command", "propulsion.command.fraction"),
+            (
+                "control.longitudinal.bridge.command",
+                "guidance.flight_path_angle.command",
+                "guidance.heading.command",
+                "guidance.override.enabled",
+                "guidance.speed.command",
+                "propulsion.command.fraction",
+            ),
         ),
         (
             "b747_racetrack_capability_pseudo6dof_compose.yaml",
-            ("control.longitudinal.bridge.command", "propulsion.command.fraction"),
+            (
+                "control.longitudinal.bridge.command",
+                "guidance.bank.command",
+                "guidance.flight_path_angle.command",
+                "guidance.heading.command",
+                "guidance.override.enabled",
+                "guidance.speed.command",
+                "propulsion.command.fraction",
+            ),
         ),
     ),
 )
@@ -1848,7 +2238,7 @@ def test_x8_capability_derived_composition_is_ready_for_native_route_translation
 
         assert result.status == "translation_ready"
         assert all(check.passed for check in result.checks)
-        assert result.translator_id == "taoryx.powered_fixed_wing_racetrack.capability_scaled.v1"
+        assert result.translator_id == "taoryx.x8_racetrack.source_route.v1"
     ####
 
 

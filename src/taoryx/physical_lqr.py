@@ -24,7 +24,7 @@ from typing import Any, Protocol
 import numpy as np
 
 from .control_allocation import ControlPlantAdapter, EffectorEffectiveness, PhysicalAllocationStep, ProvenancedLinearization
-from .runtime.lqr import LqrResult, solve_scaled_continuous_lqr
+from .runtime.lqr import LqiController, LqiResult, LqrResult, solve_scaled_continuous_lqi, solve_scaled_continuous_lqr
 from .trim import TrimResult
 
 
@@ -202,6 +202,115 @@ class PhysicalWrenchLqrDesign:
             },
         }
         ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class PhysicalWrenchLqiDesign:
+    """One offset-free LQI design whose demands remain allocator requests.
+
+    The integrators accumulate only explicitly named local state outputs.  A
+    caller still passes the returned wrench coordinates to the plant's bounded
+    allocator; this class never converts a persistent error into a directly
+    injected force or moment.
+    """
+
+    id: str
+    projection: WrenchLinearizationProjection
+    result: LqiResult
+    q_diagonal: tuple[float, ...]
+    r_diagonal: tuple[float, ...]
+    integral_q_diagonal: tuple[float, ...]
+    state_scales: tuple[float, ...]
+    wrench_scales: tuple[float, ...]
+
+    def __post_init__(self) -> None:
+        if not self.id.strip():
+            raise ValueError("physical LQI design requires a stable id")
+        output_count = len(self.result.output_names)
+        if not output_count or set(self.result.output_names) - set(self.projection.state_names):
+            raise ValueError("physical LQI outputs must be unique projected state names")
+        if len(self.q_diagonal) != self.projection.state_dimension:
+            raise ValueError("physical LQI Q dimension does not match projected state")
+        if len(self.r_diagonal) != self.projection.wrench_dimension:
+            raise ValueError("physical LQI R dimension does not match projected wrench")
+        if len(self.integral_q_diagonal) != output_count:
+            raise ValueError("physical LQI integral-Q dimension does not match tracked outputs")
+        if len(self.state_scales) != self.projection.state_dimension:
+            raise ValueError("physical LQI state-scale dimension does not match projected state")
+        if len(self.wrench_scales) != self.projection.wrench_dimension:
+            raise ValueError("physical LQI wrench-scale dimension does not match projected wrench")
+        if any(
+            not math.isfinite(value) or value <= 0.0
+            for value in (*self.q_diagonal, *self.r_diagonal, *self.integral_q_diagonal)
+        ):
+            raise ValueError("physical LQI weights must be finite and positive")
+        if any(not math.isfinite(value) or value <= 0.0 for value in (*self.state_scales, *self.wrench_scales)):
+            raise ValueError("physical LQI scales must be finite and positive")
+        if tuple(self.result.state_names) != self.projection.state_names:
+            raise ValueError("physical LQI state names do not match projected plant")
+        if tuple(self.result.control_names) != self.projection.wrench_names:
+            raise ValueError("physical LQI wrench names do not match projected plant")
+        ####
+
+    def build_controller(
+        self,
+        *,
+        wrench_lower: Mapping[str, float] | None = None,
+        wrench_upper: Mapping[str, float] | None = None,
+        integral_lower: Mapping[str, float] | None = None,
+        integral_upper: Mapping[str, float] | None = None,
+    ) -> LqiController:
+        """Build a named offset-free wrench controller around the source trim.
+
+        Wrench bounds are optional and deliberately separate from actuator
+        limits.  The downstream allocator remains authoritative for coupled
+        rotor/surface saturation and logs every realized control value.
+        """
+
+        return LqiController(
+            self.result,
+            state_trim=self.projection.trim_state,
+            control_trim=self.projection.nominal_wrench,
+            output_trim={name: float(self.projection.trim_state[name]) for name in self.result.output_names},
+            lower=wrench_lower or {},
+            upper=wrench_upper or {},
+            integral_lower=integral_lower or {},
+            integral_upper=integral_upper or {},
+        )
+        ####
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the design and explicit output-integrator provenance."""
+
+        return {
+            "id": self.id,
+            "method": "lqi",
+            "projection": self.projection.as_dict(),
+            "output_names": list(self.result.output_names),
+            "q_diagonal": list(self.q_diagonal),
+            "r_diagonal": list(self.r_diagonal),
+            "integral_q_diagonal": list(self.integral_q_diagonal),
+            "state_scales": list(self.state_scales),
+            "wrench_scales": list(self.wrench_scales),
+            "state_gain": np.asarray(self.result.state_gain, dtype=float).tolist(),
+            "integral_gain": np.asarray(self.result.integral_gain, dtype=float).tolist(),
+            "closed_loop_poles": [
+                {"real": float(value.real), "imaginary": float(value.imag)}
+                for value in self.result.design.closed_loop_eigenvalues
+            ],
+            "maximum_real_pole": self.result.maximum_real_pole,
+            "controllable": self.result.design.controllable,
+            "matrix_sha256": {
+                "a": self.result.design.a_sha256,
+                "b": self.result.design.b_sha256,
+                "q": self.result.design.q_sha256,
+                "r": self.result.design.r_sha256,
+                "k": self.result.design.k_sha256,
+            },
+        }
+        ####
+
     ####
 
 
@@ -578,7 +687,14 @@ def run_scheduled_physical_wrench_transition(
                     "normalized_error": norm,
                     "allocation_status": allocation.allocation.status,
                     "allocation_residual": allocation.achieved_controlled_residual_norm,
+                    "state": dict(state),
+                    "environment": dict(environment_for_coordinate(coordinate)),
+                    "requested_wrench": dict(command.requested_wrench),
+                    "achieved_wrench": dict(allocation.achieved_wrench),
+                    "residual_wrench": dict(allocation.achieved_residual_wrench),
                     "actual_effectors": dict(allocation.actuator.actual_positions),
+                    "position_saturated": list(allocation.actuator.position_saturated),
+                    "rate_limited": list(allocation.actuator.rate_limited),
                 }
             )
         actual_effectors = dict(allocation.actuator.actual_positions)
@@ -735,9 +851,15 @@ class PhysicalWrenchLqrValidation:
 
     @property
     def initial_feedback_error_norm(self) -> float:
-        """Return the initial selected-state error norm."""
+        """Return the selected-state error norm before the first interval."""
 
-        return _feedback_error_norm(self.samples[0].state_error, self.design.projection.state_names)
+        return _feedback_error_norm(
+            {
+                name: float(self.initial_state[name]) - float(self.design.projection.trim_state[name])
+                for name in self.design.projection.state_names
+            },
+            self.design.projection.state_names,
+        )
         ####
     ####
 
@@ -745,7 +867,13 @@ class PhysicalWrenchLqrValidation:
     def final_feedback_error_norm(self) -> float:
         """Return the final selected-state error norm."""
 
-        return _feedback_error_norm(self.samples[-1].state_error, self.design.projection.state_names)
+        return _feedback_error_norm(
+            {
+                name: float(self.final_state[name]) - float(self.design.projection.trim_state[name])
+                for name in self.design.projection.state_names
+            },
+            self.design.projection.state_names,
+        )
         ####
 
     @property
@@ -795,6 +923,221 @@ class PhysicalWrenchLqrValidation:
                 "saturation_fraction": self.saturation_fraction,
                 "maximum_continuous_saturation_duration_s": self.maximum_continuous_saturation_duration_s,
                 "allocation_statuses": list(self.allocation_statuses),
+            },
+            "samples": [sample.as_dict() for sample in self.samples],
+        }
+        ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class PhysicalWrenchLqiSample:
+    """One accepted end-of-interval nonlinear physical LQI sample.
+
+    ``state`` is the accepted state at ``time_s`` after the held, allocator-
+    realized effector command advanced one interval.  The sample preserves the
+    output-integrator state alongside its exact requested and realized wrench.
+    This makes offset-free control inspectable without treating the integral
+    term as an injected load.
+    """
+
+    time_s: float
+    state: Mapping[str, float]
+    state_error: Mapping[str, float]
+    lqi_integral_error: Mapping[str, float]
+    lqi_wrench_command: Mapping[str, float]
+    lqi_wrench_saturated: tuple[str, ...]
+    requested_wrench: Mapping[str, float]
+    allocation: PhysicalAllocationStep
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return allocator-backed LQI telemetry for one truth sample."""
+
+        payload = PhysicalWrenchLqrSample(
+            self.time_s,
+            self.state,
+            self.state_error,
+            self.lqi_wrench_command,
+            self.requested_wrench,
+            self.allocation,
+        ).as_dict()
+        payload["lqi_integral_error"] = dict(self.lqi_integral_error)
+        payload["lqi_wrench_command"] = dict(self.lqi_wrench_command)
+        payload["lqi_wrench_saturated"] = list(self.lqi_wrench_saturated)
+        payload.pop("lqr_wrench_increment")
+        return payload
+        ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class PhysicalWrenchLqiValidation:
+    """Deterministic local nonlinear evidence for a plant-derived LQI.
+
+    A completed record proves only this bounded local controller execution.
+    It does not infer disturbance rejection, scheduling, navigation, or an
+    operating envelope beyond the caller's declared test conditions.
+    """
+
+    design: PhysicalWrenchLqiDesign
+    duration_s: float
+    dt_s: float
+    initial_state: Mapping[str, float]
+    final_state: Mapping[str, float]
+    reference: Mapping[str, float]
+    environment: Mapping[str, float | str]
+    samples: tuple[PhysicalWrenchLqiSample, ...]
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.duration_s) or self.duration_s <= 0.0:
+            raise ValueError("physical LQI validation duration must be finite and positive")
+        if not math.isfinite(self.dt_s) or self.dt_s <= 0.0:
+            raise ValueError("physical LQI validation step must be finite and positive")
+        if not self.samples:
+            raise ValueError("physical LQI validation requires telemetry samples")
+        missing_reference = set(self.design.result.output_names) - set(self.reference)
+        if missing_reference:
+            raise KeyError(f"physical LQI validation reference is missing: {', '.join(sorted(missing_reference))}")
+        if any(not math.isfinite(float(value)) for value in self.reference.values()):
+            raise ValueError("physical LQI validation reference must be finite")
+        if any(
+            isinstance(value, bool) or not isinstance(value, int | float | str)
+            or (isinstance(value, int | float) and not math.isfinite(float(value)))
+            for value in self.environment.values()
+        ):
+            raise ValueError("physical LQI validation environment values must be finite numeric or text")
+        ####
+    ####
+
+    @property
+    def maximum_controlled_actual_residual(self) -> float:
+        """Return the worst realized residual over actively controlled axes."""
+
+        return max(sample.allocation.achieved_controlled_residual_norm for sample in self.samples)
+        ####
+    ####
+
+    @property
+    def saturation_fraction(self) -> float:
+        """Return fraction of samples affected by a physical limitation."""
+
+        return sum(_sample_is_constrained(sample) for sample in self.samples) / len(self.samples)
+        ####
+    ####
+
+    @property
+    def maximum_continuous_saturation_duration_s(self) -> float:
+        """Return the longest committed run with an active physical limit."""
+
+        longest = 0
+        current = 0
+        for sample in self.samples:
+            if _sample_is_constrained(sample):
+                current += 1
+                longest = max(longest, current)
+            else:
+                current = 0
+        return longest * self.dt_s
+        ####
+    ####
+
+    @property
+    def final_controlled_actual_residual(self) -> float:
+        """Return the realized controlled-axis residual at the final sample."""
+
+        return self.samples[-1].allocation.achieved_controlled_residual_norm
+        ####
+    ####
+
+    @property
+    def allocation_statuses(self) -> tuple[str, ...]:
+        """Return all observed allocator statuses in deterministic order."""
+
+        return tuple(sorted({sample.allocation.allocation.status for sample in self.samples}))
+        ####
+    ####
+
+    @property
+    def initial_feedback_error_norm(self) -> float:
+        """Return the initial selected-state error norm."""
+
+        return _feedback_error_norm(self.samples[0].state_error, self.design.projection.state_names)
+        ####
+    ####
+
+    @property
+    def final_feedback_error_norm(self) -> float:
+        """Return the final selected-state error norm."""
+
+        return _feedback_error_norm(self.samples[-1].state_error, self.design.projection.state_names)
+        ####
+    ####
+
+    @property
+    def initial_normalized_feedback_error_norm(self) -> float:
+        """Return the initial feedback error in the declared LQI state units."""
+
+        return _normalized_feedback_error_norm(
+            {
+                name: float(self.initial_state[name]) - float(self.design.projection.trim_state[name])
+                for name in self.design.projection.state_names
+            },
+            self.design.projection.state_names,
+            self.design.state_scales,
+        )
+        ####
+    ####
+
+    @property
+    def final_normalized_feedback_error_norm(self) -> float:
+        """Return the final feedback error in the declared LQI state units."""
+
+        return _normalized_feedback_error_norm(
+            {
+                name: float(self.final_state[name]) - float(self.design.projection.trim_state[name])
+                for name in self.design.projection.state_names
+            },
+            self.design.projection.state_names,
+            self.design.state_scales,
+        )
+        ####
+    ####
+
+    @property
+    def integrators_exercised(self) -> bool:
+        """Return whether any explicitly declared output integral changed."""
+
+        return any(
+            abs(float(value)) > 1.0e-12
+            for sample in self.samples
+            for value in sample.lqi_integral_error.values()
+        )
+        ####
+    ####
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return a self-contained local physical-LQI validation artifact."""
+
+        return {
+            "schema": "taoryx.physical-lqi-validation/v1alpha1",
+            "design": self.design.as_dict(),
+            "duration_s": self.duration_s,
+            "dt_s": self.dt_s,
+            "initial_state": dict(self.initial_state),
+            "final_state": dict(self.final_state),
+            "reference": dict(self.reference),
+            "environment": dict(self.environment),
+            "metrics": {
+                "initial_feedback_error_norm": self.initial_feedback_error_norm,
+                "final_feedback_error_norm": self.final_feedback_error_norm,
+                "initial_normalized_feedback_error_norm": self.initial_normalized_feedback_error_norm,
+                "final_normalized_feedback_error_norm": self.final_normalized_feedback_error_norm,
+                "maximum_controlled_actual_residual": self.maximum_controlled_actual_residual,
+                "final_controlled_actual_residual": self.final_controlled_actual_residual,
+                "saturation_fraction": self.saturation_fraction,
+                "maximum_continuous_saturation_duration_s": self.maximum_continuous_saturation_duration_s,
+                "allocation_statuses": list(self.allocation_statuses),
+                "integrators_exercised": self.integrators_exercised,
             },
             "samples": [sample.as_dict() for sample in self.samples],
         }
@@ -937,6 +1280,81 @@ def design_physical_wrench_lqr(
     ####
 
 
+def design_physical_wrench_lqi(
+    identifier: str,
+    projection: WrenchLinearizationProjection,
+    *,
+    output_names: Sequence[str],
+    q_diagonal: Sequence[float],
+    r_diagonal: Sequence[float],
+    integral_q_diagonal: Sequence[float],
+    state_scales: Sequence[float],
+    wrench_scales: Sequence[float],
+) -> PhysicalWrenchLqiDesign:
+    """Synthesize offset-free wrench feedback from real plant derivatives.
+
+    ``output_names`` are local plant coordinates to be regulated against
+    persistent matched bias.  The resulting command is a desired wrench in
+    the projection's coordinates and must still traverse physical allocation
+    before the nonlinear plant advances.
+    """
+
+    outputs = tuple(output_names)
+    q_diagonal = tuple(float(value) for value in q_diagonal)
+    r_diagonal = tuple(float(value) for value in r_diagonal)
+    integral_q_diagonal = tuple(float(value) for value in integral_q_diagonal)
+    state_scales = tuple(float(value) for value in state_scales)
+    wrench_scales = tuple(float(value) for value in wrench_scales)
+    if not outputs or len(set(outputs)) != len(outputs) or set(outputs) - set(projection.state_names):
+        raise ValueError("physical wrench LQI outputs must be unique projected state names")
+    if len(q_diagonal) != projection.state_dimension or len(state_scales) != projection.state_dimension:
+        raise ValueError("physical wrench LQI state weights/scales must match projected state dimension")
+    if len(r_diagonal) != projection.wrench_dimension or len(wrench_scales) != projection.wrench_dimension:
+        raise ValueError("physical wrench LQI control weights/scales must match projected wrench dimension")
+    if len(integral_q_diagonal) != len(outputs):
+        raise ValueError("physical wrench LQI integral weights must match tracked outputs")
+    if any(not math.isfinite(value) or value <= 0.0 for value in (*q_diagonal, *r_diagonal, *integral_q_diagonal)):
+        raise ValueError("physical wrench LQI weights must be finite and positive")
+    output_matrix = tuple(
+        tuple(1.0 if state_name == output_name else 0.0 for state_name in projection.state_names)
+        for output_name in outputs
+    )
+    q_values = (*q_diagonal, *integral_q_diagonal)
+    q = tuple(
+        tuple(value if row_index == column_index else 0.0 for column_index in range(len(q_values)))
+        for row_index, value in enumerate(q_values)
+    )
+    r = tuple(
+        tuple(value if row_index == column_index else 0.0 for column_index in range(projection.wrench_dimension))
+        for row_index, value in enumerate(r_diagonal)
+    )
+    result = solve_scaled_continuous_lqi(
+        projection.a_matrix,
+        projection.b_matrix,
+        q,
+        r,
+        output_matrix=output_matrix,
+        output_names=outputs,
+        state_scales=state_scales,
+        control_scales=wrench_scales,
+        state_names=projection.state_names,
+        control_names=projection.wrench_names,
+    )
+    if not result.hurwitz:
+        raise ValueError(f"physical wrench LQI is not strictly stable: maximum real pole {result.maximum_real_pole:.6g}")
+    return PhysicalWrenchLqiDesign(
+        identifier,
+        projection,
+        result,
+        q_diagonal,
+        r_diagonal,
+        integral_q_diagonal,
+        state_scales,
+        wrench_scales,
+    )
+    ####
+
+
 def validate_nonlinear_wrench_lqr(
     plant: ControlPlantAdapter,
     trim: TrimResult,
@@ -1013,18 +1431,136 @@ def validate_nonlinear_wrench_lqr(
     ####
 
 
+def validate_nonlinear_wrench_lqi(
+    plant: ControlPlantAdapter,
+    trim: TrimResult,
+    design: PhysicalWrenchLqiDesign,
+    *,
+    initial_state: Mapping[str, float],
+    duration_s: float,
+    dt_s: float,
+    reference: Mapping[str, float] | None = None,
+    wrench_lower: Mapping[str, float] | None = None,
+    wrench_upper: Mapping[str, float] | None = None,
+    integral_lower: Mapping[str, float] | None = None,
+    integral_upper: Mapping[str, float] | None = None,
+    environment: Mapping[str, float | str] | None = None,
+) -> PhysicalWrenchLqiValidation:
+    """Run a bounded nonlinear LQI screen through actual physical effectors.
+
+    The controller produces only desired wrench coordinates.  At every
+    committed sample those coordinates are allocated through the plant's
+    declared effectors and the accepted actual positions are held over the
+    RK4 interval.  This is the physical LQI counterpart to
+    :func:`validate_nonlinear_wrench_lqr`; it never injects integral actions
+    directly into the dynamics.
+    """
+
+    if not math.isfinite(duration_s) or duration_s <= 0.0:
+        raise ValueError("nonlinear physical LQI duration must be finite and positive")
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("nonlinear physical LQI time step must be finite and positive")
+    required_state_names = tuple(plant.state_names)
+    missing_state = set(required_state_names) - set(initial_state)
+    if missing_state:
+        raise KeyError(f"initial nonlinear state is missing: {', '.join(sorted(missing_state))}")
+    if tuple(trim.spec.state_names) != required_state_names:
+        raise ValueError("nonlinear physical LQI trim does not match the adapter state contract")
+    if tuple(trim.spec.control_names) != tuple(plant.control_names):
+        raise ValueError("nonlinear physical LQI trim does not match the adapter effector contract")
+    if set(design.projection.state_names) - set(required_state_names):
+        raise ValueError("physical LQI design refers to states absent from adapter")
+    state = {name: float(initial_state[name]) for name in required_state_names}
+    if any(not math.isfinite(value) for value in state.values()):
+        raise ValueError("nonlinear physical LQI initial state must be finite")
+    tracked_reference = {name: float(trim.state[name]) for name in design.result.output_names}
+    if reference is not None:
+        missing_reference = set(design.result.output_names) - set(reference)
+        if missing_reference:
+            raise KeyError(f"nonlinear physical LQI reference is missing: {', '.join(sorted(missing_reference))}")
+        unknown_reference = set(reference) - set(design.result.output_names)
+        if unknown_reference:
+            raise KeyError(f"nonlinear physical LQI reference names unknown outputs: {', '.join(sorted(unknown_reference))}")
+        tracked_reference = {name: float(reference[name]) for name in design.result.output_names}
+    if any(not math.isfinite(value) for value in tracked_reference.values()):
+        raise ValueError("nonlinear physical LQI reference must be finite")
+    derivative_environment = dict(environment or {})
+    if any(
+        isinstance(value, bool) or not isinstance(value, int | float | str)
+        or (isinstance(value, int | float) and not math.isfinite(float(value)))
+        for value in derivative_environment.values()
+    ):
+        raise ValueError("nonlinear physical LQI environment values must be finite numeric or text")
+    controller = design.build_controller(
+        wrench_lower=wrench_lower,
+        wrench_upper=wrench_upper,
+        integral_lower=integral_lower,
+        integral_upper=integral_upper,
+    )
+    actual_effectors = {name: float(trim.controls[name]) for name in plant.control_names}
+    nominal_wrench = dict(design.projection.nominal_wrench)
+    samples: list[PhysicalWrenchLqiSample] = []
+    steps = int(math.ceil(duration_s / dt_s))
+    time_s = 0.0
+    for _ in range(steps):
+        command = controller.command(state, tracked_reference, dt=dt_s)
+        requested = dict(nominal_wrench)
+        requested.update({name: float(value) for name, value in command.controls.items()})
+        requested = {name: float(requested.get(name, nominal_wrench[name])) for name in nominal_wrench}
+        allocation = plant.allocate(state, requested, actual_effectors, dt_s)
+        if tuple(allocation.allocation.controlled_wrench_axes) != design.projection.wrench_names:
+            raise ValueError(
+                "plant allocation controlled axes do not match the physical LQI design: "
+                f"{allocation.allocation.controlled_wrench_axes!r} != {design.projection.wrench_names!r}"
+            )
+        actual_effectors = dict(allocation.actuator.actual_positions)
+        step = min(dt_s, duration_s - time_s)
+        if step <= 0.0:
+            break
+        state = _rk4_state_step(plant, state, actual_effectors, step, derivative_environment)
+        time_s += step
+        state_error = {name: state[name] - float(trim.state[name]) for name in required_state_names}
+        samples.append(
+            PhysicalWrenchLqiSample(
+                time_s,
+                dict(state),
+                state_error,
+                dict(controller.integral_error),
+                {name: float(value) for name, value in command.controls.items()},
+                tuple(command.saturated),
+                requested,
+                allocation,
+            )
+        )
+    final_state = dict(state)
+    if any(not math.isfinite(value) for value in final_state.values()):
+        raise ValueError("physical LQI plant integration produced a non-finite final state")
+    return PhysicalWrenchLqiValidation(
+        design,
+        duration_s,
+        dt_s,
+        dict(initial_state),
+        final_state,
+        tracked_reference,
+        derivative_environment,
+        tuple(samples),
+    )
+    ####
+
+
 def _rk4_state_step(
     plant: ControlPlantAdapter,
     state: Mapping[str, float],
     effectors: Mapping[str, float],
     dt_s: float,
+    environment: Mapping[str, float | str] | None = None,
 ) -> dict[str, float]:
     """Advance named local plant states with a held accepted actuator state."""
 
     names = tuple(plant.state_names)
 
     def derivative(values: Mapping[str, float]) -> np.ndarray:
-        result = plant.state_derivative(values, effectors, {})
+        result = plant.state_derivative(values, effectors, environment or {})
         missing = set(names) - set(result)
         if missing:
             raise KeyError(f"plant derivative is missing: {', '.join(sorted(missing))}")
@@ -1084,7 +1620,7 @@ def _normalized_feedback_error_norm(
     ####
 
 
-def _sample_is_constrained(sample: PhysicalWrenchLqrSample) -> bool:
+def _sample_is_constrained(sample: PhysicalWrenchLqrSample | PhysicalWrenchLqiSample) -> bool:
     """Return whether an allocator or actuator limit affected one sample."""
 
     allocation = sample.allocation

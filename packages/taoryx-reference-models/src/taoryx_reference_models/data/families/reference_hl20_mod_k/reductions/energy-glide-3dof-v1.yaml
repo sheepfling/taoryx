@@ -1,0 +1,18 @@
+schema_version: 1
+kind: taoryx.reference-reduction-contract/v1
+family: reference_hl20_mod_k
+reduction_id: hl20-energy-glide-3dof-v1
+qualification_class: derived_exact
+status: equivalence_pending
+parent:
+  family_id: reference_hl20_mod_k
+  fidelity: rigid_body_6dof
+  manifest: families/reference_hl20_mod_k/family.yaml
+  source_package_sha256: 443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63
+preserves: [atmosphere, gravity, mass_properties, aerodynamic_force_channels, energy_rate, glide_trim]
+omits: [attitude_dynamics, aerodynamic_moments, body_rates, physical_actuator_states]
+comparison:
+  required_evidence: [matched_glide_trim, altitude_history, speed_history, energy_rate_history]
+  pass_rule: reduction_must_match_parent_over_declared_glide_envelope
+  evidence_artifact: verification/daveml_alpha3_reduction_evidence.json
+nonclaims: [controller_qualification, landing_validation, source_exact_attitude_response]

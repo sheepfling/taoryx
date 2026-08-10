@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Any, Literal, cast
 
 import pytest
+from taoryx.hl20_source_release_composition_execution import execute_hl20_source_booster_release_composition
+from taoryx.hummingbird_composition_execution import execute_hummingbird_pseudo_composition
+from taoryx.nesc_composition_execution import execute_nesc_source_replay_composition
+from taoryx.passive_tumbling_composition_execution import execute_passive_tumbling_composition
+from taoryx.x15_staged_composition_execution import execute_x15_staged_reachability_composition
 
 from taoryx.composition_control_trace import validate_committed_control_trace
 from taoryx.composition_episode import (
@@ -15,12 +20,8 @@ from taoryx.composition_episode import (
     registered_episode_factory_ids,
 )
 from taoryx.composition_result_catalog import index_composition_results
-from taoryx.hl20_source_release_composition_execution import execute_hl20_source_booster_release_composition
-from taoryx.hummingbird_composition_execution import execute_hummingbird_pseudo_composition
 from taoryx.language_backed_execution import execute_powered_fixed_wing_composition
 from taoryx.local_direct_wrench_composition_execution import execute_local_direct_wrench_composition
-from taoryx.nesc_composition_execution import execute_nesc_source_replay_composition
-from taoryx.passive_tumbling_composition_execution import execute_passive_tumbling_composition
 from taoryx.runtime.cli import main
 from taoryx.vehicle_composition import (
     CompiledVehicleComposition,
@@ -46,7 +47,6 @@ from taoryx.vehicle_execution_bindings import (
 )
 from taoryx.vehicle_execution_preflight import preflight_vehicle_composition
 from taoryx.vehicle_runtime_lowering import lower_vehicle_composition
-from taoryx.x15_staged_composition_execution import execute_x15_staged_reachability_composition
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -105,6 +105,7 @@ def test_execution_binding_catalog_references_declared_family_missions_and_tiers
         "source_scheduled_replay",
         "open_loop_witness",
         "local_direct_wrench_screen",
+        "source_surface_authority_screen",
         "passive_uncontrolled",
         "planned",
     } <= {item.execution_mode for item in catalog.bindings}
@@ -158,6 +159,10 @@ def test_every_advertised_runnable_episode_factory_has_one_runtime_constructor()
             {"execution_mode": "local_direct_wrench_screen", "fidelity": "pseudo_6dof"},
             "requires rigid_body_6dof_direct_wrench fidelity",
         ),
+        (
+            {"execution_mode": "source_surface_authority_screen", "operation": "episode", "batch_action_trace": "not_applicable"},
+            "supports batch execution only",
+        ),
     ),
 )
 def test_execution_mode_rejects_an_incompatible_endpoint_contract(update: dict[str, object], message: str) -> None:
@@ -186,6 +191,10 @@ def test_batch_episode_parity_registry_is_explicit_and_never_inferred() -> None:
     assert validate_batch_episode_parity_bindings(parity_catalog.bindings, execution_bindings=execution_catalog.bindings) == ()
 
     hummingbird = batch_episode_parity_record("hummingbird", "multirotor_pad_box_yaw_recovery_land_v1", "pseudo_6dof", parity_catalog=parity_catalog)
+    hummingbird_physical = batch_episode_parity_record("hummingbird", "hummingbird_local_individual_rotor_lqi_screen_v1", "rigid_body_6dof_surface_allocated", parity_catalog=parity_catalog)
+    hummingbird_horizontal = batch_episode_parity_record("hummingbird", "hummingbird_local_horizontal_translation_lqi_screen_v1", "rigid_body_6dof_surface_allocated", parity_catalog=parity_catalog)
+    hummingbird_vertical = batch_episode_parity_record("hummingbird", "hummingbird_local_vertical_translation_lqi_screen_v1", "rigid_body_6dof_surface_allocated", parity_catalog=parity_catalog)
+    hummingbird_direct = batch_episode_parity_record("hummingbird", "hummingbird_local_direct_wrench_screen_v1", "rigid_body_6dof_direct_wrench", parity_catalog=parity_catalog)
     x8 = batch_episode_parity_record("skywalker_x8", "powered_fixed_wing_racetrack_v1", "point_mass_3dof", parity_catalog=parity_catalog)
     x8_pseudo = batch_episode_parity_record("skywalker_x8", "powered_fixed_wing_racetrack_v1", "pseudo_6dof", parity_catalog=parity_catalog)
     a320 = batch_episode_parity_record("a320_openap_3dof", "powered_fixed_wing_racetrack_v1", "pseudo_6dof", parity_catalog=parity_catalog)
@@ -195,6 +204,14 @@ def test_batch_episode_parity_registry_is_explicit_and_never_inferred() -> None:
 
     assert hummingbird["availability"] == "registered"
     assert hummingbird["adapter_id"] == "taoryx.hummingbird.aggregate_thrust_batch_episode_parity.v1"
+    assert hummingbird_physical["availability"] == "not_available"
+    assert hummingbird_physical["runnable_operations"] == ["batch"]
+    assert hummingbird_horizontal["availability"] == "not_available"
+    assert hummingbird_horizontal["runnable_operations"] == ["batch"]
+    assert hummingbird_vertical["availability"] == "not_available"
+    assert hummingbird_vertical["runnable_operations"] == ["batch"]
+    assert hummingbird_direct["availability"] == "not_available"
+    assert hummingbird_direct["runnable_operations"] == ["batch"]
     assert x8["availability"] == "registered"
     assert x8["adapter_id"] == "taoryx.language_backed.action_trace_batch_episode_parity.v1"
     assert x8_pseudo["availability"] == "registered"
@@ -207,7 +224,13 @@ def test_batch_episode_parity_registry_is_explicit_and_never_inferred() -> None:
     assert x15["adapter_id"] == "taoryx.x15.local_direct_wrench_batch_episode_parity.v1"
     assert hl20["availability"] == "registered"
     assert hl20["adapter_id"] == "taoryx.local_direct_wrench_batch_episode_parity.v1"
-    assert batch_episode_parity_records("hummingbird", parity_catalog=parity_catalog) == [hummingbird]
+    assert batch_episode_parity_records("hummingbird", parity_catalog=parity_catalog) == [
+        hummingbird_direct,
+        hummingbird_horizontal,
+        hummingbird_physical,
+        hummingbird_vertical,
+        hummingbird,
+    ]
     ####
 
 
@@ -225,6 +248,7 @@ def test_batch_episode_parity_registry_is_explicit_and_never_inferred() -> None:
         ("x15_local_direct_wrench_screen_compose.yaml", "batch", "local_direct_wrench_screen.v1"),
         ("tumbling_body_direct_release_pseudo6dof_compose.yaml", "batch", "passive_tumbling_direct_release.v1"),
         ("hummingbird_hover_yaw_episode_pseudo6dof_compose.yaml", "episode", "hummingbird_aggregate_thrust_episode.v1"),
+        ("hummingbird_local_individual_rotor_lqi_screen_compose.yaml", "batch", "hummingbird_local_individual_rotor_lqi_screen.v1"),
     ),
 )
 def test_execution_bindings_select_an_exact_family_mission_tier_and_operation(

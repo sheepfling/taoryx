@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from ..fidelity_contracts import (
     CANONICAL_FIDELITY_TIERS,
@@ -14,7 +14,9 @@ from ..fidelity_contracts import (
     canonical_tier_for_runtime,
 )
 from ..fidelity_lowering import LoweringCandidate, select_canonical_lowering
-from .reference_families import ReferenceFidelityProfile
+
+if TYPE_CHECKING:
+    from .reference_families import ReferenceFidelityProfile
 
 FallbackPolicy = Literal["exact_only", "validated_lower_only"]
 FidelityName = LegacyFidelityTier

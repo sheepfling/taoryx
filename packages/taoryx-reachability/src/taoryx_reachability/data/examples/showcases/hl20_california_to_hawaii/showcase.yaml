@@ -1,0 +1,111 @@
+schema_version: 1
+id: hl20_california_to_hawaii_comparison
+title: HL-20 California-to-Hawaii entry and glide comparison contract
+status: four_fidelity_executable
+family_group: hypersonic_lifting_body_research
+vehicle_id: reference_hl20_mod_k
+qualification: source_grounded_reference_plus_synthetic_route_assumptions
+claim_boundary:
+  source_exact_vehicle: true
+  source_exact_route: false
+  controller_claims: false
+  landing_or_arrival_claims: false
+  engineering_validity: false
+  purpose: commensurate_telemetry_and_phase_comparison
+route:
+  kind: synthetic_great_circle
+  start: {latitude_deg: 34.7, longitude_deg: -120.6}
+  target: {latitude_deg: 21.31, longitude_deg: -157.86}
+  target_tolerance_km: 40.0
+vehicle:
+  model: reference_hl20_mod_k
+  propulsion: none
+  mass_binding: separate_fixed_binding_v1
+  runtime_profile: hl20.rigid_body_6dof.v1
+  control_mode: direct_surface_or_open_loop_only
+  source_envelope: {mach: [0.3, 4.0], altitude_m: [-1000.0, 20000.0]}
+phases:
+  - id: initial_condition
+    qualification: executable
+  - id: energy_entry
+    qualification: source_bound_executable
+  - id: hypersonic_glide
+    qualification: source_bound_executable
+  - id: terminal_termination
+    qualification: contract_executable
+comparison_channels:
+  - time_s
+  - altitude_m
+  - mach
+  - dynamic_pressure_pa
+  - latitude_deg
+  - longitude_deg
+  - range_to_target_m
+  - flight_path_angle_deg
+  - bank_angle_deg
+  - angle_of_attack_deg
+  - mass_kg
+nonclaims:
+  - This is not a NASA trajectory reconstruction.
+  - This does not establish California-to-Hawaii range or arrival capability.
+  - No controller, guidance, thermal, landing, or terminal ProNav claim is made.
+terminal_contract:
+  target_id: honolulu_terminal_reference
+  target_frame: local_ecic_tangent_from_california_origin
+  max_impact_radius_m: 40000.0
+  impact_speed_m_s: {min: 1000.0, max: 3000.0}
+  ground_contact_required: true
+  timeout_is_not_success: true
+next_implementation_gate: alpha4-new-hl20-physics-or-controller-contract
+post_g6_program: docs/plan/hl20-post-g6-program.md
+source_bound_showcase:
+  command: python -m tools.dev showcase-hl20-source-composites
+  destination: artifacts/showcases/hl20_california_to_hawaii/source_bound
+  aerodynamic_model: hl20_mod_k_daveml_source_v1
+  actuator_profile: hl20.reference_first_order.v1
+  mission_profile: hl20.energy_managed_entry_glide.v1
+  claim_boundary: source force/moment and actuator telemetry with synthetic booster and route assumptions; not source-exact trajectory or controller qualification
+quality_gates:
+  contract: examples/showcases/hl20_california_to_hawaii/quality_gates.yaml
+  report: verification/hl20_ca_hi_qualification.json
+  scope: HL20-G0_through_HL20-G6
+  status: qualified_through_hl20_g6
+  terminal_policy: nominal parent and child runs require ground contact; horizon timeout is not success
+launch_composition:
+  status: four_fidelity_executable
+  parent:
+    id: generic-staged-booster-v1
+    role: launch_parent
+    qualification: synthetic
+    propulsion_claim: scenario_assumption_only
+  release_event:
+    id: hl20-release-v1
+    mechanism: timed_or_altitude_boundary
+    child_initialization: inherit_position_velocity_attitude_and_rates
+    lineage_required: true
+  child:
+    id: reference_hl20_mod_k
+    role: unpowered_entry_glider
+    propulsion: none
+  fidelity_ladder:
+    - {id: boost_release_3dof, status: verified_witness}
+    - {id: boost_release_pseudo6dof, status: verified_witness}
+    - {id: boost_release_rigid6dof, status: verified_witness}
+    - {id: boost_release_rigid6dof_surface_allocated, status: verified_witness}
+showcase_composites:
+  status: executable
+  command: python -m tools.dev showcase-hl20-composites
+  destination: artifacts/showcases/hl20_california_to_hawaii/low_fidelity/composites
+  phase_schedule_s: {boost_start: 0.0, booster_burnout: 15.0, booster_release: 25.0}
+  phase_objectives:
+    - boost phase retained for every realized launch command
+    - coast begins at booster burnout before the accepted release boundary
+    - HL-20 unpowered glide begins after release
+    - one synthetic passive aero-ballistic cylinder is spawned per accepted release
+    - terminal disposition and horizon outcomes remain classified rather than arrival success
+  artifacts:
+    - hl20-ca-hi-flight-composite.png
+    - hl20-ca-hi-envelope-comparison.png
+    - hl20-ca-hi-spent-booster-composite.png
+    - showcase-summary.json
+    - showcase-manifest.json

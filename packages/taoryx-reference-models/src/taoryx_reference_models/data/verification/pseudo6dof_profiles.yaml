@@ -1,0 +1,351 @@
+schema: taoryx.pseudo6dof-profiles/v1alpha1
+profiles:
+  - id: skywalker_x8.attitude_response_p6dof.v1
+    family_id: skywalker_x8
+    parent_3dof_profile_id: skywalker_x8.point_mass_3dof.v1
+    model_kind: attitude_response_surrogate
+    control_realization: response_law
+    status: nominal_case_pass
+    evidence_grade: derived
+    response:
+      roll: {time_constant_s: 0.8, damping_ratio: 0.75, maximum_rate_rad_s: 0.8, maximum_acceleration_rad_s2: 1.8}
+      pitch: {time_constant_s: 1.0, damping_ratio: 0.75, maximum_rate_rad_s: 0.5, maximum_acceleration_rad_s2: 1.2}
+      yaw: {time_constant_s: 1.2, damping_ratio: 0.75, maximum_rate_rad_s: 0.35, maximum_acceleration_rad_s2: 0.8}
+    resource_channels: [fuel]
+    required_channels: [bank, pitch, heading, speed, altitude]
+    unsupported_claims: [physical_elevon_allocation, physical_moment_closure]
+  - id: b747.attitude_response_p6dof.v1
+    family_id: b747
+    parent_3dof_profile_id: b747.point_mass_3dof.v1
+    model_kind: attitude_response_surrogate
+    control_realization: response_law
+    status: nominal_case_pass
+    evidence_grade: estimated
+    response:
+      roll: {time_constant_s: 2.4, damping_ratio: 0.8, maximum_rate_rad_s: 0.18, maximum_acceleration_rad_s2: 0.12}
+      pitch: {time_constant_s: 3.0, damping_ratio: 0.8, maximum_rate_rad_s: 0.12, maximum_acceleration_rad_s2: 0.08}
+      yaw: {time_constant_s: 3.5, damping_ratio: 0.8, maximum_rate_rad_s: 0.08, maximum_acceleration_rad_s2: 0.05}
+    resource_channels: [fuel, mass]
+    required_channels: [bank, pitch, heading, speed, altitude]
+    unsupported_claims: [physical_surface_allocation, physical_moment_closure]
+  - id: a320.attitude_response_p6dof.v1
+    family_id: a320_openap_3dof
+    parent_3dof_profile_id: a320_openap_3dof.point_mass_3dof.v1
+    model_kind: source_derived_reduced_model
+    control_realization: response_law
+    status: nominal_case_pass
+    evidence_grade: mixed
+    response:
+      roll: {time_constant_s: 1.2, damping_ratio: 0.78, maximum_rate_rad_s: 0.35, maximum_acceleration_rad_s2: 0.5}
+      pitch: {time_constant_s: 1.5, damping_ratio: 0.78, maximum_rate_rad_s: 0.25, maximum_acceleration_rad_s2: 0.35}
+      yaw: {time_constant_s: 1.8, damping_ratio: 0.8, maximum_rate_rad_s: 0.2, maximum_acceleration_rad_s2: 0.25}
+    resource_channels: [fuel, mass]
+    required_channels: [bank, pitch, heading, speed, altitude]
+    unsupported_claims: [source_exact_airbus_dynamics, physical_surface_allocation]
+  - id: f16_s119.attitude_response_p6dof.v1
+    family_id: f16_s119
+    parent_3dof_profile_id: f16_s119.point_mass_3dof.v1
+    model_kind: source_derived_reduced_model
+    control_realization: response_law
+    status: nominal_case_pass
+    evidence_grade: source_derived
+    response:
+      roll: {time_constant_s: 0.45, damping_ratio: 0.7, maximum_rate_rad_s: 1.4, maximum_acceleration_rad_s2: 5.0}
+      pitch: {time_constant_s: 0.7, damping_ratio: 0.75, maximum_rate_rad_s: 0.7, maximum_acceleration_rad_s2: 2.5}
+      yaw: {time_constant_s: 0.9, damping_ratio: 0.8, maximum_rate_rad_s: 0.45, maximum_acceleration_rad_s2: 1.2}
+    resource_channels: [fuel, mass]
+    required_channels: [bank, pitch, heading, alpha, beta, load_factor]
+    unsupported_claims: [physical_surface_allocation_outside_declared_plant, supersonic_fidelity]
+  - id: x15.attitude_response_p6dof.v1
+    family_id: x15
+    parent_3dof_profile_id: x15.point_mass_3dof.v1
+    model_kind: source_derived_reduced_model
+    control_realization: response_law
+    status: nominal_case_pass
+    evidence_grade: mixed
+    response:
+      # The reachability bridge historically used one 0.35 s first-order
+      # response with a 3600 deg/s ceiling.  Preserve that checkpoint while
+      # making the response law explicit; the richer scheduled values belong
+      # to the native X-15 refinement, not this reduced envelope screen.
+      roll: {time_constant_s: 0.35, damping_ratio: 0.7, maximum_rate_rad_s: 62.8318530718, maximum_acceleration_rad_s2: 100.0}
+      pitch: {time_constant_s: 0.35, damping_ratio: 0.75, maximum_rate_rad_s: 62.8318530718, maximum_acceleration_rad_s2: 100.0}
+      yaw: {time_constant_s: 0.35, damping_ratio: 0.8, maximum_rate_rad_s: 62.8318530718, maximum_acceleration_rad_s2: 100.0}
+    # The phase schedule is an engineering response bridge, not a source
+    # exact X-15 flight-control law.  Keeping it in the profile makes the
+    # powered/coast/glide regime boundary explicit and replayable.
+    phase_response:
+      boost:
+        roll: {time_constant_s: 0.25, damping_ratio: 0.7, maximum_rate_rad_s: 3.0, maximum_acceleration_rad_s2: 10.0}
+        pitch: {time_constant_s: 0.30, damping_ratio: 0.75, maximum_rate_rad_s: 2.5, maximum_acceleration_rad_s2: 8.0}
+        yaw: {time_constant_s: 0.35, damping_ratio: 0.8, maximum_rate_rad_s: 1.5, maximum_acceleration_rad_s2: 5.0}
+      coast:
+        roll: {time_constant_s: 0.45, damping_ratio: 0.7, maximum_rate_rad_s: 1.5, maximum_acceleration_rad_s2: 4.0}
+        pitch: {time_constant_s: 0.55, damping_ratio: 0.75, maximum_rate_rad_s: 1.2, maximum_acceleration_rad_s2: 3.0}
+        yaw: {time_constant_s: 0.65, damping_ratio: 0.8, maximum_rate_rad_s: 0.8, maximum_acceleration_rad_s2: 2.0}
+      glide:
+        roll: {time_constant_s: 0.75, damping_ratio: 0.7, maximum_rate_rad_s: 0.6, maximum_acceleration_rad_s2: 1.5}
+        pitch: {time_constant_s: 0.90, damping_ratio: 0.75, maximum_rate_rad_s: 0.45, maximum_acceleration_rad_s2: 1.0}
+        yaw: {time_constant_s: 1.10, damping_ratio: 0.8, maximum_rate_rad_s: 0.30, maximum_acceleration_rad_s2: 0.75}
+    resource_channels: [propellant, mass]
+    required_channels: [bank, pitch, heading, speed, altitude, dynamic_pressure]
+    unsupported_claims: [regime_unvalidated_authority, phase_schedule_source_exactness, physical_surface_allocation]
+  - id: hummingbird.attitude_response_p6dof.v1
+    family_id: hummingbird
+    parent_3dof_profile_id: hummingbird.point_mass_3dof.v1
+    model_kind: thrust_vector_surrogate
+    control_realization: response_law
+    status: nominal_case_pass
+    evidence_grade: derived
+    response:
+      roll: {time_constant_s: 0.18, damping_ratio: 0.8, maximum_rate_rad_s: 3.0, maximum_acceleration_rad_s2: 15.0}
+      pitch: {time_constant_s: 0.18, damping_ratio: 0.8, maximum_rate_rad_s: 3.0, maximum_acceleration_rad_s2: 15.0}
+      yaw: {time_constant_s: 0.25, damping_ratio: 0.8, maximum_rate_rad_s: 2.0, maximum_acceleration_rad_s2: 8.0}
+    resource_channels: [battery, thrust]
+    required_channels: [roll, pitch, yaw, position, velocity, thrust]
+    unsupported_claims: [motor_level_allocation, blade_aerodynamics, rotor_inflow]
+  - id: hl20.attitude_response_p6dof.v1
+    family_id: hl20_mod_k
+    parent_3dof_profile_id: hl20_mod_k.point_mass_3dof.v1
+    model_kind: source_derived_reduced_model
+    control_realization: response_law
+    status: nominal_case_pass
+    evidence_grade: source_derived
+    response:
+      roll: {time_constant_s: 1.0, damping_ratio: 0.75, maximum_rate_rad_s: 0.7, maximum_acceleration_rad_s2: 1.8}
+      pitch: {time_constant_s: 1.1, damping_ratio: 0.75, maximum_rate_rad_s: 0.45, maximum_acceleration_rad_s2: 1.2}
+      yaw: {time_constant_s: 1.4, damping_ratio: 0.8, maximum_rate_rad_s: 0.25, maximum_acceleration_rad_s2: 0.6}
+    resource_channels: [mass]
+    required_channels: [bank, pitch, heading, alpha, energy, crossrange]
+    unsupported_claims: [thermal_model, physical_surface_allocation_without_source_data]
+  - id: nesc_rocket.attitude_response_p6dof.v1
+    family_id: reference_nesc_two_stage_rocket
+    parent_3dof_profile_id: nesc_rocket.performance_3dof.v1
+    model_kind: thrust_vector_surrogate
+    control_realization: response_law
+    status: nominal_case_pass
+    evidence_grade: mixed
+    response:
+      roll: {time_constant_s: 0.8, damping_ratio: 0.7, maximum_rate_rad_s: 0.8, maximum_acceleration_rad_s2: 2.0}
+      pitch: {time_constant_s: 0.9, damping_ratio: 0.75, maximum_rate_rad_s: 0.55, maximum_acceleration_rad_s2: 1.4}
+      yaw: {time_constant_s: 1.0, damping_ratio: 0.75, maximum_rate_rad_s: 0.45, maximum_acceleration_rad_s2: 1.0}
+    # The retained DAVE-ML history supplies phase labels but no independent
+    # attitude channel. These are bounded response assumptions attached to
+    # those labels, not source-exact gimbal dynamics.
+    phase_response:
+      stage1_burn:
+        roll: {time_constant_s: 0.55, damping_ratio: 0.7, maximum_rate_rad_s: 1.2, maximum_acceleration_rad_s2: 3.0}
+        pitch: {time_constant_s: 0.65, damping_ratio: 0.75, maximum_rate_rad_s: 0.9, maximum_acceleration_rad_s2: 2.5}
+        yaw: {time_constant_s: 0.75, damping_ratio: 0.75, maximum_rate_rad_s: 0.7, maximum_acceleration_rad_s2: 2.0}
+      stage2_burn:
+        roll: {time_constant_s: 0.70, damping_ratio: 0.7, maximum_rate_rad_s: 0.95, maximum_acceleration_rad_s2: 2.4}
+        pitch: {time_constant_s: 0.80, damping_ratio: 0.75, maximum_rate_rad_s: 0.7, maximum_acceleration_rad_s2: 1.9}
+        yaw: {time_constant_s: 0.90, damping_ratio: 0.75, maximum_rate_rad_s: 0.55, maximum_acceleration_rad_s2: 1.5}
+      stack_coast:
+        roll: {time_constant_s: 0.95, damping_ratio: 0.7, maximum_rate_rad_s: 0.65, maximum_acceleration_rad_s2: 1.6}
+        pitch: {time_constant_s: 1.05, damping_ratio: 0.75, maximum_rate_rad_s: 0.5, maximum_acceleration_rad_s2: 1.2}
+        yaw: {time_constant_s: 1.20, damping_ratio: 0.75, maximum_rate_rad_s: 0.38, maximum_acceleration_rad_s2: 0.9}
+      orbit_coast:
+        roll: {time_constant_s: 1.10, damping_ratio: 0.7, maximum_rate_rad_s: 0.5, maximum_acceleration_rad_s2: 1.2}
+        pitch: {time_constant_s: 1.20, damping_ratio: 0.75, maximum_rate_rad_s: 0.4, maximum_acceleration_rad_s2: 0.9}
+        yaw: {time_constant_s: 1.35, damping_ratio: 0.75, maximum_rate_rad_s: 0.3, maximum_acceleration_rad_s2: 0.7}
+    resource_channels: [propellant, mass]
+    required_channels: [bank, pitch, yaw, body_rates, stage, deployment_state]
+    unsupported_claims: [source_exact_gimbal_effectivity, plume_interaction]
+  - id: tumbling_body.rigid_body_reuse_p6dof.v1
+    family_id: tumbling_body
+    parent_3dof_profile_id: tumbling_body.average_area_3dof.v1
+    model_kind: rigid_body_reuse
+    control_realization: uncontrolled
+    # This is a passing pseudo-tier realization because it reuses the native
+    # rigid-body equations.  It remains ineligible for controller lowering:
+    # passive rotation has no control law to synthesize.
+    status: nominal_case_pass
+    evidence_grade: derived
+    resource_channels: [mass]
+    required_channels: [quaternion, body_rates, projected_area, aerodynamic_moment, angular_momentum]
+    unsupported_claims: [prescribed_tumble_as_physical_proof]
+    area_policy: average_projected_area
+    area_source: geometry-specific orientation average or steady-stage cross-section
+
+direct_wrench_profiles:
+  - id: skywalker_x8.direct_wrench_6dof.v1
+    family_id: skywalker_x8
+    parent_3dof_profile_id: skywalker_x8.point_mass_3dof.v1
+    status: nominal_case_pass
+    evidence_grade: source_table_local
+    force_axes: [force_x_n, force_y_n, force_z_n]
+    moment_axes: [moment_x_nm, moment_y_nm, moment_z_nm]
+    trim_contract: source-trim local rigid-body witness; no surface trim claim
+    envelope_contract: local source-table operating point and declared wrench limits
+    resource_channels: [mass]
+    required_channels: [source_force, source_moment, requested_wrench, achieved_wrench, residual_wrench]
+    unsupported_claims: [physical_elevon_allocation, servo_dynamics, family_wide_schedule]
+  - id: b747.direct_wrench_6dof.v1
+    family_id: b747
+    parent_3dof_profile_id: b747.point_mass_3dof.v1
+    status: nominal_case_pass
+    evidence_grade: source_table_transport
+    force_axes: [force_x_n, force_y_n, force_z_n]
+    moment_axes: [moment_x_nm, moment_y_nm, moment_z_nm]
+    trim_contract: declared transport operating condition with source-table/local balance contract
+    envelope_contract: nominal transport racetrack, table domain, and terminal gates
+    resource_channels: [mass]
+    required_channels: [source_force, source_moment, requested_wrench, achieved_wrench, residual_wrench]
+    unsupported_claims: [physical_elevator_aileron_rudder_allocation, fuel_burn, full_envelope_schedule]
+  - id: a320.direct_wrench_6dof.v1
+    family_id: a320_openap_3dof
+    parent_3dof_profile_id: a320_openap_3dof.point_mass_3dof.v1
+    status: nominal_case_pass
+    evidence_grade: source_calibrated_surrogate
+    force_axes: [force_x_n, force_y_n, force_z_n]
+    moment_axes: [moment_x_nm, moment_y_nm, moment_z_nm]
+    trim_contract: OpenAP/JSBSim-derived local operating-point contract
+    envelope_contract: single local Mach/altitude operating point
+    resource_channels: [mass]
+    required_channels: [source_force, source_moment, requested_wrench, achieved_wrench, residual_wrench]
+    unsupported_claims: [physical_surface_allocation, fuel_burn, scheduled_full_envelope]
+  - id: f16_s119.direct_wrench_6dof.v1
+    family_id: f16_s119
+    parent_3dof_profile_id: f16_s119.point_mass_3dof.v1
+    status: nominal_case_pass
+    evidence_grade: source_plant_local
+    force_axes: [force_x_n, force_y_n, force_z_n]
+    moment_axes: [moment_x_nm, moment_y_nm, moment_z_nm]
+    trim_contract: source-plant local trim contract
+    envelope_contract: local subsonic alpha/beta and rate domain
+    resource_channels: [mass]
+    required_channels: [source_force, source_moment, requested_wrench, achieved_wrench, residual_wrench]
+    unsupported_claims: [physical_surface_allocation, supersonic_fidelity, family_wide_schedule]
+  - id: x15.direct_wrench_6dof.v1
+    family_id: x15
+    parent_3dof_profile_id: x15.point_mass_3dof.v1
+    status: nominal_case_pass
+    evidence_grade: source_loads_engineering_balance
+    force_axes: [force_x_n, force_y_n, force_z_n]
+    moment_axes: [moment_x_nm, moment_y_nm, moment_z_nm]
+    trim_contract: source trim blocked at the witness; explicit balance bias is not source trim
+    envelope_contract: local release/glide source-load region with no terminal handoff claim
+    resource_channels: [mass]
+    required_channels: [source_force, source_moment, requested_wrench, achieved_wrench, residual_wrench]
+    unsupported_claims: [source_exact_trim, physical_stabilator_rudder_allocation, powered_propellant_control]
+  - id: hummingbird.direct_wrench_6dof.v1
+    family_id: hummingbird
+    status: nominal_case_pass
+    evidence_grade: native_rotor_debug_comparator
+    parent_3dof_profile_id: hummingbird.point_mass_3dof.v1
+    force_axes: [force_x_n, force_y_n, force_z_n]
+    moment_axes: [moment_x_nm, moment_y_nm, moment_z_nm]
+    trim_contract: native rotor hover trim preferred; direct-wrench comparator uses the local debug condition
+    envelope_contract: local hover response comparator only
+    resource_channels: [mass]
+    required_channels: [source_force, source_moment, requested_wrench, achieved_wrench, residual_wrench]
+    unsupported_claims: [motor_level_allocation, rotor_inflow, battery_draw, sustained_directional_flight]
+  - id: hl20.direct_wrench_6dof.v1
+    family_id: hl20_mod_k
+    parent_3dof_profile_id: hl20_mod_k.point_mass_3dof.v1
+    status: nominal_case_pass
+    evidence_grade: daveml_source_loads
+    force_axes: [force_x_n, force_y_n, force_z_n]
+    moment_axes: [moment_x_nm, moment_y_nm, moment_z_nm]
+    trim_contract: source-load operating point with explicit balance bias; source trim pending
+    envelope_contract: single Mach/alpha/altitude source-domain witness
+    resource_channels: [mass]
+    required_channels: [source_force, source_moment, requested_wrench, achieved_wrench, residual_wrench]
+    unsupported_claims: [physical_surface_allocation, source_exact_trim, thermal_model, family_wide_glide]
+  - id: nesc_rocket.direct_wrench_6dof.v1
+    family_id: reference_nesc_two_stage_rocket
+    parent_3dof_profile_id: nesc_rocket.performance_3dof.v1
+    status: nominal_case_pass
+    evidence_grade: translation_derived_engineering
+    force_axes: [force_x_n, force_y_n, force_z_n]
+    moment_axes: [moment_x_nm, moment_y_nm, moment_z_nm]
+    trim_contract: source attitude trim unavailable; declared engineering initial condition
+    envelope_contract: translation-history extension with declared engineering inertia
+    resource_channels: [mass]
+    required_channels: [source_force, requested_wrench, achieved_wrench, residual_wrench, stage]
+    unsupported_claims: [source_attitude_data, physical_gimbal_allocation, plume_interaction, source_exact_moments]
+
+surface_allocation_profiles:
+  - id: skywalker_x8.surface_allocated_6dof.v1
+    family_id: skywalker_x8
+    parent_direct_wrench_profile_id: skywalker_x8.direct_wrench_6dof.v1
+    status: development
+    evidence_grade: source_table_local
+    allocator_id: x8-bounded-collective-differential-elevon-v1
+    effector_channels: [left_elevon_deg, right_elevon_deg, throttle]
+    required_channels: [requested_wrench, allocated_effectors, achieved_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [servo_hardware_fidelity, independent_yaw_authority, family_wide_schedule]
+  - id: b747.surface_allocated_6dof.v1
+    family_id: b747
+    parent_direct_wrench_profile_id: b747.direct_wrench_6dof.v1
+    status: development
+    evidence_grade: source_table_local
+    allocator_id: b747-bounded-surface-v1
+    effector_channels: [elevator_deg, aileron_deg, rudder_deg, throttle]
+    required_channels: [requested_wrench, allocated_effectors, achieved_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [servo_hardware_fidelity, fuel_flow, full_envelope_schedule]
+  - id: a320.surface_allocated_6dof.v1
+    family_id: a320_openap_3dof
+    parent_direct_wrench_profile_id: a320.direct_wrench_6dof.v1
+    status: planned
+    evidence_grade: unavailable
+    allocator_id: a320-surface-allocation-pending-v1
+    effector_channels: [elevator_deg, aileron_deg, rudder_deg, throttle]
+    required_channels: [requested_wrench, allocated_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [physical_surface_effectivity, servo_dynamics, scheduled_full_envelope]
+  - id: f16_s119.surface_allocated_6dof.v1
+    family_id: f16_s119
+    parent_direct_wrench_profile_id: f16_s119.direct_wrench_6dof.v1
+    status: development
+    evidence_grade: source_plant_local
+    allocator_id: f16-bounded-elevator-aileron-rudder-throttle-v1
+    effector_channels: [elevator_deg, aileron_deg, rudder_deg, throttle]
+    required_channels: [requested_wrench, allocated_effectors, achieved_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [full_envelope_schedule, servo_certification, operational_flight]
+  - id: x15.surface_allocated_6dof.v1
+    family_id: x15
+    parent_direct_wrench_profile_id: x15.direct_wrench_6dof.v1
+    status: planned
+    evidence_grade: unavailable
+    allocator_id: x15-source-effector-contract-pending-v1
+    effector_channels: [stabilator_deg, rudder_deg, throttle]
+    required_channels: [requested_wrench, allocated_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [source_exact_effector_effectivity, powered_control_authority, terminal_handoff]
+  - id: hummingbird.surface_allocated_6dof.v1
+    family_id: hummingbird
+    parent_direct_wrench_profile_id: hummingbird.direct_wrench_6dof.v1
+    status: development
+    evidence_grade: native_rotor_local
+    allocator_id: hummingbird-bounded-quad-x-v1
+    effector_channels: [rotor_1_speed, rotor_2_speed, rotor_3_speed, rotor_4_speed]
+    required_channels: [requested_wrench, allocated_effectors, achieved_effectors, achieved_wrench, residual_wrench, saturation, power]
+    unsupported_claims: [blade_resolved_aerodynamics, battery_depletion, full_translated_envelope]
+  - id: hl20.surface_allocated_6dof.v1
+    family_id: hl20_mod_k
+    parent_direct_wrench_profile_id: hl20.direct_wrench_6dof.v1
+    status: development
+    evidence_grade: logical_surface_overlay
+    allocator_id: hl20-logical-surface-v1
+    effector_channels: [left_wing_flap, right_wing_flap, body_flap, rudder]
+    required_channels: [requested_wrench, allocated_effectors, achieved_wrench, residual_wrench, saturation]
+    unsupported_claims: [source_servo_dynamics, thermal_model, full_arrival_qualification]
+  - id: nesc_rocket.surface_allocated_6dof.v1
+    family_id: reference_nesc_two_stage_rocket
+    parent_direct_wrench_profile_id: nesc_rocket.direct_wrench_6dof.v1
+    status: not_applicable
+    evidence_grade: unavailable
+    allocator_id: nesc-source-gimbal-contract-pending-v1
+    effector_channels: [thrust_vector_gimbal_x, thrust_vector_gimbal_y]
+    required_channels: [requested_wrench, achieved_wrench, residual_wrench, stage]
+    unsupported_claims: [source_gimbal_effectivity, plume_interaction, active_guidance]
+bindings:
+  - {family_id: skywalker_x8, point_mass_profile_id: skywalker_x8.point_mass_3dof.v1, pseudo_profile_id: skywalker_x8.attitude_response_p6dof.v1, direct_wrench_profile_id: skywalker_x8.direct_wrench_6dof.v1, surface_allocation_profile_id: skywalker_x8.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'shared fixed-wing response, direct-wrench bridge, and declared surface path'}
+  - {family_id: b747, point_mass_profile_id: b747.point_mass_3dof.v1, pseudo_profile_id: b747.attitude_response_p6dof.v1, direct_wrench_profile_id: b747.direct_wrench_6dof.v1, surface_allocation_profile_id: b747.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'transport-scaled response, direct-wrench bridge, and declared surface path'}
+  - {family_id: a320_openap_3dof, point_mass_profile_id: a320_openap_3dof.point_mass_3dof.v1, pseudo_profile_id: a320.attitude_response_p6dof.v1, direct_wrench_profile_id: a320.direct_wrench_6dof.v1, surface_allocation_profile_id: a320.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'mixed OpenAP/source-surrogate response, direct-wrench bridge, and pending surface path'}
+  - {family_id: f16_s119, point_mass_profile_id: f16_s119.point_mass_3dof.v1, pseudo_profile_id: f16_s119.attitude_response_p6dof.v1, direct_wrench_profile_id: f16_s119.direct_wrench_6dof.v1, surface_allocation_profile_id: f16_s119.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'source-derived subsonic response, direct-wrench bridge, and declared surface path'}
+  - {family_id: x15, point_mass_profile_id: x15.point_mass_3dof.v1, pseudo_profile_id: x15.attitude_response_p6dof.v1, direct_wrench_profile_id: x15.direct_wrench_6dof.v1, surface_allocation_profile_id: x15.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'staged response and direct-wrench bridge; source trim and physical effectors remain gates'}
+  - {family_id: hummingbird, point_mass_profile_id: hummingbird.point_mass_3dof.v1, pseudo_profile_id: hummingbird.attitude_response_p6dof.v1, direct_wrench_profile_id: hummingbird.direct_wrench_6dof.v1, surface_allocation_profile_id: hummingbird.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'hover response, direct-wrench comparator, and native rotor allocation path'}
+  - {family_id: hl20_mod_k, point_mass_profile_id: hl20_mod_k.point_mass_3dof.v1, pseudo_profile_id: hl20.attitude_response_p6dof.v1, direct_wrench_profile_id: hl20.direct_wrench_6dof.v1, surface_allocation_profile_id: hl20.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'source-derived glide response, direct-wrench bridge, and logical surface overlay'}
+  - {family_id: reference_nesc_two_stage_rocket, point_mass_profile_id: nesc_rocket.performance_3dof.v1, pseudo_profile_id: nesc_rocket.attitude_response_p6dof.v1, direct_wrench_profile_id: nesc_rocket.direct_wrench_6dof.v1, surface_allocation_profile_id: nesc_rocket.surface_allocated_6dof.v1, automatic_lowering: true, lowering_note: 'staged response and translation-derived direct-wrench bridge; source gimbal remains not applicable'}
+  - {family_id: tumbling_body, point_mass_profile_id: tumbling_body.average_area_3dof.v1, pseudo_profile_id: tumbling_body.rigid_body_reuse_p6dof.v1, automatic_lowering: false, lowering_note: 'uncontrolled rigid-body reuse is required to prove tumble'}

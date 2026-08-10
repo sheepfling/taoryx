@@ -1,0 +1,10 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: hl20-source-surface-attitude-rate-lqi-screen-v1
+vehicle: hl20_mod_k
+fidelity: rigid_body_6dof_surface_allocated
+initialization:
+  id: source_mach1_pitch_trim_anchor
+mission:
+  id: hl20_source_surface_attitude_rate_lqi_screen_v1
+segments:
+  - id: source_surface_attitude_rate_lqi_recovery_screen

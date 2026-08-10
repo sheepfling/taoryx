@@ -10,10 +10,11 @@ runtime or automatic lowering is invoked.
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .fidelity_contracts import FidelityTier
 from .horizontal_fidelity import HorizontalFamilyManifest, HorizontalFidelityRegistry, load_horizontal_registry
@@ -25,8 +26,10 @@ from .trajectory.pseudo6dof_profiles import (
     SurfaceAllocationProfile,
     load_pseudo6dof_catalog,
 )
-from .trajectory.reference_families import ReferenceFamilyManifest, load_reference_family_manifest
 from .vehicle_registry import REGISTRY, ROOT
+
+if TYPE_CHECKING:
+    from .trajectory.reference_families import ReferenceFamilyManifest
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,6 +66,10 @@ class UnifiedFamilyManifest:
             "source_manifest": self.source_manifest_path,
             "source_family_id": self.family.source_family_id,
             "resolved_source_family_id": self.source_manifest.family_id if self.source_manifest is not None else None,
+            "data_evidence": {
+                tier: evidence.model_dump(mode="json")
+                for tier, evidence in self.family.data_evidence.items()
+            },
             "tiers": {
                 "point_mass_3dof": self.binding.point_mass_profile_id,
                 "pseudo_6dof": self.binding.pseudo_profile_id,
@@ -148,6 +155,8 @@ def load_unified_family_manifest_catalog(
 ) -> UnifiedFamilyManifestCatalog:
     """Resolve all family/tier bindings through one typed join."""
 
+    from .trajectory.reference_families import load_reference_family_manifest
+
     horizontal_registry = horizontal or load_horizontal_registry()
     pseudo_catalog = pseudo or load_pseudo6dof_catalog()
     pseudo_map, direct_map, surface_map = _profile_maps(pseudo_catalog)
@@ -196,6 +205,27 @@ def load_unified_family_manifest_catalog(
                         findings.append(UnifiedFamilyManifestFinding(family.family_id, "source-family-id-mismatch", f"source manifest declares {source_manifest.family_id!r}, expected {family.source_family_id!r}"))
                 except (OSError, ValueError) as error:
                     findings.append(UnifiedFamilyManifestFinding(family.family_id, "source-manifest-invalid", str(error)))
+        for tier, evidence in family.data_evidence.items():
+            for evidence_path in evidence.paths:
+                path = root / evidence_path
+                if not path.is_file():
+                    findings.append(
+                        UnifiedFamilyManifestFinding(
+                            family.family_id,
+                            "tier-data-evidence-missing",
+                            f"{tier} data evidence {evidence_path!r} does not exist",
+                        )
+                    )
+                    continue
+                actual_sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+                if actual_sha256 != evidence.sha256[evidence_path]:
+                    findings.append(
+                        UnifiedFamilyManifestFinding(
+                            family.family_id,
+                            "tier-data-evidence-hash-mismatch",
+                            f"{tier} data evidence {evidence_path!r} SHA-256 does not match its declaration",
+                        )
+                    )
         resolved.append(
             UnifiedFamilyManifest(
                 family,

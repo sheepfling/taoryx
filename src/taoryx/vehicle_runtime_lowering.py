@@ -9,170 +9,23 @@ to controller, trim, and runtime requests.
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass
-from functools import lru_cache
 from typing import Literal
 
 from .family_adapter import (
     AdapterCapabilityError,
     StandardFamilyAdapter,
-    descriptor_from_control_plant,
     validate_family_adapter,
 )
-from .family_adapter_probes import AdapterProbeCase
-from .family_adapter_registry import AdapterRegistrationError, FamilyAdapterRegistration, FamilyAdapterRegistry
+from .family_adapter_registry import AdapterRegistrationError, FamilyAdapterRegistry
 from .fidelity_contracts import FidelityTier
-from .hl20_adapter import build_hl20_source_adapter
-from .nesc_adapter import build_nesc_replay_adapter
-from .source_f16 import build_f16_source_physical_plant
-from .source_table_fixed_wing import (
-    build_b747_condition3_source_table_plant,
-    build_x8_source_table_plant,
-)
-from .source_table_multirotor import build_hummingbird_individual_rotor_source_table_plant
+from .plugins import PluginCatalog, discover_plugins
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_composition_registry import mission_graph_execution_contract
 from .vehicle_execution_bindings import VehicleExecutionBindingError, resolve_vehicle_execution_binding
 from .vehicle_execution_preflight import VehicleExecutionPreflight, preflight_vehicle_composition
-from .x15_adapter import build_x15_source_direct_wrench_adapter
 
 RuntimeLoweringStatus = Literal["adapter_bound", "factory_bound", "blocked"]
-
-
-def _source_local_probe(adapter: StandardFamilyAdapter) -> AdapterProbeCase:
-    """Return the plant-owned source operating point for generic probes.
-
-    This is deliberately structural: the source plant itself owns its trim
-    state and effectors, while the generic adapter framework only verifies
-    that every declared operation can be exercised at that exact point.
-    """
-
-    plant = adapter.plant
-    if plant is None or not hasattr(plant, "source_local_state") or not hasattr(plant, "source_effectors"):
-        raise ValueError(f"{adapter.describe().family_id}: plant does not expose a source local operating point")
-    state = dict(getattr(plant, "source_local_state"))
-    effectors = dict(getattr(plant, "source_effectors"))
-    return AdapterProbeCase(
-        state=state,
-        effectors=effectors,
-        trim_target=state,
-        trim_initial_guess=effectors,
-        previous_effectors=effectors,
-    )
-    ####
-
-
-def _source_or_trim_probe(adapter: StandardFamilyAdapter) -> AdapterProbeCase:
-    """Probe a source-local plant or a source-owned resolved trim point."""
-
-    plant = adapter.plant
-    if plant is None:
-        raise ValueError(f"{adapter.describe().family_id}: adapter has no plant")
-    if hasattr(plant, "source_local_state") and hasattr(plant, "source_effectors"):
-        return _source_local_probe(adapter)
-    if not hasattr(plant, "trim_result"):
-        raise ValueError(f"{adapter.describe().family_id}: plant has no source operating point")
-    trim = getattr(plant, "trim_result")
-    state = dict(trim.state)
-    effectors = dict(trim.controls)
-    environment: dict[str, float | str] = {}
-    for name in ("altitude_m", "trim_pitch_rad"):
-        if hasattr(plant, name):
-            environment[name] = float(getattr(plant, name))
-    return AdapterProbeCase(
-        state=state,
-        effectors=effectors,
-        environment=environment,
-        trim_target=state,
-        trim_initial_guess=effectors,
-        previous_effectors=effectors,
-    )
-    ####
-
-
-def _source_table_fixed_wing_factory(
-    builder: Callable[[], object],
-    *,
-    family_id: str,
-    adapter_id: str = "taoryx.fixed_wing.source_table.v1",
-    physical_family: str = "powered_fixed_wing",
-    effector_attribute: str = "effector_limits",
-    omitted_physics: tuple[str, ...] = (
-        "family-specific mission and resource providers",
-        "gain-scheduled or envelope-wide closed-loop validation",
-    ),
-) -> Callable[[FidelityTier], StandardFamilyAdapter]:
-    """Bind one pinned source-table plant without a family-level fallback."""
-
-    @lru_cache(maxsize=1)
-    def plant() -> object:
-        return builder()
-        ####
-
-    @lru_cache(maxsize=None)
-    def build(tier: FidelityTier) -> StandardFamilyAdapter:
-        source_plant = plant()
-        control_names = getattr(source_plant, "control_names", ())
-        limits = getattr(source_plant, effector_attribute, None)
-        if not control_names or not isinstance(limits, dict):
-            raise ValueError(f"{family_id}: source-table plant has no declared control limits")
-        descriptor = descriptor_from_control_plant(
-            source_plant,  # type: ignore[arg-type]
-            family_id=family_id,
-            adapter_id=adapter_id,
-            physical_family=physical_family,
-            tier=tier,
-            control_units={name: limits[name].unit for name in control_names},
-            evidence_status="development",
-            omitted_physics=omitted_physics,
-        )
-        return StandardFamilyAdapter.from_control_plant(descriptor, source_plant)  # type: ignore[arg-type]
-        ####
-
-    return build
-    ####
-
-
-def _source_table_multirotor_factory(
-    builder: Callable[[], object],
-    *,
-    family_id: str,
-    adapter_id: str,
-) -> Callable[[FidelityTier], StandardFamilyAdapter]:
-    """Bind one pinned multirotor source plant without family fallback."""
-
-    @lru_cache(maxsize=1)
-    def plant() -> object:
-        return builder()
-        ####
-
-    @lru_cache(maxsize=None)
-    def build(tier: FidelityTier) -> StandardFamilyAdapter:
-        source_plant = plant()
-        control_names = getattr(source_plant, "control_names", ())
-        limits = getattr(source_plant, "effector_limits", None)
-        if not control_names or not isinstance(limits, dict):
-            raise ValueError(f"{family_id}: source-table plant has no declared control limits")
-        descriptor = descriptor_from_control_plant(
-            source_plant,  # type: ignore[arg-type]
-            family_id=family_id,
-            adapter_id=adapter_id,
-            physical_family="multirotor",
-            tier=tier,
-            control_units={name: limits[name].unit for name in control_names},
-            evidence_status="development",
-            omitted_physics=(
-                "mission and position-control providers",
-                "battery and voltage resource model",
-                "blade-resolved and dynamic-inflow rotor physics",
-            ),
-        )
-        return StandardFamilyAdapter.from_control_plant(descriptor, source_plant)  # type: ignore[arg-type]
-        ####
-
-    return build
-    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -288,106 +141,20 @@ def lower_vehicle_composition(
     ####
 
 
-def build_vehicle_runtime_adapter_registry() -> FamilyAdapterRegistry:
-    """Return the central, explicitly scoped runtime adapter registry.
+def build_vehicle_runtime_adapter_registry(
+    *,
+    plugins: PluginCatalog | None = None,
+    include_external_plugins: bool = True,
+) -> FamilyAdapterRegistry:
+    """Build the runtime adapter registry from compatible plug-in contributions.
 
-    The source-backed X8, B747, Hummingbird, F-16, X-15, HL-20, and NESC
-    adapters are safe to construct directly from ``src``. Other current
-    witnesses still live in qualification tools or lack a mission translator;
-    they remain explicitly development registrations rather than being
-    imported through tool scripts or silently represented by a different
-    family.
+    Discovery registers factories and metadata only; no plant is constructed
+    here. Installed model packages preserve every current ID and can add new
+    families through the same fail-closed registry contract.
     """
 
-    registrations = (
-        FamilyAdapterRegistration(
-            "x15",
-            "taoryx.high_energy.fixed_wing.v1",
-            "available",
-            build_x15_source_direct_wrench_adapter,
-            supported_tiers=("rigid_body_6dof_direct_wrench",),
-            note="local source direct-wrench bridge only; mission translation remains pending",
-        ),
-        FamilyAdapterRegistration(
-            "hl20_mod_k",
-            "taoryx.lifting_body.daveml.v1",
-            "available",
-            build_hl20_source_adapter,
-            supported_tiers=("rigid_body_6dof_direct_wrench", "rigid_body_6dof_surface_allocated"),
-            note="local source load/surface witnesses; mission translation remains pending",
-        ),
-        FamilyAdapterRegistration(
-            "reference_nesc_two_stage_rocket",
-            "taoryx.rocket.variable_mass_nesc.v1",
-            "available",
-            build_nesc_replay_adapter,
-            supported_tiers=("point_mass_3dof", "pseudo_6dof"),
-            note="source replay adapter; active segment translation remains pending",
-        ),
-        FamilyAdapterRegistration(
-            "tumbling_body",
-            "taoryx.passive_body.rigid_aero.v1",
-            "development",
-            supported_tiers=("pseudo_6dof",),
-            note="passive-body runtime adapter factory has not yet moved from the qualification harness",
-        ),
-        FamilyAdapterRegistration(
-            "skywalker_x8",
-            "taoryx.fixed_wing.source_table.v1",
-            "available",
-            _source_table_fixed_wing_factory(build_x8_source_table_plant, family_id="skywalker_x8"),
-            probe_factory=_source_local_probe,
-            supported_tiers=("rigid_body_6dof_direct_wrench", "rigid_body_6dof_surface_allocated"),
-            note="pinned source-table local plant; semantic mission translation remains a separate gate",
-        ),
-        FamilyAdapterRegistration(
-            "b747",
-            "taoryx.fixed_wing.source_table.v1",
-            "available",
-            _source_table_fixed_wing_factory(build_b747_condition3_source_table_plant, family_id="b747"),
-            probe_factory=_source_local_probe,
-            supported_tiers=("rigid_body_6dof_direct_wrench", "rigid_body_6dof_surface_allocated"),
-            note="pinned NASA condition-3 source-table plant; semantic mission translation remains a separate gate",
-        ),
-        FamilyAdapterRegistration(
-            "a320_openap_3dof",
-            "taoryx.fixed_wing.openap.v1",
-            "development",
-            note="OpenAP reduced adapter needs a semantic-segment runtime binding",
-        ),
-        FamilyAdapterRegistration(
-            "f16_s119",
-            "taoryx.fixed_wing.daveml.v1",
-            "available",
-            _source_table_fixed_wing_factory(
-                build_f16_source_physical_plant,
-                family_id="f16_s119",
-                adapter_id="taoryx.fixed_wing.daveml.v1",
-                effector_attribute="effectors",
-                omitted_physics=(
-                    "mission translation and gain scheduling",
-                    "full-flight-envelope and release qualification",
-                ),
-            ),
-            probe_factory=_source_or_trim_probe,
-            supported_tiers=("rigid_body_6dof_direct_wrench", "rigid_body_6dof_surface_allocated"),
-            note="runtime-owned source-backed first operating point; mission and schedule gates remain separate",
-        ),
-        FamilyAdapterRegistration(
-            "hummingbird",
-            "taoryx.multirotor.native_quad_x.v1",
-            "available",
-            _source_table_multirotor_factory(
-                build_hummingbird_individual_rotor_source_table_plant,
-                family_id="hummingbird",
-                adapter_id="taoryx.multirotor.native_quad_x.v1",
-            ),
-            probe_factory=_source_local_probe,
-            supported_tiers=("rigid_body_6dof_direct_wrench", "rigid_body_6dof_surface_allocated"),
-            note="runtime-owned individual-rotor local plant; mission and resource providers remain separate gates",
-        ),
-    )
-    return FamilyAdapterRegistry(registrations)
+    catalog = plugins or discover_plugins(include_external=include_external_plugins)
+    return catalog.build_family_adapter_registry()
     ####
 
 

@@ -1,0 +1,250 @@
+schema_version: 1
+families:
+  - family_id: simple_aero
+    version: 1.0.0
+    display_name: Simple Aero-style configurable point-mass family
+    fidelities: [point_mass_3dof]
+    provenance: synthetic successor-side fixture; not a recovered TAOS runtime
+    parameters:
+      - {id: vehicle.id, kind: string, canonical_unit: null, default: generic-3dof}
+      - {id: vehicle.mass.initial, kind: number, canonical_unit: kg, default: 1000.0, minimum: 1.0}
+      - {id: vehicle.booster.thrust, kind: number, canonical_unit: N, default: 100000.0, minimum: 0.0}
+      - {id: vehicle.booster.mass_flow, kind: number, canonical_unit: kg/s, default: 20.0, minimum: 0.0}
+      - {id: vehicle.aero.drag_coefficient, kind: number, canonical_unit: dimensionless, default: 0.02, minimum: 0.0}
+      - {id: vehicle.aero.lift_to_drag, kind: number, canonical_unit: dimensionless, default: 4.0, minimum: 0.0}
+      - {id: mission.initial_altitude, kind: number, canonical_unit: m, default: 0.0, minimum: 0.0}
+      - {id: mission.initial_speed, kind: number, canonical_unit: m/s, default: 50.0, minimum: 0.0}
+      - {id: mission.burnout_speed, kind: number, canonical_unit: m/s, default: 1200.0, minimum: 0.0001}
+      - {id: mission.apogee_altitude, kind: number, canonical_unit: m, default: 80000.0, minimum: 0.0001}
+      - {id: mission.pitch_over_angle, kind: number, canonical_unit: deg, default: 80.0, minimum: -89.0, maximum: 89.0}
+      - {id: mission.target_range, kind: number, canonical_unit: m, default: 100000.0, minimum: 0.0}
+      - {id: mission.target_bearing, kind: number, canonical_unit: deg, default: 90.0, minimum: -360.0, maximum: 360.0}
+      - {id: mission.initial_heading_offset, kind: number, canonical_unit: deg, default: 0.0, minimum: -180.0, maximum: 180.0}
+      - {id: mission.target_altitude, kind: number, canonical_unit: m, default: 0.0, minimum: 0.0}
+      - {id: mission.target_speed, kind: number, canonical_unit: m/s, default: 0.0, minimum: 0.0}
+      - {id: mission.target_heading, kind: number, canonical_unit: deg, default: 0.0, minimum: -360.0, maximum: 360.0}
+      - {id: mission.boost_duration, kind: number, canonical_unit: s, default: 5.0, minimum: 0.0001}
+      - {id: mission.coast_duration, kind: number, canonical_unit: s, default: 10.0, minimum: 0.0001}
+      - {id: mission.bank_duration, kind: number, canonical_unit: s, default: 5.0, minimum: 0.0001}
+      - {id: mission.terminal_duration, kind: number, canonical_unit: s, default: 5.0, minimum: 0.0001}
+      - {id: mission.terminal_capture_range, kind: number, canonical_unit: m, default: 25.0, minimum: 0.0001}
+      - {id: runtime.time_step, kind: number, canonical_unit: s, default: 0.05, minimum: 0.0001}
+      - {id: runtime.output_interval, kind: number, canonical_unit: s, default: 0.5, minimum: 0.0001}
+    variants:
+      baseline: {}
+      light:
+        vehicle.mass.initial: {value: 850.0, unit: kg}
+    variant_space:
+      policy: reject
+      modifiers:
+        - id: propulsion.thrust_scale
+          target: vehicle.booster.thrust
+          operation: scale
+          canonical_unit: dimensionless
+          minimum: 0.5
+          maximum: 1.5
+          qualified_minimum: 0.8
+          qualified_maximum: 1.2
+          requires_retrim: true
+          provenance: synthetic Alpha 2 scaling fixture; not source vehicle data
+    loadouts:
+      baseline: {}
+      high_thrust:
+        vehicle.booster.thrust: {value: 120.0, unit: kN}
+        vehicle.booster.mass_flow: {value: 22.0, unit: kg/s}
+    missions:
+      baseline: {}
+      short_range:
+        mission.target_range: {value: 80.0, unit: km}
+    segment_plans:
+      baseline: {}
+      boost_coast:
+        runtime.time_step: {value: 0.1, unit: s}
+    segment_graphs:
+      baseline:
+        schema_version: 1
+        launch:
+          latitude_deg: 0.0
+          longitude_deg: 0.0
+        aim_point:
+          altitude_m: 0.0
+        segments:
+          - {id: powered_ascent, kind: powered_ascent, duration_parameter: mission.boost_duration, cutoff: physical_burnout}
+          - {id: ballistic_coast, kind: ballistic_coast, duration_parameter: mission.coast_duration, cutoff: time}
+          - {id: bank_maneuver, kind: bank_maneuver, duration_parameter: mission.bank_duration, cutoff: commanded_heading}
+          - {id: terminal_pronav, kind: terminal_pronav, duration_parameter: mission.terminal_duration, cutoff: commanded_range}
+        events:
+          - {id: physical_burnout, kind: physical_burnout, source: vehicle.booster.mass_flow, annotation: propellant depletion at derived mass-flow time}
+          - {id: commanded_cutoff, kind: commanded_cutoff, source: mission.burnout_speed, annotation: requested burnout speed is a separate command condition}
+      boost_coast:
+        schema_version: 1
+        launch:
+          latitude_deg: 0.0
+          longitude_deg: 0.0
+        aim_point:
+          altitude_m: 0.0
+        segments:
+          - {id: powered_ascent, kind: powered_ascent, duration_parameter: mission.boost_duration, cutoff: physical_burnout}
+          - {id: ballistic_coast, kind: ballistic_coast, duration_parameter: mission.coast_duration, cutoff: time}
+          - {id: bank_maneuver, kind: bank_maneuver, duration_parameter: mission.bank_duration, cutoff: commanded_heading}
+          - {id: terminal_pronav, kind: terminal_pronav, duration_parameter: mission.terminal_duration, cutoff: commanded_range}
+        events:
+          - {id: physical_burnout, kind: physical_burnout, source: vehicle.booster.mass_flow, annotation: propellant depletion at derived mass-flow time}
+          - {id: commanded_cutoff, kind: commanded_cutoff, source: mission.burnout_speed, annotation: requested burnout speed is a separate command condition}
+    controls:
+      - id: command.bank
+        unit: deg
+        default: 0.0
+        minimum: -90.0
+        maximum: 90.0
+        authority_modes: [autopilot, commanded, overlay, direct, mixed]
+        default_authority: commanded
+        cadence_s: 0.1
+        hold_behavior: hold
+        failsafe_value: 0.0
+        overlay_minimum: -15.0
+        overlay_maximum: 15.0
+        rate_limit_per_s: 45.0
+      - id: command.throttle
+        unit: dimensionless
+        default: 0.0
+        minimum: 0.0
+        maximum: 1.0
+        authority_modes: [autopilot, commanded, overlay, direct, mixed]
+        default_authority: commanded
+        cadence_s: 0.1
+        hold_behavior: failsafe
+        failsafe_value: 0.0
+        overlay_minimum: -0.25
+        overlay_maximum: 0.25
+        rate_limit_per_s: 1.0
+    observations:
+      - {id: state.position.downrange, unit: m, source: position.downrange}
+      - {id: state.position.altitude, unit: m, source: position.altitude}
+      - {id: state.velocity, unit: m/s, source: velocity}
+  - family_id: dual_launch_glider
+    version: 1.0.0
+    display_name: Dual-launch glider composition proof family
+    fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof]
+    provenance: synthetic successor-side Alpha 2 T6 fixture; native launch composition only
+    parameters:
+      - {id: vehicle.id, kind: string, canonical_unit: null, default: t6-glider}
+      - {id: vehicle.mass.initial, kind: number, canonical_unit: kg, default: 1000.0, minimum: 1.0}
+      - {id: vehicle.mass.glider, kind: number, canonical_unit: kg, default: 900.0, minimum: 1.0}
+      - {id: vehicle.booster.thrust, kind: number, canonical_unit: N, default: 15000.0, minimum: 0.0}
+      - {id: vehicle.booster.mass_flow, kind: number, canonical_unit: kg/s, default: 50.0, minimum: 0.0}
+      - {id: vehicle.geometry.reference_area, kind: number, canonical_unit: m^2, default: 1.0, minimum: 0.0001}
+      - {id: vehicle.geometry.reference_length, kind: number, canonical_unit: m, default: 1.0, minimum: 0.0001}
+      - {id: vehicle.aero.drag_coefficient, kind: number, canonical_unit: dimensionless, default: 0.02, minimum: 0.0}
+      - {id: vehicle.aero.lift_to_drag, kind: number, canonical_unit: dimensionless, default: 4.0, minimum: 0.0}
+      - {id: mission.initial_altitude, kind: number, canonical_unit: m, default: 3000.0, minimum: 0.0}
+      - {id: mission.initial_speed, kind: number, canonical_unit: m/s, default: 120.0, minimum: 0.0}
+      - {id: mission.release_altitude, kind: number, canonical_unit: m, default: 3200.0, minimum: 0.0}
+      - {id: mission.release_speed, kind: number, canonical_unit: m/s, default: 155.0, minimum: 0.0}
+      - {id: mission.initial_flight_path_angle, kind: number, canonical_unit: deg, default: 5.0, minimum: -89.0, maximum: 89.0}
+      - {id: mission.initial_heading, kind: number, canonical_unit: deg, default: 90.0, minimum: -360.0, maximum: 360.0}
+      - {id: mission.target_range, kind: number, canonical_unit: m, default: 2000.0, minimum: 0.0}
+      - {id: mission.target_bearing, kind: number, canonical_unit: deg, default: 90.0, minimum: -360.0, maximum: 360.0}
+      - {id: mission.target_altitude, kind: number, canonical_unit: m, default: 3200.0, minimum: 0.0}
+      - {id: mission.target_speed, kind: number, canonical_unit: m/s, default: 120.0, minimum: 0.0}
+      - {id: mission.boost_duration, kind: number, canonical_unit: s, default: 2.0, minimum: 0.0001}
+      - {id: mission.glide_duration, kind: number, canonical_unit: s, default: 12.0, minimum: 0.0001}
+      - {id: mission.terminal_duration, kind: number, canonical_unit: s, default: 4.0, minimum: 0.0001}
+      - {id: runtime.time_step, kind: number, canonical_unit: s, default: 0.05, minimum: 0.0001}
+      - {id: runtime.output_interval, kind: number, canonical_unit: s, default: 0.1, minimum: 0.0001}
+    variants:
+      baseline: {}
+    loadouts:
+      baseline: {}
+    missions:
+      waypoint_release: {}
+    segment_plans:
+      dual_launch: {}
+    segment_graphs:
+      dual_launch:
+        schema_version: 1
+        launch_forms: [air_release, attached_booster]
+        post_release_guidance: terminal_pronav
+        segments:
+          - {id: attached_booster, kind: powered_ascent, duration_parameter: mission.boost_duration, cutoff: separation}
+          - {id: release_glide, kind: ballistic_coast, duration_parameter: mission.glide_duration, cutoff: time}
+          - {id: terminal_guidance, kind: terminal_pronav, duration_parameter: mission.terminal_duration, cutoff: waypoint_capture}
+        events:
+          - {id: separation, kind: separation, source: mission.boost_duration, continuity: continuous, impulse: none}
+          - {id: waypoint_capture, kind: waypoint_capture, source: mission.target_range, tolerance_m: 100.0}
+    controls:
+      - {id: command.bank, unit: deg, default: 0.0, minimum: -25.0, maximum: 25.0, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: autopilot, cadence_s: 0.1, hold_behavior: hold, failsafe_value: 0.0, rate_limit_per_s: 45.0}
+      - {id: command.throttle, unit: dimensionless, default: 0.0, minimum: 0.0, maximum: 1.0, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: autopilot, cadence_s: 0.1, hold_behavior: failsafe, failsafe_value: 0.0, rate_limit_per_s: 1.0}
+    observations:
+      - {id: state.position.altitude, unit: m, source: alt}
+      - {id: state.position.downrange, unit: m, source: range}
+      - {id: state.velocity, unit: m/s, source: vel}
+      - {id: event.separation, unit: s, source: separation}
+  - family_id: simple_aero_ladder
+    version: 1.0.0
+    display_name: Simple Aero fidelity-ladder proof family
+    fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof]
+    provenance: synthetic successor-side T5 fixture; not a recovered TAOS runtime
+    parameters:
+      - {id: vehicle.id, kind: string, canonical_unit: null, default: t5-ladder}
+      - {id: vehicle.mass.initial, kind: number, canonical_unit: kg, default: 1000.0, minimum: 1.0}
+      - {id: vehicle.booster.thrust, kind: number, canonical_unit: N, default: 0.0, minimum: 0.0}
+      - {id: vehicle.booster.mass_flow, kind: number, canonical_unit: kg/s, default: 0.0, minimum: 0.0}
+      - {id: vehicle.geometry.reference_area, kind: number, canonical_unit: m^2, default: 1.0, minimum: 0.0001}
+      - {id: vehicle.geometry.reference_length, kind: number, canonical_unit: m, default: 1.0, minimum: 0.0001}
+      - {id: vehicle.inertia.x, kind: number, canonical_unit: kg*m^2, default: 100.0, minimum: 0.0001}
+      - {id: vehicle.inertia.y, kind: number, canonical_unit: kg*m^2, default: 120.0, minimum: 0.0001}
+      - {id: vehicle.inertia.z, kind: number, canonical_unit: kg*m^2, default: 140.0, minimum: 0.0001}
+      - {id: vehicle.envelope.max_alpha, kind: number, canonical_unit: deg, default: 20.0, minimum: 0.0001}
+      - {id: vehicle.envelope.max_beta, kind: number, canonical_unit: deg, default: 20.0, minimum: 0.0001}
+      - {id: vehicle.aero.drag_coefficient, kind: number, canonical_unit: dimensionless, default: 0.02, minimum: 0.0}
+      - {id: vehicle.aero.lift_to_drag, kind: number, canonical_unit: dimensionless, default: 4.0, minimum: 0.0}
+      - {id: vehicle.aero.moment_coefficient.x, kind: number, canonical_unit: dimensionless, default: 0.0002}
+      - {id: vehicle.aero.moment_coefficient.y, kind: number, canonical_unit: dimensionless, default: 0.0004}
+      - {id: vehicle.aero.moment_coefficient.z, kind: number, canonical_unit: dimensionless, default: 0.0006}
+      - {id: mission.initial_altitude, kind: number, canonical_unit: m, default: 1000.0, minimum: 0.0}
+      - {id: mission.initial_speed, kind: number, canonical_unit: m/s, default: 60.0, minimum: 0.0}
+      - {id: mission.burnout_speed, kind: number, canonical_unit: m/s, default: 120.0, minimum: 0.0001}
+      - {id: mission.apogee_altitude, kind: number, canonical_unit: m, default: 1200.0, minimum: 0.0001}
+      - {id: mission.pitch_over_angle, kind: number, canonical_unit: deg, default: 0.0, minimum: -89.0, maximum: 89.0}
+      - {id: mission.target_range, kind: number, canonical_unit: m, default: 1000.0, minimum: 0.0}
+      - {id: mission.target_bearing, kind: number, canonical_unit: deg, default: 90.0, minimum: -360.0, maximum: 360.0}
+      - {id: mission.initial_heading_offset, kind: number, canonical_unit: deg, default: 0.0, minimum: -180.0, maximum: 180.0}
+      - {id: mission.target_altitude, kind: number, canonical_unit: m, default: 1000.0, minimum: 0.0}
+      - {id: mission.target_speed, kind: number, canonical_unit: m/s, default: 60.0, minimum: 0.0}
+      - {id: mission.target_heading, kind: number, canonical_unit: deg, default: 90.0, minimum: -360.0, maximum: 360.0}
+      - {id: mission.boost_duration, kind: number, canonical_unit: s, default: 0.5, minimum: 0.0001}
+      - {id: mission.coast_duration, kind: number, canonical_unit: s, default: 0.5, minimum: 0.0001}
+      - {id: mission.bank_duration, kind: number, canonical_unit: s, default: 0.5, minimum: 0.0001}
+      - {id: mission.terminal_duration, kind: number, canonical_unit: s, default: 0.5, minimum: 0.0001}
+      - {id: mission.terminal_capture_range, kind: number, canonical_unit: m, default: 25.0, minimum: 0.0001}
+      - {id: runtime.time_step, kind: number, canonical_unit: s, default: 0.05, minimum: 0.0001}
+      - {id: runtime.output_interval, kind: number, canonical_unit: s, default: 0.1, minimum: 0.0001}
+    variants:
+      baseline: {}
+    loadouts:
+      baseline: {}
+    missions:
+      ladder: {}
+    segment_plans:
+      ladder: {}
+    segment_graphs:
+      ladder:
+        schema_version: 1
+        launch: {latitude_deg: 0.0, longitude_deg: 0.0}
+        aim_point: {altitude_m: 1000.0}
+        segments:
+          - {id: powered_ascent, kind: powered_ascent, duration_parameter: mission.boost_duration, cutoff: physical_burnout}
+          - {id: ballistic_coast, kind: ballistic_coast, duration_parameter: mission.coast_duration, cutoff: time}
+          - {id: bank_maneuver, kind: bank_maneuver, duration_parameter: mission.bank_duration, cutoff: commanded_heading}
+          - {id: terminal_pronav, kind: terminal_pronav, duration_parameter: mission.terminal_duration, cutoff: commanded_range}
+        events:
+          - {id: physical_burnout, kind: physical_burnout, source: vehicle.booster.mass_flow}
+          - {id: commanded_cutoff, kind: commanded_cutoff, source: mission.burnout_speed}
+    controls:
+      - {id: command.bank, unit: deg, default: 0.0, minimum: -90.0, maximum: 90.0, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: commanded, cadence_s: 0.1, hold_behavior: hold, failsafe_value: 0.0, rate_limit_per_s: 45.0}
+      - {id: command.throttle, unit: dimensionless, default: 0.0, minimum: 0.0, maximum: 1.0, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: commanded, cadence_s: 0.1, hold_behavior: failsafe, failsafe_value: 0.0, rate_limit_per_s: 1.0}
+    observations:
+      - {id: state.position.downrange, unit: m, source: position.downrange}
+      - {id: state.position.altitude, unit: m, source: position.altitude}
+      - {id: state.velocity, unit: m/s, source: velocity}

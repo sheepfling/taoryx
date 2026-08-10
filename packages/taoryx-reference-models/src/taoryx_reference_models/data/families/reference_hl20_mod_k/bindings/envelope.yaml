@@ -1,0 +1,15 @@
+schema_version: 1
+kind: taoryx.reference-envelope/v1alpha1
+family: reference_hl20_mod_k
+fidelity: rigid_body_6dof
+body_frame: FRD
+navigation_frame: NED
+qualified_axes:
+  mach: [0.3, 4.0]
+  alpha_rad: [0.0, 0.2617993877991494]
+  beta: declared_by_source_payload
+interpolation: source_package_declared
+extrapolation: fail_closed
+notes:
+  - Current envelope is the Mod K source-package envelope, not a generic hypersonic claim.
+  - The vehicle is unpowered and has no qualified ground-contact lifecycle.

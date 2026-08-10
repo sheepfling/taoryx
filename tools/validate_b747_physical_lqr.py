@@ -32,7 +32,10 @@ from taoryx.physical_lqr import (
     validate_nonlinear_wrench_lqr,
 )
 from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant
-from taoryx.source_table_fixed_wing import build_b747_condition3_source_table_plant
+from taoryx.source_table_fixed_wing import (
+    build_b747_condition3_source_surface_physical_lqr_design,
+    build_b747_condition3_source_table_plant,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBLEM = ROOT / "examples/generated/vehicles/b747_condition3_surface_trim_6dof.prb"
@@ -220,7 +223,8 @@ def build_artifact() -> dict[str, Any]:
             "B747 physical-surface authority preflight blocked LQR synthesis: "
             + json.dumps(authority_preflight.as_dict(), sort_keys=True)
         )
-    wrench_scales = _physical_wrench_scales(effectiveness, plant)
+    shared_design = build_b747_condition3_source_surface_physical_lqr_design()
+    wrench_scales = shared_design.wrench_scales
     initial_state = dict(trim.state)
     initial_state.update(
         {
@@ -287,7 +291,7 @@ def build_artifact() -> dict[str, Any]:
                 "passed": passed,
             }
         )
-        if passed and selected_design is None:
+        if passed and design.id == shared_design.id and selected_design is None:
             selected_design = design
             selected_validation = validation
     if selected_design is None or selected_validation is None:
@@ -301,7 +305,7 @@ def build_artifact() -> dict[str, Any]:
             for trial in trials
         ]
         raise RuntimeError(
-            "no B747 physical-surface LQR profile passed the declared local acceptance gates: "
+            "the shared B747 condition-3 physical-surface LQR profile did not pass the declared local acceptance gates: "
             + json.dumps(summary, sort_keys=True)
         )
     final_error_fraction = selected_validation.final_normalized_feedback_error_norm / max(

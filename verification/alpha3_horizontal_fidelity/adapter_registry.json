@@ -69,7 +69,7 @@
           },
           "rigid_body_6dof_direct_wrench": {
             "blockers": [
-              "nonlinear_direct_wrench_mission"
+              "envelope_robustness_and_flight_qualification"
             ],
             "declared_status": "development",
             "required_operations": [
@@ -157,7 +157,7 @@
           },
           "rigid_body_6dof_direct_wrench": {
             "blockers": [
-              "nonlinear_direct_wrench_mission"
+              "envelope_robustness_and_flight_qualification"
             ],
             "declared_status": "development",
             "required_operations": [
@@ -493,7 +493,7 @@
           },
           "rigid_body_6dof_direct_wrench": {
             "blockers": [
-              "direct_wrench_is_debug_comparator"
+              "local_direct_wrench_comparator_scope_only"
             ],
             "declared_status": "development",
             "required_operations": [
@@ -806,7 +806,7 @@
       },
       {
         "blockers": [
-          "nonlinear_direct_wrench_mission"
+          "envelope_robustness_and_flight_qualification"
         ],
         "declared_status": "development",
         "family_id": "skywalker_x8",
@@ -884,7 +884,7 @@
       },
       {
         "blockers": [
-          "nonlinear_direct_wrench_mission"
+          "envelope_robustness_and_flight_qualification"
         ],
         "declared_status": "development",
         "family_id": "b747",
@@ -1225,7 +1225,7 @@
       },
       {
         "blockers": [
-          "direct_wrench_is_debug_comparator"
+          "local_direct_wrench_comparator_scope_only"
         ],
         "declared_status": "development",
         "family_id": "hummingbird",

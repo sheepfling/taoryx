@@ -47,9 +47,9 @@ families:
     display_name: HL-20 Mod K source-grounded reference family
     physical_family: unpowered_lifting_body
     manifest: families/reference_hl20_mod_k/family.yaml
-    maturity: M3
+    maturity: M4
     evidence_strength: source_grounded_reference
-    status: source_replay_qualified_surface_allocation_contract_ready
+    status: source_replay_scalar_pitch_surface_authority_allocation_composable
     supported_profiles:
       - id: hl20.rigid_body_6dof.v1
         fidelity: rigid_body_6dof
@@ -57,8 +57,8 @@ families:
         claim: source-bounded nonlinear unpowered lifting-body replay
       - id: hl20.rigid_body_6dof_surface_allocated.v1
         fidelity: rigid_body_6dof
-        status: contract_ready
-        claim: not_qualified
+        status: development_source_surface_authority_pass
+        claim: source-bounded scalar-pitch surface-authority allocation screen
       - id: hl20.energy_glide_3dof.v1
         fidelity: point_mass_3dof
         status: planned_derived_from_parent
@@ -72,4 +72,4 @@ families:
       - actuator dynamics or controller qualification
       - landing gear, contact, flare, touchdown, or rollout
       - generic hypersonic-glider or operational performance
-    next_gate: surface_allocator_glide_guidance_and_arrival_showcase
+    next_gate: full_state_trim_surface_feedback_glide_guidance_and_arrival_showcase

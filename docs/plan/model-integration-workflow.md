@@ -105,6 +105,22 @@ with zeros or precise-looking guesses.
     actuators, events, envelope/closure/convergence/evaluation reports,
     terminal state, reproduction command, limitations, and open questions.
 
+Once stages 1–3 can publish a Mission Composition advertisement, use the
+common [model-to-mission automation](../architecture/model-authoring-automation.md)
+instead of creating a parallel model-specific authoring tool:
+
+```bash
+taoryx model plan <provider-id> <model-id>
+taoryx model scaffold <provider-id> <model-id> --output model-draft.yaml
+```
+
+This immediately exercises advertised metadata, modes, segment templates,
+waypoint parameters, controls, and output schemas. When stages 4–7 provide a
+true family adapter, operating points, scales, and authority, register those
+inputs as a controller-tuning campaign and exercise them with
+`taoryx model tune`. The host supplies orchestration; the integration record
+remains authoritative for all family-specific data and evidence.
+
 ## Qualification tiers
 
 | Tier | Gate | Evidence |

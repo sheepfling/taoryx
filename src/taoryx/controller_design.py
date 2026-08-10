@@ -23,11 +23,12 @@ from .controller_realization import (
     ControllerRealization,
     ControllerRole,
 )
-from .runtime.lqr import LqrController, solve_continuous_lqr
+from .runtime.lqr import LqiController, LqrController, solve_continuous_lqi, solve_continuous_lqr, solve_scaled_continuous_lqi
 from .trim import TrimResult
 
 ControllerDesignMethod = Literal[
     "lqr",
+    "lqi",
     "pid",
     "mpc",
     "pole_placement",
@@ -69,6 +70,7 @@ class ControllerDesignSpec(BaseModel):
     scenario_overrides_allowed: bool = False
     evidence_tier: ControllerEvidenceTier = "T0_structural"
     control_realization_path: ControllerControlPath = "unspecified"
+    integral_outputs: tuple[str, ...] = ()
     screen_only: bool = False
     notes: str = ""
 
@@ -80,6 +82,12 @@ class ControllerDesignSpec(BaseModel):
             raise ValueError(f"controller design {self.id!r} has duplicate controls")
         if set(self.states) & set(self.controls):
             raise ValueError(f"controller design {self.id!r} overlaps state and control names")
+        if self.method == "lqi" and not self.integral_outputs:
+            raise ValueError(f"LQI controller design {self.id!r} requires integral outputs")
+        if set(self.integral_outputs) - set(self.states):
+            raise ValueError(f"controller design {self.id!r} integral outputs must identify declared states")
+        if len(set(self.integral_outputs)) != len(self.integral_outputs):
+            raise ValueError(f"controller design {self.id!r} has duplicate integral outputs")
         for values, label, expected in (
             (self.state_units, "state_units", len(self.states)),
             (self.state_frames, "state_frames", len(self.states)),
@@ -187,6 +195,74 @@ def build_lqr_controller(
     ####
 
 
+def build_lqi_controller(
+    design: ControllerDesignSpec,
+    trim: TrimResult,
+    a: Sequence[Sequence[float]],
+    b: Sequence[Sequence[float]],
+    q: Sequence[Sequence[float]],
+    r: Sequence[Sequence[float]],
+    *,
+    output_matrix: Sequence[Sequence[float]],
+    lower: Mapping[str, float] | None = None,
+    upper: Mapping[str, float] | None = None,
+    integral_lower: Mapping[str, float] | None = None,
+    integral_upper: Mapping[str, float] | None = None,
+    state_scales: Sequence[float] | None = None,
+    control_scales: Sequence[float] | None = None,
+    state_adapter: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None,
+) -> LqiController:
+    """Build an explicit output-integrating LQI controller from a named trim.
+
+    ``integral_outputs`` selects the physical state outputs whose persistent
+    tracking error is integrated.  The caller supplies ``output_matrix`` so a
+    nontrivial measured output cannot be guessed from a state name.
+    """
+
+    if design.method != "lqi":
+        raise ValueError(f"controller design {design.id!r} uses method {design.method!r}, not 'lqi'")
+    if tuple(design.states) != tuple(trim.spec.state_names):
+        raise ValueError(f"controller design {design.id!r} states do not match trim {design.trim!r}")
+    if tuple(design.controls) != tuple(trim.spec.control_names):
+        raise ValueError(f"controller design {design.id!r} controls do not match trim {design.trim!r}")
+    solver = solve_continuous_lqi
+    kwargs: dict[str, object] = {}
+    if state_scales is not None or control_scales is not None:
+        if state_scales is None or control_scales is None:
+            raise ValueError("scaled LQI requires both state_scales and control_scales")
+        solver = solve_scaled_continuous_lqi
+        kwargs = {"state_scales": state_scales, "control_scales": control_scales}
+    result = solver(
+        a,
+        b,
+        q,
+        r,
+        output_matrix=output_matrix,
+        output_names=design.integral_outputs,
+        state_names=design.states,
+        control_names=design.controls,
+        **kwargs,
+    )
+    realization = _build_lqi_realization(design, trim, result)
+    import numpy as np
+
+    trim_state = np.asarray([float(trim.state[name]) for name in design.states], dtype=float)
+    output_trim = np.asarray(output_matrix, dtype=float) @ trim_state
+    return LqiController(
+        result,
+        state_trim=trim.state,
+        control_trim=trim.controls,
+        output_trim={name: float(value) for name, value in zip(design.integral_outputs, output_trim, strict=True)},
+        lower=lower or {},
+        upper=upper or {},
+        integral_lower=integral_lower or {},
+        integral_upper=integral_upper or {},
+        realization=realization,
+        state_adapter=state_adapter,
+    )
+    ####
+
+
 def _build_lqr_realization(design: ControllerDesignSpec, trim: TrimResult, result: object) -> ControllerRealization:
     """Build the immutable runtime contract attached to a factory result."""
 
@@ -239,6 +315,71 @@ def _build_lqr_realization(design: ControllerDesignSpec, trim: TrimResult, resul
         control_realization_path=design.control_realization_path,
         provenance={
             "trim": design.trim,
+            "notes": design.notes,
+            "screen_only": str(design.screen_only).lower(),
+        },
+    )
+    ####
+
+
+def _build_lqi_realization(design: ControllerDesignSpec, trim: TrimResult, result: object) -> ControllerRealization:
+    """Build LQI provenance while retaining the physical state contract."""
+
+    from .runtime.lqr import LqiResult
+
+    if not isinstance(result, LqiResult):
+        raise TypeError("LQI realization requires an LqiResult")
+    state_units = design.state_units or tuple("unspecified" for _ in design.states)
+    state_frames = design.state_frames or tuple("unspecified" for _ in design.states)
+    control_units = design.control_units or tuple("unspecified" for _ in design.controls)
+    control_frames = design.control_frames or tuple("unspecified" for _ in design.controls)
+    states = tuple(
+        ControllerChannel(name=name, order=index, unit=state_units[index], frame=state_frames[index], scale=1.0)
+        for index, name in enumerate(design.states)
+    )
+    inputs = tuple(
+        ControllerChannel(name=name, order=index, unit=control_units[index], frame=control_frames[index], scale=1.0)
+        for index, name in enumerate(design.controls)
+    )
+    poles = tuple(ClosedLoopPole(real=float(value.real), imaginary=float(value.imag)) for value in result.design.closed_loop_eigenvalues)
+    return ControllerRealization(
+        id=f"{design.id}:realization",
+        role=cast(ControllerRole, design.role)
+        if design.role in {"guidance", "attitude", "rate", "local_regulator", "integral_regulator", "allocator", "actuator", "fallback", "baseline", "unspecified"}
+        else "unspecified",
+        implementation="lqi",
+        implementation_version=design.implementation_version,
+        fidelity=cast(ControllerFidelity, design.fidelity)
+        if design.fidelity in {"point_mass_3dof", "pseudo_6dof", "rigid_body_6dof"}
+        else "rigid_body_6dof",
+        design_id=design.id,
+        states=states,
+        inputs=inputs,
+        plant_source=design.plant_source,
+        linearization_source=design.linearization_source,
+        operating_point={"trim": design.trim, **dict(trim.spec.operating_point)},
+        state_scale_id=design.state_scale_id,
+        control_scale_id=design.control_scale_id,
+        q_id=design.q_id,
+        r_id=design.r_id,
+        a_sha256=result.design.a_sha256,
+        b_sha256=result.design.b_sha256,
+        q_sha256=result.design.q_sha256,
+        r_sha256=result.design.r_sha256,
+        k_sha256=result.design.k_sha256,
+        integral_states=design.integral_outputs,
+        closed_loop_poles=poles,
+        closed_loop_max_real_pole=result.maximum_real_pole,
+        allocator_id=design.allocator,
+        control_path=("guidance", "reference_shaping", "lqi", "allocator", "actuator", "plant"),
+        fallback_controller_id=design.fallback_controller_id,
+        scenario_overrides_allowed=design.scenario_overrides_allowed,
+        claim_status="design",
+        evidence_tier=design.evidence_tier,
+        control_realization_path=design.control_realization_path,
+        provenance={
+            "trim": design.trim,
+            "integral_outputs": ",".join(design.integral_outputs),
             "notes": design.notes,
             "screen_only": str(design.screen_only).lower(),
         },

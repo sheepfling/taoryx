@@ -130,3 +130,30 @@ def test_normalized_evaluation_reports_observed_graph_dispatches_as_evidence_not
     assert "completion=True" in graph_gate.message
     assert evaluation.outcome == "partial"
     ####
+
+
+def test_step_limited_prefix_is_time_limited_not_a_numerical_failure() -> None:
+    """A caller-imposed smoke cap preserves valid prefix evidence honestly."""
+
+    composition = compile_vehicle_composition(
+        load_vehicle_composition_request(ROOT / "examples/vehicle_composition/x8_racetrack_direct_wrench_compose.yaml")
+    )
+
+    evaluation = build_composition_trajectory_evaluation(
+        composition,
+        preflight_vehicle_composition(composition),
+        {"mission_pass": False, "results": []},
+        runtime={
+            "numerical_valid": False,
+            "execution_limit_reason": "max_steps",
+            "hard_gates_passed": False,
+        },
+        envelope={"pass": True},
+        claim_boundary="capped prefix fixture",
+    )
+
+    assert evaluation.validity == "valid"
+    assert evaluation.outcome == "time_limited"
+    runtime_gate = next(gate for gate in evaluation.gates if gate.id == "runtime-hard-gates")
+    assert runtime_gate.status == "fail"
+    ####

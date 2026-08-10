@@ -18,6 +18,7 @@ from .configuration_contract import (
     ConfigurationChoiceSchema,
     ConfigurationChoiceValue,
     ConfigurationChoiceVariant,
+    ConfigurationContractError,
     ConfigurationGroupSchema,
     ConfigurationGroupValue,
     ConfigurationInterval,
@@ -36,6 +37,12 @@ from .configuration_contract import (
     PresentationLinkMetadata,
     TrajectoryConfigurationInstance,
     TrajectoryConfigurationSchema,
+    TrajectoryControlAdvertisement,
+    TrajectoryControlAuthorityMetadata,
+    TrajectoryControlAvailability,
+    TrajectoryControlChannelMetadata,
+    TrajectoryControlIntentMetadata,
+    TrajectoryControlNativeBindingMetadata,
     TrajectoryDeploymentMetadata,
     TrajectoryEntityOutputMetadata,
     TrajectoryFidelityMetadata,
@@ -152,7 +159,96 @@ class ContractProbeMissionCompositionProvider:
         self,
         configuration: TrajectoryConfigurationInstance,
     ) -> PreparedTrajectoryConfiguration:
-        return validate_configuration_instance(self._schema, configuration)
+        prepared = validate_configuration_instance(self._schema, configuration)
+        self._validate_advertised_selection(configuration, operation="validate")
+        return prepared
+        ####
+
+    def _validate_advertised_selection(
+        self,
+        configuration: TrajectoryConfigurationInstance,
+        *,
+        operation: Literal["validate", "batch", "step"],
+    ) -> None:
+        """Reject configurations outside this provider's exact public matrix."""
+
+        realization = next((item for item in self._model.realizations if item.id == configuration.realization_id), None)
+        if realization is None:
+            raise ConfigurationContractError(
+                "unknown-realization",
+                "contract-probe execution requires one advertised realization_id",
+                path="configuration.realization_id",
+            )
+        if realization.status != "available":
+            raise ConfigurationContractError(
+                "realization-unavailable",
+                f"realization {realization.id!r} is {realization.status!r}: {list(realization.blockers)!r}",
+                path="configuration.realization_id",
+            )
+        if configuration.fidelity not in realization.fidelity_aliases:
+            raise ConfigurationContractError(
+                "realization-fidelity-incompatible",
+                f"realization {realization.id!r} does not support fidelity {configuration.fidelity!r}",
+                path="configuration.realization_id",
+            )
+        mission = next((item for item in self._model.mission_templates if item.id == configuration.mission_template_id), None)
+        if mission is None:
+            raise ConfigurationContractError(
+                "unknown-mission-template",
+                "contract-probe execution requires one advertised mission_template_id",
+                path="configuration.mission_template_id",
+            )
+        if configuration.fidelity not in mission.compatible_fidelities:
+            raise ConfigurationContractError(
+                "mission-fidelity-incompatible",
+                f"mission {mission.id!r} does not support fidelity {configuration.fidelity!r}",
+                path="configuration.mission_template_id",
+            )
+        if mission.id not in realization.mission_template_ids:
+            raise ConfigurationContractError(
+                "realization-mission-incompatible",
+                f"realization {realization.id!r} does not support mission {mission.id!r}",
+                path="configuration.realization_id",
+            )
+        if not isinstance(configuration.root, ConfigurationGroupValue):
+            raise ConfigurationContractError(
+                "invalid-configuration-root",
+                "contract-probe configuration root must be a group",
+                path="configuration.root",
+            )
+        segments = configuration.root.values.get("segments")
+        if not isinstance(segments, ConfigurationSequenceValue):
+            raise ConfigurationContractError(
+                "missing-mission-sequence",
+                "contract-probe configuration requires a mission segment sequence",
+                path="configuration.root.segments",
+            )
+        selected_segments = tuple(
+            item.selected for item in segments.items if isinstance(item, ConfigurationChoiceValue)
+        )
+        if selected_segments != mission.segment_sequence:
+            raise ConfigurationContractError(
+                "mission-sequence-mismatch",
+                f"mission {mission.id!r} requires segment sequence {list(mission.segment_sequence)!r}",
+                path="configuration.root.segments",
+            )
+        exact = next(
+            (
+                item
+                for item in mission.operations
+                if item.fidelity == configuration.fidelity
+                and item.realization_id == realization.id
+                and item.operation == operation
+            ),
+            None,
+        )
+        if exact is None or exact.status != "available":
+            raise ConfigurationContractError(
+                "operation-unavailable",
+                f"mission {mission.id!r} has no available {operation!r} operation for "
+                f"{configuration.fidelity!r}/{realization.id!r}",
+                path="configuration.mission_template_id",
+            )
         ####
 
     def build_runner(self) -> MissionCompositionRunnerRegistry:
@@ -182,6 +278,18 @@ class ContractProbeMissionCompositionProvider:
                 path="/operation",
             )
         try:
+            self._validate_advertised_selection(
+                request.prepared_configuration.configuration,
+                operation="batch",
+            )
+        except ConfigurationContractError as error:
+            raise _probe_error(
+                "operation-not-advertised",
+                str(error),
+                request,
+                path="/prepared_configuration/configuration",
+            ) from error
+        try:
             selected_channels = resolve_output_selection(
                 self._model.output_schema,
                 request.output,
@@ -202,13 +310,8 @@ class ContractProbeMissionCompositionProvider:
                 request,
                 path="/output/maximum_samples_per_object",
             )
-        include_child = (
-            request.output.include_spawned_objects
-            and (request.output.maximum_objects is None or request.output.maximum_objects >= 2)
-        )
-        include_descendant = include_child and (
-            request.output.maximum_objects is None or request.output.maximum_objects >= 3
-        )
+        include_child = request.output.include_spawned_objects and (request.output.maximum_objects is None or request.output.maximum_objects >= 2)
+        include_descendant = include_child and (request.output.maximum_objects is None or request.output.maximum_objects >= 3)
         return _probe_result(
             request,
             selected_channels,
@@ -452,7 +555,7 @@ def contract_probe_configuration_schema() -> TrajectoryConfigurationSchema:
                 label="Contract Walkthrough",
                 description="Exercises two segment variants without a deployment.",
                 item_variants=("hold", "maneuver"),
-                compatible_fidelities=_FIDELITIES,
+                compatible_fidelities=("coarse", "medium"),
             ),
             ConfigurationSequenceTemplate(
                 id="deployment_walkthrough",
@@ -554,6 +657,7 @@ def contract_probe_model_metadata(schema: TrajectoryConfigurationSchema | None =
                 dynamics_fidelities=(item.dynamics_fidelity,),
                 input_realization=item.input_realization,
                 actuator_types=item.actuator_types,
+                controls=_probe_control_advertisement(item),
                 fidelity_aliases=(item.id,),
                 mission_template_ids=("deployment_walkthrough",),
                 operations=item.operations,
@@ -655,7 +759,19 @@ def _probe_properties() -> tuple[TrajectoryModelPropertyMetadata, ...]:
     return (
         _property("debug_identity", "Debug Identity", "identity", "string", "declared", "CONTRACT-PROBE", group="identity", order=10),
         _property("physical_model", "Physical Model", "identity", "boolean", "exact", False, group="identity", order=20),
-        _property("reference_mass_kg", "Reference Mass", "mass", "number", "nominal", 1250.0, quantity="mass", unit="kg", group="physical", order=30, format=scalar_format),
+        _property(
+            "reference_mass_kg",
+            "Reference Mass",
+            "mass",
+            "number",
+            "nominal",
+            1250.0,
+            quantity="mass",
+            unit="kg",
+            group="physical",
+            order=30,
+            format=scalar_format,
+        ),
         _property("axis_count", "Axis Count", "geometry", "integer", "exact", 3, group="physical", order=40),
         _property(
             "debug_mode",
@@ -668,7 +784,18 @@ def _probe_properties() -> tuple[TrajectoryModelPropertyMetadata, ...]:
             group="implementation",
             order=50,
         ),
-        _property("reference_vector", "Reference Vector", "geometry", "vector3", "representative", (1.0, 2.0, 3.0), quantity="length", unit="m", group="physical", order=60),
+        _property(
+            "reference_vector",
+            "Reference Vector",
+            "geometry",
+            "vector3",
+            "representative",
+            (1.0, 2.0, 3.0),
+            quantity="length",
+            unit="m",
+            group="physical",
+            order=60,
+        ),
         _property("reference_quaternion", "Reference Quaternion", "geometry", "vector4", "representative", (1.0, 0.0, 0.0, 0.0), group="physical", order=70),
         TrajectoryModelPropertyMetadata(
             id="demonstrated_speed_range",
@@ -790,6 +917,157 @@ def _probe_fidelities() -> tuple[TrajectoryFidelityMetadata, ...]:
     ####
 
 
+def _probe_control_advertisement(
+    fidelity: TrajectoryFidelityMetadata,
+) -> TrajectoryControlAdvertisement:
+    """Exercise scalar, vector, boolean, authority, and intent metadata."""
+
+    available = "batch" in fidelity.operations
+    availability: TrajectoryControlAvailability = "available_in_batch" if available else "planned"
+    operations: tuple[Literal["batch", "step"], ...] = ("batch",) if available else ()
+    speed_interval = _interval(0.0, 500.0)
+    speed_space = ConfigurationValueSpace(
+        topology="bounded_interval",
+        representation="scalar",
+        error_rule="componentwise subtraction",
+        interpolation_rule="linear",
+        coordinate_chart="[0, 500]",
+    )
+    quaternion_space = ConfigurationValueSpace(
+        topology="unit_quaternion",
+        representation="vector4",
+        error_rule="shortest rotation",
+        interpolation_rule="slerp",
+        normalization_rule="unit norm with canonical sign",
+        equivalence="q and -q",
+        coordinate_chart="S^3 / {q ~ -q}",
+    )
+    boolean_space = ConfigurationValueSpace(
+        topology="boolean",
+        representation="boolean",
+        error_rule="exact equality",
+        interpolation_rule="not interpolable",
+    )
+    channels = (
+        TrajectoryControlChannelMetadata(
+            id="guidance.speed.command",
+            label="Speed Command",
+            description="Synthetic bounded scalar guidance command.",
+            channel_kind="action",
+            quantity="speed",
+            canonical_unit="m/s",
+            display_unit="m/s",
+            interval=speed_interval,
+            sampling_semantics="batch_profile",
+            value_space=speed_space,
+            availability=availability,
+            operations=operations,
+            native_channel_id="synthetic_speed_m_s",
+            native_binding=TrajectoryControlNativeBindingMetadata(
+                id="synthetic_speed_m_s",
+                quantity="speed",
+                canonical_unit="m/s",
+                interval=speed_interval,
+                value_space=speed_space,
+                provider_binding={"debug_field": "synthetic_speed_m_s"},
+            ),
+            provider_binding={"debug_field": "synthetic_speed_m_s"},
+            presentation=ValuePresentationMetadata(group="controls", order=10, control="slider"),
+            source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
+            provenance="synthetic contract probe",
+            claim_boundary="Synthetic transport and renderer witness only.",
+        ),
+        TrajectoryControlChannelMetadata(
+            id="attitude.quaternion.command",
+            label="Attitude Quaternion Command",
+            description="Synthetic body-attitude vector command.",
+            channel_kind="action",
+            quantity="orientation",
+            data_type="float64",
+            shape=(4,),
+            frame="body",
+            sampling_semantics="batch_profile",
+            value_space=quaternion_space,
+            availability=availability,
+            operations=operations,
+            native_channel_id="synthetic_attitude_quaternion",
+            native_binding=TrajectoryControlNativeBindingMetadata(
+                id="synthetic_attitude_quaternion",
+                quantity="orientation",
+                data_type="float64",
+                shape=(4,),
+                value_space=quaternion_space,
+                provider_binding={"debug_field": "synthetic_attitude_quaternion"},
+            ),
+            provider_binding={"debug_field": "synthetic_attitude_quaternion"},
+            presentation=ValuePresentationMetadata(group="controls", order=20, control="vector_editor"),
+            source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
+            provenance="synthetic contract probe",
+            claim_boundary="Synthetic transport and renderer witness only.",
+        ),
+        TrajectoryControlChannelMetadata(
+            id="mission.enable",
+            label="Mission Enable",
+            description="Synthetic boolean command channel.",
+            channel_kind="action",
+            data_type="boolean",
+            sampling_semantics="segment_generated",
+            value_space=boolean_space,
+            availability=availability,
+            operations=operations,
+            native_channel_id="synthetic_mission_enabled",
+            native_binding=TrajectoryControlNativeBindingMetadata(
+                id="synthetic_mission_enabled",
+                quantity="boolean",
+                data_type="boolean",
+                value_space=boolean_space,
+                provider_binding={"debug_field": "synthetic_mission_enabled"},
+            ),
+            provider_binding={"debug_field": "synthetic_mission_enabled"},
+            presentation=ValuePresentationMetadata(group="controls", order=30, control="toggle"),
+            source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
+            provenance="synthetic contract probe",
+            claim_boundary="Synthetic transport and renderer witness only.",
+        ),
+    )
+    resolution: Literal["provider_internal", "blocked"] = "provider_internal" if available else "blocked"
+    return TrajectoryControlAdvertisement(
+        status="internally_generated" if available else "blocked",
+        channels=channels,
+        authorities=(
+            TrajectoryControlAuthorityMetadata(
+                id="synthetic_mission_authority",
+                authority="provider_defined",
+                availability=availability,
+                channel_ids=tuple(item.id for item in channels),
+                operations=operations,
+                description="Synthetic mutually exclusive authority over every probe command.",
+                source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
+                provenance="synthetic contract probe",
+                claim_boundary="Debug contract coverage only.",
+            ),
+        ),
+        intents=(
+            TrajectoryControlIntentMetadata(
+                id="deployment_guidance",
+                label="Deployment Guidance",
+                description="Synthetic intent resolved during the deploy segment.",
+                resolution=resolution,
+                segment_ids=("deploy",),
+                mission_template_ids=("deployment_walkthrough",),
+                channel_ids=tuple(item.id for item in channels),
+                operations=operations,
+                source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
+                provenance="synthetic contract probe",
+                claim_boundary="Debug contract coverage only.",
+            ),
+        ),
+        default_authority_id="synthetic_mission_authority" if available else None,
+        claim_boundary="Synthetic full-surface control advertisement for generic composer development.",
+    )
+    ####
+
+
 def _probe_fidelity_transitions() -> tuple[TrajectoryFidelityTransition, ...]:
     return (
         _transition("coarse", "medium", "step_up", "available", automatic=False, policy="explicit_upgrade_only"),
@@ -826,18 +1104,6 @@ def _transition(
 def _probe_mission_templates() -> tuple[TrajectoryMissionTemplateMetadata, ...]:
     return (
         TrajectoryMissionTemplateMetadata(
-            id="contract_walkthrough",
-            name="Contract Walkthrough",
-            description="Two-segment path used for configuration and operation-matrix rendering.",
-            status="runnable_debug_contract",
-            initialization_variants=("debug_initial_state",),
-            segment_sequence=("hold", "maneuver"),
-            compatible_fidelities=_FIDELITIES,
-            operations=_probe_operations(),
-            provenance="synthetic contract probe",
-            claim_boundary="Contract coverage only.",
-        ),
-        TrajectoryMissionTemplateMetadata(
             id="deployment_walkthrough",
             name="Deployment Walkthrough",
             description="Two-segment path that emits a child object through the standardized lineage contract.",
@@ -856,7 +1122,7 @@ def _probe_mission_templates() -> tuple[TrajectoryMissionTemplateMetadata, ...]:
 def _probe_operations() -> tuple[TrajectoryMissionOperationMetadata, ...]:
     records: list[TrajectoryMissionOperationMetadata] = []
     operations: tuple[Literal["validate", "batch", "step"], ...] = ("validate", "batch", "step")
-    for fidelity in _FIDELITIES:
+    for fidelity in ("coarse", "medium"):
         for operation in operations:
             available = operation == "validate" or (operation == "batch" and fidelity in {"coarse", "medium"})
             common_status: Literal["registered", "adapter_required", "not_available"] = (
@@ -1161,29 +1427,32 @@ def _probe_result(
     descendant_event_id = f"{request.request_id}:debug-descendant-released"
     primary_channels = tuple(_result_channel(item) for item in advertised_channels)
     primary_segments = (
-        TrajectorySegmentResult(
-            id="hold",
-            instance_id="01-hold",
-            object_id=primary_id,
-            start_time_s=0.0,
-            end_time_s=1.0,
-            status="completed",
-        ),
-        TrajectorySegmentResult(
-            id="deploy",
-            instance_id="02-deploy",
-            object_id=primary_id,
-            start_time_s=1.0,
-            end_time_s=2.0,
-            status="completed",
-            event_ids=(deployment_event_id,) if include_child else (),
-        ),
-    ) if request.output.include_segments else ()
+        (
+            TrajectorySegmentResult(
+                id="hold",
+                instance_id="01-hold",
+                object_id=primary_id,
+                start_time_s=0.0,
+                end_time_s=1.0,
+                status="completed",
+            ),
+            TrajectorySegmentResult(
+                id="deploy",
+                instance_id="02-deploy",
+                object_id=primary_id,
+                start_time_s=1.0,
+                end_time_s=2.0,
+                status="completed",
+                event_ids=(deployment_event_id,) if include_child else (),
+            ),
+        )
+        if request.output.include_segments
+        else ()
+    )
     primary = TrajectoryObject(
         object_id=primary_id,
         model_id=CONTRACT_PROBE_MODEL_ID,
-        realization_id=request.prepared_configuration.configuration.realization_id
-        or request.prepared_configuration.configuration.fidelity,
+        realization_id=request.prepared_configuration.configuration.realization_id or request.prepared_configuration.configuration.fidelity,
         name="Contract Probe Primary",
         role="primary_vehicle",
         fidelity=request.prepared_configuration.configuration.fidelity,
@@ -1243,7 +1512,9 @@ def _probe_result(
                         status="completed",
                         event_ids=(descendant_event_id,) if include_descendant else (),
                     ),
-                ) if request.output.include_segments else (),
+                )
+                if request.output.include_segments
+                else (),
                 provenance="synthetic child generated by the contract probe",
                 claim_boundary="Lineage witness only.",
             )
@@ -1277,10 +1548,7 @@ def _probe_result(
                     data={"state_transfer": "inherited_at_accepted_boundary"},
                 )
             )
-            descendant_samples = tuple(
-                _probe_sample(time_s, advertised_channels, child=True)
-                for time_s in (1.5, 1.75, 2.0)
-            )
+            descendant_samples = tuple(_probe_sample(time_s, advertised_channels, child=True) for time_s in (1.5, 1.75, 2.0))
             objects.append(
                 TrajectoryObject(
                     object_id=descendant_id,

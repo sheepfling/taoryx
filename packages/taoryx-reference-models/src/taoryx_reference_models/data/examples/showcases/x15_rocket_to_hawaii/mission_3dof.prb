@@ -1,0 +1,27 @@
+(x15-rocket-to-hawaii-3dof-reduction)
+*title X-15 staged point-mass ascent and coast reduction
+*atmos standard
+*earth wgs-84 omega=7.2921151467e-5 gm=3.986004418e14
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+*runtime status target latitude-deg=21.3069 longitude-deg=-157.8583 altitude-m=0.0
+*runtime status route mode=great-circle start-latitude-deg=34.0522 start-longitude-deg=-118.2437 duration-s=180.0 powered-end-s=40.0 altitude-profile=mission powered-speed-mps=1200.0 powered-climb-rate-mps=120.0 glide-speed-mps=900.0 terminal-start-s=120.0 terminal-speed-mps=250.0
+*trajectory 1 x15 start on 1
+  *initial geodetic alt=0.0 long=-118.2437 lat=34.0522 vel=500.0 gama=20.0 psi=245.0 time=0.0 mass=14641.0545
+  *segment 1 powered-ascent
+    *integ dtprnt=0.5 dt=0.1
+    *aero cx=(cx) cy=(cy) cz=(cz) sref=18.580608
+    *prop thrust=(x15-thrust) mdot=(x15-mdot)
+    *fly alpha=0.0
+    *when time>40.0 goto 2
+  *segment 2 release-coast
+    *integ dtprnt=0.5 dt=0.1
+    *aero cx=(cx) cy=(cy) cz=(cz) sref=18.580608
+    *fly alpha=0.0
+    *when time>180.0 stop
+*end

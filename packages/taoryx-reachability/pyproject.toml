@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taoryx-reachability"
+version = "0.1.0a0"
+description = "Optional reachability workbench and mission overlays for Taoryx"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "matplotlib>=3.9",
+  "pydantic>=2.8",
+  "PyYAML>=6.0",
+  "taoryx>=0.1.0a0,<0.2",
+  "taoryx-reference-models>=0.1.0a0,<0.2",
+]
+
+[project.entry-points."taoryx.plugins"]
+"taoryx.reachability" = "taoryx_reachability.plugin:PLUGIN"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[tool.setuptools.package-data]
+taoryx_reachability = ["data/**/*", "data/**/**/*", "data/**/**/**/*"]

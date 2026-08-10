@@ -29,6 +29,7 @@ from .generic_tuning import (
     LinearAuthorityRequirement,
     NormalizedLqrProfileGrid,
     linear_authority_preflight,
+    tune_lqi_profiles,
     tune_lqr_profiles,
 )
 from .trim import TrimResult
@@ -66,6 +67,9 @@ class TuningCampaignNode:
     profile_grid: NormalizedLqrProfileGrid | None = None
     design_state_names: tuple[str, ...] | None = None
     design_control_names: tuple[str, ...] | None = None
+    controller_method: Literal["lqr", "lqi"] = "lqr"
+    integral_output_names: tuple[str, ...] = ()
+    integral_q_diagonal: tuple[float, ...] = ()
     maximum_omitted_state_coupling: float = 1.0e-8
     linearization_options: Mapping[str, float | str] = field(default_factory=dict)
 
@@ -84,6 +88,17 @@ class TuningCampaignNode:
             not self.design_control_names or len(set(self.design_control_names)) != len(self.design_control_names)
         ):
             raise ValueError("campaign design-control names must be non-empty and unique when supplied")
+        if self.controller_method == "lqi":
+            if not self.integral_output_names or len(set(self.integral_output_names)) != len(self.integral_output_names):
+                raise ValueError("LQI campaign nodes require non-empty unique integral outputs")
+            if self.design_state_names is not None and set(self.integral_output_names) - set(self.design_state_names):
+                raise ValueError("LQI campaign integral outputs must identify design states")
+            if len(self.integral_q_diagonal) != len(self.integral_output_names):
+                raise ValueError("LQI campaign integral weights must match integral outputs")
+            if any(value <= 0.0 for value in self.integral_q_diagonal):
+                raise ValueError("LQI campaign integral weights must be positive")
+        elif self.integral_output_names or self.integral_q_diagonal:
+            raise ValueError("LQR campaign nodes cannot declare LQI integral outputs or weights")
         if self.maximum_omitted_state_coupling < 0.0:
             raise ValueError("maximum omitted-state coupling must be nonnegative")
         ####
@@ -115,6 +130,9 @@ class TuningCampaignNode:
             },
             "design_state_names": list(self.design_state_names) if self.design_state_names is not None else None,
             "design_control_names": list(self.design_control_names) if self.design_control_names is not None else None,
+            "controller_method": self.controller_method,
+            "integral_output_names": list(self.integral_output_names),
+            "integral_q_diagonal": list(self.integral_q_diagonal),
             "maximum_omitted_state_coupling": self.maximum_omitted_state_coupling,
             "linearization_options": dict(self.linearization_options),
         }
@@ -369,19 +387,28 @@ def _run_node(
 
     try:
         profiles = node.resolved_profiles(len(design_state_names), len(design_control_names))
-        report = tune_lqr_profiles(
-            campaign.family_id,
-            design_a_matrix,
-            design_b_matrix,
-            state_names=design_state_names,
-            control_names=design_control_names,
-            state_scales=node.state_scales,
-            control_scales=node.control_scales,
-            profiles=profiles,
-            design_source=(
+        report_args = {
+            "state_names": design_state_names,
+            "control_names": design_control_names,
+            "state_scales": node.state_scales,
+            "control_scales": node.control_scales,
+            "profiles": profiles,
+            "design_source": (
                 f"{campaign.campaign_id}:{node.node_id}:"
                 f"{provenance.nonlinear_plant_id}@{provenance.nonlinear_plant_revision}"
             ),
+        }
+        report = (
+            tune_lqi_profiles(
+                campaign.family_id,
+                design_a_matrix,
+                design_b_matrix,
+                output_names=node.integral_output_names,
+                integral_q_diagonal=node.integral_q_diagonal,
+                **report_args,
+            )
+            if node.controller_method == "lqi"
+            else tune_lqr_profiles(campaign.family_id, design_a_matrix, design_b_matrix, **report_args)
         )
     except (TypeError, ValueError, RuntimeError) as error:
         return TuningCampaignNodeResult(
@@ -407,7 +434,7 @@ def _run_node(
         return TuningCampaignNodeResult(
             node.node_id,
             "candidate_rejected",
-            "no bounded LQR candidate passed the declared design screen",
+            f"no bounded {node.controller_method.upper()} candidate passed the declared design screen",
             blockers,
             trim=trim,
             derivative_consistent=True,
@@ -418,7 +445,7 @@ def _run_node(
     return TuningCampaignNodeResult(
         node.node_id,
         "candidate_ready",
-        "trim, derivative consistency, authority preflight, and a bounded LQR candidate passed",
+        f"trim, derivative consistency, authority preflight, and a bounded {node.controller_method.upper()} candidate passed",
         trim=trim,
         derivative_consistent=True,
         derivative_metrics=derivative_metrics,

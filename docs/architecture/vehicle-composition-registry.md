@@ -163,6 +163,15 @@ quaternion is an `SO(3)` representation. Registry loading fails if an exposed
 input lacks this catalog entry, and `topology-report` reports catalog coverage
 separately from interface-channel coverage.
 
+Every numeric public status, resource, and diagnostic channel must likewise
+advertise either a `canonical_unit` or explicit `quantity_semantics`. The
+unitless forms are deliberately narrow: `count` for cardinality/rank,
+`normalized_error` for a scale-normalized feedback metric, and
+`mixed_wrench_norm` where combining forces and moments has no honest single
+physical unit. A plug-in must not label a mixed norm as `N` or `N*m` merely to
+fill a field; publish separately unit-typed residual components when a
+consumer needs them. `taoryx vehicle topology-report` enforces this contract.
+
 `semantic-preflight-handler-report` is the narrow structural audit beneath
 the maturity report. For every declared family/mission/fidelity translator it
 reports the matching tier-scoped capability adapter, whether that adapter ID
@@ -680,8 +689,10 @@ and opens interactive endpoints once. It also requires one checked-in composed
 witness for every advertised runtime-bound variant and records its exact native
 input trace plus retrim/requalification invalidations. It does not substitute
 for a batch mission run or qualification evidence. Use
-`python tools/validate_vehicle_execution_witnesses.py --execute-batch` for
-the slower public compose-to-run smoke of every batch witness. The
+`taoryx vehicle witness-report --execute-batch` for the slower public
+compose-to-run smoke of every batch witness. Add `--family <id>` or
+`--witness <id>` to keep ordinary edits focused on one exact vehicle or
+endpoint. The
 source-table fixed-wing factories use a declared eight-row translation smoke;
 their full transport-sized racetracks remain separate nominal-mission runs.
 Every batch smoke also requires and validates `status_trace.json` beside
@@ -1064,6 +1075,29 @@ When its immutable composition also passes semantic preflight, runtime lowering
 reports both the constructed X-15 source adapter and the exact
 `local_direct_wrench_screen.v1` batch factory. This is execution wiring, not a
 promotion beyond the local screen boundary.
+
+The distinct `x15_source_surface_authority_screen_v1` Composition endpoint
+adds the retained source-table controls without widening the direct-wrench
+claim. It freezes the release/glide source fixture, obtains a three-axis local
+moment effectiveness matrix by centered source-table differences, allocates
+the requested moment through the symmetric stabilator, differential
+stabilator, and rudder, and then re-evaluates the nonlinear six-axis source
+loads at the achieved positions:
+
+```bash
+taoryx vehicle compose \
+  examples/vehicle_composition/x15_source_surface_authority_screen_compose.yaml \
+  --output generated/x15-source-surface-authority-semantic.json
+taoryx vehicle preflight generated/x15-source-surface-authority-semantic.json
+taoryx vehicle run generated/x15-source-surface-authority-semantic.json \
+  --output-dir generated/x15-source-surface-authority-execution
+```
+
+The standard status/action artifacts therefore contain actual named source
+surface positions, requested/achieved/residual body moments, rank, and the
+fixed mass/source condition. The screen is batch-only and explicitly leaves
+full-state trim, feedback, state propagation, propulsion/RCS allocation,
+guidance, the energy-managed mission, and flight qualification unavailable.
 
 HL-20 uses the same reusable local-screen definition for the separately pinned
 Mach-0.5 source point:

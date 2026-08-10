@@ -1,0 +1,150 @@
+id: slower_airbreathing_and_multirotor_6dof_bundle_v1_tables
+title: Slower airbreathing and multirotor public research table catalog
+kind: vehicle-specific-public-6dof-research-surrogate
+source_fixture: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
+provenance:
+  source_status: mixed-public-research
+  source_bundle_sha256: 17ee0ca897e3ee44d4dd68deb6eb6c4922fef9ef87de46fb032124596b39b911
+  notes:
+    - source-csv-preserved
+    - generated-si-and-radian-axes-where-applicable
+    - not-flight-qualified
+tables:
+  - path: b747_nominal_static_6axis.tbl
+    vehicle: b747
+    family: aerodynamic-static-six-axis
+    axes: [alpha, beta]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: reference-flight-condition-3-only
+  - path: b747_nominal_static_6axis_direct_wrench.tbl
+    vehicle: b747
+    family: aerodynamic-static-six-axis-bounded-direct-wrench
+    status: taoryx-derived-bounded-local-beta-extension
+    axes: [alpha, beta]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: estimated-local-extension-beta-plus-or-minus-0.12-rad
+  - path: b747_nominal_elevator_6axis.tbl
+    vehicle: b747
+    family: aerodynamic-elevator-six-axis
+    axes: [alpha, beta, elevator]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: reference-flight-condition-3-only
+  - path: b747_nominal_aileron_6axis.tbl
+    vehicle: b747
+    family: aerodynamic-aileron-six-axis
+    axes: [alpha, beta, aileron]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: reference-flight-condition-3-only
+  - path: b747_nominal_rudder_6axis.tbl
+    vehicle: b747
+    family: aerodynamic-rudder-six-axis
+    axes: [alpha, beta, rudder]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: reference-flight-condition-3-only
+  - path: b747_jt9d_thrust.tbl
+    vehicle: b747
+    family: propulsion
+    axes: [altitude_m, mach, throttle]
+    quantities: [thrust]
+  - path: b747_notional_fuel_flow.tbl
+    vehicle: b747
+    family: propulsion-mass-coupling
+    status: taoryx-notional-first-cut
+    axes: [throttle]
+    quantities: [mdot]
+    units: kg/sec
+    envelope: [0, 1]
+  - path: skywalker_x8_static_6axis.tbl
+    vehicle: skywalker_x8
+    family: aerodynamic-static-six-axis
+    axes: [velocity_m_s, altitude_m, alpha, beta]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+  - path: skywalker_x8_collective_elevon_6axis.tbl
+    vehicle: skywalker_x8
+    family: aerodynamic-collective-elevon-six-axis
+    axes: [velocity_m_s, altitude_m, alpha, beta, collective_elevon]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: identified-control-grid
+  - path: skywalker_x8_differential_elevon_6axis.tbl
+    vehicle: skywalker_x8
+    family: aerodynamic-differential-elevon-six-axis
+    axes: [velocity_m_s, altitude_m, alpha, beta, differential_elevon]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: identified-control-grid
+  - path: skywalker_x8_rate_p_6axis.tbl
+    vehicle: skywalker_x8
+    family: aerodynamic-rate-effect-six-axis
+    axes: [velocity_m_s, altitude_m, p_hat]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: identified-reference-rate-slice
+  - path: skywalker_x8_rate_q_6axis.tbl
+    vehicle: skywalker_x8
+    family: aerodynamic-rate-effect-six-axis
+    axes: [velocity_m_s, altitude_m, q_hat]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: identified-reference-rate-slice
+  - path: skywalker_x8_rate_r_6axis.tbl
+    vehicle: skywalker_x8
+    family: aerodynamic-rate-effect-six-axis
+    axes: [velocity_m_s, altitude_m, r_hat]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: identified-reference-rate-slice
+  - path: skywalker_x8_thrust.tbl
+    vehicle: skywalker_x8
+    family: propulsion
+    axes: [altitude_m, velocity_m_s, throttle]
+    quantities: [thrust]
+  - path: skywalker_x8_propeller_ct.tbl
+    vehicle: skywalker_x8
+    family: propulsion
+    axes: [advance_ratio]
+    quantities: [output]
+  - path: skywalker_x8_propeller_cq.tbl
+    vehicle: skywalker_x8
+    family: propulsion
+    axes: [advance_ratio]
+    quantities: [output]
+  - path: hummingbird_common_speed_wrench.tbl
+    vehicle: hummingbird
+    family: aerodynamic-wrench
+    status: source-csv-only
+  - path: hummingbird_cx.tbl
+    vehicle: hummingbird
+    family: aerodynamic-wrench
+    axes: [velocity_x, velocity_y, velocity_z, rotor_speed]
+    quantities: [output]
+  - path: hummingbird_cy.tbl
+    vehicle: hummingbird
+    family: aerodynamic-wrench
+    axes: [velocity_x, velocity_y, velocity_z, rotor_speed]
+    quantities: [output]
+  - path: hummingbird_cz.tbl
+    vehicle: hummingbird
+    family: aerodynamic-wrench
+    axes: [velocity_x, velocity_y, velocity_z, rotor_speed]
+    quantities: [output]
+  - path: hummingbird_cmx.tbl
+    vehicle: hummingbird
+    family: aerodynamic-wrench
+    axes: [velocity_x, velocity_y, velocity_z, rotor_speed]
+    quantities: [output]
+  - path: hummingbird_cmy.tbl
+    vehicle: hummingbird
+    family: aerodynamic-wrench
+    axes: [velocity_x, velocity_y, velocity_z, rotor_speed]
+    quantities: [output]
+  - path: hummingbird_cmz.tbl
+    vehicle: hummingbird
+    family: aerodynamic-wrench
+    axes: [velocity_x, velocity_y, velocity_z, rotor_speed]
+    quantities: [output]
+  - path: hummingbird_rotor_static.tbl
+    vehicle: hummingbird
+    family: propulsion
+    axes: [rotor_speed]
+    quantities: [thrust]
+  - path: hummingbird_rotor_reaction_torque.tbl
+    vehicle: hummingbird
+    family: propulsion
+    axes: [rotor_speed]
+    quantities: [output]

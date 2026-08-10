@@ -5,36 +5,88 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Annotated, Literal, TypeAlias
 
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, model_validator
+
+from taoryx.sensor_api import sensor_plugin_registry
 
 
 class _ContractModel(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
-class ImuErrorModelProviderConfig(_ContractModel):
+class SensorProviderConfig(_ContractModel):
+    """Open provider envelope with plug-in-owned nested configuration."""
+
+    kind: str
+    config: dict[str, object] = Field(default_factory=dict)
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_plugin_config(cls, value: object) -> dict[str, object]:
+        if isinstance(value, str):
+            payload: dict[str, object] = {"kind": value}
+        elif isinstance(value, Mapping):
+            payload = {str(key): item for key, item in value.items()}
+        else:
+            raise ValueError("sensor provider must be a name or mapping")
+        if "kind" not in payload and "provider" in payload:
+            payload["kind"] = payload.pop("provider")
+        kind_value = payload.get("kind")
+        if kind_value is None:
+            declared_default = cls.model_fields["kind"].default
+            kind_value = declared_default if isinstance(declared_default, str) else ""
+        kind = str(kind_value).strip()
+        if not kind:
+            raise ValueError("sensor provider kind must not be empty")
+        raw_config = payload.pop("config", {})
+        if raw_config is None:
+            raw_config = {}
+        if not isinstance(raw_config, Mapping):
+            raise ValueError("sensor provider config must be a mapping")
+        flattened = {key: item for key, item in payload.items() if key != "kind"}
+        config_payload = {str(key): item for key, item in raw_config.items()}
+        overlap = set(config_payload) & set(flattened)
+        if overlap:
+            raise ValueError(f"sensor provider config repeats field(s): {sorted(overlap)}")
+        config_payload.update(flattened)
+        validated = sensor_plugin_registry().validate_config(kind, config_payload)
+        return {
+            "kind": kind,
+            "config": validated.model_dump(
+                mode="python",
+                exclude_defaults=True,
+                exclude_none=True,
+            ),
+        }
+        ####
+
+    def to_metadata(self) -> dict[str, object]:
+        metadata: dict[str, object] = {"kind": self.kind}
+        if self.config:
+            metadata["config"] = dict(self.config)
+        return metadata
+        ####
+    ####
+
+
+class ImuErrorModelProviderConfig(SensorProviderConfig):
     kind: Literal["imu-error-model"] = "imu-error-model"
+    ####
 
 
-class IdealImuProviderConfig(_ContractModel):
+class IdealImuProviderConfig(SensorProviderConfig):
     kind: Literal["ideal"] = "ideal"
+    ####
 
 
-class IdealGyroscopeProviderConfig(_ContractModel):
+class IdealGyroscopeProviderConfig(SensorProviderConfig):
     kind: Literal["ideal-gyroscope"] = "ideal-gyroscope"
+    ####
 
 
-class TranslationAccelerationProviderConfig(_ContractModel):
+class TranslationAccelerationProviderConfig(SensorProviderConfig):
     kind: Literal["translation-acceleration"] = "translation-acceleration"
-
-
-SensorProviderConfig: TypeAlias = Annotated[
-    ImuErrorModelProviderConfig
-    | IdealImuProviderConfig
-    | IdealGyroscopeProviderConfig
-    | TranslationAccelerationProviderConfig,
-    Field(discriminator="kind"),
-]
+    ####
 
 
 class VelocityAlignedAttitudeConfig(_ContractModel):
@@ -99,7 +151,6 @@ TruthConfig: TypeAlias = Annotated[
 
 
 _TRUTH_ADAPTER: TypeAdapter[TruthConfig] = TypeAdapter(TruthConfig)
-_PROVIDER_ADAPTER: TypeAdapter[SensorProviderConfig] = TypeAdapter(SensorProviderConfig)
 
 
 def parse_truth_config(value: Mapping[str, object] | None) -> TruthConfig:
@@ -120,11 +171,5 @@ def parse_truth_config(value: Mapping[str, object] | None) -> TruthConfig:
 def parse_provider_config(value: object) -> SensorProviderConfig:
     """Validate and discriminate one provider name or provider mapping."""
 
-    if isinstance(value, str):
-        value = {"kind": value}
-    elif isinstance(value, Mapping):
-        payload: dict[str, object] = {str(key): item for key, item in value.items()}
-        if "kind" not in payload and "provider" in payload:
-            payload["kind"] = payload.pop("provider")
-        value = payload
-    return _PROVIDER_ADAPTER.validate_python(value)
+    return SensorProviderConfig.model_validate(value)
+    ####

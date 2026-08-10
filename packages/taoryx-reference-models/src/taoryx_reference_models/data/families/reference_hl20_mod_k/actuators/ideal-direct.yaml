@@ -1,0 +1,10 @@
+schema_version: 1
+kind: taoryx.reference-actuator-profile/v1alpha1
+family: reference_hl20_mod_k
+profile_id: hl20.ideal_direct.v1
+evidence: source_plant_direct_input
+position_dynamics: bypassed
+rate_limits: undeclared
+latency: undeclared
+health_model: undeclared
+use: plant_regression_only

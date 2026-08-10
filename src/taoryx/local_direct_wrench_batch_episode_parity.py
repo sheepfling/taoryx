@@ -135,14 +135,18 @@ def verify_serialized_local_direct_wrench_batch_episode_parity(
         requested = _requested_wrench(_mapping(frame.get("values"), f"steps[{index}].action_frame.values"))
         state, projection, time_s = _advance_batch(config, state, projection.achieved, requested, time_s, duration_s)
         expected_status = _mapping(step.get("status_frame"), f"steps[{index}].status_frame")
-        actual_status = _status_values(contract, state, projection, time_s, config.duration_s)
+        actual_status = _status_values(contract, config, state, projection, time_s, config.duration_s)
         mismatches = _mismatches(_mapping(expected_status.get("values"), f"steps[{index}].status_frame.values"), actual_status, "status")
         if abs(_finite(step.get("time_end_s"), f"steps[{index}].time_end_s") - time_s) > _TOLERANCE:
             mismatches.append("time_end_s differs from batch committed boundary")
         records.append(LocalDirectWrenchBatchEpisodeParityStep(index, _finite(step.get("time_start_s"), f"steps[{index}].time_start_s"), time_s, "pass" if not mismatches else "fail", tuple(mismatches)))
 
     final_status = _mapping(payload.get("final_status"), "final_status")
-    final_mismatches = _mismatches(_mapping(final_status.get("values"), "final_status.values"), _status_values(contract, state, projection, time_s, config.duration_s), "final_status")
+    final_mismatches = _mismatches(
+        _mapping(final_status.get("values"), "final_status.values"),
+        _status_values(contract, config, state, projection, time_s, config.duration_s),
+        "final_status",
+    )
     if final_mismatches:
         records.append(LocalDirectWrenchBatchEpisodeParityStep(len(records), time_s, time_s, "fail", tuple(final_mismatches)))
     return LocalDirectWrenchBatchEpisodeParityReport(
@@ -193,6 +197,7 @@ def _advance_batch(
 
 def _status_values(
     contract: VehicleInterfaceContract,
+    config: LocalDirectWrenchScreenConfig,
     state: Mapping[str, float],
     projection: DirectWrenchProjection,
     time_s: float,
@@ -210,10 +215,13 @@ def _status_values(
         "achieved_moment_body_nm": [achieved[name] for name in ("moment_x_nm", "moment_y_nm", "moment_z_nm")],
         "residual_force_body_n": [residual[name] for name in ("force_x_n", "force_y_n", "force_z_n")],
         "residual_moment_body_nm": [residual[name] for name in ("moment_x_nm", "moment_y_nm", "moment_z_nm")],
+        "wrench_residual_norm": projection.residual_norm,
+        "feedback_norm": _feedback_norm(config, state),
         "wrench_status": projection.status,
         "wrench_saturated": bool(projection.position_saturated or projection.rate_limited),
         "control_realization": "direct_wrench_screen",
         "physical_effector_allocation": False,
+        **{str(name): float(value) for name, value in config.resource_values.items()},
     }
     values = project_committed_status_values(
         contract,
@@ -223,6 +231,20 @@ def _status_values(
     )
     validate_projected_status_values(contract, values, context=f"local direct-wrench batch parity t={time_s:.12g} s")
     return values
+    ####
+
+
+def _feedback_norm(config: LocalDirectWrenchScreenConfig, state: Mapping[str, float]) -> float:
+    """Match the local episode's declared normalized feedback diagnostic."""
+
+    names = config.assessment_state_names or config.state_names
+    scales = dict(zip(config.state_names, config.state_scales, strict=True))
+    return math.sqrt(
+        sum(
+            ((float(state[name]) - float(config.reference_state[name])) / scales[name]) ** 2
+            for name in names
+        )
+    )
     ####
 
 

@@ -54,6 +54,7 @@ InterfaceChannelKind = Literal[
     "diagnostic",
 ]
 InterfaceValueType = Literal["scalar", "vector3", "vector4", "boolean", "enum", "event"]
+QuantitySemantics = Literal["count", "mixed_wrench_norm", "normalized_error"]
 ParameterScope = Literal[
     "family_model",
     "variant_configuration",
@@ -99,6 +100,7 @@ class InterfaceChannel:
     value_type: InterfaceValueType
     canonical_unit: str | None
     description: str
+    quantity_semantics: QuantitySemantics | None = None
     scope: ParameterScope | None = None
     frame: str | None = None
     lower: float | None = None
@@ -117,6 +119,14 @@ class InterfaceChannel:
             raise ValueError(f"parameter channel {self.id!r} requires a mutability scope")
         if self.kind != "parameter" and self.scope is not None:
             raise ValueError(f"non-parameter channel {self.id!r} cannot declare a parameter scope")
+        if self.quantity_semantics is not None and self.value_type != "scalar":
+            raise ValueError(
+                f"interface channel {self.id!r} declares unitless quantity semantics but is not a scalar"
+            )
+        if self.value_type in {"scalar", "vector3", "vector4"} and self.canonical_unit is None and self.quantity_semantics is None:
+            raise ValueError(
+                f"numeric interface channel {self.id!r} requires a canonical unit or explicit quantity semantics"
+            )
         if self.lower is not None and self.upper is not None and self.lower > self.upper:
             raise ValueError(f"interface channel {self.id!r} has inverted bounds")
         if self.availability == "available" and not self.claim_boundary.strip():
@@ -163,6 +173,7 @@ class InterfaceChannel:
                 else "ad_hoc_primitive_fallback"
             ),
             "canonical_unit": self.canonical_unit,
+            "quantity_semantics": self.quantity_semantics,
             "frame": self.frame,
             "lower": self.lower,
             "upper": self.upper,
@@ -413,7 +424,12 @@ def interface_contract_for_composition(
     vehicle_id = family.family.vehicle_registry_id or family.family_id
     episode_runnable = _has_runnable_episode(family.family_id, fidelity)
     batch_runnable = _has_runnable_batch(family.family_id, fidelity)
-    action_channels, authority_profiles = _action_contract(family.family_id, fidelity, episode_runnable)
+    action_channels, authority_profiles = _action_contract(
+        family.family_id,
+        fidelity,
+        episode_runnable,
+        batch_runnable,
+    )
     status, resources, diagnostics = _status_contract(
         family.family_id,
         fidelity,
@@ -434,7 +450,13 @@ def interface_contract_for_composition(
         evidence_status=tier.promotion_status,
         parameter_channels=_parameter_channels(composition),
         action_channels=action_channels,
-        effector_channels=_effector_contract(family.family_id, fidelity, family.vehicle_definition, tier.profile_id is not None),
+        effector_channels=_effector_contract(
+            family.family_id,
+            fidelity,
+            family.vehicle_definition,
+            tier.profile_id is not None,
+            batch_runnable,
+        ),
         status_channels=status,
         resource_channels=resources,
         diagnostic_channels=diagnostics,
@@ -505,6 +527,7 @@ def _action_contract(
     family_id: str,
     fidelity: FidelityTier,
     episode_runnable: bool,
+    batch_runnable: bool,
 ) -> tuple[tuple[InterfaceChannel, ...], tuple[AuthorityProfile, ...]]:
     if family_id == "hummingbird" and fidelity == "pseudo_6dof":
         available: InterfaceAvailability = "available" if episode_runnable else "unavailable_at_runtime"
@@ -593,23 +616,63 @@ def _action_contract(
     fixed_wing_controls = _fixed_wing_bridge_controls(family_id)
     if fixed_wing_controls and fidelity in {"point_mass_3dof", "pseudo_6dof"}:
         available = "available" if episode_runnable else "unavailable_at_runtime"
+        guidance_channels = _language_backed_guidance_controls(family_id, available, fidelity)
         bridge_channels: tuple[InterfaceChannel, ...] = tuple(
-            _action(identifier, unit, lower, upper, description, native, available)
+            _action(
+                identifier,
+                unit,
+                lower,
+                upper,
+                description,
+                native,
+                available,
+                binding={
+                    "control_role": "source_runtime_load_probe",
+                    "tuning_eligible": False,
+                    "state_authority": "diagnostic_only",
+                },
+                claim_boundary=(
+                    "This coordinate is accepted by the source-runtime load evaluation, but the selected lower "
+                    "tier's autonomous route resolver owns translational state rates. It is therefore a source-load "
+                    "probe, not a lower-tier trajectory-control or tuning input and not physical actuator evidence."
+                ),
+            )
             for identifier, unit, lower, upper, description, native in fixed_wing_controls
         )
-        return bridge_channels, (
+        return (*guidance_channels, *bridge_channels), (
+            AuthorityProfile(
+                "kinematic_guidance",
+                "kinematic",
+                available,
+                tuple(item.id for item in guidance_channels),
+                "Explicit bounded speed, flight-path, and heading targets for the native lower-tier command law.",
+                "This authority replaces the autonomous route target only when explicitly enabled. It is a point-mass "
+                "or kinematic-response command seam, not source surface allocation, moment balance, or a flight-control qualification.",
+            ),
             AuthorityProfile(
                 "native_control_bridge",
                 "native_bridge",
                 available,
                 tuple(item.id for item in bridge_channels),
-                "Explicit source-runtime control coordinates projected into stable semantic names.",
-                "The bridge preserves the selected point-mass or response-law claim. It does not prove physical actuator allocation, servo dynamics, or moment balance.",
+                "Explicit source-runtime load coordinates projected into stable semantic names.",
+                "The bridge preserves source-load visibility but does not own lower-tier trajectory state rates. It does not "
+                "prove trajectory authority, physical actuator allocation, servo dynamics, or moment balance.",
             ),
         )
 
     if fidelity == "rigid_body_6dof_direct_wrench":
-        direct_available: InterfaceAvailability = "available" if episode_runnable else "planned"
+        batch_internal_controller_trace = batch_runnable and family_id in {
+            "hummingbird",
+            "hl20_mod_k",
+            "x15",
+        }
+        direct_available: InterfaceAvailability = (
+            "available"
+            if episode_runnable
+            else "available_in_batch"
+            if batch_internal_controller_trace
+            else "planned"
+        )
         wrench_channels: tuple[InterfaceChannel, ...] = (
             InterfaceChannel(
                 "wrench.force.command",
@@ -620,9 +683,15 @@ def _action_contract(
                 availability=direct_available,
                 provenance="engineering_surrogate",
                 sampling="held_action",
-                binding={"frame": "body", "native_action": "force_body_n"},
+                binding={
+                    "frame": "body",
+                    "native_action": "force_body_n",
+                    "external_override": episode_runnable,
+                    "internal_controller_trace": batch_internal_controller_trace,
+                },
                 claim_boundary=(
                     "The command is a total direct body force, including any declared local source-load bridge bias. "
+                    "For batch-only local screens it records the controller-generated request, not a caller override. "
                     "It is not an actuator, surface, rotor, gimbal, or thruster command."
                 ),
             ),
@@ -635,9 +704,15 @@ def _action_contract(
                 availability=direct_available,
                 provenance="engineering_surrogate",
                 sampling="held_action",
-                binding={"frame": "body", "native_action": "moment_body_nm"},
+                binding={
+                    "frame": "body",
+                    "native_action": "moment_body_nm",
+                    "external_override": episode_runnable,
+                    "internal_controller_trace": batch_internal_controller_trace,
+                },
                 claim_boundary=(
                     "The command is a total direct body moment, including any declared local source-load bridge bias. "
+                    "For batch-only local screens it records the controller-generated request, not a caller override. "
                     "It is not physical effector allocation."
                 ),
             ),
@@ -650,10 +725,16 @@ def _action_contract(
                 tuple(item.id for item in wrench_channels),
                 "Six-axis direct-wrench request for a declared rigid-body bridge.",
                 (
-                    "This profile is available only when an exact source-local episode binding and achieved-wrench "
-                    "telemetry exist. It remains bridge/screen evidence, never physical-effector allocation."
+                    "This profile accepts external actions only when an exact source-local episode binding and achieved-wrench "
+                    "telemetry exist. Batch-only screens publish their internal controller requests as an exact action trace. "
+                    "It remains bridge/screen evidence, never physical-effector allocation."
                     if episode_runnable
-                    else "This profile remains unavailable to an episode until an exact native binding and achieved-wrench telemetry exist."
+                    else (
+                        "This profile remains unavailable to an episode until an exact native binding and achieved-wrench "
+                        "telemetry exist; a runnable batch screen can still publish its internally generated requests."
+                        if batch_internal_controller_trace
+                        else "This profile remains unavailable until an exact native binding and achieved-wrench telemetry exist."
+                    )
                 ),
             ),
         )
@@ -689,6 +770,109 @@ def _fixed_wing_bridge_controls(
     ####
 
 
+def _language_backed_guidance_controls(
+    family_id: str,
+    availability: InterfaceAvailability,
+    fidelity: FidelityTier,
+) -> tuple[InterfaceChannel, ...]:
+    """Expose the exact external command seam added by composition materialization.
+
+    X8 and B747 lower-tier racetracks use a native commanded-state response
+    law.  These channels drive that law only after the explicit enable action;
+    source surface coordinates remain separately available as load probes.
+    """
+
+    maximum_speed_m_s = 27.0 if family_id == "skywalker_x8" else 220.0
+    minimum_speed_m_s = 2.0 if family_id == "skywalker_x8" else 100.0
+    maximum_flight_path_deg = 20.0 if family_id == "skywalker_x8" else 10.0
+    maximum_bank_deg = 45.0 if family_id == "skywalker_x8" else 30.0
+    common_binding = {
+        "control_role": "kinematic_guidance",
+        "tuning_eligible": True,
+        "override_gate_native_action": "guidance-override-enabled",
+        "state_authority": "native_commanded_state_rate",
+    }
+    controls: tuple[InterfaceChannel, ...] = (
+        InterfaceChannel(
+            "guidance.override.enabled",
+            "action",
+            "boolean",
+            None,
+            "Enable an explicit held external target in place of the autonomous lower-tier racetrack target.",
+            availability=availability,
+            provenance="derived",
+            sampling="held_action",
+            binding={"native_action": "guidance-override-enabled", **common_binding},
+            claim_boundary=(
+                "This selects the native lower-tier kinematic command law. It neither enables a source surface "
+                "controller nor changes the physical-effector evidence boundary."
+            ),
+        ),
+        _action(
+            "guidance.speed.command",
+            "m/s",
+            minimum_speed_m_s,
+            maximum_speed_m_s,
+            "Held speed target for the native lower-tier commanded-state response.",
+            "guidance-speed-mps",
+            availability,
+            binding={**common_binding, "controlled_state_channels": ["velocity.speed"]},
+            claim_boundary=(
+                "This target is effective only while guidance.override.enabled is true. It drives the declared "
+                "lower-tier speed response, not source thrust or physical actuator allocation."
+            ),
+        ),
+        _action(
+            "guidance.flight_path_angle.command",
+            "deg",
+            -maximum_flight_path_deg,
+            maximum_flight_path_deg,
+            "Held flight-path-angle target for the native lower-tier commanded-state response.",
+            "guidance-flight-path-angle-deg",
+            availability,
+            binding={**common_binding, "controlled_state_channels": ["position.altitude", "flight.path_angle"]},
+            claim_boundary=(
+                "This target is effective only while guidance.override.enabled is true. It drives the declared "
+                "lower-tier flight-path response, not a physical pitch surface or moment."
+            ),
+        ),
+        _action(
+            "guidance.heading.command",
+            "deg",
+            0.0,
+            360.0,
+            "Held heading target for the native lower-tier commanded-state response.",
+            "guidance-heading-deg",
+            availability,
+            binding={**common_binding, "controlled_state_channels": ["flight.heading"]},
+            claim_boundary=(
+                "This target is effective only while guidance.override.enabled is true. It drives the declared "
+                "lower-tier heading response, not a physical lateral surface or moment."
+            ),
+        ),
+    )
+    if fidelity != "pseudo_6dof":
+        return controls
+    return (
+        *controls,
+        _action(
+            "guidance.bank.command",
+            "deg",
+            -maximum_bank_deg,
+            maximum_bank_deg,
+            "Held bank target for the profile-backed pseudo-6DOF kinematic attitude response.",
+            "guidance-bank-deg",
+            availability,
+            binding={**common_binding, "controlled_state_channels": ["attitude.euler"]},
+            claim_boundary=(
+                "This target is effective only while guidance.override.enabled is true. It drives the declared "
+                "pseudo-6DOF Euler response sidecar, not a physical roll surface or moment."
+            ),
+        ),
+    )
+    ####
+
+
 def _action(
     identifier: str,
     unit: str,
@@ -697,6 +881,9 @@ def _action(
     description: str,
     native: str,
     availability: InterfaceAvailability,
+    *,
+    binding: Mapping[str, object] | None = None,
+    claim_boundary: str | None = None,
 ) -> InterfaceChannel:
     return InterfaceChannel(
         identifier,
@@ -709,8 +896,12 @@ def _action(
         availability=availability,
         provenance="source_backed",
         sampling="held_action",
-        binding={"native_action": native},
-        claim_boundary="This action binds to the named source/runtime coordinate. The selected lower fidelity does not turn that coordinate into physical actuator evidence.",
+        binding={"native_action": native, **(dict(binding) if binding is not None else {})},
+        claim_boundary=(
+            claim_boundary
+            if claim_boundary is not None
+            else "This action binds to the named source/runtime coordinate. The selected lower fidelity does not turn that coordinate into physical actuator evidence."
+        ),
     )
     ####
 
@@ -720,9 +911,235 @@ def _effector_contract(
     fidelity: FidelityTier,
     vehicle_definition: Mapping[str, Any] | None,
     tier_declared: bool,
+    batch_runnable: bool,
 ) -> tuple[InterfaceChannel, ...]:
     if fidelity != "rigid_body_6dof_surface_allocated":
         return ()
+    if family_id == "f16_s119":
+        availability: InterfaceAvailability = "available_in_batch" if batch_runnable else "planned"
+        return tuple(
+            InterfaceChannel(
+                f"effector.{identifier}.position",
+                "effector",
+                "scalar",
+                unit,
+                f"Actual {identifier} position emitted by the bounded F-16 engineering actuator overlay.",
+                lower=lower,
+                upper=upper,
+                availability=availability,
+                provenance="engineering_surrogate",
+                sampling="held_action",
+                binding={"batch_telemetry": telemetry, "family_id": family_id},
+                claim_boundary=(
+                    "This is a commanded-to-achieved position from the declared F-16 engineering actuator overlay. "
+                    "It is batch-visible only for the exact local source-trim screen and is not source-validated servo or envelope evidence."
+                ),
+            )
+            for identifier, unit, lower, upper, telemetry in (
+                ("elevator", "deg", -25.0, 25.0, "elevator_deg"),
+                ("aileron", "deg", -21.0, 21.0, "aileron_deg"),
+                ("rudder", "deg", -30.0, 30.0, "rudder_deg"),
+                ("throttle", "dimensionless", 0.0, 1.0, "throttle_fraction"),
+            )
+        )
+    if family_id == "hummingbird":
+        availability = "available_in_batch" if batch_runnable else "planned"
+        return tuple(
+            InterfaceChannel(
+                f"effector.rotor.{index}.speed.position",
+                "effector",
+                "scalar",
+                "rad/s",
+                f"Actual source motor-{index} speed after the bounded quad-X allocator and declared first-order motor lag.",
+                lower=0.0,
+                upper=1500.0,
+                availability=availability,
+                provenance="source_backed",
+                sampling="held_action",
+                binding={"batch_telemetry": f"rotor_{index}_speed_rad_s", "family_id": family_id},
+                claim_boundary=(
+                    "This is batch-visible only for the declared local Hummingbird individual-rotor LQI screens. "
+                    "It records source motor-speed coordinates and their local lag, not a battery, propulsor, or flight-envelope qualification."
+                ),
+            )
+            for index in range(1, 5)
+        )
+    if family_id == "skywalker_x8":
+        availability = "available_in_batch" if batch_runnable else "planned"
+        return tuple(
+            InterfaceChannel(
+                identifier,
+                "effector",
+                "scalar",
+                unit,
+                description,
+                lower=lower,
+                upper=upper,
+                availability=availability,
+                provenance="source_backed",
+                sampling="held_action",
+                binding={"batch_telemetry": telemetry, "native_effector": native, "family_id": family_id},
+                claim_boundary=(
+                    "This is the actual bounded source-table coordinate emitted by the exact local X8 physical screen. "
+                    "Collective/differential values are not asserted to be individual left/right servo telemetry or wiring evidence."
+                ),
+            )
+            for identifier, unit, lower, upper, telemetry, native, description in (
+                (
+                    "effector.throttle.position",
+                    "dimensionless",
+                    0.0,
+                    1.0,
+                    "throttle_fraction",
+                    "throttle",
+                    "Actual X8 source-table throttle coordinate after the local bounded allocator.",
+                ),
+                (
+                    "effector.elevon.collective.position",
+                    "deg",
+                    -20.0,
+                    20.0,
+                    "collective_elevon_deg",
+                    "collective-elevon-deg",
+                    "Actual X8 collective-elevon source-table coordinate after the local bounded allocator.",
+                ),
+                (
+                    "effector.elevon.differential.position",
+                    "deg",
+                    -20.0,
+                    20.0,
+                    "differential_elevon_deg",
+                    "differential-elevon-deg",
+                    "Actual X8 differential-elevon source-table coordinate after the local bounded allocator.",
+                ),
+            )
+        )
+    if family_id == "hl20_mod_k":
+        availability = "available_in_batch" if batch_runnable else "planned"
+        return tuple(
+            InterfaceChannel(
+                f"effector.surface.{name}.position",
+                "effector",
+                "scalar",
+                "deg",
+                f"Actual named HL-20 DAVE-ML {name.replace('_', ' ')} input after bounded source-surface allocation.",
+                lower=lower,
+                upper=upper,
+                availability=availability,
+                provenance="source_backed",
+                sampling="held_action",
+                binding={
+                    "batch_telemetry": f"surface_{name}_deg",
+                    "native_effector": name,
+                    "family_id": family_id,
+                },
+                claim_boundary=(
+                    "This is an actual bounded named DAVE-ML surface input emitted by the exact frozen-fixture "
+                    "HL-20 source-authority screen. It does not establish hardware geometry, surface dynamics outside "
+                    "the declared local lag model, six-DOF trim, feedback control, navigation, or flight qualification."
+                ),
+            )
+            for name, lower, upper in (
+                ("upper_left_body_flap", -60.0, 0.0),
+                ("lower_left_body_flap", 0.0, 60.0),
+                ("upper_right_body_flap", -60.0, 0.0),
+                ("lower_right_body_flap", 0.0, 60.0),
+                ("left_wing_flap", -30.0, 30.0),
+                ("right_wing_flap", -30.0, 30.0),
+                ("rudder", -30.0, 30.0),
+            )
+        )
+    if family_id == "x15":
+        availability = "available_in_batch" if batch_runnable else "planned"
+        return tuple(
+            InterfaceChannel(
+                f"effector.surface.{name}.position",
+                "effector",
+                "scalar",
+                "deg",
+                f"Actual X-15 source-table {name.replace('_', ' ')} input after bounded three-axis source-surface allocation.",
+                lower=lower,
+                upper=upper,
+                availability=availability,
+                provenance="source_backed",
+                sampling="held_action",
+                binding={
+                    "batch_telemetry": f"surface_{name}_deg",
+                    "native_effector": name.replace("_", "-") + "-deg",
+                    "family_id": family_id,
+                },
+                claim_boundary=(
+                    "This is an actual bounded X-15 source-table surface input emitted by the exact frozen release "
+                    "authority screen. It does not establish actuator dynamics, full vehicle trim, propulsion or RCS "
+                    "allocation, feedback control, navigation, high-energy guidance, or flight qualification."
+                ),
+            )
+            for name, lower, upper in (
+                ("symmetric_stabilator", -14.9, 34.9),
+                ("differential_stabilator", -20.05, 20.05),
+                ("rudder", -29.79, 29.79),
+            )
+        )
+    if family_id == "b747":
+        availability = "available_in_batch" if batch_runnable else "planned"
+        return tuple(
+            InterfaceChannel(
+                identifier,
+                "effector",
+                "scalar",
+                unit,
+                description,
+                lower=lower,
+                upper=upper,
+                availability=availability,
+                provenance="source_backed",
+                sampling="held_action",
+                binding={"batch_telemetry": telemetry, "native_effector": native, "family_id": family_id},
+                claim_boundary=(
+                    "This is the actual bounded B747 NASA CR-2144 condition-3 source-table coordinate emitted by the "
+                    "exact local physical screen. The source package supplies no servo rate or lag data, so this does "
+                    "not claim actuator-dynamics, schedule, route, or flight-envelope validation."
+                ),
+            )
+            for identifier, unit, lower, upper, telemetry, native, description in (
+                (
+                    "effector.throttle.position",
+                    "dimensionless",
+                    0.0,
+                    1.0,
+                    "throttle_fraction",
+                    "throttle",
+                    "Actual B747 condition-3 source-table throttle coordinate during the local physical screen.",
+                ),
+                (
+                    "effector.elevator.position",
+                    "deg",
+                    -10.0,
+                    10.0,
+                    "elevator_deg",
+                    "elevator-deg",
+                    "Actual B747 elevator source-table coordinate after bounded physical allocation.",
+                ),
+                (
+                    "effector.aileron.position",
+                    "deg",
+                    -10.0,
+                    10.0,
+                    "aileron_deg",
+                    "aileron-deg",
+                    "Actual B747 aileron source-table coordinate after bounded physical allocation.",
+                ),
+                (
+                    "effector.rudder.position",
+                    "deg",
+                    -15.0,
+                    15.0,
+                    "rudder_deg",
+                    "rudder-deg",
+                    "Actual B747 rudder source-table coordinate after bounded physical allocation.",
+                ),
+            )
+        )
     controls = vehicle_definition.get("controls") if isinstance(vehicle_definition, Mapping) else None
     if not isinstance(controls, list | tuple):
         return ()
@@ -859,6 +1276,723 @@ def _status_contract(
         )
         status.append(_status("propulsion.output.thrust.aggregate", "N", "Achieved aggregate thrust in the pseudo response law.", "aggregate_thrust_n", runtime_availability))
         diagnostics.extend((_diagnostic("control.realization", "control_realization", runtime_availability), _diagnostic("control.physical_motor_allocation", "physical_motor_allocation", runtime_availability)))
+    elif family_id == "hummingbird" and fidelity == "rigid_body_6dof_surface_allocated":
+        status.extend(
+            (
+                _status(
+                    "attitude.euler",
+                    "rad",
+                    "Source-hover local roll, pitch, and yaw error coordinates.",
+                    "local_attitude_rad",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "local_attitude_rad", "frame": "source_hover_local"},
+                ),
+                _status(
+                    "body_rate",
+                    "rad/s",
+                    "Source-hover local body angular rates.",
+                    "body_rate_rad_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_rate_rad_s", "frame": "body"},
+                ),
+                _status(
+                    "position.local",
+                    "m",
+                    "Committed source-hover local position reconstructed only over the selected bounded local screen; horizontal screens retain zero vertical coordinate and the vertical screen retains the body-z/down reconstruction.",
+                    "position_local_m",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "position_local_m", "frame": "source_hover_local"},
+                    provenance="derived",
+                ),
+                _status(
+                    "velocity.local",
+                    "m/s",
+                    "Committed source-hover local velocity; horizontal components are expressed in the initial hover frame.",
+                    "velocity_local_m_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "velocity_local_m_s", "frame": "source_hover_local"},
+                    provenance="derived",
+                ),
+                _status(
+                    "velocity.body",
+                    "m/s",
+                    "Source-hover local body velocity state.",
+                    "body_velocity_m_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding=_local_direct_wrench_binding(family_id, "body_velocity_m_s", frame="body"),
+                ),
+                _status(
+                    "control.wrench.requested.moment",
+                    "N*m",
+                    "LQI requested body moment before physical motor allocation.",
+                    "requested_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "requested_moment_body_nm", "frame": "body"},
+                ),
+                _status(
+                    "control.wrench.achieved.moment",
+                    "N*m",
+                    "Achieved body moment from the allocated source motor speeds.",
+                    "achieved_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "achieved_moment_body_nm", "frame": "body"},
+                ),
+                _status(
+                    "control.wrench.residual.moment",
+                    "N*m",
+                    "Requested-minus-achieved body-moment residual after motor allocation.",
+                    "residual_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "residual_moment_body_nm", "frame": "body"},
+                ),
+                _status(
+                    "control.wrench.status",
+                    None,
+                    "Bounded quad-X allocator status at the committed truth boundary.",
+                    "wrench_status",
+                    runtime_availability,
+                    value_type="enum",
+                    binding={"batch_telemetry": "wrench_status"},
+                ),
+                _status(
+                    "control.wrench.saturated",
+                    None,
+                    "Whether a requested wrench or motor boundary was constrained on the committed interval.",
+                    "wrench_saturated",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "wrench_saturated"},
+                ),
+                _status(
+                    "control.lqi.integral_error",
+                    "rad*s",
+                    "Persisted roll, pitch, and yaw output-error integrals of the local source-hover LQI controller.",
+                    "lqi_integral_error_rad_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "lqi_integral_error_rad_s", "frame": "source_hover_local"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.lqi.integral_error.vertical_speed",
+                    "m/s*s",
+                    "Persisted local vertical-speed output-error integral; zero for the attitude-only and horizontal LQI screens.",
+                    "integral_vertical_speed_m_s_s",
+                    runtime_availability,
+                    binding={"batch_telemetry": "integral_vertical_speed_m_s_s", "frame": "source_hover_local"},
+                    provenance="derived",
+                ),
+            )
+        )
+        resources.append(
+            InterfaceChannel(
+                "resources.mass.total",
+                "resource",
+                "scalar",
+                "kg",
+                "Fixed source-hover local rigid-body mass.",
+                availability=runtime_availability,
+                provenance="source_backed",
+                sampling="truth_boundary",
+                binding={"batch_telemetry": "mass_kg"},
+                claim_boundary="This source-local screen retains a fixed mass and does not establish battery, payload, inertia, or mass-flow behavior.",
+            )
+        )
+        diagnostics.extend(
+            (
+                _diagnostic(
+                    "control.realization",
+                    "control_realization",
+                    runtime_availability,
+                    binding={"batch_telemetry": "control_realization"},
+                ),
+                _diagnostic(
+                    "control.physical_motor_allocation",
+                    "physical_motor_allocation",
+                    runtime_availability,
+                    binding={"batch_telemetry": "physical_motor_allocation"},
+                ),
+                _diagnostic(
+                    "control.allocation.residual_norm",
+                    "allocation_residual_norm",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="mixed_wrench_norm",
+                    description="Mixed requested-minus-achieved wrench norm at the committed physical-allocation boundary.",
+                    binding={"batch_telemetry": "allocation_residual_norm"},
+                ),
+                _diagnostic(
+                    "control.allocation.saturation_count",
+                    "saturation_count",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="count",
+                    description="Number of physical allocator or actuator constraints active at the committed boundary.",
+                    binding={"batch_telemetry": "saturation_count"},
+                ),
+            )
+        )
+    elif family_id == "skywalker_x8" and fidelity == "rigid_body_6dof_surface_allocated":
+        status.extend(
+            (
+                _status(
+                    "attitude.euler",
+                    "rad",
+                    "Committed X8 source-table local roll, pitch, and yaw-error coordinates.",
+                    "local_attitude_rad",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "local_attitude_rad", "frame": "source_trim_local"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "body_rate",
+                    "rad/s",
+                    "Committed X8 source-table local body angular rates.",
+                    "body_rate_rad_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_rate_rad_s", "frame": "body_frd"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "velocity.body",
+                    "m/s",
+                    "Committed X8 source-table local body velocity.",
+                    "body_velocity_m_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_velocity_m_s", "frame": "body_frd"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "control.wrench.requested.moment",
+                    "N*m",
+                    "LQR requested body moment before bounded X8 source-coordinate allocation.",
+                    "requested_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "requested_moment_body_nm", "frame": "body_frd"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.achieved.moment",
+                    "N*m",
+                    "Achieved body moment from the bounded X8 source-table-coordinate allocation.",
+                    "achieved_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "achieved_moment_body_nm", "frame": "body_frd"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "control.wrench.residual.moment",
+                    "N*m",
+                    "Requested-minus-achieved body-moment residual after X8 source-coordinate allocation.",
+                    "residual_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "residual_moment_body_nm", "frame": "body_frd"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.status",
+                    None,
+                    "Bounded X8 source-coordinate allocator disposition at the committed local-screen state.",
+                    "wrench_status",
+                    runtime_availability,
+                    value_type="enum",
+                    binding={"batch_telemetry": "wrench_status"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.saturated",
+                    None,
+                    "Whether a source-table coordinate or allocator boundary constrained the committed X8 screen interval.",
+                    "wrench_saturated",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "wrench_saturated"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.physical_effector_allocation",
+                    None,
+                    "Whether the X8 screen allocated requested moments to bounded source-table coordinates.",
+                    "physical_effector_allocation",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "physical_effector_allocation"},
+                    provenance="derived",
+                ),
+            )
+        )
+        resources.append(
+            InterfaceChannel(
+                "resources.mass.total",
+                "resource",
+                "scalar",
+                "kg",
+                "Fixed source-table X8 mass used by the local physical-control screen.",
+                availability=runtime_availability,
+                provenance="source_backed",
+                sampling="truth_boundary",
+                binding={"batch_telemetry": "mass_kg"},
+                claim_boundary="The local screen retains fixed source mass and does not establish fuel, battery, payload, or mass-property scheduling.",
+            )
+        )
+        diagnostics.extend(
+            (
+                _diagnostic(
+                    "control.realization",
+                    "control_realization",
+                    runtime_availability,
+                    binding={"batch_telemetry": "control_realization"},
+                ),
+                _diagnostic(
+                    "control.physical_effector_allocation",
+                    "physical_effector_allocation",
+                    runtime_availability,
+                    binding={"batch_telemetry": "physical_effector_allocation"},
+                ),
+                _diagnostic(
+                    "control.allocation.residual_norm",
+                    "allocation_controlled_residual_norm",
+                    runtime_availability,
+                    value_type="scalar",
+                    unit="N*m",
+                    description="Mixed requested-minus-achieved moment norm at the committed X8 allocator boundary.",
+                    binding={"batch_telemetry": "allocation_controlled_residual_norm"},
+                ),
+                _diagnostic(
+                    "control.allocation.saturation_count",
+                    "saturation_count",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="count",
+                    description="Number of X8 allocator or source-coordinate constraints active at the committed boundary.",
+                    binding={"batch_telemetry": "saturation_count"},
+                ),
+            )
+        )
+    elif family_id == "x15" and fidelity == "rigid_body_6dof_surface_allocated":
+        status.extend(
+            (
+                _status(
+                    "velocity.body",
+                    "m/s",
+                    "Frozen source-release body velocity used by the X-15 source-surface authority screen.",
+                    "body_velocity_m_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_velocity_m_s", "frame": "body"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "body_rate",
+                    "rad/s",
+                    "Frozen source-release body rate used by the X-15 source-surface authority screen.",
+                    "body_rate_rad_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_rate_rad_s", "frame": "body"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "aerodynamics.mach",
+                    "dimensionless",
+                    "Mach evaluated by the committed nonlinear X-15 source-table load query.",
+                    "source_mach",
+                    runtime_availability,
+                    binding={"batch_telemetry": "source_mach"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "aerodynamics.alpha",
+                    "deg",
+                    "Angle of attack evaluated by the committed nonlinear X-15 source-table load query.",
+                    "source_alpha_deg",
+                    runtime_availability,
+                    binding={"batch_telemetry": "source_alpha_deg", "frame": "body"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "aerodynamics.beta",
+                    "deg",
+                    "Sideslip evaluated by the committed nonlinear X-15 source-table load query.",
+                    "source_beta_deg",
+                    runtime_availability,
+                    binding={"batch_telemetry": "source_beta_deg", "frame": "body"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "control.wrench.requested.moment",
+                    "N*m",
+                    "Requested three-axis body moment used by the bounded X-15 source-surface allocator.",
+                    "requested_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "requested_moment_body_nm", "frame": "body"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.achieved.moment",
+                    "N*m",
+                    "Actual nonlinear X-15 source-table body moment after the committed named surface positions.",
+                    "achieved_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "achieved_moment_body_nm", "frame": "body"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "control.wrench.residual.moment",
+                    "N*m",
+                    "Requested-minus-nonlinear-source three-axis moment residual at the committed allocation boundary.",
+                    "residual_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "residual_moment_body_nm", "frame": "body"},
+                    provenance="derived",
+                ),
+                _status("control.wrench.status", None, "Bounded X-15 source-surface allocator disposition.", "wrench_status", runtime_availability, value_type="enum", binding={"batch_telemetry": "wrench_status"}, provenance="derived"),
+                _status("control.wrench.saturated", None, "Whether a surface position constraint limited the committed X-15 allocation.", "wrench_saturated", runtime_availability, value_type="boolean", binding={"batch_telemetry": "wrench_saturated"}, provenance="derived"),
+                _status("control.physical_effector_allocation", None, "Whether this screen allocated its three-axis moment request to all three bounded X-15 source surfaces.", "physical_effector_allocation", runtime_availability, value_type="boolean", binding={"batch_telemetry": "physical_effector_allocation"}, provenance="derived"),
+                _status("trim.full_state.status", None, "Availability of a full X-15 source equilibrium for the selected screen.", "full_state_trim_status", runtime_availability, value_type="enum", binding={"batch_telemetry": "full_state_trim_status"}, provenance="derived"),
+            )
+        )
+        resources.append(
+            InterfaceChannel(
+                "resources.mass.total",
+                "resource",
+                "scalar",
+                "kg",
+                "Fixed X-15 source-release mass used by the frozen source-surface authority screen.",
+                availability=runtime_availability,
+                provenance="source_backed",
+                sampling="truth_boundary",
+                binding={"batch_telemetry": "mass_kg"},
+                claim_boundary="The screen holds this source mass fixed and does not establish fuel, propellant, inertia, or mass-property scheduling.",
+            )
+        )
+        diagnostics.extend(
+            (
+                _diagnostic("control.realization", "control_realization", runtime_availability, binding={"batch_telemetry": "control_realization"}),
+                _diagnostic("control.physical_effector_allocation", "physical_effector_allocation", runtime_availability, binding={"batch_telemetry": "physical_effector_allocation"}),
+                _diagnostic("control.allocation.residual_norm", "allocation_controlled_residual_norm", runtime_availability, value_type="scalar", unit="N*m", description="Controlled moment residual reported by the bounded X-15 source-surface allocator.", binding={"batch_telemetry": "allocation_controlled_residual_norm"}),
+                _diagnostic("control.allocation.saturation_count", "saturation_count", runtime_availability, value_type="scalar", quantity_semantics="count", description="Number of active X-15 source-surface allocator constraints.", binding={"batch_telemetry": "saturation_count"}),
+                _diagnostic("control.source_effectiveness_rank", "source_effectiveness_rank", runtime_availability, value_type="scalar", quantity_semantics="count", description="Rank of the source-load finite-difference three-surface effectiveness matrix at the frozen fixture.", binding={"batch_telemetry": "source_effectiveness_rank"}),
+            )
+        )
+    elif family_id == "hl20_mod_k" and fidelity == "rigid_body_6dof_surface_allocated":
+        status.extend(
+            (
+                _status(
+                    "attitude.euler",
+                    "rad",
+                    "Committed HL-20 local roll, pitch, and yaw-error coordinates when the selected source-surface screen closes the local attitude loop.",
+                    "local_attitude_rad",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "local_attitude_rad", "frame": "source_pitch_trim_local"},
+                    provenance="derived",
+                ),
+                _status(
+                    "velocity.body",
+                    "m/s",
+                    "Frozen Mach-1 DAVE-ML body-velocity fixture used by the source-surface local screens.",
+                    "body_velocity_m_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_velocity_m_s", "frame": "body"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "body_rate",
+                    "rad/s",
+                    "Committed DAVE-ML body-rate state at the frozen source-translation fixture.",
+                    "body_rate_rad_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_rate_rad_s", "frame": "body"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "aerodynamics.pitch_coefficient",
+                    "dimensionless",
+                    "Nonlinear DAVE-ML pitch coefficient evaluated after the committed actual source-surface positions.",
+                    "source_pitch_coefficient",
+                    runtime_availability,
+                    binding={"batch_telemetry": "source_pitch_coefficient"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "control.pitch_moment.requested",
+                    "N*m",
+                    "Requested total source-fixture pitch moment used by the bounded seven-surface allocator.",
+                    "requested_pitch_moment_nm",
+                    runtime_availability,
+                    binding={"batch_telemetry": "requested_pitch_moment_nm", "frame": "body"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.pitch_moment.achieved",
+                    "N*m",
+                    "Actual nonlinear DAVE-ML pitch moment after the committed named source-surface positions.",
+                    "achieved_pitch_moment_nm",
+                    runtime_availability,
+                    binding={"batch_telemetry": "achieved_pitch_moment_nm", "frame": "body"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "control.pitch_moment.residual",
+                    "N*m",
+                    "Requested-minus-nonlinear-source pitch-moment residual at the committed allocation boundary.",
+                    "pitch_moment_residual_nm",
+                    runtime_availability,
+                    binding={"batch_telemetry": "pitch_moment_residual_nm", "frame": "body"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.status",
+                    None,
+                    "Bounded source-surface allocator disposition for the pitch-authority request.",
+                    "wrench_status",
+                    runtime_availability,
+                    value_type="enum",
+                    binding={"batch_telemetry": "wrench_status"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.saturated",
+                    None,
+                    "Whether a source-surface position, rate, or lag constraint limited the committed allocation interval.",
+                    "wrench_saturated",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "wrench_saturated"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.physical_effector_allocation",
+                    None,
+                    "Whether this screen allocated its pitch request to all seven bounded named source surfaces.",
+                    "physical_effector_allocation",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "physical_effector_allocation"},
+                    provenance="derived",
+                ),
+                _status(
+                    "trim.full_state.status",
+                    None,
+                    "Availability of a full-state HL-20 source equilibrium for the selected screen.",
+                    "full_state_trim_status",
+                    runtime_availability,
+                    value_type="enum",
+                    binding={"batch_telemetry": "full_state_trim_status"},
+                    provenance="derived",
+                ),
+            )
+        )
+        resources.append(
+            InterfaceChannel(
+                "resources.mass.total",
+                "resource",
+                "scalar",
+                "kg",
+                "Fixed DAVE-ML HL-20 source mass used by the frozen source-surface authority screen.",
+                availability=runtime_availability,
+                provenance="source_backed",
+                sampling="truth_boundary",
+                binding={"batch_telemetry": "mass_kg"},
+                claim_boundary="The screen holds this source mass fixed and does not establish fuel, propellant, inertia, or mass-property scheduling.",
+            )
+        )
+        diagnostics.extend(
+            (
+                _diagnostic("control.realization", "control_realization", runtime_availability, binding={"batch_telemetry": "control_realization"}),
+                _diagnostic("control.physical_effector_allocation", "physical_effector_allocation", runtime_availability, binding={"batch_telemetry": "physical_effector_allocation"}),
+                _diagnostic(
+                    "control.allocation.residual_norm",
+                    "allocation_controlled_residual_norm",
+                    runtime_availability,
+                    value_type="scalar",
+                    unit="N*m",
+                    description="Linearized controlled-axis residual reported by the bounded HL-20 source-surface allocator.",
+                    binding={"batch_telemetry": "allocation_controlled_residual_norm"},
+                ),
+                _diagnostic(
+                    "control.allocation.saturation_count",
+                    "saturation_count",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="count",
+                    description="Number of active HL-20 source-surface allocator or local actuator constraints.",
+                    binding={"batch_telemetry": "saturation_count"},
+                ),
+                _diagnostic(
+                    "control.source_effectiveness_rank",
+                    "source_effectiveness_rank",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="count",
+                    description="Rank of the source-load finite-difference seven-surface effectiveness matrix at the frozen fixture.",
+                    binding={"batch_telemetry": "source_effectiveness_rank"},
+                ),
+            )
+        )
+    elif family_id == "b747" and fidelity == "rigid_body_6dof_surface_allocated":
+        status.extend(
+            (
+                _status(
+                    "attitude.euler",
+                    "rad",
+                    "Committed B747 condition-3 local roll, pitch, and yaw-error coordinates.",
+                    "local_attitude_rad",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "local_attitude_rad", "frame": "source_trim_local"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "body_rate",
+                    "rad/s",
+                    "Committed B747 condition-3 local body angular rates.",
+                    "body_rate_rad_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_rate_rad_s", "frame": "body_frd"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "velocity.body",
+                    "m/s",
+                    "Committed B747 condition-3 local body velocity.",
+                    "body_velocity_m_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_velocity_m_s", "frame": "body_frd"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "control.wrench.requested.moment",
+                    "N*m",
+                    "LQR requested body moment before bounded B747 source-table surface allocation.",
+                    "requested_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "requested_moment_body_nm", "frame": "body_frd"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.achieved.moment",
+                    "N*m",
+                    "Achieved body moment from bounded B747 condition-3 source-table surface allocation.",
+                    "achieved_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "achieved_moment_body_nm", "frame": "body_frd"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "control.wrench.residual.moment",
+                    "N*m",
+                    "Requested-minus-achieved body-moment residual after B747 source-table allocation.",
+                    "residual_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "residual_moment_body_nm", "frame": "body_frd"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.status",
+                    None,
+                    "Bounded B747 source-table allocator disposition at the committed condition-3 screen state.",
+                    "wrench_status",
+                    runtime_availability,
+                    value_type="enum",
+                    binding={"batch_telemetry": "wrench_status"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.saturated",
+                    None,
+                    "Whether a B747 source-table coordinate or allocator boundary constrained the committed screen interval.",
+                    "wrench_saturated",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "wrench_saturated"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.physical_effector_allocation",
+                    None,
+                    "Whether the B747 screen allocated requested moments to bounded source-table surface coordinates.",
+                    "physical_effector_allocation",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "physical_effector_allocation"},
+                    provenance="derived",
+                ),
+            )
+        )
+        resources.append(
+            InterfaceChannel(
+                "resources.mass.total",
+                "resource",
+                "scalar",
+                "kg",
+                "Fixed B747 condition-3 source-table mass used by the local physical-control screen.",
+                availability=runtime_availability,
+                provenance="source_backed",
+                sampling="truth_boundary",
+                binding={"batch_telemetry": "mass_kg"},
+                claim_boundary="The local screen retains fixed source mass and does not establish fuel, payload, inertia, or mass-property scheduling.",
+            )
+        )
+        diagnostics.extend(
+            (
+                _diagnostic(
+                    "control.realization",
+                    "control_realization",
+                    runtime_availability,
+                    binding={"batch_telemetry": "control_realization"},
+                ),
+                _diagnostic(
+                    "control.physical_effector_allocation",
+                    "physical_effector_allocation",
+                    runtime_availability,
+                    binding={"batch_telemetry": "physical_effector_allocation"},
+                ),
+                _diagnostic(
+                    "control.allocation.residual_norm",
+                    "allocation_controlled_residual_norm",
+                    runtime_availability,
+                    value_type="scalar",
+                    unit="N*m",
+                    description="Mixed requested-minus-achieved moment norm at the committed B747 allocator boundary.",
+                    binding={"batch_telemetry": "allocation_controlled_residual_norm"},
+                ),
+                _diagnostic(
+                    "control.allocation.saturation_count",
+                    "saturation_count",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="count",
+                    description="Number of B747 allocator or source-surface constraints active at the committed boundary.",
+                    binding={"batch_telemetry": "saturation_count"},
+                ),
+            )
+        )
     elif family_id in {"skywalker_x8", "b747"} and fidelity in {"point_mass_3dof", "pseudo_6dof"}:
         status.extend(
             (
@@ -866,8 +2000,54 @@ def _status_contract(
                 _status("velocity.speed", "m/s", "Scalar speed from the committed runtime state.", "1.vel", runtime_availability, scale=0.3048),
                 _status("flight.path_angle", "deg", "Geodetic flight-path angle from the committed runtime state.", "1.gama", runtime_availability),
                 _status("flight.heading", "deg", "Geodetic heading from the committed runtime state.", "1.psi", runtime_availability),
+                _status(
+                    "guidance.override.active",
+                    None,
+                    "Whether the committed lower-tier state-rate command came from the explicit external guidance authority.",
+                    "1.guidance_override_active",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={
+                        "derived_from": "episode_value.1.guidance_override_active",
+                        "transform": "positive_boolean",
+                    },
+                    provenance="derived",
+                ),
             )
         )
+        if fidelity == "pseudo_6dof":
+            status.extend(
+                (
+                    _status(
+                        "attitude.euler",
+                        "deg",
+                        "Profile-backed kinematic pseudo-6DOF Euler attitude at the committed truth boundary.",
+                        "1",
+                        runtime_availability,
+                        value_type="vector3",
+                        binding={
+                            "derived_from": "episode_value.1",
+                            "transform": "kinematic_attitude_deg_vector",
+                            "frame": "kinematic_body_to_reference",
+                        },
+                        provenance="derived",
+                    ),
+                    _status(
+                        "body_rate",
+                        "rad/s",
+                        "Profile-backed kinematic pseudo-6DOF body rate at the committed truth boundary.",
+                        "1",
+                        runtime_availability,
+                        value_type="vector3",
+                        binding={
+                            "derived_from": "episode_value.1",
+                            "transform": "kinematic_body_rate_vector",
+                            "frame": "body",
+                        },
+                        provenance="derived",
+                    ),
+                )
+            )
         resources.append(
             InterfaceChannel(
                 "resources.mass.total",
@@ -985,6 +2165,29 @@ def _status_contract(
                     ),
                 )
             )
+        if family_id == "a320_openap_3dof":
+            status.extend(
+                (
+                    _status(
+                        "propulsion.thrust",
+                        "N",
+                        "Installed thrust evaluated by the committed OpenAP operating point.",
+                        "thrust_n",
+                        runtime_availability,
+                        binding={"batch_telemetry": "thrust_n", "frame": "body"},
+                        provenance="derived",
+                    ),
+                    _status(
+                        "control.throttle.realized",
+                        "1",
+                        "Throttle ratio realized by the committed OpenAP reduced-model operating point.",
+                        "throttle_ratio",
+                        runtime_availability,
+                        binding={"batch_telemetry": "throttle_ratio"},
+                        provenance="derived",
+                    ),
+                )
+            )
         resources.append(
             InterfaceChannel(
                 "resources.mass.total",
@@ -1003,6 +2206,25 @@ def _status_contract(
                 ),
             )
         )
+        if family_id == "a320_openap_3dof":
+            resources.append(
+                InterfaceChannel(
+                    "resources.mass.fuel_flow",
+                    "resource",
+                    "scalar",
+                    "kg/s",
+                    "OpenAP fuel-flow estimate at the committed reduced-model operating point.",
+                    availability=runtime_availability,
+                    provenance="derived",
+                    sampling="truth_boundary",
+                    binding={"batch_telemetry": "fuel_flow_kg_s"},
+                    claim_boundary=(
+                        "This is the OpenAP performance-model fuel-flow estimate for the selected composition. It does "
+                        "not establish an independent fuel-system state, engine spool model, reserve policy, or physical "
+                        "A320 propulsion qualification."
+                    ),
+                )
+            )
         diagnostics.append(
             _diagnostic(
                 "control.realization",
@@ -1242,7 +2464,224 @@ def _status_contract(
                 binding={"batch_report": "runtime.control_realization"},
             )
         )
-    elif family_id in {"x15", "hl20_mod_k"} and fidelity == "rigid_body_6dof_direct_wrench":
+    elif family_id == "f16_s119" and fidelity in {
+        "rigid_body_6dof_direct_wrench",
+        "rigid_body_6dof_surface_allocated",
+    }:
+        status.extend(
+            (
+                _status(
+                    "position.north",
+                    "m",
+                    "Committed F-16 north context: route-integrated for the route-entry screen or fixed local origin for the exact fixed-altitude LQI screen.",
+                    "north_m",
+                    runtime_availability,
+                    binding={"batch_telemetry": "north_m", "frame": "local_navigation"},
+                ),
+                _status(
+                    "position.east",
+                    "m",
+                    "Committed F-16 east context: route-integrated for the route-entry screen or fixed local origin for the exact fixed-altitude LQI screen.",
+                    "east_m",
+                    runtime_availability,
+                    binding={"batch_telemetry": "east_m", "frame": "local_navigation"},
+                ),
+                _status(
+                    "position.altitude",
+                    "m",
+                    "Committed F-16 altitude context: route-integrated for the route-entry screen or fixed source derivative altitude for the exact LQI screen.",
+                    "altitude_m",
+                    runtime_availability,
+                    binding={"batch_telemetry": "altitude_m", "frame": "local_navigation"},
+                ),
+                _status(
+                    "velocity.speed",
+                    "m/s",
+                    "Committed F-16 body-speed magnitude.",
+                    "speed_m_s",
+                    runtime_availability,
+                    binding={"batch_telemetry": "speed_m_s"},
+                ),
+                _status(
+                    "velocity.body",
+                    "m/s",
+                    "Committed F-16 source-plant body velocity.",
+                    "body_velocity_m_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_velocity_m_s", "frame": "body_frd"},
+                ),
+                _status(
+                    "attitude.euler",
+                    "deg",
+                    "Committed F-16 Euler context: route-integrated for the route-entry screen or fixed source trim attitude for the exact LQI screen.",
+                    "attitude_euler_deg",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "attitude_euler_deg", "frame": "local_navigation"},
+                ),
+                _status(
+                    "body_rate",
+                    "rad/s",
+                    "Committed F-16 source-plant body angular rate.",
+                    "body_rate_rad_s",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "body_rate_rad_s", "frame": "body_frd"},
+                ),
+                _status(
+                    "control.wrench.requested.force",
+                    "N",
+                    "Requested local physical-controller body force.",
+                    "requested_force_body_n",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "requested_force_body_n", "frame": "body_frd"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.requested.moment",
+                    "N*m",
+                    "Requested local physical-controller body moment.",
+                    "requested_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "requested_moment_body_nm", "frame": "body_frd"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.achieved.force",
+                    "N",
+                    "Achieved F-16 source-plant body force on the local screen.",
+                    "achieved_force_body_n",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "achieved_force_body_n", "frame": "body_frd"},
+                ),
+                _status(
+                    "control.wrench.achieved.moment",
+                    "N*m",
+                    "Achieved F-16 source-plant body moment on the local screen.",
+                    "achieved_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "achieved_moment_body_nm", "frame": "body_frd"},
+                ),
+                _status(
+                    "control.wrench.residual.force",
+                    "N",
+                    "Requested-minus-achieved F-16 body force on the local screen.",
+                    "residual_force_body_n",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "residual_force_body_n", "frame": "body_frd"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.residual.moment",
+                    "N*m",
+                    "Requested-minus-achieved F-16 body moment on the local screen.",
+                    "residual_moment_body_nm",
+                    runtime_availability,
+                    value_type="vector3",
+                    binding={"batch_telemetry": "residual_moment_body_nm", "frame": "body_frd"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.status",
+                    None,
+                    "F-16 direct-wrench or allocator disposition at the committed local-screen state.",
+                    "wrench_status",
+                    runtime_availability,
+                    value_type="enum",
+                    binding={"batch_telemetry": "wrench_status"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.saturated",
+                    None,
+                    "Whether the F-16 local screen reported an actuator or allocation saturation.",
+                    "wrench_saturated",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "wrench_saturated"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.physical_effector_allocation",
+                    None,
+                    "Whether this F-16 physical-control screen allocates the requested wrench to effectors.",
+                    "physical_effector_allocation",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "physical_effector_allocation"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.schedule.node_id",
+                    None,
+                    "Selected source-trim F-16 node for the committed local control sample.",
+                    "schedule_node_id",
+                    runtime_availability,
+                    value_type="enum",
+                    binding={"batch_telemetry": "schedule_node_id"},
+                    provenance="source_backed",
+                ),
+                _status(
+                    "control.schedule.selection",
+                    None,
+                    "How the F-16 local controller selected its source schedule node for the committed sample.",
+                    "controller_selection",
+                    runtime_availability,
+                    value_type="enum",
+                    binding={"batch_telemetry": "controller_selection"},
+                    provenance="derived",
+                ),
+            )
+        )
+        resources.append(
+            InterfaceChannel(
+                "resources.mass.total",
+                "resource",
+                "scalar",
+                "kg",
+                "Fixed source-bound F-16 mass used by the local physical-control screen.",
+                availability=runtime_availability,
+                provenance="source_backed",
+                sampling="truth_boundary",
+                binding={"batch_telemetry": "mass_kg"},
+                claim_boundary="The screen uses a fixed source-bound mass and does not model fuel depletion or mass-property scheduling.",
+            )
+        )
+        diagnostics.extend(
+            (
+                _diagnostic(
+                    "control.realization",
+                    resolved_control_realization_for(family_id, fidelity),
+                    runtime_availability,
+                    binding={"batch_telemetry": "control_realization"},
+                ),
+                _diagnostic(
+                    "control.allocation.residual_norm",
+                    "allocation_residual_norm",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="mixed_wrench_norm",
+                    description="Mixed requested-minus-achieved wrench norm at the committed F-16 control boundary.",
+                    binding={"batch_telemetry": "allocation_residual_norm"},
+                ),
+                _diagnostic(
+                    "control.allocation.saturation_count",
+                    "saturation_count",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="count",
+                    description="Number of F-16 allocator or actuator constraints active at the committed boundary.",
+                    binding={"batch_telemetry": "saturation_count"},
+                ),
+            )
+        )
+    elif family_id in {"hummingbird", "x15", "hl20_mod_k"} and fidelity == "rigid_body_6dof_direct_wrench":
         status.extend(
             (
                 _status(
@@ -1262,7 +2701,7 @@ def _status_contract(
                     "body_rate_rad_s",
                     runtime_availability,
                     value_type="vector3",
-                    binding={"batch_telemetry": "body_rate_rad_s", "frame": "body"},
+                    binding=_local_direct_wrench_binding(family_id, "body_rate_rad_s", frame="body"),
                     provenance="source_backed",
                 ),
                 _status(
@@ -1272,7 +2711,7 @@ def _status_contract(
                     "requested_force_body_n",
                     runtime_availability,
                     value_type="vector3",
-                    binding={"batch_telemetry": "requested_force_body_n", "frame": "body"},
+                    binding=_local_direct_wrench_binding(family_id, "requested_force_body_n", frame="body"),
                     provenance="derived",
                 ),
                 _status(
@@ -1282,7 +2721,7 @@ def _status_contract(
                     "requested_moment_body_nm",
                     runtime_availability,
                     value_type="vector3",
-                    binding={"batch_telemetry": "requested_moment_body_nm", "frame": "body"},
+                    binding=_local_direct_wrench_binding(family_id, "requested_moment_body_nm", frame="body"),
                     provenance="derived",
                 ),
                 _status(
@@ -1292,7 +2731,7 @@ def _status_contract(
                     "achieved_force_body_n",
                     runtime_availability,
                     value_type="vector3",
-                    binding={"batch_telemetry": "achieved_force_body_n", "frame": "body"},
+                    binding=_local_direct_wrench_binding(family_id, "achieved_force_body_n", frame="body"),
                     provenance="engineering_surrogate",
                 ),
                 _status(
@@ -1302,7 +2741,7 @@ def _status_contract(
                     "achieved_moment_body_nm",
                     runtime_availability,
                     value_type="vector3",
-                    binding={"batch_telemetry": "achieved_moment_body_nm", "frame": "body"},
+                    binding=_local_direct_wrench_binding(family_id, "achieved_moment_body_nm", frame="body"),
                     provenance="engineering_surrogate",
                 ),
                 _status(
@@ -1312,7 +2751,7 @@ def _status_contract(
                     "residual_force_body_n",
                     runtime_availability,
                     value_type="vector3",
-                    binding={"batch_telemetry": "residual_force_body_n", "frame": "body"},
+                    binding=_local_direct_wrench_binding(family_id, "residual_force_body_n", frame="body"),
                     provenance="derived",
                 ),
                 _status(
@@ -1322,7 +2761,7 @@ def _status_contract(
                     "residual_moment_body_nm",
                     runtime_availability,
                     value_type="vector3",
-                    binding={"batch_telemetry": "residual_moment_body_nm", "frame": "body"},
+                    binding=_local_direct_wrench_binding(family_id, "residual_moment_body_nm", frame="body"),
                     provenance="derived",
                 ),
                 _status(
@@ -1332,7 +2771,7 @@ def _status_contract(
                     "wrench_status",
                     runtime_availability,
                     value_type="enum",
-                    binding={"batch_telemetry": "wrench_status"},
+                    binding=_local_direct_wrench_binding(family_id, "wrench_status"),
                     provenance="derived",
                 ),
                 _status(
@@ -1342,7 +2781,7 @@ def _status_contract(
                     "wrench_saturated",
                     runtime_availability,
                     value_type="boolean",
-                    binding={"batch_telemetry": "wrench_saturated"},
+                    binding=_local_direct_wrench_binding(family_id, "wrench_saturated"),
                     provenance="derived",
                 ),
                 _status(
@@ -1352,17 +2791,91 @@ def _status_contract(
                     "physical_effector_allocation",
                     runtime_availability,
                     value_type="boolean",
-                    binding={"batch_telemetry": "physical_effector_allocation"},
+                    binding=_local_direct_wrench_binding(family_id, "physical_effector_allocation"),
                     provenance="derived",
                 ),
             )
         )
-        diagnostics.append(
-            _diagnostic(
-                "control.realization",
-                "direct_wrench_screen",
-                runtime_availability,
-                binding={"batch_telemetry": "control_realization"},
+        if family_id == "hummingbird":
+            resources.append(
+                InterfaceChannel(
+                    "resources.mass.total",
+                    "resource",
+                    "scalar",
+                    "kg",
+                    "Pinned source-hover rigid-body mass used by the local direct-wrench comparator.",
+                    availability=runtime_availability,
+                    provenance="source_backed",
+                    sampling="truth_boundary",
+                    binding={"batch_telemetry": "mass_kg"},
+                    claim_boundary=(
+                        "The comparator holds this source-hover mass fixed. It does not establish battery, payload, "
+                        "inertia, or mass-flow behavior."
+                    ),
+                )
+            )
+        elif family_id == "x15":
+            resources.append(
+                InterfaceChannel(
+                    "resources.mass.total",
+                    "resource",
+                    "scalar",
+                    "kg",
+                    "Fixed source-release mass used by the local X-15 direct-wrench screen.",
+                    availability=runtime_availability,
+                    provenance="source_backed",
+                    sampling="truth_boundary",
+                    binding={"batch_telemetry": "mass_kg", "episode_value": "mass_kg"},
+                    claim_boundary=(
+                        "The local source-release screen holds the declared mass fixed. It does not establish fuel, "
+                        "propellant, inertia, or mass-property scheduling."
+                    ),
+                )
+            )
+        elif family_id == "hl20_mod_k":
+            resources.append(
+                InterfaceChannel(
+                    "resources.mass.total",
+                    "resource",
+                    "scalar",
+                    "kg",
+                    "Fixed DAVE-ML source mass used by the local HL-20 direct-wrench screen.",
+                    availability=runtime_availability,
+                    provenance="source_backed",
+                    sampling="truth_boundary",
+                    binding={"batch_telemetry": "mass_kg", "episode_value": "mass_kg"},
+                    claim_boundary=(
+                        "The local source screen holds the declared mass fixed. It does not establish fuel, propellant, "
+                        "inertia, or mass-property scheduling."
+                    ),
+                )
+            )
+        diagnostics.extend(
+            (
+                _diagnostic(
+                    "control.realization",
+                    "direct_wrench_screen",
+                    runtime_availability,
+                    binding=_local_direct_wrench_binding(family_id, "control_realization"),
+                ),
+                _diagnostic(
+                    "control.wrench.residual_norm",
+                    "wrench_residual_norm",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="mixed_wrench_norm",
+                    description="Mixed requested-minus-achieved wrench norm at the committed direct-wrench boundary.",
+                    binding=_local_direct_wrench_binding(family_id, "wrench_residual_norm"),
+                ),
+                _diagnostic(
+                    "control.feedback_norm",
+                    "feedback_norm",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="normalized_error",
+                    description="Native feedback-error norm retained from the direct-wrench local screen.",
+                    binding=_local_direct_wrench_binding(family_id, "feedback_norm"),
+                ),
             )
         )
     elif family_id == "tumbling_body" and fidelity in {"point_mass_3dof", "pseudo_6dof"}:
@@ -1404,6 +2917,33 @@ def _status_contract(
                     "velocity_m_s",
                     runtime_availability,
                     binding={"derived_from": "batch_telemetry.velocity_m_s", "transform": "norm"},
+                    provenance="engineering_surrogate",
+                ),
+                _status(
+                    "aerodynamics.drag_force",
+                    "N",
+                    "Committed aerodynamic drag-force magnitude from the passive-body truth model.",
+                    "drag_force_n",
+                    runtime_availability,
+                    binding={"batch_telemetry": "drag_force_n", "frame": "local_reduced"},
+                    provenance="engineering_surrogate",
+                ),
+                _status(
+                    "aerodynamics.projected_area",
+                    "m^2",
+                    "Committed projected area used by the selected passive-body aerodynamic representation.",
+                    "projected_area_m2",
+                    runtime_availability,
+                    binding={"batch_telemetry": "projected_area_m2", "frame": "body"},
+                    provenance="engineering_surrogate",
+                ),
+                _status(
+                    "angular_rate.norm",
+                    "rad/s",
+                    "Committed angular-rate magnitude; zero in the orientation-averaged 3DOF reduction.",
+                    "angular_rate_norm_rad_s",
+                    runtime_availability,
+                    binding={"batch_telemetry": "angular_rate_norm_rad_s", "frame": "body"},
                     provenance="engineering_surrogate",
                 ),
                 _status(
@@ -1465,7 +3005,37 @@ def _status_contract(
                 binding={"batch_report": "runtime.control_realization"},
             )
         )
+    diagnostics.append(
+        _diagnostic(
+            "control.controller.method",
+            "controller_method",
+            runtime_availability,
+            binding={"batch_telemetry": "controller_method", "episode_value": "controller_method"},
+            value_type="enum",
+            description=(
+                "Executed reusable controller family for this committed sample: lqr, lqi, or not_applicable "
+                "when this execution mode has no such controller."
+            ),
+        )
+    )
     return tuple(status), tuple(resources), tuple(diagnostics)
+    ####
+
+
+def _local_direct_wrench_binding(
+    family_id: str,
+    native: str,
+    *,
+    frame: str | None = None,
+) -> dict[str, object]:
+    """Declare batch and, where available, episode projection of local-screen truth."""
+
+    binding: dict[str, object] = {"batch_telemetry": native}
+    if family_id in {"x15", "hl20_mod_k"}:
+        binding["episode_value"] = native
+    if frame is not None:
+        binding["frame"] = frame
+    return binding
     ####
 
 
@@ -1505,13 +3075,18 @@ def _diagnostic(
     availability: InterfaceAvailability,
     *,
     binding: Mapping[str, object] | None = None,
+    value_type: InterfaceValueType | None = None,
+    unit: str | None = None,
+    quantity_semantics: QuantitySemantics | None = None,
+    description: str | None = None,
 ) -> InterfaceChannel:
     return InterfaceChannel(
         identifier,
         "diagnostic",
-        "enum" if identifier == "control.realization" else "boolean",
-        None,
-        "Raw claim-boundary diagnostic retained with the canonical status view.",
+        value_type or ("enum" if identifier in {"control.realization", "control.controller.method"} else "boolean"),
+        unit,
+        description or "Raw claim-boundary diagnostic retained with the canonical status view.",
+        quantity_semantics=quantity_semantics,
         availability=availability,
         provenance="derived",
         sampling="truth_boundary",
@@ -1905,8 +3480,11 @@ def _bound_status_value(
         return _STATUS_MISSING
     else:
         value = _nested_status_value(raw_values, native)
-    if value is _STATUS_MISSING and channel.id == "control.realization":
-        return contract.control_realization
+    if value is _STATUS_MISSING:
+        if channel.id == "control.realization":
+            return contract.control_realization
+        if channel.id == "control.controller.method":
+            return "not_applicable"
     scale = channel.binding.get("scale")
     if isinstance(scale, int | float) and not isinstance(scale, bool) and isinstance(value, int | float) and not isinstance(value, bool):
         return float(value) * float(scale)
@@ -1946,6 +3524,28 @@ def _derived_status_value(
         if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
             return _STATUS_MISSING
         return math.degrees(float(value))
+    if transform == "positive_boolean":
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, int | float) and math.isfinite(float(value)):
+            return float(value) >= 0.5
+        return _STATUS_MISSING
+    if transform in {"kinematic_attitude_deg_vector", "kinematic_body_rate_vector"}:
+        if not isinstance(value, Mapping):
+            return _STATUS_MISSING
+        component_names = (
+            ("kinematic_roll_deg", "kinematic_pitch_deg", "kinematic_yaw_deg")
+            if transform == "kinematic_attitude_deg_vector"
+            else (
+                "kinematic_body_rate_p_rad_s",
+                "kinematic_body_rate_q_rad_s",
+                "kinematic_body_rate_r_rad_s",
+            )
+        )
+        components = [value.get(name) for name in component_names]
+        if any(isinstance(component, bool) or not isinstance(component, int | float) or not math.isfinite(float(component)) for component in components):
+            return _STATUS_MISSING
+        return [float(component) for component in components]
     if transform == "100_kg_s_times_min_time_20_s":
         if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
             return _STATUS_MISSING

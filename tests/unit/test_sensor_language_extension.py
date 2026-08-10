@@ -27,6 +27,25 @@ def test_sensor_declarations_are_typed_and_profile_bound() -> None:
     assert any(item.code == "taoryx-extension-requires-profile" for item in historical.diagnostics)
 
 
+def test_sensor_language_names_families_not_plugin_implementations() -> None:
+    source = """\
+(sensor-families)
+*runtime sensor seeker kind=infrared cadence-s=0.02 sample=instantaneous delivery-s=0 truth=boundary rate-policy=split
+*runtime sensor navigation kind=gnss cadence-s=1 sample=instantaneous delivery-s=0.1 truth=boundary rate-policy=split
+*end
+"""
+    document = parse_problem_text(source, profile=GrammarProfile.TAORYX)
+    assert not [item for item in document.diagnostics if item.severity.value == "error"]
+
+    provider_id = parse_problem_text(
+        "(provider-id)\n*runtime sensor seeker kind=ir-bearing cadence-s=0.02 sample=instantaneous "
+        "delivery-s=0 truth=boundary rate-policy=split\n*end\n",
+        profile=GrammarProfile.TAORYX,
+    )
+    assert any(item.code == "invalid-sensor-kind" for item in provider_id.diagnostics)
+    ####
+
+
 @pytest.mark.parametrize(
     ("header", "code"),
     (

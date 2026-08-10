@@ -1,0 +1,23 @@
+schema_version: 1
+scenario_id: ir_point_source_v1
+sensor:
+  name: nose_fpa
+  vehicle: vehicle
+  provider:
+    kind: ir-point-source
+    config:
+      target_id: target
+      width_pixels: 640
+      height_pixels: 480
+      horizontal_fov_rad: 1.0471975511965976
+      vertical_fov_rad: 0.7853981633974483
+      centroid_bias_pixels: [0.2, -0.1]
+      centroid_noise_stddev_pixels: 0.35
+  cadence_s: 0.02
+  sample: instantaneous
+  delivery_s: 0.01
+  truth: boundary
+  rate_policy: split
+  seed: 43
+truth:
+  mode: vehicle

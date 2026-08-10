@@ -19,12 +19,12 @@ from becoming one provider-specific dictionary:
 ```text
                          MODEL REGISTRY
                               │
-                 ┌────────────┴────────────┐
-                 ▼                         ▼
-       ConfigurationSchema          OutputSchema
-          what can I set?         what can I request?
-                 │                         │
-                 └────────────┬────────────┘
+            ┌───────────┼───────────┐
+            ▼           ▼           ▼
+ ConfigurationSchema   Controls     OutputSchema
+    what can I set?   how is intent   what can I
+                     realized?       request?
+            └───────────┼───────────┘
                               ▼
                 validated configuration + output selection
                               │
@@ -41,6 +41,7 @@ The public schemas are:
 | Provider metadata | `taoryx.trajectory-provider-metadata/v1` |
 | Configuration schema | `taoryx.trajectory-provider-configuration-schema/v1` |
 | Output schema | `taoryx.trajectory-provider-output-schema/v1` |
+| Per-realization control advertisement | Nested `TrajectoryControlAdvertisement` in model metadata |
 | Configuration instance | `taoryx.trajectory-provider-configuration/v1` |
 | Prepared configuration | `taoryx.trajectory-provider-prepared-configuration/v1` |
 | Run request | `taoryx.mission-composition-run-request/v1` |
@@ -77,7 +78,7 @@ class ConfigurableTrajectoryProvider(Protocol):
 
 Discovery must not execute a trajectory. `list_models()` returns stable model
 identity, family and model kind, presentation metadata, typed read-only model
-properties, reference frames, a fingerprinted output schema, exact operations,
+properties, per-realization controls, reference frames, a fingerprinted output schema, exact operations,
 mission templates, deployments, source references, fidelity records, and
 fidelity transitions.
 Each model record identifies its configuration schema and SHA-256 fingerprint.
@@ -109,6 +110,38 @@ missions and operations, and whether presence is `guaranteed`, `conditional`,
 or `runtime_reported`. Returned objects repeat the actual channel metadata so
 runtime output remains self-contained and values can be validated without a
 provider-specific state-vector definition.
+
+### Per-realization control advertisement
+
+Every `TrajectoryRealizationMetadata` must contain a complete
+`TrajectoryControlAdvertisement`; an omitted controls dictionary is not a
+valid advertisement. It publishes:
+
+- a control status: `available`, `internally_generated`, `uncontrolled`,
+  `blocked`, or `unsupported`;
+- semantic action and effector channels with primitive type, shape, quantity,
+  units, interval, frame, sampling, topology, availability, operations, and
+  presentation/provenance metadata;
+- mutually exclusive authority profiles and their channel membership;
+- mission-level intents, the segments and templates that require them, and
+  whether each intent is externally resolved, provider-internal, open-loop,
+  blocked, or unsupported; and
+- an exact native binding schema when a semantic channel maps to a provider
+  coordinate.
+
+The semantic channel and native binding deliberately retain separate value
+spaces. For example, a stable semantic angle may bind to a source-table angle
+coordinate, while a bounded speed command may bind to a native positive-half-
+line coordinate with additional runtime bounds. The native record repeats its
+ID, type, shape, quantity, unit, interval, topology, and provider binding so a
+composer can validate an interactive action before opening a plant. Discovery
+tests then compare that record byte-for-byte at the field level with every live
+session action schema.
+
+An internally generated command is discoverable but is not presented as an
+interactive action. Likewise, planned source effectors remain visible with no
+execution operation, and an uncontrolled realization cannot silently inherit
+controls from another fidelity.
 
 ### Output capability and selection
 
@@ -205,6 +238,9 @@ actuator-allocated, source-replay, or provider-defined. Actuator type is a
 third field: aerodynamic surfaces, rotors, thrust vectoring, gimbals, RCS,
 mixed, or not applicable. Historical four-tier fidelity IDs remain selectable
 compatibility aliases; they are not used to infer controls or effectors.
+The normalized input-realization field is only a classification; the nested
+control advertisement is the authoritative inventory of channels, native
+bindings, authority profiles, intent resolution, and operation availability.
 
 All four canonical fidelity positions remain visible. An absent realization is
 `declared: false`; it is not omitted. Adjacent transition records distinguish
@@ -238,7 +274,7 @@ The registry currently exposes:
 | X-15 | Available, independently propagated passive spent booster |
 | HL-20 | Available, independently propagated synthetic passive spent booster |
 | NESC two-stage rocket | Declared cutoff/separation/ignition lineage; no independent spent-stage trajectory |
-| Dual-launch glider | Declared event-only booster/glider separation; no execution binding or independently propagated child yet |
+| Dual-launch glider | Source-generated point-mass batch path for both launch forms; declared event-only separation with no independently propagated child |
 | Other models and `simple_aero` | No advertised child emission |
 
 ## Common run request
@@ -296,6 +332,12 @@ type, shape, quantity, unit, bounds, sampling semantics, and explicit value
 space. Observations include lifecycle, sequence, time, events, diagnostics, and
 spawned entity IDs. The current native episodes advertise no interactive child
 generation; that absence remains explicit.
+
+For every registered `step` tuple, advertisement conformance requires active
+semantic action channels with exact native binding schemas. The vertical
+session suite opens every episode witness and checks native channel identity,
+type, shape, quantity, unit, bounds, and value-space topology against the
+descriptor returned by the live session.
 
 ## Feedback and failure contract
 
@@ -437,9 +479,11 @@ The Simple Aero schema publishes
 launch and endpoint choices, mass/boost/aero inputs, checkpoints, open segment
 composition, named maneuver templates, and an explicit point-mass-only fidelity
 boundary. Only its fixed-L/D baseline currently has a configuration-to-runtime
-binding; named maneuver fixtures remain blocked for batch execution. The
-dual-launch family is registry-ready but truthfully execution-blocked until an
-immutable native binding can return the attached stack and released glider.
+binding; named maneuver fixtures remain blocked for batch execution. Both
+dual-launch forms have a source-generated point-mass batch binding; they remain
+truthfully limited to one continuous primary trajectory and an event-only
+separation boundary, without independent attached-stack or released-glider
+histories.
 
 `ReferenceMissionCompositionProvider` is the runnable interface witness. It
 publishes the analytical ballistic and constant-velocity waypoint models,

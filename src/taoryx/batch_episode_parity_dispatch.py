@@ -8,43 +8,32 @@ future UI do not independently guess which reduced or native runtime to use.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import Protocol, cast
 
-from .composition_batch_episode_parity import (
-    BatchEpisodeParityReport,
-    verify_serialized_composition_batch_episode_parity,
-)
-from .language_backed_batch_episode_parity import (
-    LanguageBackedBatchEpisodeParityReport,
-    verify_serialized_language_backed_batch_episode_parity,
-)
-from .local_direct_wrench_batch_episode_parity import (
-    LocalDirectWrenchBatchEpisodeParityReport,
-    verify_serialized_local_direct_wrench_batch_episode_parity,
-)
-from .reduced_fixed_wing_batch_episode_parity import (
-    ReducedFixedWingBatchEpisodeParityReport,
-    verify_serialized_reduced_fixed_wing_batch_episode_parity,
-)
+from .plugins import PluginCatalog, discover_plugins
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_bindings import batch_episode_parity_record
 
-DeclaredParityReport = BatchEpisodeParityReport | LanguageBackedBatchEpisodeParityReport | LocalDirectWrenchBatchEpisodeParityReport | ReducedFixedWingBatchEpisodeParityReport
 
-_HUMMINGBIRD_ADAPTER = "taoryx.hummingbird.aggregate_thrust_batch_episode_parity.v1"
-_LANGUAGE_BACKED_ADAPTER = "taoryx.language_backed.action_trace_batch_episode_parity.v1"
-_LOCAL_DIRECT_WRENCH_ADAPTERS = {
-    "taoryx.x15.local_direct_wrench_batch_episode_parity.v1",
-    "taoryx.local_direct_wrench_batch_episode_parity.v1",
-}
-_REDUCED_FIXED_WING_ADAPTERS = {
-    "taoryx.reduced_fixed_wing.a320_action_trace_batch_episode_parity.v1",
-    "taoryx.reduced_fixed_wing.f16_action_trace_batch_episode_parity.v1",
-}
+class DeclaredParityReport(Protocol):
+    """Common report projection returned by family-owned parity verifiers."""
+
+    status: str
+
+    def as_dict(self) -> dict[str, object]:
+        """Return the adapter identity and parity evidence."""
+
+        ...
+
+
+ParityVerifier = object
 
 
 def verify_serialized_declared_batch_episode_parity(
     composition: CompiledVehicleComposition,
     payload: Mapping[str, object],
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> DeclaredParityReport:
     """Verify one trace through its exact registered parity adapter.
 
@@ -63,17 +52,17 @@ def verify_serialized_declared_batch_episode_parity(
     adapter_id = record.get("adapter_id")
     if not isinstance(adapter_id, str):
         raise ValueError("registered batch/episode parity record lacks adapter_id")
-    report: DeclaredParityReport
-    if adapter_id == _HUMMINGBIRD_ADAPTER:
-        report = verify_serialized_composition_batch_episode_parity(composition, payload)
-    elif adapter_id == _LANGUAGE_BACKED_ADAPTER:
-        report = verify_serialized_language_backed_batch_episode_parity(composition, payload)
-    elif adapter_id in _LOCAL_DIRECT_WRENCH_ADAPTERS:
-        report = verify_serialized_local_direct_wrench_batch_episode_parity(composition, payload)
-    elif adapter_id in _REDUCED_FIXED_WING_ADAPTERS:
-        report = verify_serialized_reduced_fixed_wing_batch_episode_parity(composition, payload)
-    else:
+    selected = plugins or discover_plugins()
+    try:
+        contribution = selected.contribution("batch_episode_parity_verifier", adapter_id)
+    except KeyError:
         raise ValueError(f"no parity verifier is registered for declared adapter {adapter_id!r}")
+    verifier = contribution.value
+    if not callable(verifier):
+        raise TypeError(
+            f"plug-in {contribution.plugin.id!r} supplied a non-callable parity verifier for {adapter_id!r}"
+        )
+    report = cast(DeclaredParityReport, verifier(composition, payload))
     if report.as_dict().get("adapter_id") != adapter_id:
         raise ValueError("declared batch/episode parity adapter disagrees with the verifier result")
     return report

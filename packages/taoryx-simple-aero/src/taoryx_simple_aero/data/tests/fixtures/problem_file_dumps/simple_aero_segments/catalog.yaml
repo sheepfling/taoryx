@@ -1,0 +1,168 @@
+schema_version: 1
+source_bundle: ../../simple_aero_v1
+translation_style: synthetic_taos_problem_files
+description: Machine-readable phase index for the Simple Aero simple-aero dump workspace.
+phases:
+  - name: boost
+    description: Thrust-driven launch burn phase.
+    introduced_controls:
+      - "*integ"
+      - "*aero"
+      - "*prop"
+      - "*when time=... stop"
+    families:
+      - ballistic
+  - name: coast
+    description: Passive ballistic coast phase.
+    introduced_controls:
+      - "*integ"
+      - "*aero"
+      - "*when time=... stop"
+    families: []
+  - name: maneuver
+    description: Steering and guidance phase.
+    introduced_controls:
+      - "*integ"
+      - "*aero"
+      - "*fly"
+      - "*when time=... stop"
+      - "*when tseg=... stop"
+    families:
+      - cbcr
+      - crossrange
+      - marv
+      - phugoid
+      - range_extension
+      - skip
+      - slalom
+      - weave
+  - name: final_pronav
+    description: Planned proportional-navigation intercept phase.
+    introduced_controls:
+      - "*fly propnav"
+      - "*when ... stop"
+    families: []
+families:
+  - family: ballistic
+    path: ballistic.prb
+    phase: boost
+    problem_name: simple_aero-ballistic
+    source_bundle: ../../simple_aero_v1/ballistic.yaml
+    source_snippet: ballistic.yaml
+    source_controls:
+      - launch_point
+      - aimpoint
+      - initial_altitude_m
+      - initial_speed_mps
+    stop_controls:
+      - coast_time_s
+      - optimization termination
+    notes:
+      - thrust burn with passive aerodynamic coefficients set to zero
+  - family: cbcr
+    path: cbcr.prb
+    phase: maneuver
+    problem_name: simple_aero-cbcr
+    source_bundle: ../../simple_aero_v1/cbcr.yaml
+    source_snippet: cbcr.yaml
+    source_controls:
+      - go_left
+      - maneuver_altitude_start_km
+    stop_controls:
+      - maneuver_duration_s
+      - min_time_to_go_s
+    notes:
+      - coordinated banked turn with left/right mirror variants
+  - family: crossrange
+    path: crossrange.prb
+    phase: maneuver
+    problem_name: simple_aero-crossrange
+    source_bundle: ../../simple_aero_v1/crossrange.yaml
+    source_snippet: crossrange.yaml
+    source_controls:
+      - initial_heading_error_deg
+      - min_time_to_go_s
+    stop_controls:
+      - min_time_to_go_s
+    notes:
+      - banked crossrange steering example
+  - family: marv
+    path: marv.prb
+    phase: maneuver
+    problem_name: simple_aero-marv
+    source_bundle: ../../simple_aero_v1/marv.yaml
+    source_snippet: marv.yaml
+    source_controls:
+      - maneuver_begin_time_to_go_s
+      - min_time_to_go_s
+    stop_controls:
+      - tseg=60.0
+    notes:
+      - maneuver re-entry example with a fixed bank profile
+  - family: phugoid
+    path: phugoid.prb
+    phase: maneuver
+    problem_name: simple_aero-phugoid
+    source_bundle: ../../simple_aero_v1/phugoid.yaml
+    source_snippet: phugoid.yaml
+    source_controls:
+      - start_range_to_go_km
+      - phugoid_amplitude_deg
+      - phugoid_frequency_Hz
+      - maneuver_roll_deg
+    stop_controls:
+      - implicit solution termination
+    notes:
+      - oscillatory alpha table wrapped around a maneuver roll
+  - family: range_extension
+    path: range_extension.prb
+    phase: maneuver
+    problem_name: simple_aero-range-extension
+    source_bundle: ../../simple_aero_v1/range_extension.yaml
+    source_snippet: range_extension.yaml
+    source_controls:
+      - min_time_to_go_s
+    stop_controls:
+      - time=60.0
+    notes:
+      - range-extending zero-lift glide placeholder
+  - family: skip
+    path: skip.prb
+    phase: maneuver
+    problem_name: simple_aero-skip
+    source_bundle: ../../simple_aero_v1/skip.yaml
+    source_snippet: skip.yaml
+    source_controls:
+      - maneuver_begin_time_to_go_s
+    stop_controls:
+      - trajectory termination
+    notes:
+      - skip-flight steering example
+  - family: slalom
+    path: slalom.prb
+    phase: maneuver
+    problem_name: simple_aero-slalom
+    source_bundle: ../../simple_aero_v1/slalom.yaml
+    source_snippet: slalom.yaml
+    source_controls:
+      - start_range_to_go_km
+      - end_range_to_go_km
+      - min_time_to_go_s
+    stop_controls:
+      - end_range_to_go_km
+      - min_time_to_go_s
+    notes:
+      - alternating bank guidance example
+  - family: weave
+    path: weave.prb
+    phase: maneuver
+    problem_name: simple_aero-weave
+    source_bundle: ../../simple_aero_v1/weave.yaml
+    source_snippet: weave.yaml
+    source_controls:
+      - weave_end_range_to_go_km
+      - min_time_to_go_s
+    stop_controls:
+      - min_time_to_go_s
+    notes:
+      - alternating weave guidance example

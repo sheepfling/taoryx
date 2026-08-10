@@ -63,11 +63,21 @@ class LocalDirectWrenchCompositionExecution:
             "preflight": self.preflight.as_dict(),
             "plan": self.plan.manifest(),
             "output_dir": str(self.output_dir),
+            "runtime": {
+                "controller_method": self.screen.controller_method,
+                "control_realization": "direct_wrench_screen",
+                "physical_effector_allocation": False,
+                "integral_output_names": list(self.screen.lqi.output_names) if self.screen.lqi is not None else [],
+                "integrators_exercised": self.screen.integrators_exercised,
+            },
             "control_screen": {
                 "screen_pass": self.screen_pass,
                 "initial_error_norm": self.screen.initial_error_norm,
                 "final_error_norm": self.screen.final_error_norm,
                 "observed_wrench_statuses": list(self.screen.observed_statuses),
+                "controller_method": self.screen.controller_method,
+                "integral_output_names": list(self.screen.lqi.output_names) if self.screen.lqi is not None else [],
+                "integrators_exercised": self.screen.integrators_exercised,
                 "control_realization": "direct_wrench_screen",
                 "physical_effector_allocation": False,
             },
@@ -101,6 +111,7 @@ def execute_local_direct_wrench_composition(
         family_id=definition.family_id,
         mission_id=definition.mission_id,
         initialization_id=definition.initialization_id,
+        segment_id=definition.segment_id,
         screen_config_id=config.id,
     )
     destination = Path(output_dir)
@@ -109,11 +120,18 @@ def execute_local_direct_wrench_composition(
     destination.mkdir(parents=True, exist_ok=True)
 
     screen = run_local_direct_wrench_screen(config)
+    truth_rows = [
+        {
+            **row,
+            **{name: float(value) for name, value in config.resource_values.items()},
+        }
+        for row in screen.rows
+    ]
     mission_graph_execution = unobserved_mission_graph_execution(
         composition,
         "The local direct-wrench screen has no mission graph dispatcher; it is not a navigation execution.",
     ).as_dict()
-    status_trace = build_committed_status_trace(composition, _status_samples(screen))
+    status_trace = build_committed_status_trace(composition, _status_samples(screen, config))
     semantic_action_trace = _direct_wrench_control_trace(composition, screen)
     resource_ledger = build_committed_resource_ledger(composition, status_trace)
     result = LocalDirectWrenchCompositionExecution(
@@ -131,7 +149,7 @@ def execute_local_direct_wrench_composition(
     _write_json(destination / "preflight.json", preflight.as_dict())
     _write_json(destination / "plan.json", plan.manifest())
     _write_json(destination / "local_screen.json", screen.as_dict())
-    _write_json(destination / "truth_telemetry.json", list(screen.rows))
+    _write_json(destination / "truth_telemetry.json", truth_rows)
     _write_json(destination / "objective_report.json", _screen_evaluation(screen))
     _write_json(destination / "mission_graph_execution.json", mission_graph_execution)
     _write_json(destination / "status_trace.json", status_trace)
@@ -150,6 +168,7 @@ def _screen_evaluation(screen: LocalDirectWrenchScreenExecution) -> dict[str, ob
     return {
         "schema": "taoryx.local-direct-wrench-screen-evaluation/v1alpha1",
         "kind": "local_controller_recovery_screen",
+        "controller_method": screen.controller_method,
         "screen_pass": screen.mission_pass,
         "requirements": [
             {
@@ -172,6 +191,11 @@ def _screen_evaluation(screen: LocalDirectWrenchScreenExecution) -> dict[str, ob
                 "passed": final_fraction < screen.config.final_error_fraction_limit,
             },
             {"id": "all_requests_feasible", "actual": list(statuses), "passed": statuses == ("feasible",)},
+            {
+                "id": "integrators_exercised",
+                "actual": screen.integrators_exercised,
+                "passed": screen.lqi is None or screen.integrators_exercised,
+            },
         ],
         "claim_boundary": ("The result assesses one local screen only. It is not an independent route, terminal, or physical-effector mission evaluation."),
     }
@@ -213,7 +237,10 @@ def _direct_wrench_control_trace(
     ####
 
 
-def _status_samples(screen: LocalDirectWrenchScreenExecution) -> tuple[BatchTruthSample, ...]:
+def _status_samples(
+    screen: LocalDirectWrenchScreenExecution,
+    config: object,
+) -> tuple[BatchTruthSample, ...]:
     """Flatten screen telemetry for the exact resolved batch-status contract."""
 
     samples: list[BatchTruthSample] = []
@@ -223,6 +250,9 @@ def _status_samples(screen: LocalDirectWrenchScreenExecution) -> tuple[BatchTrut
         requested = _mapping(wrench.get("requested_wrench"), "requested wrench")
         achieved = _mapping(wrench.get("achieved_wrench"), "achieved wrench")
         residual = _mapping(wrench.get("residual_wrench"), "residual wrench")
+        resource_values = getattr(config, "resource_values", {})
+        if not isinstance(resource_values, Mapping):
+            raise ValueError("local direct-wrench screen resource values must be a mapping")
         raw = {
             "body_velocity_m_s": [_number(state, name) for name in ("u_m_s", "v_m_s", "w_m_s")],
             "body_rate_rad_s": [_number(state, name) for name in ("p_rad_s", "q_rad_s", "r_rad_s")],
@@ -232,10 +262,14 @@ def _status_samples(screen: LocalDirectWrenchScreenExecution) -> tuple[BatchTrut
             "achieved_moment_body_nm": [_number(achieved, name) for name in ("moment_x_nm", "moment_y_nm", "moment_z_nm")],
             "residual_force_body_n": [_number(residual, name) for name in ("force_x_n", "force_y_n", "force_z_n")],
             "residual_moment_body_nm": [_number(residual, name) for name in ("moment_x_nm", "moment_y_nm", "moment_z_nm")],
+            "wrench_residual_norm": _number(wrench, "residual_norm"),
+            "feedback_norm": _number(row, "feedback_norm"),
             "wrench_status": str(wrench["status"]),
             "wrench_saturated": bool(wrench["position_saturated"] or wrench["rate_limited"]),
+            "controller_method": screen.controller_method,
             "control_realization": "direct_wrench_screen",
             "physical_effector_allocation": False,
+            **{str(name): float(value) for name, value in resource_values.items()},
         }
         samples.append(
             BatchTruthSample(

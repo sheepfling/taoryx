@@ -75,6 +75,19 @@ def run_check(*, documentation: bool = False) -> list[Check]:
     checks.extend(
         package_check(name, import_name, distribution_name)
         for name, import_name, distribution_name in (
+            ("Taoryx core", "taoryx", "taoryx"),
+            ("Taoryx DAVE-ML plug-in", "taoryx_daveml", "taoryx-daveml"),
+            ("Taoryx Simple Aero plug-in", "taoryx_simple_aero", "taoryx-simple-aero"),
+            (
+                "Taoryx reference-model plug-in",
+                "taoryx_reference_models",
+                "taoryx-reference-models",
+            ),
+            (
+                "Taoryx reachability plug-in",
+                "taoryx_reachability",
+                "taoryx-reachability",
+            ),
             ("pydantic", "pydantic", "pydantic"),
             ("PyYAML", "yaml", "PyYAML"),
             ("pypdf", "pypdf", "pypdf"),
@@ -85,6 +98,7 @@ def run_check(*, documentation: bool = False) -> list[Check]:
             ("PyMuPDF", "fitz", "PyMuPDF"),
             ("Pillow", "PIL", "Pillow"),
             ("NumPy", "numpy", "numpy"),
+            ("SciPy", "scipy", "scipy"),
             ("RapidFuzz", "rapidfuzz", "RapidFuzz"),
             ("ReportLab", "reportlab", "reportlab"),
         )

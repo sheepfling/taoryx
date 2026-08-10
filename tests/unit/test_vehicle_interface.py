@@ -32,18 +32,31 @@ from taoryx.vehicle_interface import (
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_x8_pseudo_interface_exposes_a_native_bridge_without_effector_promotion() -> None:
+def test_x8_pseudo_interface_separates_kinematic_guidance_from_source_load_probes() -> None:
     contract = resolve_vehicle_interface_contract("skywalker_x8", "pseudo_6dof")
 
     assert contract.control_realization == "response_law"
+    assert contract.authority_profile("kinematic_guidance").availability == "available"
     assert contract.authority_profile("native_control_bridge").availability == "available"
     assert {channel.id for channel in contract.action_channels} == {
+        "guidance.override.enabled",
+        "guidance.speed.command",
+        "guidance.flight_path_angle.command",
+        "guidance.heading.command",
+        "guidance.bank.command",
         "propulsion.command.fraction",
         "control.longitudinal.bridge.command",
         "control.lateral.bridge.command",
     }
+    actions = {channel.id: channel for channel in contract.action_channels}
+    assert actions["guidance.speed.command"].binding["tuning_eligible"] is True
+    assert actions["guidance.bank.command"].binding["tuning_eligible"] is True
+    assert actions["propulsion.command.fraction"].binding["tuning_eligible"] is False
+    status = {channel.id: channel for channel in contract.status_channels}
+    assert status["attitude.euler"].canonical_unit == "deg"
+    assert status["body_rate"].canonical_unit == "rad/s"
     assert contract.effector_channels == ()
-    assert "physical actuator evidence" in contract.action_channels[0].claim_boundary
+    assert "physical actuator evidence" in actions["propulsion.command.fraction"].claim_boundary
     assert validate_vehicle_interface_contract(contract) == ()
     ####
 
@@ -135,8 +148,44 @@ def test_every_resolved_public_interface_channel_has_an_explicit_catalog_entry()
 
     assert {channel.id for channel in channels} <= set(catalog)
     assert all(channel.as_dict()["value_space_source"] == "interface_channel_value_space_catalog" for channel in channels)
+    numeric = [channel for channel in channels if channel.value_type in {"scalar", "vector3", "vector4"}]
+    assert all(channel.canonical_unit is not None or channel.quantity_semantics is not None for channel in numeric)
+    assert {
+        (channel.id, channel.quantity_semantics)
+        for channel in numeric
+        if channel.canonical_unit is None
+    } == {
+        ("control.allocation.residual_norm", "mixed_wrench_norm"),
+        ("control.allocation.saturation_count", "count"),
+        ("control.feedback_norm", "normalized_error"),
+        ("control.source_effectiveness_rank", "count"),
+        ("control.wrench.residual_norm", "mixed_wrench_norm"),
+    }
     with pytest.raises(ValueError, match="lack explicit value-space contracts"):
         validate_interface_channel_value_space_coverage(["new.public.channel"])
+    ####
+
+
+def test_source_surface_and_schedule_channels_have_explicit_semantic_topology() -> None:
+    """New controller-screen telemetry stays typed beyond its native fixture."""
+
+    catalog = load_interface_channel_value_space_catalog()
+    expected = {
+        "control.controller.method": "finite_set",
+        "control.schedule.node_id": "finite_set",
+        "control.schedule.selection": "finite_set",
+        "effector.surface.symmetric_stabilator.position": "bounded_interval",
+        "effector.surface.upper_left_body_flap.position": "bounded_interval",
+        "aerodynamics.mach": "positive_half_line",
+        "aerodynamics.alpha": "bounded_interval",
+        "aerodynamics.beta": "bounded_interval",
+        "control.source_effectiveness_rank": "positive_half_line",
+        "control.lqi.integral_error.vertical_speed": "euclidean_scalar",
+        "aerodynamics.pitch_coefficient": "euclidean_scalar",
+        "control.pitch_moment.residual": "euclidean_scalar",
+        "trim.full_state.status": "finite_set",
+    }
+    assert {identifier: catalog[identifier] for identifier in expected} == expected
     ####
 
 
@@ -163,6 +212,12 @@ def test_passive_pseudo_interface_reuses_rigid_truth_in_batch_without_a_response
     assert status["position.local"].availability == "available_in_batch"
     assert status["attitude.quaternion"].availability == "available_in_batch"
     assert status["body_rate"].availability == "available_in_batch"
+    assert {"aerodynamics.drag_force", "aerodynamics.projected_area", "angular_rate.norm"} <= set(status)
+    assert all(status[item].availability == "available_in_batch" for item in {
+        "aerodynamics.drag_force",
+        "aerodynamics.projected_area",
+        "angular_rate.norm",
+    })
     resources = {channel.id: channel for channel in contract.resource_channels}
     assert resources["resources.mass.total"].availability == "available_in_batch"
     assert validate_vehicle_interface_contract(contract) == ()
@@ -191,6 +246,11 @@ def test_x15_direct_wrench_screen_publishes_stepwise_bounded_wrench_authority() 
     assert {channel.id for channel in contract.action_channels} == {"wrench.force.command", "wrench.moment.command"}
     assert all(channel.availability == "available" for channel in contract.action_channels)
     assert {channel.binding["native_action"] for channel in contract.action_channels} == {"force_body_n", "moment_body_nm"}
+    resources = {channel.id: channel for channel in contract.resource_channels}
+    assert resources["resources.mass.total"].binding == {
+        "batch_telemetry": "mass_kg",
+        "episode_value": "mass_kg",
+    }
     status = {channel.id: channel for channel in contract.status_channels}
     assert {
         "velocity.body",
@@ -206,7 +266,69 @@ def test_x15_direct_wrench_screen_publishes_stepwise_bounded_wrench_authority() 
     } <= set(status)
     assert all(channel.availability == "available" for channel in status.values())
     diagnostics = {channel.id: channel for channel in contract.diagnostic_channels}
-    assert diagnostics["control.realization"].binding["batch_telemetry"] == "control_realization"
+    assert diagnostics["control.realization"].binding == {
+        "batch_telemetry": "control_realization",
+        "episode_value": "control_realization",
+    }
+    assert diagnostics["control.wrench.residual_norm"].binding == {
+        "batch_telemetry": "wrench_residual_norm",
+        "episode_value": "wrench_residual_norm",
+    }
+    assert diagnostics["control.feedback_norm"].binding == {
+        "batch_telemetry": "feedback_norm",
+        "episode_value": "feedback_norm",
+    }
+    assert validate_vehicle_interface_contract(contract) == ()
+    ####
+
+
+def test_f16_physical_screen_publishes_requested_to_achieved_wrench_residuals() -> None:
+    """F-16 local screens expose allocation error rather than a sidecar-only norm."""
+
+    contract = resolve_vehicle_interface_contract("f16_s119", "rigid_body_6dof_surface_allocated")
+
+    status = {channel.id: channel for channel in contract.status_channels}
+    assert {
+        "control.wrench.residual.force",
+        "control.wrench.residual.moment",
+    } <= set(status)
+    assert status["control.wrench.residual.force"].binding == {
+        "batch_telemetry": "residual_force_body_n",
+        "frame": "body_frd",
+    }
+    assert status["control.wrench.residual.moment"].binding == {
+        "batch_telemetry": "residual_moment_body_nm",
+        "frame": "body_frd",
+    }
+    diagnostics = {channel.id: channel for channel in contract.diagnostic_channels}
+    assert diagnostics["control.allocation.residual_norm"].binding == {"batch_telemetry": "allocation_residual_norm"}
+    assert diagnostics["control.allocation.saturation_count"].binding == {"batch_telemetry": "saturation_count"}
+    assert validate_vehicle_interface_contract(contract) == ()
+    ####
+
+
+@pytest.mark.parametrize(
+    ("model_id", "fidelity", "residual_binding"),
+    (
+        ("hummingbird", "rigid_body_6dof_surface_allocated", "allocation_residual_norm"),
+        ("skywalker_x8", "rigid_body_6dof_surface_allocated", "allocation_controlled_residual_norm"),
+        ("b747", "rigid_body_6dof_surface_allocated", "allocation_controlled_residual_norm"),
+    ),
+)
+def test_physical_allocator_interfaces_publish_numeric_health_diagnostics(
+    model_id: str,
+    fidelity: str,
+    residual_binding: str,
+) -> None:
+    """All committed physical-allocation screens disclose numerical allocator health."""
+
+    contract = resolve_vehicle_interface_contract(model_id, fidelity)  # type: ignore[arg-type]
+
+    diagnostics = {channel.id: channel for channel in contract.diagnostic_channels}
+    assert diagnostics["control.allocation.residual_norm"].binding == {"batch_telemetry": residual_binding}
+    assert diagnostics["control.allocation.saturation_count"].binding == {"batch_telemetry": "saturation_count"}
+    assert diagnostics["control.allocation.residual_norm"].value_type == "scalar"
+    assert diagnostics["control.allocation.saturation_count"].value_type == "scalar"
     assert validate_vehicle_interface_contract(contract) == ()
     ####
 
@@ -218,6 +340,11 @@ def test_hl20_direct_wrench_screen_publishes_the_same_explicit_bridge_without_su
     assert contract.authority_profile("direct_wrench").availability == "available"
     assert {channel.id for channel in contract.action_channels} == {"wrench.force.command", "wrench.moment.command"}
     assert all(channel.availability == "available" for channel in contract.action_channels)
+    resources = {channel.id: channel for channel in contract.resource_channels}
+    assert resources["resources.mass.total"].binding == {
+        "batch_telemetry": "mass_kg",
+        "episode_value": "mass_kg",
+    }
     status = {channel.id: channel for channel in contract.status_channels}
     assert status["control.wrench.achieved.force"].availability == "available"
     assert status["control.physical_effector_allocation"].availability == "available"
@@ -235,6 +362,19 @@ def test_composition_interface_does_not_borrow_the_x15_local_screen_episode_for_
     assert all(channel.availability == "unavailable_at_runtime" for channel in contract.action_channels)
     assert contract.observation_profile("truth_debug").availability == "unavailable_at_runtime"
     assert {record["mission"] for record in contract.execution_records} == {"rocket_aircraft_high_energy_v1"}
+    assert validate_vehicle_interface_contract(contract) == ()
+    ####
+
+
+def test_composition_interface_names_an_exact_mission_without_an_execution_binding() -> None:
+    composition = compile_vehicle_composition(
+        load_vehicle_composition_request(ROOT / "examples/vehicle_composition/hl20_glide_energy_capability_3dof_compose.yaml")
+    )
+    contract = resolve_vehicle_composition_interface_contract(composition)
+
+    assert contract.execution_records == ()
+    assert "lifting_body_glide_energy_management_v1" in contract.claim_boundary
+    assert "unbound_mission" not in contract.claim_boundary
     assert validate_vehicle_interface_contract(contract) == ()
     ####
 

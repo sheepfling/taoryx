@@ -12,8 +12,8 @@ import hashlib
 import json
 import shlex
 import tempfile
-from collections.abc import Mapping
-from contextlib import redirect_stdout
+from collections.abc import Iterable, Mapping
+from contextlib import nullcontext, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from typing import Literal
@@ -33,11 +33,30 @@ from .vehicle_execution_bindings import (
     load_vehicle_execution_binding_catalog,
     resolve_vehicle_execution_binding,
 )
-from .vehicle_execution_preflight import preflight_vehicle_composition
+from .vehicle_execution_preflight import preflight_vehicle_composition, validate_public_capability_advertisement
 from .vehicle_registry import ROOT
 from .vehicle_runtime_lowering import lower_vehicle_composition
 
 VEHICLE_EXECUTION_WITNESSES = ROOT / "verification/vehicle_execution_witnesses.yaml"
+
+# These executions deliberately have no common control screen.  A release
+# packet must preserve that boundary as explicit ``not_applicable`` evidence;
+# accepting missing or fabricated controller evidence would make a source
+# replay or passive witness look more capable than it is.
+_CONTROL_FREE_EXECUTION_MODES = frozenset(
+    {
+        "open_loop_witness",
+        "passive_uncontrolled",
+        "source_history_replay",
+        "source_scheduled_replay",
+    }
+)
+
+# An implementation-owned route can execute an autonomous policy and expose
+# its accepted-interval semantic action trace without claiming the common
+# LQR/LQI control-screen protocol.  It is distinct from a replay or passive
+# execution: verified native action-trace evidence is required here.
+_NATIVE_AUTONOMOUS_EXECUTION_MODES = frozenset({"source_native_autonomous", "native_autonomous"})
 
 
 class VehicleExecutionWitness(BaseModel):
@@ -139,6 +158,9 @@ def validate_vehicle_execution_witnesses(
     catalog: VehicleExecutionWitnessCatalog | None = None,
     *,
     execute_batch: bool = False,
+    family_ids: Iterable[str] | None = None,
+    witness_ids: Iterable[str] | None = None,
+    retained_results_directory: str | Path | None = None,
 ) -> dict[str, object]:
     """Validate every runnable execution binding has an exact composition witness.
 
@@ -147,20 +169,37 @@ def validate_vehicle_execution_witnesses(
     execution or qualification. With ``execute_batch=True``, it additionally
     drives the public compose-to-run command for every batch witness. This is
     deliberately opt-in because it is an integration smoke, not a fast static
-    registry check. Interactive witnesses are opened once because their
-    endpoint contract includes a concrete accepted-truth episode.
+    registry check. ``retained_results_directory`` additionally keeps every
+    generated batch packet in a caller-selected empty directory and writes one
+    aggregate, hash-bound release catalog; it does not change evidence scope.
+    Interactive witnesses are opened once because their endpoint contract
+    includes a concrete accepted-truth episode.
     """
 
     witness_catalog = catalog or load_vehicle_execution_witness_catalog()
+    family_filter = _normalized_family_filter(family_ids)
+    witness_filter = _normalized_witness_filter(witness_ids)
+    batch_output_root = _prepare_retained_results_directory(retained_results_directory, execute_batch=execute_batch)
     binding_catalog = load_vehicle_execution_binding_catalog()
     composition_catalog = load_resolved_vehicle_composition_catalog()
-    runnable = tuple(item for item in binding_catalog.bindings if item.status == "runnable")
+    known_families = {item.family_id for item in binding_catalog.bindings}
+    known_witnesses = {item.id for item in witness_catalog.witnesses}
+    requested_unknown_families = () if family_filter is None else tuple(sorted(family_filter - known_families))
+    requested_unknown_witnesses = () if witness_filter is None else tuple(sorted(witness_filter - known_witnesses))
+    runnable = tuple(
+        item
+        for item in binding_catalog.bindings
+        if item.status == "runnable" and (family_filter is None or item.family_id in family_filter)
+    )
     binding_by_key: dict[tuple[str, str, str, ExecutionOperation], VehicleExecutionBinding] = {_binding_key(item): item for item in runnable}
     witness_keys: dict[tuple[str, str, str, ExecutionOperation], str] = {}
     records: list[dict[str, object]] = []
-    errors: list[str] = []
+    errors: list[str] = [f"unknown requested vehicle family: {family_id}" for family_id in requested_unknown_families]
+    errors.extend(f"unknown requested execution witness: {witness_id}" for witness_id in requested_unknown_witnesses)
 
     for witness in witness_catalog.witnesses:
+        if witness_filter is not None and witness.id not in witness_filter:
+            continue
         source = ROOT / witness.composition
         if not source.is_file():
             errors.append(f"{witness.id}: composition request is missing: {witness.composition}")
@@ -172,6 +211,8 @@ def validate_vehicle_execution_witnesses(
             )
         except (TypeError, ValueError) as error:
             errors.append(f"{witness.id}: composition does not compile: {error}")
+            continue
+        if family_filter is not None and composition.family_id not in family_filter:
             continue
         key = (composition.family_id, composition.mission, composition.fidelity, witness.operation)
         if key in witness_keys:
@@ -221,10 +262,11 @@ def validate_vehicle_execution_witnesses(
             except (TypeError, ValueError) as error:
                 errors.append(f"{witness.id}: declared episode did not open: {error}")
         elif execute_batch:
-            batch_execution = _execute_batch_witness(
+            batch_execution = _run_batch_witness(
                 witness.id,
                 composition,
                 binding=resolved,
+                output_root=batch_output_root,
             )
             if batch_execution["status"] != "pass":
                 errors.append(f"{witness.id}: public batch execution failed: {batch_execution['detail']}")
@@ -248,16 +290,23 @@ def validate_vehicle_execution_witnesses(
             }
         )
 
-    for binding_key in sorted(binding_by_key):
-        if binding_key not in witness_keys:
-            errors.append(f"runnable execution binding has no composition witness: {_format_key(binding_key)}")
+    if witness_filter is None:
+        for binding_key in sorted(binding_by_key):
+            if binding_key not in witness_keys:
+                errors.append(f"runnable execution binding has no composition witness: {_format_key(binding_key)}")
     for witness_key in sorted(witness_keys):
         if witness_key not in binding_by_key:
             errors.append(f"composition witness targets an unavailable endpoint: {_format_key(witness_key)}")
-    variant_report = validate_vehicle_variant_witnesses(
-        witness_catalog,
-        composition_catalog=composition_catalog,
-        execute_batch=execute_batch,
+    variant_report = (
+        _empty_variant_witness_report(execute_batch=execute_batch, family_filter=family_filter)
+        if witness_filter is not None
+        else validate_vehicle_variant_witnesses(
+            witness_catalog,
+            composition_catalog=composition_catalog,
+            execute_batch=execute_batch,
+            family_ids=family_filter,
+            batch_output_root=batch_output_root,
+        )
     )
     variant_errors = variant_report["errors"]
     variant_records = variant_report["records"]
@@ -266,10 +315,16 @@ def validate_vehicle_execution_witnesses(
     if not isinstance(variant_records, list):
         raise ValueError("variant witness report has invalid records")
     errors.extend(variant_errors)
-    graph_extension_report = validate_vehicle_graph_extension_witnesses(
-        witness_catalog,
-        composition_catalog=composition_catalog,
-        execute_batch=execute_batch,
+    graph_extension_report = (
+        _empty_graph_extension_witness_report(execute_batch=execute_batch, family_filter=family_filter)
+        if witness_filter is not None
+        else validate_vehicle_graph_extension_witnesses(
+            witness_catalog,
+            composition_catalog=composition_catalog,
+            execute_batch=execute_batch,
+            family_ids=family_filter,
+            batch_output_root=batch_output_root,
+        )
     )
     graph_extension_errors = graph_extension_report["errors"]
     graph_extension_records = graph_extension_report["records"]
@@ -278,15 +333,21 @@ def validate_vehicle_execution_witnesses(
     if not isinstance(graph_extension_records, list):
         raise ValueError("graph-extension witness report has invalid records")
     errors.extend(graph_extension_errors)
+    retained_result_corpus = _finalize_retained_results_directory(batch_output_root)
+    if retained_result_corpus is not None and retained_result_corpus["status"] != "pass":
+        errors.append(f"retained batch result corpus failed: {retained_result_corpus['detail']}")
     return {
         "schema": "taoryx.vehicle-execution-witness-report/v1alpha1",
         "status": "pass" if not errors else "fail",
-        "runnable_binding_count": len(runnable),
-        "witness_count": len(witness_catalog.witnesses),
+        "runnable_binding_count": len(witness_keys) if witness_filter is not None else len(runnable),
+        "witness_count": len(records),
         "runnable_variant_count": variant_report["runnable_variant_count"],
-        "variant_witness_count": len(witness_catalog.variant_witnesses),
-        "graph_extension_witness_count": len(witness_catalog.graph_extension_witnesses),
+        "variant_witness_count": variant_report["variant_witness_count"],
+        "graph_extension_witness_count": graph_extension_report["graph_extension_witness_count"],
         "batch_execution_smoke": execute_batch,
+        "retained_result_corpus": retained_result_corpus,
+        "family_filter": None if family_filter is None else sorted(family_filter),
+        "witness_filter": None if witness_filter is None else sorted(witness_filter),
         "records": records,
         "variant_records": variant_records,
         "graph_extension_records": graph_extension_records,
@@ -305,6 +366,8 @@ def validate_vehicle_variant_witnesses(
     *,
     composition_catalog: ResolvedVehicleCompositionCatalog | None = None,
     execute_batch: bool = False,
+    family_ids: Iterable[str] | None = None,
+    batch_output_root: Path | None = None,
 ) -> dict[str, object]:
     """Validate every runnable variant has one exact composed witness.
 
@@ -316,12 +379,13 @@ def validate_vehicle_variant_witnesses(
     """
 
     witness_catalog = catalog or load_vehicle_execution_witness_catalog()
+    family_filter = _normalized_family_filter(family_ids)
     resolved_catalog = composition_catalog or load_resolved_vehicle_composition_catalog()
     runnable_variants = {
         (vehicle.family.family_id, variant.id)
         for vehicle in resolved_catalog.vehicles
         for variant in vehicle.declaration.variant_parameters
-        if variant.status == "runnable"
+        if variant.status == "runnable" and (family_filter is None or vehicle.family.family_id in family_filter)
     }
     witnessed_variants: dict[tuple[str, str], str] = {}
     records: list[dict[str, object]] = []
@@ -338,6 +402,8 @@ def validate_vehicle_variant_witnesses(
             )
         except (TypeError, ValueError) as error:
             errors.append(f"{witness.id}: variant composition does not compile: {error}")
+            continue
+        if family_filter is not None and composition.family_id not in family_filter:
             continue
         declared = tuple(sorted(witness.variant_ids))
         actual = tuple(sorted(composition.variant.inputs))
@@ -370,7 +436,12 @@ def validate_vehicle_variant_witnesses(
         batch_execution: dict[str, object] | None = None
         if execute_batch and batch_binding is not None:
             try:
-                batch_execution = _execute_batch_witness(witness.id, composition, binding=batch_binding)
+                batch_execution = _run_batch_witness(
+                    witness.id,
+                    composition,
+                    binding=batch_binding,
+                    output_root=batch_output_root,
+                )
                 if batch_execution["status"] != "pass":
                     errors.append(f"{witness.id}: variant batch execution failed: {batch_execution['detail']}")
             except ValueError as error:
@@ -397,8 +468,9 @@ def validate_vehicle_variant_witnesses(
         "schema": "taoryx.vehicle-variant-witness-report/v1alpha1",
         "status": "pass" if not errors else "fail",
         "runnable_variant_count": len(runnable_variants),
-        "variant_witness_count": len(witness_catalog.variant_witnesses),
+        "variant_witness_count": len(records),
         "batch_execution_smoke": execute_batch,
+        "family_filter": None if family_filter is None else sorted(family_filter),
         "records": records,
         "errors": errors,
         "claim_boundary": (
@@ -415,6 +487,8 @@ def validate_vehicle_graph_extension_witnesses(
     *,
     composition_catalog: ResolvedVehicleCompositionCatalog | None = None,
     execute_batch: bool = False,
+    family_ids: Iterable[str] | None = None,
+    batch_output_root: Path | None = None,
 ) -> dict[str, object]:
     """Validate declared non-success graph extensions without generic branches.
 
@@ -428,6 +502,7 @@ def validate_vehicle_graph_extension_witnesses(
     """
 
     witness_catalog = catalog or load_vehicle_execution_witness_catalog()
+    family_filter = _normalized_family_filter(family_ids)
     resolved_catalog = composition_catalog or load_resolved_vehicle_composition_catalog()
     records: list[dict[str, object]] = []
     errors: list[str] = []
@@ -443,6 +518,8 @@ def validate_vehicle_graph_extension_witnesses(
             )
         except (TypeError, ValueError) as error:
             errors.append(f"{witness.id}: graph-extension composition does not compile: {error}")
+            continue
+        if family_filter is not None and composition.family_id not in family_filter:
             continue
         graph = composition.mission_graph
         if graph is None:
@@ -488,7 +565,12 @@ def validate_vehicle_graph_extension_witnesses(
             errors.append(f"{witness.id}: graph-extension composition has no public batch endpoint: {error}")
         batch_execution: dict[str, object] | None = None
         if execute_batch and batch_binding is not None:
-            batch_execution = _execute_batch_witness(witness.id, composition, binding=batch_binding)
+            batch_execution = _run_batch_witness(
+                witness.id,
+                composition,
+                binding=batch_binding,
+                output_root=batch_output_root,
+            )
             if batch_execution.get("status") != "pass":
                 errors.append(f"{witness.id}: graph-extension batch execution failed: {batch_execution.get('detail')}")
             graph_execution = batch_execution.get("graph_execution")
@@ -522,8 +604,9 @@ def validate_vehicle_graph_extension_witnesses(
     return {
         "schema": "taoryx.vehicle-graph-extension-witness-report/v1alpha1",
         "status": "pass" if not errors else "fail",
-        "graph_extension_witness_count": len(witness_catalog.graph_extension_witnesses),
+        "graph_extension_witness_count": len(records),
         "batch_execution_smoke": execute_batch,
+        "family_filter": None if family_filter is None else sorted(family_filter),
         "records": records,
         "errors": errors,
         "claim_boundary": (
@@ -586,6 +669,22 @@ def _validate_concrete_capability_preflight(
         "certainly_infeasible",
     }:
         errors.append(f"{context}: concrete capability preflight has invalid feasibility {feasibility!r}")
+    advertisement = capability.get("capability_advertisement")
+    if not isinstance(advertisement, Mapping):
+        errors.append(f"{context}: concrete capability preflight omitted its generic capability advertisement")
+    else:
+        for finding in validate_public_capability_advertisement(
+            advertisement,
+            expected_selection={
+                "composition_id": composition.id,
+                "composition_identity_sha256": composition.identity_sha256,
+                "vehicle_id": composition.vehicle_id,
+                "family_id": composition.family_id,
+                "mission_id": composition.mission,
+                "fidelity": composition.fidelity,
+            },
+        ):
+            errors.append(f"{context}: {finding}")
     try:
         encoded = json.dumps(
             derived_mission,
@@ -606,6 +705,7 @@ def _validate_concrete_capability_preflight(
     return {
         "adapter_id": capability.get("adapter_id"),
         "feasibility": feasibility,
+        "capability_advertisement": dict(advertisement) if isinstance(advertisement, Mapping) else None,
         "derived_mission_sha256": capability.get("derived_mission_sha256"),
     }
     ####
@@ -613,6 +713,65 @@ def _validate_concrete_capability_preflight(
 
 def _binding_key(binding: VehicleExecutionBinding) -> tuple[str, str, str, ExecutionOperation]:
     return (binding.family_id, binding.mission, binding.fidelity, binding.operation)
+    ####
+
+
+def _normalized_family_filter(family_ids: Iterable[str] | None) -> frozenset[str] | None:
+    """Return an explicit family filter or ``None`` for the full witness matrix."""
+
+    if family_ids is None:
+        return None
+    normalized = frozenset(str(family_id).strip() for family_id in family_ids if str(family_id).strip())
+    if not normalized:
+        raise ValueError("family_ids must contain at least one non-empty vehicle family ID")
+    return normalized
+    ####
+
+
+def _normalized_witness_filter(witness_ids: Iterable[str] | None) -> frozenset[str] | None:
+    """Return an explicit endpoint-witness filter or ``None`` for the full matrix."""
+
+    if witness_ids is None:
+        return None
+    normalized = frozenset(str(witness_id).strip() for witness_id in witness_ids if str(witness_id).strip())
+    if not normalized:
+        raise ValueError("witness_ids must contain at least one non-empty execution witness ID")
+    return normalized
+    ####
+
+
+def _empty_variant_witness_report(
+    *,
+    execute_batch: bool,
+    family_filter: frozenset[str] | None,
+) -> dict[str, object]:
+    """Describe intentionally omitted variant work for an endpoint-only witness run."""
+
+    return {
+        "runnable_variant_count": 0,
+        "variant_witness_count": 0,
+        "batch_execution_smoke": execute_batch,
+        "family_filter": None if family_filter is None else sorted(family_filter),
+        "records": [],
+        "errors": [],
+    }
+    ####
+
+
+def _empty_graph_extension_witness_report(
+    *,
+    execute_batch: bool,
+    family_filter: frozenset[str] | None,
+) -> dict[str, object]:
+    """Describe intentionally omitted graph extensions for an endpoint-only run."""
+
+    return {
+        "graph_extension_witness_count": 0,
+        "batch_execution_smoke": execute_batch,
+        "family_filter": None if family_filter is None else sorted(family_filter),
+        "records": [],
+        "errors": [],
+    }
     ####
 
 
@@ -636,11 +795,105 @@ def _format_key(key: tuple[str, str, str, ExecutionOperation]) -> str:
     ####
 
 
+def _prepare_retained_results_directory(
+    directory: str | Path | None,
+    *,
+    execute_batch: bool,
+) -> Path | None:
+    """Create one empty caller-owned root for retained public batch packets."""
+
+    if directory is None:
+        return None
+    if not execute_batch:
+        raise ValueError("retained batch results require execute_batch=True")
+    root = Path(directory)
+    if root.exists():
+        if not root.is_dir():
+            raise ValueError(f"retained batch result path is not a directory: {root}")
+        if any(root.iterdir()):
+            raise ValueError(f"retained batch result directory must be empty: {root}")
+    else:
+        root.mkdir(parents=True, exist_ok=False)
+    return root
+    ####
+
+
+def _run_batch_witness(
+    witness_id: str,
+    composition: CompiledVehicleComposition,
+    *,
+    binding: VehicleExecutionBinding,
+    output_root: Path | None,
+) -> dict[str, object]:
+    """Run one witness with temporary or explicitly retained artifacts."""
+
+    if output_root is None:
+        return _execute_batch_witness(witness_id, composition, binding=binding)
+    return _execute_batch_witness(witness_id, composition, binding=binding, output_root=output_root)
+    ####
+
+
+def _finalize_retained_results_directory(root: Path | None) -> dict[str, object] | None:
+    """Index and seal all retained batch packets as one release-ready corpus."""
+
+    if root is None:
+        return None
+    from .composition_result_catalog import (
+        index_composition_results,
+        validate_composition_release_catalog,
+        write_composition_release_catalog,
+    )
+
+    indexed = index_composition_results(root)
+    if indexed.get("status") != "pass":
+        return {
+            "status": "fail",
+            "directory": str(root),
+            "detail": f"normalized result index returned {indexed.get('status')!r}: {indexed.get('errors')!r}",
+        }
+    result_count = indexed.get("valid_result_count")
+    if not isinstance(result_count, int) or result_count <= 0:
+        return {
+            "status": "fail",
+            "directory": str(root),
+            "detail": "retained result directory contains no valid public batch packet",
+        }
+    release_catalog_path = root / "release-catalog.json"
+    try:
+        release_catalog = write_composition_release_catalog(root, release_catalog_path)
+        release_errors = validate_composition_release_catalog(root, release_catalog)
+    except (OSError, ValueError) as error:
+        return {
+            "status": "fail",
+            "directory": str(root),
+            "detail": f"could not create aggregate release catalog: {error}",
+        }
+    if release_errors:
+        return {
+            "status": "fail",
+            "directory": str(root),
+            "detail": f"aggregate release catalog is not reproducible: {list(release_errors)!r}",
+        }
+    return {
+        "status": "pass",
+        "directory": str(root),
+        "valid_result_count": result_count,
+        "release_catalog": str(release_catalog_path),
+        "release_packet_count": release_catalog.get("result_packet_count"),
+        "claim_boundary": (
+            "This is a retained, hash-bound inventory of public batch witness packets. It does not create "
+            "new control, physical-fidelity, robustness, or qualification evidence."
+        ),
+    }
+    ####
+
+
 def _execute_batch_witness(
     witness_id: str,
     composition: CompiledVehicleComposition,
     *,
     binding: VehicleExecutionBinding,
+    output_root: Path | None = None,
 ) -> dict[str, object]:
     """Run one exact batch witness through the public CLI without log leakage.
 
@@ -653,7 +906,18 @@ def _execute_batch_witness(
 
     from .runtime.cli import main
 
-    with tempfile.TemporaryDirectory(prefix=f"taoryx-execution-witness-{witness_id}-") as temporary:
+    if output_root is None:
+        workspace = tempfile.TemporaryDirectory(prefix=f"taoryx-execution-witness-{witness_id}-")
+    else:
+        identifier = Path(witness_id)
+        if identifier.name != witness_id or witness_id in {".", ".."}:
+            raise ValueError(f"retained batch witness ID is not a safe path segment: {witness_id!r}")
+        destination = output_root / witness_id
+        if destination.exists():
+            raise ValueError(f"retained batch witness directory already exists: {destination}")
+        destination.mkdir()
+        workspace = nullcontext(destination)
+    with workspace as temporary:
         root = Path(temporary)
         composition_path = root / "composition.json"
         output_dir = root / "execution"
@@ -674,15 +938,9 @@ def _execute_batch_witness(
                 "status": "fail",
                 "detail": "vehicle run omitted execution, interface, committed status-trace, or resource-ledger artifact",
             }
-        try:
-            from .composition_status_trace import validate_committed_status_trace
-
-            trace_payload = json.loads(status_trace_path.read_text(encoding="utf-8"))
-            if not isinstance(trace_payload, Mapping):
-                return {"status": "fail", "detail": "status trace artifact is not a JSON object"}
-            validate_committed_status_trace(composition, trace_payload)
-        except (OSError, ValueError, json.JSONDecodeError) as error:
-            return {"status": "fail", "detail": f"invalid committed status trace: {error}"}
+        interface_trace_evidence = _validate_batch_interface_trace_artifact(composition, output_dir)
+        if interface_trace_evidence["status"] != "pass":
+            return {"status": "fail", "detail": str(interface_trace_evidence["detail"])}
         resource_ledger_evidence = _validate_batch_resource_ledger_artifact(composition, output_dir)
         if resource_ledger_evidence["status"] != "pass":
             return {"status": "fail", "detail": str(resource_ledger_evidence["detail"])}
@@ -723,6 +981,7 @@ def _execute_batch_witness(
                 "mode": "bounded_translation_smoke",
                 "max_steps": 8,
                 "mission_pass": bool(payload.get("mission_pass")),
+                "interface_trace": interface_trace_evidence,
                 "action_trace": action_trace_evidence,
                 "resource_ledger": resource_ledger_evidence,
                 "result_catalog": result_catalog_evidence,
@@ -730,15 +989,36 @@ def _execute_batch_witness(
                 "reproduction": reproduction_evidence,
                 "release_packet": release_packet_evidence,
             }
-        if binding.factory_id == "local_direct_wrench_screen.v1":
-            control_screen = payload.get("control_screen")
-            if not isinstance(control_screen, Mapping) or control_screen.get("screen_pass") is not True:
-                return {"status": "fail", "detail": "local controller screen did not pass its declared screen contract"}
+        control_screen = payload.get("control_screen")
+        declared_screen_pass = payload.get("screen_pass") is True or (
+            isinstance(control_screen, Mapping)
+            and (control_screen.get("screen_pass") is True or control_screen.get("mission_pass") is True)
+        )
+        if declared_screen_pass:
+            if not isinstance(control_screen, Mapping) or (
+                control_screen.get("screen_pass") is not True and control_screen.get("mission_pass") is not True
+            ):
+                return {"status": "fail", "detail": "batch screen did not pass its declared screen contract"}
+            is_source_surface_authority = binding.execution_mode == "source_surface_authority_screen"
+            controller_metadata: dict[str, object] | None = None
+            if not is_source_surface_authority:
+                status_trace = json.loads(status_trace_path.read_text(encoding="utf-8"))
+                if not isinstance(status_trace, Mapping):
+                    return {"status": "fail", "detail": "committed status trace is not a JSON object"}
+                controller_metadata = _validate_batch_controller_metadata(payload, status_trace=status_trace)
+                if controller_metadata["status"] != "pass":
+                    return {"status": "fail", "detail": str(controller_metadata["detail"])}
             return {
                 "status": "pass",
-                "detail": "local controller screen completed and emitted execution/interface/status artifacts",
-                "mode": "local_controller_screen",
+                "detail": (
+                    "source-surface authority screen completed and emitted execution/interface/status artifacts"
+                    if is_source_surface_authority
+                    else "local controller screen completed and emitted execution/interface/status artifacts"
+                ),
+                "mode": "source_surface_authority_screen" if is_source_surface_authority else "local_controller_screen",
                 "screen_pass": True,
+                **({"controller_metadata": controller_metadata} if controller_metadata is not None else {}),
+                "interface_trace": interface_trace_evidence,
                 "action_trace": action_trace_evidence,
                 "resource_ledger": resource_ledger_evidence,
                 "result_catalog": result_catalog_evidence,
@@ -753,6 +1033,7 @@ def _execute_batch_witness(
             "detail": "public vehicle run completed and emitted execution/interface/status artifacts",
             "mode": "complete_nominal_mission",
             "mission_pass": True,
+            "interface_trace": interface_trace_evidence,
             "action_trace": action_trace_evidence,
             "resource_ledger": resource_ledger_evidence,
             "result_catalog": result_catalog_evidence,
@@ -760,6 +1041,121 @@ def _execute_batch_witness(
             "reproduction": reproduction_evidence,
             "release_packet": release_packet_evidence,
         }
+    ####
+
+
+def _validate_batch_controller_metadata(
+    payload: Mapping[str, object],
+    *,
+    status_trace: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    """Require a completed controller screen to identify its actual method.
+
+    An aggregate family/fidelity interface can legitimately include both
+    controller-driven and non-controller operations.  This mission-specific
+    gate therefore verifies the executed screen record itself: its runtime
+    metadata and control-screen evaluation must both name the same supported
+    controller method.  It is evidence of an executed implementation choice,
+    not a qualification or robustness claim.
+    """
+
+    runtime = payload.get("runtime")
+    if not isinstance(runtime, Mapping):
+        return {"status": "fail", "detail": "controller screen omitted runtime controller metadata"}
+    control_screen = payload.get("control_screen")
+    if not isinstance(control_screen, Mapping):
+        return {"status": "fail", "detail": "controller screen omitted control-screen metadata"}
+    runtime_method = runtime.get("controller_method")
+    screen_method = control_screen.get("controller_method")
+    if runtime_method not in {"lqr", "lqi"}:
+        return {"status": "fail", "detail": "runtime controller metadata must declare lqr or lqi"}
+    if screen_method != runtime_method:
+        return {
+            "status": "fail",
+            "detail": "runtime and control-screen controller methods disagree",
+        }
+    control_realization = runtime.get("control_realization")
+    if not isinstance(control_realization, str) or not control_realization:
+        return {"status": "fail", "detail": "runtime controller metadata omitted control realization"}
+    evidence: dict[str, object] = {
+        "status": "pass",
+        "method": runtime_method,
+        "control_realization": control_realization,
+        "integral_output_names": list(runtime.get("integral_output_names", ())),
+    }
+    if status_trace is None:
+        return evidence
+    samples = status_trace.get("samples")
+    if not isinstance(samples, list) or not samples:
+        return {"status": "fail", "detail": "controller screen status trace has no committed samples"}
+    for index, sample in enumerate(samples):
+        if not isinstance(sample, Mapping) or not isinstance(sample.get("values"), Mapping):
+            return {"status": "fail", "detail": f"controller screen status trace sample {index} is malformed"}
+        if sample["values"].get("control.controller.method") != runtime_method:
+            return {
+                "status": "fail",
+                "detail": "runtime controller method disagrees with committed status trace",
+            }
+    evidence["status_trace_method"] = runtime_method
+    evidence["status_trace_sample_count"] = len(samples)
+    return evidence
+    ####
+
+
+def _validate_batch_interface_trace_artifact(
+    composition: CompiledVehicleComposition,
+    output_dir: Path,
+) -> dict[str, object]:
+    """Validate and summarize exercised batch-visible interface categories.
+
+    The committed status trace is the common runtime proof for all advertised
+    status, resource, and diagnostic channels.  This helper makes that exact
+    coverage visible in a witness report without turning an availability
+    declaration into controller or qualification evidence.
+    """
+
+    path = output_dir / "status_trace.json"
+    try:
+        from .composition_status_trace import validate_committed_status_trace
+        from .vehicle_composition import resolve_vehicle_composition_interface_contract
+
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError("status trace artifact is not a JSON object")
+        validate_committed_status_trace(composition, payload)
+        contract = resolve_vehicle_composition_interface_contract(composition)
+        channel_groups = {
+            "status": contract.status_channels,
+            "resources": contract.resource_channels,
+            "diagnostics": contract.diagnostic_channels,
+        }
+        coverage = {
+            name: [
+                channel.id
+                for channel in channels
+                if channel.availability in {"available", "available_in_batch"}
+            ]
+            for name, channels in channel_groups.items()
+        }
+        channels = payload.get("channels")
+        samples = payload.get("samples")
+        if not isinstance(channels, list) or not isinstance(samples, list):
+            raise ValueError("validated status trace has malformed summary fields")
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        return {"status": "fail", "detail": f"invalid committed interface trace: {error}"}
+    return {
+        "status": "pass",
+        "artifact": "status_trace.json",
+        "interface_id": contract.id,
+        "interface_fingerprint_sha256": contract.fingerprint,
+        "sample_count": len(samples),
+        "channel_count": len(channels),
+        "batch_visible_channels": coverage,
+        "claim_boundary": (
+            "This proves complete batch projection of the selected interface's available status, resource, and "
+            "diagnostic channels. Control evidence remains separately bounded by the declared action trace."
+        ),
+    }
     ####
 
 
@@ -979,7 +1375,14 @@ def _validate_batch_result_catalog(
     if not isinstance(records, list) or len(records) != 1 or not isinstance(records[0], Mapping):
         return {"status": "fail", "detail": "batch packet did not produce exactly one normalized catalog record"}
     record = records[0]
-    expected_kind = "local_controller_screen" if binding.factory_id == "local_direct_wrench_screen.v1" else "mission_evaluation"
+    expected_kind = (
+        "local_controller_screen"
+        if binding.factory_id in {
+            "local_direct_wrench_screen.v1",
+            "local_native_coordinate_lqi_screen.v1",
+        }
+        else "mission_evaluation"
+    )
     if record.get("record_kind") != expected_kind or record.get("status") != "valid":
         return {
             "status": "fail",
@@ -998,11 +1401,77 @@ def _validate_batch_result_catalog(
                 f"observed status {observed_status!r}"
             ),
         }
+    controller_execution = record.get("controller_execution_evidence")
+    control_execution = record.get("control_execution_evidence")
+    action_trace_execution = record.get("semantic_action_trace_evidence")
+    control_status = None if not isinstance(control_execution, Mapping) else control_execution.get("status")
+    controller_status = None if not isinstance(controller_execution, Mapping) else controller_execution.get("status")
+    if binding.execution_mode in _CONTROL_FREE_EXECUTION_MODES:
+        if control_status != "not_applicable":
+            return {
+                "status": "fail",
+                "detail": (
+                    "controller-free batch packet must declare control execution evidence not_applicable: "
+                    f"observed status {control_status!r}"
+                ),
+            }
+        if controller_status != "not_applicable":
+            return {
+                "status": "fail",
+                "detail": (
+                    "controller-free batch packet must declare controller execution evidence not_applicable: "
+                    f"observed status {controller_status!r}"
+                ),
+            }
+    elif binding.execution_mode in _NATIVE_AUTONOMOUS_EXECUTION_MODES:
+        if control_status != "not_applicable" or controller_status != "not_applicable":
+            return {
+                "status": "fail",
+                "detail": (
+                    "native autonomous batch packet must not claim common LQR/LQI execution evidence: "
+                    f"observed control/controller statuses {control_status!r}/{controller_status!r}"
+                ),
+            }
+        action_trace_status = (
+            None if not isinstance(action_trace_execution, Mapping) else action_trace_execution.get("status")
+        )
+        if action_trace_status != "verified":
+            return {
+                "status": "fail",
+                "detail": (
+                    "native autonomous batch packet omitted or invalidated accepted-interval action evidence: "
+                    f"observed status {action_trace_status!r}"
+                ),
+            }
+    else:
+        if control_status != "verified":
+            return {
+                "status": "fail",
+                "detail": (
+                    "batch packet omitted or invalidated control execution evidence: "
+                    f"observed status {control_status!r}"
+                ),
+            }
+        expected_controller_status = (
+            "not_applicable" if binding.execution_mode == "source_surface_authority_screen" else "verified"
+        )
+        if controller_status != expected_controller_status:
+            return {
+                "status": "fail",
+                "detail": (
+                    "batch packet controller execution evidence disagrees with its declared execution mode: "
+                    f"observed status {controller_status!r}; expected {expected_controller_status!r}"
+                ),
+            }
     return {
         "status": "pass",
         "record_kind": expected_kind,
         "outcome": record.get("outcome"),
+        "qualification": record.get("qualification"),
         "graph_observation_status": graph_execution.get("observation_status"),
+        "control_execution_evidence": dict(control_execution),
+        **({"controller_execution_evidence": dict(controller_execution)} if isinstance(controller_execution, Mapping) else {}),
+        **({"semantic_action_trace_evidence": dict(action_trace_execution)} if isinstance(action_trace_execution, Mapping) else {}),
         "claim_boundary": "The batch packet is consumable by the normalized result catalog; this is not qualification.",
     }
     ####

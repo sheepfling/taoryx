@@ -14,12 +14,22 @@ Use `pytest --markers` to inspect the registered marker descriptions directly.
 
 ## Choose the smallest useful tier
 
-The repository has three development tiers. The broad `test` task is a
+The repository has four development tiers. Start vehicle work with one
+vertical Composition slice; the broad `test` task is a
 regression gate, not the inner loop: it still selects more than two thousand
 tests even though it excludes the explicitly marked `slow`, `artifact`, and
 `simple_aero` categories.
 
 ```bash
+python -m tools.dev test-vehicle f16_s119  # one runnable F-16 Composition path
+python -m tools.dev test-f16               # convenience alias for the same slice
+python -m tools.dev test-vehicle a320_openap_3dof
+python -m tools.dev test-vehicle hummingbird
+python -m tools.dev test-vehicle x15
+python -m tools.dev check-vehicle-maturity
+python -m tools.dev test-vehicle simple_aero  # runnable fixed-L/D workflow, batch only
+python -m tools.dev test-vehicle dual_launch_glider  # source-generated point-mass batch forms
+python -m tools.dev test-vehicle-catalogue  # campaign declarations must have vertical coverage
 python -m tools.dev test-quick      # curated smoke/contracts; stop on first failure
 python -m tools.dev test-changed     # changed tests, or test-quick when no mapping exists
 python -m tools.dev test-parallel    # broad fast suite across workers, optional xdist
@@ -32,13 +42,56 @@ For a focused edit, direct pytest selection is still the fastest option:
 ```bash
 python -m pytest tests/unit/test_runtime_algorithms.py -q -x
 python -m pytest --lf -q -x
+# Validate native output-channel IDs, fidelity/mission applicability, and core
+# versus telemetry classification without executing a long route.
+python -m pytest tests/unit/test_native_output_contract.py -q
 ```
+
+When changing a source executor's emitted fields or an advertised native
+output map, run that structural contract followed by the exact affected
+`vehicle_execution_witnesses.yaml` witness. Reserve the all-witness execution
+run for a promotion checkpoint: full source routes can be intentionally much
+more expensive than a local controller screen.
 
 `test-changed` includes modified test files and uses imports from modified
 `src/taoryx` modules to find related tests. For changes with no reliable
 mapping—such as shared fixtures, project configuration, or documentation—it
 falls back to `test-quick`. This is a feedback aid, not a release-quality
 claim; run `test` or `check` before handoff as appropriate.
+
+## Vehicle vertical slices
+
+`test-vehicle <family>` is the focused loop for making a vehicle or workflow
+solid. Each slice is explicit rather than a family-marker sweep: it checks the
+plug-in advertisement and authoring plan, runs the documented batch endpoint,
+exercises an interactive episode only when one is advertised, and runs any
+registered controller campaign. It therefore proves the same user-facing
+Composition route a model developer works through without pulling unrelated
+vehicles or historical evidence into every edit.
+
+The available physical-family slices are `f16_s119`, `a320_openap_3dof`,
+`hummingbird`, `x15`, `hl20_mod_k`, `reference_nesc_two_stage_rocket`,
+`tumbling_body`, `skywalker_x8`, and `b747`. `simple_aero` is the focused
+fixed-L/D workflow slice: it proves the provider-generated batch path and its
+explicitly blocked interactive boundary, not a physical vehicle or actuator
+claim. `dual_launch_glider` proves the source-generated point-mass batch path
+for both launch forms and reports attached-booster separation as an event; it
+does not claim an independently propagated released-glider history. Add the
+next slice only after its documented composition has a real runnable endpoint;
+the registry lives in `tools/dev.py` as
+`VEHICLE_VERTICAL_TEST_PATHS`. This keeps the work vertical: establish one
+model's data, controls, segment contract, execution, and tuning footing before
+broadening the matrix. A narrow local controller screen—such as X-15's
+direct-wrench route—must preserve that boundary rather than being labeled a
+full flight mission.
+
+For a catalogue-wide metadata change, run `python -m tools.dev
+vehicle-catalogue`. It checks registered controller-campaign coverage, family
+membership, semantic interfaces, and onboarding data for the runnable
+catalogue without promoting planned fidelity tiers. It does not run every
+vehicle or imply mission qualification. Keep this distinct from
+`test-vehicle <family>`, which is the fast executable proof for one specific
+vehicle.
 
 `test-parallel` requires the development extra, which includes
 `pytest-xdist`. It uses `--dist loadfile` so tests from one file stay on one

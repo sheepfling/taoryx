@@ -1,0 +1,13 @@
+schema_version: 1
+kind: taoryx.reference-plant-source-lock/v1alpha1
+family: reference_f16_s119
+package:
+  relative_to_corpus: qualified-models/f16-s119/taoryx-f16-s119-reference-v0.7.txair
+  sha256: eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c
+aerodynamics:
+  relative_to_corpus: qualified-models/f16-s119/F16_aero_mod_k_normalized.dml
+  sha256: 272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764
+corpus:
+  archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
+  sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+replay_boundary: taoryx_rigid_body_load_contract_and_hold_evidence

@@ -18,18 +18,22 @@ from typing import Literal, cast
 from .composition_control_trace import validate_committed_control_trace_against_status
 from .composition_graph_evidence import GraphExecutionDispatch, observed_mission_graph_execution
 from .composition_resource_ledger import validate_committed_resource_ledger
+from .composition_status_trace import validate_committed_status_trace
 from .fidelity_contracts import FidelityTier
 from .trajectory.evaluation import TrajectoryEvaluation
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_bindings import batch_episode_parity_record, resolve_vehicle_execution_binding
+from .vehicle_execution_preflight import validate_public_capability_advertisement
 
 _KNOWN_ARTIFACTS = (
     "execution.json",
     "composition.json",
     "preflight.json",
     "local_screen.json",
+    "nonlinear_validation.json",
     "semantic_action_trace.json",
     "control_provenance.json",
+    "controller_tuning_provenance.json",
     "mission_graph_execution.json",
     "variant_runtime_evidence.json",
     "objective_report.json",
@@ -47,6 +51,7 @@ _KNOWN_ARTIFACTS = (
     "telemetry.csv",
 )
 _LOCAL_DIRECT_WRENCH_SCREEN_SCHEMA = "taoryx.local-direct-wrench-screen/v1alpha1"
+_LOCAL_NATIVE_COORDINATE_LQI_SCREEN_SCHEMA = "taoryx.local-native-coordinate-lqi-screen/v1alpha1"
 _RELEASE_EVIDENCE_ARTIFACTS = (
     "convergence_report.json",
     "robustness_report.json",
@@ -225,6 +230,51 @@ def index_composition_results(directory: str | Path) -> dict[str, object]:
                 }
             )
             continue
+        control_execution_evidence = _control_execution_evidence(output_directory, provenance)
+        if control_execution_evidence["status"] == "invalid":
+            detail = str(control_execution_evidence["error"])
+            errors.append(f"{relative_path}: invalid control execution evidence: {detail}")
+            records.append(
+                {
+                    "evaluation_path": str(relative_path),
+                    "output_directory": str(output_directory.relative_to(root)),
+                    "status": "invalid",
+                    "error": detail,
+                    "composition_provenance": provenance,
+                    "capability_preflight_evidence": capability_preflight_evidence,
+                    "interface_provenance": interface_provenance,
+                    "semantic_action_trace_evidence": action_trace_evidence,
+                    "graph_execution_evidence": graph_execution_evidence,
+                    "variant_runtime_evidence": variant_runtime_evidence,
+                    "resource_ledger_evidence": resource_ledger_evidence,
+                    "reproduction_evidence": reproduction_evidence,
+                    "control_execution_evidence": control_execution_evidence,
+                }
+            )
+            continue
+        controller_execution_evidence = _controller_execution_evidence(output_directory, provenance)
+        if controller_execution_evidence["status"] == "invalid":
+            detail = str(controller_execution_evidence["error"])
+            errors.append(f"{relative_path}: invalid controller execution evidence: {detail}")
+            records.append(
+                {
+                    "evaluation_path": str(relative_path),
+                    "output_directory": str(output_directory.relative_to(root)),
+                    "status": "invalid",
+                    "error": detail,
+                    "composition_provenance": provenance,
+                    "capability_preflight_evidence": capability_preflight_evidence,
+                    "interface_provenance": interface_provenance,
+                    "semantic_action_trace_evidence": action_trace_evidence,
+                    "graph_execution_evidence": graph_execution_evidence,
+                    "variant_runtime_evidence": variant_runtime_evidence,
+                    "resource_ledger_evidence": resource_ledger_evidence,
+                    "reproduction_evidence": reproduction_evidence,
+                    "control_execution_evidence": control_execution_evidence,
+                    "controller_execution_evidence": controller_execution_evidence,
+                }
+            )
+            continue
         records.append(
             _mission_record(
                 root,
@@ -238,6 +288,8 @@ def index_composition_results(directory: str | Path) -> dict[str, object]:
                 variant_runtime_evidence,
                 resource_ledger_evidence,
                 reproduction_evidence,
+                control_execution_evidence,
+                controller_execution_evidence,
             )
         )
     local_screen_paths = tuple(sorted(root.rglob("local_screen.json")))
@@ -540,6 +592,8 @@ def _mission_record(
     variant_runtime_evidence: dict[str, object],
     resource_ledger_evidence: dict[str, object],
     reproduction_evidence: dict[str, object],
+    control_execution_evidence: dict[str, object],
+    controller_execution_evidence: dict[str, object],
 ) -> dict[str, object]:
     """Return the compact catalog record for one normalized mission result."""
 
@@ -565,6 +619,8 @@ def _mission_record(
         "variant_runtime_evidence": variant_runtime_evidence,
         "resource_ledger_evidence": resource_ledger_evidence,
         "reproduction_evidence": reproduction_evidence,
+        "control_execution_evidence": control_execution_evidence,
+        "controller_execution_evidence": controller_execution_evidence,
         "batch_episode_parity": _batch_episode_parity_disposition(provenance),
         "artifact_paths": _artifact_paths(root, output_directory),
         "claim_boundary": evaluation.claim_boundary,
@@ -625,6 +681,336 @@ def _evaluation_summary(evaluation: TrajectoryEvaluation) -> dict[str, object]:
     ####
 
 
+def _control_execution_evidence(
+    output_directory: Path,
+    composition_provenance: Mapping[str, object],
+) -> dict[str, object]:
+    """Bind any executed control realization to its screen and status trace.
+
+    This common proof covers both closed-loop controller screens and source
+    authority allocators.  It establishes the exact realization and whether
+    physical effectors were allocated, without inferring a feedback controller
+    where none ran or promoting an authority probe to a flight mission.
+    """
+
+    source = output_directory / "execution.json"
+    if not source.is_file():
+        return {
+            "status": "missing",
+            "path": None,
+            "claim_boundary": "No execution artifact was supplied with this result packet.",
+        }
+    try:
+        payload = json.loads(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError("execution artifact is not a JSON object")
+        runtime = payload.get("runtime")
+        screen = payload.get("control_screen")
+        if runtime is None or screen is None:
+            return {
+                "status": "not_applicable",
+                "path": str(source),
+                "claim_boundary": "The execution artifact does not declare a common runtime and control-screen record.",
+            }
+        if not isinstance(runtime, Mapping) or not isinstance(screen, Mapping):
+            raise ValueError("execution runtime and control-screen records must be mappings")
+        execution_control_realization = runtime.get("control_realization")
+        if not isinstance(execution_control_realization, str) or not execution_control_realization.strip():
+            return {
+                "status": "not_applicable",
+                "path": str(source),
+                "claim_boundary": "The execution runtime does not declare a common control realization.",
+            }
+        if composition_provenance.get("status") != "verified":
+            raise ValueError("control execution evidence requires verified compiled-composition provenance")
+        composition_payload = payload.get("composition")
+        if not isinstance(composition_payload, Mapping):
+            raise ValueError("execution artifact has no compiled composition mapping")
+        composition = CompiledVehicleComposition.model_validate(composition_payload)
+        if composition.id != composition_provenance.get("composition_id"):
+            raise ValueError("execution composition ID disagrees with composition provenance")
+        if composition.identity_sha256 != composition_provenance.get("composition_identity_sha256"):
+            raise ValueError("execution composition fingerprint disagrees with composition provenance")
+        if screen.get("control_realization") != execution_control_realization:
+            raise ValueError("control-screen realization disagrees with execution runtime")
+        physical_effector_allocation = runtime.get("physical_effector_allocation")
+        if not isinstance(physical_effector_allocation, bool):
+            raise ValueError("execution control runtime must declare physical effector allocation")
+        full_state_trim = runtime.get("full_state_trim")
+        if full_state_trim is not None:
+            if not isinstance(full_state_trim, Mapping):
+                raise ValueError("execution full-state trim record must be a mapping")
+            trim_status = full_state_trim.get("status")
+            if not isinstance(trim_status, str) or not trim_status.strip():
+                raise ValueError("execution full-state trim record must declare a nonempty status")
+        screen_allocation = screen.get("physical_effector_allocation")
+        if screen_allocation is not None and screen_allocation != physical_effector_allocation:
+            raise ValueError("control-screen physical allocation disagrees with execution runtime")
+        trace_source = output_directory / "status_trace.json"
+        if not trace_source.is_file():
+            raise ValueError("control execution has no committed status trace")
+        trace_payload = json.loads(trace_source.read_text(encoding="utf-8"))
+        if not isinstance(trace_payload, Mapping):
+            raise ValueError("control status trace is not a JSON object")
+        validate_committed_status_trace(composition, trace_payload)
+        samples = trace_payload.get("samples")
+        if not isinstance(samples, list) or not samples:
+            raise ValueError("control status trace has no samples")
+        trace_realizations: set[str] = set()
+        physical_trace_channels: set[str] = set()
+        for index, sample in enumerate(samples):
+            if not isinstance(sample, Mapping):
+                raise ValueError(f"control status trace sample {index} is not a mapping")
+            values = sample.get("values")
+            if not isinstance(values, Mapping):
+                raise ValueError(f"control status trace sample {index} has no values mapping")
+            trace_realization = values.get("control.realization")
+            if trace_realization not in {composition.control_realization, execution_control_realization}:
+                raise ValueError(f"control status trace sample {index} disagrees with known control realizations")
+            trace_realizations.add(str(trace_realization))
+            allocation_channels = (
+                "control.physical_effector_allocation",
+                "control.physical_motor_allocation",
+            )
+            observed_physical_channels = tuple(channel for channel in allocation_channels if values.get(channel) is True)
+            if physical_effector_allocation and not observed_physical_channels:
+                raise ValueError(f"control status trace sample {index} omits physical allocation")
+            if not physical_effector_allocation and observed_physical_channels:
+                raise ValueError(f"control status trace sample {index} disagrees with physical allocation")
+            physical_trace_channels.update(observed_physical_channels)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        return {"status": "invalid", "path": str(source), "error": str(error)}
+    if len(trace_realizations) != 1:
+        return {
+            "status": "invalid",
+            "path": str(source),
+            "error": "control status trace changes realization during one fixed execution",
+        }
+    if physical_effector_allocation and len(physical_trace_channels) != 1:
+        return {
+            "status": "invalid",
+            "path": str(source),
+            "error": "control status trace has ambiguous physical-allocation evidence",
+        }
+    result: dict[str, object] = {
+        "status": "verified",
+        "path": str(source),
+        "composition_id": composition.id,
+        "composition_identity_sha256": composition.identity_sha256,
+        "control_realization": composition.control_realization,
+        "execution_control_realization": execution_control_realization,
+        "status_trace_control_realization": next(iter(trace_realizations)),
+        "physical_effector_allocation": physical_effector_allocation,
+        "status_trace_path": str(trace_source),
+        "status_trace_sample_count": len(samples),
+        "claim_boundary": (
+            "This verifies the execution realization against its control-screen summary and the composition realization "
+            "against committed status samples. It does not establish full-state trim, feedback performance, navigation, "
+            "or qualification."
+        ),
+    }
+    if physical_trace_channels:
+        result["physical_allocation_trace_channel"] = next(iter(physical_trace_channels))
+    if full_state_trim is not None:
+        trim_evidence: dict[str, object] = {"status": full_state_trim["status"]}
+        reason = full_state_trim.get("reason")
+        if isinstance(reason, str) and reason.strip():
+            trim_evidence["reason"] = reason
+        result["full_state_trim"] = trim_evidence
+    effector_names = runtime.get("effector_names")
+    if isinstance(effector_names, list) and all(isinstance(name, str) and name.strip() for name in effector_names):
+        result["effector_names"] = list(effector_names)
+    return result
+    ####
+
+
+def _controller_execution_evidence(
+    output_directory: Path,
+    composition_provenance: Mapping[str, object],
+) -> dict[str, object]:
+    """Validate controller facts reported by an executed composition packet.
+
+    A controller screen is useful to a generic result consumer only when its
+    selected method agrees across the execution summary, the screen summary,
+    and every committed status sample.  This binds those claims to the exact
+    compiled composition; it does not recompute gains or qualification.
+    """
+
+    source = output_directory / "execution.json"
+    if not source.is_file():
+        return {
+            "status": "missing",
+            "path": None,
+            "claim_boundary": "No execution artifact was supplied with this result packet.",
+        }
+    try:
+        payload = json.loads(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError("execution artifact is not a JSON object")
+        runtime = payload.get("runtime")
+        if runtime is None:
+            return {
+                "status": "not_applicable",
+                "path": str(source),
+                "claim_boundary": "The execution artifact does not declare a shared controller-runtime record.",
+            }
+        if not isinstance(runtime, Mapping):
+            raise ValueError("execution runtime must be a mapping")
+        method = runtime.get("controller_method")
+        if method is None:
+            return {
+                "status": "not_applicable",
+                "path": str(source),
+                "claim_boundary": "The execution runtime does not declare an LQR or LQI controller method.",
+            }
+        if method not in {"lqr", "lqi"}:
+            raise ValueError("execution controller method must be 'lqr' or 'lqi'")
+        tuning_binding = _runtime_tuning_binding(runtime, method)
+        if composition_provenance.get("status") != "verified":
+            raise ValueError("controller execution evidence requires verified compiled-composition provenance")
+        composition_payload = payload.get("composition")
+        if not isinstance(composition_payload, Mapping):
+            raise ValueError("execution artifact has no compiled composition mapping")
+        composition = CompiledVehicleComposition.model_validate(composition_payload)
+        if composition.id != composition_provenance.get("composition_id"):
+            raise ValueError("execution composition ID disagrees with composition provenance")
+        if composition.identity_sha256 != composition_provenance.get("composition_identity_sha256"):
+            raise ValueError("execution composition fingerprint disagrees with composition provenance")
+        control_realization = runtime.get("control_realization")
+        if not isinstance(control_realization, str) or not control_realization.strip():
+            raise ValueError("execution controller runtime has no nonempty control realization")
+        raw_integral_names = runtime.get("integral_output_names", [])
+        if not isinstance(raw_integral_names, list) or any(
+            not isinstance(name, str) or not name.strip() for name in raw_integral_names
+        ):
+            raise ValueError("execution integral output names must be a list of nonempty strings")
+        integral_output_names = tuple(raw_integral_names)
+        if len(set(integral_output_names)) != len(integral_output_names):
+            raise ValueError("execution integral output names must be unique")
+        if method == "lqi" and not integral_output_names:
+            raise ValueError("LQI execution must identify at least one integral output")
+        if method == "lqr" and integral_output_names:
+            raise ValueError("LQR execution must not identify integral outputs")
+        screen = payload.get("control_screen")
+        if not isinstance(screen, Mapping):
+            raise ValueError("controller execution has no control-screen mapping")
+        if screen.get("controller_method") != method:
+            raise ValueError("control-screen controller method disagrees with execution runtime")
+        screen_integral_names = screen.get("integral_output_names")
+        if screen_integral_names is not None and screen_integral_names != list(integral_output_names):
+            raise ValueError("control-screen integral outputs disagree with execution runtime")
+        screen_realization = screen.get("control_realization")
+        if screen_realization is not None and screen_realization != control_realization:
+            raise ValueError("control-screen realization disagrees with execution runtime")
+        trace_source = output_directory / "status_trace.json"
+        if not trace_source.is_file():
+            raise ValueError("controller execution has no committed status trace")
+        trace_payload = json.loads(trace_source.read_text(encoding="utf-8"))
+        if not isinstance(trace_payload, Mapping):
+            raise ValueError("controller status trace is not a JSON object")
+        validate_committed_status_trace(composition, trace_payload)
+        samples = trace_payload.get("samples")
+        if not isinstance(samples, list) or not samples:
+            raise ValueError("controller status trace has no samples")
+        for index, sample in enumerate(samples):
+            if not isinstance(sample, Mapping):
+                raise ValueError(f"controller status trace sample {index} is not a mapping")
+            values = sample.get("values")
+            if not isinstance(values, Mapping):
+                raise ValueError(f"controller status trace sample {index} has no values mapping")
+            if values.get("control.controller.method") != method:
+                raise ValueError(f"controller status trace sample {index} disagrees with execution runtime")
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        return {"status": "invalid", "path": str(source), "error": str(error)}
+    result: dict[str, object] = {
+        "status": "verified",
+        "path": str(source),
+        "composition_id": composition.id,
+        "composition_identity_sha256": composition.identity_sha256,
+        "method": method,
+        "control_realization": control_realization,
+        "integral_output_names": list(integral_output_names),
+        "status_trace_path": str(trace_source),
+        "status_trace_sample_count": len(samples),
+        "claim_boundary": (
+            "This verifies agreement among the execution summary, its control-screen summary, and committed status "
+            "samples. It does not retune the controller, establish disturbance robustness, or promote qualification."
+        ),
+    }
+    controller_id = runtime.get("controller_id")
+    if isinstance(controller_id, str) and controller_id.strip():
+        result["controller_id"] = controller_id
+    result["tuning_binding"] = tuning_binding
+    integrators_exercised = runtime.get("integrators_exercised")
+    if isinstance(integrators_exercised, bool):
+        result["integrators_exercised"] = integrators_exercised
+    return result
+    ####
+
+
+def _runtime_tuning_binding(runtime: Mapping[str, object], method: object) -> dict[str, object]:
+    """Validate an optional exact campaign-candidate claim made by a controller runtime.
+
+    A batch factory may declare this only after it has actually applied a
+    candidate produced by the common tuning campaign. The result catalog
+    requires both the candidate configuration and the applied ordered-gain
+    fingerprints, then checks agreement with its runtime method; the endpoint
+    verifier later compares both claims to the specific cached campaign
+    artifact.
+    """
+
+    raw_binding = runtime.get("tuning_binding")
+    if raw_binding is None:
+        return {
+            "status": "not_declared",
+            "claim_boundary": (
+                "The runtime did not claim that this controller was instantiated from a common tuning-campaign candidate."
+            ),
+        }
+    if not isinstance(raw_binding, Mapping):
+        raise ValueError("execution tuning_binding must be a mapping when supplied")
+    required = (
+        "campaign_id",
+        "node_id",
+        "candidate_profile_id",
+        "candidate_configuration_fingerprint_sha256",
+        "applied_gain_fingerprint_sha256",
+    )
+    missing = [name for name in required if not isinstance(raw_binding.get(name), str) or not raw_binding[name].strip()]
+    if missing:
+        raise ValueError("execution tuning_binding is missing nonempty fields: " + ", ".join(missing))
+    fingerprint = raw_binding["candidate_configuration_fingerprint_sha256"]
+    if not isinstance(fingerprint, str) or len(fingerprint) != 64 or any(character not in "0123456789abcdef" for character in fingerprint):
+        raise ValueError("execution tuning_binding candidate configuration fingerprint must be a lowercase SHA-256 hex digest")
+    gain_fingerprint = raw_binding["applied_gain_fingerprint_sha256"]
+    if (
+        not isinstance(gain_fingerprint, str)
+        or len(gain_fingerprint) != 64
+        or any(character not in "0123456789abcdef" for character in gain_fingerprint)
+    ):
+        raise ValueError("execution tuning_binding applied gain fingerprint must be a lowercase SHA-256 hex digest")
+    binding_method = raw_binding.get("controller_method")
+    if binding_method is not None and binding_method != method:
+        raise ValueError("execution tuning_binding controller method disagrees with execution runtime")
+    result: dict[str, object] = {
+        "status": "declared",
+        "campaign_id": raw_binding["campaign_id"],
+        "node_id": raw_binding["node_id"],
+        "candidate_profile_id": raw_binding["candidate_profile_id"],
+        "candidate_configuration_fingerprint_sha256": fingerprint,
+        "applied_gain_fingerprint_sha256": gain_fingerprint,
+    }
+    if binding_method is not None:
+        result["controller_method"] = binding_method
+    cache_key = raw_binding.get("cache_key")
+    if cache_key is not None:
+        if not isinstance(cache_key, str) or not cache_key.strip():
+            raise ValueError("execution tuning_binding cache_key must be a nonempty string when supplied")
+        result["cache_key"] = cache_key
+    return result
+    ####
+
+
 def _local_controller_screen_record(
     root: Path,
     screen_path: Path,
@@ -642,14 +1028,19 @@ def _local_controller_screen_record(
         payload = json.loads(screen_path.read_text(encoding="utf-8"))
         if not isinstance(payload, Mapping):
             raise ValueError("local controller screen is not a JSON object")
-        if payload.get("schema") != _LOCAL_DIRECT_WRENCH_SCREEN_SCHEMA:
+        schema = payload.get("schema")
+        if schema not in {_LOCAL_DIRECT_WRENCH_SCREEN_SCHEMA, _LOCAL_NATIVE_COORDINATE_LQI_SCREEN_SCHEMA}:
             raise ValueError("unsupported local controller screen schema")
         screen_id = _nonempty_string(payload, "id")
         plant_id = _nonempty_string(payload, "plant_id")
-        if payload.get("fidelity") != "rigid_body_6dof_direct_wrench":
-            raise ValueError("local controller screen must declare rigid_body_6dof_direct_wrench")
-        if payload.get("control_realization") != "direct_wrench":
-            raise ValueError("local controller screen must declare direct_wrench control realization")
+        fidelity = _nonempty_string(payload, "fidelity")
+        control_realization = _nonempty_string(payload, "control_realization")
+        if schema == _LOCAL_DIRECT_WRENCH_SCREEN_SCHEMA and (
+            fidelity != "rigid_body_6dof_direct_wrench" or control_realization != "direct_wrench"
+        ):
+            raise ValueError("local direct-wrench screen has incompatible fidelity or control realization")
+        if schema == _LOCAL_NATIVE_COORDINATE_LQI_SCREEN_SCHEMA and control_realization != "native_named_coordinates":
+            raise ValueError("local native-coordinate LQI screen must declare native_named_coordinates")
         if payload.get("physical_effector_allocation") is not False:
             raise ValueError("local controller screen must not claim physical effector allocation")
         evaluation = payload.get("evaluation")
@@ -673,6 +1064,18 @@ def _local_controller_screen_record(
         reproduction_evidence = _reproduction_evidence(output_directory, provenance)
         if reproduction_evidence["status"] == "invalid":
             raise ValueError(f"invalid local controller screen reproduction record: {reproduction_evidence.get('error')}")
+        control_execution_evidence = _control_execution_evidence(output_directory, provenance)
+        if control_execution_evidence["status"] == "invalid":
+            raise ValueError(
+                "invalid local controller screen control evidence: "
+                f"{control_execution_evidence.get('error')}"
+            )
+        controller_execution_evidence = _controller_execution_evidence(output_directory, provenance)
+        if controller_execution_evidence["status"] == "invalid":
+            raise ValueError(
+                "invalid local controller screen execution evidence: "
+                f"{controller_execution_evidence.get('error')}"
+            )
     except (OSError, ValueError, json.JSONDecodeError) as error:
         return (
             {
@@ -692,8 +1095,8 @@ def _local_controller_screen_record(
             "status": "valid",
             "screen_id": screen_id,
             "plant_id": plant_id,
-            "fidelity": "rigid_body_6dof_direct_wrench",
-            "control_realization": "direct_wrench",
+            "fidelity": fidelity,
+            "control_realization": control_realization,
             "physical_effector_allocation": False,
             "outcome": "local_screen_pass" if evaluation["mission_pass"] else "local_screen_failed",
             "composition_provenance": provenance,
@@ -701,6 +1104,8 @@ def _local_controller_screen_record(
             "graph_execution_evidence": graph_execution_evidence,
             "resource_ledger_evidence": resource_ledger_evidence,
             "reproduction_evidence": reproduction_evidence,
+            "control_execution_evidence": control_execution_evidence,
+            "controller_execution_evidence": controller_execution_evidence,
             "batch_episode_parity": _batch_episode_parity_disposition(provenance),
             "artifact_paths": _artifact_paths(root, output_directory),
             "claim_boundary": (
@@ -941,6 +1346,23 @@ def _capability_preflight_evidence(
             "certainly_infeasible",
         }:
             raise ValueError("concrete capability estimate has invalid feasibility")
+        advertisement = capability.get("capability_advertisement")
+        if advertisement is not None and not isinstance(advertisement, Mapping):
+            raise ValueError("concrete capability estimate has an invalid generic capability advertisement")
+        if isinstance(advertisement, Mapping):
+            advertisement_findings = validate_public_capability_advertisement(
+                advertisement,
+                expected_selection={
+                    "composition_id": composition_provenance.get("composition_id"),
+                    "composition_identity_sha256": composition_provenance.get("composition_identity_sha256"),
+                    "vehicle_id": composition_provenance.get("vehicle_id"),
+                    "family_id": composition_provenance.get("family_id"),
+                    "mission_id": composition_provenance.get("mission_id"),
+                    "fidelity": composition_provenance.get("fidelity"),
+                },
+            )
+            if advertisement_findings:
+                raise ValueError("; ".join(advertisement_findings))
         encoded = json.dumps(
             derived_mission,
             sort_keys=True,
@@ -960,6 +1382,7 @@ def _capability_preflight_evidence(
         "capability_available": True,
         "adapter_id": adapter_id,
         "feasibility": feasibility,
+        "capability_advertisement": None if advertisement is None else dict(advertisement),
         "derived_mission_sha256": expected_sha256,
         "claim_boundary": capability.get("claim_boundary"),
     }
@@ -1419,7 +1842,7 @@ def _batch_episode_parity_disposition(composition_provenance: Mapping[str, objec
 
 
 def _local_screen_composition_provenance(output_directory: Path) -> dict[str, object]:
-    """Verify that a local screen remains bound to its direct-wrench composition."""
+    """Verify that a local screen remains bound to its exact Composition endpoint."""
 
     source = output_directory / "composition.json"
     if not source.is_file():
@@ -1433,10 +1856,13 @@ def _local_screen_composition_provenance(output_directory: Path) -> dict[str, ob
         if not isinstance(payload, Mapping):
             raise ValueError("composition sidecar is not a JSON object")
         composition = CompiledVehicleComposition.model_validate(payload)
-        if composition.fidelity != "rigid_body_6dof_direct_wrench":
-            raise ValueError("local controller screen composition has the wrong fidelity")
         binding = resolve_vehicle_execution_binding(composition, "batch")
-        if binding is None or binding.factory_id != "local_direct_wrench_screen.v1":
+        if binding is None or binding.factory_id not in {
+            "local_direct_wrench_screen.v1",
+            "local_native_coordinate_lqi_screen.v1",
+            "hl20_source_surface_pitch_authority_screen.v1",
+            "x15_source_surface_authority_screen.v1",
+        }:
             raise ValueError("local controller screen composition has no matching batch screen binding")
     except (OSError, ValueError, json.JSONDecodeError) as error:
         return {"status": "invalid", "path": str(source), "error": str(error)}

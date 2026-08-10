@@ -12,13 +12,59 @@ from taoryx.generic_tuning import (
     linear_authority_preflight,
     linear_authority_preflight_evaluator,
     trim_linearize_and_tune,
+    tune_lqi_profiles,
     tune_lqr_profiles,
+    validate_nonlinear_native_coordinate_lqi,
 )
-from taoryx.trim import TrimSpec
+from taoryx.trim import TrimResult, TrimSpec
 
 
 def _profile() -> GenericLqrProfile:
     return GenericLqrProfile("standard", (1.0, 1.0), (1.0,))
+
+
+class _SecondOrderNativeControlPlant:
+    """Analytic native-control plant with no physical allocation claim."""
+
+    state_names = ("position", "velocity")
+    control_names = ("force",)
+
+    def state_derivative(
+        self,
+        state: Mapping[str, float],
+        controls: Mapping[str, float],
+        environment: Mapping[str, float | str],
+    ) -> Mapping[str, float]:
+        return {
+            "position": float(state["velocity"]),
+            "velocity": -float(state["position"]) + float(controls["force"]) + float(environment.get("bias", 0.0)),
+        }
+        ####
+
+    ####
+
+
+def _native_trim() -> TrimResult:
+    specification = TrimSpec(
+        state_names=("position", "velocity"),
+        control_names=("force",),
+        residual_names=("position_residual", "velocity_residual"),
+        state_initial={"position": 0.0, "velocity": 0.0},
+        control_initial={"force": 0.0},
+    )
+    return TrimResult(
+        specification,
+        {"position": 0.0, "velocity": 0.0},
+        {"force": 0.0},
+        {"position_residual": 0.0, "velocity_residual": 0.0},
+        0.0,
+        True,
+        1,
+        "analytic native trim",
+        1,
+        0.0,
+    )
+    ####
 
 
 def test_normalized_lqr_profile_grid_generates_a_bounded_deterministic_lattice() -> None:
@@ -58,6 +104,50 @@ def test_generic_lqr_tuning_accepts_arbitrary_state_and_control_dimensions() -> 
     assert report.best.lqr.state_names == ("position", "velocity")
     assert report.best.lqr.control_names == ("force",)
     assert report.best.safe
+
+
+def test_generic_lqi_retains_integral_gains_and_validates_native_control_coordinates() -> None:
+    """Generic LQI can be replayed through model controls without an allocator fiction."""
+
+    report = tune_lqi_profiles(
+        "synthetic_native_second_order",
+        ((0.0, 1.0), (-1.0, 0.0)),
+        ((0.0,), (1.0,)),
+        state_names=("position", "velocity"),
+        control_names=("force",),
+        state_scales=(0.2, 1.0),
+        control_scales=(1.0,),
+        profiles=(GenericLqrProfile("offset-free", (10.0, 1.0), (1.0,)),),
+        output_names=("position",),
+        integral_q_diagonal=(20.0,),
+    )
+    candidate = report.best
+    assert candidate is not None
+    assert candidate.lqi is not None
+    assert candidate.lqi.output_names == ("position",)
+    assert candidate.as_dict()["lqi_controller"] is not None
+
+    validation = validate_nonlinear_native_coordinate_lqi(
+        _SecondOrderNativeControlPlant(),
+        _native_trim(),
+        candidate,
+        initial_state={"position": 0.02, "velocity": 0.0},
+        duration_s=8.0,
+        dt_s=0.01,
+        control_lower={"force": -1.0},
+        control_upper={"force": 1.0},
+        integral_lower={"position": -0.5},
+        integral_upper={"position": 0.5},
+        environment={"bias": 0.01},
+    )
+
+    assert validation.integrators_exercised
+    assert validation.final_normalized_feedback_error_norm < validation.initial_normalized_feedback_error_norm * 0.05
+    assert validation.control_saturation_fraction == 0.0
+    payload = validation.as_dict()
+    assert payload["control_realization"] == "native_named_coordinates"
+    assert payload["environment"] == {"bias": 0.01}
+    ####
 
 
 def test_trim_linearize_and_tune_stops_when_trim_fails() -> None:

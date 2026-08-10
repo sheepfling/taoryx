@@ -28,36 +28,23 @@ import tempfile
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Any, Literal, Protocol, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
 
 from .committed_boundary_sensor import CommittedBoundarySensor
 from .direct_wrench import DIRECT_WRENCH_NAMES, DirectWrenchProjection
 from .language.grammar_contracts import GrammarProfile
-from .language_backed_execution import _mission, _mission_tables
+from .language_backed_execution import (
+    _kinematic_attitude_from_row,
+    _kinematic_body_rate_from_row,
+    _mission,
+    _mission_tables,
+)
 from .language_backed_racetrack import materialize_powered_fixed_wing_composition
 from .local_direct_wrench_screen_registry import resolve_local_direct_wrench_screen_definition
-from .reduced_fixed_wing_execution import _a320_operating_point_for_speed, _f16_source_trim
+from .plugins import PluginCatalog, discover_plugins
 from .runtime.interactive import InteractiveSession, InteractiveStatus
 from .scenario import ResolvedScenario, ScenarioCompiler
-from .trajectory import (
-    A320GuidanceOverride,
-    A320OpenAPModel,
-    A320Pseudo6DOFModel,
-    A320RacetrackRunner,
-    A320RacetrackStepper,
-    A320RacetrackStepperState,
-    F16AttitudeResponsePseudo6DOFModel,
-    F16GuidanceOverride,
-    F16PointMass3DOFModel,
-    F16ReducedRacetrackRunner,
-    F16ReducedRacetrackStepper,
-    F16ReducedRacetrackStepperState,
-    HummingbirdPseudo6DOFCommand,
-    HummingbirdPseudo6DOFModel,
-    HummingbirdPseudo6DOFState,
-    load_pseudo6dof_catalog,
-)
-from .trajectory.pseudo6dof_profiles import Pseudo6DOFProfile
+from .trajectory.pseudo6dof_profiles import Pseudo6DOFProfile, load_pseudo6dof_catalog
 from .value_space import (
     ValueSpaceSpec,
     boolean,
@@ -80,6 +67,18 @@ from .vehicle_interface import (
     validate_authority_action_values,
     validate_projected_status_values,
 )
+
+if TYPE_CHECKING:
+    from .trajectory import (
+        A320GuidanceOverride,
+        A320RacetrackStepper,
+        A320RacetrackStepperState,
+        F16GuidanceOverride,
+        F16ReducedRacetrackStepper,
+        F16ReducedRacetrackStepperState,
+        HummingbirdPseudo6DOFCommand,
+        HummingbirdPseudo6DOFState,
+    )
 
 EpisodeStatus = Literal["ready", "active", "completed", "closed"]
 
@@ -104,7 +103,7 @@ class EpisodeChannel:
             object.__setattr__(
                 self,
                 "value_space",
-                _episode_channel_value_space(self.name, self.unit, self.lower, self.upper),
+                episode_channel_value_space(self.name, self.unit, self.lower, self.upper),
             )
         ####
 
@@ -129,7 +128,7 @@ class EpisodeChannel:
     ####
 
 
-def _episode_channel_value_space(
+def episode_channel_value_space(
     name: str,
     unit: str | None,
     lower: float | None,
@@ -488,9 +487,7 @@ class LanguageBackedCompositionEpisode:
         return tuple(
             EpisodeChannel(
                 control.name,
-                semantic_by_native[control.name].canonical_unit
-                if control.name in semantic_by_native
-                else control.unit,
+                semantic_by_native[control.name].canonical_unit if control.name in semantic_by_native else control.unit,
                 control.lower,
                 control.upper,
                 "language-backed runtime control",
@@ -506,10 +503,20 @@ class LanguageBackedCompositionEpisode:
         channels: list[EpisodeChannel] = []
         for vehicle in self._session.problem.vehicles.values():
             names = tuple(dict.fromkeys((*vehicle.state.value_names, *vehicle.state.named)))
-            channels.extend(
-                EpisodeChannel(f"{vehicle.name}.{name}", None, description="committed runtime truth")
-                for name in names
-            )
+            channels.extend(EpisodeChannel(f"{vehicle.name}.{name}", None, description="committed runtime truth") for name in names)
+            if self.composition.fidelity == "pseudo_6dof":
+                channels.extend(
+                    EpisodeChannel(f"{vehicle.name}.{name}", unit, description="profile-backed kinematic sidecar truth")
+                    for name, unit in (
+                        ("kinematic_roll_deg", "deg"),
+                        ("kinematic_pitch_deg", "deg"),
+                        ("kinematic_yaw_deg", "deg"),
+                        ("kinematic_body_rate_p_rad_s", "rad/s"),
+                        ("kinematic_body_rate_q_rad_s", "rad/s"),
+                        ("kinematic_body_rate_r_rad_s", "rad/s"),
+                    )
+                    if name not in names
+                )
         return tuple(channels)
         ####
 
@@ -537,10 +544,24 @@ class LanguageBackedCompositionEpisode:
         self._require_open()
         values: dict[str, object] = {}
         for vehicle in self._session.problem.vehicles.values():
-            values[vehicle.name] = {
+            state = {
                 **dict(zip(vehicle.state.value_names, vehicle.state.values, strict=False)),
                 **dict(vehicle.state.named),
             }
+            if self.composition.fidelity == "pseudo_6dof":
+                attitude = _kinematic_attitude_from_row(state)
+                body_rate = _kinematic_body_rate_from_row(state)
+                state.update(
+                    {
+                        "kinematic_roll_deg": attitude[0],
+                        "kinematic_pitch_deg": attitude[1],
+                        "kinematic_yaw_deg": attitude[2],
+                        "kinematic_body_rate_p_rad_s": body_rate[0],
+                        "kinematic_body_rate_q_rad_s": body_rate[1],
+                        "kinematic_body_rate_r_rad_s": body_rate[2],
+                    }
+                )
+            values[vehicle.name] = state
         return EpisodeObservation(self._session.time, values, _episode_status(self._session.status, self._closed))
         ####
 
@@ -741,6 +762,8 @@ class HummingbirdPseudoCompositionEpisode:
     )
 
     def __init__(self, composition: CompiledVehicleComposition, *, seed: int | None = None, integration_step_s: float = 0.02) -> None:
+        from .trajectory.hummingbird_pseudo6dof import HummingbirdPseudo6DOFModel
+
         if composition.family_id != "hummingbird" or composition.fidelity != "pseudo_6dof":
             raise ValueError("Hummingbird pseudo episode requires the hummingbird pseudo_6dof composition")
         if composition.initialization.id not in {"grounded_idle", "airborne_hover"}:
@@ -975,6 +998,8 @@ class HummingbirdPseudoCompositionEpisode:
         ####
 
     def _command_from_action(self, action: Mapping[str, object]) -> HummingbirdPseudo6DOFCommand:
+        from .trajectory.hummingbird_pseudo6dof import HummingbirdPseudo6DOFCommand
+
         return HummingbirdPseudo6DOFCommand(
             roll_rad=_finite_number(action["roll_rad"], "roll_rad"),
             pitch_rad=_finite_number(action["pitch_rad"], "pitch_rad"),
@@ -1357,6 +1382,9 @@ class LocalDirectWrenchCompositionEpisode:
         EpisodeChannel("achieved_moment_body_nm", "N*m", description="projected direct body moment actually applied"),
         EpisodeChannel("residual_force_body_n", "N", description="unachieved direct body-force request"),
         EpisodeChannel("residual_moment_body_nm", "N*m", description="unachieved direct body-moment request"),
+        EpisodeChannel("wrench_residual_norm", None, description="mixed requested-to-achieved wrench residual norm"),
+        EpisodeChannel("feedback_norm", None, description="normalized local-screen state-feedback error norm"),
+        EpisodeChannel("mass_kg", "kg", 0.0, description="fixed source-local mass declared by the selected screen"),
         EpisodeChannel("wrench_saturated", "boolean", description="direct-wrench authority or slew projection status"),
         EpisodeChannel("wrench_status", None, description="direct-wrench projection disposition"),
         EpisodeChannel("control_realization", None, description="declared direct-wrench bridge realization"),
@@ -1454,7 +1482,8 @@ class LocalDirectWrenchCompositionEpisode:
             projection = self.config.limits.project(requested, self._projection.achieved, dt_s)
             derivative = self.config.source_derivative(self._state, projection.achieved)
             self._state = {
-                name: self._state[name] + dt_s * _finite_number(derivative.get(name), f"local direct-wrench derivative {name}") for name in self.config.state_names
+                name: self._state[name] + dt_s * _finite_number(derivative.get(name), f"local direct-wrench derivative {name}")
+                for name in self.config.state_names
             }
             if any(not math.isfinite(value) for value in self._state.values()):
                 raise RuntimeError("local direct-wrench episode produced a nonfinite state")
@@ -1591,11 +1620,31 @@ class LocalDirectWrenchCompositionEpisode:
             "achieved_moment_body_nm": _moment_vector(wrench.achieved),
             "residual_force_body_n": _force_vector(wrench.residual),
             "residual_moment_body_nm": _moment_vector(wrench.residual),
+            "wrench_residual_norm": wrench.residual_norm,
+            "feedback_norm": self._feedback_norm(),
             "wrench_status": wrench.status,
             "wrench_saturated": bool(wrench.position_saturated or wrench.rate_limited),
             "control_realization": "direct_wrench_screen",
             "physical_effector_allocation": False,
+            # Resource values are part of the source-local screen definition,
+            # not an inferred episode property.  Project them here so an
+            # interactive endpoint that advertises a fixed resource produces
+            # the same committed resource view as its batch counterpart.
+            **{str(name): float(value) for name, value in self.config.resource_values.items()},
         }
+        ####
+
+    def _feedback_norm(self) -> float:
+        """Return the batch-screen normalized state error at this boundary."""
+
+        names = self.config.assessment_state_names or self.config.state_names
+        scales = dict(zip(self.config.state_names, self.config.state_scales, strict=True))
+        return math.sqrt(
+            sum(
+                ((self._state[name] - self.config.reference_state[name]) / scales[name]) ** 2
+                for name in names
+            )
+        )
         ####
 
     def _require_open(self) -> None:
@@ -1662,17 +1711,20 @@ def _open_local_direct_wrench_episode(
     ####
 
 
-_EPISODE_FACTORY_BUILDERS: dict[str, EpisodeFactory] = {
-    "language_backed_interactive.v1": _open_language_backed_episode,
-    "hummingbird_aggregate_thrust_episode.v1": _open_hummingbird_episode,
-    "reduced_fixed_wing_a320_episode.v1": _open_a320_reduced_episode,
-    "reduced_fixed_wing_f16_episode.v1": _open_f16_reduced_episode,
-    "local_direct_wrench_episode.v1": _open_local_direct_wrench_episode,
-    "x15_local_direct_wrench_episode.v1": _open_local_direct_wrench_episode,
-}
+def _episode_factories(*, plugins: PluginCatalog | None = None) -> dict[str, EpisodeFactory]:
+    """Build the installed interactive factory registry."""
+
+    selected = plugins or discover_plugins()
+    factories: dict[str, EpisodeFactory] = {}
+    for contribution in selected.records("episode_factory"):
+        if not callable(contribution.value):
+            raise TypeError(f"plug-in {contribution.plugin.id!r} supplied a non-callable episode factory for {contribution.id!r}")
+        factories[contribution.id] = cast(EpisodeFactory, contribution.value)
+    return factories
+    ####
 
 
-def registered_episode_factory_ids() -> tuple[str, ...]:
+def registered_episode_factory_ids(*, plugins: PluginCatalog | None = None) -> tuple[str, ...]:
     """Return every public episode factory implemented by this runtime.
 
     The execution-binding catalog remains the authority for whether a factory
@@ -1682,7 +1734,7 @@ def registered_episode_factory_ids() -> tuple[str, ...]:
     a nearby fallback model.
     """
 
-    return tuple(sorted(_EPISODE_FACTORY_BUILDERS))
+    return tuple(sorted(_episode_factories(plugins=plugins)))
     ####
 
 
@@ -1691,6 +1743,7 @@ def open_vehicle_composition_episode(
     *,
     seed: int | None = None,
     integration_step_s: float = 0.02,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleCompositionEpisode:
     """Open one declared composition episode or fail without a substitute path."""
 
@@ -1701,7 +1754,7 @@ def open_vehicle_composition_episode(
     if binding.factory_id is None:
         raise ValueError("runnable episode binding lacks a factory identifier")
     try:
-        factory = _EPISODE_FACTORY_BUILDERS[binding.factory_id]
+        factory = _episode_factories(plugins=plugins)[binding.factory_id]
     except KeyError as error:
         raise ValueError(f"episode execution factory is declared but not implemented: {binding.factory_id!r}") from error
     return factory(composition, seed, integration_step_s)
@@ -1762,9 +1815,7 @@ def validate_vehicle_composition_episode_contract(
             ),
         }
     raw_action_channels = {native_channel.name: native_channel for native_channel in episode.action_schema}
-    raw_observation_channels = {
-        native_channel.name: native_channel for native_channel in episode.observation_schema
-    }
+    raw_observation_channels = {native_channel.name: native_channel for native_channel in episode.observation_schema}
 
     if len(raw_action_channels) != len(episode.action_schema):
         findings.append("native episode action schema contains duplicate names")
@@ -1774,20 +1825,14 @@ def validate_vehicle_composition_episode_contract(
         if native_channel.value_space is None:
             findings.append(f"native episode channel {native_channel.name!r} omits a value-space declaration")
 
-    available_profiles = tuple(
-        profile for profile in contract.authority_profiles if profile.availability == "available"
-    )
-    semantic_actions_by_id = {
-        semantic_channel.id: semantic_channel for semantic_channel in contract.action_channels
-    }
+    available_profiles = tuple(profile for profile in contract.authority_profiles if profile.availability == "available")
+    semantic_actions_by_id = {semantic_channel.id: semantic_channel for semantic_channel in contract.action_channels}
     semantic_to_native: dict[str, str] = {}
     for profile in available_profiles:
         for identifier in profile.action_ids:
             semantic_channel = semantic_actions_by_id[identifier]
             if semantic_channel.availability != "available":
-                findings.append(
-                    f"available authority profile {profile.id!r} exposes unavailable action {identifier!r}"
-                )
+                findings.append(f"available authority profile {profile.id!r} exposes unavailable action {identifier!r}")
                 continue
             native = semantic_channel.binding.get("native_action")
             if not isinstance(native, str) or not native.strip():
@@ -1796,41 +1841,26 @@ def validate_vehicle_composition_episode_contract(
             semantic_to_native[identifier] = native
             bound_native_channel = raw_action_channels.get(native)
             if bound_native_channel is None:
-                findings.append(
-                    f"semantic action {identifier!r} maps to absent native episode action {native!r}"
-                )
+                findings.append(f"semantic action {identifier!r} maps to absent native episode action {native!r}")
                 continue
             if bound_native_channel.value_space is None:
                 findings.append(f"native action {native!r} has no declared value space")
             if semantic_channel.value_space is None:
                 findings.append(f"semantic action {identifier!r} has no declared value space")
-            unit_compatible = (
-                semantic_channel.canonical_unit == bound_native_channel.unit
-                or (
-                    semantic_channel.value_type == "boolean"
-                    and semantic_channel.canonical_unit is None
-                    and bound_native_channel.unit == "boolean"
-                )
+            unit_compatible = semantic_channel.canonical_unit == bound_native_channel.unit or (
+                semantic_channel.value_type == "boolean" and semantic_channel.canonical_unit is None and bound_native_channel.unit == "boolean"
             )
             if not unit_compatible:
                 findings.append(
                     f"semantic action {identifier!r} unit {semantic_channel.canonical_unit!r} does not match "
                     f"native action {native!r} unit {bound_native_channel.unit!r}"
                 )
-            if (
-                semantic_channel.lower is not None
-                and bound_native_channel.lower is not None
-                and bound_native_channel.lower > semantic_channel.lower
-            ):
+            if semantic_channel.lower is not None and bound_native_channel.lower is not None and bound_native_channel.lower > semantic_channel.lower:
                 findings.append(
                     f"native action {native!r} lower bound {bound_native_channel.lower!r} excludes "
                     f"semantic action {identifier!r} lower bound {semantic_channel.lower!r}"
                 )
-            if (
-                semantic_channel.upper is not None
-                and bound_native_channel.upper is not None
-                and bound_native_channel.upper < semantic_channel.upper
-            ):
+            if semantic_channel.upper is not None and bound_native_channel.upper is not None and bound_native_channel.upper < semantic_channel.upper:
                 findings.append(
                     f"native action {native!r} upper bound {bound_native_channel.upper!r} excludes "
                     f"semantic action {identifier!r} upper bound {semantic_channel.upper!r}"
@@ -1839,18 +1869,12 @@ def validate_vehicle_composition_episode_contract(
     bound_native_actions = set(semantic_to_native.values())
     unbound_native_actions = sorted(set(raw_action_channels) - bound_native_actions)
     if unbound_native_actions:
-        findings.append(
-            "native episode actions lack an available semantic binding: " + ", ".join(unbound_native_actions)
-        )
+        findings.append("native episode actions lack an available semantic binding: " + ", ".join(unbound_native_actions))
     duplicate_native_bindings = sorted(
-        native
-        for native in set(semantic_to_native.values())
-        if sum(bound == native for bound in semantic_to_native.values()) > 1
+        native for native in set(semantic_to_native.values()) if sum(bound == native for bound in semantic_to_native.values()) > 1
     )
     if duplicate_native_bindings:
-        findings.append(
-            "multiple semantic actions map to one native episode action: " + ", ".join(duplicate_native_bindings)
-        )
+        findings.append("multiple semantic actions map to one native episode action: " + ", ".join(duplicate_native_bindings))
 
     raw_observation = episode.observe()
     flattened_native_observation = _flatten_episode_native_values(raw_observation.values)
@@ -1865,14 +1889,10 @@ def validate_vehicle_composition_episode_contract(
         observation_schema_projection = "native_truth"
         missing_native_observation_schema = sorted(set(flattened_native_observation) - set(raw_observation_channels))
         if missing_native_observation_schema:
-            findings.append(
-                "committed native observation keys lack schema entries: " + ", ".join(missing_native_observation_schema)
-            )
+            findings.append("committed native observation keys lack schema entries: " + ", ".join(missing_native_observation_schema))
         missing_native_observation_values = sorted(set(raw_observation_channels) - set(flattened_native_observation))
         if missing_native_observation_values:
-            findings.append(
-                "native observation schema keys are absent from committed truth: " + ", ".join(missing_native_observation_values)
-            )
+            findings.append("native observation schema keys are absent from committed truth: " + ", ".join(missing_native_observation_values))
 
     status = episode.status_frame()
     if status.interface_id != contract.id:
@@ -1890,22 +1910,16 @@ def validate_vehicle_composition_episode_contract(
             continue
         observation = episode.observe_frame(observation_profile.id)
         if observation.interface_id != contract.id:
-            findings.append(
-                f"observation profile {observation_profile.id!r} has interface ID {observation.interface_id!r}, expected {contract.id!r}"
-            )
+            findings.append(f"observation profile {observation_profile.id!r} has interface ID {observation.interface_id!r}, expected {contract.id!r}")
         if observation.interface_fingerprint_sha256 != contract.fingerprint:
             findings.append(f"observation profile {observation_profile.id!r} has a mismatched interface fingerprint")
         if observation.observation_profile_id != observation_profile.id:
-            findings.append(
-                f"observation profile {observation_profile.id!r} returned identity {observation.observation_profile_id!r}"
-            )
+            findings.append(f"observation profile {observation_profile.id!r} returned identity {observation.observation_profile_id!r}")
         if observation.time_s != status.time_s or observation.status != status.status:
             findings.append(f"observation profile {observation_profile.id!r} is not aligned to the committed status boundary")
         unknown = sorted(set(observation.values) - set(observation_profile.channel_ids))
         if unknown:
-            findings.append(
-                f"observation profile {observation_profile.id!r} emitted undeclared channels: {', '.join(unknown)}"
-            )
+            findings.append(f"observation profile {observation_profile.id!r} emitted undeclared channels: {', '.join(unknown)}")
         available_observations.append(
             {
                 "id": observation_profile.id,
@@ -1960,11 +1974,18 @@ def _flatten_episode_native_values(
 def _a320_stepper_for_composition(composition: CompiledVehicleComposition) -> A320RacetrackStepper:
     """Build the exact A320 reduced plant selected by one composition."""
 
+    from taoryx_reference_models.resources import model_resource_root
+
+    from .reduced_fixed_wing_execution import _a320_operating_point_for_speed
+    from .trajectory.a320_openap import A320OpenAPModel
+    from .trajectory.a320_pseudo6dof import A320Pseudo6DOFModel
+    from .trajectory.a320_racetrack import A320RacetrackRunner, A320RacetrackStepper
+
     route = compile_powered_fixed_wing_racetrack_from_composition(composition).route
     inputs = composition.initialization.inputs
     altitude_m = _composition_number(inputs, "altitude_m", default=6000.0)
     mass_kg = _composition_number(inputs, "mass_kg", default=60000.0)
-    root = Path(__file__).resolve().parents[2]
+    root = model_resource_root()
     base_model = A320OpenAPModel.from_repository(root)
     operating_point = _a320_operating_point_for_speed(base_model, altitude_m, mass_kg, route.speed_m_s)
     model: A320OpenAPModel | A320Pseudo6DOFModel
@@ -1999,6 +2020,12 @@ def _a320_stepper_for_composition(composition: CompiledVehicleComposition) -> A3
 def _f16_stepper_for_composition(composition: CompiledVehicleComposition) -> F16ReducedRacetrackStepper:
     """Build the exact source-trimmed F-16 reduction selected by one composition."""
 
+    from taoryx_reference_models.resources import model_resource_root
+
+    from .reduced_fixed_wing_execution import _f16_source_trim
+    from .trajectory.f16_reduced_racetrack import F16ReducedRacetrackRunner, F16ReducedRacetrackStepper
+    from .trajectory.f16_reductions import F16AttitudeResponsePseudo6DOFModel, F16PointMass3DOFModel
+
     route = compile_powered_fixed_wing_racetrack_from_composition(composition).route
     source, trim, trim_pitch_rad = _f16_source_trim()
     observed_mach = float(source.evaluate_loads(trim.state, trim.controls, altitude_m=0.0)["mach"])
@@ -2021,7 +2048,7 @@ def _f16_stepper_for_composition(composition: CompiledVehicleComposition) -> F16
             control_step=1.0e-5,
         )
         model = F16AttitudeResponsePseudo6DOFModel(source, trim, linearization, trim_pitch_rad)
-        root = Path(__file__).resolve().parents[2]
+        root = model_resource_root()
         _, response_profile = load_pseudo6dof_catalog(root / "verification/pseudo6dof_profiles.yaml").for_family("f16_s119")
         mode = "pseudo_6dof_kinematic_bridge"
     else:
@@ -2032,6 +2059,8 @@ def _f16_stepper_for_composition(composition: CompiledVehicleComposition) -> F16
 
 def _a320_guidance_override(action: Mapping[str, float]) -> A320GuidanceOverride:
     """Translate held public/native A320 guidance coordinates into SI/radians."""
+
+    from .trajectory.a320_racetrack import A320GuidanceOverride
 
     return A320GuidanceOverride(
         speed_m_s=action.get("speed_m_s"),
@@ -2044,6 +2073,8 @@ def _a320_guidance_override(action: Mapping[str, float]) -> A320GuidanceOverride
 
 def _f16_guidance_override(action: Mapping[str, float]) -> F16GuidanceOverride:
     """Translate held public/native F-16 guidance coordinates into SI/radians."""
+
+    from .trajectory.f16_reduced_racetrack import F16GuidanceOverride
 
     return F16GuidanceOverride(
         speed_m_s=action.get("speed_m_s"),
@@ -2072,6 +2103,8 @@ def _a320_status_values(row: Mapping[str, object]) -> dict[str, object]:
 
 def _f16_stepper_state(payload: Mapping[str, object]) -> F16ReducedRacetrackStepperState:
     """Decode a checkpointed F-16 stepper state with no permissive coercion."""
+
+    from .trajectory.f16_reduced_racetrack import F16ReducedRacetrackStepperState
 
     controls = payload.get("controls")
     if not isinstance(controls, Mapping):
@@ -2124,6 +2157,8 @@ def _f16_stepper_state(payload: Mapping[str, object]) -> F16ReducedRacetrackStep
 
 def _a320_stepper_state(payload: Mapping[str, object]) -> A320RacetrackStepperState:
     """Decode a checkpointed A320 stepper state with no permissive coercion."""
+
+    from .trajectory.a320_racetrack import A320RacetrackStepperState
 
     state = payload.get("state")
     controls = payload.get("controls")
@@ -2232,13 +2267,17 @@ def _hummingbird_initial_mass_kg(composition: CompiledVehicleComposition) -> flo
 
 
 def _numeric_action(action: Mapping[str, object]) -> dict[str, float]:
-    """Reject boolean/string controls at the numeric language runtime boundary."""
+    """Normalize semantic booleans and numeric controls for the language runtime."""
 
     values: dict[str, float] = {}
     for name, raw in action.items():
         if isinstance(raw, bool):
-            raise ValueError(f"language-backed action {name!r} must be numeric")
-        numeric = _finite_number(raw, f"language-backed action {name!r}")
+            # Language ``*runtime control`` values are numeric.  A semantic
+            # boolean remains explicit at the interface boundary, then maps
+            # to the native 0/1 convention only for its declared binding.
+            numeric = 1.0 if raw else 0.0
+        else:
+            numeric = _finite_number(raw, f"language-backed action {name!r}")
         values[name] = numeric
     return values
     ####
@@ -2282,6 +2321,8 @@ def _hummingbird_state_payload(state: HummingbirdPseudo6DOFState) -> dict[str, o
 
 
 def _hummingbird_state_from_payload(payload: object) -> HummingbirdPseudo6DOFState:
+    from .trajectory.hummingbird_pseudo6dof import HummingbirdPseudo6DOFState
+
     if not isinstance(payload, Mapping):
         raise ValueError("Hummingbird episode checkpoint state must be a mapping")
     vectors = {
@@ -2364,9 +2405,14 @@ def _semantic_action_from_native(
     channels = {channel.id: channel for channel in contract.action_channels}
     result: dict[str, object] = {}
     for identifier in profile.action_ids:
-        native = channels[identifier].binding.get("native_action")
+        channel = channels[identifier]
+        native = channel.binding.get("native_action")
         if isinstance(native, str) and native in native_action:
-            result[identifier] = native_action[native]
+            value = native_action[native]
+            if channel.value_type == "boolean" and isinstance(value, int | float) and not isinstance(value, bool):
+                result[identifier] = float(value) >= 0.5
+            else:
+                result[identifier] = value
     return result
     ####
 

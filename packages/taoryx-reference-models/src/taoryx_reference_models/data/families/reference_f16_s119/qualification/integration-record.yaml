@@ -1,0 +1,47 @@
+schema: taoryx.model-integration/v1alpha1
+family: reference_f16_s119
+source:
+  kind: daveml
+  package: f16-s119-reference-v0.7.txair
+  package_sha256: eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c
+  aerodynamic_source: qualified-models/f16-s119/F16_aero_mod_k_normalized.dml
+  aerodynamics_sha256: 272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764
+  expected_input_path: qualified-models/f16-s119/taoryx-f16-s119-reference-v0.7.txair
+  source_corpus_archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
+  source_corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+  availability: local_corpus_input_verified
+  license_and_notices: required_from_source_package
+plant:
+  fidelity: rigid_body_6dof
+  body_frame: FRD
+  navigation_frame: NED
+  qualification: runtime_replay_qualification_passed
+  source_payload_required_for_execution: true
+library:
+  family_manifest: families/reference_f16_s119/family.yaml
+  standardized_shape: source_grounded_reference_manifest_to_family_package
+  case_resolution: supported
+  native_runtime_replay: verified_load_contract_and_hold_evidence
+layers:
+  mass_properties: {version: v1, evidence: source_bound_fixed}
+  aerodynamics: {version: v1, evidence: source_checked_semantic_reconstruction}
+  propulsion: {version: v1, evidence: source_checked_steady}
+  actuators: {version: reference-first-order-v1, evidence: engineering_overlay_development_screen}
+  controller: {version: local-lqr-trim-hold-v1, evidence: plant_derived_development_screen}
+  allocation: {version: source-local-effectiveness-v1, evidence: verification/f16_physical_wrench_lqr_evidence.json}
+  mission: {version: external-overlay-required-v1, evidence: no_source_mission_contract}
+  reductions: {version: local-reduction-screen-v1, evidence: verification/f16_reduction_evidence.json}
+  operating_points: {version: source-retrimmed-local-catalog-v1, evidence: verification/f16_operating_points_evidence.json}
+claims:
+  - source-grounded nonlinear powered fixed-wing reference plant
+  - subsonic rigid-body 6DOF regression represented by the verified corpus package and embedded evidence
+  - normalized DAVE-ML source independently parsed, compiled, and passed 17 embedded static checks
+nonclaims:
+  - production F-16 training or operational fidelity
+  - actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone
+open_questions:
+  - replace the development actuator overlay with source-backed command, rate, latency, and saturation evidence where available
+  - synthesize and validate local wrench-LQR witnesses at the additional operating points before scheduling gains
+  - run nonlinear coupled perturbation cases after the local trim-hold screen
+  - qualify the screened reductions against matched parent histories over the racetrack mission window
+next_gate: alpha3_overlay_and_reduction_equivalence

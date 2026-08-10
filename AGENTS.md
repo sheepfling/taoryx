@@ -4,6 +4,24 @@
 
 This repository is the canonical semantic reconstruction of the 1995 TAOS User's Manual and the foundation for a typed `.tbl` / `.prb` language toolchain. The original source PDF is authoritative for historical wording and appearance. The LaTeX, metadata, fixtures, parser, QA reports, and generated products must remain mutually traceable.
 
+## Environment setup
+
+For a fresh checkout, install the complete contributor profile before doing
+model or registry work:
+
+```bash
+python -m tools.dev bootstrap
+source .venv/bin/activate
+python -m tools.dev install-check
+```
+
+Bootstrap installs the core and all four official plug-in distributions in
+editable mode. Do not infer that packages are installed merely because tests
+can import sibling source roots. The install check requires actual distribution
+metadata and entry points. Package profiles, individual installs, optional
+extras, Windows activation, and troubleshooting are documented in
+[docs/INSTALLATION.md](docs/INSTALLATION.md).
+
 ## Required commands
 
 Run these before completing a change:
@@ -70,6 +88,10 @@ After modifying any equation or equation label, run `python tools/dev.py equatio
 For practical recipes covering grammar validation, segment compilation,
 scenario composition, batch and interactive stepping, plotting, and controls
 above trim, start with [docs/AGENT_WORKFLOWS.md](docs/AGENT_WORKFLOWS.md).
+For model-data intake, generic metadata/controls inspection, plain YAML/Python
+segment and waypoint authoring, and registered automatic tuning, start with
+[docs/architecture/model-authoring-automation.md](docs/architecture/model-authoring-automation.md)
+and run `taoryx model list` followed by `taoryx model plan <provider> <model>`.
 
 ## Source and licensing
 

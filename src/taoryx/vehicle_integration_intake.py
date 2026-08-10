@@ -555,6 +555,7 @@ def _interface_contract_blueprint() -> dict[str, object]:
             "constraints": [
                 "source_history_replay_source_scheduled_replay_and_passive_uncontrolled_are_batch_only",
                 "local_direct_wrench_screen_requires_rigid_body_6dof_direct_wrench",
+                "source_surface_authority_screen_is_batch_only",
                 "planned_status_requires_execution_mode_planned",
             ],
         },

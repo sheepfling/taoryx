@@ -1,0 +1,27 @@
+schema_version: 1
+kind: taoryx.operating-point-catalog/v1alpha1
+family: reference_hl20_mod_k
+claim_boundary: >-
+  Source-bounded pitch-channel operating point; not full 6-DOF equilibrium,
+  controller qualification, or flight qualification.
+source_evidence: verification/daveml_hl20_trim_evidence.json
+points:
+  - id: hl20-mach1-pitch-trim
+    environment:
+      mach: 1.0
+      true_airspeed_f_s: 100.0
+      gravity_m_s2: 9.80665
+      atmosphere: verification/daveml_atmosphere_binding.json
+    target:
+      flight_path_angle_rad: 0.0
+      turn_rate_rad_s: 0.0
+      sideslip_rad: 0.0
+    state:
+      alpha_deg: 6.457652069267908
+      body_rates_rad_s: {p: 0.0, q: 0.0, r: 0.0}
+    controls: {}
+    residuals:
+      pitch_cm: 1.1578411840407199e-14
+      max_residual: 1.1578411840407199e-14
+    validity: certified_source_operating_point
+    next_use: source_bounded_pitch_channel_regression_then_adapter_linearization

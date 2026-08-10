@@ -56,6 +56,7 @@
               42338711.37831559,
               42338711.37831559
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "0983769c372c95260d9b529e27c7d35d5b728461e224bdef93aa377acee24479",
@@ -63,6 +64,7 @@
               "q": "ba53c003ec160e168b3e486bcbb646e7e1a2a083ad8f53a32fd1bca7676474b8",
               "r": "9e7cf194cf25f6ad5b94878fdae08c572be06259a20441065247dd3984b6d671"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -1.5657193553210167
@@ -90,6 +92,7 @@
             "vehicle_id": "b747",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 0.25,
                 0.25,
@@ -131,6 +134,7 @@
               42338711.37831559,
               42338711.37831559
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "0983769c372c95260d9b529e27c7d35d5b728461e224bdef93aa377acee24479",
@@ -138,6 +142,7 @@
               "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
               "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -3.1314387106420334
@@ -165,6 +170,7 @@
             "vehicle_id": "b747",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 1.0,
                 1.0,
@@ -200,6 +206,7 @@
               42338711.37831559,
               42338711.37831559
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "0983769c372c95260d9b529e27c7d35d5b728461e224bdef93aa377acee24479",
@@ -207,6 +214,7 @@
               "q": "44a85bd25b3cc5ac4485ceb50182fb5d7620650d931fd5047d8864abdcfb54da",
               "r": "939833d7a42c35bb6f78dc992fed907e7f195ac36fddf15db3a6a5bd6468b3c6"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -6.058528074273852
@@ -234,6 +242,7 @@
             "vehicle_id": "b747",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 4.0,
                 4.0,
@@ -251,6 +260,8 @@
           }
         ],
         "design_source": "runtime_inertia_attitude_bridge",
+        "integral_output_names": [],
+        "method": "lqr",
         "status": "safe",
         "vehicle_id": "b747"
       },
@@ -309,6 +320,7 @@
               469.124102661955,
               469.124102661955
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "1162a8719d174066089ef2e4188992c90a64c5a4a78bd3e15c4fb13703d6cc9e",
@@ -316,6 +328,7 @@
               "q": "ba53c003ec160e168b3e486bcbb646e7e1a2a083ad8f53a32fd1bca7676474b8",
               "r": "3b26902f81c2a2b577fa1dc329a8ca36db305082f1dec4e4f404ed79b701ee06"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -2.8665961621827023
@@ -343,6 +356,7 @@
             "vehicle_id": "hummingbird",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 0.25,
                 0.25,
@@ -381,6 +395,7 @@
               469.124102661955,
               469.124102661955
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "1162a8719d174066089ef2e4188992c90a64c5a4a78bd3e15c4fb13703d6cc9e",
@@ -388,6 +403,7 @@
               "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
               "r": "658294101da7cb3de76e17a85322361cc3a749a39c87411a85d3421c76b84665"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -5.7331923243654614
@@ -415,6 +431,7 @@
             "vehicle_id": "hummingbird",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 1.0,
                 1.0,
@@ -453,6 +470,7 @@
               469.124102661955,
               469.124102661955
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "1162a8719d174066089ef2e4188992c90a64c5a4a78bd3e15c4fb13703d6cc9e",
@@ -460,6 +478,7 @@
               "q": "44a85bd25b3cc5ac4485ceb50182fb5d7620650d931fd5047d8864abdcfb54da",
               "r": "1771a19321425888afc1155290fd159027683a3d53b17a5e18705daef2dd0d0d"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -11.460960098676765
@@ -487,6 +506,7 @@
             "vehicle_id": "hummingbird",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 4.0,
                 4.0,
@@ -505,6 +525,8 @@
           }
         ],
         "design_source": "quad_x_rotor_rate_bridge",
+        "integral_output_names": [],
+        "method": "lqr",
         "status": "safe",
         "vehicle_id": "hummingbird"
       },
@@ -561,6 +583,7 @@
               11.876245416,
               11.876245416
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "9529a9e7acbe5e435d1701604a90a773f56d31dc099936661030655b017bb325",
@@ -568,6 +591,7 @@
               "q": "ba53c003ec160e168b3e486bcbb646e7e1a2a083ad8f53a32fd1bca7676474b8",
               "r": "9e7cf194cf25f6ad5b94878fdae08c572be06259a20441065247dd3984b6d671"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -4.812242860041101
@@ -595,6 +619,7 @@
             "vehicle_id": "skywalker_x8",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 0.25,
                 0.25,
@@ -630,6 +655,7 @@
               11.876245416,
               11.876245416
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "9529a9e7acbe5e435d1701604a90a773f56d31dc099936661030655b017bb325",
@@ -637,6 +663,7 @@
               "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
               "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -9.624485720082227
@@ -664,6 +691,7 @@
             "vehicle_id": "skywalker_x8",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 1.0,
                 1.0,
@@ -699,6 +727,7 @@
               11.876245416,
               11.876245416
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "9529a9e7acbe5e435d1701604a90a773f56d31dc099936661030655b017bb325",
@@ -706,6 +735,7 @@
               "q": "44a85bd25b3cc5ac4485ceb50182fb5d7620650d931fd5047d8864abdcfb54da",
               "r": "939833d7a42c35bb6f78dc992fed907e7f195ac36fddf15db3a6a5bd6468b3c6"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -19.21216112177851
@@ -733,6 +763,7 @@
             "vehicle_id": "skywalker_x8",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 4.0,
                 4.0,
@@ -750,6 +781,8 @@
           }
         ],
         "design_source": "runtime_inertia_attitude_bridge",
+        "integral_output_names": [],
+        "method": "lqr",
         "status": "safe",
         "vehicle_id": "skywalker_x8"
       },
@@ -818,6 +851,7 @@
               527303.6096,
               527303.6096
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "870845504172a89e60619ffde728f534ce74e72bc58675d8ff8a982fb70421f2",
@@ -825,6 +859,7 @@
               "q": "ba53c003ec160e168b3e486bcbb646e7e1a2a083ad8f53a32fd1bca7676474b8",
               "r": "9e7cf194cf25f6ad5b94878fdae08c572be06259a20441065247dd3984b6d671"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -2.1953857597732043
@@ -852,6 +887,7 @@
             "vehicle_id": "x15",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 0.25,
                 0.25,
@@ -899,6 +935,7 @@
               527303.6096,
               527303.6096
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "870845504172a89e60619ffde728f534ce74e72bc58675d8ff8a982fb70421f2",
@@ -906,6 +943,7 @@
               "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
               "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -4.390771519546407
@@ -933,6 +971,7 @@
             "vehicle_id": "x15",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 1.0,
                 1.0,
@@ -980,6 +1019,7 @@
               527303.6096,
               527303.6096
             ],
+            "integral_output_names": [],
             "matrix_sha256": {
               "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
               "b": "870845504172a89e60619ffde728f534ce74e72bc58675d8ff8a982fb70421f2",
@@ -987,6 +1027,7 @@
               "q": "44a85bd25b3cc5ac4485ceb50182fb5d7620650d931fd5047d8864abdcfb54da",
               "r": "939833d7a42c35bb6f78dc992fed907e7f195ac36fddf15db3a6a5bd6468b3c6"
             },
+            "method": "lqr",
             "metrics": {
               "condition_number": 1.0,
               "maximum_real_pole": -13.646647804310007
@@ -1014,6 +1055,7 @@
             "vehicle_id": "x15",
             "violations": [],
             "weights": {
+              "integral_q_diagonal": [],
               "q_diagonal": [
                 4.0,
                 4.0,
@@ -1031,6 +1073,8 @@
           }
         ],
         "design_source": "runtime_inertia_attitude_bridge",
+        "integral_output_names": [],
+        "method": "lqr",
         "status": "safe",
         "vehicle_id": "x15"
       },

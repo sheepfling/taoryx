@@ -55,6 +55,25 @@ def test_existing_reduced_models_clear_adapter_waits_without_false_effector_clai
             assert item.pending_operations == ()
 
 
+def test_replay_backed_x15_reduced_tiers_admit_only_their_first_strategy_audit() -> None:
+    """A runnable staged witness is visible without becoming an adapter probe."""
+
+    worklist = build_family_strategy_worklist()
+
+    for tier, expected_stage in (
+        ("point_mass_3dof", "release_audit"),
+        ("pseudo_6dof", "parent_parity_check"),
+    ):
+        item = next(candidate for candidate in worklist.items if candidate.family_id == "x15" and candidate.tier == tier)
+
+        assert item.status == "strategy_development"
+        assert item.next_action == f"run_strategy_stage:{expected_stage}"
+        assert item.pending_operations == ("state_derivative", "trim")
+        assert item.runnable_batch_execution_modes == ("open_loop_witness",)
+        assert item.runnable_batch_missions == ("x15_staged_booster_reachability_v1",)
+        assert item.runnable_batch_claim_boundaries
+
+
 def test_unknown_strategy_mapping_fails_closed() -> None:
     registry = load_horizontal_registry()
     altered = registry.model_copy(

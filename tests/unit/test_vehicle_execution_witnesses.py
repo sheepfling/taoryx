@@ -20,6 +20,7 @@ from taoryx.vehicle_execution_bindings import (
 from taoryx.vehicle_execution_witnesses import (
     _execute_batch_witness,
     _validate_batch_action_trace_artifact,
+    _validate_batch_controller_metadata,
     _validate_batch_release_packet,
     _validate_batch_reproduction_artifact,
     _validate_batch_resource_ledger_artifact,
@@ -59,6 +60,7 @@ def test_every_runnable_execution_binding_has_a_checked_in_compilation_witness()
     assert all(isinstance(item, dict) for item in capability_preflights)
     assert all(item["adapter_id"] for item in capability_preflights)
     assert all(item["derived_mission_sha256"] for item in capability_preflights)
+    assert all(isinstance(item["capability_advertisement"], dict) for item in capability_preflights)
     assert all(item["lowering_status"] in {"adapter_bound", "factory_bound"} for item in records)
     assert all(
         item["batch_action_trace_disposition"]
@@ -78,7 +80,90 @@ def test_every_runnable_execution_binding_has_a_checked_in_compilation_witness()
     assert {item["family_id"] for item in variant_records} == {"a320_openap_3dof", "hummingbird"}
     assert all(item["preflight_status"] == "translation_ready" for item in variant_records)
     assert all(isinstance(item["capability_preflight"], dict) for item in variant_records)
-    assert all(item["lowering_status"] == "factory_bound" for item in variant_records)
+    assert all(isinstance(item["capability_preflight"]["capability_advertisement"], dict) for item in variant_records)
+    assert {
+        item["family_id"]: item["lowering_status"]
+        for item in variant_records
+    } == {
+        "a320_openap_3dof": "adapter_bound",
+        "hummingbird": "factory_bound",
+    }
+    ####
+
+
+def test_family_scoped_execution_witnesses_keep_exact_endpoint_coverage() -> None:
+    """A focused smoke validates one family without borrowing global witnesses."""
+
+    report = validate_vehicle_execution_witnesses(family_ids=("hl20_mod_k",))
+
+    assert report["status"] == "pass"
+    assert report["family_filter"] == ["hl20_mod_k"]
+    assert report["runnable_binding_count"] == 7
+    assert report["witness_count"] == 7
+    assert report["runnable_variant_count"] == 0
+    assert report["variant_witness_count"] == 0
+    assert report["graph_extension_witness_count"] == 0
+    records = report["records"]
+    assert isinstance(records, list)
+    assert {
+        (item["mission"], item["fidelity"], item["operation"])
+        for item in records
+    } == {
+            ("hl20_local_direct_wrench_screen_v1", "rigid_body_6dof_direct_wrench", "batch"),
+            ("hl20_local_direct_wrench_screen_v1", "rigid_body_6dof_direct_wrench", "episode"),
+            ("hl20_local_direct_wrench_lqi_screen_v1", "rigid_body_6dof_direct_wrench", "batch"),
+            ("hl20_source_surface_attitude_rate_lqi_screen_v1", "rigid_body_6dof_surface_allocated", "batch"),
+            ("hl20_source_surface_pitch_authority_screen_v1", "rigid_body_6dof_surface_allocated", "batch"),
+        ("hl20_source_booster_release_replay_v1", "point_mass_3dof", "batch"),
+        ("hl20_source_booster_release_replay_v1", "pseudo_6dof", "batch"),
+    }
+    ####
+
+
+def test_family_scoped_execution_witnesses_reject_an_unknown_family() -> None:
+    """A typo must not turn a focused endpoint check into a false pass."""
+
+    report = validate_vehicle_execution_witnesses(family_ids=("no_such_vehicle",))
+
+    assert report["status"] == "fail"
+    assert report["runnable_binding_count"] == 0
+    assert report["witness_count"] == 0
+    assert report["errors"] == ["unknown requested vehicle family: no_such_vehicle"]
+    ####
+
+
+def test_witness_scoped_execution_witness_runs_one_exact_endpoint() -> None:
+    """One endpoint smoke does not claim family variants or graph extensions."""
+
+    report = validate_vehicle_execution_witnesses(
+        witness_ids=("hl20-local-direct-wrench-screen-batch",),
+    )
+
+    assert report["status"] == "pass"
+    assert report["family_filter"] is None
+    assert report["witness_filter"] == ["hl20-local-direct-wrench-screen-batch"]
+    assert report["runnable_binding_count"] == 1
+    assert report["witness_count"] == 1
+    assert report["runnable_variant_count"] == 0
+    assert report["variant_witness_count"] == 0
+    assert report["graph_extension_witness_count"] == 0
+    records = report["records"]
+    assert isinstance(records, list)
+    assert [(item["family_id"], item["mission"], item["fidelity"], item["operation"]) for item in records] == [
+        ("hl20_mod_k", "hl20_local_direct_wrench_screen_v1", "rigid_body_6dof_direct_wrench", "batch"),
+    ]
+    ####
+
+
+def test_witness_scoped_execution_witnesses_reject_an_unknown_witness() -> None:
+    """A typo must not turn an endpoint-only smoke into a false pass."""
+
+    report = validate_vehicle_execution_witnesses(witness_ids=("no-such-witness",))
+
+    assert report["status"] == "fail"
+    assert report["runnable_binding_count"] == 0
+    assert report["witness_count"] == 0
+    assert report["errors"] == ["unknown requested execution witness: no-such-witness"]
     ####
 
 
@@ -181,7 +266,11 @@ def test_runtime_variant_witnesses_are_composed_and_lowered_without_running_a_ve
     assert {item["family_id"] for item in records} == {"a320_openap_3dof", "hummingbird"}
     assert all(item["preflight_status"] == "translation_ready" for item in records)
     assert all(isinstance(item["capability_preflight"], dict) for item in records)
-    assert all(item["lowering_status"] == "factory_bound" for item in records)
+    lowering_statuses = {item["family_id"]: item["lowering_status"] for item in records}
+    assert lowering_statuses == {
+        "a320_openap_3dof": "adapter_bound",
+        "hummingbird": "factory_bound",
+    }
     assert {item["family_id"]: item["batch_factory_id"] for item in records} == {
         "a320_openap_3dof": "reduced_fixed_wing_openap.v1",
         "hummingbird": "hummingbird_aggregate_thrust_pseudo_batch.v1",
@@ -260,6 +349,27 @@ def test_batch_witness_smoke_validates_its_declared_committed_action_trace() -> 
     assert normalized["status"] == "pass"
     assert normalized["record_kind"] == "mission_evaluation"
     assert normalized["graph_observation_status"] == "unobserved"
+    control_evidence = normalized["control_execution_evidence"]
+    controller_evidence = normalized["controller_execution_evidence"]
+    source_action_evidence = normalized["semantic_action_trace_evidence"]
+    assert isinstance(control_evidence, dict)
+    assert isinstance(controller_evidence, dict)
+    assert isinstance(source_action_evidence, dict)
+    assert control_evidence["status"] == "not_applicable"
+    assert controller_evidence["status"] == "not_applicable"
+    assert source_action_evidence["status"] == "verified"
+    assert source_action_evidence["sample_count"] > 0
+    interface_trace = report["interface_trace"]
+    assert isinstance(interface_trace, dict)
+    assert interface_trace["status"] == "pass"
+    assert interface_trace["sample_count"] > 0
+    assert interface_trace["channel_count"] > 0
+    coverage = interface_trace["batch_visible_channels"]
+    assert isinstance(coverage, dict)
+    assert coverage["status"]
+    assert coverage["resources"]
+    assert coverage["diagnostics"]
+    assert "control.controller.method" in coverage["diagnostics"]
     reproduction = report["reproduction"]
     assert isinstance(reproduction, dict)
     assert reproduction["status"] == "pass"
@@ -268,6 +378,47 @@ def test_batch_witness_smoke_validates_its_declared_committed_action_trace() -> 
     assert isinstance(release_packet, dict)
     assert release_packet["status"] == "pass"
     assert release_packet["reproduction_identity"] == "verified"
+    ####
+
+
+def test_batch_witness_can_retain_a_release_ready_result_corpus(tmp_path: Path) -> None:
+    """A user-selected output root preserves one normalized public packet."""
+
+    destination = tmp_path / "retained-witness-results"
+    report = validate_vehicle_execution_witnesses(
+        execute_batch=True,
+        witness_ids=("x8-3dof-batch",),
+        retained_results_directory=destination,
+    )
+
+    assert report["status"] == "pass"
+    retained = report["retained_result_corpus"]
+    assert isinstance(retained, dict)
+    assert retained["status"] == "pass"
+    assert retained["valid_result_count"] == 1
+    assert retained["release_packet_count"] == 1
+    assert (destination / "x8-3dof-batch" / "execution" / "evaluation.json").is_file()
+    release_path = destination / "release-catalog.json"
+    assert release_path.is_file()
+    release_catalog = json.loads(release_path.read_text(encoding="utf-8"))
+    assert result_catalog_module.validate_composition_release_catalog(destination, release_catalog) == ()
+    indexed = result_catalog_module.index_composition_results(destination)
+    assert indexed["status"] == "pass"
+    assert indexed["valid_result_count"] == 1
+    ####
+
+
+def test_retained_batch_result_corpus_requires_an_empty_destination(tmp_path: Path) -> None:
+    destination = tmp_path / "nonempty-results"
+    destination.mkdir()
+    (destination / "existing.txt").write_text("preserve", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="must be empty"):
+        validate_vehicle_execution_witnesses(
+            execute_batch=True,
+            witness_ids=("x8-3dof-batch",),
+            retained_results_directory=destination,
+        )
     ####
 
 
@@ -282,18 +433,211 @@ def test_batch_witness_smoke_evaluates_a_local_controller_screen_by_its_declared
     assert report["status"] == "pass"
     assert report["mode"] == "local_controller_screen"
     assert report["screen_pass"] is True
+    controller_metadata = report["controller_metadata"]
+    assert isinstance(controller_metadata, dict)
+    assert controller_metadata["status"] == "pass"
+    assert controller_metadata["method"] == "lqi"
+    assert controller_metadata["status_trace_method"] == "lqi"
     action_trace = report["action_trace"]
     assert isinstance(action_trace, dict)
     assert action_trace["status"] == "pass"
     normalized = report["result_catalog"]
     assert isinstance(normalized, dict)
     assert normalized["record_kind"] == "local_controller_screen"
+    interface_trace = report["interface_trace"]
+    assert isinstance(interface_trace, dict)
+    assert interface_trace["status"] == "pass"
+    coverage = interface_trace["batch_visible_channels"]
+    assert isinstance(coverage, dict)
+    assert coverage["status"]
+    assert coverage["resources"]
+    assert coverage["diagnostics"]
     reproduction = report["reproduction"]
     assert isinstance(reproduction, dict)
     assert reproduction["status"] == "pass"
     release_packet = report["release_packet"]
     assert isinstance(release_packet, dict)
     assert release_packet["status"] == "pass"
+    ####
+
+
+@pytest.mark.parametrize(
+    "composition_name",
+    (
+        "a320_local_native_coordinate_lqi_screen_compose.yaml",
+        "b747_condition3_local_physical_surface_lqi_screen_compose.yaml",
+        "f16_local_physical_direct_wrench_screen_compose.yaml",
+        "f16_local_physical_surface_screen_compose.yaml",
+        "f16_local_physical_surface_lqi_screen_compose.yaml",
+        "f16_local_physical_surface_lqr_schedule_interior_screen_compose.yaml",
+        "f16_local_physical_surface_lqi_schedule_interior_screen_compose.yaml",
+        "f16_local_physical_surface_lqr_schedule_transition_screen_compose.yaml",
+        "x8_local_physical_surface_lqi_long_recovery_screen_compose.yaml",
+        "x15_source_surface_attitude_rate_lqi_screen_compose.yaml",
+        "hl20_source_surface_attitude_rate_lqi_screen_compose.yaml",
+        "hummingbird_local_individual_rotor_lqi_screen_compose.yaml",
+        "hummingbird_local_vertical_translation_lqi_screen_compose.yaml",
+    ),
+)
+def test_batch_witness_smoke_normalizes_every_local_controller_screen(
+    composition_name: str,
+) -> None:
+    """Local screen result packets use their declared screen pass, not mission-only fields."""
+
+    composition = compile_vehicle_composition(
+        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / composition_name)
+    )
+    binding = resolve_vehicle_execution_binding(composition, "batch")
+
+    report = _execute_batch_witness("local-screen-normalization", composition, binding=binding)
+
+    assert report["status"] == "pass"
+    assert report["mode"] == "local_controller_screen"
+    assert report["screen_pass"] is True
+    controller_metadata = report["controller_metadata"]
+    assert isinstance(controller_metadata, dict)
+    assert controller_metadata["status"] == "pass"
+    assert controller_metadata["method"] in {"lqr", "lqi"}
+    assert controller_metadata["status_trace_method"] == controller_metadata["method"]
+    result_catalog = report["result_catalog"]
+    assert isinstance(result_catalog, dict)
+    assert result_catalog["record_kind"] in {"local_controller_screen", "mission_evaluation"}
+    assert result_catalog["qualification"] in {None, "unqualified"}
+    control_evidence = result_catalog["control_execution_evidence"]
+    assert isinstance(control_evidence, dict)
+    assert control_evidence["status"] == "verified"
+    assert control_evidence["execution_control_realization"] == controller_metadata["control_realization"]
+    controller_evidence = result_catalog["controller_execution_evidence"]
+    assert isinstance(controller_evidence, dict)
+    assert controller_evidence["status"] == "verified"
+    assert controller_evidence["method"] == controller_metadata["method"]
+    assert controller_evidence["status_trace_sample_count"] > 0
+    ####
+
+
+@pytest.mark.parametrize(
+    ("composition_name", "control_realization"),
+    (
+        ("x15_source_surface_authority_screen_compose.yaml", "source_surface_three_axis_authority_allocation"),
+        ("hl20_source_surface_pitch_authority_screen_compose.yaml", "source_surface_pitch_authority_allocation"),
+    ),
+)
+def test_batch_witness_normalizes_source_surface_authority_execution(
+    composition_name: str,
+    control_realization: str,
+) -> None:
+    """Physical source authority proves allocation without inventing a controller."""
+
+    composition = compile_vehicle_composition(
+        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / composition_name)
+    )
+    binding = resolve_vehicle_execution_binding(composition, "batch")
+
+    report = _execute_batch_witness("source-surface-authority-normalization", composition, binding=binding)
+
+    assert report["status"] == "pass"
+    assert report["mode"] == "source_surface_authority_screen"
+    result_catalog = report["result_catalog"]
+    assert isinstance(result_catalog, dict)
+    control_evidence = result_catalog["control_execution_evidence"]
+    assert isinstance(control_evidence, dict)
+    assert control_evidence["status"] == "verified"
+    assert control_evidence["execution_control_realization"] == control_realization
+    assert control_evidence["physical_effector_allocation"] is True
+    assert control_evidence["physical_allocation_trace_channel"] == "control.physical_effector_allocation"
+    assert control_evidence["full_state_trim"]["status"] == "not_available"
+    controller_evidence = result_catalog["controller_execution_evidence"]
+    assert isinstance(controller_evidence, dict)
+    assert controller_evidence["status"] == "not_applicable"
+    ####
+
+
+@pytest.mark.parametrize(
+    ("family_id", "expected_witness_count"),
+    (
+        ("reference_nesc_two_stage_rocket", 2),
+        ("tumbling_body", 2),
+    ),
+)
+def test_family_batch_witnesses_preserve_explicit_controller_free_evidence(
+    family_id: str,
+    expected_witness_count: int,
+) -> None:
+    """Replay and passive endpoints remain consumable without inventing control."""
+
+    report = validate_vehicle_execution_witnesses(
+        execute_batch=True,
+        family_ids=(family_id,),
+    )
+
+    assert report["status"] == "pass"
+    records = report["records"]
+    assert isinstance(records, list)
+    assert len(records) == expected_witness_count
+    for record in records:
+        execution = record["batch_execution"]
+        assert isinstance(execution, dict)
+        assert execution["status"] == "pass"
+        result_catalog = execution["result_catalog"]
+        assert isinstance(result_catalog, dict)
+        control_evidence = result_catalog["control_execution_evidence"]
+        controller_evidence = result_catalog["controller_execution_evidence"]
+        assert isinstance(control_evidence, dict)
+        assert isinstance(controller_evidence, dict)
+        assert control_evidence["status"] == "not_applicable"
+        assert controller_evidence["status"] == "not_applicable"
+    ####
+
+
+@pytest.mark.parametrize(
+(
+    "payload", "detail"
+),
+(
+    (
+        {
+            "runtime": {"controller_method": "lqr", "control_realization": "surface_allocated"},
+            "control_screen": {"controller_method": "lqi"},
+        },
+        "runtime and control-screen controller methods disagree",
+    ),
+    (
+        {
+            "runtime": {"controller_method": "lqi"},
+            "control_screen": {"controller_method": "lqi"},
+        },
+        "runtime controller metadata omitted control realization",
+    ),
+    (
+        {"control_screen": {"controller_method": "lqr"}},
+        "controller screen omitted runtime controller metadata",
+    ),
+),
+)
+def test_batch_controller_metadata_gate_fails_closed_for_incoherent_evidence(
+    payload: dict[str, object],
+    detail: str,
+) -> None:
+    report = _validate_batch_controller_metadata(payload)
+
+    assert report == {"status": "fail", "detail": detail}
+    ####
+
+
+def test_batch_controller_metadata_gate_requires_committed_trace_agreement() -> None:
+    payload = {
+        "runtime": {"controller_method": "lqi", "control_realization": "surface_allocated"},
+        "control_screen": {"controller_method": "lqi"},
+    }
+    report = _validate_batch_controller_metadata(
+        payload,
+        status_trace={"samples": [{"values": {"control.controller.method": "lqr"}}]},
+    )
+
+    assert report == {
+        "status": "fail",
+        "detail": "runtime controller method disagrees with committed status trace",
+    }
     ####
 
 

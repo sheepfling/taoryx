@@ -1,0 +1,21 @@
+schema_version: 1
+kind: taoryx.reference-controller-profile/v1alpha1
+family: reference_f16_s119
+controller_id: f16.local_lqr_trim_hold.v1
+method: continuous_lqr
+fidelity: rigid_body_6dof_local_body_dynamics
+linearization_artifact: verification/f16_runtime_linearization_evidence.json
+state_names: [u_m_s, v_m_s, w_m_s, p_rad_s, q_rad_s, r_rad_s]
+authority_requirement:
+  id: f16-local-trim-hold-body-axis-authority
+  required_state_names: [u_m_s, v_m_s, w_m_s, p_rad_s, q_rad_s, r_rad_s]
+control_names: [elevator_deg, aileron_deg, rudder_deg, throttle_fraction]
+state_scales: [10.0, 10.0, 10.0, 0.1, 0.1, 0.1]
+control_scales: [10.0, 10.0, 10.0, 0.1]
+q_diagonal: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+r_diagonal: [1.0, 1.0, 1.0, 1.0]
+evidence: development_screen
+claim_boundary: >-
+  LQR trim-hold screen using plant-derived local derivatives and bounded
+  engineering actuator overlays; not a scheduled controller or flight
+  qualification.

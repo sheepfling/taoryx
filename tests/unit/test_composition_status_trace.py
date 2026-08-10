@@ -53,6 +53,7 @@ def test_batch_status_trace_projects_declared_x15_resources_without_interpolatio
     assert terminal["resources.booster.attached"] is False
     assert terminal["resources.booster.propellant.consumed"] == pytest.approx(2000.0)
     assert terminal["velocity.speed"] == pytest.approx((500.0**2 + 5.0**2) ** 0.5)
+    assert terminal["control.controller.method"] == "not_applicable"
     validate_committed_status_trace(_composition("x15_staged_booster_reachability_pseudo6dof_compose.yaml"), trace)
     ####
 

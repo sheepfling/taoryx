@@ -85,32 +85,21 @@ def trajectory_result_from_run_artifact(
             output_selection,
             fidelity=projection.fidelities.get(projection.primary_object_id, projection.default_fidelity),
             operation=projection.operation,
+            realization_id=(projection.realization_ids.get(projection.primary_object_id) or projection.default_realization_id),
         )
         if output_schema is not None and output_selection is not None
         else None
     )
     advertised_core_ids = {item.id for item in output_schema.core_channels} if output_schema is not None else set()
-    primary_core_ids = (
-        {item.id for item in selected_primary_channels if item.id in advertised_core_ids}
-        if selected_primary_channels is not None
-        else set()
-    )
+    primary_core_ids = {item.id for item in selected_primary_channels if item.id in advertised_core_ids} if selected_primary_channels is not None else set()
     primary_telemetry_group_by_channel = (
-        {
-            channel_id: group.id
-            for group in output_schema.telemetry_groups
-            for channel_id in group.channel_ids
-        }
-        if output_schema is not None
-        else {}
+        {channel_id: group.id for group in output_schema.telemetry_groups for channel_id in group.channel_ids} if output_schema is not None else {}
     )
     model_to_object = _model_to_object(artifact, projection)
     events, spawn_by_child, event_diagnostics = _artifact_events(artifact, projection)
     included_object_ids = _selected_object_ids(artifact, projection, output_selection)
     spawn_by_child = {
-        child_id: event
-        for child_id, event in spawn_by_child.items()
-        if child_id in included_object_ids and event.parent_object_id in included_object_ids
+        child_id: event for child_id, event in spawn_by_child.items() if child_id in included_object_ids and event.parent_object_id in included_object_ids
     }
     lifecycle_event_ids = {item.id for item in spawn_by_child.values()}
     events = tuple(
@@ -118,11 +107,7 @@ def trajectory_result_from_run_artifact(
         for item in events
         if item.object_id in included_object_ids
         and (item.parent_object_id is None or item.parent_object_id in included_object_ids)
-        and (
-            output_selection is None
-            or output_selection.include_events
-            or item.id in lifecycle_event_ids
-        )
+        and (output_selection is None or output_selection.include_events or item.id in lifecycle_event_ids)
     )
     diagnostics = [*projection.diagnostics, *event_diagnostics]
     objects: list[TrajectoryObject] = []
@@ -136,9 +121,7 @@ def trajectory_result_from_run_artifact(
             projection,
             selected=selected_primary_channels if object_id == projection.primary_object_id else None,
             core_ids=primary_core_ids if object_id == projection.primary_object_id else set(),
-            telemetry_group_by_channel=(
-                primary_telemetry_group_by_channel if object_id == projection.primary_object_id else {}
-            ),
+            telemetry_group_by_channel=(primary_telemetry_group_by_channel if object_id == projection.primary_object_id else {}),
         )
         diagnostics.extend(channel_diagnostics)
         parent_object_id = _parent_object_id(telemetry, model_to_object)
@@ -147,11 +130,7 @@ def trajectory_result_from_run_artifact(
             raise ValueError(f"runtime child {object_id!r} has no committed spawn event")
         object_status = _object_status(object_id, projection)
         active_to_s = None if object_status == "active" else telemetry.times[-1]
-        segments = (
-            _segments(object_id, telemetry, object_status)
-            if output_selection is None or output_selection.include_segments
-            else ()
-        )
+        segments = _segments(object_id, telemetry, object_status) if output_selection is None or output_selection.include_segments else ()
         objects.append(
             TrajectoryObject(
                 object_id=object_id,
@@ -179,10 +158,7 @@ def trajectory_result_from_run_artifact(
             )
         )
     object_by_id = {item.object_id: item for item in objects}
-    relationships = tuple(
-        _spawn_relationship(object_by_id[child_id], event, projection)
-        for child_id, event in sorted(spawn_by_child.items())
-    )
+    relationships = tuple(_spawn_relationship(object_by_id[child_id], event, projection) for child_id, event in sorted(spawn_by_child.items()))
     return MissionCompositionTrajectoryResult(
         provider_id=projection.provider_id,
         provider_version=projection.provider_version,
@@ -232,11 +208,7 @@ def _object_for_model_id(
     projection: RuntimeArtifactProjection,
     model_id: str,
 ) -> str | None:
-    matches = [
-        object_id
-        for object_id, telemetry in artifact.vehicles.items()
-        if (projection.model_ids.get(object_id) or telemetry.model_id) == model_id
-    ]
+    matches = [object_id for object_id, telemetry in artifact.vehicles.items() if (projection.model_ids.get(object_id) or telemetry.model_id) == model_id]
     if len(matches) > 1:
         raise ValueError(f"runtime artifact model_id {model_id!r} is not unique")
     return matches[0] if matches else None
@@ -272,9 +244,7 @@ def _parent_object_id(telemetry: VehicleTelemetry, model_to_object: Mapping[str,
     try:
         return model_to_object[telemetry.parent_model_id]
     except KeyError as error:
-        raise ValueError(
-            f"runtime object {telemetry.vehicle_id!r} references unknown parent model {telemetry.parent_model_id!r}"
-        ) from error
+        raise ValueError(f"runtime object {telemetry.vehicle_id!r} references unknown parent model {telemetry.parent_model_id!r}") from error
     ####
 
 
@@ -347,27 +317,18 @@ def _channels(
         result.append(
             TrajectoryChannelMetadata(
                 id=channel_id,
-                channel_class=(
-                    "core_state"
-                    if channel_id in core_ids or (selected is None and _runtime_channel_is_core(channel_id))
-                    else "telemetry"
-                ),
+                channel_class=("core_state" if channel_id in core_ids or (selected is None and _runtime_channel_is_core(channel_id)) else "telemetry"),
                 telemetry_group=(
                     None
                     if channel_id in core_ids or (selected is None and _runtime_channel_is_core(channel_id))
                     else telemetry_group_by_channel.get(channel_id, _runtime_telemetry_group(channel_id))
                 ),
-                quantity=(selected_by_id[channel_id].quantity if channel_id in selected_by_id else None)
-                or (spec.quantity if spec is not None else None),
+                quantity=(selected_by_id[channel_id].quantity if channel_id in selected_by_id else None) or (spec.quantity if spec is not None else None),
                 unit=channel.unit,
                 data_type=selected_by_id[channel_id].data_type if channel_id in selected_by_id else "float64",
                 shape=selected_by_id[channel_id].shape if channel_id in selected_by_id else (),
                 frame=selected_by_id[channel_id].frame if channel_id in selected_by_id else None,
-                sampling_semantics=(
-                    selected_by_id[channel_id].sampling_semantics
-                    if channel_id in selected_by_id
-                    else "continuous_sample"
-                ),
+                sampling_semantics=(selected_by_id[channel_id].sampling_semantics if channel_id in selected_by_id else "continuous_sample"),
                 interpolation=interpolation,
                 description=(selected_by_id[channel_id].description if channel_id in selected_by_id else None)
                 or f"Runtime channel projected from {channel.source_name!r}.",
@@ -453,17 +414,25 @@ def _segments(
     telemetry: VehicleTelemetry,
     object_status: TrajectoryObjectStatus,
 ) -> tuple[TrajectorySegmentResult, ...]:
-    return tuple(
-        TrajectorySegmentResult(
-            id=f"segment-{item.number}",
-            instance_id=f"{object_id}:segment-{item.number}",
-            object_id=object_id,
-            start_time_s=item.start_time,
-            end_time_s=item.end_time,
-            status="terminated" if object_status in {"terminated", "failed"} and index == len(telemetry.segments) - 1 else "completed",
+    active_from_s = telemetry.times[0]
+    active_to_s = telemetry.times[-1]
+    result: list[TrajectorySegmentResult] = []
+    for index, item in enumerate(telemetry.segments):
+        start_time_s = max(item.start_time, active_from_s)
+        end_time_s = min(item.end_time, active_to_s)
+        if end_time_s < start_time_s:
+            continue
+        result.append(
+            TrajectorySegmentResult(
+                id=f"segment-{item.number}",
+                instance_id=f"{object_id}:segment-{item.number}",
+                object_id=object_id,
+                start_time_s=start_time_s,
+                end_time_s=end_time_s,
+                status=("terminated" if object_status in {"terminated", "failed"} and index == len(telemetry.segments) - 1 else "completed"),
+            )
         )
-        for index, item in enumerate(telemetry.segments)
-    )
+    return tuple(result)
     ####
 
 
@@ -558,7 +527,9 @@ def _runtime_event_segment(object_id: str, payload: Mapping[str, object]) -> str
     ####
 
 
-def _event_category(event_id: str, payload: Mapping[str, object]) -> Literal[
+def _event_category(
+    event_id: str, payload: Mapping[str, object]
+) -> Literal[
     "segment",
     "burnout",
     "release",

@@ -1,7 +1,4 @@
 import pytest
-
-from taoryx.composition_episode import registered_episode_factory_ids
-from taoryx.trajectory.execution_contract import MissionCompositionExecutionError
 from taoryx.trajectory.native_mission_composition import configuration_instance_from_vehicle_request
 from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.trajectory.session_contract import (
@@ -16,15 +13,16 @@ from taoryx.trajectory.session_contract import (
     MissionCompositionSessionStepRequest,
     MissionCompositionSessionStepResult,
 )
+
+from taoryx.composition_episode import registered_episode_factory_ids
+from taoryx.trajectory.execution_contract import MissionCompositionExecutionError
 from taoryx.vehicle_composition import load_vehicle_composition_request
 from taoryx.vehicle_execution_bindings import load_vehicle_execution_binding_catalog
 from taoryx.vehicle_execution_witnesses import load_vehicle_execution_witness_catalog
 from taoryx.vehicle_registry import ROOT
 
 PROVIDER = RegistryMissionCompositionProvider()
-EPISODE_WITNESSES = tuple(
-    item for item in load_vehicle_execution_witness_catalog().witnesses if item.operation == "episode"
-)
+EPISODE_WITNESSES = tuple(item for item in load_vehicle_execution_witness_catalog().witnesses if item.operation == "episode")
 
 
 def _prepared(witness: object):
@@ -35,11 +33,7 @@ def _prepared(witness: object):
 
 def test_episode_factory_registry_exactly_covers_native_catalog() -> None:
     catalog = load_vehicle_execution_binding_catalog()
-    declared = {
-        item.factory_id
-        for item in catalog.bindings
-        if item.operation == "episode" and item.status == "runnable" and item.factory_id is not None
-    }
+    declared = {item.factory_id for item in catalog.bindings if item.operation == "episode" and item.status == "runnable" and item.factory_id is not None}
     assert set(registered_episode_factory_ids()) == declared
     ####
 
@@ -64,12 +58,34 @@ def test_every_native_episode_tuple_uses_common_stateful_session(witness: object
     assert descriptor.initial_observation.sequence == 0
     assert set(descriptor.initial_observation.values) == {item.id for item in descriptor.observation_schema}
     assert all(item.data_type and item.sampling_semantics for item in descriptor.observation_schema)
+    configuration = prepared.configuration
+    realization_id = configuration.realization_id or configuration.fidelity
+    model = PROVIDER.model(configuration.model_id)
+    realization = next(item for item in model.realizations if item.id == realization_id)
+    advertised_actions = {
+        item.native_channel_id: item
+        for item in realization.controls.channels
+        if item.channel_kind == "action" and "step" in item.operations and item.native_channel_id is not None
+    }
+    runtime_actions = {item.id: item for item in descriptor.action_schema}
+    assert set(advertised_actions) == set(runtime_actions)
+    for channel_id, runtime_channel in runtime_actions.items():
+        advertised = advertised_actions[channel_id]
+        native = advertised.native_binding
+        assert native is not None
+        minimum = native.interval.minimum.value if native.interval is not None and native.interval.minimum is not None else None
+        maximum = native.interval.maximum.value if native.interval is not None and native.interval.maximum is not None else None
+        assert native.quantity == runtime_channel.quantity
+        assert native.canonical_unit == runtime_channel.unit
+        assert native.data_type == runtime_channel.data_type
+        assert native.shape == runtime_channel.shape
+        assert minimum == runtime_channel.minimum
+        assert maximum == runtime_channel.maximum
+        assert native.value_space.model_dump(mode="json") == runtime_channel.value_space
     assert MissionCompositionSessionDescriptor.model_validate_json(descriptor.model_dump_json(by_alias=True)) == descriptor
 
     inspect_request = MissionCompositionInspectSessionRequest(session_id=session_id)
-    assert MissionCompositionInspectSessionRequest.model_validate_json(
-        inspect_request.model_dump_json(by_alias=True)
-    ) == inspect_request
+    assert MissionCompositionInspectSessionRequest.model_validate_json(inspect_request.model_dump_json(by_alias=True)) == inspect_request
     inspected = manager.inspect(inspect_request)
     assert inspected == descriptor.initial_observation
     stepped = manager.step(
@@ -92,9 +108,7 @@ def test_every_native_episode_tuple_uses_common_stateful_session(witness: object
     assert MissionCompositionSessionObservation.model_validate_json(reset.model_dump_json()) == reset
 
     close_request = MissionCompositionCloseSessionRequest(session_id=session_id)
-    assert MissionCompositionCloseSessionRequest.model_validate_json(
-        close_request.model_dump_json(by_alias=True)
-    ) == close_request
+    assert MissionCompositionCloseSessionRequest.model_validate_json(close_request.model_dump_json(by_alias=True)) == close_request
     closed = manager.close(close_request)
     assert closed.lifecycle == "closed"
     assert MissionCompositionClosedSession.model_validate_json(closed.model_dump_json()) == closed
@@ -104,17 +118,32 @@ def test_every_native_episode_tuple_uses_common_stateful_session(witness: object
 
 
 def test_registered_interactive_matrix_exactly_matches_episode_witnesses() -> None:
-    advertised: set[tuple[str, str, str]] = set()
+    advertised: set[tuple[str, str, str, str | None]] = set()
     for model in PROVIDER.list_models():
         for mission in model.mission_templates:
             for operation in mission.operations:
                 if operation.operation == "step" and operation.common_runner_status == "registered":
-                    advertised.add((model.id, mission.id, operation.fidelity))
-    witnessed: set[tuple[str, str, str]] = set()
+                    advertised.add((model.id, mission.id, operation.fidelity, operation.realization_id))
+    witnessed: set[tuple[str, str, str, str | None]] = set()
     for witness in EPISODE_WITNESSES:
         prepared = _prepared(witness)
         configuration = prepared.configuration
-        witnessed.add((configuration.model_id, str(configuration.mission_template_id), configuration.fidelity))
+        witnessed.add(
+            (
+                configuration.model_id,
+                str(configuration.mission_template_id),
+                configuration.fidelity,
+                configuration.realization_id,
+            )
+        )
+    witnessed.add(
+        (
+            "a320_openap_3dof",
+            "powered_fixed_wing_racetrack_v1",
+            "pseudo_6dof",
+            "jsbsim_surrogate_composite_pseudo6dof",
+        )
+    )
     assert advertised == witnessed
     ####
 

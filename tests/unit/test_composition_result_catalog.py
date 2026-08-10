@@ -16,6 +16,7 @@ from taoryx.composition_result_catalog import (
     validate_composition_release_catalog,
     write_composition_release_catalog,
 )
+from taoryx.local_direct_wrench_composition_execution import execute_local_direct_wrench_composition
 from taoryx.runtime.cli import main
 from taoryx.trajectory.evaluation import EvaluationGate, EvaluationMetric, EvidenceChannel, TrajectoryEvaluation
 from taoryx.vehicle_composition import (
@@ -393,9 +394,30 @@ def test_result_catalog_binds_concrete_capability_preflight_to_the_composition(t
     assert isinstance(records, list)
     evidence = records[0]["capability_preflight_evidence"]
     assert evidence["status"] == "verified"
-    assert evidence["adapter_id"] == "taoryx.powered_fixed_wing_racetrack.capability_scaled.v1"
+    assert evidence["adapter_id"] == "taoryx.x8_racetrack.source_route.v1"
     assert evidence["feasibility"] == "feasible"
+    advertisement = evidence["capability_advertisement"]
+    assert isinstance(advertisement, dict)
+    assert advertisement["schema"] == "taoryx.vehicle-capability-advertisement/v1alpha1"
+    assert advertisement["interface"]["interface_id"] == "skywalker_x8/point_mass_3dof"
+    family_owned = advertisement["family_owned"]
+    assert isinstance(family_owned, dict)
+    assert family_owned["vehicle_id"] == "skywalker_x8"
+    assert family_owned["operating_point_id"] == "x8-cruise-17p9mps"
 
+    payload = json.loads((output_directory / "preflight.json").read_text(encoding="utf-8"))
+    payload["capability_estimate"]["capability_advertisement"]["family_owned"]["vehicle_id"] = "wrong"
+    (output_directory / "preflight.json").write_text(json.dumps(payload), encoding="utf-8")
+
+    invalid_advertisement = index_composition_results(tmp_path)
+
+    assert invalid_advertisement["status"] == "fail"
+    invalid_advertisement_records = invalid_advertisement["records"]
+    assert isinstance(invalid_advertisement_records, list)
+    assert invalid_advertisement_records[0]["capability_preflight_evidence"]["status"] == "invalid"
+    assert "capability advertisement" in invalid_advertisement_records[0]["capability_preflight_evidence"]["error"]
+
+    (output_directory / "preflight.json").write_text(json.dumps(preflight.as_dict()), encoding="utf-8")
     payload = json.loads((output_directory / "preflight.json").read_text(encoding="utf-8"))
     payload["capability_estimate"]["derived_mission_sha256"] = "0" * 64
     (output_directory / "preflight.json").write_text(json.dumps(payload), encoding="utf-8")
@@ -629,6 +651,10 @@ def test_result_catalog_rejects_semantic_action_trace_from_another_composition(t
                 0.0,
                 0.1,
                 {
+                    "guidance.override.enabled": False,
+                    "guidance.speed.command": 17.9,
+                    "guidance.flight_path_angle.command": 0.0,
+                    "guidance.heading.command": 90.0,
                     "propulsion.command.fraction": 0.5,
                     "control.longitudinal.bridge.command": 0.0,
                     "control.lateral.bridge.command": 0.0,
@@ -680,6 +706,10 @@ def test_result_catalog_rejects_trace_when_the_selected_binding_does_not_declare
                 0.0,
                 0.1,
                 {
+                    "guidance.override.enabled": False,
+                    "guidance.speed.command": 17.9,
+                    "guidance.flight_path_angle.command": 0.0,
+                    "guidance.heading.command": 90.0,
                     "propulsion.command.fraction": 0.5,
                     "control.longitudinal.bridge.command": 0.0,
                     "control.lateral.bridge.command": 0.0,
@@ -798,6 +828,8 @@ def test_result_catalog_indexes_local_direct_wrench_screen_without_promoting_a_m
     assert record["composition_provenance"]["status"] == "verified"
     assert record["capability_preflight_evidence"]["status"] == "verified"
     assert record["graph_execution_evidence"]["status"] == "missing"
+    assert record["control_execution_evidence"]["status"] == "missing"
+    assert record["controller_execution_evidence"]["status"] == "missing"
     assert record["batch_episode_parity"]["availability"] == "registered"
     assert "does not establish an X-15 flight mission" in record["batch_episode_parity"]["claim_boundary"]
     assert "not a mission completion" in record["claim_boundary"]
@@ -807,6 +839,49 @@ def test_result_catalog_indexes_local_direct_wrench_screen_without_promoting_a_m
     assert payload["record_kind"] == "local_controller_screen"
     assert payload["result"]["outcome"] == "local_screen_pass"
     assert "not a normalized mission" in payload["claim_boundary"]
+    ####
+
+
+def test_controller_execution_evidence_binds_runtime_screen_and_committed_trace(tmp_path: Path) -> None:
+    """A generic result reader must reject a controller method mismatch."""
+
+    composition = compile_vehicle_composition(
+        load_vehicle_composition_request(ROOT / "examples/vehicle_composition/x15_local_direct_wrench_lqi_screen_compose.yaml")
+    )
+    output_directory = tmp_path / "x15-lqi"
+    execute_local_direct_wrench_composition(composition, output_directory)
+    provenance = result_catalog._local_screen_composition_provenance(output_directory)
+
+    evidence = result_catalog._controller_execution_evidence(output_directory, provenance)
+
+    assert evidence["status"] == "verified"
+    assert evidence["method"] == "lqi"
+    assert evidence["integral_output_names"]
+    assert evidence["status_trace_sample_count"] > 0
+    control_evidence = result_catalog._control_execution_evidence(output_directory, provenance)
+    assert control_evidence["status"] == "verified"
+    assert control_evidence["physical_effector_allocation"] is False
+    assert control_evidence["control_realization"] == "direct_wrench"
+    assert control_evidence["execution_control_realization"] == "direct_wrench_screen"
+
+    execution_path = output_directory / "execution.json"
+    execution = json.loads(execution_path.read_text(encoding="utf-8"))
+    execution["control_screen"]["control_realization"] = "invalid-control-realization"
+    execution_path.write_text(json.dumps(execution), encoding="utf-8")
+
+    rejected_control = result_catalog._control_execution_evidence(output_directory, provenance)
+
+    assert rejected_control["status"] == "invalid"
+    assert "control-screen realization disagrees" in rejected_control["error"]
+
+    execution["control_screen"]["control_realization"] = "direct_wrench_screen"
+    execution["control_screen"]["controller_method"] = "lqr"
+    execution_path.write_text(json.dumps(execution), encoding="utf-8")
+
+    rejected = result_catalog._controller_execution_evidence(output_directory, provenance)
+
+    assert rejected["status"] == "invalid"
+    assert "control-screen controller method disagrees" in rejected["error"]
     ####
 
 

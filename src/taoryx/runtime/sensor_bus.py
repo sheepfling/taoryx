@@ -3,10 +3,20 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from copy import deepcopy
 from dataclasses import dataclass, field, replace
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
-from taoryx.sensors import MeasurementPacket, TruthPoint, TruthSegment
+import numpy as np
+
+from taoryx.sensor_api import (
+    MeasurementPacket,
+    SensorContext,
+    SensorContextSegment,
+    SensorSampleRequest,
+    TruthPoint,
+    TruthSegment,
+)
 
 from .sensor_clock import SensorClockSpec
 
@@ -16,10 +26,16 @@ if TYPE_CHECKING:
 
 MeasurementConsumer = Callable[[MeasurementPacket[Any]], None]
 TruthProvider = Callable[["RuntimeState"], TruthPoint]
+SensorContextProvider = Callable[["RuntimeState", TruthPoint], SensorContext]
 
 
 class SensorModelProtocol(Protocol):
     def sample(self, truth: TruthPoint) -> MeasurementPacket[Any]:
+        ...
+
+
+class ContextSensorModelProtocol(Protocol):
+    def sample_request(self, request: SensorSampleRequest) -> MeasurementPacket[Any]:
         ...
 
 
@@ -37,17 +53,22 @@ class SensorBinding:
     name: str
     vehicle_name: str
     clock: SensorClockSpec
-    model: SensorModelProtocol
+    model: object
     provenance: Mapping[str, object] = field(default_factory=dict)
     truth_provider: TruthProvider | None = None
+    context_provider: SensorContextProvider | None = None
+    rng_seed: int = 0
     drop_predicate: Callable[[MeasurementPacket[Any]], bool] | None = None
     checkpoint_drop_policy_id: str | None = None
     interval_start: TruthPoint | None = None
+    interval_start_context: SensorContext | None = None
     samples_emitted: int = 0
     invalid_samples: int = 0
     dropped_samples: int = 0
     drop_attempts: int = 0
     dropped_packets: list[MeasurementPacket[Any]] = field(default_factory=list)
+    next_sequence: int = 0
+    _rng: np.random.Generator = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         if not self.name.strip():
@@ -56,32 +77,95 @@ class SensorBinding:
             raise ValueError("sensor binding vehicle name must not be empty")
         if self.clock.name != self.name:
             raise ValueError("sensor binding name must match its clock")
-        if not callable(getattr(self.model, "sample", None)):
-            raise TypeError("sensor model must provide sample(truth)")
+        if not callable(getattr(self.model, "sample", None)) and not callable(
+            getattr(self.model, "sample_request", None)
+        ):
+            raise TypeError("sensor model must provide sample(truth) or sample_request(request)")
+        if isinstance(self.rng_seed, bool) or not isinstance(self.rng_seed, int):
+            raise TypeError("sensor binding rng_seed must be an integer")
+        self._rng = np.random.default_rng(self.rng_seed)
 
-    def sample_point(self, truth: TruthPoint) -> MeasurementPacket[Any]:
-        packet = self.model.sample(truth)
-        self._record(packet)
-        return packet
+    def sample_point(
+        self,
+        truth: TruthPoint,
+        context: SensorContext | None = None,
+    ) -> MeasurementPacket[Any]:
+        context_sampler = getattr(self.model, "sample_request", None)
+        if callable(context_sampler):
+            selected_context = context or SensorContext.from_host(truth)
+            packet = context_sampler(SensorSampleRequest(point=selected_context, rng=self._rng))
+        else:
+            sampler = getattr(self.model, "sample", None)
+            if not callable(sampler):
+                raise TypeError(f"sensor model {self.name!r} cannot sample a truth point")
+            packet = sampler(truth)
+        return self._record(packet)
+        ####
 
-    def sample_interval(self, segment: TruthSegment) -> MeasurementPacket[Any]:
-        sampler = getattr(self.model, "sample_segment", None)
-        packet = sampler(segment) if callable(sampler) else self.model.sample(segment.end)
-        self._record(packet)
-        return packet
+    def sample_interval(
+        self,
+        segment: TruthSegment,
+        context_segment: SensorContextSegment | None = None,
+    ) -> MeasurementPacket[Any]:
+        context_sampler = getattr(self.model, "sample_request", None)
+        if callable(context_sampler):
+            selected_segment = context_segment or SensorContextSegment(
+                SensorContext.from_host(segment.start),
+                SensorContext.from_host(segment.end),
+            )
+            packet = context_sampler(SensorSampleRequest(segment=selected_segment, rng=self._rng))
+        else:
+            sampler = getattr(self.model, "sample_segment", None)
+            point_sampler = getattr(self.model, "sample", None)
+            if callable(sampler):
+                packet = sampler(segment)
+            elif callable(point_sampler):
+                packet = point_sampler(segment.end)
+            else:
+                raise TypeError(f"sensor model {self.name!r} cannot sample a truth interval")
+        return self._record(packet)
+        ####
 
-    def _record(self, packet: MeasurementPacket[Any]) -> None:
+    def _record(self, packet: MeasurementPacket[Any]) -> MeasurementPacket[Any]:
+        if not isinstance(packet, MeasurementPacket):
+            raise TypeError(f"sensor model {self.name!r} must return MeasurementPacket")
+        if packet.sensor_id is not None and packet.sensor_id != self.name:
+            raise ValueError(
+                f"sensor model emitted sensor_id {packet.sensor_id!r} for binding {self.name!r}"
+            )
+        packet = replace(packet, sensor_id=self.name, sequence=self.next_sequence)
+        self.next_sequence += 1
         self.samples_emitted += 1
         if not packet.valid:
             self.invalid_samples += 1
+        return packet
+        ####
 
-    def reset_after_transition(self, truth: TruthPoint) -> MeasurementPacket[Any] | None:
+    def reset_after_transition(
+        self,
+        truth: TruthPoint,
+        context: SensorContext | None = None,
+    ) -> MeasurementPacket[Any] | None:
         reset = getattr(self.model, "reset", None)
         if not callable(reset):
             raise TypeError(f"sensor model {self.name!r} cannot reset after a truth discontinuity")
         reset()
         self.interval_start = truth
-        return self.sample_point(truth)
+        self.interval_start_context = context
+        return self.sample_point(truth, context)
+        ####
+
+    def rng_state(self) -> dict[str, object]:
+        """Return the runtime-owned random stream state for checkpointing."""
+
+        return cast(dict[str, object], deepcopy(self._rng.bit_generator.state))
+        ####
+
+    def restore_rng_state(self, value: Mapping[str, object]) -> None:
+        """Restore a state produced by :meth:`rng_state`."""
+
+        self._rng.bit_generator.state = deepcopy(dict(value))
+        ####
 
     def to_metadata(self) -> dict[str, object]:
         snapshot = getattr(self.model, "snapshot", None)
@@ -92,6 +176,10 @@ class SensorBinding:
             "clock": self.clock.to_metadata(),
             "provenance": dict(self.provenance),
             "truth_provider": None if self.truth_provider is None else getattr(self.truth_provider, "__class__", type(self.truth_provider)).__name__,
+            "context_provider": None
+            if self.context_provider is None
+            else getattr(self.context_provider, "__class__", type(self.context_provider)).__name__,
+            "rng_seed": self.rng_seed,
             "drop_policy": (
                 "none"
                 if self.drop_predicate is None
@@ -107,7 +195,10 @@ class SensorBinding:
             "drop_attempts": self.drop_attempts,
             "dropped_packet_times_s": [packet.sampled_at_s for packet in self.dropped_packets],
             "interval_start_s": None if self.interval_start is None else self.interval_start.time_s,
+            "next_sequence": self.next_sequence,
         }
+        ####
+    ####
 
 
 @dataclass(slots=True)
@@ -156,12 +247,15 @@ class SensorBus:
             vehicle = self._vehicle(problem, binding)
             truth = self._truth(binding, vehicle)
             if _due(binding.clock, truth.time_s):
+                context = self._context(binding, vehicle, truth)
                 if binding.clock.sample_mode == "instantaneous":
-                    self._queue(binding, binding.sample_point(truth))
+                    self._queue(binding, binding.sample_point(truth, context))
                 else:
                     binding.interval_start = truth
+                    binding.interval_start_context = context
             elif binding.clock.sample_mode == "interval":
                 binding.interval_start = None
+                binding.interval_start_context = None
         self.initialized = True
         self.release_available(max((vehicle.state.time for vehicle in problem.vehicles.values()), default=0.0))
 
@@ -185,9 +279,12 @@ class SensorBus:
                 continue
             if binding.clock.sample_mode == "instantaneous":
                 if _due(binding.clock, end_truth.time_s):
-                    self._queue(binding, binding.sample_point(end_truth))
+                    end_context = self._context(binding, vehicle, end_truth)
+                    self._queue(binding, binding.sample_point(end_truth, end_context))
             else:
-                self._accept_interval(binding, start_truth, end_truth)
+                start_context = self._context(binding, vehicle, start_truth, previous)
+                end_context = self._context(binding, vehicle, end_truth)
+                self._accept_interval(binding, start_truth, end_truth, start_context, end_context)
         current_time = max((vehicle.state.time for vehicle in problem.vehicles.values()), default=0.0)
         self.release_available(current_time)
 
@@ -205,12 +302,14 @@ class SensorBus:
             if binding.vehicle_name != vehicle.name:
                 continue
             truth = self._truth(binding, vehicle, state)
+            context = self._context(binding, vehicle, truth, state)
             if state_discontinuity:
-                packet = binding.reset_after_transition(truth)
+                packet = binding.reset_after_transition(truth, context)
                 if packet is not None:
                     self._queue(binding, packet)
             else:
                 binding.interval_start = truth
+                binding.interval_start_context = context
 
     def release_available(self, time_s: float) -> tuple[MeasurementPacket[Any], ...]:
         """Release packets whose declared delivery time has arrived."""
@@ -240,17 +339,30 @@ class SensorBus:
             "delivered_counts": {name: len(items) for name, items in self.delivered.items()},
         }
 
-    def _accept_interval(self, binding: SensorBinding, start: TruthPoint, end: TruthPoint) -> None:
+    def _accept_interval(
+        self,
+        binding: SensorBinding,
+        start: TruthPoint,
+        end: TruthPoint,
+        start_context: SensorContext,
+        end_context: SensorContext,
+    ) -> None:
         if binding.interval_start is None:
             if _due(binding.clock, start.time_s):
                 binding.interval_start = start
+                binding.interval_start_context = start_context
             else:
                 return
         if not _due(binding.clock, end.time_s):
             return
         segment = TruthSegment(binding.interval_start, end)
-        self._queue(binding, binding.sample_interval(segment))
+        context_segment = SensorContextSegment(
+            binding.interval_start_context or SensorContext.from_host(binding.interval_start),
+            end_context,
+        )
+        self._queue(binding, binding.sample_interval(segment, context_segment))
         binding.interval_start = end
+        binding.interval_start_context = end_context
 
     def _queue(self, binding: SensorBinding, packet: MeasurementPacket[Any]) -> None:
         binding.drop_attempts += 1
@@ -279,3 +391,25 @@ class SensorBus:
         if not isinstance(truth, TruthPoint):
             raise TypeError(f"vehicle {vehicle.name!r} truth provider must return TruthPoint")
         return truth
+
+    @staticmethod
+    def _context(
+        binding: SensorBinding,
+        vehicle: RuntimeVehicle,
+        truth: TruthPoint,
+        state: RuntimeState | None = None,
+    ) -> SensorContext:
+        selected = vehicle.state if state is None else state
+        if binding.context_provider is None:
+            return SensorContext.from_host(
+                truth,
+                snapshot_id=f"{vehicle.name}@{truth.time_s:.17g}",
+            )
+        context = binding.context_provider(selected, truth)
+        if not isinstance(context, SensorContext):
+            raise TypeError(f"sensor {binding.name!r} context provider must return SensorContext")
+        if not np.isclose(context.host.time_s, truth.time_s, atol=1.0e-12):
+            raise ValueError(f"sensor {binding.name!r} context timestamp does not match committed host truth")
+        return context
+        ####
+    ####

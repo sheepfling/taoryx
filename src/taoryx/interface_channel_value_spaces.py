@@ -10,6 +10,7 @@ from typing import Literal
 
 import yaml
 
+from .plugins.resources import packaged_resource_fallback
 from .value_space import (
     ValueSpaceSpec,
     boolean,
@@ -24,7 +25,11 @@ from .value_space import (
 )
 from .vehicle_registry import ROOT
 
-INTERFACE_CHANNEL_VALUE_SPACE_CATALOG = ROOT / "verification/interface_channel_value_space_catalog.yaml"
+INTERFACE_CHANNEL_VALUE_SPACE_CATALOG = packaged_resource_fallback(
+    ROOT / "verification/interface_channel_value_space_catalog.yaml",
+    package="taoryx_reference_models",
+    resource="data/verification/interface_channel_value_space_catalog.yaml",
+)
 
 InterfaceChannelValueSpaceProfile = Literal[
     "boolean",

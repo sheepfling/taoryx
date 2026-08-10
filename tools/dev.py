@@ -16,8 +16,13 @@ from typing import Callable
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 TOOLS = ROOT / "tools"
-VENV_PYTHON = (
-    ROOT / ".venv" / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
+VENV_PYTHON = ROOT / ".venv" / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
+SOURCE_ROOTS = (
+    ROOT / "src",
+    ROOT / "packages" / "taoryx-daveml" / "src",
+    ROOT / "packages" / "taoryx-simple-aero" / "src",
+    ROOT / "packages" / "taoryx-reference-models" / "src",
+    ROOT / "packages" / "taoryx-reachability" / "src",
 )
 QUICK_TEST_PATHS = (
     "tests/parser/test_lexical.py",
@@ -29,8 +34,25 @@ QUICK_TEST_PATHS = (
     "tests/unit/test_interactive_runtime.py",
     "tests/unit/test_composition_policy.py",
     "tests/unit/test_mission_composition_completion.py",
+    "tests/unit/test_model_authoring.py",
     "tests/unit/test_tooling_entrypoints.py",
 )
+VEHICLE_VERTICAL_TEST_PATHS: dict[str, tuple[str, ...]] = {
+    # A vertical slice is deliberately one family rather than every test with
+    # that family marker.  It proves the public Composition path from the
+    # plug-in advertisement through execution and controller automation.
+    "f16_s119": ("tests/unit/test_f16_vehicle_vertical.py",),
+    "a320_openap_3dof": ("tests/unit/test_a320_vehicle_vertical.py",),
+    "hummingbird": ("tests/unit/test_hummingbird_vehicle_vertical.py",),
+    "x15": ("tests/unit/test_x15_vehicle_vertical.py",),
+    "hl20_mod_k": ("tests/unit/test_hl20_vehicle_vertical.py",),
+    "reference_nesc_two_stage_rocket": ("tests/unit/test_nesc_vehicle_vertical.py",),
+    "tumbling_body": ("tests/unit/test_tumbling_body_vehicle_vertical.py",),
+    "skywalker_x8": ("tests/unit/test_x8_vehicle_vertical.py",),
+    "b747": ("tests/unit/test_b747_vehicle_vertical.py",),
+    "simple_aero": ("tests/unit/test_simple_aero_vehicle_vertical.py",),
+    "dual_launch_glider": ("tests/unit/test_dual_launch_vehicle_vertical.py",),
+}
 
 
 def project_python() -> str:
@@ -38,24 +60,27 @@ def project_python() -> str:
         return str(VENV_PYTHON)
     ####
     return sys.executable
+
+
 ####
 
 
 def run(command: list[str]) -> None:
     print("+", " ".join(command))
     environment = os.environ.copy()
-    source_path = str(ROOT / "src")
     existing_pythonpath = environment.get("PYTHONPATH")
-    environment["PYTHONPATH"] = os.pathsep.join(
-        path for path in (source_path, existing_pythonpath) if path
-    )
+    environment["PYTHONPATH"] = os.pathsep.join(path for path in (*(str(item) for item in SOURCE_ROOTS), existing_pythonpath) if path)
     subprocess.run(command, cwd=ROOT, check=True, env=environment)
     ####
+
+
 ####
 
 
 def python_tool(script: str, *args: str) -> list[str]:
     return [project_python(), str(SCRIPTS / script), *args]
+
+
 ####
 
 
@@ -64,22 +89,47 @@ def tool_script(script: str, *args: str) -> list[str]:
 
     module = Path(script).stem
     return [project_python(), "-m", f"tools.{module}", *args]
+
+
 ####
 
 
 def bootstrap() -> None:
     run(python_tool("bootstrap.py"))
+
+
 ####
 
 
 def source_pdf() -> None:
     run(python_tool("fetch_source_pdf.py", "--link-root"))
+
+
 ####
 
 
 def doctor() -> None:
     run(python_tool("doctor.py"))
+
+
 ####
+
+
+def installation_check() -> None:
+    """Require all official editable distributions and installed entry points."""
+
+    run(
+        [
+            project_python(),
+            "-m",
+            "taoryx.runtime.cli",
+            "plugins",
+            "check",
+            "--profile",
+            "full",
+        ]
+    )
+    ####
 
 
 def docs_doctor() -> None:
@@ -89,12 +139,16 @@ def docs_doctor() -> None:
 
 
 def lint() -> None:
-    run([project_python(), "-m", "ruff", "check", "src", "tests", "tools", "scripts"])
+    run([project_python(), "-m", "ruff", "check", "src", "packages", "tests", "tools", "scripts"])
+
+
 ####
 
 
 def typecheck() -> None:
     run([project_python(), "-m", "mypy"])
+
+
 ####
 
 
@@ -140,11 +194,7 @@ def _git_changed_paths() -> tuple[str, ...]:
 def _changed_test_paths(changed_paths: Iterable[str]) -> tuple[str, ...]:
     """Map changed source/test files to a small, conservative pytest selection."""
     changed = tuple(Path(path).as_posix() for path in changed_paths)
-    test_files = {
-        path.relative_to(ROOT).as_posix()
-        for path in (ROOT / "tests").rglob("test_*.py")
-        if path.is_file()
-    }
+    test_files = {path.relative_to(ROOT).as_posix() for path in (ROOT / "tests").rglob("test_*.py") if path.is_file()}
     selected: set[str] = set()
     source_paths = tuple(path for path in changed if path.startswith("src/taoryx/") and path.endswith(".py"))
     for normalized in changed:
@@ -280,12 +330,75 @@ def test_vehicle_family(family: str) -> None:
     ####
 
 
+def test_vehicle_vertical(family: str) -> None:
+    """Run the fast end-to-end Composition slice for one runnable vehicle."""
+
+    try:
+        paths = VEHICLE_VERTICAL_TEST_PATHS[family]
+    except KeyError as error:
+        available = ", ".join(sorted(VEHICLE_VERTICAL_TEST_PATHS))
+        raise SystemExit(f"no focused vehicle slice is defined for {family!r}; available: {available}") from error
+    run(
+        [
+            project_python(),
+            "-m",
+            "pytest",
+            *paths,
+            "-q",
+            "-x",
+            "-o",
+            "addopts=",
+            "--strict-markers",
+            "--basetemp",
+            f".pytest-vehicle-{family}",
+        ]
+    )
+    ####
+
+
+def test_vehicle_catalogue() -> None:
+    """Check that catalogue-owned controller campaigns have vertical coverage."""
+
+    run(
+        [
+            project_python(),
+            "-m",
+            "pytest",
+            "tests/unit/test_vehicle_catalogue_contract.py",
+            "-q",
+            "-x",
+            "-o",
+            "addopts=",
+            "--strict-markers",
+            "--basetemp",
+            ".pytest-vehicle-catalogue",
+        ]
+    )
+    ####
+
+
+def vehicle_catalogue() -> None:
+    """Validate runnable catalogue contracts without promoting planned tiers."""
+
+    test_vehicle_catalogue()
+    check_vehicle_models()
+    check_vehicle_interfaces()
+    onboard_vehicles()
+    ####
+
+
 def test_views() -> None:
     """Print the supported pytest views and cost-category selections."""
     print("Inner-loop commands:")
     print("  test-quick   curated smoke and contract suite")
     print("  test-changed tests associated with current Git changes")
     print("  test-parallel default fast suite with pytest-xdist when installed")
+    print(f"  test-vehicle <family> runnable one-family Composition vertical slice ({', '.join(sorted(VEHICLE_VERTICAL_TEST_PATHS))})")
+    print("  test-vehicle-catalogue controller-campaign to vertical-slice catalogue contract")
+    print("  test-f16     F-16 S.119 vertical-slice convenience alias")
+    print("  test-a320    A320 pseudo-6DOF vertical-slice convenience alias")
+    print("  test-hummingbird-vertical Hummingbird pseudo-6DOF vertical-slice convenience alias")
+    print("  test-x15-vertical X-15 direct-wrench vertical-slice convenience alias")
     print("Overlapping test views:")
     print("  grammar      parser, lexer, EBNF, corpus, and language validation")
     print("  equations    equation catalog, implementations, provenance, verification")
@@ -314,6 +427,7 @@ def test_views() -> None:
     print("  check-problems verify generated .prb products are current")
     print("  check-vehicles verify vehicle-family contracts and table bindings")
     print("  check-vehicle-interfaces verify every declared semantic interface and episode binding")
+    print("  check-vehicle-maturity  verify maturity records retain public batch witnesses")
     print("  onboard-vehicles diagnose the complete new-vehicle metadata path")
     print("  fidelity-readiness check declared data for all four fidelity tiers")
     print("  pseudo6dof-profiles validate the Alpha 3 pseudo-6DOF family profile catalog")
@@ -532,7 +646,8 @@ def audit_alpha1() -> None:
     run(
         [
             *tool_script("audit_alpha1_release.py"),
-            "--output", "artifacts/verification/alpha1/alpha1-status.json",
+            "--output",
+            "artifacts/verification/alpha1/alpha1-status.json",
         ]
     )
     ####
@@ -549,7 +664,8 @@ def alpha1_manual_examples() -> None:
     run(
         [
             *tool_script("run_alpha1_manual_examples.py"),
-            "--output", "artifacts/verification/alpha1/manual_examples/report.json",
+            "--output",
+            "artifacts/verification/alpha1/manual_examples/report.json",
         ],
     )
     ####
@@ -626,6 +742,13 @@ def check_vehicle_models() -> None:
 def check_supported_reference_families() -> None:
     """Verify source-grounded family bindings and their claim boundaries."""
     run(tool_script("validate_supported_reference_families.py"))
+    ####
+
+
+def check_vehicle_maturity_registry() -> None:
+    """Verify composition-managed maturity claims retain public batch witnesses."""
+
+    run(tool_script("validate_vehicle_maturity_registry.py"))
     ####
 
 
@@ -990,12 +1113,16 @@ def grammar() -> None:
     run([project_python(), "-m", "pytest", "tests/parser"])
     run(tool_script("check_taos_fixtures.py"))
     manual_corpus()
+
+
 ####
 
 
 def manual_corpus() -> None:
     """Verify the tracked manual corpus and its parser evidence."""
     run(tool_script("check_manual_snippet_corpus.py"))
+
+
 ####
 
 
@@ -1015,17 +1142,23 @@ def e2e_all() -> None:
 
 def legacy_audit() -> None:
     run(tool_script("audit_legacy_inbox.py", "--verify-fixtures"))
+
+
 ####
 
 
 def legacy_close_check() -> None:
     run(tool_script("check_legacy_closure.py"))
+
+
 ####
 
 
 def manual() -> None:
     run(["latexmk", "manual/manual.tex"])
     run(tool_script("normalize_pdf.py", "build/manual.pdf"))
+
+
 ####
 
 
@@ -1044,6 +1177,8 @@ def successor_guide() -> None:
         ]
     )
     run(tool_script("normalize_pdf.py", str(output / "taoryx_extensions_and_verification.pdf")))
+
+
 ####
 
 
@@ -1117,6 +1252,8 @@ def equation_audit() -> None:
     )
     shutil.copy2(audit_build / "equation_provenance_audit.pdf", ROOT / "qa/TAOS_equation_provenance_audit_v21.pdf")
     run(tool_script("check_equation_provenance.py"))
+
+
 ####
 
 
@@ -1399,12 +1536,15 @@ def handoff() -> None:
             "dist/taos-manual-codex-handoff-v21.zip",
         )
     )
+
+
 ####
 
 
 def check() -> None:
     check_vehicle_models()
     check_supported_reference_families()
+    check_vehicle_maturity_registry()
     check_vehicle_interfaces()
     check_vehicle_execution_witnesses()
     check_mission_composition_completion()
@@ -1432,12 +1572,15 @@ def check() -> None:
     manual_corpus()
     manual()
     taoryx_extension_pdf()
+
+
 ####
 
 
 TASKS: dict[str, Callable[[], None]] = {
     "bootstrap": bootstrap,
     "doctor": doctor,
+    "install-check": installation_check,
     "docs-doctor": docs_doctor,
     "source-pdf": source_pdf,
     "lint": lint,
@@ -1463,6 +1606,11 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-x8": lambda: test_vehicle_family("x8"),
     "test-hummingbird": lambda: test_vehicle_family("hummingbird"),
     "test-x15": lambda: test_vehicle_family("x15"),
+    "test-f16": lambda: test_vehicle_vertical("f16_s119"),
+    "test-a320": lambda: test_vehicle_vertical("a320_openap_3dof"),
+    "test-hummingbird-vertical": lambda: test_vehicle_vertical("hummingbird"),
+    "test-x15-vertical": lambda: test_vehicle_vertical("x15"),
+    "test-vehicle-catalogue": test_vehicle_catalogue,
     "test-x15-segments": test_x15_segments,
     "test-x15-catalog": test_x15_catalog,
     "test-views": test_views,
@@ -1495,7 +1643,9 @@ TASKS: dict[str, Callable[[], None]] = {
     "generate-problems": generate_problem_files,
     "check-problems": check_problem_files,
     "check-vehicles": check_vehicle_models,
+    "vehicle-catalogue": vehicle_catalogue,
     "check-reference-families": check_supported_reference_families,
+    "check-vehicle-maturity": check_vehicle_maturity_registry,
     "check-vehicle-interfaces": check_vehicle_interfaces,
     "mission-composition-completion": check_mission_composition_completion,
     "check-simulation-runtime-quality": check_simulation_runtime_quality,
@@ -1593,8 +1743,16 @@ TASKS: dict[str, Callable[[], None]] = {
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("task", choices=sorted(TASKS))
+    parser.add_argument("task", choices=sorted((*TASKS, "test-vehicle")))
+    parser.add_argument("vehicle", nargs="?")
     args = parser.parse_args()
+    if args.task == "test-vehicle":
+        if args.vehicle is None:
+            parser.error("test-vehicle requires a vehicle family, for example: f16_s119")
+        test_vehicle_vertical(args.vehicle)
+        return 0
+    if args.vehicle is not None:
+        parser.error(f"{args.task} does not accept a vehicle family")
     TASKS[args.task]()
     return 0
 

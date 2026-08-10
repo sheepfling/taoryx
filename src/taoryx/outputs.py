@@ -475,10 +475,16 @@ def _sample_indices(times: Sequence[float], interval: float | None) -> list[int]
 def _build_vehicle_telemetry(vehicle_id: str, vehicle: object, history: Sequence[object], kind: VehicleKind) -> VehicleTelemetry:
     times = [float(getattr(state, "time")) for state in history]
     source_names: list[str] = []
+    seen_source_names: set[str] = set()
     for state in history:
         for name in (*getattr(state, "value_names", ()), *getattr(state, "named", {}).keys()):
-            if name != "time" and (not name.startswith("_") or name == "_segment") and name not in source_names:
+            if name != "time" and (not name.startswith("_") or name == "_segment") and name not in seen_source_names:
                 source_names.append(name)
+                seen_source_names.add(name)
+    value_indices = tuple(
+        {name: index for index, name in enumerate(getattr(state, "value_names", ())) }
+        for state in history
+    )
     channels: dict[str, TelemetryChannel] = {}
     for source_name in source_names:
         public_source_name = canonical_output_name(source_name)
@@ -490,7 +496,10 @@ def _build_vehicle_telemetry(vehicle_id: str, vehicle: object, history: Sequence
             source_name=public_source_name,
             semantic_name=semantic_name,
             interpolation=spec.interpolation if spec is not None else _interpolation_for(public_source_name),
-            values=[_state_value(state, public_source_name) for state in history],
+            values=[
+                _state_value(state, public_source_name, value_index=index)
+                for state, index in zip(history, value_indices, strict=True)
+            ],
         )
     segments, events = _segment_metadata(vehicle_id, history, times)
     dynamics = _dynamics_kind(getattr(vehicle, "dynamics_mode", None))
@@ -514,7 +523,12 @@ def _build_vehicle_telemetry(vehicle_id: str, vehicle: object, history: Sequence
     )
 
 
-def _state_value(state: object, source_name: str) -> float | None:
+def _state_value(
+    state: object,
+    source_name: str,
+    *,
+    value_index: Mapping[str, int] | None = None,
+) -> float | None:
     named = getattr(state, "named", {})
     value = named.get(source_name)
     if value is None and source_name.casefold() == "segment":
@@ -522,8 +536,9 @@ def _state_value(state: object, source_name: str) -> float | None:
     if value is None:
         names = getattr(state, "value_names", ())
         values = getattr(state, "values", ())
-        if source_name in names:
-            value = values[names.index(source_name)]
+        index = value_index.get(source_name) if value_index is not None else (names.index(source_name) if source_name in names else None)
+        if index is not None:
+            value = values[index]
     return None if value is None else float(value)
 
 

@@ -1,0 +1,252 @@
+schema: taoryx.vehicle-endpoint-specs/v1alpha1
+version: 1
+description: >-
+  Focused vertical contracts that join a selected vehicle composition to its
+  runtime factory, executable witness, capability advertisement, normalized
+  output surface, controller campaign, and planning ledger record.
+endpoints:
+  - id: hummingbird-source-hover-rotor-lqi
+    family_id: hummingbird
+    model_id: hummingbird
+    mission_id: hummingbird_local_individual_rotor_lqi_screen_v1
+    fidelity: rigid_body_6dof_surface_allocated
+    execution_mode: closed_loop_controller
+    operations:
+      - operation: batch
+        factory_id: hummingbird_local_individual_rotor_lqi_screen.v1
+        witness_id: hummingbird-local-physical-lqi-screen-batch
+    controller_campaign_id: hummingbird-source-rotor-local-lqi-v1
+    required_tuning_operations: [state_derivative, trim, linearize, effectiveness, allocate]
+    required_core_output_ids:
+      - attitude.local.roll_error
+      - attitude.local.pitch_error
+      - attitude.local.yaw_error
+      - angular_rate.body.x
+      - angular_rate.body.y
+      - angular_rate.body.z
+    required_telemetry_output_ids:
+      - mass.total
+      - diagnostics.allocation_residual_norm
+      - diagnostics.saturation_count
+      - actuator.rotor.1.speed.actual
+      - actuator.rotor.4.speed.actual
+    robustness_screens:
+      - id: hummingbird-hover-fixed-lqi-mass-variation
+        kind: mass_variation
+        artifact_filename: robustness_report.json
+        execution_readiness: planned
+        cases:
+          - id: mass-0.85x
+            parameters: {mass_factor: 0.85}
+            description: Independently re-trim the source hover plant at 85 percent of nominal mass.
+          - id: mass-1.00x
+            parameters: {mass_factor: 1.0}
+            description: Retain the nominal source-hover mass as the reference case.
+          - id: mass-1.15x
+            parameters: {mass_factor: 1.15}
+            description: Independently re-trim the source hover plant at 115 percent of nominal mass.
+        metrics:
+          - id: final_attitude_rate_error_fraction
+            maximum: 1.0
+            unit: ratio
+            description: Final attitude/rate error norm divided by the case initial norm; below one proves bounded recovery.
+          - id: saturation_fraction
+            maximum: 0.0
+            unit: fraction
+            description: Fraction of committed control samples with an allocation or actuator saturation.
+        claim_boundary: >-
+          Planned discrete source-mass screen under one fixed nominal LQI design and independent case re-trims. It will not
+          establish a gain schedule, an in-flight mass transition, wind rejection, or qualification.
+    maturity_record_id: hummingbird
+    claim_boundary: >-
+      Local source-hover attitude/rate LQI and physical four-rotor allocation
+      screen only; it does not establish translation, wind rejection, battery,
+      landing, gain scheduling, or vehicle qualification.
+
+  - id: f16-source-node-surface-lqr-schedule-transition
+    family_id: f16_s119
+    model_id: f16_s119
+    mission_id: f16_local_physical_surface_lqr_schedule_transition_screen_v1
+    fidelity: rigid_body_6dof_surface_allocated
+    execution_mode: closed_loop_controller
+    operations:
+      - operation: batch
+        factory_id: f16_local_physical_surface_lqr_schedule_transition_screen.v1
+        witness_id: f16-local-surface-lqr-schedule-transition-screen-batch
+    controller_campaign_id: f16-source-surface-local-lqr-v1
+    required_tuning_operations: [state_derivative, trim, linearize, effectiveness, allocate]
+    required_core_output_ids:
+      - velocity.body.x
+      - angular_rate.body.x
+      - angular_rate.body.y
+      - angular_rate.body.z
+    required_telemetry_output_ids:
+      - mass.total
+      - control.wrench.requested.moment.y
+      - control.wrench.achieved.moment.y
+      - control.wrench.residual.moment.y
+      - diagnostics.allocation_residual_norm
+      - diagnostics.saturation_count
+      - actuator.elevator.actual
+      - control.throttle.actual
+    robustness_screens:
+      - id: f16-schedule-matched-pitch-wrench-offset
+        kind: constant_offset
+        artifact_filename: robustness_report.json
+        execution_readiness: planned
+        cases:
+          - id: nominal
+            parameters: {pitch_wrench_bias_fraction: 0.0}
+            description: Retain the unmodified source-node schedule transition as the nominal reference.
+          - id: positive-pitch-offset
+            parameters: {pitch_wrench_bias_fraction: 0.05}
+            description: Apply a constant positive pitch-wrench bias equal to five percent of the declared pitch wrench scale.
+          - id: negative-pitch-offset
+            parameters: {pitch_wrench_bias_fraction: -0.05}
+            description: Apply a constant negative pitch-wrench bias equal to five percent of the declared pitch wrench scale.
+        metrics:
+          - id: maximum_final_normalized_error
+            maximum: 0.25
+            unit: normalized_error
+            description: Worst case terminal normalized error using the existing schedule-transition recovery threshold.
+          - id: saturation_fraction
+            maximum: 0.0
+            unit: fraction
+            description: Fraction of committed samples with bounded-effector or allocation saturation.
+        claim_boundary: >-
+          Planned matched pitch-wrench offset screen for the bounded source-node LQR schedule. It will reveal, not assume,
+          whether this non-integrating controller can satisfy the stated local recovery gate under a constant offset.
+    maturity_record_id: reference_f16_s119
+    claim_boundary: >-
+      Bounded local F-16 source-node LQR schedule-transition evidence only; it
+      does not establish navigation, wind or mass robustness, a continuous
+      schedule, a full envelope, or flight qualification.
+
+  - id: x15-source-surface-attitude-rate-lqi
+    family_id: x15
+    model_id: x15
+    mission_id: x15_source_surface_attitude_rate_lqi_screen_v1
+    fidelity: rigid_body_6dof_surface_allocated
+    execution_mode: closed_loop_controller
+    operations:
+      - operation: batch
+        factory_id: x15_local_physical_surface_lqi_screen.v1
+        witness_id: x15-source-surface-attitude-rate-lqi-screen-batch
+    controller_campaign_id: x15-source-surface-local-lqi-v1
+    required_tuning_operations: [state_derivative, trim, linearize, effectiveness, allocate]
+    required_core_output_ids:
+      - attitude.local.roll_error
+      - attitude.local.pitch_error
+      - attitude.local.yaw_error
+      - angular_rate.body.x
+      - angular_rate.body.y
+      - angular_rate.body.z
+      - source_fixture.velocity.body.u
+      - source_fixture.velocity.body.v
+      - source_fixture.velocity.body.w
+    required_telemetry_output_ids:
+      - mass.total
+      - source_fixture.mach
+      - control.moment.y.requested
+      - control.moment.y.achieved
+      - control.moment.y.residual
+      - control.allocation.residual_norm
+      - control.allocation.saturation_count
+      - actuator.surface.rudder.actual
+    robustness_screens:
+      - id: x15-local-lqi-matched-pitch-wrench-offset
+        kind: constant_offset
+        artifact_filename: robustness_report.json
+        execution_readiness: planned
+        cases:
+          - id: nominal
+            parameters: {pitch_wrench_bias_fraction: 0.0}
+            description: Retain the pinned source-release local LQI recovery as the nominal reference.
+          - id: positive-pitch-offset
+            parameters: {pitch_wrench_bias_fraction: 0.05}
+            description: Apply a constant matched positive pitch-wrench bias at five percent of the declared controller scale.
+          - id: negative-pitch-offset
+            parameters: {pitch_wrench_bias_fraction: -0.05}
+            description: Apply a constant matched negative pitch-wrench bias at five percent of the declared controller scale.
+        metrics:
+          - id: final_feedback_error_fraction
+            maximum: 0.2
+            unit: ratio
+            description: Final normalized feedback error divided by initial normalized feedback error.
+          - id: saturation_fraction
+            maximum: 0.0
+            unit: fraction
+            description: Fraction of committed samples with an allocation or surface saturation.
+        claim_boundary: >-
+          Planned matched-wrench offset screen at the frozen X-15 source fixture. It does not turn the local source fragment
+          into a wind model, full-state trim, propulsion/RCS, navigation, or qualification result.
+    maturity_record_id: x15
+    claim_boundary: >-
+      Local frozen-translation X-15 source-surface attitude/rate LQI recovery
+      only; it does not establish full-state trim, translation, propulsion or
+      RCS allocation, persistent-disturbance rejection, guidance, or flight
+      qualification.
+
+  - id: hl20-source-surface-attitude-rate-lqi
+    family_id: hl20_mod_k
+    model_id: hl20_mod_k
+    mission_id: hl20_source_surface_attitude_rate_lqi_screen_v1
+    fidelity: rigid_body_6dof_surface_allocated
+    execution_mode: closed_loop_controller
+    operations:
+      - operation: batch
+        factory_id: hl20_local_physical_surface_lqi_screen.v1
+        witness_id: hl20-source-surface-attitude-rate-lqi-screen-batch
+    controller_campaign_id: hl20-source-surface-local-lqi-v1
+    required_tuning_operations: [state_derivative, trim, linearize, effectiveness, allocate]
+    required_core_output_ids:
+      - attitude.local.roll_error
+      - attitude.local.pitch_error
+      - attitude.local.yaw_error
+      - angular_rate.body.x
+      - angular_rate.body.y
+      - angular_rate.body.z
+      - source_fixture.velocity.body.x
+      - source_fixture.velocity.body.y
+      - source_fixture.velocity.body.z
+    required_telemetry_output_ids:
+      - mass.total
+      - aerodynamics.pitch_coefficient
+      - control.pitch_moment.requested
+      - control.pitch_moment.achieved
+      - control.pitch_moment.residual
+      - control.allocation.residual_norm
+      - control.allocation.saturation_count
+      - actuator.surface.rudder.actual
+    robustness_screens:
+      - id: hl20-local-lqi-matched-pitch-wrench-offset
+        kind: constant_offset
+        artifact_filename: robustness_report.json
+        execution_readiness: planned
+        cases:
+          - id: nominal
+            parameters: {pitch_wrench_bias_fraction: 0.0}
+            description: Retain the pinned Mach-1 source-pitch-trim local LQI recovery as the nominal reference.
+          - id: positive-pitch-offset
+            parameters: {pitch_wrench_bias_fraction: 0.05}
+            description: Apply a constant matched positive pitch-wrench bias at five percent of the declared controller scale.
+          - id: negative-pitch-offset
+            parameters: {pitch_wrench_bias_fraction: -0.05}
+            description: Apply a constant matched negative pitch-wrench bias at five percent of the declared controller scale.
+        metrics:
+          - id: final_feedback_error_fraction
+            maximum: 0.2
+            unit: ratio
+            description: Final normalized feedback error divided by initial normalized feedback error.
+          - id: saturation_fraction
+            maximum: 0.0
+            unit: fraction
+            description: Fraction of committed samples with an allocation or surface saturation.
+        claim_boundary: >-
+          Planned matched-wrench offset screen at the frozen HL-20 source fixture. It does not establish an atmospheric-wind
+          model, full glide trim, guidance, navigation, or flight qualification.
+    maturity_record_id: reference_hl20_mod_k
+    claim_boundary: >-
+      Local frozen-translation HL-20 source-surface attitude/rate LQI recovery
+      only; it does not establish full-state trim, glide guidance, navigation,
+      robustness, or flight qualification.

@@ -31,6 +31,14 @@ def test_unified_manifest_preserves_source_and_vehicle_authorities() -> None:
     x8 = next(family for family in catalog.families if family.family_id == "skywalker_x8")
     assert x8.vehicle_definition is not None
     assert x8.source_manifest is None
+    a320 = next(family for family in catalog.families if family.family_id == "a320_openap_3dof")
+    assert set(a320.family.data_evidence) == {"point_mass_3dof", "pseudo_6dof"}
+    assert a320.family.data_evidence["point_mass_3dof"].paths == (
+        "verification/daveml_a320_openap_integration.json",
+    )
+    assert a320.family.data_evidence["point_mass_3dof"].sha256 == {
+        "verification/daveml_a320_openap_integration.json": "0fc54c2a92fe2798e75edef807d589c843e69b6cb5a49f3c20f3cf93a09d26af",
+    }
     ####
 
 

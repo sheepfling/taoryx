@@ -204,14 +204,17 @@ missions:
         This is a local surface-allocation realization using a declared
         bank/pitch response law and finite-difference source-table derivatives.
         It commands only the roll/pitch subspace available to the two X8
-        elevon channels; yaw residual is reported rather than injected. It is
+        elevon channels; yaw residual is reported rather than injected. A
+        source-linearized diagnostic finds the differential-elevon coupled
+        roll/yaw/sideslip subproblem controllable, but it does not establish an
+        independent yaw wrench axis or nonlinear yaw/sideslip recovery. It is
         bounded by the declared elevon limits and aerodynamic table domain; it
         is not a manufacturer flight-control law or a claim of source-validated
         actuator dynamics. The current full-route witness is intentionally
-        fail-closed when the uncontrolled yaw/sideslip state reaches the
-        declared source beta boundary; the short source-domain allocation
-        witness remains the active physical-effector evidence until an
-        independently supported yaw-control realization is available.
+        fail-closed when yaw/sideslip reaches the declared source beta boundary;
+        the short source-domain allocation witness remains the active
+        physical-effector evidence until coupled nonlinear recovery and route
+        use are independently exercised.
     problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_6dof.prb
     racetrack_binding: x8-reference
     timing_estimate:

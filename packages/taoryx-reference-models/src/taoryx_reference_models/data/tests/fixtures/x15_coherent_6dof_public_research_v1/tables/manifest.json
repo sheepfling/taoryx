@@ -1,0 +1,33 @@
+{
+  "source_validation": "checks/validation_report.json",
+  "reference_geometry": "geometry/reference_geometry.csv",
+  "generated_tables": [
+    "x15_differential_stabilator_6axis.tbl",
+    "x15_rudder_6axis.tbl",
+    "x15_static_6axis.tbl",
+    "x15_symmetric_stabilator_6axis.tbl",
+    "x15_xlr99_thrust_mdot.tbl"
+  ],
+  "body_axes": {
+    "x": "forward",
+    "y": "right",
+    "z": "down"
+  },
+  "static_axes": [
+    "mach",
+    "altitude_m",
+    "alpha",
+    "beta"
+  ],
+  "control_axes": [
+    "symmetric_stabilator",
+    "differential_stabilator",
+    "rudder"
+  ],
+  "fidelity": "vehicle-specific public 6-DOF research surrogate",
+  "limitations": [
+    "no certified thermal model",
+    "zero wind baseline",
+    "source marked BETA"
+  ]
+}

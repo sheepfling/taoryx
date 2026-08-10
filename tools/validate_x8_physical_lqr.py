@@ -17,13 +17,9 @@ from typing import Any
 
 from taoryx.airbreathing_control_mapping import x8_mapping_hypotheses, x8_source_mapping
 from taoryx.generic_tuning import LinearAuthorityRequirement, linear_authority_preflight
-from taoryx.physical_lqr import (
-    design_physical_wrench_lqr,
-    project_linearization_to_wrench,
-    validate_nonlinear_wrench_lqr,
-)
+from taoryx.physical_lqr import validate_nonlinear_wrench_lqr
 from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant
-from taoryx.source_table_fixed_wing import build_x8_source_table_plant
+from taoryx.source_table_fixed_wing import build_x8_source_surface_physical_lqr_design, build_x8_source_table_plant
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBLEM = ROOT / "examples/generated/vehicles/skywalker_x8_table_coordinate_trim_6dof.prb"
@@ -55,24 +51,10 @@ def build_artifact() -> dict[str, Any]:
     trim = plant.trim(plant.source_local_state, plant.source_effectors)
     if not trim.success:
         raise RuntimeError(f"source table-coordinate trim did not converge: {trim.as_dict()}")
-    linearization = plant.linearize(
-        trim,
-        {
-            "state_step": 1.0e-4,
-            "control_step": 1.0e-3,
-            "comparison_factor": 0.5,
-            "maximum_relative_difference": 0.10,
-            "comparison_absolute_floor": 1.0e-8,
-        },
-    )
+    design = build_x8_source_surface_physical_lqr_design()
+    projection = design.projection
+    linearization = projection.source_linearization
     effectiveness = plant.effectiveness(trim.state, trim.controls)
-    projection = project_linearization_to_wrench(
-        linearization,
-        effectiveness,
-        state_names=("roll_error_rad", "pitch_error_rad", "p_rad_s", "q_rad_s"),
-        wrench_names=("moment_x_nm", "moment_y_nm"),
-        effector_names=("differential-elevon-deg", "collective-elevon-deg"),
-    )
     authority_preflight = linear_authority_preflight(
         LinearAuthorityRequirement(
             "x8-roll-pitch-source-coordinate-authority",
@@ -87,14 +69,6 @@ def build_artifact() -> dict[str, Any]:
             "X8 source-coordinate authority preflight blocked roll/pitch LQR synthesis: "
             + json.dumps(authority_preflight.as_dict(), sort_keys=True)
         )
-    design = design_physical_wrench_lqr(
-        "skywalker-x8-source-trim-roll-pitch-wrench-lqr-v1",
-        projection,
-        q_diagonal=(16.0, 16.0, 3.0, 3.0),
-        r_diagonal=(1.0, 1.0),
-        state_scales=(math.radians(10.0), math.radians(10.0), math.radians(45.0), math.radians(45.0)),
-        wrench_scales=(0.20, 0.20),
-    )
     initial_state = dict(trim.state)
     initial_state.update(
         {

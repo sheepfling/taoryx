@@ -16,9 +16,11 @@ from taoryx.control_allocation import (
 from taoryx.physical_lqr import (
     PhysicalWrenchLqrSchedule,
     PhysicalWrenchLqrScheduleNode,
+    design_physical_wrench_lqi,
     design_physical_wrench_lqr,
     project_linearization_to_wrench,
     run_scheduled_physical_wrench_transition,
+    validate_nonlinear_wrench_lqi,
     validate_nonlinear_wrench_lqr,
 )
 from taoryx.trim import DynamicsLinearization, TrimResult, TrimSpec
@@ -40,10 +42,10 @@ class _SecondOrderPhysicalPlant:
         effectors: Mapping[str, float],
         environment: Mapping[str, float | str],
     ) -> Mapping[str, float]:
-        del environment
+        bias = float(environment.get("pitch_bias_rad_s2", 0.0))
         return {
             "angle_rad": float(state["rate_rad_s"]),
-            "rate_rad_s": float(effectors["elevon_rad"]),
+            "rate_rad_s": float(effectors["elevon_rad"]) + bias,
         }
         ####
 
@@ -216,6 +218,134 @@ def test_physical_wrench_lqr_accepts_explicit_local_state_reference() -> None:
 
     assert requested["pitch_moment_nm"] == pytest.approx(increment["pitch_moment_nm"])
     assert increment["pitch_moment_nm"] > 0.0
+    ####
+
+
+def test_physical_wrench_lqi_integrates_an_explicit_output_without_bypassing_allocation() -> None:
+    """LQI retains the wrench/effector boundary while removing constant angle bias."""
+
+    projection = project_linearization_to_wrench(
+        _linearization(),
+        _effectiveness(),
+        state_names=("angle_rad", "rate_rad_s"),
+        wrench_names=("pitch_moment_nm",),
+        effector_names=("elevon_rad",),
+    )
+    design = design_physical_wrench_lqi(
+        "analytic-physical-wrench-lqi",
+        projection,
+        output_names=("angle_rad",),
+        q_diagonal=(10.0, 1.0),
+        r_diagonal=(1.0,),
+        integral_q_diagonal=(20.0,),
+        state_scales=(0.2, 1.0),
+        wrench_scales=(1.0,),
+    )
+    controller = design.build_controller(
+        wrench_lower={"pitch_moment_nm": -1.0},
+        wrench_upper={"pitch_moment_nm": 1.0},
+        integral_lower={"angle_rad": -0.5},
+        integral_upper={"angle_rad": 0.5},
+    )
+    command = controller.command(
+        {"angle_rad": 0.02, "rate_rad_s": 0.0},
+        {"angle_rad": 0.0},
+        dt=0.01,
+    )
+
+    assert design.result.hurwitz
+    assert design.result.design.controllable
+    assert command.controls["pitch_moment_nm"] < 0.0
+    assert controller.integral_error["angle_rad"] == pytest.approx(0.0002)
+    assert design.as_dict()["method"] == "lqi"
+    ####
+
+
+def test_physical_wrench_lqi_validates_integral_actions_through_the_real_allocator() -> None:
+    """The reusable LQI runner retains integral and achieved-wrench evidence."""
+
+    trim = _trim()
+    projection = project_linearization_to_wrench(
+        _linearization(),
+        _effectiveness(),
+        state_names=("angle_rad", "rate_rad_s"),
+        wrench_names=("pitch_moment_nm",),
+        effector_names=("elevon_rad",),
+    )
+    design = design_physical_wrench_lqi(
+        "analytic-physical-wrench-lqi-validation",
+        projection,
+        output_names=("angle_rad",),
+        q_diagonal=(10.0, 1.0),
+        r_diagonal=(1.0,),
+        integral_q_diagonal=(20.0,),
+        state_scales=(0.2, 1.0),
+        wrench_scales=(1.0,),
+    )
+    result = validate_nonlinear_wrench_lqi(
+        _SecondOrderPhysicalPlant(),
+        trim,
+        design,
+        initial_state={"angle_rad": 0.02, "rate_rad_s": 0.0},
+        duration_s=4.0,
+        dt_s=0.01,
+        wrench_lower={"pitch_moment_nm": -1.0},
+        wrench_upper={"pitch_moment_nm": 1.0},
+        integral_lower={"angle_rad": -0.5},
+        integral_upper={"angle_rad": 0.5},
+    )
+
+    payload = result.as_dict()
+    assert result.integrators_exercised is True
+    assert result.final_feedback_error_norm < result.initial_feedback_error_norm
+    assert result.final_controlled_actual_residual < 1.0e-8
+    assert result.allocation_statuses == ("feasible",)
+    assert payload["schema"] == "taoryx.physical-lqi-validation/v1alpha1"
+    assert payload["samples"][0]["lqi_integral_error"]["angle_rad"] == pytest.approx(0.0002)
+    assert "lqr_wrench_increment" not in payload["samples"][0]
+    ####
+
+
+def test_physical_wrench_lqi_rejects_a_constant_matched_disturbance_through_allocation() -> None:
+    """A declared derivative bias exercises the offset-free path without injection."""
+
+    trim = _trim()
+    projection = project_linearization_to_wrench(
+        _linearization(),
+        _effectiveness(),
+        state_names=("angle_rad", "rate_rad_s"),
+        wrench_names=("pitch_moment_nm",),
+        effector_names=("elevon_rad",),
+    )
+    design = design_physical_wrench_lqi(
+        "analytic-physical-wrench-lqi-bias-rejection",
+        projection,
+        output_names=("angle_rad",),
+        q_diagonal=(10.0, 1.0),
+        r_diagonal=(1.0,),
+        integral_q_diagonal=(20.0,),
+        state_scales=(0.2, 1.0),
+        wrench_scales=(1.0,),
+    )
+    result = validate_nonlinear_wrench_lqi(
+        _SecondOrderPhysicalPlant(),
+        trim,
+        design,
+        initial_state={"angle_rad": 0.0, "rate_rad_s": 0.0},
+        duration_s=8.0,
+        dt_s=0.01,
+        wrench_lower={"pitch_moment_nm": -1.0},
+        wrench_upper={"pitch_moment_nm": 1.0},
+        integral_lower={"angle_rad": -0.5},
+        integral_upper={"angle_rad": 0.5},
+        environment={"pitch_bias_rad_s2": 0.01},
+    )
+
+    assert result.environment == {"pitch_bias_rad_s2": 0.01}
+    assert result.integrators_exercised is True
+    assert abs(result.final_state["angle_rad"]) < 0.002
+    assert result.final_controlled_actual_residual < 1.0e-8
+    assert result.allocation_statuses == ("feasible",)
     ####
 
 

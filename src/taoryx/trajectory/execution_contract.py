@@ -29,6 +29,7 @@ from .configuration_contract import (
     ConfigurationParameterSchema,
     ConfigurationSequenceSchema,
     PreparedTrajectoryConfiguration,
+    TrajectoryControlStatus,
     TrajectoryOutputChannelMetadata,
     TrajectoryOutputDataType,
     TrajectoryOutputSchema,
@@ -155,10 +156,7 @@ def resolve_output_selection(
         return (
             (not channel.compatible_fidelities or fidelity in channel.compatible_fidelities)
             and (not channel.compatible_realizations or realization_id in channel.compatible_realizations)
-            and (
-                not channel.compatible_mission_templates
-                or mission_template_id in channel.compatible_mission_templates
-            )
+            and (not channel.compatible_mission_templates or mission_template_id in channel.compatible_mission_templates)
             and operation in channel.operations
         )
         ####
@@ -271,6 +269,7 @@ class TrajectorySample(BaseModel):
         for channel, value in self.values.items():
             _validate_json_output_value(value, path=f"trajectory sample channel {channel!r}")
         return self
+
     ####
 
     ####
@@ -327,6 +326,7 @@ class TrajectoryEvent(BaseModel):
         if not math.isfinite(self.time_s):
             raise ValueError("trajectory event time must be finite")
         return self
+
     ####
 
     ####
@@ -438,9 +438,7 @@ class TrajectoryObject(BaseModel):
             raise ValueError(f"trajectory object {self.object_id!r} last sample must equal active_to_s")
         for index, sample in enumerate(self.samples):
             if set(sample.values) != expected_channels:
-                raise ValueError(
-                    f"trajectory object {self.object_id!r} sample {index} channel set does not match channel metadata"
-                )
+                raise ValueError(f"trajectory object {self.object_id!r} sample {index} channel set does not match channel metadata")
             for channel_id, value in sample.values.items():
                 _validate_typed_output_value(
                     channel_by_id[channel_id],
@@ -526,10 +524,7 @@ class MissionCompositionTrajectoryResult(BaseModel):
                 raise ValueError(f"trajectory relationship {relationship.id!r} references an unknown event")
             if relationship_event.category != relationship.kind:
                 raise ValueError(f"trajectory relationship {relationship.id!r} kind does not match its event")
-            if (
-                relationship_event.object_id != relationship.child_object_id
-                or relationship_event.parent_object_id != relationship.parent_object_id
-            ):
+            if relationship_event.object_id != relationship.child_object_id or relationship_event.parent_object_id != relationship.parent_object_id:
                 raise ValueError(f"trajectory relationship {relationship.id!r} event has inconsistent lineage")
             if relationship_event.deployment_id != relationship.deployment_id:
                 raise ValueError(f"trajectory relationship {relationship.id!r} event has inconsistent deployment identity")
@@ -716,6 +711,14 @@ class ProviderModelAdvertisementConformance(BaseModel):
     configuration_value_types: tuple[str, ...] = ()
     model_property_count: int = Field(default=0, ge=0)
     reference_frame_count: int = Field(default=0, ge=0)
+    control_statuses: tuple[TrajectoryControlStatus, ...] = ()
+    control_channel_count: int = Field(default=0, ge=0)
+    action_control_channel_count: int = Field(default=0, ge=0)
+    effector_control_channel_count: int = Field(default=0, ge=0)
+    active_control_channel_count: int = Field(default=0, ge=0)
+    native_bound_control_channel_count: int = Field(default=0, ge=0)
+    control_authority_count: int = Field(default=0, ge=0)
+    control_intent_count: int = Field(default=0, ge=0)
     output_channel_count: int = Field(default=0, ge=0)
     core_output_channel_count: int = Field(default=0, ge=0)
     telemetry_channel_count: int = Field(default=0, ge=0)
@@ -774,9 +777,7 @@ def audit_provider_advertisement(
         models = ()
     model_ids = tuple(item.id for item in models)
     if len(model_ids) != len(set(model_ids)):
-        diagnostics.append(
-            _audit_diagnostic("duplicate-model-id", "Provider advertises duplicate model IDs.", metadata.id)
-        )
+        diagnostics.append(_audit_diagnostic("duplicate-model-id", "Provider advertises duplicate model IDs.", metadata.id))
     if metadata.model_count != len(models):
         diagnostics.append(
             _audit_diagnostic(
@@ -790,24 +791,20 @@ def audit_provider_advertisement(
         model_diagnostics: list[MissionCompositionDiagnostic] = []
         node_kinds: tuple[str, ...] = ()
         value_types: tuple[str, ...] = ()
-        execution_operations = tuple(
-            item
+        execution_operations = tuple(item for mission in model.mission_templates for item in mission.operations if item.operation in _RUN_OPERATIONS)
+        registered_execution_operations = tuple(item for item in execution_operations if item.common_runner_status == "registered")
+        registered_batch_tuples = tuple(
+            (mission.id, item)
             for mission in model.mission_templates
             for item in mission.operations
-            if item.operation in _RUN_OPERATIONS
-        )
-        registered_execution_operations = tuple(
-            item for item in execution_operations if item.common_runner_status == "registered"
+            if item.operation == "batch" and item.common_runner_status == "registered"
         )
         for item in execution_operations:
             if item.status == "available" and item.common_runner_status != "registered":
                 model_diagnostics.append(
                     _audit_diagnostic(
                         "available-operation-not-registered",
-                        (
-                            f"Available {item.operation} tuple {item.fidelity!r}/{item.realization_id!r} "
-                            "does not resolve through the common interface."
-                        ),
+                        (f"Available {item.operation} tuple {item.fidelity!r}/{item.realization_id!r} does not resolve through the common interface."),
                         metadata.id,
                         model_id=model.id,
                     )
@@ -822,9 +819,7 @@ def audit_provider_advertisement(
                     )
                 )
         if model.mission_templates:
-            exact_common_operations = {
-                item.operation for item in registered_execution_operations
-            }
+            exact_common_operations = {item.operation for item in registered_execution_operations}
             if set(model.common_runner_operations) != exact_common_operations:
                 model_diagnostics.append(
                     _audit_diagnostic(
@@ -841,11 +836,7 @@ def audit_provider_advertisement(
                 expected = {item for item in realization.operations if item in _RUN_OPERATIONS}
                 if not expected:
                     continue
-                witnessed = {
-                    item.operation
-                    for item in registered_execution_operations
-                    if item.realization_id == realization.id
-                }
+                witnessed = {item.operation for item in registered_execution_operations if item.realization_id == realization.id}
                 missing_realization_operations = sorted(expected - witnessed)
                 if missing_realization_operations:
                     model_diagnostics.append(
@@ -859,9 +850,40 @@ def audit_provider_advertisement(
                             model_id=model.id,
                         )
                     )
-        advertised_output_operations = {
-            operation for channel in model.output_channels for operation in channel.operations
-        }
+        for realization in model.realizations:
+            active_channels = tuple(item for item in realization.controls.channels if item.operations)
+            active_authorities = tuple(item for item in realization.controls.authorities if item.operations)
+            if realization.controls.status == "available" and not active_authorities:
+                model_diagnostics.append(
+                    _audit_diagnostic(
+                        "control-authority-missing",
+                        f"Externally controlled realization {realization.id!r} has no active authority profile.",
+                        metadata.id,
+                        model_id=model.id,
+                    )
+                )
+            if "step" in realization.operations:
+                step_actions = tuple(item for item in active_channels if item.channel_kind == "action" and "step" in item.operations)
+                if not step_actions:
+                    model_diagnostics.append(
+                        _audit_diagnostic(
+                            "interactive-control-schema-missing",
+                            f"Interactive realization {realization.id!r} has no advertised step action channels.",
+                            metadata.id,
+                            model_id=model.id,
+                        )
+                    )
+                missing_native_ids = sorted(item.id for item in step_actions if item.native_binding is None)
+                if missing_native_ids:
+                    model_diagnostics.append(
+                        _audit_diagnostic(
+                            "interactive-control-native-binding-missing",
+                            (f"Interactive realization {realization.id!r} has action channels without native IDs {missing_native_ids!r}."),
+                            metadata.id,
+                            model_id=model.id,
+                        )
+                    )
+        advertised_output_operations = {operation for channel in model.output_channels for operation in channel.operations}
         unavailable_output_operations = sorted(advertised_output_operations - set(model.common_runner_operations))
         if unavailable_output_operations:
             model_diagnostics.append(
@@ -917,6 +939,28 @@ def audit_provider_advertisement(
             for passed, code, message in output_checks:
                 if not passed:
                     model_diagnostics.append(_audit_diagnostic(code, message, metadata.id, model_id=model.id))
+            for mission_id, operation in registered_batch_tuples:
+                try:
+                    resolve_output_selection(
+                        output_schema,
+                        MissionCompositionOutputSelection(mode="core"),
+                        fidelity=operation.fidelity,
+                        operation="batch",
+                        realization_id=operation.realization_id,
+                        mission_template_id=mission_id,
+                    )
+                except ValueError as error:
+                    model_diagnostics.append(
+                        _audit_diagnostic(
+                            "registered-batch-output-core-missing",
+                            (
+                                f"Registered batch tuple {mission_id!r}/{operation.fidelity!r}/"
+                                f"{operation.realization_id!r} has no selectable core output ({error})."
+                            ),
+                            metadata.id,
+                            model_id=model.id,
+                        )
+                    )
         except Exception as error:
             diagnostic, _ = diagnostic_from_exception(
                 error,
@@ -1012,9 +1056,7 @@ def audit_provider_advertisement(
                             model_id=model.id,
                         )
                     )
-                unavailable_operations = sorted(
-                    {str(item) for item in deployment.operations} - {str(item) for item in model.operations}
-                )
+                unavailable_operations = sorted({str(item) for item in deployment.operations} - {str(item) for item in model.operations})
                 if unavailable_operations:
                     model_diagnostics.append(
                         _audit_diagnostic(
@@ -1024,9 +1066,7 @@ def audit_provider_advertisement(
                             model_id=model.id,
                         )
                     )
-                if deployment.status == "available" and (
-                    deployment.common_runner_status != "registered" or deployment.executor_id is None
-                ):
+                if deployment.status == "available" and (deployment.common_runner_status != "registered" or deployment.executor_id is None):
                     model_diagnostics.append(
                         _audit_diagnostic(
                             "available-deployment-not-registered",
@@ -1044,6 +1084,7 @@ def audit_provider_advertisement(
                         model_id=model.id,
                     )
                 )
+        control_channels = tuple(channel for realization in model.realizations for channel in realization.controls.channels)
         model_reports.append(
             ProviderModelAdvertisementConformance(
                 model_id=model.id,
@@ -1062,13 +1103,19 @@ def audit_provider_advertisement(
                     )
                 ),
                 deployment_ids=tuple(item.id for item in model.deployments),
-                deployment_adapter_required_ids=tuple(
-                    item.id for item in model.deployments if item.common_runner_status == "adapter_required"
-                ),
+                deployment_adapter_required_ids=tuple(item.id for item in model.deployments if item.common_runner_status == "adapter_required"),
                 configuration_node_kinds=node_kinds,
                 configuration_value_types=value_types,
                 model_property_count=len(model.presentation.properties),
                 reference_frame_count=len(model.reference_frames),
+                control_statuses=tuple(dict.fromkeys(item.controls.status for item in model.realizations)),
+                control_channel_count=len(control_channels),
+                action_control_channel_count=sum(item.channel_kind == "action" for item in control_channels),
+                effector_control_channel_count=sum(item.channel_kind == "effector" for item in control_channels),
+                active_control_channel_count=sum(bool(item.operations) for item in control_channels),
+                native_bound_control_channel_count=sum(item.native_binding is not None for item in control_channels),
+                control_authority_count=sum(len(item.controls.authorities) for item in model.realizations),
+                control_intent_count=sum(len(item.controls.intents) for item in model.realizations),
                 output_channel_count=len(model.output_channels),
                 core_output_channel_count=len(model.output_schema.core_channels),
                 telemetry_channel_count=len(model.output_schema.telemetry_channels),
@@ -1076,9 +1123,7 @@ def audit_provider_advertisement(
                 registered_batch_tuple_count=sum(item.operation == "batch" for item in registered_execution_operations),
                 registered_step_tuple_count=sum(item.operation == "step" for item in registered_execution_operations),
                 blocked_execution_tuple_count=sum(item.status == "blocked" for item in execution_operations),
-                registered_executor_ids=tuple(
-                    sorted({item.executor_id for item in registered_execution_operations if item.executor_id is not None})
-                ),
+                registered_executor_ids=tuple(sorted({item.executor_id for item in registered_execution_operations if item.executor_id is not None})),
                 supports_dynamic_spawning=model.output_schema.entity_output.supports_dynamic_spawning,
                 diagnostics=tuple(model_diagnostics),
             )

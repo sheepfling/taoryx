@@ -30,6 +30,7 @@ from ..fidelity_contracts import (
 )
 from ..fidelity_lowering import LoweringCandidate, select_canonical_lowering
 from ..fidelity_lowering import LoweringStatus as SharedLoweringStatus
+from ..plugins.resources import packaged_resource_fallback
 from ..vehicle_registry import ROOT
 
 Pseudo6DOFModelKind = Literal[
@@ -433,7 +434,15 @@ class Pseudo6DOFCatalog(BaseModel):
 def load_pseudo6dof_catalog(path: str | Path | None = None) -> Pseudo6DOFCatalog:
     """Load and validate the canonical pseudo-6DOF catalog."""
 
-    catalog_path = Path(path) if path is not None else ROOT / "verification/pseudo6dof_profiles.yaml"
+    catalog_path = (
+        Path(path)
+        if path is not None
+        else packaged_resource_fallback(
+            ROOT / "verification/pseudo6dof_profiles.yaml",
+            package="taoryx_reference_models",
+            resource="data/verification/pseudo6dof_profiles.yaml",
+        )
+    )
     payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"{catalog_path} must contain a mapping")

@@ -3,14 +3,33 @@
 This is the shortest route from a new task to a traceable TAORYX change. Read
 this page first, then follow the detailed architecture page for the workflow.
 
+Before running a workflow in a fresh checkout, install and verify the complete
+contributor package profile:
+
+```bash
+python -m tools.dev bootstrap
+source .venv/bin/activate
+python -m tools.dev install-check
+```
+
+The test configuration can import plug-ins directly from sibling source trees,
+so a passing test alone does not prove that package metadata or entry points
+are installed. See [Installing Taoryx and its model packages](INSTALLATION.md)
+for smaller profiles, optional dependencies, wheel installs, and diagnostics.
+
 Before adding a new source-grounded plant, DAVE-ML model, OpenAP model,
 NASA/NESC scenario, JSBSim aircraft, orbital source, or public-data surrogate,
 follow the [model integration workflow](plan/model-integration-workflow.md).
 Start with the integration record and source hashes; keep the immutable plant
 separate from Taoryx actuator, controller, mission, and RL overlays. This is
 the contributor-facing Tier 0–4 process for new model work.
+Use [Model-to-mission authoring and automation](architecture/model-authoring-automation.md)
+to turn that advertisement into plain-value initialization, segments,
+waypoints, modes, and a registered no-manual-gain-search campaign.
 
 For sensors, estimators, seekers, or RL observations, also follow the
+[sensor plug-in architecture](architecture/sensor-plugin-api.md), the
+[basic executable sensor examples](../examples/sensors/README.md), and the
 [sensor and measurement orchestration backlog](plan/sensor-measurement-orchestration.md).
 It defines the committed-truth boundary, measurement timing, multi-rate event
 ordering, and truth-isolated decision ports.
@@ -57,8 +76,16 @@ California–Hawaii variants, external time stepping, and the diagnostic ladder.
 | Find and run Simulation Runtime scenarios | [Simulation Runtime onboarding](SIMULATION_RUNTIME_ONBOARDING.md) | `taoryx run ...` / `taoryx vehicle compose → preflight → lower → run` |
 | Build plots | [Telemetry](architecture/telemetry.md) | `RunArtifact`, `render_run_artifact_plots(...)` |
 | Add control above trim | [Controller stack](architecture/controller-stack.md), [Control contracts](architecture/control-contracts.md), and [LQR](extensions/lqr.md) | `TrimSpec`, `solve_trim`, controller/allocator |
+| Introduce data for a new model | [Model-to-mission automation](architecture/model-authoring-automation.md) and [Model integration workflow](plan/model-integration-workflow.md) | Mission Composition advertisement → `taoryx model plan` |
+| Assess all advertised model/control readiness | [Model-to-mission automation](architecture/model-authoring-automation.md) | `taoryx model assess --output build/model-assessment.json` |
+| Generate initialization, modes, and segments | [Model-to-mission automation](architecture/model-authoring-automation.md) | `taoryx model scaffold` → edit plain YAML → `taoryx model compile` |
+| Run automatic controller candidate tuning | [Generic controller tuning](architecture/generic-controller-tuning.md) | plug-in campaign registration → `taoryx model tune` |
+| Verify one mature vehicle endpoint vertically | [Model-to-mission automation](architecture/model-authoring-automation.md) | `taoryx vehicle endpoint-specs` → `taoryx vehicle verify <endpoint-id>` |
+| Validate an LQI candidate through native model controls | [Model-to-mission automation](architecture/model-authoring-automation.md) | `LocalNativeCoordinateLqiScreenConfig` → exact batch Composition screen for response-law/guidance coordinates; use physical wrench validation when allocation is declared |
 | Add an airbreathing vehicle mission | [Mission-composition automation](plan/mission-composition-automation.md) | `compile_powered_fixed_wing_racetrack(...)` |
 | Add a vehicle or topology | [Generic family integration playbook](plan/generic-family-integration-playbook.md) | `taoryx vehicle intake existing-family ...` or `taoryx vehicle intake new-topology ...` |
+| Solidify one runnable vehicle | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py test-vehicle <family>` |
+| Validate catalogue declarations | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py vehicle-catalogue` |
 | Expose a parameter, control, status, or objective value | [Public value-space contract](architecture/public-value-spaces.md) | `taoryx vehicle topology-report` |
 | Demonstrate the three layers | [Authoring → Runtime → Composition showcase guide](AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md) | `taoryx vehicle maturity-report` → `catalog` → `mission inspect`/`mission create`/`mission validate` → `preflight` → `run` |
 | Publish schema-driven Mission Composition | [Mission Composition Provider API](architecture/mission-composition-provider-api.md) | `list_models()` → `get_model_schema()` → `validate_configuration()` |
@@ -71,6 +98,257 @@ Use the narrowest audit that proves the change you made. These are separate
 evidence levels, not interchangeable green checks:
 
 ```bash
+# Start a model/plugin change with one explicit vertical endpoint instead of
+# the repository-wide maturity sweep. The default check compiles the endpoint
+# witness, validates its generic capability advertisement and interface,
+# confirms its exact factory and controller-adapter operations, and checks its
+# selected public core-state and telemetry IDs.
+taoryx vehicle endpoint-specs
+taoryx vehicle verify hummingbird-source-hover-rotor-lqi
+
+# Opt into only the work relevant to the change. --execute drives that one
+# exact factory; --tune runs its registered campaign. Campaign results use a
+# content-addressed cache unless --no-cache is chosen. --results-dir retains
+# the exact packet, verifies finite samples for each required advertised output,
+# and writes a controller/tuning provenance sidecar.
+taoryx vehicle verify hummingbird-source-hover-rotor-lqi --execute
+taoryx vehicle verify hummingbird-source-hover-rotor-lqi \
+  --execute --tune --cache-dir build/controller-tuning-cache \
+  --results-dir build/vehicle-endpoints/hummingbird-hover-lqi
+
+# Read readiness in order: contract_valid → batch_executed → tuner_bound →
+# tracking_passed → disturbance_or_mass_screened. A candidate-ready tuner is
+# not bound until the runtime names the exact campaign node/profile/configuration
+# fingerprint it actually applied. `records.performance` gives local phase
+# timings and the campaign cache disposition; use a stable --cache-dir when
+# iterating. `records.controller.tuning_application_contexts` exposes resolved
+# gains for an exactly coordinate-compatible runtime, but is not proof of
+# application until that runtime emits the returned tuning_binding receipt.
+# Each endpoint also declares mass/offset/wind screen cases and thresholds;
+# `not_executed` is intentional incomplete evidence, never a robustness pass.
+
+# The corresponding cross-contract regression set is intentionally slow and
+# opt-in; it exercises the four current physical-controller endpoint slices
+# without invoking every vehicle's witnesses.
+python -m pytest tests/unit/test_vehicle_endpoint_spec.py -m slow
+
+# Fast executable proof for one vehicle: advertisement, Composition batch,
+# interactive episode where that fidelity supports one, and any registered
+# controller campaign. Current focused slices: f16_s119, a320_openap_3dof,
+# hummingbird, x15, hl20_mod_k, skywalker_x8, b747,
+# reference_nesc_two_stage_rocket, tumbling_body, all Simple Aero fixed-L/D
+# batch templates, and both source-generated point-mass dual-launch forms.
+python tools/dev.py test-vehicle skywalker_x8
+
+# Simple Aero is a batch-only fixed-L/D workflow. Its baseline and every
+# source-shaped maneuver template lower through the same common runner. This
+# checks generated command/control advertisement, representative alpha/bank
+# profile execution, and the explicit lack of an interactive session without
+# representing it as a physical vehicle.
+python tools/dev.py test-vehicle simple_aero
+
+# Dual launch is also batch-only: this executes both air-release and attached-
+# booster source forms, reports the primary trajectory, and preserves the
+# event-only/no-child-propagation boundary.
+python tools/dev.py test-vehicle dual_launch_glider
+
+# Run the exact checked-in compose → preflight → public batch-run → normalized
+# result-artifact witnesses for one family. This installed command is the
+# focused endpoint smoke for agents; it does not substitute a local screen or
+# another vehicle.
+taoryx vehicle witness-report \
+  --family hl20_mod_k --execute-batch
+
+# Before executing a new or blocked composition, use one read-only report to
+# inspect its exact interface plus preflight capability advertisement and
+# lowering disposition. This makes source-domain and runtime-admission gaps
+# visible without treating semantic compilation as a runnable model.
+taoryx vehicle mission validate \
+  examples/vehicle_composition/hl20_glide_energy_capability_3dof_compose.yaml
+
+# If a family has several batch endpoints, keep the smoke even narrower with
+# its stable witness ID from verification/vehicle_execution_witnesses.yaml.
+taoryx vehicle witness-report \
+  --witness hl20-local-direct-wrench-screen-batch --execute-batch
+
+# Keep generated packets instead of discarding the bounded smoke workspace.
+# The target must be empty. The command writes one isolated packet per
+# selected batch witness plus release-catalog.json; feed that same directory
+# into maturity-report for a validated retained-result projection. This is an
+# artifact inventory, not a qualification or expanded controller claim.
+taoryx vehicle witness-report \
+  --family hl20_mod_k --execute-batch \
+  --results-dir /tmp/taoryx-hl20-witness-results
+taoryx vehicle maturity-report \
+  --results-dir /tmp/taoryx-hl20-witness-results
+
+# Every committed batch status trace now carries the typed
+# control.controller.method diagnostic. It is lqr or lqi only when that exact
+# screen ran the corresponding reusable controller; other modes report
+# not_applicable. A passing local-controller witness also includes a
+# controller_metadata record that checks the runtime and screen evaluation
+# agree, so controller selection is executable evidence rather than a
+# plan-only advertisement. `taoryx vehicle result <output-dir>` also projects
+# control_execution_evidence for any executed realization (including a
+# source-surface allocator) and controller_execution_evidence for LQR/LQI:
+# realization, physical-allocation flag, method/integral outputs when present,
+# and committed-trace sample count. Both fail closed on disagreement and do
+# not turn a local screen into qualification.
+
+# X-15 and HL-20 each also expose a distinct source-local body-speed LQI
+# screen. These use the registered tuner result through bounded generalized
+# wrench coordinates, emit integral-error telemetry, and remain batch-only:
+# they are not physical-effector or interactive-control endpoints.
+python tools/validate_vehicle_execution_witnesses.py \
+  --witness x15-local-direct-wrench-lqi-screen-batch --execute-batch
+python tools/validate_vehicle_execution_witnesses.py \
+  --witness hl20-local-direct-wrench-lqi-screen-batch --execute-batch
+
+# X-15 also exposes a separate frozen-fixture source-table surface-authority
+# screen. It allocates only the declared symmetric stabilator, differential
+# stabilator, and rudder; it is not a full X-15 trim or flight mission.
+python tools/validate_vehicle_execution_witnesses.py \
+  --witness x15-source-surface-authority-screen-batch --execute-batch
+
+# The X8 physical source-table paths are separate eight-second local LQR and
+# LQI recovery screens. Both report actual bounded collective/differential
+# source coordinates, not inferred individual left/right servo positions.
+python tools/validate_vehicle_execution_witnesses.py \
+  --witness x8-local-physical-surface-lqr-screen-batch --execute-batch
+python tools/validate_vehicle_execution_witnesses.py \
+  --witness x8-local-physical-surface-lqi-screen-batch --execute-batch
+
+# The X8 direct-wrench racetrack is a separate source-autonomous nominal route.
+# It has a batch endpoint and action-free interval trace; it is not an external
+# six-axis control endpoint or a physical-elevon allocation claim.
+taoryx vehicle compose examples/vehicle_composition/x8_racetrack_direct_wrench_compose.yaml \
+  --output build/x8-direct-wrench.composition.json
+taoryx vehicle run build/x8-direct-wrench.composition.json \
+  --output-dir build/x8-direct-wrench
+
+# The B747 condition-3 source-table paths are eighty-second local three-axis
+# LQR and LQI recoveries. They report actual bounded elevator, aileron, rudder,
+# and throttle source coordinates without claiming servo dynamics, persistent-
+# disturbance rejection, or a racetrack.
+python tools/validate_vehicle_execution_witnesses.py \
+  --witness b747-condition3-local-physical-surface-lqr-screen-batch --execute-batch
+python tools/validate_vehicle_execution_witnesses.py \
+  --witness b747-condition3-local-physical-surface-lqi-screen-batch --execute-batch
+
+# The B747 direct-wrench racetrack is a complete 665-second, 66k-step source
+# route. It is intentionally marked slow: use the local-screen witnesses for
+# ordinary edits and reserve this exact common-runner proof for promotion.
+python -m pytest tests/unit/test_mission_composition_native_bridge.py \
+  -m slow -rA
+
+# A320's point-mass and named pseudo-6DOF routes are separate runnable
+# reduced products. The pseudo path advertises OpenAP thrust, throttle, mass,
+# fuel-flow, and surrogate attitude-response telemetry without an effector claim.
+python tools/validate_vehicle_execution_witnesses.py \
+  --witness a320-pseudo6dof-batch --execute-batch
+
+# The distinct A320 local LQI endpoint runs the retained common-host candidate
+# through its exact named aileron/elevator/rudder response coordinates. It is
+# batch-only: native controls and integral telemetry are recorded in
+# local_screen.json, while no external guidance action trace or physical
+# surface-allocation claim is made.
+python tools/validate_vehicle_execution_witnesses.py \
+  --witness a320-local-native-coordinate-lqi-screen-batch --execute-batch
+
+# Passive tumbling has two batch-only, intentionally uncontrolled reductions.
+# This checks the exact point-mass and native-rigid-body-reuse release paths.
+python tools/validate_vehicle_execution_witnesses.py \
+  --family tumbling_body --execute-batch
+
+# F-16 physical control has one-second LQR route-entry screens plus a distinct
+# five-second fixed-altitude physical LQI velocity-recovery screen. The surface
+# paths write actual actuator-overlay positions and allocation diagnostics; the
+# direct-wrench lane remains an explicit comparison screen.
+taoryx vehicle compose examples/vehicle_composition/f16_local_physical_surface_screen_compose.yaml \
+  --output build/f16-surface-screen.composition.json
+taoryx vehicle run build/f16-surface-screen.composition.json \
+  --output-dir build/f16-surface-screen
+taoryx vehicle result build/f16-surface-screen \
+  --composition build/f16-surface-screen.composition.json
+taoryx vehicle compose examples/vehicle_composition/f16_local_physical_surface_lqi_screen_compose.yaml \
+  --output build/f16-surface-lqi-screen.composition.json
+taoryx vehicle run build/f16-surface-lqi-screen.composition.json \
+  --output-dir build/f16-surface-lqi-screen
+
+# The F-16 schedule-interior endpoint executes two retained body-w LQR
+# recoveries at each of four independently retrimmed source nodes. It is a
+# held-node campaign, not a continuous gain scheduler or a route.
+taoryx vehicle compose examples/vehicle_composition/f16_local_physical_surface_lqr_schedule_interior_screen_compose.yaml \
+  --output build/f16-surface-lqr-schedule-interior-screen.composition.json
+taoryx vehicle run build/f16-surface-lqr-schedule-interior-screen.composition.json \
+  --output-dir build/f16-surface-lqr-schedule-interior-screen
+
+# The separate F-16 transition screen time-marches four retained altitude-
+# coordinate cases. It linearly blends only the validated source endpoint
+# derivatives/effectiveness and allocates every scheduled wrench through actual
+# bounded elevator, aileron, rudder, and throttle. It is not navigation, wind
+# or mass robustness, a full envelope, or flight qualification.
+taoryx vehicle compose examples/vehicle_composition/f16_local_physical_surface_lqr_schedule_transition_screen_compose.yaml \
+  --output build/f16-surface-lqr-schedule-transition-screen.composition.json
+taoryx vehicle run build/f16-surface-lqr-schedule-transition-screen.composition.json \
+  --output-dir build/f16-surface-lqr-schedule-transition-screen
+
+# The companion LQI screen uses the same four held source nodes but retains
+# only the source-feasible +/-0.25 m/s body-w interior. It proves bounded
+# offset-free local recovery and allocation, not interpolation, node transfer,
+# wind/mass rejection, a route, or qualification.
+taoryx vehicle witness-report \
+  --witness f16-local-surface-lqi-schedule-interior-screen-batch \
+  --execute-batch
+
+# Hummingbird's local source-hover screen closes the controller loop through
+# its four bounded, lagged rotor-speed effectors. It is an LQI attitude/rate
+# recovery screen with requested-versus-achieved moment allocation evidence.
+# Its result also retains nonlinear_validation.json from the shared physical-LQI
+# runner, including the integral state, realized allocation, and derivative
+# environment used for the exact local run.
+taoryx vehicle compose \
+  examples/vehicle_composition/hummingbird_local_individual_rotor_lqi_screen_compose.yaml \
+  --output build/hummingbird-lqi-screen.composition.json
+taoryx vehicle run build/hummingbird-lqi-screen.composition.json \
+  --output-dir build/hummingbird-lqi-screen
+taoryx vehicle result build/hummingbird-lqi-screen \
+  --composition build/hummingbird-lqi-screen.composition.json
+
+# The vertical companion keeps the same source plant and four actual rotors,
+# but extends its LQI design to collective body-z force plus roll/pitch/yaw
+# moments. Its bounded source-local route is climb, hover capture, descent,
+# and return hover. It is deliberately not a wind, contact, landing, or
+# full-route qualification endpoint.
+taoryx vehicle compose \
+  examples/vehicle_composition/hummingbird_local_vertical_translation_lqi_screen_compose.yaml \
+  --output build/hummingbird-vertical-lqi-screen.composition.json
+taoryx vehicle run build/hummingbird-vertical-lqi-screen.composition.json \
+  --output-dir build/hummingbird-vertical-lqi-screen
+taoryx vehicle result build/hummingbird-vertical-lqi-screen \
+  --composition build/hummingbird-vertical-lqi-screen.composition.json
+
+# The companion direct-wrench screen uses the same pinned source-hover plant
+# for a bounded six-axis LQR recovery comparator. Its batch-visible requests
+# are controller-generated; it is not an external episode-control, rotor-
+# allocation, motor-lag, or flight-mission endpoint.
+taoryx vehicle compose \
+  examples/vehicle_composition/hummingbird_local_direct_wrench_screen_compose.yaml \
+  --output build/hummingbird-direct-wrench-screen.composition.json
+taoryx vehicle preflight build/hummingbird-direct-wrench-screen.composition.json
+taoryx vehicle run build/hummingbird-direct-wrench-screen.composition.json \
+  --output-dir build/hummingbird-direct-wrench-screen
+taoryx vehicle result build/hummingbird-direct-wrench-screen \
+  --composition build/hummingbird-direct-wrench-screen.composition.json
+
+# Cross-family catalogue contracts for controller-slice coverage, model
+# membership, interfaces, and onboarding data. Planned tiers remain blockers.
+python tools/dev.py vehicle-catalogue
+
+# Verify that every composition-managed maturity record still names a concrete
+# catalog family with a checked-in public batch witness.
+python tools/dev.py check-vehicle-maturity
+
 # Fast declaration and value-space/catalog audit.
 taoryx vehicle topology-report
 taoryx vehicle maturity-report
@@ -87,10 +365,26 @@ taoryx vehicle maturity-report \
   --execute-batch-witnesses \
   --execute-parity-witnesses
 
+# To retain the entire batch matrix in one release-ready evidence corpus, use
+# this separate empty destination. The command indexes the generated corpus in
+# the same maturity report; it remains packet evidence, not qualification.
+taoryx vehicle maturity-report \
+  --execute-batch-witnesses \
+  --retain-batch-results-dir /tmp/taoryx-all-batch-witness-results
+
 # Reconcile the authoritative asset inventory, every advertisement and exact
 # common batch/session registration, then verify the generated coverage matrix.
 python tools/dev.py mission-composition-completion
 ```
+
+When batch execution is enabled, each witness record includes an
+`interface_trace` summary: the exact interface fingerprint and the status,
+resource, and diagnostic channel IDs projected at committed truth boundaries.
+Its control evidence remains separately represented by the semantic action
+trace. This is an execution-coverage report, not controller or qualification
+promotion. The containing maturity report also provides
+`execution.batch_interface_trace_conformance`, a compact cross-witness count
+and channel inventory; it is `not_checked` until batch witnesses are executed.
 
 The maturity command proves only the declared composition/execution and parity
 contracts. The completion command additionally reconciles discovery and exact
@@ -98,6 +392,54 @@ common-interface coverage. Neither promotes a direct-wrench screen, replay,
 pseudo-6DOF response law, or nominal mission to physical-effector or family
 qualification. The generated completion matrix lists every family and
 realization, including explicit blockers and intentionally deferred physics.
+
+## Model-to-mission automation
+
+Do not start a new model by hand-coding a bespoke mission graph or copying
+controller gains. First exercise the installed advertisement:
+
+```bash
+taoryx plugins check --profile models
+taoryx model list
+taoryx model assess --output build/model-assessment.json
+taoryx model plan <provider-id> <model-id> --output build/model-plan.json
+taoryx model scaffold <provider-id> <model-id> --output build/model-draft.yaml
+```
+
+The plan joins the model's data contract, frames, controls, authorities,
+control intents, navigation parameters, initialization modes, mission
+templates, segments, family adapter, and tuning registrations. Fill only the
+generated `<REQUIRED>` and `<SELECT>` sites, then validate the ordinary YAML
+through the exact owning provider:
+
+When a caller supplies `--fidelity` without `--mission`, `model plan` keeps
+that fidelity and selects its first runnable compatible mission. This prevents
+a physical local-control-screen default from silently overriding a requested
+reduced tier. Supplying both an incompatible fidelity and mission remains a
+hard error. A registered local tuning campaign can still be invoked for a
+blocked end-to-end realization; its report is local design evidence, not a
+new runnable mission or qualification claim.
+
+```bash
+taoryx model compile build/model-draft.yaml \
+  --output build/model-configuration.json
+```
+
+For a controlled realization, the plug-in must supply state derivatives,
+trim/linearization semantics, authority, operating points, scales, and
+family-specific allocation before it registers a tuning campaign. Once it
+does, the host runs the same bounded sequence for every topology:
+
+```bash
+taoryx model tune <provider-id> <model-id> \
+  --campaign <campaign-id> \
+  --output build/tuning-report.json
+```
+
+A missing campaign, route coordinate, control axis, or effector is an explicit
+integration gap. Do not synthesize a value to make the command pass. See the
+automation architecture page for the Python helpers and the exact host versus
+plug-in ownership table.
 
 ## Grammar validation
 
@@ -199,12 +541,15 @@ The reusable templates are `powered_ascent`, `ballistic_coast`,
 `moving_target_intercept`. They apply to point-mass 3-DOF, kinematic
 pseudo-6-DOF, and—after additional plant gates—rigid-body 6-DOF.
 
-The Simple Aero fixture status is deliberately separate from vehicle promotion:
-`fixture-ready` means the synthetic source translation and provenance are
-available. It does not prove a vehicle's thrust, aero tables, bank sign, alpha
-response, target closure, or terminal behavior. Reuse the phase contract and
-retune the vehicle-specific controls, tables, limits, and time-to-go values;
-never copy those values blindly from the Simple Aero surrogate.
+The Simple Aero source vocabulary is deliberately separate from vehicle
+promotion. Each reviewed workflow template now has a real bounded
+point-mass batch lowering: its source-shaped values map to a generated
+fixed-L/D alpha, bank, and duration profile. That proves a typed
+compose-to-run path and its standardized telemetry—not a vehicle's thrust,
+aero tables, bank sign, alpha response, target closure, terminal behavior, or
+historical Simple Aero runtime. Reuse the phase contract and retune the
+vehicle-specific controls, tables, limits, and time-to-go values; never copy
+those values blindly from the surrogate.
 
 Inspect the same workflow through the provider-independent Mission Composition
 advertisement with:
@@ -237,8 +582,20 @@ evidence.
 
 That schema exposes launch and endpoint geometry, initial mass and burnout
 checkpoints, fixed-L/D surrogate inputs, and the reviewed ballistic, phugoid,
-skip, slalom, and weave recipes. It declares only point-mass fidelity and does
-not promote fixture-ready maneuvers into vehicle execution claims.
+skip, slalom, and weave recipes. It declares only point-mass fidelity. The
+templates are runnable fixed-L/D lowerings, not vehicle execution or
+qualification claims.
+
+For a minimal typed request for any published template, use the plug-in helper:
+
+```python
+from taoryx.trajectory import build_simple_aero_template_configuration
+
+request = build_simple_aero_template_configuration("phugoid")
+```
+
+Validate that request with the registry provider, then submit it to the normal
+batch runner; parameters can be replaced in the typed tree before validation.
 
 Before composing a Simple Aero phase into a vehicle route, run the isolated fixture
 ladder:

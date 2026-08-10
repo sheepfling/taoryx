@@ -40,6 +40,10 @@ common model metadata without loading or running a plant.
 same shape and identifies the exact schema fingerprint and requested fidelity.
 `get_model_output_schema()` returns the independent, fingerprinted description
 of required core state, optional telemetry, and multi-entity result behavior.
+Each realization returned by `list_models()` also carries its required control
+advertisement: semantic actions/effectors, exact native bindings, authority
+profiles, mission intents, and explicit available/internal/uncontrolled/
+blocked/unsupported status.
 
 The repository-backed implementation is
 `RegistryMissionCompositionProvider`. It projects, rather than copies, the
@@ -67,6 +71,22 @@ advertised mission templates. The analytical ballistic and waypoint examples
 use the same grammar but intentionally publish open, variable-length segment
 sequences.
 
+Users and agents do not need to instantiate the schema node classes merely to
+start a mission. The common authoring CLI turns these same advertisements into
+plain YAML and validates the result through the exact provider:
+
+```bash
+taoryx model list
+taoryx model plan <provider-id> <model-id>
+taoryx model scaffold <provider-id> <model-id> --output mission.yaml
+taoryx model compile mission.yaml --output prepared.json
+```
+
+Controlled plug-ins may also register model-owned inputs for the common
+automatic-tuning runner exposed by `taoryx model tune`. See
+[Model-to-mission authoring and automation](architecture/model-authoring-automation.md)
+for the host/plug-in boundary and the concise Python API.
+
 ## Common model metadata
 
 Every model advertisement separates authoritative semantics from optional
@@ -80,6 +100,7 @@ provider:
 | Read-only properties | Typed model facts with semantic role, value or range, quantity, canonical/display units, format, grouping, ordering, and evidence boundary |
 | Configuration | Typed input tree with units, intervals, defaults, topology, fidelity compatibility, and non-authoritative editor hints |
 | Realization and fidelity | Dynamics fidelity, input/control realization, actuator type, compatibility aliases, operation support, blockers, and explicit step-up/step-down transitions |
+| Controls | Per-realization semantic actions and effectors, native type/shape/unit/bounds/topology bindings, authority profiles, mission-intent resolution, operation availability, and claim boundaries |
 | Missions and deployments | Ordered templates, exact operation matrices, and parent/child lifecycle contracts |
 | Coordinates and outputs | Reference-frame definitions, required core channels, selectable telemetry groups, entity-output behavior, units, and interpolation rules |
 
@@ -90,19 +111,19 @@ format them without changing the submitted canonical value. Likewise, a
 topology. Output availability is explicit: `guaranteed`, `conditional`, or
 `runtime_reported`.
 
-## Ask separately what can be set and what can be returned
+## Ask separately what can be configured, controlled, and returned
 
 Mission Composition publishes two schemas around the execution call:
 
 ```text
                          MODEL REGISTRY
                               │
-                 ┌────────────┴────────────┐
-                 ▼                         ▼
-       ConfigurationSchema          OutputSchema
-          what can I set?         what can I request?
-                 │                         │
-                 └────────────┬────────────┘
+            ┌───────────┼───────────┐
+            ▼           ▼           ▼
+ ConfigurationSchema   Controls     OutputSchema
+    what can I set?   how is intent   what can I
+                     realized?       request?
+            └───────────┼───────────┘
                               ▼
                    generate(config, outputs)
                               │
@@ -123,6 +144,16 @@ canonical/display units, frame, sampling semantics, interpolation,
 fidelity/realization/mission/operation compatibility, availability,
 provenance, and presentation hints. Related telemetry can be requested through
 named groups.
+
+Control metadata is neither mutable configuration nor result telemetry. A
+semantic control channel describes the provider-neutral meaning. Its native
+binding separately describes the exact action coordinate accepted by a live
+session, including data type, shape, quantity, canonical unit, interval, and
+value-space topology. Internally generated batch commands and planned source
+effectors use the same structure but cannot advertise an interactive
+operation. This lets one generic composer render every model without treating
+`guidance.bank.command`, an X8 elevon coordinate, and a direct body wrench as
+the same control realization.
 
 `MissionCompositionOutputSelection` supports:
 
@@ -153,16 +184,17 @@ configuration follows the shape of an engineering mission form:
 The segment list is open for composition experiments and publishes reviewed
 templates for `ballistic`, `cbcr`, `crossrange`, `marv`, `phugoid`,
 `range_extension`, `skip`, `slalom`, and `weave`, plus the runnable
-`fixed_ld_baseline`. Segment parameters stay with each occurrence, so two
+`fixed_ld_baseline`. Every reviewed template has a bounded fixed-L/D
+point-mass batch lowering. Segment parameters stay with each occurrence, so two
 weaves or ballistic coasts may carry different durations or checkpoints.
 
 Only `point_mass_3dof` is declared. The metadata explicitly marks all higher
 fidelity realizations and transitions unavailable; sharing a segment name with
 a pseudo-6-DOF or rigid-body implementation does not authorize automatic
-promotion. The fixed-L/D baseline advertises batch generation/execution. The
-named Simple Aero maneuver templates advertise schema validation and
-fixture-level semantics but keep batch execution blocked until a
-configuration-to-runtime adapter and vehicle-specific evidence are registered.
+promotion. Source-shaped maneuver parameters lower to bounded generated
+fixed-L/D alpha, bank, and duration profiles before batch execution. That makes
+the templates executable workflow recipes, not validation of vehicle-specific
+physics, historical Simple Aero semantics, optimization, or terminal accuracy.
 
 ## Execution, feedback, and results are separate contracts
 
@@ -223,8 +255,11 @@ The complete contract is in the
 loads every advertised configuration and output schema, verifies their
 model/version/schema/fingerprint identities, checks configuration-frame references, fidelity declarations,
 deployment trigger and operation references, common-runner registration, and
-the presence of output metadata. Each model report also inventories node kinds,
-value types, model properties, reference frames, and output channels.
+the presence of output metadata. It also requires every interactive
+realization to publish active action channels and exact native binding schemas.
+Each model report inventories node kinds, value types, model properties,
+reference frames, control statuses/channels/authorities/intents, native-bound
+controls, and output channels.
 The report includes a pass/fail record for every model, not only a provider-wide
 boolean.
 
@@ -249,7 +284,10 @@ and
 [mission_composition_physics_backlog.yaml](../verification/mission_composition_physics_backlog.yaml).
 Their completion rule is strict: every exact combination advertised as
 available must execute through the common interface; every other combination
-must be blocked or unsupported. None of these audits promotes fidelity
+must be blocked or unsupported, and every realization must explicitly publish
+how its control intents are resolved. The session suite also opens every
+registered episode and compares its live action schema with the advertised
+native control binding. None of these audits promotes fidelity
 evidence or vehicle qualification.
 
 ## The contract-probe vehicle
@@ -262,6 +300,9 @@ range/unknown model properties, three reference frames, core and grouped
 telemetry channels, all output interpolation kinds, a fidelity ladder with
 available and blocked operations, all four deployment states, and a runnable
 parent/child/grandchild lineage result with explicit spawn initial states.
+Its control surface exercises scalar, vector, and boolean commands, a native
+binding for each, one authority profile, and available versus blocked intent
+resolution.
 
 The example also submits an invalid output channel. The same runner returns a
 normal trajectory for the valid request and a structured `unsupported` failure
@@ -276,6 +317,21 @@ PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_contract
 This is the first integration target for a generic editor or remote plug-in
 host. Passing it proves contract coverage and serialization behavior, not
 physical trajectory correctness.
+
+It is installed with the model profile and is discoverable as
+`taoryx.debug.mission-composition-contract-probe`, alongside the two reference
+models. After compiling a prepared configuration, consumers can use the same
+batch boundary for all three fixtures:
+
+```bash
+taoryx model run <provider-id> <prepared.json> --output <response.json>
+```
+
+The command revalidates the prepared configuration, dispatches only a
+provider-owned common batch runner, and writes a discriminated trajectory or
+failure response. The contract probe is particularly useful with
+`--output-mode all` and `--maximum-objects 2` to exercise typed output and
+lineage limits.
 
 ## The two reference models
 

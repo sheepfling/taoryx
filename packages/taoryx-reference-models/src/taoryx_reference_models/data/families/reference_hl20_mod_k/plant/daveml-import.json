@@ -1,0 +1,93 @@
+{
+  "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
+  "catalog_root": "resources/aerospace/daveml/nesc-model-catalog-v1.0",
+  "claims": [
+    "qualified HL-20 source package is bound to the Taoryx rigid-body load contract",
+    "package DAVE-ML aerodynamics complete the canonical structural and numeric cycle"
+  ],
+  "family_id": "reference_hl20_mod_k",
+  "kind": "taoryx.daveml-family-import/v1alpha1",
+  "model_id": "hl20-mod-k-unpowered-6dof",
+  "nonclaims": [
+    "landing gear, ground contact, flare, tire friction, touchdown, or rollout behavior",
+    "generic hypersonic-glider or operational spacecraft performance"
+  ],
+  "package": {
+    "display_name": "NASA HL-20 Mod K Unpowered 6-DOF",
+    "fidelity": "6dof",
+    "frames": {
+      "body": "FRD",
+      "navigation": "NED",
+      "quaternion_order": "wxyz"
+    },
+    "aerodynamic_convention": {
+      "source_force_frame": "body_axes_frd_with_wind_axis_cl_cd_source_outputs",
+      "force_channels": ["cl", "cd", "cy"],
+      "drag_representation": "direct_wind_axis_cd_source_output",
+      "coefficient_semantics": "polynomial_total_buildup_from_source_terms",
+      "baseline_rule": "do_not_apply_static_control_subtraction_to_source_terms"
+    },
+    "model_id": "hl20-mod-k-unpowered-6dof",
+    "path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/hl20-mod-k/hl20-mod-k-unpowered-v0.10.txair",
+    "reference_geometry": {
+      "area_m2": 26.612075808,
+      "mean_aerodynamic_chord_m": 8.607552,
+      "span_m": 4.233672
+    },
+    "runtime_members": [
+      "runtime/aerodynamic-binding.json",
+      "runtime/vehicle-binding.json"
+    ],
+    "schema_version": "0.3.0",
+    "sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+    "source_documents": [
+      {
+        "canonical_export_sha256": "1216498bf6fb0d07565fd06ef47c14bec5a1e40a0fca90bb54371a789d7a5629",
+        "canonical_ir_sha256": "880e42e77fde5bf6a786321223628126a1ccb6497ceeb3638a8d730023bcda8f",
+        "catalog_document_id": "daveml-example-hl20-aero",
+        "catalog_normalized_path": "normalized/daveml-example-hl20-aero",
+        "catalog_sha256": "8639b55c2525fdb6c0177b8e359de5d6eb984a3b4b35b4d1e5898d54ddc1f44e",
+        "checkdata_count": 240,
+        "checkdata_failed": 0,
+        "checkdata_passed": 240,
+        "checkdata_unsupported": 0,
+        "document_id": "hl20-mod-k-unpowered-6dof.aerodynamics",
+        "numeric_diff_count": 0,
+        "package_member": "models/aerodynamics.dml",
+        "package_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+        "role": "aerodynamics",
+        "structural_diff_count": 0
+      }
+    ],
+    "validity_envelope": {
+      "alpha_max_rad": 0.2617993877991494,
+      "alpha_min_rad": 0.0,
+      "altitude_max_m": 20000.0,
+      "altitude_min_m": -1000.0,
+      "beta_max_rad": 0.17453292519943295,
+      "beta_min_rad": -0.17453292519943295,
+      "mach_max": 4.0,
+      "mach_min": 0.3
+    }
+  },
+  "replay": {
+    "force_moment_residual": 0.0,
+    "hold_evidence": "validation/glide-hold-summary.json",
+    "runtime_load_contract": "taoryx_rigid_body_6dof",
+    "source_evaluation": "verified_pinned_package_artifact",
+    "status": "runtime_replay_qualification_passed"
+  },
+  "roundtrip": {
+    "checkdata_count": 240,
+    "checkdata_failed": 0,
+    "checkdata_passed": 240,
+    "checkdata_status": "verified",
+    "checkdata_unsupported": 0,
+    "document_count": 1,
+    "numeric_diff_count": 0,
+    "status": "verified",
+    "structural_diff_count": 0
+  },
+  "schema_version": 1,
+  "source_authority": "daveml"
+}

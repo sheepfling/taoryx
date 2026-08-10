@@ -92,7 +92,7 @@ class ControllerBackendRegistry:
 def default_controller_backend_registry() -> ControllerBackendRegistry:
     """Return the repository's explicit baseline/candidate backend registry."""
 
-    from .controller_design import build_lqr_controller
+    from .controller_design import build_lqi_controller, build_lqr_controller
 
     return ControllerBackendRegistry(
         {
@@ -121,9 +121,10 @@ def default_controller_backend_registry() -> ControllerBackendRegistry:
             "lqi": ControllerBackendSpec(
                 id="lqi",
                 implementation="lqi",
-                status="declared",
+                status="implemented",
                 qualification_eligible=True,
-                note="Declared architecture; integral augmentation must be explicit in the design artifact.",
+                factory=build_lqi_controller,
+                note="Explicit output-integrating LQI; a physical scheduled envelope remains a promotion gate.",
             ),
             "legacy_pid_baseline": ControllerBackendSpec(
                 id="legacy_pid_baseline",

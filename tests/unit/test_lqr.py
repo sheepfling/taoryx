@@ -7,11 +7,15 @@ from taoryx.contracts import Vector3
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.problem_parser import parse_problem_text
 from taoryx.runtime import (
+    GainScheduledLqiController,
     GainScheduledLqrController,
+    LqiController,
     LqrController,
     LqrUncertaintySpec,
     assess_lqr_robustness,
+    solve_continuous_lqi,
     solve_continuous_lqr,
+    solve_scaled_continuous_lqi,
     solve_scaled_continuous_lqr,
 )
 from taoryx.runtime.lowering import RuntimeTable, _build_attitude_lqr
@@ -248,3 +252,119 @@ def test_lqr_uncertainty_screen_reports_sampled_pole_margin() -> None:
     assert report.samples == 17
     assert report.nominal_max_real_pole < 0.0
     assert report.worst_max_real_pole >= report.nominal_max_real_pole
+
+
+def test_lqi_rejects_a_constant_matched_disturbance_without_hidden_bias_gain() -> None:
+    """An explicit position integrator removes steady error from a constant load."""
+
+    result = solve_continuous_lqi(
+        ((0.0, 1.0), (0.0, 0.0)),
+        ((0.0,), (1.0,)),
+        ((10.0, 0.0, 0.0), (0.0, 2.0, 0.0), (0.0, 0.0, 30.0)),
+        ((1.0,),),
+        output_matrix=((1.0, 0.0),),
+        output_names=("position",),
+        state_names=("position", "velocity"),
+        control_names=("acceleration",),
+    )
+    controller = LqiController(result)
+    state = np.asarray((0.0, 0.0), dtype=float)
+    dt = 0.002
+    for _ in range(10_000):
+        command = controller.command(
+            {"position": float(state[0]), "velocity": float(state[1])},
+            {"position": 0.0},
+            dt=dt,
+        )
+        state += dt * np.asarray((state[1], command.controls["acceleration"] + 0.15))
+
+    assert result.hurwitz
+    assert abs(state[0]) < 2.0e-3
+    assert abs(state[1]) < 2.0e-3
+    assert abs(controller.integral_error["position"]) > 1.0e-3
+
+
+def test_scaled_lqi_returns_physical_gains_for_nonunit_engineering_scales() -> None:
+    """LQI tuning scales must not leak a normalized command into the runtime."""
+
+    result = solve_scaled_continuous_lqi(
+        ((0.0, 1.0), (0.0, 0.0)),
+        ((0.0,), (1.0,)),
+        ((10.0, 0.0, 0.0), (0.0, 2.0, 0.0), (0.0, 0.0, 30.0)),
+        ((1.0,),),
+        output_matrix=((1.0, 0.0),),
+        output_names=("position",),
+        state_scales=(100.0, 10.0),
+        control_scales=(5.0,),
+        state_names=("position", "velocity"),
+        control_names=("acceleration",),
+    )
+    controller = LqiController(result)
+    command = controller.command(
+        {"position": 2.0, "velocity": 0.0},
+        {"position": 0.0},
+        dt=0.01,
+    )
+
+    assert result.hurwitz
+    assert result.design.k_sha256 is not None
+    assert np.isfinite(command.controls["acceleration"])
+
+
+def test_lqi_accepts_a_full_state_feedback_reference_without_moving_its_integral_target() -> None:
+    """Guidance can move proportional feedback off trim while LQI tracks named outputs."""
+
+    result = solve_continuous_lqi(
+        ((0.0, 1.0), (0.0, 0.0)),
+        ((0.0,), (1.0,)),
+        ((10.0, 0.0, 0.0), (0.0, 2.0, 0.0), (0.0, 0.0, 30.0)),
+        ((1.0,),),
+        output_matrix=((1.0, 0.0),),
+        output_names=("position",),
+        state_names=("position", "velocity"),
+        control_names=("acceleration",),
+    )
+    controller = LqiController(result)
+
+    command = controller.command(
+        {"position": 0.0, "velocity": 0.0},
+        {"position": 1.0},
+        state_reference={"position": 1.0, "velocity": 0.0},
+        dt=0.01,
+    )
+
+    assert command.controls["acceleration"] > 0.0
+    assert controller.integral_error["position"] == pytest.approx(-0.01)
+    with pytest.raises(KeyError, match="velocity"):
+        controller.command(
+            {"position": 0.0, "velocity": 0.0},
+            {"position": 1.0},
+            state_reference={"position": 1.0},
+            dt=0.01,
+        )
+
+
+def test_scheduled_lqi_rebuilds_for_mass_mismatch_while_retaining_integral_tracking() -> None:
+    """Mass changes select a plant-specific LQI gain instead of an adaptive guess."""
+
+    def build(mass: float | None, _inertia: tuple[float, float, float] | None) -> LqiController:
+        resolved_mass = 1.0 if mass is None else mass
+        result = solve_continuous_lqi(
+            ((0.0, 1.0), (0.0, 0.0)),
+            ((0.0,), (1.0 / resolved_mass,)),
+            ((5.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 10.0)),
+            ((1.0,),),
+            output_matrix=((1.0, 0.0),),
+            output_names=("position",),
+            state_names=("position", "velocity"),
+            control_names=("force",),
+        )
+        return LqiController(result)
+
+    scheduled = GainScheduledLqiController(build(1.0, None), builder=build)
+    scheduled.command({"position": 0.1, "velocity": 0.0}, {"position": 0.0}, dt=0.01, mass_kg=1.0)
+    nominal_gain = np.asarray(scheduled.result.state_gain)
+    scheduled.command({"position": 0.1, "velocity": 0.0}, {"position": 0.0}, dt=0.01, mass_kg=1.5)
+
+    assert scheduled.schedule_updates == 2
+    assert not np.allclose(nominal_gain, scheduled.result.state_gain)

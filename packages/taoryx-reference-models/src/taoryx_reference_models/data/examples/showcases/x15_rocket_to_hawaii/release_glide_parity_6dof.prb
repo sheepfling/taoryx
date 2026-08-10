@@ -1,0 +1,24 @@
+(x15-release-glide-parity-6dof)
+*title X-15 common release unpowered glide rigid-body parity case
+*mode rigid-body-6dof
+*atmos standard
+*earth wgs-84 omega=7.2921151467e-5 gm=3.986004418e14
+*runtime status vehicle reference-area=18.580608 reference-length=3.130296 inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024 dry-mass-kg=14641.0545 envelope-max-mach=6.7 envelope-max-alpha-deg=10 envelope-max-beta-deg=10 nominal-mass-kg=14641.0545
+*runtime control bank-deg vehicle=1 default=0.0 lower=-25.0 upper=25.0
+
+
+
+*runtime status actuator maximum-moment=250000 maximum-body-rate-deg-s=3600
+*runtime status thermal policy=none
+
+*trajectory 1 x15 start on 1
+  *initial ecic x=-2550174.732106006 y=-4630503.055917352 z=3606993.764430032 xdt=-544.7078860930444 ydt=494.63489765078185 zdt=636.70629759 qw=-0.0683358917930683 qx=0.389325992523833 qy=0.7691778008540426 qz=0.5021165085032727 wx=0.0 wy=0.0 wz=0.0 time=0.0 mass=14641.0545
+  *segment 1 release-glide
+    *integ dtprnt=0.025 dt=0.0125
+    *prop thrust=0 mdot=0
+    # Aero channels are body-axis cx/cy/cz (not direct CD/CL); X-15 control decks are absolute source-grid values including zero-control baseline.
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *fly bankgc=0
+
+    *when time>0.01 stop
+*end

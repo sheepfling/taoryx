@@ -5,32 +5,13 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generic, Protocol, TypeVar, cast
+from typing import Any, Protocol, cast
 
 import numpy as np
 
+from taoryx.sensor_api import MeasurementPacket, TruthPoint, TruthSegment, _rotation, _vector3
+
 Array3 = np.ndarray
-MeasurementT = TypeVar("MeasurementT")
-
-
-def _vector3(value: Array3, name: str) -> Array3:
-    result = np.asarray(value, dtype=float)
-    if result.shape != (3,) or not np.all(np.isfinite(result)):
-        raise ValueError(f"{name} must be a finite 3-vector")
-    result = result.copy()
-    result.setflags(write=False)
-    return result
-
-
-def _rotation(value: Array3, name: str) -> Array3:
-    result = np.asarray(value, dtype=float)
-    if result.shape != (3, 3) or not np.all(np.isfinite(result)):
-        raise ValueError(f"{name} must be a finite 3x3 matrix")
-    if not np.allclose(result.T @ result, np.eye(3), atol=1.0e-8) or not np.isclose(np.linalg.det(result), 1.0, atol=1.0e-8):
-        raise ValueError(f"{name} must be a proper rotation matrix")
-    result = result.copy()
-    result.setflags(write=False)
-    return result
 
 
 def _truth_payload(truth: "TruthPoint | None") -> dict[str, object] | None:
@@ -75,89 +56,6 @@ def _truth_from_payload(payload: Mapping[str, object] | None) -> "TruthPoint | N
         None if payload.get("temperature_celsius") is None else float(cast(float | int | str, payload["temperature_celsius"])),
     )
     ####
-
-
-@dataclass(frozen=True, slots=True)
-class TruthPoint:
-    """One immutable, sensor-visible committed truth boundary.
-
-    ``velocity_without_gravity_eci_mps`` is an explicit EOM-produced
-    quantity. It is not ``velocity_eci_mps - gravity_eci_mps2``. ECI is the
-    navigation frame so attitude changes include Earth rotation when the body
-    is fixed to Earth. Translation-only providers may leave attitude and body
-    rate unset; those providers expose acceleration channels without claiming
-    a physical body frame or gyro measurement.
-    """
-
-    time_s: float
-    position_eci_m: Array3
-    velocity_eci_mps: Array3
-    velocity_without_gravity_eci_mps: Array3
-    orientation_eci_from_body: Array3 | None
-    gravity_eci_mps2: Array3
-    angular_rate_body_radps: Array3 | None
-    acceleration_eci_mps2: Array3 | None = None
-    angular_acceleration_body_radps2: Array3 | None = None
-    temperature_celsius: float | None = None
-
-    def __post_init__(self) -> None:
-        if not np.isfinite(self.time_s):
-            raise ValueError("truth time must be finite")
-        object.__setattr__(self, "position_eci_m", _vector3(self.position_eci_m, "position_eci_m"))
-        object.__setattr__(self, "velocity_eci_mps", _vector3(self.velocity_eci_mps, "velocity_eci_mps"))
-        object.__setattr__(
-            self,
-            "velocity_without_gravity_eci_mps",
-            _vector3(self.velocity_without_gravity_eci_mps, "velocity_without_gravity_eci_mps"),
-        )
-        if self.orientation_eci_from_body is not None:
-            object.__setattr__(self, "orientation_eci_from_body", _rotation(self.orientation_eci_from_body, "orientation_eci_from_body"))
-        object.__setattr__(self, "gravity_eci_mps2", _vector3(self.gravity_eci_mps2, "gravity_eci_mps2"))
-        if self.angular_rate_body_radps is not None:
-            object.__setattr__(self, "angular_rate_body_radps", _vector3(self.angular_rate_body_radps, "angular_rate_body_radps"))
-        if self.acceleration_eci_mps2 is not None:
-            object.__setattr__(self, "acceleration_eci_mps2", _vector3(self.acceleration_eci_mps2, "acceleration_eci_mps2"))
-        if self.angular_acceleration_body_radps2 is not None:
-            object.__setattr__(
-                self,
-                "angular_acceleration_body_radps2",
-                _vector3(self.angular_acceleration_body_radps2, "angular_acceleration_body_radps2"),
-            )
-        if self.temperature_celsius is not None and not np.isfinite(self.temperature_celsius):
-            raise ValueError("temperature_celsius must be finite when supplied")
-
-
-@dataclass(frozen=True, slots=True)
-class TruthSegment:
-    """Accepted truth over one interval between committed boundaries."""
-
-    start: TruthPoint
-    end: TruthPoint
-
-    def __post_init__(self) -> None:
-        if self.end.time_s <= self.start.time_s:
-            raise ValueError("truth segment end must be later than its start")
-
-
-@dataclass(frozen=True, slots=True)
-class MeasurementPacket(Generic[MeasurementT]):
-    """Timestamped measurement with explicit delivery and validity state."""
-
-    sampled_at_s: float
-    available_at_s: float
-    interval_start_s: float | None
-    payload: MeasurementT | None
-    valid: bool = True
-
-    def __post_init__(self) -> None:
-        if not np.isfinite(self.sampled_at_s) or not np.isfinite(self.available_at_s):
-            raise ValueError("measurement timestamps must be finite")
-        if self.available_at_s < self.sampled_at_s:
-            raise ValueError("measurement cannot be available before it is sampled")
-        if self.interval_start_s is not None and self.interval_start_s > self.sampled_at_s:
-            raise ValueError("measurement interval start cannot be after sample time")
-        if self.valid and self.payload is None:
-            raise ValueError("valid measurements require a payload")
 
 
 @dataclass(frozen=True, slots=True)

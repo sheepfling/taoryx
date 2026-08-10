@@ -53,7 +53,10 @@ from .interactive import (
 )
 from .loiter import RacetrackCommand, RacetrackController, RacetrackPhase, RacetrackReference, RacetrackSpec
 from .lqr import (
+    GainScheduledLqiController,
     GainScheduledLqrController,
+    LqiController,
+    LqiResult,
     LqrCommand,
     LqrController,
     LqrResult,
@@ -62,7 +65,9 @@ from .lqr import (
     LqrUnavailableError,
     LqrUncertaintySpec,
     assess_lqr_robustness,
+    solve_continuous_lqi,
     solve_continuous_lqr,
+    solve_scaled_continuous_lqi,
     solve_scaled_continuous_lqr,
 )
 from .navigation_feedback import NavigationFeedbackConfig, parse_navigation_feedback
@@ -98,7 +103,7 @@ from .rigid_body import (
     runtime_state,
 )
 from .rotational_replay import RotationalReplayFrame, RotationalTruthRecorder, RotationalTruthReplay
-from .sensor_bus import SensorBinding, SensorBus
+from .sensor_bus import SensorBinding, SensorBus, SensorContextProvider
 from .sensor_clock import SensorClockSpec
 from .sensor_contracts import (
     AttitudePolicyConfig,
@@ -172,6 +177,7 @@ __all__ = [
     "SensorClockSpec",
     "SensorBinding",
     "SensorBus",
+    "SensorContextProvider",
     "SensorAdapterFactory",
     "SensorScenarioRuntime",
     "SensorScenarioSpec",
@@ -214,14 +220,19 @@ __all__ = [
     "RacetrackSpec",
     "LqrResult",
     "GainScheduledLqrController",
+    "GainScheduledLqiController",
     "LqrRobustnessReport",
     "LqrSpec",
     "LqrCommand",
     "LqrController",
     "LqrUnavailableError",
     "LqrUncertaintySpec",
+    "LqiController",
+    "LqiResult",
     "assess_lqr_robustness",
     "solve_continuous_lqr",
+    "solve_continuous_lqi",
+    "solve_scaled_continuous_lqi",
     "solve_scaled_continuous_lqr",
     "PursuitCommand",
     "TargetState",

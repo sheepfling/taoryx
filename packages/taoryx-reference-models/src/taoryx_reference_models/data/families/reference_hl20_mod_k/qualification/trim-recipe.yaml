@@ -1,0 +1,47 @@
+kind: taoryx.trim-recipe/v1alpha1
+schema_version: 1
+family: reference_hl20_mod_k
+recipe_id: hl20-mod-k-pitch-channel-trim-v1
+adapter: taoryx.adapters.reference_hl20_mod_k.daveml_pitch_channel
+claim_boundary: >-
+  Source-bounded pitch-channel trim worklist at the pinned Mach 1 operating
+  point; no full 6-DOF equilibrium or controller claim.
+operating_point_catalog: operating-points.yaml
+source_evidence: verification/daveml_hl20_trim_evidence.json
+variables:
+  - name: alpha_deg
+    role: state
+    unit: deg
+    initial: 5.0
+    bounds: [0.0, 15.0]
+    point_path: state.alpha_deg
+solver:
+  method: bounded_least_squares
+  residual_tolerance: 1.0e-10
+  max_iterations: 100
+  evaluator_owned_by_adapter: true
+continuation:
+  strategy: ordered_catalog_with_previous_solution_seed
+  ordering: mach
+  fallback: declared_initial_guess
+fixed_inputs:
+  BETA: 0.0
+  XMACH: 1.0
+  PB: 0.0
+  QB: 0.0
+  RB: 0.0
+  VRW: 100.0
+  H_rwy: 0.0
+  DBFUL: 0.0
+  DBFUR: 0.0
+  DBFLL: 0.0
+  DBFLR: 0.0
+  DWFL: 0.0
+  DWFR: 0.0
+  DRUD: 0.0
+  DLG: 0.0
+residuals:
+  - name: pitch_cm
+    unit: coefficient
+    scale: 1.0
+    tolerance: 1.0e-10

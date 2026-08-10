@@ -54,9 +54,14 @@ trim artifact. This prevents a gain or controller configuration from being
 silently reused across vehicles. LQR is therefore the first controller, not a
 permanent architectural dependency.
 
-When mass properties vary, use `GainScheduledLqrController` with an explicit
-operating-point builder. The builder receives the current mass and inertia;
-the controller never infers inertia from mass. The catalog's controller scale
+When mass properties vary, use `GainScheduledLqrController` or the
+offset-free `GainScheduledLqiController` with an explicit operating-point
+builder. The builder receives the current mass and inertia; the controller
+never infers inertia from mass. `LqiController` integrates explicitly named
+output error, freezes its integral update when the new bounded command
+saturates, and exposes the integral state for controller telemetry. It rejects
+constant matched trim/wind bias; it does not make an adaptive-control claim.
+The catalog's controller scale
 contract records `mass_scale_kg`, `inertia_scale_kg_m2`, `force_scale_n`,
 `weight_moment_scale_nm`, and `inertia_moment_scale_nm`. A profile may opt
 into nominal-ratio mass conditioning; the current inertia still comes from the
@@ -144,8 +149,8 @@ is classified before migrating it to LQR/RSLQR/LQI.
 
 Backend selection is likewise explicit. `ControllerBackendRegistry` resolves a
 named implementation during case construction; it does not branch on vehicle
-or route names. The default registry exposes the implemented fixed-point LQR,
-declared gain-scheduled/RSLQR/LQI promotion points, and the regression-only
+or route names. The default registry exposes implemented fixed-point LQR and
+explicit LQI, declared gain-scheduled/RSLQR promotion points, and the regression-only
 `legacy_pid_baseline`. Declared-but-unimplemented backends fail closed when a
 factory is requested, and legacy baselines are never qualification eligible.
 

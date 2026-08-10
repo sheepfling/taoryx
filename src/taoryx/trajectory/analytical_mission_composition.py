@@ -39,7 +39,12 @@ from .configuration_contract import (
     PreparedTrajectoryConfiguration,
     TrajectoryConfigurationInstance,
     TrajectoryConfigurationSchema,
+    TrajectoryControlAdvertisement,
+    TrajectoryControlAuthorityMetadata,
+    TrajectoryControlIntentMetadata,
     TrajectoryFidelityMetadata,
+    TrajectoryMissionOperationMetadata,
+    TrajectoryMissionTemplateMetadata,
     TrajectoryModelCapabilities,
     TrajectoryModelMetadata,
     TrajectoryModelPresentationMetadata,
@@ -851,6 +856,7 @@ def _example_model_metadata(
     vehicle: MissionCompositionVehicle,
     schema: TrajectoryConfigurationSchema,
 ) -> TrajectoryModelMetadata:
+    mission_template = _analytical_mission_template(vehicle)
     fidelity_labels = {
         "point_mass_3dof": "Point-Mass 3-DOF",
         "pseudo_6dof": "Pseudo 6-DOF",
@@ -863,13 +869,7 @@ def _example_model_metadata(
             label=fidelity_labels.get(item, item),
             rank=index,
             declared=True,
-            dynamics_fidelity=(
-                "point_mass_3dof"
-                if item == "point_mass_3dof"
-                else "pseudo_6dof"
-                if item == "pseudo_6dof"
-                else "rigid_body_6dof"
-            ),
+            dynamics_fidelity=("point_mass_3dof" if item == "point_mass_3dof" else "pseudo_6dof" if item == "pseudo_6dof" else "rigid_body_6dof"),
             input_realization=(
                 "guidance_command"
                 if item in {"point_mass_3dof", "pseudo_6dof"}
@@ -960,6 +960,7 @@ def _example_model_metadata(
             sort_key=vehicle.vehicle_id,
             badges=("Reference", "Runnable"),
             default_fidelity_id=vehicle.fidelities[0],
+            default_mission_template_id=mission_template.id,
             default_output_channel_ids=default_channels,
             properties=tuple(properties),
         ),
@@ -982,14 +983,17 @@ def _example_model_metadata(
                 description="Deterministic provider-local analytical realization used to prove the portable contract.",
                 status="available",
                 dynamics_fidelities=("point_mass_3dof",),
-                input_realization="guidance_command",
+                input_realization="uncontrolled" if vehicle.model_kind == "ballistic_3dof" else "guidance_command",
+                controls=_analytical_control_advertisement(vehicle),
                 fidelity_aliases=("point_mass_3dof",),
+                mission_template_ids=(mission_template.id,),
                 operations=("validate", "batch"),
                 native_factory_ids=("analytical_reference.v1",),
                 source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
                 claim_boundary="Reference contract fixture only; no physical qualification claim.",
             ),
         ),
+        mission_templates=(mission_template,),
         reference_frames=(_analytical_ned_frame(),),
         output_schema=output_schema,
         output_schema_id=output_schema.schema_id,
@@ -999,6 +1003,137 @@ def _example_model_metadata(
         fidelities=fidelities,
         provenance=vehicle.provenance,
         claim_boundary="Analytical interface example; no historical or qualification claim.",
+    )
+    ####
+
+
+def _analytical_mission_template(
+    vehicle: MissionCompositionVehicle,
+) -> TrajectoryMissionTemplateMetadata:
+    """Advertise the repeatable native sequence behind one analytical runner.
+
+    The reference models accept a caller-authored nonempty repetition of one
+    segment kind.  The template records that executable shape and its
+    batch-only runner boundary so a common authoring plan can expose the same
+    lifecycle as the canonical vehicle providers without turning the fixture
+    into a physical mission claim.
+    """
+
+    initialization = vehicle.initializations[0]
+    segment = vehicle.segments[0]
+    identifier = f"{vehicle.vehicle_id}_repeatable_sequence_v1"
+    return TrajectoryMissionTemplateMetadata(
+        id=identifier,
+        name=f"Repeatable {segment.id.replace('_', ' ').title()} Sequence",
+        description=(
+            f"One or more native {segment.id!r} segments after {initialization.id!r}; "
+            "the caller supplies all initial-state and segment values through the published schema."
+        ),
+        status="runnable_reference",
+        initialization_variants=(initialization.id,),
+        segment_sequence=(segment.id,),
+        compatible_fidelities=("point_mass_3dof",),
+        operations=(
+            TrajectoryMissionOperationMetadata(
+                fidelity="point_mass_3dof",
+                realization_id="analytical_point_mass",
+                operation="validate",
+                status="available",
+                execution_mode="schema_validation",
+                availability_scope="provider_interface",
+                common_runner_status="not_available",
+                claim_boundary="Schema validation for the analytical reference fixture only.",
+            ),
+            TrajectoryMissionOperationMetadata(
+                fidelity="point_mass_3dof",
+                realization_id="analytical_point_mass",
+                operation="batch",
+                status="available",
+                execution_mode="analytical_deterministic",
+                availability_scope="provider_interface",
+                common_runner_status="registered",
+                executor_id="analytical-reference-executor",
+                claim_boundary=(
+                    "Deterministic analytical reference execution only; no historical, physical-vehicle, or qualification claim."
+                ),
+            ),
+            TrajectoryMissionOperationMetadata(
+                fidelity="point_mass_3dof",
+                realization_id="analytical_point_mass",
+                operation="step",
+                status="blocked",
+                common_runner_status="not_available",
+                blockers=("no stateful analytical-reference Mission Composition session is registered",),
+                claim_boundary="The analytical reference provider is batch-only.",
+            ),
+        ),
+        provenance="analytical-reference-fixture",
+        claim_boundary=(
+            "This template describes only the deterministic fixture's repeatable input shape and batch lifecycle. "
+            "It is not a physical vehicle mission, a controller, or qualification evidence."
+        ),
+    )
+    ####
+
+
+def _analytical_control_advertisement(
+    vehicle: MissionCompositionVehicle,
+) -> TrajectoryControlAdvertisement:
+    """Describe open-loop ballistic or provider-internal waypoint authority."""
+
+    if vehicle.model_kind == "ballistic_3dof":
+        return TrajectoryControlAdvertisement(
+            status="uncontrolled",
+            channels=(),
+            authorities=(
+                TrajectoryControlAuthorityMetadata(
+                    id="no_external_action",
+                    authority="open_loop",
+                    availability="not_applicable",
+                    channel_ids=(),
+                    operations=(),
+                    description="The ballistic coast is deliberately uncontrolled.",
+                    source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
+                    provenance="analytical reference implementation",
+                    claim_boundary="No external or provider-generated control is applied to ballistic propagation.",
+                ),
+            ),
+            intents=(),
+            claim_boundary="This realization is an explicit open-loop analytical propagation fixture.",
+        )
+    return TrajectoryControlAdvertisement(
+        status="internally_generated",
+        channels=(),
+        authorities=(
+            TrajectoryControlAuthorityMetadata(
+                id="waypoint_guidance",
+                authority="mission",
+                availability="available_in_batch",
+                channel_ids=(),
+                operations=("batch",),
+                description="Provider-internal constant-velocity waypoint steering.",
+                source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
+                provenance="analytical reference implementation",
+                claim_boundary="Internal geometric steering only; no external action or physical actuator is exposed.",
+            ),
+        ),
+        intents=(
+            TrajectoryControlIntentMetadata(
+                id="waypoint_tracking",
+                label="Waypoint Tracking",
+                description="Track each configured local-frame waypoint until capture.",
+                resolution="provider_internal",
+                segment_ids=("waypoint_leg",),
+                mission_template_ids=(),
+                channel_ids=(),
+                operations=("batch",),
+                source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
+                provenance="analytical reference implementation",
+                claim_boundary="Deterministic provider-local guidance semantics only.",
+            ),
+        ),
+        default_authority_id="waypoint_guidance",
+        claim_boundary="Waypoint guidance is generated internally and does not create an interactive control surface.",
     )
     ####
 
@@ -1410,7 +1545,9 @@ class ExampleMissionCompositionProvider:
             raise MissionCompositionError("unsupported-fidelity", f"vehicle does not advertise {request.fidelity!r}", field="fidelity")
         initialization = vehicle.initialization(request.initialization_id)
         if request.fidelity not in initialization.compatible_fidelities:
-            raise MissionCompositionError("initialization-fidelity-mismatch", "initialization is not compatible with requested fidelity", field="initialization_id")
+            raise MissionCompositionError(
+                "initialization-fidelity-mismatch", "initialization is not compatible with requested fidelity", field="initialization_id"
+            )
         resolved_initialization = _resolve_parameters(initialization.parameters, request.initialization, scope=f"initialization:{initialization.id}")
 
         channel_map = {item.id: item for item in vehicle.channels}
@@ -1433,7 +1570,9 @@ class ExampleMissionCompositionProvider:
             except KeyError as error:
                 raise MissionCompositionError("unknown-segment", f"vehicle does not advertise {selected.id!r}", field=f"segments[{index - 1}].id") from error
             if request.fidelity not in segment.compatible_fidelities:
-                raise MissionCompositionError("segment-fidelity-mismatch", "segment is not compatible with requested fidelity", field=f"segments[{index - 1}].id")
+                raise MissionCompositionError(
+                    "segment-fidelity-mismatch", "segment is not compatible with requested fidelity", field=f"segments[{index - 1}].id"
+                )
             if previous is None:
                 if not segment.entry_allowed:
                     raise MissionCompositionError("invalid-sequence", f"segment {segment.id!r} is not an allowed entry segment", field="segments[0].id")
@@ -1547,7 +1686,9 @@ class ExampleMissionCompositionProvider:
 
     def _run_ballistic(
         self, prepared: MissionCompositionPreparedRequest
-    ) -> tuple[list[MissionCompositionTrajectorySample], list[MissionCompositionSegmentResult], list[MissionCompositionTrajectoryEvent], list[str], TrajectoryStatus]:
+    ) -> tuple[
+        list[MissionCompositionTrajectorySample], list[MissionCompositionSegmentResult], list[MissionCompositionTrajectoryEvent], list[str], TrajectoryStatus
+    ]:
         """Propagate the analytical ballistic fixture."""
 
         state = self._initial_state(prepared.resolved_initialization)
@@ -1602,7 +1743,9 @@ class ExampleMissionCompositionProvider:
 
     def _run_constant_velocity_waypoint(
         self, prepared: MissionCompositionPreparedRequest
-    ) -> tuple[list[MissionCompositionTrajectorySample], list[MissionCompositionSegmentResult], list[MissionCompositionTrajectoryEvent], list[str], TrajectoryStatus]:
+    ) -> tuple[
+        list[MissionCompositionTrajectorySample], list[MissionCompositionSegmentResult], list[MissionCompositionTrajectoryEvent], list[str], TrajectoryStatus
+    ]:
         """Propagate repeatable constant-velocity waypoint legs."""
 
         state = self._initial_state(prepared.resolved_initialization)
@@ -1698,7 +1841,9 @@ class ExampleMissionCompositionProvider:
             "attitude.flight_path_angle_deg": state["flight_path_angle_deg"],
             "maneuver.load_factor_g": state["load_factor_g"],
         }
-        return MissionCompositionTrajectorySample(time_s=state["time_s"], values={key: available[key] for key in channels}, segment_instance_id=segment_instance_id)
+        return MissionCompositionTrajectorySample(
+            time_s=state["time_s"], values={key: available[key] for key in channels}, segment_instance_id=segment_instance_id
+        )
         ####
 
     @staticmethod

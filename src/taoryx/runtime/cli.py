@@ -5,32 +5,35 @@ from __future__ import annotations
 import argparse
 import base64
 import json
-import math
 import shlex
 from collections.abc import Mapping
 from html import escape
+from importlib import metadata as importlib_metadata
 from pathlib import Path
-from typing import TypedDict, cast
+from typing import Any, TypedDict, cast
 
-from taoryx.batch_episode_parity_dispatch import verify_serialized_declared_batch_episode_parity
-from taoryx.composition_episode import open_vehicle_composition_episode
-from taoryx.composition_policy import replay_composition_policy_trace_file
 from taoryx.composition_result_catalog import index_composition_results, write_composition_release_catalog
+from taoryx.controller_tuning_registry import (
+    ControllerTuningCampaignRegistration,
+    ControllerTuningCampaignRegistry,
+)
 from taoryx.integration import available_integrator_descriptions, available_integrators
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language_backed_racetrack import materialize_powered_fixed_wing_composition
-from taoryx.mission_composition_maturity import build_mission_composition_maturity_report
-from taoryx.outputs import RunArtifact
-from taoryx.reachability_catalog import ReachabilityCatalog, load_reachability_catalog
-from taoryx.reachability_envelope import (
-    ReachabilityFidelity,
-    RocketGlideVehicle,
-    TerminalCriteria,
-    generate_launch_grid,
-    rerun_timed_out_artifact,
-    run_reachability_envelope,
+from taoryx.model_authoring import (
+    ModelAuthoringError,
+    build_model_authoring_plan,
+    build_model_automation_assessment,
+    build_model_automation_readiness_summary,
+    compile_model_authoring_draft,
+    load_model_authoring_draft,
+    resolve_model_authoring_selection,
+    run_prepared_mission_composition,
+    scaffold_model_authoring_draft,
+    write_model_authoring_draft,
 )
-from taoryx.reachability_visualization import load_reachability_artifact, render_reachability_plot_bundle
+from taoryx.outputs import RunArtifact
+from taoryx.plugins import PluginError, discover_plugins
 from taoryx.scenario import ScenarioCompileError, ScenarioCompiler
 from taoryx.simulation_runtime_bundle import build_simulation_runtime_bundle, write_composition_run_artifact
 from taoryx.simulation_runtime_catalog import SimulationRuntimeScenario, load_simulation_runtime_catalog
@@ -46,20 +49,16 @@ from taoryx.simulation_runtime_manifest import (
 )
 from taoryx.table_explorer import InterpolationExplanation, TableInspection, explain_interpolation, inspect_table_file
 from taoryx.trajectory import (
-    A320OpenAPModel,
-    A320OpenAPOperatingPoint,
-    A320Pseudo6DOFModel,
-    A320Pseudo6DOFOperatingPoint,
     FamilyCatalog,
     ResolvedCase,
     diff_resolved_cases,
     load_case_intent,
-    load_daveml_family_graph,
-    load_daveml_family_import,
     load_family_catalog,
     resolve_case,
 )
+from taoryx.trajectory.configuration_contract import PreparedTrajectoryConfiguration
 from taoryx.trajectory.evaluation import TrajectoryEvaluation
+from taoryx.trajectory.execution_contract import MissionCompositionOutputSelection
 from taoryx.trajectory.resolution import ResolutionError
 from taoryx.vehicle_batch_execution import execute_vehicle_composition_batch
 from taoryx.vehicle_composition import (
@@ -75,6 +74,7 @@ from taoryx.vehicle_composition_registry import (
     build_vehicle_composition_topology_report,
     load_resolved_vehicle_composition_catalog,
 )
+from taoryx.vehicle_endpoint_spec import vehicle_endpoint_spec_list, verify_vehicle_endpoint
 from taoryx.vehicle_execution_bindings import VehicleExecutionBinding, resolve_vehicle_execution_binding
 from taoryx.vehicle_execution_preflight import build_semantic_preflight_handler_report, preflight_vehicle_composition
 from taoryx.vehicle_integration_intake import (
@@ -84,11 +84,6 @@ from taoryx.vehicle_integration_intake import (
     build_existing_family_intake_blueprint,
     build_new_topology_intake_scaffold,
 )
-from taoryx.vehicle_integration_pipeline import (
-    validate_all_vehicle_integration_pipelines,
-    validate_vehicle_integration_pipeline,
-    write_vehicle_integration_packet,
-)
 from taoryx.vehicle_integration_readiness import (
     validate_all_vehicle_integration_readiness,
     validate_vehicle_integration_readiness,
@@ -96,8 +91,6 @@ from taoryx.vehicle_integration_readiness import (
 from taoryx.vehicle_interface import build_vehicle_interface_catalog_report, resolve_vehicle_interface_contract, validate_vehicle_interface_contract
 from taoryx.vehicle_runtime_lowering import lower_vehicle_composition
 from taoryx.visualization import render_run_artifact_html, render_run_artifact_plots
-from taoryx.x15_native_replay import write_x15_native_boundary_replay
-from taoryx.x15_reachability import write_x15_reachability_bundle
 
 from .optimization_runtime import available_optimizers
 from .runner import run_files
@@ -131,6 +124,29 @@ class _ArtifactInspectionPayload(TypedDict):
     claim_boundary: str
 
 
+_OFFICIAL_PLUGIN_DISTRIBUTIONS: dict[str, str] = {
+    "taoryx.daveml": "taoryx-daveml",
+    "taoryx.simple-aero": "taoryx-simple-aero",
+    "taoryx.reference-models": "taoryx-reference-models",
+    "taoryx.reachability": "taoryx-reachability",
+}
+
+_PLUGIN_INSTALL_PROFILES: dict[str, tuple[str, ...]] = {
+    "core": (),
+    "models": (
+        "taoryx.daveml",
+        "taoryx.simple-aero",
+        "taoryx.reference-models",
+    ),
+    "full": (
+        "taoryx.daveml",
+        "taoryx.simple-aero",
+        "taoryx.reference-models",
+        "taoryx.reachability",
+    ),
+}
+
+
 def _add_reachability_criteria_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--min-speed-m-s", type=float)
     parser.add_argument("--max-speed-m-s", type=float)
@@ -143,32 +159,13 @@ def _add_reachability_criteria_arguments(parser: argparse.ArgumentParser) -> Non
     parser.add_argument("--max-impact-speed-m-s", type=float)
 
 
-def _criteria_from_arguments(arguments: argparse.Namespace) -> TerminalCriteria | None:
-    names = (
-        "min_speed_m_s",
-        "max_speed_m_s",
-        "target_x_m",
-        "target_y_m",
-        "target_z_m",
-        "max_impact_radius_m",
-        "min_impact_speed_m_s",
-        "max_impact_speed_m_s",
-    )
-    if not arguments.require_ground_contact and not any(getattr(arguments, name) is not None for name in names):
-        return None
-    return TerminalCriteria(
-        min_speed_m_s=0.0 if arguments.min_speed_m_s is None else arguments.min_speed_m_s,
-        max_speed_m_s=math.inf if arguments.max_speed_m_s is None else arguments.max_speed_m_s,
-        require_ground_contact=arguments.require_ground_contact,
-        target_position_m=(
-            0.0 if arguments.target_x_m is None else arguments.target_x_m,
-            0.0 if arguments.target_y_m is None else arguments.target_y_m,
-            0.0 if arguments.target_z_m is None else arguments.target_z_m,
-        ),
-        max_impact_radius_m=arguments.max_impact_radius_m,
-        min_impact_speed_m_s=arguments.min_impact_speed_m_s,
-        max_impact_speed_m_s=arguments.max_impact_speed_m_s,
-    )
+def _add_model_selection_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add the exact provider-advertised selection axes used by model tools."""
+
+    parser.add_argument("--fidelity", help="advertised fidelity ID; an advertised default is used when unambiguous")
+    parser.add_argument("--realization", help="advertised executable realization ID")
+    parser.add_argument("--mission", help="advertised mission-template ID")
+    ####
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -263,17 +260,116 @@ def main(argv: list[str] | None = None) -> int:
     integrators = subparsers.add_parser("integrators", help="inspect available integration backends")
     integrators_subparsers = integrators.add_subparsers(dest="integrator_command", required=True)
     integrators_subparsers.add_parser("list", help="list installed integration backends")
+    plugins = subparsers.add_parser("plugins", help="inspect installed model and provider plug-ins")
+    plugins_subparsers = plugins.add_subparsers(dest="plugins_command", required=True)
+    plugins_list = plugins_subparsers.add_parser("list", help="list compatible plug-ins and their typed contributions")
+    plugins_list.add_argument("--json", action="store_true")
+    plugins_list.add_argument("--no-builtin", action="store_true")
+    plugins_list.add_argument("--no-external", action="store_true")
+    plugins_list.add_argument("--disable", action="append", default=[], metavar="PLUGIN_ID")
+    plugins_inspect = plugins_subparsers.add_parser("inspect", help="show one installed plug-in and its contributions")
+    plugins_inspect.add_argument("plugin_id")
+    plugins_inspect.add_argument("--json", action="store_true")
+    plugins_inspect.add_argument("--no-builtin", action="store_true")
+    plugins_inspect.add_argument("--no-external", action="store_true")
+    plugins_inspect.add_argument("--disable", action="append", default=[], metavar="PLUGIN_ID")
+    plugins_check = plugins_subparsers.add_parser(
+        "check",
+        help="verify an official installed distribution profile without source fallbacks",
+    )
+    plugins_check.add_argument("--profile", choices=tuple(_PLUGIN_INSTALL_PROFILES), default="full")
+    plugins_check.add_argument("--json", action="store_true")
+    model = subparsers.add_parser(
+        "model",
+        help="plan, scaffold, validate, and tune plug-in models through common contracts",
+    )
+    model_subparsers = model.add_subparsers(dest="model_command", required=True)
+    model_list = model_subparsers.add_parser("list", help="list every composer model and registered tuning campaign")
+    model_list.add_argument("--provider", help="restrict the inventory to one exact provider ID")
+    model_list.add_argument("--output", type=Path)
+    model_assess = model_subparsers.add_parser(
+        "assess",
+        help="report all-model advertisement, control, adapter, and tuning readiness",
+    )
+    model_assess.add_argument("--provider", help="restrict the readiness matrix to one exact provider ID")
+    model_assess.add_argument("--output", type=Path)
+    model_assess.add_argument(
+        "--summary",
+        action="store_true",
+        help="emit a concise per-realization control and tuning readiness inventory",
+    )
+    model_plan = model_subparsers.add_parser(
+        "plan",
+        help="join model data, controls, navigation, segments, adapters, and tuning readiness",
+    )
+    model_plan.add_argument("provider_id")
+    model_plan.add_argument("model_id")
+    _add_model_selection_arguments(model_plan)
+    model_plan.add_argument("--output", type=Path)
+    model_scaffold = model_subparsers.add_parser(
+        "scaffold",
+        help="generate an editable plain-value YAML or JSON mission draft",
+    )
+    model_scaffold.add_argument("provider_id")
+    model_scaffold.add_argument("model_id")
+    _add_model_selection_arguments(model_scaffold)
+    model_scaffold.add_argument("--draft-id")
+    model_scaffold.add_argument("--configuration-id")
+    model_scaffold.add_argument("--output", type=Path, required=True)
+    model_compile = model_subparsers.add_parser(
+        "compile",
+        help="compile a plain-value draft through the exact provider schema",
+    )
+    model_compile.add_argument("draft", type=Path)
+    model_compile.add_argument("--output", type=Path)
+    model_run = model_subparsers.add_parser(
+        "run",
+        help="run a prepared configuration through its provider-owned common batch runner",
+    )
+    model_run.add_argument("provider_id", help="exact provider that validated the prepared configuration")
+    model_run.add_argument("prepared", type=Path, help="JSON written by 'taoryx model compile'")
+    model_run.add_argument("--request-id", help="caller correlation ID; defaults to the configuration ID")
+    model_run.add_argument("--output-mode", choices=("core", "selected", "all"), default="core")
+    model_run.add_argument("--channel", action="append", default=[], help="request one telemetry channel (requires --output-mode selected)")
+    model_run.add_argument("--telemetry-group", action="append", default=[], help="request one telemetry group (requires --output-mode selected)")
+    model_run.add_argument("--cadence-s", type=float, help="requested output cadence in seconds")
+    model_run.add_argument("--maximum-samples-per-object", type=int, help="cap samples returned for each object")
+    model_run.add_argument("--maximum-objects", type=int, help="cap returned primary and spawned objects")
+    model_run.add_argument("--no-events", action="store_true", help="omit event records when the provider supports it")
+    model_run.add_argument("--no-segments", action="store_true", help="omit segment spans when the provider supports it")
+    model_run.add_argument("--no-spawned-objects", action="store_true", help="return only the primary object")
+    model_run.add_argument("--output", type=Path, help="write the discriminated trajectory/failure response as JSON")
+    model_tune = model_subparsers.add_parser(
+        "tune",
+        help="run a plug-in campaign through the common stop-at-first-blocker tuning pipeline",
+    )
+    model_tune.add_argument("provider_id")
+    model_tune.add_argument("model_id")
+    _add_model_selection_arguments(model_tune)
+    model_tune.add_argument("--campaign", help="registered campaign ID; inferred only when exactly one applies")
+    model_tune.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=Path("build/controller-cache"),
+        help="content-addressed tuning cache (default: build/controller-cache)",
+    )
+    model_tune.add_argument("--no-cache", action="store_true", help="rerun the campaign without reading or writing cache")
+    model_tune.add_argument("--output", type=Path)
     reachability = subparsers.add_parser("reachability", help="inspect Alpha 3 reachability catalogs")
     reachability_subparsers = reachability.add_subparsers(dest="reachability_command", required=True)
     reachability_list = reachability_subparsers.add_parser("list", help="list reachability catalog entries")
     reachability_list.add_argument("kind", choices=("profiles", "families", "semantics"))
-    reachability_list.add_argument("--catalog", type=Path, default=Path("verification/reachability_profile_catalog.yaml"))
+    reachability_list.add_argument("--catalog", type=Path)
     reachability_inspect = reachability_subparsers.add_parser("inspect", help="inspect one reachability catalog entry")
     reachability_inspect.add_argument("kind", choices=("profile", "family", "semantic"))
     reachability_inspect.add_argument("identifier")
-    reachability_inspect.add_argument("--catalog", type=Path, default=Path("verification/reachability_profile_catalog.yaml"))
+    reachability_inspect.add_argument("--catalog", type=Path)
     reachability_run = reachability_subparsers.add_parser("run", help="run the reduced-order rocket/glide envelope fixture")
-    reachability_run.add_argument("--fidelity", choices=tuple(item.value for item in ReachabilityFidelity), default=ReachabilityFidelity.POINT_MASS_3DOF.value)
+    reachability_run.add_argument(
+        "--fidelity",
+        choices=("point_mass_3dof", "pseudo_6dof", "rigid_body_6dof", "rigid_body_6dof_surface_allocated"),
+        default="point_mass_3dof",
+    )
     reachability_run.add_argument("--workers", type=int, default=1)
     reachability_run.add_argument("--azimuth-deg", type=float, action="append", default=[])
     reachability_run.add_argument("--elevation-deg", type=float, action="append", default=[])
@@ -379,6 +475,78 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help="optionally index existing normalized result artifacts as part of the maturity report",
     )
+    vehicle_maturity_report.add_argument(
+        "--retain-batch-results-dir",
+        type=Path,
+        help="retain all executed batch-witness packets in an empty directory and index the generated corpus",
+    )
+    vehicle_witness_report = vehicle_subparsers.add_parser(
+        "witness-report",
+        help="compile or run exact public endpoint witnesses, optionally scoped to one family or endpoint",
+    )
+    vehicle_witness_report.add_argument(
+        "--execute-batch",
+        action="store_true",
+        help="run selected batch witnesses through their public compose-to-run entry point",
+    )
+    vehicle_witness_report.add_argument(
+        "--results-dir",
+        type=Path,
+        help="retain generated batch witness packets in an empty directory and write an aggregate release catalog",
+    )
+    witness_selection = vehicle_witness_report.add_mutually_exclusive_group()
+    witness_selection.add_argument(
+        "--family",
+        action="append",
+        metavar="FAMILY_ID",
+        help="limit to one family; repeat to select several families",
+    )
+    witness_selection.add_argument(
+        "--witness",
+        action="append",
+        metavar="WITNESS_ID",
+        help="limit to one exact checked-in endpoint witness; repeat to select several witnesses",
+    )
+    vehicle_subparsers.add_parser(
+        "endpoint-specs",
+        help="list focused vertical contracts that join composition, runtime, advertisements, outputs, and tuning",
+    )
+    vehicle_verify = vehicle_subparsers.add_parser(
+        "verify",
+        help="verify one focused vehicle endpoint across its declared composition, runtime, advertisements, outputs, and tuner",
+    )
+    vehicle_verify.add_argument("endpoint_id", help="ID from 'taoryx vehicle endpoint-specs'")
+    vehicle_verify.add_argument(
+        "--execute",
+        action="store_true",
+        help="run the endpoint's exact batch factory or initialize its exact interactive episode after static verification",
+    )
+    vehicle_verify.add_argument(
+        "--tune",
+        action="store_true",
+        help="run the endpoint's declared controller campaign after verifying its advertised tuning operations",
+    )
+    vehicle_verify_cache = vehicle_verify.add_mutually_exclusive_group()
+    vehicle_verify_cache.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=Path("build/controller-tuning-cache"),
+        help="content-addressed controller-campaign cache directory used only with --tune",
+    )
+    vehicle_verify_cache.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="with --tune, run the campaign without creating or reading a cache artifact",
+    )
+    vehicle_verify.add_argument(
+        "--results-dir",
+        type=Path,
+        help=(
+            "retain the exact executed batch packet in an empty directory, including controller/tuning provenance; "
+            "requires --execute"
+        ),
+    )
+    vehicle_verify.add_argument("--output", type=Path, help="optional JSON destination for the focused report")
     vehicle_inspect = vehicle_subparsers.add_parser("inspect", help="show one vehicle's composition contract")
     vehicle_inspect.add_argument("identifier", help="family ID or native vehicle registry ID")
     vehicle_describe = vehicle_subparsers.add_parser(
@@ -690,6 +858,10 @@ def main(argv: list[str] | None = None) -> int:
         for integrator_name, description in available_integrator_descriptions():
             print(f"{integrator_name.value}\t{description}")
         return 0
+    if arguments.command == "plugins":
+        return _plugins_command(arguments)
+    if arguments.command == "model":
+        return _model_command(arguments)
     if arguments.command == "reachability":
         return _reachability_command(arguments)
     if arguments.command == "catalog":
@@ -757,6 +929,198 @@ def main(argv: list[str] | None = None) -> int:
     return report.exit_code
 
 
+def _plugins_command(arguments: argparse.Namespace) -> int:
+    """Render a non-executing scan of installed Taoryx plug-ins."""
+
+    if arguments.plugins_command == "check":
+        return _plugin_installation_check_command(arguments)
+    try:
+        catalog = discover_plugins(
+            include_builtin=not arguments.no_builtin,
+            include_external=not arguments.no_external,
+            disabled=tuple(arguments.disable),
+            strict=False,
+        )
+        payload = catalog.public_dict()
+        if arguments.plugins_command == "inspect":
+            plugin = catalog.plugin(arguments.plugin_id)
+            payload = {
+                "schema": "taoryx.plugin-inspection/v1",
+                "api_version": payload["api_version"],
+                "catalog_fingerprint": catalog.fingerprint,
+                "plugin": plugin.public_dict(),
+                "contributions": [item.public_dict() for item in catalog.contributions if item.plugin.id == plugin.id],
+                "diagnostics": [item.public_dict() for item in catalog.diagnostics if item.plugin_id == plugin.id],
+            }
+    except (KeyError, PluginError, TypeError, ValueError) as error:
+        print(f"error: plugin-discovery-failed: {error}")
+        return 2
+    if arguments.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+    raw_plugins = payload.get("plugins") if arguments.plugins_command == "list" else [payload.get("plugin")]
+    plugin_items = raw_plugins if isinstance(raw_plugins, list) else []
+    raw_contributions = payload.get("contributions")
+    contributions = raw_contributions if isinstance(raw_contributions, list) else []
+    raw_diagnostics = payload.get("diagnostics")
+    diagnostics = raw_diagnostics if isinstance(raw_diagnostics, list) else []
+    for plugin in plugin_items:
+        if not isinstance(plugin, Mapping):
+            continue
+        print(f"{plugin['id']}\t{plugin['package']}=={plugin['version']}\tAPI {plugin['api_version']}")
+        for contribution in contributions:
+            if isinstance(contribution, Mapping) and contribution.get("plugin_id") == plugin["id"]:
+                print(f"  {contribution['kind']}\t{contribution['id']}")
+    for diagnostic in diagnostics:
+        if isinstance(diagnostic, Mapping) and diagnostic.get("status") not in {"loaded", "disabled"}:
+            print(f"{diagnostic['status']}: {diagnostic['plugin_id']}: {diagnostic['message']}")
+    return 0
+    ####
+
+
+def _plugin_installation_check_command(arguments: argparse.Namespace) -> int:
+    """Verify distribution metadata and installed entry points for one suite."""
+
+    expected_plugin_ids = _PLUGIN_INSTALL_PROFILES[arguments.profile]
+    expected_distributions = (
+        "taoryx",
+        *(_OFFICIAL_PLUGIN_DISTRIBUTIONS[plugin_id] for plugin_id in expected_plugin_ids),
+    )
+    distribution_records: list[dict[str, object]] = []
+    distribution_versions: dict[str, str | None] = {}
+    for distribution in expected_distributions:
+        try:
+            version = importlib_metadata.version(distribution)
+        except importlib_metadata.PackageNotFoundError:
+            version = None
+        distribution_versions[distribution] = version
+        distribution_records.append(
+            {
+                "distribution": distribution,
+                "installed": version is not None,
+                "version": version,
+            }
+        )
+
+    if expected_plugin_ids:
+        catalog = discover_plugins(include_builtin=False, strict=False)
+        loaded_plugins = {plugin.id: plugin for plugin in catalog.plugins}
+        contributions = catalog.contributions
+        failed_diagnostics = [
+            diagnostic.public_dict()
+            for diagnostic in catalog.diagnostics
+            if diagnostic.plugin_id in expected_plugin_ids and diagnostic.status not in {"loaded", "disabled"}
+        ]
+    else:
+        loaded_plugins = {}
+        contributions = ()
+        failed_diagnostics = []
+
+    plugin_records: list[dict[str, object]] = []
+    for plugin_id in expected_plugin_ids:
+        distribution = _OFFICIAL_PLUGIN_DISTRIBUTIONS[plugin_id]
+        plugin = loaded_plugins.get(plugin_id)
+        loaded = plugin is not None
+        package_matches = plugin is not None and plugin.package == distribution
+        version_matches = plugin is not None and plugin.version == distribution_versions[distribution]
+        plugin_records.append(
+            {
+                "plugin_id": plugin_id,
+                "distribution": distribution,
+                "loaded": loaded,
+                "package_matches": package_matches,
+                "version": plugin.version if plugin is not None else None,
+                "version_matches": version_matches,
+                "contribution_count": sum(contribution.plugin.id == plugin_id for contribution in contributions),
+                "valid": loaded and package_matches and version_matches,
+            }
+        )
+    ready = (
+        all(bool(record["installed"]) for record in distribution_records) and all(bool(record["valid"]) for record in plugin_records) and not failed_diagnostics
+    )
+    payload = {
+        "schema": "taoryx.plugin-installation-check/v1",
+        "profile": arguments.profile,
+        "ready": ready,
+        "distributions": distribution_records,
+        "plugins": plugin_records,
+        "diagnostics": failed_diagnostics,
+    }
+    if arguments.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0 if ready else 2
+
+    print(f"Taoryx installation profile: {arguments.profile}")
+    for record in distribution_records:
+        marker = "OK" if record["installed"] else "FAIL"
+        detail = record["version"] if record["version"] is not None else "not installed"
+        print(f"[{marker:4}] distribution {record['distribution']}: {detail}")
+    for record in plugin_records:
+        marker = "OK" if record["valid"] else "FAIL"
+        if not record["loaded"]:
+            detail = "entry point missing or failed to load"
+        elif not record["package_matches"]:
+            detail = f"advertises unexpected package metadata (expected {record['distribution']})"
+        elif not record["version_matches"]:
+            detail = f"advertised version {record['version']} does not match installed distribution"
+        else:
+            detail = f"{record['version']}; {record['contribution_count']} contribution(s)"
+        print(f"[{marker:4}] plug-in {record['plugin_id']}: {detail}")
+    for diagnostic in failed_diagnostics:
+        print(f"[FAIL] {diagnostic['plugin_id']}: {diagnostic['message']}")
+    if not ready:
+        print("Installation is incomplete. Install the missing distributions from the release wheelhouse")
+        print("or follow docs/INSTALLATION.md from a source checkout, then run this check again.")
+        return 2
+    print("Installation is ready; all required entry points loaded without source fallbacks.")
+    return 0
+    ####
+
+
+def build_mission_composition_maturity_report(
+    catalog: object,
+    *,
+    check_execution_witnesses: bool,
+    execute_batch_witnesses: bool,
+    execute_parity_witnesses: bool,
+    results_directory: Path | None,
+    retained_batch_results_directory: Path | None,
+) -> dict[str, object]:
+    """Lazily invoke the optional reference-model maturity reporter."""
+
+    from taoryx.mission_composition_maturity import build_mission_composition_maturity_report as build_report
+
+    return build_report(
+        cast(Any, catalog),
+        check_execution_witnesses=check_execution_witnesses,
+        execute_batch_witnesses=execute_batch_witnesses,
+        execute_parity_witnesses=execute_parity_witnesses,
+        results_directory=results_directory,
+        retained_batch_results_directory=retained_batch_results_directory,
+    )
+    ####
+
+
+def build_vehicle_execution_witness_report(
+    *,
+    execute_batch: bool,
+    family_ids: list[str] | None,
+    witness_ids: list[str] | None,
+    results_directory: Path | None,
+) -> dict[str, object]:
+    """Lazily run exact endpoint witnesses without widening their selected scope."""
+
+    from taoryx.vehicle_execution_witnesses import validate_vehicle_execution_witnesses
+
+    return validate_vehicle_execution_witnesses(
+        execute_batch=execute_batch,
+        family_ids=family_ids,
+        witness_ids=witness_ids,
+        retained_results_directory=results_directory,
+    )
+    ####
+
+
 def _write_source_run_manifest(arguments: argparse.Namespace, report: object, artifact_path: Path | None) -> Path:
     """Write the common Simulation Runtime manifest for a file-oriented source run."""
 
@@ -791,7 +1155,11 @@ def _write_source_run_manifest(arguments: argparse.Namespace, report: object, ar
         source_inputs=tuple(source_inputs),
         runtime=default_runtime_identity(),
         integration={"profile": arguments.profile, "integrator": arguments.integrator, "max_steps": arguments.max_steps, "seed": arguments.seed},
-        time={"requested_duration_s": None, "accepted_start_s": min(accepted_times) if accepted_times else None, "accepted_end_s": max(accepted_times) if accepted_times else None},
+        time={
+            "requested_duration_s": None,
+            "accepted_start_s": min(accepted_times) if accepted_times else None,
+            "accepted_end_s": max(accepted_times) if accepted_times else None,
+        },
         termination=termination,
         artifacts=artifact_inventory(arguments.output_dir),
         claim_boundary=(
@@ -805,6 +1173,8 @@ def _write_source_run_manifest(arguments: argparse.Namespace, report: object, ar
 
 def _daveml_command(arguments: argparse.Namespace) -> int:
     """Run fail-closed DAVE-ML family smoke verification."""
+
+    from taoryx.trajectory.daveml_import import load_daveml_family_graph, load_daveml_family_import
 
     if arguments.daveml_command == "composite-smoke":
         return _a320_pseudo_smoke(arguments)
@@ -854,6 +1224,9 @@ def _daveml_command(arguments: argparse.Namespace) -> int:
 def _a320_pseudo_smoke(arguments: argparse.Namespace) -> int:
     """Run the bounded surrogate binding and authored-DAVE-ML smoke chain."""
 
+    from taoryx.trajectory.a320_openap import A320OpenAPOperatingPoint
+    from taoryx.trajectory.a320_pseudo6dof import A320Pseudo6DOFModel, A320Pseudo6DOFOperatingPoint
+
     try:
         model = A320Pseudo6DOFModel.from_repository()
         point = A320Pseudo6DOFOperatingPoint(
@@ -892,6 +1265,8 @@ def _a320_pseudo_smoke(arguments: argparse.Namespace) -> int:
 
 def _a320_openap_smoke(arguments: argparse.Namespace) -> int:
     """Run the derived-exact A320 family-library evidence chain."""
+
+    from taoryx.trajectory.a320_openap import A320OpenAPModel, A320OpenAPOperatingPoint
 
     try:
         model = A320OpenAPModel.from_repository()
@@ -1087,13 +1462,6 @@ def _trajectory_catalog(path: Path) -> FamilyCatalog:
     ####
 
 
-def _reachability_catalog(path: Path) -> ReachabilityCatalog:
-    """Load the configured Alpha 3 reachability catalog for CLI commands."""
-
-    return load_reachability_catalog(path)
-    ####
-
-
 def _print_json(payload: object, output: Path | None = None) -> None:
     """Print or write one deterministic JSON payload."""
 
@@ -1104,6 +1472,233 @@ def _print_json(payload: object, output: Path | None = None) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(text, encoding="utf-8")
     print(f"wrote {output}")
+    ####
+
+
+def _model_command(arguments: argparse.Namespace) -> int:
+    """Drive every installed composer model through the common authoring seam."""
+
+    try:
+        plugins = discover_plugins()
+        providers = plugins.build_mission_composition_provider_registry()
+        campaigns = plugins.build_controller_tuning_campaign_registry()
+        campaigns.validate_against(providers)
+        if arguments.model_command == "list":
+            selected_providers = providers.providers
+            if arguments.provider is not None:
+                selected_providers = (providers.provider(arguments.provider),)
+            payload: dict[str, object] = {
+                "schema": "taoryx.model-authoring-catalog/v1",
+                "plugin_catalog_fingerprint": plugins.fingerprint,
+                "providers": [
+                    {
+                        "metadata": provider.metadata.model_dump(mode="json", by_alias=True),
+                        "models": [
+                            {
+                                "id": model.id,
+                                "version": model.version,
+                                "display_name": model.presentation.display_name,
+                                "family_id": model.family_id,
+                                "physical_family": model.physical_family,
+                                "model_kind": model.model_kind,
+                                "status": model.status,
+                                "fidelities": [item.model_dump(mode="json") for item in model.fidelities],
+                                "realizations": [
+                                    {
+                                        "id": item.id,
+                                        "status": item.status,
+                                        "fidelity_aliases": list(item.fidelity_aliases),
+                                        "input_realization": item.input_realization,
+                                        "control_status": item.controls.status,
+                                    }
+                                    for item in model.realizations
+                                ],
+                                "mission_template_ids": [item.id for item in model.mission_templates],
+                                "controller_tuning_campaign_ids": [
+                                    item.id for item in campaigns.registrations if item.provider_id == provider.metadata.id and item.model_id == model.id
+                                ],
+                            }
+                            for model in provider.list_models()
+                        ],
+                    }
+                    for provider in selected_providers
+                ],
+                "workflow": {
+                    "installation_check": "taoryx plugins check --profile models",
+                    "next": "taoryx model plan <provider-id> <model-id>",
+                },
+                "claim_boundary": (
+                    "This inventory reports installed advertisements and campaign registrations; "
+                    "it does not imply that every fidelity or mission operation is executable."
+                ),
+            }
+            _print_json(payload, arguments.output)
+            return 0
+        if arguments.model_command == "assess":
+            family_adapters = plugins.build_family_adapter_registry() if plugins.records("family_adapter") else None
+            local_controller_screens = (
+                plugins.build_local_controller_screen_advertisement_registry()
+                if plugins.records("local_controller_screen_advertisement")
+                else None
+            )
+            payload = build_model_automation_assessment(
+                providers,
+                campaigns,
+                family_adapters=family_adapters,
+                local_controller_screens=local_controller_screens,
+                provider_id=arguments.provider,
+            )
+            if arguments.summary:
+                payload = build_model_automation_readiness_summary(payload)
+            _print_json(payload, arguments.output)
+            return 0
+        if arguments.model_command == "plan":
+            family_adapters = plugins.build_family_adapter_registry() if plugins.records("family_adapter") else None
+            local_controller_screens = (
+                plugins.build_local_controller_screen_advertisement_registry()
+                if plugins.records("local_controller_screen_advertisement")
+                else None
+            )
+            payload = build_model_authoring_plan(
+                providers,
+                campaigns,
+                arguments.provider_id,
+                arguments.model_id,
+                family_adapters=family_adapters,
+                local_controller_screens=local_controller_screens,
+                fidelity=arguments.fidelity,
+                realization_id=arguments.realization,
+                mission_template_id=arguments.mission,
+            )
+            _print_json(payload, arguments.output)
+            return 0
+        if arguments.model_command == "scaffold":
+            draft = scaffold_model_authoring_draft(
+                providers,
+                arguments.provider_id,
+                arguments.model_id,
+                fidelity=arguments.fidelity,
+                realization_id=arguments.realization,
+                mission_template_id=arguments.mission,
+                draft_id=arguments.draft_id,
+                configuration_id=arguments.configuration_id,
+            )
+            destination = write_model_authoring_draft(draft, arguments.output)
+            _print_json(
+                {
+                    "schema": "taoryx.model-authoring-scaffold-result/v1",
+                    "output": str(destination),
+                    "draft_id": draft.draft_id,
+                    "configuration_id": draft.configuration_id,
+                    "status": "inputs_required" if draft.unresolved_inputs else "complete",
+                    "unresolved_inputs": list(draft.unresolved_inputs),
+                    "next": f"taoryx model compile {destination}",
+                }
+            )
+            return 0
+        if arguments.model_command == "compile":
+            draft = load_model_authoring_draft(arguments.draft)
+            prepared = compile_model_authoring_draft(providers, draft)
+            _print_json(prepared.model_dump(mode="json", by_alias=True), arguments.output)
+            return 0
+        if arguments.model_command == "run":
+            prepared = PreparedTrajectoryConfiguration.model_validate_json(arguments.prepared.read_text(encoding="utf-8"))
+            response = run_prepared_mission_composition(
+                providers,
+                arguments.provider_id,
+                prepared,
+                request_id=arguments.request_id,
+                output=MissionCompositionOutputSelection(
+                    mode=arguments.output_mode,
+                    cadence_s=arguments.cadence_s,
+                    channels=tuple(arguments.channel),
+                    telemetry_groups=tuple(arguments.telemetry_group),
+                    include_events=not arguments.no_events,
+                    include_segments=not arguments.no_segments,
+                    include_spawned_objects=not arguments.no_spawned_objects,
+                    maximum_samples_per_object=arguments.maximum_samples_per_object,
+                    maximum_objects=arguments.maximum_objects,
+                ),
+            )
+            _print_json(response.model_dump(mode="json", by_alias=True), arguments.output)
+            return 0 if response.kind == "trajectory" else 2
+        if arguments.model_command == "tune":
+            registration = _select_model_tuning_campaign(campaigns, arguments)
+            selection = resolve_model_authoring_selection(
+                providers,
+                arguments.provider_id,
+                arguments.model_id,
+                fidelity=arguments.fidelity or registration.fidelity,
+                realization_id=(arguments.realization or (registration.realization_ids[0] if len(registration.realization_ids) == 1 else None)),
+                mission_template_id=(arguments.mission or (registration.mission_template_ids[0] if len(registration.mission_template_ids) == 1 else None)),
+                allow_blocked_local_design=True,
+            )
+            selected_realization = selection.realization.id if selection.realization is not None else None
+            selected_mission = selection.mission.id if selection.mission is not None else None
+            if selection.model.family_id != registration.family_id or not registration.matches(
+                provider_id=arguments.provider_id,
+                model_id=arguments.model_id,
+                fidelity=selection.fidelity,
+                realization_id=selected_realization,
+                mission_template_id=selected_mission,
+            ):
+                raise ModelAuthoringError(
+                    "campaign-selection-mismatch",
+                    f"campaign {registration.id!r} does not apply to the resolved model selection",
+                    path="campaign",
+                )
+            cached = registration.run_cached(
+                None if arguments.no_cache else arguments.cache_dir,
+                context_fingerprint=plugins.fingerprint,
+            )
+            _print_json(
+                {
+                    "schema": "taoryx.model-tuning-result/v1",
+                    "selection": selection.public_dict(),
+                    "registration": registration.public_dict(),
+                    "cache": {
+                        "key": cached.cache_key,
+                        "hit": cached.cache_hit,
+                        "path": str(cached.cache_path) if cached.cache_path is not None else None,
+                    },
+                    "report": cached.payload,
+                },
+                arguments.output,
+            )
+            return 0 if cached.payload.get("status") == "candidate_ready" else 2
+        raise ValueError(f"unknown model command {arguments.model_command!r}")
+    except ModuleNotFoundError as error:
+        print(f"error: model-tool-dependency-missing: {error}; install the model packages plus the declared numerical extras")
+        return 2
+    except (KeyError, ModelAuthoringError, OSError, PluginError, TypeError, ValueError, RuntimeError) as error:
+        print(f"error: model-tool-failed: {error}")
+        return 2
+    ####
+
+
+def _select_model_tuning_campaign(
+    campaigns: ControllerTuningCampaignRegistry,
+    arguments: argparse.Namespace,
+) -> ControllerTuningCampaignRegistration:
+    """Resolve an explicit campaign or the only registration for a model."""
+
+    if arguments.campaign is not None:
+        registration = campaigns.registration(arguments.campaign)
+        if registration.provider_id != arguments.provider_id or registration.model_id != arguments.model_id:
+            raise ModelAuthoringError(
+                "campaign-model-mismatch",
+                (f"campaign targets {registration.provider_id!r}/{registration.model_id!r}, not {arguments.provider_id!r}/{arguments.model_id!r}"),
+                path="campaign",
+            )
+        return registration
+    matches = tuple(item for item in campaigns.registrations if item.provider_id == arguments.provider_id and item.model_id == arguments.model_id)
+    if len(matches) != 1:
+        raise ModelAuthoringError(
+            "campaign-selection-required",
+            f"model has registered campaigns {[item.id for item in matches]!r}; select one explicitly",
+            path="campaign",
+        )
+    return matches[0]
     ####
 
 
@@ -1132,114 +1727,18 @@ def _catalog_command(arguments: argparse.Namespace) -> int:
 
 
 def _reachability_command(arguments: argparse.Namespace) -> int:
-    """Handle Alpha 3 reachability catalog inspection."""
+    """Delegate optional reachability operations through the typed provider registry."""
 
     try:
-        if arguments.reachability_command == "x15":
-            reachability_bundle = write_x15_reachability_bundle(
-                arguments.output_dir,
-                workers=arguments.workers,
-                step_size_s=arguments.step_size_s,
-                horizon_s=arguments.horizon_s,
-                criteria=_criteria_from_arguments(arguments),
-                dpi=arguments.dpi,
-            )
-            print(f"wrote X-15 reachability bundle: {reachability_bundle.manifest_path.parent}")
-            return 0
-        if arguments.reachability_command == "x15-native-replay":
-            native_bundle = write_x15_native_boundary_replay(
-                arguments.envelope,
-                arguments.output_dir,
-                max_points=arguments.max_points,
-                duration_s=arguments.duration_s,
-                max_steps=arguments.max_steps,
-            )
-            print(f"wrote X-15 native replay bundle: {native_bundle.manifest_path.parent}")
-            return 0
-        if arguments.reachability_command == "run":
-            azimuths = arguments.azimuth_deg or (-30.0, 0.0, 30.0)
-            elevations = arguments.elevation_deg or (35.0, 50.0, 65.0)
-            banks = arguments.bank_deg or (-30.0, 0.0, 30.0)
-            commands = generate_launch_grid(
-                tuple(math.radians(value) for value in azimuths),
-                tuple(math.radians(value) for value in elevations),
-                tuple(math.radians(value) for value in banks),
-            )
-            result = run_reachability_envelope(
-                RocketGlideVehicle(),
-                commands,
-                fidelity=ReachabilityFidelity(arguments.fidelity),
-                step_size_s=arguments.step_size_s,
-                horizon_s=arguments.horizon_s,
-                workers=arguments.workers,
-                criteria=_criteria_from_arguments(arguments),
-            )
-            _print_json(
-                result.as_dict(include_trajectories=arguments.include_trajectories or not arguments.omit_trajectories),
-                arguments.output,
-            )
-            return 0
-        if arguments.reachability_command == "rerun-timeouts":
-            payload = load_reachability_artifact(arguments.envelope)
-            result = rerun_timed_out_artifact(
-                payload,
-                horizon_s=arguments.horizon_s,
-                step_size_s=arguments.step_size_s,
-                workers=arguments.workers,
-            )
-            result.write_json(arguments.output)
-            print(f"wrote timeout rerun: {arguments.output}")
-            return 0
-        if arguments.reachability_command == "plot":
-            sources = tuple(load_reachability_artifact(path) for path in arguments.compare)
-            report = render_reachability_plot_bundle(
-                load_reachability_artifact(arguments.path),
-                arguments.output_dir,
-                comparison_sources=sources,
-                dpi=arguments.dpi,
-            )
-            print(f"rendered {len(report.plot_paths)} reachability plot(s): {arguments.output_dir}")
-            return 0
-        catalog = _reachability_catalog(arguments.catalog)
-        if arguments.reachability_command == "list":
-            if arguments.kind == "profiles":
-                _print_json(
-                    [
-                        {
-                            "profile_id": profile.id,
-                            "archetype": profile.archetype,
-                            "status": profile.status,
-                            "configurations": list(profile.configurations),
-                            "coordinates": list(profile.coordinates),
-                            "products": list(profile.products),
-                        }
-                        for profile in catalog.profiles
-                    ]
-                )
-            elif arguments.kind == "families":
-                _print_json(
-                    [
-                        {
-                            "family_id": family.id,
-                            "status": family.status,
-                            "configurations": list(family.configurations),
-                            "profiles": list(family.profiles),
-                        }
-                        for family in catalog.vehicle_families
-                    ]
-                )
-            else:
-                _print_json({name: {"meaning": semantic.meaning} for name, semantic in sorted(catalog.study_semantics.items())})
-        elif arguments.kind == "profile":
-            _print_json(catalog.profile(arguments.identifier).model_dump(mode="json"))
-        elif arguments.kind == "family":
-            _print_json(catalog.family(arguments.identifier).model_dump(mode="json"))
-        else:
-            _print_json(catalog.semantic(arguments.identifier).model_dump(mode="json"))
-        return 0
-    except (OSError, KeyError, TypeError, ValueError) as error:
-        print(f"error: reachability-failed: {error}")
+        catalog = discover_plugins()
+        provider = catalog.build_reachability_provider_registry().provider("taoryx.reachability.workbench")
+    except KeyError:
+        print("error: reachability-plugin-required: install taoryx-reachability to use reachability commands")
         return 2
+    except PluginError as error:
+        print(f"error: reachability-plugin-load-failed: {error}")
+        return 2
+    return provider.run_cli(arguments)
     ####
 
 
@@ -1359,13 +1858,15 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
                         },
                         "runtime_readiness": {
                             "preflight_status": preflight.status,
+                            "preflight": preflight.as_dict(),
                             "lowering_status": lowering.status,
                             "execution_binding": lowering.execution_binding,
                         },
                         "claim_boundary": (
                             "Mission validation proves only immutable semantic compilation and interface conformance. "
-                            "A non-ready adapter, missing batch factory, or failed mission execution remains visible "
-                            "and cannot be promoted by this command."
+                            "It projects the selected preflight advertisement and lowering disposition without running "
+                            "the model. A non-ready adapter, missing batch factory, or failed mission execution remains "
+                            "visible and cannot be promoted by this command."
                         ),
                     }
                 )
@@ -1485,11 +1986,15 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
             _print_json(payload)
             return 0 if batch_execution.passed else 1
         if arguments.vehicle_command == "replay-policy":
+            from taoryx.composition_policy import replay_composition_policy_trace_file
+
             composition = load_compiled_vehicle_composition(arguments.composition)
             replay_report = replay_composition_policy_trace_file(composition, arguments.trace)
             _print_json(replay_report.as_dict(), arguments.output)
             return 0 if replay_report.status == "pass" else 1
         if arguments.vehicle_command == "batch-episode-parity":
+            from taoryx.batch_episode_parity_dispatch import verify_serialized_declared_batch_episode_parity
+
             composition = load_compiled_vehicle_composition(arguments.composition)
             trace_payload = json.loads(arguments.trace.read_text(encoding="utf-8"))
             if not isinstance(trace_payload, Mapping):
@@ -1498,6 +2003,8 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
             _print_json(parity_report.as_dict(), arguments.output)
             return 0 if parity_report.status == "pass" else 1
         if arguments.vehicle_command == "episode-info":
+            from taoryx.composition_episode import open_vehicle_composition_episode
+
             composition = load_compiled_vehicle_composition(arguments.composition)
             binding = resolve_vehicle_execution_binding(composition, "episode")
             episode = open_vehicle_composition_episode(composition, seed=arguments.seed)
@@ -1580,6 +2087,7 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
                     raise ValueError("evaluation composition fingerprint does not match the supplied compiled composition")
             artifact_names = (
                 "execution.json",
+                "nonlinear_validation.json",
                 "mission_graph_execution.json",
                 "objective_report.json",
                 "status_trace.json",
@@ -1624,14 +2132,44 @@ def _vehicle_command(arguments: argparse.Namespace) -> int:
             _print_json(report)
             return 0 if report["status"] == "pass" else 2
         if arguments.vehicle_command == "maturity-report":
+            if arguments.retain_batch_results_dir is not None and not arguments.execute_batch_witnesses:
+                raise ValueError("vehicle maturity-report --retain-batch-results-dir requires --execute-batch-witnesses")
+            if arguments.retain_batch_results_dir is not None and arguments.results_dir is not None:
+                raise ValueError("vehicle maturity-report accepts either --results-dir or --retain-batch-results-dir, not both")
             report = build_mission_composition_maturity_report(
                 catalog,
                 check_execution_witnesses=arguments.check_execution_witnesses,
                 execute_batch_witnesses=arguments.execute_batch_witnesses,
                 execute_parity_witnesses=arguments.execute_parity_witnesses,
                 results_directory=arguments.results_dir,
+                retained_batch_results_directory=arguments.retain_batch_results_dir,
             )
             _print_json(report)
+            return 0 if report["status"] == "pass" else 2
+        if arguments.vehicle_command == "witness-report":
+            report = build_vehicle_execution_witness_report(
+                execute_batch=arguments.execute_batch,
+                family_ids=arguments.family,
+                witness_ids=arguments.witness,
+                results_directory=arguments.results_dir,
+            )
+            _print_json(report)
+            return 0 if report["status"] == "pass" else 2
+        if arguments.vehicle_command == "endpoint-specs":
+            _print_json(vehicle_endpoint_spec_list())
+            return 0
+        if arguments.vehicle_command == "verify":
+            if arguments.results_dir is not None and not arguments.execute:
+                raise ValueError("vehicle verify --results-dir requires --execute")
+            report = verify_vehicle_endpoint(
+                arguments.endpoint_id,
+                execute=arguments.execute,
+                tune=arguments.tune,
+                cache_dir=None if arguments.no_cache else arguments.cache_dir,
+                results_dir=arguments.results_dir,
+                composition_catalog=catalog,
+            )
+            _print_json(report, arguments.output)
             return 0 if report["status"] == "pass" else 2
         if arguments.vehicle_command == "interface":
             contract = resolve_vehicle_interface_contract(arguments.identifier, arguments.fidelity, catalog=catalog)
@@ -1759,13 +2297,15 @@ def _vehicle_integration_command(arguments: argparse.Namespace) -> int:
     composition discovery.
     """
 
+    from taoryx.vehicle_integration_pipeline import (
+        validate_all_vehicle_integration_pipelines,
+        validate_vehicle_integration_pipeline,
+        write_vehicle_integration_packet,
+    )
+
     try:
         if arguments.vehicle_integration_command == "readiness":
-            reports = (
-                validate_all_vehicle_integration_readiness()
-                if arguments.family == "all"
-                else (validate_vehicle_integration_readiness(arguments.family),)
-            )
+            reports = validate_all_vehicle_integration_readiness() if arguments.family == "all" else (validate_vehicle_integration_readiness(arguments.family),)
             payload: dict[str, object] = {
                 "schema": "taoryx.vehicle-integration-command/v1alpha1",
                 "command": "readiness",
@@ -1780,9 +2320,7 @@ def _vehicle_integration_command(arguments: argparse.Namespace) -> int:
             return 0 if all(not report.errors for report in reports) else 1
 
         pipeline_reports = (
-            validate_all_vehicle_integration_pipelines()
-            if arguments.family == "all"
-            else (validate_vehicle_integration_pipeline(arguments.family),)
+            validate_all_vehicle_integration_pipelines() if arguments.family == "all" else (validate_vehicle_integration_pipeline(arguments.family),)
         )
         if arguments.packet_dir is not None:
             for report in pipeline_reports:
@@ -1797,8 +2335,7 @@ def _vehicle_integration_command(arguments: argparse.Namespace) -> int:
             "command": "pipeline",
             "family": arguments.family,
             "claim_boundary": (
-                "Staged provider-neutral integration evidence only. It does not execute a mission, prove "
-                "physical allocation, or qualify a vehicle family."
+                "Staged provider-neutral integration evidence only. It does not execute a mission, prove physical allocation, or qualify a vehicle family."
             ),
             "reports": [report.as_dict() for report in pipeline_reports],
         }
@@ -1966,8 +2503,20 @@ def _write_composition_run_manifest(
     """Write the common Simulation Runtime manifest for a composition-owned run."""
 
     write_composition_run_artifact(output_dir, composition)
-    mission_pass = payload.get("mission_pass")
-    status = SimulationRuntimeStatus.PASSED if mission_pass is True else SimulationRuntimeStatus.INCOMPLETE
+    pass_disposition = payload.get("mission_pass")
+    if pass_disposition is None:
+        pass_disposition = payload.get("screen_pass")
+    status = SimulationRuntimeStatus.PASSED if pass_disposition is True else SimulationRuntimeStatus.INCOMPLETE
+    execution_limit_reason = payload.get("execution_limit_reason")
+    termination_reason = (
+        "mission_pass"
+        if payload.get("mission_pass") is True
+        else "local_screen_pass"
+        if payload.get("screen_pass") is True
+        else str(execution_limit_reason)
+        if isinstance(execution_limit_reason, str) and execution_limit_reason
+        else "mission_or_screen_not_passed"
+    )
     manifest = build_simulation_runtime_run_manifest(
         scenario_id=composition.id,
         status=status,
@@ -1979,7 +2528,10 @@ def _write_composition_run_manifest(
         runtime=default_runtime_identity(),
         integration={"factory_id": binding.factory_id, "execution_mode": binding.execution_mode, "max_steps": max_steps},
         time={"requested_duration_s": None, "accepted_start_s": None, "accepted_end_s": None},
-        termination={"completed": status is SimulationRuntimeStatus.PASSED, "reason": "mission_pass" if mission_pass is True else "mission_not_passed"},
+        termination={
+            "completed": status is SimulationRuntimeStatus.PASSED,
+            "reason": termination_reason,
+        },
         artifacts=artifact_inventory(output_dir),
         claim_boundary=(
             "This manifest identifies one composition-owned execution packet. It does not prove numerical accuracy, "

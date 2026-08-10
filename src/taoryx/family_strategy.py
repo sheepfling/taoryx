@@ -26,6 +26,11 @@ from .family_adapter import AdapterOperation
 from .fidelity_contracts import CANONICAL_FIDELITY_TIERS, FidelityTier
 from .horizontal_fidelity import HorizontalFidelityRegistry, load_horizontal_registry
 from .horizontal_readiness import HorizontalReadinessReport, HorizontalTierReadiness, build_horizontal_readiness_report
+from .vehicle_execution_bindings import (
+    ExecutionMode,
+    VehicleExecutionBindingCatalog,
+    load_vehicle_execution_binding_catalog,
+)
 from .vehicle_registry import ROOT
 
 FAMILY_STRATEGY_CATALOG = ROOT / "verification/family_integration_strategies.yaml"
@@ -37,6 +42,19 @@ StrategyWorkStatus = Literal[
     "strategy_development",
     "strategy_probe_ready",
 ]
+
+# These modes establish only a bounded source/release execution witness.  They
+# intentionally do not include a closed-loop controller or a local
+# direct-wrench screen: those paths must still meet their adapter prerequisites
+# before they can start a generic strategy campaign.
+_REPLAY_OR_RELEASE_BATCH_EXECUTION_MODES: frozenset[ExecutionMode] = frozenset(
+    {
+        "source_history_replay",
+        "source_scheduled_replay",
+        "open_loop_witness",
+        "passive_uncontrolled",
+    }
+)
 
 
 class FamilyTierStrategy(BaseModel):
@@ -213,6 +231,9 @@ class FamilyStrategyWorkItem:
     data_requirements: tuple[str, ...]
     required_operations: tuple[str, ...]
     pending_operations: tuple[str, ...]
+    runnable_batch_execution_modes: tuple[ExecutionMode, ...]
+    runnable_batch_missions: tuple[str, ...]
+    runnable_batch_claim_boundaries: tuple[str, ...]
     stages: tuple[str, ...]
     next_action: str
     declared_blockers: tuple[str, ...]
@@ -234,6 +255,9 @@ class FamilyStrategyWorkItem:
             "data_requirements": list(self.data_requirements),
             "required_operations": list(self.required_operations),
             "pending_operations": list(self.pending_operations),
+            "runnable_batch_execution_modes": list(self.runnable_batch_execution_modes),
+            "runnable_batch_missions": list(self.runnable_batch_missions),
+            "runnable_batch_claim_boundaries": list(self.runnable_batch_claim_boundaries),
             "stages": list(self.stages),
             "next_action": self.next_action,
             "declared_blockers": list(self.declared_blockers),
@@ -268,7 +292,9 @@ class FamilyStrategyWorklistReport:
             "items": [item.as_dict() for item in self.items],
             "claim_boundary": (
                 "A worklist determines admissible diagnostic and calibration work. "
-                "It is neither controller tuning evidence nor a promotion claim."
+                "A declared replay/release batch witness may admit its first source "
+                "or release audit while pending generic adapter operations remain "
+                "visible; it is neither controller tuning evidence nor a promotion claim."
             ),
         }
         ####
@@ -353,6 +379,8 @@ def _work_status(
     recipe: FamilyTierStrategy,
     readiness: HorizontalTierReadiness,
     pending_operations: tuple[str, ...],
+    *,
+    runnable_replay_or_release_batch: bool,
 ) -> StrategyWorkStatus:
     """Classify whether the next strategy stage may be attempted."""
 
@@ -362,11 +390,44 @@ def _work_status(
         return "planned"
     if readiness.status in {"blocked", "not_registered"}:
         return "blocked"
-    if pending_operations:
+    if pending_operations and not runnable_replay_or_release_batch:
         return "waiting_for_adapter_operation"
     if readiness.status == "probe_ready":
         return "strategy_probe_ready"
     return "strategy_development"
+    ####
+
+
+def _runnable_replay_or_release_batch_evidence(
+    family_id: str,
+    tier: FidelityTier,
+    catalog: VehicleExecutionBindingCatalog,
+) -> tuple[tuple[ExecutionMode, ...], tuple[str, ...], tuple[str, ...]]:
+    """Return declared batch witness details without treating them as an adapter probe.
+
+    A source-history, source-scheduled, open-loop, or passive batch can start
+    the first strategy audit even when a generic derivative/trim adapter has
+    not been implemented.  It remains bounded execution evidence: callers
+    must retain ``pending_operations`` and cannot infer a plant, trim, or
+    controller result from this helper.
+    """
+
+    matches = tuple(
+        binding
+        for binding in catalog.bindings
+        if (
+            binding.family_id == family_id
+            and binding.fidelity == tier
+            and binding.operation == "batch"
+            and binding.status == "runnable"
+            and binding.execution_mode in _REPLAY_OR_RELEASE_BATCH_EXECUTION_MODES
+        )
+    )
+    return (
+        tuple(dict.fromkeys(binding.execution_mode for binding in matches)),
+        tuple(dict.fromkeys(binding.mission for binding in matches)),
+        tuple(dict.fromkeys(binding.claim_boundary for binding in matches)),
+    )
     ####
 
 
@@ -396,6 +457,7 @@ def build_family_strategy_worklist(
     catalog: FamilyIntegrationStrategyCatalog | None = None,
     registry: HorizontalFidelityRegistry | None = None,
     readiness: HorizontalReadinessReport | None = None,
+    execution_catalog: VehicleExecutionBindingCatalog | None = None,
 ) -> FamilyStrategyWorklistReport:
     """Join strategy, registry, and evidence status into the 36-slot worklist."""
 
@@ -403,6 +465,7 @@ def build_family_strategy_worklist(
     resolved_registry = registry or load_horizontal_registry()
     conformance = validate_family_strategy_catalog(resolved_catalog, registry=resolved_registry)
     readiness_report = readiness or build_horizontal_readiness_report()
+    resolved_execution_catalog = execution_catalog or load_vehicle_execution_binding_catalog()
     readiness_by_key = {(item.family_id, item.tier): item for item in readiness_report.records}
     strategy_by_id = {item.id: item for item in resolved_catalog.strategies}
     items: list[FamilyStrategyWorkItem] = []
@@ -420,7 +483,17 @@ def build_family_strategy_worklist(
                 tuple(readiness_item.required_operations),
             )
             pending = _pending_operations(readiness_item, required_operations)
-            status = _work_status(recipe, readiness_item, pending)
+            execution_modes, execution_missions, execution_claim_boundaries = _runnable_replay_or_release_batch_evidence(
+                family.family_id,
+                tier,
+                resolved_execution_catalog,
+            )
+            status = _work_status(
+                recipe,
+                readiness_item,
+                pending,
+                runnable_replay_or_release_batch=bool(execution_modes),
+            )
             items.append(
                 FamilyStrategyWorkItem(
                     family.family_id,
@@ -435,6 +508,9 @@ def build_family_strategy_worklist(
                     tuple(recipe.data),
                     required_operations,
                     pending,
+                    execution_modes,
+                    execution_missions,
+                    execution_claim_boundaries,
                     tuple(recipe.stages),
                     _next_action(status, recipe, readiness_item, pending),
                     tuple(family.tiers[tier].blockers),

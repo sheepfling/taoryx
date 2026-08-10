@@ -30,7 +30,7 @@ def test_powered_fixed_wing_racetrack_uses_one_declared_capability_adapter() -> 
 
     assert adapter is not None
     assert estimate is not None
-    assert estimate.adapter_id == "taoryx.powered_fixed_wing_racetrack.capability_scaled.v1"
+    assert estimate.adapter_id == "taoryx.x8_racetrack.source_route.v1"
     assert estimate.feasibility == "feasible"
     resolved_route = estimate.manifest["resolved_route"]
     assert isinstance(resolved_route, Mapping)
@@ -43,6 +43,13 @@ def test_powered_fixed_wing_racetrack_uses_one_declared_capability_adapter() -> 
     assert capability_evidence["adapter_id"] == estimate.adapter_id
     assert capability_evidence["composition_identity_sha256"] == composition.identity_sha256
     assert capability_evidence["derived_mission_sha256"]
+    capability_advertisement = capability_evidence["capability_advertisement"]
+    assert isinstance(capability_advertisement, Mapping)
+    assert capability_advertisement["schema"] == "taoryx.vehicle-capability-advertisement/v1alpha1"
+    assert len(capability_advertisement["fingerprint_sha256"]) == 64
+    assert capability_advertisement["selection"]["composition_id"] == composition.id
+    assert capability_advertisement["interface"]["fingerprint_sha256"]
+    assert capability_advertisement["family_owned"] == estimate.manifest["capability"]
     assert preflight.as_dict()["capability_estimate"] == capability_evidence
     assert declared_mission_capability_adapter(
         composition.family_id,
@@ -336,6 +343,17 @@ def test_hl20_energy_bank_intent_translates_before_native_runtime_binding() -> N
     assert capability["direct_wrench_injection"] is False
     assert capability["opposing_bank_intent"] is True
     assert float(capability["available_specific_energy_margin_j_kg"]) > 0.0
+    source_runtime_admission = capability["source_runtime_admission"]
+    assert isinstance(source_runtime_admission, Mapping)
+    assert source_runtime_admission["status"] == "outside_source_domain"
+    assert source_runtime_admission["source_domain_covered"] is False
+    assert source_runtime_admission["runtime_factory_declared"] is False
+    assert source_runtime_admission["release"] == {"mach": 5.0, "altitude_m": 80_000.0}
+    assert source_runtime_admission["declared_source_envelope"] == {
+        "mach": [0.3, 4.0],
+        "altitude_m": [-1_000.0, 20_000.0],
+    }
+    assert any("outside the declared DAVE-ML source" in diagnostic for diagnostic in estimate.diagnostics)
     assert preflight.status == "translation_ready"
     assert preflight.translator_id == "taoryx.hl20_glide_energy_intent.v1"
     assert any(check.id == "hl20.glide_energy_semantic_plan" and check.passed for check in preflight.checks)
@@ -343,6 +361,11 @@ def test_hl20_energy_bank_intent_translates_before_native_runtime_binding() -> N
     assert preflight.derived_mission["schema"] == "taoryx.hl20-glide-energy-mission-plan/v1alpha1"
     assert preflight.capability_estimate is not None
     assert preflight.capability_estimate["adapter_id"] == estimate.adapter_id
+    public_advertisement = preflight.capability_estimate["capability_advertisement"]
+    assert isinstance(public_advertisement, Mapping)
+    public_admission = public_advertisement["family_owned"]
+    assert isinstance(public_admission, Mapping)
+    assert public_admission["source_runtime_admission"] == source_runtime_admission
     assert "no source-owned HL-20 reduced-fidelity runtime factory is declared" in preflight.diagnostics[1]
     assert "exact lowering" in str(preflight.as_dict()["claim_boundary"])
     lowering = lower_vehicle_composition(composition, preflight_result=preflight)
@@ -369,6 +392,49 @@ def test_hl20_energy_bank_intent_translator_supports_the_declared_pseudo_6dof_ti
     assert preflight.translator_id == "taoryx.hl20_glide_energy_intent.v1"
     assert preflight.derived_mission is not None
     assert preflight.derived_mission["fidelity"] == "pseudo_6dof"
+    ####
+
+
+def test_hl20_energy_bank_intent_advertises_an_in_domain_but_runtime_unbound_release() -> None:
+    request = load_vehicle_composition_request(
+        ROOT / "examples/vehicle_composition/hl20_glide_energy_capability_3dof_compose.yaml"
+    )
+    initialization = request.initialization.model_copy(
+        update={
+            "inputs": {
+                **request.initialization.inputs,
+                "altitude_m": CompositionValue(value=20_000.0, unit="m"),
+                "mach": CompositionValue(value=4.0, unit="dimensionless"),
+            }
+        }
+    )
+    segments = tuple(
+        segment.model_copy(
+            update={
+                "inputs": {
+                    **segment.inputs,
+                    "target_energy": CompositionValue(value=1_000_000.0, unit="J/kg"),
+                }
+            }
+        )
+        if segment.id == "energy_handoff"
+        else segment
+        for segment in request.segments
+    )
+    composition = compile_vehicle_composition(request.model_copy(update={"initialization": initialization, "segments": segments}))
+
+    estimate = estimate_mission_capability(composition)
+
+    assert estimate is not None
+    capability = estimate.manifest["capability"]
+    assert isinstance(capability, Mapping)
+    source_runtime_admission = capability["source_runtime_admission"]
+    assert isinstance(source_runtime_admission, Mapping)
+    assert source_runtime_admission["status"] == "source_domain_covered_runtime_unbound"
+    assert source_runtime_admission["source_domain_covered"] is True
+    assert source_runtime_admission["runtime_factory_declared"] is False
+    assert "runtime_factory_binding" in source_runtime_admission["required_before_runtime_binding"]
+    assert any("inside the declared DAVE-ML" in diagnostic for diagnostic in estimate.diagnostics)
     ####
 
 

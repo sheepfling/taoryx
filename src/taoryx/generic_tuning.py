@@ -17,8 +17,17 @@ from typing import Any, Literal
 
 import numpy as np
 
+from .control_allocation import ControlPlantAdapter
 from .controller_autotune import AutoTuneLimits, ManeuverEvaluator
-from .runtime.lqr import LqrResult, LqrRobustnessReport, assess_lqr_robustness, solve_scaled_continuous_lqr
+from .runtime.lqr import (
+    LqiController,
+    LqiResult,
+    LqrResult,
+    LqrRobustnessReport,
+    assess_lqr_robustness,
+    solve_scaled_continuous_lqi,
+    solve_scaled_continuous_lqr,
+)
 from .trim import DynamicsEvaluator, DynamicsLinearization, TrimEvaluator, TrimResult, TrimSpec, finite_difference_dynamics_linearization, solve_trim
 
 Matrix = tuple[tuple[float, ...], ...]
@@ -133,8 +142,8 @@ def linear_authority_preflight(
     if missing:
         raise ValueError(f"authority requirement names unknown states: {', '.join(missing)}")
 
-    a = np.asarray(a_matrix, dtype=float)
-    b = np.asarray(b_matrix, dtype=float)
+    a: Any = np.asarray(a_matrix, dtype=float)
+    b: Any = np.asarray(b_matrix, dtype=float)
     state_count = len(names)
     if a.shape != (state_count, state_count):
         raise ValueError("authority preflight A matrix must be square in the declared state order")
@@ -331,6 +340,10 @@ class GenericLqrCandidate:
     violations: tuple[str, ...]
     score: float
     status: str
+    method: Literal["lqr", "lqi"] = "lqr"
+    integral_output_names: tuple[str, ...] = ()
+    integral_q_diagonal: tuple[float, ...] = ()
+    lqi: LqiResult | None = None
 
     @property
     def safe(self) -> bool:
@@ -351,6 +364,7 @@ class GenericLqrCandidate:
         return {
             "vehicle_id": self.vehicle_id,
             "profile_id": self.profile_id,
+            "method": self.method,
             "state_names": list(self.state_names),
             "control_names": list(self.control_names),
             "state_scales": list(self.state_scales),
@@ -358,7 +372,9 @@ class GenericLqrCandidate:
             "weights": {
                 "q_diagonal": list(self.weights.q_diagonal),
                 "r_diagonal": list(self.weights.r_diagonal),
+                "integral_q_diagonal": list(self.integral_q_diagonal),
             },
+            "integral_output_names": list(self.integral_output_names),
             "metrics": dict(self.metrics),
             "violations": list(self.violations),
             "score": self.score if math.isfinite(self.score) else None,
@@ -379,6 +395,14 @@ class GenericLqrCandidate:
                 "samples": self.robustness.samples,
                 "stable": self.robustness.stable,
             } if self.robustness is not None else None,
+            "lqr_controller": {
+                "state_gain": np.asarray(self.lqr.gain, dtype=float).tolist(),
+            } if self.method == "lqr" and self.lqr is not None else None,
+            "lqi_controller": {
+                "output_matrix": np.asarray(self.lqi.output_matrix, dtype=float).tolist(),
+                "state_gain": np.asarray(self.lqi.state_gain, dtype=float).tolist(),
+                "integral_gain": np.asarray(self.lqi.integral_gain, dtype=float).tolist(),
+            } if self.lqi is not None else None,
         }
         ####
 
@@ -390,6 +414,8 @@ class GenericLqrReport:
     vehicle_id: str
     design_source: str
     candidates: tuple[GenericLqrCandidate, ...]
+    method: Literal["lqr", "lqi"] = "lqr"
+    integral_output_names: tuple[str, ...] = ()
 
     @property
     def best(self) -> GenericLqrCandidate | None:
@@ -406,11 +432,332 @@ class GenericLqrReport:
         return {
             "vehicle_id": self.vehicle_id,
             "design_source": self.design_source,
+            "method": self.method,
+            "integral_output_names": list(self.integral_output_names),
             "status": "safe" if best is not None else "no-safe-candidate",
             "best_profile_id": best.profile_id if best is not None else None,
             "candidates": [candidate.as_dict() for candidate in self.candidates],
         }
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class NativeCoordinateLqiSample:
+    """One accepted native-control nonlinear LQI interval.
+
+    ``applied_controls`` are the named coordinates that the family adapter
+    itself accepts at its derivative boundary.  They are deliberately not
+    called effectors: a response-law, guidance, or reduced-order plant may
+    expose controls without claiming a physical allocator.
+    """
+
+    time_s: float
+    state: Mapping[str, float]
+    state_error: Mapping[str, float]
+    lqi_integral_error: Mapping[str, float]
+    requested_controls: Mapping[str, float]
+    applied_controls: Mapping[str, float]
+    control_saturated: tuple[str, ...]
+
+    def as_dict(self) -> dict[str, object]:
+        """Return one JSON-safe committed nonlinear control sample."""
+
+        return {
+            "time_s": self.time_s,
+            "state": dict(self.state),
+            "state_error": dict(self.state_error),
+            "lqi_integral_error": dict(self.lqi_integral_error),
+            "requested_controls": dict(self.requested_controls),
+            "applied_controls": dict(self.applied_controls),
+            "control_saturated": list(self.control_saturated),
+        }
         ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class NativeCoordinateLqiValidation:
+    """Exact nonlinear evidence for LQI through native model controls.
+
+    The record is appropriate when a ``ControlPlantAdapter`` owns an
+    executable derivative and named controls but intentionally does not own a
+    physical wrench allocator.  It preserves the distinction from
+    ``PhysicalWrenchLqiValidation`` rather than fabricating actuator or wrench
+    telemetry.
+    """
+
+    candidate: GenericLqrCandidate
+    duration_s: float
+    dt_s: float
+    initial_state: Mapping[str, float]
+    final_state: Mapping[str, float]
+    state_reference: Mapping[str, float]
+    environment: Mapping[str, float | str]
+    assessment_state_names: tuple[str, ...]
+    samples: tuple[NativeCoordinateLqiSample, ...]
+
+    def __post_init__(self) -> None:
+        if self.candidate.method != "lqi" or self.candidate.lqi is None:
+            raise ValueError("native-coordinate LQI validation requires a retained LQI candidate")
+        if not math.isfinite(self.duration_s) or self.duration_s <= 0.0:
+            raise ValueError("native-coordinate LQI validation duration must be finite and positive")
+        if not math.isfinite(self.dt_s) or self.dt_s <= 0.0:
+            raise ValueError("native-coordinate LQI validation time step must be finite and positive")
+        if not self.assessment_state_names or set(self.assessment_state_names) - set(self.candidate.state_names):
+            raise ValueError("native-coordinate LQI assessment states must be declared candidate states")
+        if set(self.candidate.state_names) - set(self.initial_state) or set(self.candidate.state_names) - set(self.final_state):
+            raise ValueError("native-coordinate LQI validation state is missing candidate coordinates")
+        if set(self.candidate.state_names) - set(self.state_reference):
+            raise ValueError("native-coordinate LQI reference is missing candidate coordinates")
+        if any(
+            not math.isfinite(float(value))
+            for mapping in (self.initial_state, self.final_state, self.state_reference)
+            for value in mapping.values()
+        ):
+            raise ValueError("native-coordinate LQI validation state and reference values must be finite")
+        if any(
+            isinstance(value, bool) or not isinstance(value, int | float | str)
+            or (isinstance(value, int | float) and not math.isfinite(float(value)))
+            for value in self.environment.values()
+        ):
+            raise ValueError("native-coordinate LQI environment values must be finite numeric or text")
+        ####
+
+    @property
+    def initial_normalized_feedback_error_norm(self) -> float:
+        """Return the declared assessment-state error at the initial sample."""
+
+        return self._normalized_error_norm(self.initial_state)
+        ####
+
+    @property
+    def final_normalized_feedback_error_norm(self) -> float:
+        """Return the declared assessment-state error after the last interval."""
+
+        return self._normalized_error_norm(self.final_state)
+        ####
+
+    @property
+    def control_saturation_fraction(self) -> float:
+        """Return the fraction of intervals constrained at the native boundary."""
+
+        return sum(bool(sample.control_saturated) for sample in self.samples) / max(len(self.samples), 1)
+        ####
+
+    @property
+    def maximum_continuous_control_saturation_duration_s(self) -> float:
+        """Return the longest contiguous native-control bound interval."""
+
+        longest = 0.0
+        current = 0.0
+        previous_time_s = 0.0
+        for sample in self.samples:
+            interval_s = sample.time_s - previous_time_s
+            previous_time_s = sample.time_s
+            if sample.control_saturated:
+                current += interval_s
+                longest = max(longest, current)
+            else:
+                current = 0.0
+        return longest
+        ####
+
+    @property
+    def saturated_controls(self) -> tuple[str, ...]:
+        """Return every commanded native coordinate that reached its bound."""
+
+        return tuple(sorted({name for sample in self.samples for name in sample.control_saturated}))
+        ####
+
+    @property
+    def integrators_exercised(self) -> bool:
+        """Return whether any retained LQI state became nonzero."""
+
+        return any(
+            abs(float(value)) > 1.0e-12
+            for sample in self.samples
+            for value in sample.lqi_integral_error.values()
+        )
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Serialize native nonlinear evidence without a physical-effector claim."""
+
+        return {
+            "schema": "taoryx.native-coordinate-lqi-validation/v1alpha1",
+            "control_realization": "native_named_coordinates",
+            "candidate": self.candidate.as_dict(),
+            "duration_s": self.duration_s,
+            "dt_s": self.dt_s,
+            "initial_state": dict(self.initial_state),
+            "final_state": dict(self.final_state),
+            "state_reference": dict(self.state_reference),
+            "environment": dict(self.environment),
+            "assessment_state_names": list(self.assessment_state_names),
+            "initial_normalized_feedback_error": self.initial_normalized_feedback_error_norm,
+            "final_normalized_feedback_error": self.final_normalized_feedback_error_norm,
+            "control_saturation_fraction": self.control_saturation_fraction,
+            "maximum_continuous_control_saturation_duration_s": self.maximum_continuous_control_saturation_duration_s,
+            "saturated_controls": list(self.saturated_controls),
+            "integrators_exercised": self.integrators_exercised,
+            "samples": [sample.as_dict() for sample in self.samples],
+            "claim_boundary": (
+                "Commands were applied through the adapter's declared native control coordinates. "
+                "This does not establish physical-effector allocation, actuator dynamics, or hardware authority."
+            ),
+        }
+        ####
+
+    def _normalized_error_norm(self, state: Mapping[str, float]) -> float:
+        scales = dict(zip(self.candidate.state_names, self.candidate.state_scales, strict=True))
+        return math.sqrt(
+            sum(
+                ((float(state[name]) - float(self.state_reference[name])) / float(scales[name])) ** 2
+                for name in self.assessment_state_names
+            )
+        )
+        ####
+    ####
+
+
+def validate_nonlinear_native_coordinate_lqi(
+    plant: ControlPlantAdapter,
+    trim: TrimResult,
+    candidate: GenericLqrCandidate,
+    *,
+    initial_state: Mapping[str, float],
+    duration_s: float,
+    dt_s: float,
+    assessment_state_names: Sequence[str] | None = None,
+    reference: Mapping[str, float] | None = None,
+    control_lower: Mapping[str, float] | None = None,
+    control_upper: Mapping[str, float] | None = None,
+    integral_lower: Mapping[str, float] | None = None,
+    integral_upper: Mapping[str, float] | None = None,
+    environment: Mapping[str, float | str] | None = None,
+) -> NativeCoordinateLqiValidation:
+    """Run a retained generic LQI candidate through native plant controls.
+
+    This is the non-allocator counterpart to physical wrench validation.  The
+    function never converts a named model control into a wrench or actuator;
+    it applies only the exact controls accepted by ``plant.state_derivative``.
+    """
+
+    if candidate.method != "lqi" or candidate.lqi is None:
+        raise ValueError("native-coordinate nonlinear validation requires a retained LQI candidate")
+    if not math.isfinite(duration_s) or duration_s <= 0.0:
+        raise ValueError("native-coordinate LQI duration must be finite and positive")
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("native-coordinate LQI time step must be finite and positive")
+    required_state_names = tuple(plant.state_names)
+    required_control_names = tuple(plant.control_names)
+    if tuple(trim.spec.state_names) != required_state_names or tuple(trim.spec.control_names) != required_control_names:
+        raise ValueError("native-coordinate LQI trim does not match the adapter contract")
+    if set(candidate.state_names) - set(required_state_names):
+        raise ValueError("native-coordinate LQI candidate refers to states absent from the adapter")
+    if set(candidate.control_names) - set(required_control_names):
+        raise ValueError("native-coordinate LQI candidate refers to controls absent from the adapter")
+    missing_state = set(required_state_names) - set(initial_state)
+    if missing_state:
+        raise KeyError(f"native-coordinate LQI initial state is missing: {', '.join(sorted(missing_state))}")
+    state = {name: float(initial_state[name]) for name in required_state_names}
+    if any(not math.isfinite(value) for value in state.values()):
+        raise ValueError("native-coordinate LQI initial state must be finite")
+    native_controls = {name: float(trim.controls[name]) for name in required_control_names}
+    state_reference = {name: float(trim.state[name]) for name in candidate.state_names}
+    tracked_reference = {name: float(trim.state[name]) for name in candidate.lqi.output_names}
+    if reference is not None:
+        missing_reference = set(candidate.lqi.output_names) - set(reference)
+        unknown_reference = set(reference) - set(candidate.lqi.output_names)
+        if missing_reference or unknown_reference:
+            raise KeyError("native-coordinate LQI reference must identify exactly the tracked outputs")
+        tracked_reference = {name: float(reference[name]) for name in candidate.lqi.output_names}
+        state_reference.update(tracked_reference)
+    if any(not math.isfinite(value) for value in state_reference.values()):
+        raise ValueError("native-coordinate LQI reference must be finite")
+    derivative_environment = dict(environment or {})
+    if any(
+        isinstance(value, bool) or not isinstance(value, int | float | str)
+        or (isinstance(value, int | float) and not math.isfinite(float(value)))
+        for value in derivative_environment.values()
+    ):
+        raise ValueError("native-coordinate LQI environment values must be finite numeric or text")
+    controller = LqiController(
+        candidate.lqi,
+        state_trim={name: float(trim.state[name]) for name in candidate.state_names},
+        control_trim={name: float(trim.controls[name]) for name in candidate.control_names},
+        output_trim={name: float(trim.state[name]) for name in candidate.lqi.output_names},
+        lower=control_lower or {},
+        upper=control_upper or {},
+        integral_lower=integral_lower or {},
+        integral_upper=integral_upper or {},
+    )
+    assessment = tuple(assessment_state_names or candidate.lqi.output_names)
+    if not assessment or set(assessment) - set(candidate.state_names):
+        raise ValueError("native-coordinate LQI assessment states must be declared candidate states")
+    samples: list[NativeCoordinateLqiSample] = []
+    time_s = 0.0
+    steps = int(math.ceil(duration_s / dt_s))
+    for _ in range(steps):
+        step_s = min(dt_s, duration_s - time_s)
+        if step_s <= 0.0:
+            break
+        command = controller.command(state, tracked_reference, dt=step_s)
+        native_controls.update({name: float(value) for name, value in command.controls.items()})
+        state = _native_coordinate_rk4_state_step(plant, state, native_controls, step_s, derivative_environment)
+        time_s += step_s
+        state_error = {name: state[name] - state_reference[name] for name in candidate.state_names}
+        samples.append(
+            NativeCoordinateLqiSample(
+                time_s,
+                dict(state),
+                state_error,
+                dict(controller.integral_error),
+                {name: float(value) for name, value in command.unsaturated.items()},
+                {name: float(value) for name, value in command.controls.items()},
+                tuple(command.saturated),
+            )
+        )
+    if any(not math.isfinite(value) for value in state.values()):
+        raise ValueError("native-coordinate LQI nonlinear integration produced a non-finite state")
+    return NativeCoordinateLqiValidation(
+        candidate,
+        duration_s,
+        dt_s,
+        dict(initial_state),
+        state,
+        state_reference,
+        derivative_environment,
+        assessment,
+        tuple(samples),
+    )
+    ####
+
+
+def _native_coordinate_rk4_state_step(
+    plant: ControlPlantAdapter,
+    state: Mapping[str, float],
+    controls: Mapping[str, float],
+    dt_s: float,
+    environment: Mapping[str, float | str],
+) -> dict[str, float]:
+    """Integrate one accepted native-control interval with RK4."""
+
+    names = tuple(plant.state_names)
+
+    def derivative(values: Mapping[str, float]) -> dict[str, float]:
+        result = plant.state_derivative(values, controls, environment)
+        return {name: float(result[name]) for name in names}
+
+    k1 = derivative(state)
+    k2 = derivative({name: float(state[name]) + 0.5 * dt_s * k1[name] for name in names})
+    k3 = derivative({name: float(state[name]) + 0.5 * dt_s * k2[name] for name in names})
+    k4 = derivative({name: float(state[name]) + dt_s * k3[name] for name in names})
+    return {
+        name: float(state[name]) + dt_s * (k1[name] + 2.0 * k2[name] + 2.0 * k3[name] + k4[name]) / 6.0
+        for name in names
+    }
+    ####
 
 
 def _diagonal_matrix(values: Sequence[float], size: int, label: str) -> Matrix:
@@ -558,6 +905,154 @@ def tune_lqr_profiles(
         for profile in profiles
     )
     return GenericLqrReport(vehicle_id, design_source, candidates)
+    ####
+
+
+def tune_lqi_profiles(
+    vehicle_id: str,
+    a_matrix: Sequence[Sequence[float]],
+    b_matrix: Sequence[Sequence[float]],
+    *,
+    state_names: Sequence[str],
+    control_names: Sequence[str],
+    state_scales: Sequence[float],
+    control_scales: Sequence[float],
+    profiles: Sequence[GenericLqrProfile],
+    output_names: Sequence[str],
+    integral_q_diagonal: Sequence[float],
+    limits: AutoTuneLimits | None = None,
+    design_source: str = "supplied-plant-linearization",
+) -> GenericLqrReport:
+    """Tune scaled LQI candidates with declared tracked outputs and weights.
+
+    ``integral_q_diagonal`` is intentionally required input, not an automatic
+    multiplier.  A plug-in must make the persistent-error priority explicit
+    for each selected output; the host only runs the bounded candidate grid.
+    """
+
+    states = tuple(state_names)
+    controls = tuple(control_names)
+    outputs = tuple(output_names)
+    if not states or len(set(states)) != len(states):
+        raise ValueError("generic LQI state names must be non-empty and unique")
+    if not controls or len(set(controls)) != len(controls):
+        raise ValueError("generic LQI control names must be non-empty and unique")
+    if not outputs or len(set(outputs)) != len(outputs) or set(outputs) - set(states):
+        raise ValueError("generic LQI outputs must be unique declared states")
+    integral_weights = tuple(float(value) for value in integral_q_diagonal)
+    if len(integral_weights) != len(outputs) or any(not math.isfinite(value) or value <= 0.0 for value in integral_weights):
+        raise ValueError("generic LQI integral weights must match outputs and be finite and positive")
+    scales_x = tuple(float(value) for value in state_scales)
+    scales_u = tuple(float(value) for value in control_scales)
+    if len(scales_x) != len(states) or any(not math.isfinite(value) or value <= 0.0 for value in scales_x):
+        raise ValueError("state scales must match LQI state names and be finite and positive")
+    if len(scales_u) != len(controls) or any(not math.isfinite(value) or value <= 0.0 for value in scales_u):
+        raise ValueError("control scales must match LQI control names and be finite and positive")
+    if not profiles:
+        raise ValueError("generic LQI tuning requires at least one profile")
+
+    output = tuple(
+        tuple(1.0 if state == output_name else 0.0 for state in states)
+        for output_name in outputs
+    )
+    resolved_limits = limits or AutoTuneLimits()
+    candidates = tuple(
+        _generic_lqi_candidate(
+            vehicle_id,
+            profile,
+            a_matrix,
+            b_matrix,
+            states,
+            controls,
+            scales_x,
+            scales_u,
+            output,
+            outputs,
+            integral_weights,
+            resolved_limits,
+        )
+        for profile in profiles
+    )
+    return GenericLqrReport(
+        vehicle_id,
+        design_source,
+        candidates,
+        method="lqi",
+        integral_output_names=outputs,
+    )
+    ####
+
+
+def _generic_lqi_candidate(
+    vehicle_id: str,
+    profile: GenericLqrProfile,
+    a_matrix: Sequence[Sequence[float]],
+    b_matrix: Sequence[Sequence[float]],
+    state_names: tuple[str, ...],
+    control_names: tuple[str, ...],
+    state_scales: tuple[float, ...],
+    control_scales: tuple[float, ...],
+    output_matrix: Sequence[Sequence[float]],
+    output_names: tuple[str, ...],
+    integral_q_diagonal: tuple[float, ...],
+    limits: AutoTuneLimits,
+) -> GenericLqrCandidate:
+    """Synthesize one named LQI candidate through the common safety gates."""
+
+    metrics: dict[str, float] = {}
+    violations: list[str] = []
+    lqi: LqiResult | None = None
+    try:
+        q_matrix = _diagonal_matrix(
+            (*profile.q_diagonal, *integral_q_diagonal),
+            len(state_names) + len(output_names),
+            "augmented LQI Q diagonal",
+        )
+        r_matrix = _diagonal_matrix(profile.r_diagonal, len(control_names), "R diagonal")
+        lqi = solve_scaled_continuous_lqi(
+            a_matrix,
+            b_matrix,
+            q_matrix,
+            r_matrix,
+            output_matrix=output_matrix,
+            output_names=output_names,
+            state_scales=state_scales,
+            control_scales=control_scales,
+            state_names=state_names,
+            control_names=control_names,
+        )
+        design = lqi.design
+        metrics["maximum_real_pole"] = design.maximum_real_pole
+        metrics["condition_number"] = design.condition_number
+        if design.maximum_real_pole > limits.maximum_real_pole:
+            violations.append("closed-loop-pole-limit")
+        score = max(0.0, metrics["maximum_real_pole"] - limits.maximum_real_pole) * 1.0e6 + metrics["condition_number"] * 1.0e-6
+        status = "safe" if not violations else "unsafe"
+    except (ValueError, RuntimeError, np.linalg.LinAlgError) as error:
+        design = None
+        metrics["design_error"] = 1.0
+        violations.append(f"design-error:{type(error).__name__}")
+        score = float("inf")
+        status = "failed"
+    return GenericLqrCandidate(
+        vehicle_id,
+        profile.id,
+        state_names,
+        control_names,
+        state_scales,
+        control_scales,
+        profile,
+        design,
+        None,
+        metrics,
+        tuple(violations),
+        score,
+        status,
+        method="lqi",
+        integral_output_names=output_names,
+        integral_q_diagonal=integral_q_diagonal,
+        lqi=lqi,
+    )
     ####
 
 

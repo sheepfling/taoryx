@@ -49,6 +49,7 @@ def build_composition_trajectory_evaluation(
     numerical_pass = _optional_bool(runtime.get("numerical_valid"))
     if numerical_pass is None:
         numerical_pass = _optional_bool(truth_evaluation.get("numerical_pass"))
+    execution_limited = _execution_limited(runtime)
     envelope_pass = _optional_bool(envelope.get("pass"))
     hard_gates_pass = _optional_bool(runtime.get("hard_gates_passed"))
     metrics = tuple(_objective_metrics(truth_evaluation))
@@ -56,10 +57,10 @@ def build_composition_trajectory_evaluation(
     return TrajectoryEvaluation(
         scenario_id=composition.id,
         scenario_contract_sha256=composition.identity_sha256,
-        validity="valid" if numerical_pass is not False else "invalid",
+        validity="valid" if execution_limited or numerical_pass is not False else "invalid",
         qualification="unqualified",
         feasibility=_preflight_feasibility(preflight),
-        outcome=_outcome(objective_pass, numerical_pass, envelope_pass, hard_gates_pass),
+        outcome=_outcome(objective_pass, numerical_pass, envelope_pass, hard_gates_pass, execution_limited),
         metrics=metrics,
         gates=(
             EvaluationGate(
@@ -408,6 +409,18 @@ def _optional_bool(value: object) -> bool | None:
     ####
 
 
+def _execution_limited(runtime: Mapping[str, object]) -> bool:
+    """Recognize a family-owned, non-error execution cap.
+
+    A capped prefix has not completed its mission objectives, but the emitted
+    telemetry is still a valid bounded execution artifact.  Do not infer this
+    from an exit code alone: only a family executor may label the limit.
+    """
+
+    return runtime.get("execution_limit_reason") == "max_steps"
+    ####
+
+
 def _finite(value: object) -> float | None:
     if isinstance(value, bool):
         return None
@@ -426,7 +439,10 @@ def _outcome(
     numerical_pass: bool | None,
     envelope_pass: bool | None,
     hard_gates_pass: bool | None,
+    execution_limited: bool,
 ) -> OutcomeStatus:
+    if execution_limited:
+        return "time_limited"
     if numerical_pass is False:
         return "numerical_failure"
     if envelope_pass is False:

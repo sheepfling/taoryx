@@ -34,6 +34,7 @@ class HorizontalTierReadiness:
     declared_status: str
     data_status: str
     data_source: str
+    data_claim_boundary: str | None
     adapter_status: str
     required_operations: tuple[str, ...]
     operation_status: Mapping[str, str]
@@ -72,6 +73,7 @@ class HorizontalTierReadiness:
             "status": self.status,
             "data_status": self.data_status,
             "data_source": self.data_source,
+            "data_claim_boundary": self.data_claim_boundary,
             "adapter_status": self.adapter_status,
             "required_operations": list(self.required_operations),
             "operation_status": dict(self.operation_status),
@@ -211,20 +213,46 @@ def _adapter_records(path: Path) -> dict[tuple[str, FidelityTier], Mapping[str, 
     ####
 
 
-def _data_status(family: UnifiedFamilyManifest, tier: FidelityTier) -> tuple[str, str, tuple[str, ...]]:
-    """Join legacy metadata or source-manifest evidence without guessing."""
+def _data_status(family: UnifiedFamilyManifest, tier: FidelityTier) -> tuple[str, str, str | None, tuple[str, ...]]:
+    """Join metadata, source-family, or declared tier evidence without guessing."""
 
     if family.family.vehicle_registry_id is not None and family.vehicle_definition is not None:
         report = validate_fidelity_readiness(family.family.vehicle_registry_id, tier)
         blockers = tuple(f"{item.requirement_id}: {item.message}" for item in report.errors)
-        return report.status, "verification/vehicle_models.yaml", blockers
+        return (
+            report.status,
+            "verification/vehicle_models.yaml",
+            "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
+            blockers,
+        )
     source_profile = _source_profile(family, tier)
     if source_profile is not None:
         blockers = tuple(f"omitted:{item}" for item in source_profile.omitted_physics)
-        return "source_declared", str(family.source_manifest_path), blockers
+        return (
+            "source_declared",
+            str(family.source_manifest_path),
+            "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
+            blockers,
+        )
+    evidence = family.family.data_evidence.get(tier)
+    if evidence is not None:
+        missing = tuple(path for path in evidence.paths if not (ROOT / path).is_file())
+        if missing:
+            return (
+                "blocked",
+                ", ".join(evidence.paths),
+                evidence.claim_boundary,
+                tuple(f"tier-data-evidence-missing:{path}" for path in missing),
+            )
+        return evidence.status, ", ".join(evidence.paths), evidence.claim_boundary, ()
     if family.family_id == "tumbling_body" and tier in {"point_mass_3dof", "pseudo_6dof"}:
-        return "source_declared", "verification/pseudo6dof_profiles.yaml", ()
-    return "not_registered", "", ("no vehicle metadata or source-family profile is bound",)
+        return (
+            "source_declared",
+            "verification/pseudo6dof_profiles.yaml",
+            "Declared passive-body profile only; this is not a controlled or actuator-backed path.",
+            (),
+        )
+    return "not_registered", "", None, ("no vehicle metadata, source-family profile, or tier data evidence is bound",)
     ####
 
 
@@ -242,7 +270,7 @@ def build_horizontal_readiness_report(
     for family in catalog.families:
         for tier in CANONICAL_FIDELITY_TIERS:
             binding = family.family.tiers[tier]
-            data_status, data_source, data_blockers = _data_status(family, tier)
+            data_status, data_source, data_claim_boundary, data_blockers = _data_status(family, tier)
             adapter = adapter_map.get((family.family_id, tier))
             adapter_status = str(adapter.get("status", "not_checked")) if adapter is not None else "not_checked"
             probe = adapter.get("probe") if adapter is not None else None
@@ -264,6 +292,7 @@ def build_horizontal_readiness_report(
                     binding.promotion_status,
                     data_status,
                     data_source,
+                    data_claim_boundary,
                     adapter_status,
                     tuple(binding.required_operations),
                     operation_status,

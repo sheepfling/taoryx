@@ -25,22 +25,20 @@ from taoryx.navigation import (
     TranslationOnlyNavigator,
 )
 from taoryx.rigid_body import RIGID_BODY_STATE_NAMES, RigidBody6DofState
-from taoryx.sensors import (
-    AccelerationIncrement,
-    GyroIncrement,
-    IdealGyroscopeAdapter,
-    IdealImuAdapter,
-    ImuErrorModelAdapter,
-    ImuIncrement,
-    MeasurementPacket,
-    TranslationAccelerationAdapter,
-    TruthPoint,
+from taoryx.sensor_api import (
+    SensorBuildContext,
+    SensorContext,
+    SensorServices,
+    packet_from_record,
+    packet_to_record,
+    sensor_plugin_registry,
 )
+from taoryx.sensors import MeasurementPacket, TruthPoint
 
 from .common import RuntimeProblem
 from .navigation_feedback import NavigationFeedbackConfig, parse_navigation_feedback
 from .observation_models import ObservationModelConfig, build_observation_pipeline, parse_observation_config
-from .sensor_bus import SensorBinding, SensorBus
+from .sensor_bus import SensorBinding, SensorBus, SensorContextProvider
 from .sensor_clock import SensorClockSpec
 from .sensor_contracts import (
     Pseudo6DofTruthConfig,
@@ -144,18 +142,18 @@ class SensorScenarioSpec:
             raise ValueError("sensor and vehicle names must not be empty")
         if not self.scenario_id.strip():
             raise ValueError("sensor scenario id must not be empty")
-        if self.provider not in {"imu-error-model", "ideal", "ideal-gyroscope", "translation-acceleration"}:
-            raise ValueError("sensor provider must be imu-error-model, ideal, ideal-gyroscope, or translation-acceleration")
+        if isinstance(self.provider_config, Mapping):
+            object.__setattr__(self, "provider_config", parse_provider_config(self.provider_config))
+        provider_definition = self.resolved_provider_config()
+        manifest = sensor_plugin_registry().descriptor(provider_definition.kind).manifest
         if self.truth_mode not in {"vehicle", "translation-only", "rotation-only", "pseudo-6dof", "hybrid-6dof"}:
             raise ValueError("truth_mode must be vehicle, translation-only, rotation-only, pseudo-6dof, or hybrid-6dof")
-        if self.truth_mode == "translation-only" and self.provider != "translation-acceleration":
-            raise ValueError("translation-only truth requires the translation-acceleration provider")
-        if self.truth_mode == "rotation-only" and self.provider != "ideal-gyroscope":
-            raise ValueError("rotation-only truth requires the ideal-gyroscope provider")
-        if self.provider == "ideal-gyroscope" and self.truth_mode != "rotation-only":
-            raise ValueError("ideal-gyroscope provider requires rotation-only truth")
-        if self.truth_mode == "hybrid-6dof" and self.provider == "translation-acceleration":
-            raise ValueError("hybrid-6dof truth requires a full IMU provider")
+        if self.truth_mode not in manifest.supported_truth_modes:
+            supported = ", ".join(sorted(manifest.supported_truth_modes))
+            raise ValueError(
+                f"sensor provider {manifest.kind!r} does not support truth mode {self.truth_mode!r}; "
+                f"supported: {supported}"
+            )
         if not math.isfinite(self.speed_threshold_mps) or self.speed_threshold_mps <= 0.0:
             raise ValueError("speed_threshold_mps must be positive and finite")
         if self.alignment != "velocity":
@@ -178,6 +176,8 @@ class SensorScenarioSpec:
             raise ValueError("sensor delivery must be finite and nonnegative")
         if self.sample_mode not in {"instantaneous", "interval"}:
             raise ValueError("sensor sample_mode must be instantaneous or interval")
+        if self.sample_mode not in manifest.sample_modes:
+            raise ValueError(f"sensor provider {manifest.kind!r} does not support {self.sample_mode!r} sampling")
         if self.truth_policy not in {"boundary", "accepted-segment"}:
             raise ValueError("sensor truth_policy is invalid")
         if self.rate_policy not in {"split", "accumulate"}:
@@ -190,8 +190,15 @@ class SensorScenarioSpec:
             raise ValueError("earth_omega_rad_s must be finite when supplied")
         if self.drop_every_n is not None and self.drop_every_n <= 0:
             raise ValueError("drop_every_n must be positive when supplied")
-        if not self.estimator_modes:
-            raise ValueError("at least one estimator mode is required")
+        if self.estimator_modes and manifest.family != "inertial":
+            raise ValueError(
+                f"sensor provider {manifest.kind!r} emits {manifest.family} payloads; "
+                "the inertial navigation consumers cannot be attached"
+            )
+        if not self.estimator_modes and self.feedback.source != "plant-truth":
+            raise ValueError("sensor-derived navigation feedback requires a declared estimator")
+        if self.observation_model is not None and self.observation_model.stages and manifest.family != "inertial":
+            raise ValueError("the current scale/bias/quantization observation stages support inertial payloads only")
         if self.lever_arm_body_m is not None and len(self.lever_arm_body_m) != 3:
             raise ValueError("lever arm must be a 3-vector")
         if self.truth_config is not None and self.truth_config.mode != self.truth_mode:
@@ -288,10 +295,15 @@ class SensorScenarioSpec:
         provider_config = parse_provider_config(sensor.get("provider", payload.get("provider", "imu-error-model")))
         truth_mode = truth_config.mode
         orientation_config = truth_config.orientation if isinstance(truth_config, Pseudo6DofTruthConfig) else None
-        default_estimators = {
-            "translation-only": ("translation-dead-reckoning",),
-            "rotation-only": ("attitude-dead-reckoning",),
-        }.get(truth_mode, ("dead-reckoning", "mekf"))
+        provider_manifest = sensor_plugin_registry().descriptor(provider_config.kind).manifest
+        default_estimators = (
+            {
+                "translation-only": ("translation-dead-reckoning",),
+                "rotation-only": ("attitude-dead-reckoning",),
+            }.get(truth_mode, ("dead-reckoning", "mekf"))
+            if provider_manifest.family == "inertial"
+            else ()
+        )
         estimator = payload.get("estimators", sensor.get("estimators", navigation.get("estimators", default_estimators)))
         if "estimator" in navigation and "estimators" not in payload and "estimators" not in sensor:
             estimator = navigation["estimator"]
@@ -344,7 +356,7 @@ class SensorScenarioSpec:
             "scenario_id": self.scenario_id,
             "provider": self.provider,
             "truth_mode": self.truth_mode,
-            "provider_config": self.resolved_provider_config().model_dump(mode="json"),
+            "provider_config": self.resolved_provider_config().to_metadata(),
             "truth_config": self.resolved_truth_config().model_dump(mode="json"),
             "channel_sources": {
                 "translation": "not-consumed-by-rotation-only" if self.truth_mode == "rotation-only" else "vehicle-or-substituted-eci-truth",
@@ -456,7 +468,7 @@ SensorAdapterBuilder = Callable[[SensorScenarioSpec], Any]
 
 
 class SensorAdapterFactory:
-    """Registry-backed factory for provider implementations."""
+    """Compatibility facade over the versioned sensor plug-in registry."""
 
     _builders: ClassVar[dict[str, SensorAdapterBuilder]] = {}
 
@@ -470,115 +482,38 @@ class SensorAdapterFactory:
         cls._builders[normalized] = builder
 
     @classmethod
-    def create(cls, spec: SensorScenarioSpec) -> Any:
-        kind = spec.resolved_provider_config().kind
+    def create(
+        cls,
+        spec: SensorScenarioSpec,
+        *,
+        services: SensorServices | None = None,
+    ) -> Any:
+        provider = spec.resolved_provider_config()
+        kind = provider.kind
         builder = cls._builders.get(kind)
-        if builder is None:
-            raise ValueError(f"unsupported sensor provider kind {kind!r}")
-        return builder(spec)
-
-
-def _mounting_kwargs(spec: SensorScenarioSpec) -> dict[str, object]:
-    return {
-        "body_from_sensor": spec.body_from_sensor,
-        "lever_arm_body_m": None if spec.lever_arm_body_m is None else np.asarray(spec.lever_arm_body_m),
-    }
-
-
-def _build_translation_acceleration_adapter(spec: SensorScenarioSpec) -> Any:
-    return TranslationAccelerationAdapter()
-
-
-def _build_gyro_adapter(spec: SensorScenarioSpec) -> Any:
-    return IdealGyroscopeAdapter()
-
-
-def _build_ideal_imu_adapter(spec: SensorScenarioSpec) -> Any:
-    return IdealImuAdapter(
-        body_from_sensor=spec.body_from_sensor,
-        lever_arm_body_m=None if spec.lever_arm_body_m is None else np.asarray(spec.lever_arm_body_m),
-    )
-
-
-def _build_imu_error_model_adapter(spec: SensorScenarioSpec) -> Any:
-    if spec.profile_path is not None:
-        return ImuErrorModelAdapter.from_profile(
-            spec.profile_path,
-            seed=spec.seed,
-            body_from_sensor=spec.body_from_sensor,
-            lever_arm_body_m=None if spec.lever_arm_body_m is None else np.asarray(spec.lever_arm_body_m),
+        if builder is not None:
+            return builder(spec)
+        build_context = SensorBuildContext(
+            sensor_id=spec.sensor_name,
+            seed=0 if spec.seed is None else spec.seed,
+            body_from_sensor=np.eye(3) if spec.body_from_sensor is None else spec.body_from_sensor,
+            lever_arm_body_m=np.zeros(3) if spec.lever_arm_body_m is None else np.asarray(spec.lever_arm_body_m),
+            services=services or SensorServices(),
+            resources={
+                "profile_path": None if spec.profile_path is None else str(spec.profile_path),
+                "profile_name": spec.profile_name,
+                "profile_category": spec.profile_category,
+                "scenario_source_path": None if spec.source_path is None else str(spec.source_path),
+            },
         )
-    if spec.profile_name is not None:
-        return ImuErrorModelAdapter.from_example_profile(
-            spec.profile_name,
-            category=spec.profile_category,
-            seed=spec.seed,
-            body_from_sensor=spec.body_from_sensor,
-            lever_arm_body_m=None if spec.lever_arm_body_m is None else np.asarray(spec.lever_arm_body_m),
-        )
-    return ImuErrorModelAdapter.from_config(
-        seed=spec.seed,
-        body_from_sensor=spec.body_from_sensor,
-        lever_arm_body_m=None if spec.lever_arm_body_m is None else np.asarray(spec.lever_arm_body_m),
-    )
-
-
-SensorAdapterFactory.register("translation-acceleration", _build_translation_acceleration_adapter)
-SensorAdapterFactory.register("ideal-gyroscope", _build_gyro_adapter)
-SensorAdapterFactory.register("ideal", _build_ideal_imu_adapter)
-SensorAdapterFactory.register("imu-error-model", _build_imu_error_model_adapter)
+        return sensor_plugin_registry().create(kind, provider.config, build_context)
+        ####
+    ####
 
 
 def _packet_record(packet: MeasurementPacket[Any], provenance: Mapping[str, object] | None = None) -> dict[str, object]:
-    payload_contract: dict[str, object]
-    if isinstance(packet.payload, AccelerationIncrement) or (provenance or {}).get("provider") == "translation-acceleration":
-        payload_contract = {
-            "frame": "ECI",
-            "delta_v_unit": "m/s",
-            "measurement": "specific-force",
-        }
-    elif isinstance(packet.payload, GyroIncrement) or (provenance or {}).get("provider") == "ideal-gyroscope":
-        payload_contract = {
-            "frame": "body",
-            "delta_theta_unit": "rad",
-            "measurement": "angular-rate",
-        }
-    else:
-        payload_contract = {
-            "frame": "body",
-            "delta_v_unit": "m/s",
-            "delta_theta_unit": "rad",
-        }
-    record: dict[str, object] = {
-        "sampled_at_s": packet.sampled_at_s,
-        "available_at_s": packet.available_at_s,
-        "interval_start_s": packet.interval_start_s,
-        "valid": packet.valid,
-        "payload_contract": payload_contract,
-        "provenance": dict(provenance or {}),
-    }
-    if packet.payload is None:
-        record["payload"] = None
-    elif isinstance(packet.payload, AccelerationIncrement):
-        record["payload"] = {
-            "delta_v_eci_mps": packet.payload.delta_v_eci_mps.tolist(),
-            "start_time_s": packet.payload.start_time_s,
-            "end_time_s": packet.payload.end_time_s,
-        }
-    elif isinstance(packet.payload, GyroIncrement):
-        record["payload"] = {
-            "delta_theta_body_rad": packet.payload.delta_theta_body_rad.tolist(),
-            "start_time_s": packet.payload.start_time_s,
-            "end_time_s": packet.payload.end_time_s,
-        }
-    else:
-        record["payload"] = {
-            "delta_v_body_mps": np.asarray(packet.payload.delta_v_body_mps).tolist(),
-            "delta_theta_body_rad": np.asarray(packet.payload.delta_theta_body_rad).tolist(),
-            "start_time_s": packet.payload.start_time_s,
-            "end_time_s": packet.payload.end_time_s,
-        }
-    return record
+    return packet_to_record(packet, provenance=provenance)
+    ####
 
 
 def _navigation_record(state: Any) -> dict[str, object]:
@@ -670,6 +605,10 @@ class SensorScenarioRuntime:
         """
 
         binding = next(item for item in self.bus.bindings if item.name == self.spec.sensor_name)
+        if binding.context_provider is not None:
+            raise TypeError(
+                f"sensor binding {binding.name!r} uses a runtime context callback and requires explicit rebind on restore"
+            )
         if binding.drop_predicate is not None and binding.checkpoint_drop_policy_id != "drop_every_n":
             raise TypeError(
                 f"sensor binding {binding.name!r} uses an unregistered drop callback and cannot be checkpointed automatically"
@@ -695,6 +634,8 @@ class SensorScenarioRuntime:
                         "dropped_samples": binding.dropped_samples,
                         "drop_attempts": binding.drop_attempts,
                         "dropped_packets": [_checkpoint_packet(packet) for packet in binding.dropped_packets],
+                        "next_sequence": binding.next_sequence,
+                        "rng_state": binding.rng_state(),
                     }
                 },
                 "queued": {
@@ -747,10 +688,21 @@ class SensorScenarioRuntime:
         if not isinstance(raw_binding, Mapping):
             raise ValueError(f"sensor scenario checkpoint is missing binding state for {binding.name!r}")
         binding.interval_start = _restore_checkpoint_truth(raw_binding.get("interval_start"))
+        binding.interval_start_context = (
+            None
+            if binding.interval_start is None
+            else SensorContext.from_host(binding.interval_start)
+        )
         binding.samples_emitted = _checkpoint_int(raw_binding.get("samples_emitted", 0))
         binding.invalid_samples = _checkpoint_int(raw_binding.get("invalid_samples", 0))
         binding.dropped_samples = _checkpoint_int(raw_binding.get("dropped_samples", 0))
         binding.drop_attempts = _checkpoint_int(raw_binding.get("drop_attempts", 0))
+        binding.next_sequence = _checkpoint_int(raw_binding.get("next_sequence", binding.samples_emitted))
+        raw_rng_state = raw_binding.get("rng_state")
+        if raw_rng_state is not None:
+            if not isinstance(raw_rng_state, Mapping):
+                raise ValueError("sensor scenario checkpoint rng_state must be a mapping")
+            binding.restore_rng_state(raw_rng_state)
         raw_dropped = raw_binding.get("dropped_packets", ())
         if not isinstance(raw_dropped, Sequence) or isinstance(raw_dropped, (str, bytes)):
             raise ValueError("sensor scenario checkpoint dropped_packets must be a sequence")
@@ -818,12 +770,26 @@ class SensorScenarioRuntime:
         }
         packet_hash = _stable_hash(measurements)
         estimator_hash = _stable_hash(estimates)
+        plugin_manifest = sensor_plugin_registry().descriptor(self.spec.resolved_provider_config().kind).manifest
         return {
             "schema_version": 1,
             "execution": "accepted-truth-measurement-bus",
             "scenario_identity": self.spec.scenario_id,
             "source_inputs": dict(self.source_inputs),
             "spec": self.spec.to_metadata(),
+            "sensor_plugin": {
+                "api_version": plugin_manifest.api_version,
+                "kind": plugin_manifest.kind,
+                "family": plugin_manifest.family,
+                "language_kinds": sorted(plugin_manifest.language_kinds),
+                "standalone_clock_kind": plugin_manifest.clock_kind,
+                "required_truth": sorted(plugin_manifest.required_truth),
+                "sample_modes": sorted(plugin_manifest.sample_modes),
+                "outputs": [
+                    {"port": output.name, "schema_id": output.schema_id}
+                    for output in plugin_manifest.outputs
+                ],
+            },
             "truth_contract": {
                 **dict(self.truth_contract),
                 "frame": "ECI",
@@ -842,8 +808,8 @@ class SensorScenarioRuntime:
             "sensor_bindings": self.bus.to_metadata()["bindings"],
             "checkpointing": {
                 "sensor_model": binding.to_metadata()["checkpointing"],
-                "registered_scenario_auto_restore": True,
-                "custom_callback_rebind_required": True,
+                "registered_scenario_auto_restore": binding.context_provider is None,
+                "custom_callback_rebind_required": binding.context_provider is not None,
             },
             "measurement_summary": {
                 "emitted": binding.samples_emitted,
@@ -872,8 +838,8 @@ class SensorScenarioRuntime:
             "reproducibility": {"measurement_sha256": packet_hash, "estimator_sha256": estimator_hash},
             "plots": dict(self.plot_manifest) if self.plot_manifest else {"status": "not-rendered"},
             "limitations": [
-                "Research estimator implementation; not flight qualified.",
-                "Registered SensorScenario checkpoints restore the declared provider, bus, queued packets, and packet-only estimator state; custom callback integrations require an explicit factory or rebind.",
+                *(["Research estimator implementation; not flight qualified."] if self.estimators else []),
+                "Registered SensorScenario checkpoints restore host-only declared providers, bus state, queued packets, and packet-only estimator state; custom context callbacks require an explicit rebind.",
             ],
         }
 
@@ -929,6 +895,8 @@ def attach_sensor_scenario(
     spec: SensorScenarioSpec,
     *,
     rotational_truth_provider: RotationTruthProvider | None = None,
+    sensor_context_provider: SensorContextProvider | None = None,
+    sensor_services: SensorServices | None = None,
 ) -> SensorScenarioRuntime:
     """Attach one configured sensor and packet-only navigation consumers."""
 
@@ -937,6 +905,11 @@ def attach_sensor_scenario(
         raise KeyError(f"sensor scenario references unknown vehicle {spec.vehicle_name!r}")
     if vehicle.truth_provider is None:
         raise RuntimeError(f"vehicle {vehicle.name!r} has no lowered truth provider")
+    plugin_manifest = sensor_plugin_registry().descriptor(spec.resolved_provider_config().kind).manifest
+    if "entities" in plugin_manifest.required_truth and sensor_context_provider is None:
+        raise ValueError(
+            f"sensor provider {plugin_manifest.kind!r} requires a committed sensor_context_provider with scene entities"
+        )
     truth_provider = vehicle.truth_provider
     if spec.truth_mode == "pseudo-6dof":
         truth_definition = spec.resolved_truth_config()
@@ -951,53 +924,78 @@ def attach_sensor_scenario(
             raise ValueError("hybrid-6dof truth requires an injected rotational_truth_provider")
     elif rotational_truth_provider is not None:
         raise ValueError("rotational_truth_provider is only valid for hybrid-6dof or rotation-only truth")
-    adapter = build_observation_pipeline(SensorAdapterFactory.create(spec), spec.observation_model)
     existing_clock = next((clock for clock in problem.sensor_clocks if clock.name == spec.sensor_name), None)
-    profile_period = adapter.provenance.get("sample_period_s", 0.01)
-    if not isinstance(profile_period, (int, float)):
-        profile_period = 0.01
-    cadence_s = spec.cadence_s or (existing_clock.cadence_s if existing_clock is not None else None) or float(profile_period)
-    clock = SensorClockSpec(
-        spec.sensor_name,
-        "accelerometer" if spec.truth_mode == "translation-only" else ("gyroscope" if spec.truth_mode == "rotation-only" else "imu"),
-        cadence_s=cadence_s,
-        phase_s=spec.phase_s,
-        sample_mode=cast(Any, spec.sample_mode),
-        delivery_s=spec.delivery_s,
-        truth_policy=cast(Any, spec.truth_policy),
-        rate_policy=cast(Any, spec.rate_policy),
+    if existing_clock is not None and existing_clock.kind not in plugin_manifest.language_kinds:
+        compatible = ", ".join(sorted(plugin_manifest.language_kinds))
+        raise ValueError(
+            f"sensor clock {existing_clock.name!r} declares language kind {existing_clock.kind!r}, but provider "
+            f"{plugin_manifest.kind!r} accepts: {compatible}"
+        )
+    adapter = build_observation_pipeline(
+        SensorAdapterFactory.create(spec, services=sensor_services),
+        spec.observation_model,
     )
+    if existing_clock is not None:
+        clock = existing_clock
+    else:
+        profile_period = adapter.provenance.get("sample_period_s")
+        if not isinstance(profile_period, (int, float)) or profile_period <= 0.0:
+            profile_period = None
+        cadence_s = spec.cadence_s or (None if profile_period is None else float(profile_period)) or plugin_manifest.default_cadence_s
+        clock = SensorClockSpec(
+            spec.sensor_name,
+            plugin_manifest.clock_kind,
+            cadence_s=cadence_s,
+            phase_s=spec.phase_s,
+            sample_mode=cast(Any, spec.sample_mode),
+            delivery_s=spec.delivery_s,
+            truth_policy=cast(Any, spec.truth_policy),
+            rate_policy=cast(Any, spec.rate_policy),
+        )
     adapter_provenance = getattr(adapter, "provenance", {})
     provenance = {
         **(dict(adapter_provenance) if isinstance(adapter_provenance, Mapping) else {}),
         "scenario_spec": spec.to_metadata(),
     }
     bus = SensorBus()
-    bus.register(SensorBinding(spec.sensor_name, spec.vehicle_name, clock, adapter, provenance=provenance, truth_provider=truth_provider))
+    bus.register(
+        SensorBinding(
+            spec.sensor_name,
+            spec.vehicle_name,
+            clock,
+            adapter,
+            provenance=provenance,
+            truth_provider=truth_provider,
+            context_provider=sensor_context_provider,
+            rng_seed=0 if spec.seed is None else spec.seed,
+        )
+    )
     bus.attach(problem)
     initial_truth = truth_provider(vehicle.state)
-    if spec.truth_mode == "translation-only":
-        initial_state: Any = TranslationNavigationState(
-            initial_truth.time_s,
-            initial_truth.position_eci_m,
-            initial_truth.velocity_eci_mps,
-        )
-    elif spec.truth_mode == "rotation-only":
-        if initial_truth.orientation_eci_from_body is None:
-            raise ValueError("rotation-only truth requires committed orientation truth")
-        initial_state = AttitudeNavigationState(
-            initial_truth.time_s,
-            initial_truth.orientation_eci_from_body,
-        )
-    else:
-        if initial_truth.orientation_eci_from_body is None or initial_truth.angular_rate_body_radps is None:
-            raise ValueError(f"truth mode {spec.truth_mode!r} requires orientation and body-rate channels")
-        initial_state = NavigationState(
-            initial_truth.time_s,
-            initial_truth.position_eci_m,
-            initial_truth.velocity_eci_mps,
-            initial_truth.orientation_eci_from_body,
-        )
+    initial_state: Any | None = None
+    if spec.estimator_modes:
+        if spec.truth_mode == "translation-only":
+            initial_state = TranslationNavigationState(
+                initial_truth.time_s,
+                initial_truth.position_eci_m,
+                initial_truth.velocity_eci_mps,
+            )
+        elif spec.truth_mode == "rotation-only":
+            if initial_truth.orientation_eci_from_body is None:
+                raise ValueError("rotation-only truth requires committed orientation truth")
+            initial_state = AttitudeNavigationState(
+                initial_truth.time_s,
+                initial_truth.orientation_eci_from_body,
+            )
+        else:
+            if initial_truth.orientation_eci_from_body is None or initial_truth.angular_rate_body_radps is None:
+                raise ValueError(f"truth mode {spec.truth_mode!r} requires orientation and body-rate channels")
+            initial_state = NavigationState(
+                initial_truth.time_s,
+                initial_truth.position_eci_m,
+                initial_truth.velocity_eci_mps,
+                initial_truth.orientation_eci_from_body,
+            )
     runtime = SensorScenarioRuntime(spec, bus, problem=problem)
     runtime.truth_contract = truth_provider_contract(truth_provider)
     if spec.feedback.source != "plant-truth":
@@ -1028,6 +1026,8 @@ def attach_sensor_scenario(
         binding.drop_predicate = drop_packet
         binding.checkpoint_drop_policy_id = "drop_every_n"
     for mode in spec.estimator_modes:
+        if initial_state is None:
+            raise RuntimeError("sensor estimator construction requires an initialized navigation state")
         normalized = mode.casefold().replace("_", "-")
         estimator: _Navigator
         if spec.truth_mode == "translation-only" and normalized in {"dead-reckoning", "translation-dead-reckoning", "translation-dr", "dr"}:
@@ -1184,84 +1184,18 @@ def _restore_checkpoint_truth(value: object) -> TruthPoint | None:
 
 
 def _checkpoint_packet(packet: MeasurementPacket[Any]) -> dict[str, object]:
-    """Serialize a declared provider's recognized immutable packet type."""
+    """Serialize a packet through its registered versioned payload codec."""
 
-    payload = packet.payload
-    if payload is None:
-        payload_record: dict[str, object] | None = None
-    elif isinstance(payload, ImuIncrement):
-        payload_record = {
-            "kind": "imu_increment",
-            "delta_v_body_mps": payload.delta_v_body_mps.tolist(),
-            "delta_theta_body_rad": payload.delta_theta_body_rad.tolist(),
-            "start_time_s": payload.start_time_s,
-            "end_time_s": payload.end_time_s,
-            "temperature_celsius": payload.temperature_celsius,
-        }
-    elif isinstance(payload, GyroIncrement):
-        payload_record = {
-            "kind": "gyro_increment",
-            "delta_theta_body_rad": payload.delta_theta_body_rad.tolist(),
-            "start_time_s": payload.start_time_s,
-            "end_time_s": payload.end_time_s,
-        }
-    elif isinstance(payload, AccelerationIncrement):
-        payload_record = {
-            "kind": "acceleration_increment",
-            "delta_v_eci_mps": payload.delta_v_eci_mps.tolist(),
-            "start_time_s": payload.start_time_s,
-            "end_time_s": payload.end_time_s,
-        }
-    else:
-        raise TypeError(f"sensor scenario checkpoints do not support packet payload {type(payload).__name__!r}")
-    return {
-        "sampled_at_s": packet.sampled_at_s,
-        "available_at_s": packet.available_at_s,
-        "interval_start_s": packet.interval_start_s,
-        "valid": packet.valid,
-        "payload": payload_record,
-    }
+    record = packet_to_record(packet)
+    record.pop("provenance", None)
+    return record
     ####
 
 
 def _restore_checkpoint_packet(value: Mapping[str, object]) -> MeasurementPacket[Any]:
-    """Restore one recognized immutable packet from checkpoint data."""
+    """Restore one versioned or legacy packet through the codec registry."""
 
-    raw_payload = value.get("payload")
-    payload: ImuIncrement | GyroIncrement | AccelerationIncrement | None
-    if raw_payload is None:
-        payload = None
-    elif not isinstance(raw_payload, Mapping):
-        raise ValueError("sensor scenario checkpoint packet payload must be a mapping")
-    elif raw_payload.get("kind") == "imu_increment":
-        payload = ImuIncrement(
-            np.asarray(raw_payload["delta_v_body_mps"], dtype=float),
-            np.asarray(raw_payload["delta_theta_body_rad"], dtype=float),
-            _checkpoint_float(raw_payload["start_time_s"]),
-            _checkpoint_float(raw_payload["end_time_s"]),
-            None if raw_payload.get("temperature_celsius") is None else _checkpoint_float(raw_payload["temperature_celsius"]),
-        )
-    elif raw_payload.get("kind") == "gyro_increment":
-        payload = GyroIncrement(
-            np.asarray(raw_payload["delta_theta_body_rad"], dtype=float),
-            _checkpoint_float(raw_payload["start_time_s"]),
-            _checkpoint_float(raw_payload["end_time_s"]),
-        )
-    elif raw_payload.get("kind") == "acceleration_increment":
-        payload = AccelerationIncrement(
-            np.asarray(raw_payload["delta_v_eci_mps"], dtype=float),
-            _checkpoint_float(raw_payload["start_time_s"]),
-            _checkpoint_float(raw_payload["end_time_s"]),
-        )
-    else:
-        raise ValueError(f"unsupported sensor scenario checkpoint packet kind {raw_payload.get('kind')!r}")
-    return MeasurementPacket(
-        _checkpoint_float(value["sampled_at_s"]),
-        _checkpoint_float(value["available_at_s"]),
-        None if value.get("interval_start_s") is None else _checkpoint_float(value["interval_start_s"]),
-        payload,
-        bool(value.get("valid", True)),
-    )
+    return packet_from_record(value)
     ####
 
 

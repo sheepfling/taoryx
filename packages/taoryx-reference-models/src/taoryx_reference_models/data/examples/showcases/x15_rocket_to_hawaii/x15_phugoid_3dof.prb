@@ -1,0 +1,28 @@
+(x15-phugoid-alpha-profile-3dof)
+*title X-15 source-deck 3-DOF phugoid and alpha-profile checkpoint
+*mode point-mass
+*atmos standard
+*earth wgs-84 omega=7.2921151467e-5 gm=3.986004418e14
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*runtime status vehicle=x15 family=hypersonic-rocket-plane maneuver=phugoid alpha-profile=bounded-source-deck
+*runtime status envelope max-mach=6.7 max-alpha-deg=10 max-beta-deg=10
+
+*trajectory 1 x15 start on 1
+  *initial geodetic alt=21500.0 long=-118.2 lat=34.0 vel=1283.426096040443 gama=10.0 psi=299.82170792451166 time=0.0 mass=14641.0545
+  *file x15_phugoid_3dof.dat time alt vel gama alpha mach mass
+  *segment 1 phugoid-alpha-profile
+    *integ dtprnt=0.5 dt=0.05
+    *prop thrust=0 mdot=0
+    *aero cx=(cx) cy=(cy) cz=(cz) sref=18.580608
+    *fly alpha vrs tseg interp-1
+      0.0 0.0
+      1.5 20.0
+      -1.5 40.0
+      1.5 60.0
+      -1.5 80.0
+      1.5 100.0
+      0.0 120.0
+    *when time>120.0 stop
+*end

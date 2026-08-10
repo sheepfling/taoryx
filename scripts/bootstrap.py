@@ -1,4 +1,4 @@
-"""Create the project virtual environment and install development extras."""
+"""Create a project virtual environment and install a selected Taoryx suite."""
 
 from __future__ import annotations
 
@@ -10,6 +10,21 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 VENV = ROOT / ".venv"
+
+PROFILE_PROJECTS: dict[str, tuple[str, ...]] = {
+    "core": (),
+    "models": (
+        "packages/taoryx-daveml",
+        "packages/taoryx-simple-aero",
+        "packages/taoryx-reference-models",
+    ),
+    "full": (
+        "packages/taoryx-daveml",
+        "packages/taoryx-simple-aero",
+        "packages/taoryx-reference-models",
+        "packages/taoryx-reachability",
+    ),
+}
 
 
 def venv_python() -> Path:
@@ -24,12 +39,45 @@ def run(command: list[str]) -> None:
 ####
 
 
+def editable_install_command(
+    python: str,
+    *,
+    profile: str,
+    with_dependencies: bool,
+    with_sensors: bool,
+) -> list[str]:
+    """Build one pip command for the requested local distribution set."""
+
+    command = [python, "-m", "pip", "install"]
+    if not with_dependencies:
+        command.extend(("--no-build-isolation", "--no-deps"))
+    extras = ["dev"]
+    if with_sensors:
+        extras.append("sensors")
+    root_spec = f".[{','.join(extras)}]" if with_dependencies else "."
+    for project in (root_spec, *PROFILE_PROJECTS[profile]):
+        command.extend(("-e", project))
+    return command
+    ####
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--upgrade-pip",
         action="store_true",
         help="upgrade pip inside the virtual environment before installing the project",
+    )
+    parser.add_argument(
+        "--profile",
+        choices=tuple(PROFILE_PROJECTS),
+        default="full",
+        help="distribution set to install (default: all official model and reachability plug-ins)",
+    )
+    parser.add_argument(
+        "--with-sensors",
+        action="store_true",
+        help="also install the optional third-party sensor-model dependencies",
     )
     args = parser.parse_args()
 
@@ -48,12 +96,29 @@ def main() -> int:
         ####
     ####
     try:
-        run([python, "-m", "pip", "install", "-e", ".[dev]"])
+        run(
+            editable_install_command(
+                python,
+                profile=args.profile,
+                with_dependencies=True,
+                with_sensors=args.with_sensors,
+            )
+        )
     except subprocess.CalledProcessError:
         print("Falling back to an offline editable install without dependency resolution.")
-        run([python, "-m", "pip", "install", "--no-build-isolation", "--no-deps", "-e", "."])
+        run(
+            editable_install_command(
+                python,
+                profile=args.profile,
+                with_dependencies=False,
+                with_sensors=args.with_sensors,
+            )
+        )
     ####
-    print(f"\nBootstrap complete. Activate with: source {VENV}/bin/activate")
+    run([python, "-m", "taoryx.runtime.cli", "plugins", "check", "--profile", args.profile])
+    activation = VENV / ("Scripts/activate" if sys.platform == "win32" else "bin/activate")
+    print(f"\nBootstrap complete for the {args.profile!r} profile.")
+    print(f"Activate with: source {activation}")
     print("Then run: python -m tools.dev doctor && python -m tools.dev test")
     return 0
 

@@ -1,0 +1,492 @@
+schema_version: 1
+source_bundle: ../../simple_aero_v1
+translation_style: synthetic_taos_trajectories
+shared_launch_geodetic: &shared_launch_geodetic "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0"
+shared_launch_ecfc: &shared_launch_ecfc "*initial ecfc x=20925646.3255 y=0 z=0 xdt=0 ydt=0 zdt=0 time=0 mass=5"
+shared_target_ecfc: &shared_target_ecfc "*initial ecfc x=20925646.3255 y=1000 z=0 xdt=0 ydt=10 zdt=0 time=0 mass=1"
+shared_boost_body: &shared_boost_body
+  - "*integ dtprnt=0.1 dt=0.01"
+  - "*prop thrust=(stage1-thrust) mdot=(stage1-mdot)"
+  - "*when tseg=5 goto 2"
+shared_coast_body: &shared_coast_body
+  - "*integ dtprnt=0.5 dt=0.05"
+  - "*aero ca=(coast-ca) cn=(coast-cn)"
+  - "*when alt<0 stop"
+  - "*when tseg=40 goto 3"
+shared_pronav_body: &shared_pronav_body
+  - "*integ dtprnt=0.5 dt=0.05"
+  - "*fly propnav=2"
+  - "*when relrng[2]<20000 stop"
+  - "*when alt<0 stop"
+problems:
+  - path: ballistic.prb
+    problem_name: simple_aero-ballistic
+    title: Simple Aero-like ballistic trajectory
+    source_bundle: ../../simple_aero_v1/ballistic.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/ballistic.yaml"
+      - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
+    simple_aero_metadata:
+      family: Ballistic
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: *shared_launch_geodetic
+        file_line: "*file ballistic.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body: *shared_boost_body
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body: *shared_coast_body
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=(maneuver-ca) cn=(maneuver-cn)"
+              - "*fly bankgd=0.0"
+              - "*when alt<0 stop"
+              - "*when tseg=60 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body: *shared_pronav_body
+  - path: cbcr_left.prb
+    problem_name: simple_aero-cbcr-left
+    title: Simple Aero-like CBCR left turn
+    source_bundle: ../../simple_aero_v1/cbcr.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/cbcr.yaml"
+      - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
+    simple_aero_metadata:
+      family: CBCR
+      direction: left
+      maneuver_altitude_start_km: 40
+      maneuver_duration_s: 35
+      min_time_to_go_s: 60
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: *shared_launch_geodetic
+        file_line: "*file cbcr-left.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body: *shared_boost_body
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body: *shared_coast_body
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=15.0"
+              - "*when alt<0 stop"
+              - "*when tseg=35 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body: *shared_pronav_body
+  - path: cbcr_right.prb
+    problem_name: simple_aero-cbcr-right
+    title: Simple Aero-like CBCR right turn
+    source_bundle: ../../simple_aero_v1/cbcr.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/cbcr.yaml"
+      - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
+    simple_aero_metadata:
+      family: CBCR
+      direction: right
+      maneuver_altitude_start_km: 40
+      maneuver_duration_s: 35
+      min_time_to_go_s: 60
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: *shared_launch_geodetic
+        file_line: "*file cbcr-right.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body: *shared_boost_body
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body: *shared_coast_body
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=-15.0"
+              - "*when alt<0 stop"
+              - "*when tseg=35 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body: *shared_pronav_body
+  - path: crossrange.prb
+    problem_name: simple_aero-crossrange
+    title: Simple Aero-like crossrange trajectory
+    source_bundle: ../../simple_aero_v1/crossrange.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/crossrange.yaml"
+      - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
+    simple_aero_metadata:
+      family: Crossrange
+      min_time_to_go_s: 60
+      initial_heading_error_deg: 15
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=105.0 time=0.0 wt=1000.0"
+        file_line: "*file crossrange.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body: *shared_boost_body
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body: *shared_coast_body
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=15.0"
+              - "*when alt<0 stop"
+              - "*when tseg=60 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body: *shared_pronav_body
+  - path: marv.prb
+    problem_name: simple_aero-marv
+    title: Simple Aero-like MARV trajectory
+    source_bundle: ../../simple_aero_v1/marv.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/marv.yaml"
+      - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
+    simple_aero_metadata:
+      family: MARV
+      maneuver_begin_time_to_go_s: 60
+      min_time_to_go_s: 30
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: *shared_launch_geodetic
+        file_line: "*file marv.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body: *shared_boost_body
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body: *shared_coast_body
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=0.0"
+              - "*when alt<0 stop"
+              - "*when tseg=60 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body: *shared_pronav_body
+  - path: phugoid.prb
+    problem_name: simple_aero-phugoid-trajectory
+    title: Simple Aero-like phugoid trajectory
+    source_bundle: ../../simple_aero_v1/phugoid.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/phugoid.yaml"
+      - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
+    simple_aero_metadata:
+      family: Phugoid
+      start_range_to_go_km: null
+      phugoid_amplitude_deg: 2
+      phugoid_frequency_Hz: 0.015
+      maneuver_roll_deg: 45
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: *shared_launch_geodetic
+        file_line: "*file phugoid.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body: *shared_boost_body
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body: *shared_coast_body
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly alpha vrs tseg"
+              - "  0.0 0.0"
+              - "  10.0 2.0"
+              - "  20.0 -2.0"
+              - "  30.0 0.0"
+              - "*fly bankgd=45.0"
+              - "*when alt<0 stop"
+              - "*when tseg=60 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body: *shared_pronav_body
+  - path: range_extension.prb
+    problem_name: simple_aero-range-extension
+    title: Simple Aero-like range extension trajectory
+    source_bundle: ../../simple_aero_v1/range_extension.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/range_extension.yaml"
+      - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
+    simple_aero_metadata:
+      family: RangeExtension
+      min_time_to_go_s: 60
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: *shared_launch_geodetic
+        file_line: "*file range-extension.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body: *shared_boost_body
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body: *shared_coast_body
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly alpha=0.0"
+              - "*when alt<0 stop"
+              - "*when tseg=60 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body: *shared_pronav_body
+  - path: skip.prb
+    problem_name: simple_aero-skip
+    title: Simple Aero-like skip trajectory
+    source_bundle: ../../simple_aero_v1/skip.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/skip.yaml"
+      - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
+    simple_aero_metadata:
+      family: Skip
+      maneuver_begin_time_to_go_s: 400
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: *shared_launch_geodetic
+        file_line: "*file skip.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body: *shared_boost_body
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body: *shared_coast_body
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=0.0"
+              - "*when alt<0 stop"
+              - "*when tseg=400 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body: *shared_pronav_body
+  - path: slalom.prb
+    problem_name: simple_aero-slalom
+    title: Simple Aero-like slalom trajectory
+    source_bundle: ../../simple_aero_v1/slalom.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/slalom.yaml"
+      - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
+    simple_aero_metadata:
+      family: Slalom
+      start_range_to_go_km: null
+      end_range_to_go_km: 200
+      min_time_to_go_s: 60
+      notes:
+        - "start_range_to_go_km inferred as max(end_range_to_go_km + 50, total_range * 0.5)"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: *shared_launch_geodetic
+        file_line: "*file slalom.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body: *shared_boost_body
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body: *shared_coast_body
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly alpha=0.0"
+              - "*when alt<0 stop"
+              - "*when tseg=60 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body: *shared_pronav_body
+  - path: weave.prb
+    problem_name: simple_aero-weave
+    title: Simple Aero-like weave trajectory
+    source_bundle: ../../simple_aero_v1/weave.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/weave.yaml"
+      - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
+    simple_aero_metadata:
+      family: Weave
+      weave_end_range_to_go_km: null
+      min_time_to_go_s: 60
+      notes:
+        - "weave_end_range_to_go_km defaults to 0.15 * total_range_km"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: *shared_launch_geodetic
+        file_line: "*file weave.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body: *shared_boost_body
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body: *shared_coast_body
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=0.0"
+              - "*when alt<0 stop"
+              - "*when tseg=60 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body: *shared_pronav_body
+  - path: propnav.prb
+    problem_name: simple_aero-propnav
+    title: Simple Aero-like propnav intercept
+    source_bundle: ../../taos_e2e_v23/cases/positive/p027_proportional_navigation/input/p027_proportional_navigation.prb
+    comments:
+      - "Synthetic TAOS trajectory translation of the proportional-navigation e2e case"
+      - "Working set: shared launch/target, boost, coast-to-apogee, maneuver, terminal pronav"
+    simple_aero_metadata:
+      family: ProportionalNavigation
+      terminal_handoff_range_km: 20
+      notes:
+        - "interceptor/target pair"
+    atmosphere: none
+    earth: spherical gm=0 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 interceptor start on 1"
+        initial_line: *shared_launch_ecfc
+        file_line: "*file interceptor.dat time xecfc yecfc relrng[2] relvel[2] yawi pitchi"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body:
+              - "*integ dtprnt=0.25 dt=0.025 dtguid=3"
+              - "*inertial ecfc"
+              - "*prop thrust=(interceptor-thrust) mdot=(zero-mdot)"
+              - "*when z<0 stop"
+              - "*when tseg=5 goto 2"
+          - number: 2
+            title: coast_to_apogee
+            phase: coast
+            body:
+              - "*integ dtprnt=0.25 dt=0.025"
+              - "*inertial ecfc"
+              - "*when z<0 stop"
+              - "*when tseg=40 goto 3"
+          - number: 3
+            title: maneuver
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.25 dt=0.025 dtguid=3"
+              - "*inertial ecfc"
+              - "*prop thrust=(interceptor-thrust) mdot=(zero-mdot)"
+              - "*fly yawi=0.0 pitchi=0.0"
+              - "*when z<0 stop"
+              - "*when tseg=60 goto 4"
+          - number: 4
+            title: terminal_pronav
+            phase: final_pronav
+            body:
+              - "*integ dtprnt=0.25 dt=0.025 dtguid=3"
+              - "*inertial ecfc"
+              - "*prop thrust=(interceptor-thrust) mdot=(zero-mdot)"
+              - "# 20 km to go handoff"
+              - "*fly propnav=2"
+              - "*when relrng[2]<20000 stop"
+              - "*when time=20 stop"
+              - "*when z<0 stop"
+      - trajectory_line: "*trajectory 2 target start on 1"
+        initial_line: *shared_target_ecfc
+        file_line: "*file target.dat time xecfc yecfc"
+        segments:
+          - number: 1
+            title: coast
+            phase: coast
+            body:
+              - "*integ dtprnt=0.25 dt=0.025"
+              - "*when z<0 stop"
+              - "*when time=20 stop"

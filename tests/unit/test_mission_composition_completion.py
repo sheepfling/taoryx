@@ -4,12 +4,15 @@ import json
 
 import pytest
 from pydantic import ValidationError
-
 from taoryx.mission_composition_completion import (
     MissionCompositionCompletionReport,
     build_mission_composition_completion_report,
     render_mission_composition_completion_markdown,
 )
+from taoryx.trajectory.native_mission_composition import build_registry_mission_composition_runner
+from taoryx.trajectory.reference_mission_composition import ReferenceMissionCompositionProvider
+from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
+
 from taoryx.mission_composition_inventory import (
     MissionCompositionInventory,
     MissionCompositionInventoryAudit,
@@ -29,9 +32,6 @@ from taoryx.trajectory.execution_contract import (
     audit_provider_advertisement,
     diagnostic_from_exception,
 )
-from taoryx.trajectory.native_mission_composition import build_registry_mission_composition_runner
-from taoryx.trajectory.reference_mission_composition import ReferenceMissionCompositionProvider
-from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.vehicle_registry import ROOT
 
 
@@ -72,6 +72,11 @@ def test_production_advertisement_and_generated_completion_artifacts_are_current
     assert audit.status == "pass", audit.diagnostics
     assert audit.runner_checked
     assert all(item.status == "pass" for item in audit.models)
+    assert sum(item.control_channel_count for item in audit.models) == 133
+    assert sum(item.active_control_channel_count for item in audit.models) == 88
+    assert sum(item.native_bound_control_channel_count for item in audit.models) == 121
+    assert sum(item.control_authority_count for item in audit.models) == 57
+    assert sum(item.control_intent_count for item in audit.models) == 155
     assert ProviderAdvertisementConformanceReport.model_validate_json(audit.model_dump_json(by_alias=True)) == audit
 
     assert report.status == "pass", report.diagnostics
@@ -79,16 +84,14 @@ def test_production_advertisement_and_generated_completion_artifacts_are_current
     assert report.advertisement_status == "pass"
     assert report.family_count == 11
     assert report.realization_count == 45
-    assert report.registered_batch_tuple_count == 28
-    assert report.registered_interactive_tuple_count == 11
+    assert report.registered_batch_tuple_count == 65
+    assert report.registered_interactive_tuple_count == 12
     assert MissionCompositionCompletionReport.model_validate_json(report.model_dump_json(by_alias=True)) == report
 
     expected_json = report.model_dump_json(indent=2, by_alias=True) + "\n"
     expected_markdown = render_mission_composition_completion_markdown(report)
     assert (ROOT / "verification/mission_composition_completion.json").read_text(encoding="utf-8") == expected_json
-    assert (ROOT / "docs/architecture/mission-composition-coverage-matrix.md").read_text(
-        encoding="utf-8"
-    ) == expected_markdown
+    assert (ROOT / "docs/architecture/mission-composition-coverage-matrix.md").read_text(encoding="utf-8") == expected_markdown
     ####
 
 
@@ -100,9 +103,7 @@ def test_model_level_readiness_is_only_an_index_over_exact_registered_tuples() -
             operation.operation
             for mission in model.mission_templates
             for operation in mission.operations
-            if operation.operation in {"batch", "step"}
-            and operation.status == "available"
-            and operation.common_runner_status == "registered"
+            if operation.operation in {"batch", "step"} and operation.status == "available" and operation.common_runner_status == "registered"
         }
         assert set(model.common_runner_operations) == exact
         assert (model.status == "common_runner_ready") == bool(exact)
@@ -113,12 +114,7 @@ def test_model_level_readiness_is_only_an_index_over_exact_registered_tuples() -
             if realization.status != "available":
                 assert not {"batch", "step"} & set(realization.operations)
 
-    source_refs = {
-        source
-        for model in provider.list_models()
-        for realization in model.realizations
-        for source in realization.source_refs
-    }
+    source_refs = {source for model in provider.list_models() for realization in model.realizations for source in realization.source_refs}
     assert "verification/horizontal_fidelity_registry.yaml" in source_refs
     assert "verification/horizontal_fidelity.yaml" not in source_refs
     ####
@@ -155,23 +151,26 @@ def test_contract_probe_round_trips_typed_selected_outputs_and_child_lineage() -
     assert child.parent_object_id == relationship.parent_object_id
     assert child.samples[0].values == relationship.initial_state.values
     descendant = next(item for item in result.objects if item.parent_object_id == child.object_id)
-    descendant_relationship = next(
-        item for item in result.relationships if item.child_object_id == descendant.object_id
-    )
+    descendant_relationship = next(item for item in result.relationships if item.child_object_id == descendant.object_id)
     assert descendant.samples[0].values == descendant_relationship.initial_state.values
 
     serialized = json.loads(response.model_dump_json(by_alias=True))
-    assert provider.build_runner().run(
-        MissionCompositionRunRequest.model_validate(
-            {
-                "request_id": "typed-contract-probe-replay",
-                "provider_id": provider.metadata.id,
-                "provider_version": provider.metadata.version,
-                "prepared_configuration": prepared.model_dump(mode="json", by_alias=True),
-                "output": {"mode": "core"},
-            }
+    assert (
+        provider.build_runner()
+        .run(
+            MissionCompositionRunRequest.model_validate(
+                {
+                    "request_id": "typed-contract-probe-replay",
+                    "provider_id": provider.metadata.id,
+                    "provider_version": provider.metadata.version,
+                    "prepared_configuration": prepared.model_dump(mode="json", by_alias=True),
+                    "output": {"mode": "core"},
+                }
+            )
         )
-    ).kind == "trajectory"
+        .kind
+        == "trajectory"
+    )
     assert serialized["kind"] == "trajectory"
 
     bounded = provider.build_runner().run(
@@ -238,11 +237,7 @@ def test_discovery_configuration_preflight_execution_and_projection_diagnostics_
     successful = provider.build_runner().run(request)
     assert successful.kind == "trajectory"
     mismatched_runner = MissionCompositionRunnerRegistry(
-        {
-            (provider.metadata.id, request.model_id): lambda _: successful.result.model_copy(
-                update={"request_id": "another-request"}
-            )
-        }
+        {(provider.metadata.id, request.model_id): lambda _: successful.result.model_copy(update={"request_id": "another-request"})}
     )
     mismatched = mismatched_runner.run(request)
     assert mismatched.kind == "failure"

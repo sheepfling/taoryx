@@ -48,6 +48,40 @@ TrajectorySamplingSemantics = Literal[
     "static",
     "provider_reported",
 ]
+TrajectoryControlStatus = Literal["available", "internally_generated", "uncontrolled", "blocked", "unsupported"]
+TrajectoryControlAvailability = Literal[
+    "available",
+    "available_in_batch",
+    "not_applicable",
+    "not_available",
+    "planned",
+    "unavailable_at_runtime",
+]
+TrajectoryControlChannelKind = Literal["action", "effector"]
+TrajectoryControlAuthorityKind = Literal[
+    "mission",
+    "kinematic",
+    "body_motion",
+    "wrench",
+    "effector",
+    "native_bridge",
+    "open_loop",
+    "provider_defined",
+]
+TrajectoryControlSamplingSemantics = Literal[
+    "held_action",
+    "batch_profile",
+    "segment_generated",
+    "not_sampled",
+    "provider_reported",
+]
+TrajectoryControlIntentResolution = Literal[
+    "external_channel",
+    "provider_internal",
+    "open_loop",
+    "blocked",
+    "unsupported",
+]
 
 
 class NumericPresentationMetadata(BaseModel):
@@ -434,11 +468,7 @@ class ConfigurationSequenceValue(BaseModel):
 
     @model_validator(mode="after")
     def validate_instance_ids(self) -> ConfigurationSequenceValue:
-        instance_ids = tuple(
-            item.instance_id
-            for item in self.items
-            if isinstance(item, ConfigurationChoiceValue) and item.instance_id is not None
-        )
+        instance_ids = tuple(item.instance_id for item in self.items if isinstance(item, ConfigurationChoiceValue) and item.instance_id is not None)
         if len(instance_ids) != len(set(instance_ids)):
             raise ValueError("sequence choice instance IDs must be unique")
         return self
@@ -636,6 +666,7 @@ class TrajectoryOutputChannelMetadata(BaseModel):
         if len(self.operations) != len(set(self.operations)):
             raise ValueError(f"output channel {self.id!r} has duplicate operations")
         return self
+
     ####
 
     ####
@@ -732,9 +763,7 @@ class TrajectoryOutputSchema(BaseModel):
     def validate_output_contract(self) -> TrajectoryOutputSchema:
         nonguaranteed_core = sorted(item.id for item in self.core_channels if item.availability != "guaranteed")
         if nonguaranteed_core:
-            raise ValueError(
-                f"output schema {self.model_id!r} has non-guaranteed core channels {nonguaranteed_core!r}"
-            )
+            raise ValueError(f"output schema {self.model_id!r} has non-guaranteed core channels {nonguaranteed_core!r}")
         channel_ids = tuple(item.id for item in self.channels)
         if len(channel_ids) != len(set(channel_ids)):
             raise ValueError(f"output schema {self.model_id!r} contains duplicate channel IDs")
@@ -771,6 +800,217 @@ class TrajectoryOutputSchema(BaseModel):
         payload = self.model_dump(mode="json", by_alias=True)
         encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
         return hashlib.sha256(encoded).hexdigest()
+        ####
+
+    ####
+
+
+class TrajectoryControlNativeBindingMetadata(BaseModel):
+    """Exact provider-native action schema behind a semantic control channel."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    quantity: str | None = None
+    canonical_unit: str | None = None
+    data_type: TrajectoryOutputDataType = "float64"
+    shape: tuple[int | Literal["variable"], ...] = ()
+    interval: ConfigurationInterval | None = None
+    value_space: ConfigurationValueSpace
+    provider_binding: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_native_binding(self) -> TrajectoryControlNativeBindingMetadata:
+        if any(item != "variable" and item <= 0 for item in self.shape):
+            raise ValueError(f"native control binding {self.id!r} has a non-positive shape dimension")
+        if self.data_type in {"boolean", "string", "json"} and self.canonical_unit is not None:
+            raise ValueError(f"non-numeric native control binding {self.id!r} cannot advertise canonical units")
+        if self.interval is not None and self.data_type not in {"float64", "int64"}:
+            raise ValueError(f"non-numeric native control binding {self.id!r} cannot advertise an interval")
+        return self
+        ####
+
+    ####
+
+
+class TrajectoryControlChannelMetadata(BaseModel):
+    """One provider-neutral command or effector channel for a realization.
+
+    The semantic ``id`` is stable across providers. ``native_channel_id`` and
+    ``provider_binding`` retain the exact adapter boundary without making that
+    provider-local spelling part of the common contract.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    label: str = Field(min_length=1)
+    description: str = Field(min_length=1)
+    channel_kind: TrajectoryControlChannelKind
+    quantity: str | None = None
+    canonical_unit: str | None = None
+    display_unit: str | None = None
+    data_type: TrajectoryOutputDataType = "float64"
+    shape: tuple[int | Literal["variable"], ...] = ()
+    interval: ConfigurationInterval | None = None
+    choices: tuple[str, ...] = ()
+    frame: str | None = None
+    sampling_semantics: TrajectoryControlSamplingSemantics = "held_action"
+    value_space: ConfigurationValueSpace
+    availability: TrajectoryControlAvailability
+    operations: tuple[Literal["batch", "step"], ...]
+    native_channel_id: str | None = None
+    native_binding: TrajectoryControlNativeBindingMetadata | None = None
+    provider_binding: dict[str, Any] = Field(default_factory=dict)
+    presentation: ValuePresentationMetadata = Field(default_factory=ValuePresentationMetadata)
+    source_refs: tuple[str, ...] = ()
+    provenance: str = ""
+    claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_control_channel(self) -> TrajectoryControlChannelMetadata:
+        if self.display_unit is not None and self.canonical_unit is None:
+            raise ValueError(f"control channel {self.id!r} cannot advertise a display unit without a canonical unit")
+        if any(item != "variable" and item <= 0 for item in self.shape):
+            raise ValueError(f"control channel {self.id!r} has a non-positive shape dimension")
+        if self.data_type in {"boolean", "string", "json"} and self.canonical_unit is not None:
+            raise ValueError(f"non-numeric control channel {self.id!r} cannot advertise canonical units")
+        if self.data_type == "string" and not self.choices and self.value_space.topology == "finite_set":
+            raise ValueError(f"finite-set control channel {self.id!r} requires choices")
+        if self.data_type != "string" and self.choices:
+            raise ValueError(f"non-string control channel {self.id!r} cannot advertise choices")
+        if self.interval is not None and self.data_type not in {"float64", "int64"}:
+            raise ValueError(f"non-numeric control channel {self.id!r} cannot advertise an interval")
+        if len(self.operations) != len(set(self.operations)):
+            raise ValueError(f"control channel {self.id!r} has duplicate operations")
+        active = self.availability in {"available", "available_in_batch"}
+        if active != bool(self.operations):
+            raise ValueError(f"control channel {self.id!r} availability {self.availability!r} disagrees with its operations")
+        if self.availability == "available_in_batch" and set(self.operations) != {"batch"}:
+            raise ValueError(f"batch-only control channel {self.id!r} must advertise only batch operation")
+        if (self.native_channel_id is None) != (self.native_binding is None):
+            raise ValueError(f"control channel {self.id!r} must publish native identity and schema together")
+        if self.native_binding is not None and self.native_channel_id != self.native_binding.id:
+            raise ValueError(f"control channel {self.id!r} native ID and binding schema disagree")
+        if "step" in self.operations and self.native_binding is None:
+            raise ValueError(f"interactive control channel {self.id!r} requires an exact native binding schema")
+        return self
+        ####
+
+    ####
+
+
+class TrajectoryControlAuthorityMetadata(BaseModel):
+    """One mutually exclusive authority profile over advertised channels."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    authority: TrajectoryControlAuthorityKind
+    availability: TrajectoryControlAvailability
+    channel_ids: tuple[str, ...]
+    operations: tuple[Literal["batch", "step"], ...]
+    description: str = Field(min_length=1)
+    source_refs: tuple[str, ...] = ()
+    provenance: str = ""
+    claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_authority(self) -> TrajectoryControlAuthorityMetadata:
+        if len(self.channel_ids) != len(set(self.channel_ids)):
+            raise ValueError(f"control authority {self.id!r} has duplicate channel IDs")
+        if len(self.operations) != len(set(self.operations)):
+            raise ValueError(f"control authority {self.id!r} has duplicate operations")
+        active = self.availability in {"available", "available_in_batch"}
+        if active != bool(self.operations):
+            raise ValueError(f"control authority {self.id!r} availability {self.availability!r} disagrees with its operations")
+        if self.availability == "available_in_batch" and set(self.operations) != {"batch"}:
+            raise ValueError(f"batch-only control authority {self.id!r} must advertise only batch operation")
+        return self
+        ####
+
+    ####
+
+
+class TrajectoryControlIntentMetadata(BaseModel):
+    """One mission-level control intent and how this realization resolves it."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    label: str = Field(min_length=1)
+    description: str = Field(min_length=1)
+    resolution: TrajectoryControlIntentResolution
+    segment_ids: tuple[str, ...]
+    mission_template_ids: tuple[str, ...]
+    channel_ids: tuple[str, ...]
+    operations: tuple[Literal["batch", "step"], ...]
+    source_refs: tuple[str, ...] = ()
+    provenance: str = ""
+    claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_intent(self) -> TrajectoryControlIntentMetadata:
+        for name in ("segment_ids", "mission_template_ids", "channel_ids", "operations"):
+            values = getattr(self, name)
+            if len(values) != len(set(values)):
+                raise ValueError(f"control intent {self.id!r} has duplicate {name}")
+        if self.resolution in {"blocked", "unsupported"} and self.operations:
+            raise ValueError(f"unavailable control intent {self.id!r} cannot advertise execution operations")
+        return self
+        ####
+
+    ####
+
+
+class TrajectoryControlAdvertisement(BaseModel):
+    """Complete control publication for one selectable realization."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    status: TrajectoryControlStatus
+    channels: tuple[TrajectoryControlChannelMetadata, ...]
+    authorities: tuple[TrajectoryControlAuthorityMetadata, ...]
+    intents: tuple[TrajectoryControlIntentMetadata, ...]
+    default_authority_id: str | None = None
+    claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_control_advertisement(self) -> TrajectoryControlAdvertisement:
+        channel_ids = tuple(item.id for item in self.channels)
+        authority_ids = tuple(item.id for item in self.authorities)
+        intent_ids = tuple(item.id for item in self.intents)
+        if len(channel_ids) != len(set(channel_ids)):
+            raise ValueError("control advertisement contains duplicate channel IDs")
+        if len(authority_ids) != len(set(authority_ids)):
+            raise ValueError("control advertisement contains duplicate authority IDs")
+        if len(intent_ids) != len(set(intent_ids)):
+            raise ValueError("control advertisement contains duplicate intent IDs")
+        known_channels = set(channel_ids)
+        for authority in self.authorities:
+            unknown = sorted(set(authority.channel_ids) - known_channels)
+            if unknown:
+                raise ValueError(f"control authority {authority.id!r} references unknown channels {unknown!r}")
+        for intent in self.intents:
+            unknown = sorted(set(intent.channel_ids) - known_channels)
+            if unknown:
+                raise ValueError(f"control intent {intent.id!r} references unknown channels {unknown!r}")
+        if self.default_authority_id is not None and self.default_authority_id not in set(authority_ids):
+            raise ValueError("control advertisement references an unknown default authority")
+        active_channels = tuple(item for item in self.channels if item.operations)
+        if self.status == "available" and not active_channels:
+            raise ValueError("available control advertisement requires an active channel")
+        if self.status == "internally_generated" and not any(item.resolution == "provider_internal" for item in self.intents) and not active_channels:
+            raise ValueError("internally generated control advertisement requires a resolved intent or active channel")
+        if self.status == "uncontrolled":
+            if active_channels:
+                raise ValueError("uncontrolled realization cannot advertise active control channels")
+            if any(item.resolution in {"external_channel", "provider_internal"} for item in self.intents):
+                raise ValueError("uncontrolled realization cannot advertise resolved control intents")
+        if self.status in {"blocked", "unsupported"}:
+            if active_channels or any(item.operations for item in self.authorities) or any(item.operations for item in self.intents):
+                raise ValueError(f"{self.status} control advertisement cannot expose execution operations")
+        return self
         ####
 
     ####
@@ -826,6 +1066,7 @@ class TrajectoryRealizationMetadata(BaseModel):
     dynamics_fidelities: tuple[TrajectoryDynamicsFidelity, ...] = Field(min_length=1)
     input_realization: TrajectoryInputRealization
     actuator_types: tuple[TrajectoryActuatorType, ...] = ("not_applicable",)
+    controls: TrajectoryControlAdvertisement
     fidelity_aliases: tuple[str, ...] = Field(min_length=1)
     mission_template_ids: tuple[str, ...] = ()
     operations: tuple[Literal["validate", "batch", "step"], ...] = ("validate",)
@@ -852,6 +1093,35 @@ class TrajectoryRealizationMetadata(BaseModel):
             raise ValueError(f"realization {self.id!r} advertises actuators without actuator allocation")
         if self.input_realization == "actuator_allocated" and self.actuator_types == ("not_applicable",):
             raise ValueError(f"actuator-allocated realization {self.id!r} requires an actuator type")
+        if self.status == "blocked" and self.controls.status != "blocked":
+            raise ValueError(f"blocked realization {self.id!r} requires a blocked control advertisement")
+        if self.status == "unsupported" and self.controls.status != "unsupported":
+            raise ValueError(f"unsupported realization {self.id!r} requires an unsupported control advertisement")
+        if self.status == "available" and self.input_realization == "uncontrolled" and self.controls.status != "uncontrolled":
+            raise ValueError(f"uncontrolled realization {self.id!r} requires an uncontrolled control advertisement")
+        if (
+            self.status == "available"
+            and self.input_realization != "uncontrolled"
+            and self.controls.status
+            not in {
+                "available",
+                "internally_generated",
+            }
+        ):
+            raise ValueError(f"available controlled realization {self.id!r} requires usable control metadata")
+        supported_operations = {item for item in self.operations if item in {"batch", "step"}}
+        for channel in self.controls.channels:
+            unknown = sorted(set(channel.operations) - supported_operations)
+            if unknown:
+                raise ValueError(f"control channel {channel.id!r} requires unavailable realization operations {unknown!r}")
+        for authority in self.controls.authorities:
+            unknown = sorted(set(authority.operations) - supported_operations)
+            if unknown:
+                raise ValueError(f"control authority {authority.id!r} requires unavailable realization operations {unknown!r}")
+        for intent in self.controls.intents:
+            unknown = sorted(set(intent.operations) - supported_operations)
+            if unknown:
+                raise ValueError(f"control intent {intent.id!r} requires unavailable realization operations {unknown!r}")
         return self
         ####
 
@@ -1104,9 +1374,7 @@ class TrajectoryModelMetadata(BaseModel):
             raise ValueError(f"model {self.id!r} has duplicate operations")
         if len(self.common_runner_operations) != len(set(self.common_runner_operations)):
             raise ValueError(f"model {self.id!r} has duplicate common-runner operations")
-        unavailable_common = sorted(
-            {str(item) for item in self.common_runner_operations} - {str(item) for item in self.operations}
-        )
+        unavailable_common = sorted({str(item) for item in self.common_runner_operations} - {str(item) for item in self.operations})
         if unavailable_common:
             raise ValueError(f"model {self.id!r} exposes unavailable common-runner operations {unavailable_common!r}")
         for transition in self.fidelity_transitions:
@@ -1116,14 +1384,36 @@ class TrajectoryModelMetadata(BaseModel):
             unknown = sorted(set(mission.compatible_fidelities) - known)
             if unknown:
                 raise ValueError(f"model {self.id!r} mission {mission.id!r} references unknown fidelities {unknown!r}")
-            unknown_realizations = sorted(
-                {item.realization_id for item in mission.operations if item.realization_id is not None}
-                - known_realizations
-            )
+            unknown_realizations = sorted({item.realization_id for item in mission.operations if item.realization_id is not None} - known_realizations)
             if unknown_realizations:
-                raise ValueError(
-                    f"model {self.id!r} mission {mission.id!r} references unknown realizations {unknown_realizations!r}"
-                )
+                raise ValueError(f"model {self.id!r} mission {mission.id!r} references unknown realizations {unknown_realizations!r}")
+        realizations_by_id = {item.id: item for item in self.realizations}
+        for mission in self.mission_templates:
+            for operation in mission.operations:
+                if operation.realization_id is None:
+                    continue
+                realization = realizations_by_id[operation.realization_id]
+                if operation.fidelity not in realization.fidelity_aliases:
+                    raise ValueError(
+                        f"model {self.id!r} mission {mission.id!r} operation {operation.operation!r} "
+                        f"uses realization {realization.id!r} outside its fidelity aliases"
+                    )
+                if realization.mission_template_ids and mission.id not in realization.mission_template_ids:
+                    raise ValueError(
+                        f"model {self.id!r} mission {mission.id!r} operation {operation.operation!r} "
+                        f"uses realization {realization.id!r} outside its mission templates"
+                    )
+                if operation.status == "available":
+                    if realization.status != "available":
+                        raise ValueError(
+                            f"model {self.id!r} mission {mission.id!r} advertises available "
+                            f"{operation.operation!r} for non-available realization {realization.id!r}"
+                        )
+                    if operation.operation not in realization.operations:
+                        raise ValueError(
+                            f"model {self.id!r} mission {mission.id!r} advertises available "
+                            f"{operation.operation!r} missing from realization {realization.id!r}"
+                        )
         deployment_ids = tuple(item.id for item in self.deployments)
         if len(deployment_ids) != len(set(deployment_ids)):
             raise ValueError(f"model {self.id!r} has duplicate deployment metadata")
@@ -1131,33 +1421,42 @@ class TrajectoryModelMetadata(BaseModel):
             unknown = sorted(set(deployment.compatible_fidelities) - known)
             if unknown:
                 raise ValueError(f"model {self.id!r} deployment {deployment.id!r} references unknown fidelities {unknown!r}")
-        independently_propagated = tuple(
-            item for item in self.deployments if item.lifecycle == "independently_propagated"
-        )
+        independently_propagated = tuple(item for item in self.deployments if item.lifecycle == "independently_propagated")
         if bool(independently_propagated) != self.output_schema.entity_output.supports_dynamic_spawning:
-            raise ValueError(
-                f"model {self.id!r} deployment publication and dynamic entity-output capability disagree"
-            )
+            raise ValueError(f"model {self.id!r} deployment publication and dynamic entity-output capability disagree")
         frame_ids = tuple(item.id for item in self.reference_frames)
         if len(frame_ids) != len(set(frame_ids)):
             raise ValueError(f"model {self.id!r} has duplicate reference-frame metadata")
+        mission_ids = {item.id for item in self.mission_templates}
+        segment_ids = set(self.capabilities.segment_types)
+        for realization in self.realizations:
+            unknown_missions = sorted(set(realization.mission_template_ids) - mission_ids)
+            if unknown_missions:
+                raise ValueError(f"model {self.id!r} realization {realization.id!r} references unknown missions {unknown_missions!r}")
+            for channel in realization.controls.channels:
+                if channel.frame is not None and channel.frame not in set(frame_ids):
+                    raise ValueError(f"model {self.id!r} control channel {channel.id!r} references unknown frame {channel.frame!r}")
+            for intent in realization.controls.intents:
+                unknown_segments = sorted(set(intent.segment_ids) - segment_ids)
+                if unknown_segments:
+                    raise ValueError(f"model {self.id!r} control intent {intent.id!r} references unknown segments {unknown_segments!r}")
+                unknown_intent_missions = sorted(set(intent.mission_template_ids) - mission_ids)
+                if unknown_intent_missions:
+                    raise ValueError(f"model {self.id!r} control intent {intent.id!r} references unknown missions {unknown_intent_missions!r}")
         channel_ids = tuple(item.id for item in self.output_channels)
         if len(channel_ids) != len(set(channel_ids)):
             raise ValueError(f"model {self.id!r} has duplicate output-channel metadata")
-        for channel in self.output_channels:
-            unknown = sorted(set(channel.compatible_fidelities) - known)
+        for output_channel in self.output_channels:
+            unknown = sorted(set(output_channel.compatible_fidelities) - known)
             if unknown:
-                raise ValueError(f"model {self.id!r} output channel {channel.id!r} references unknown fidelities {unknown!r}")
-            unknown_realizations = sorted(set(channel.compatible_realizations) - known_realizations)
+                raise ValueError(f"model {self.id!r} output channel {output_channel.id!r} references unknown fidelities {unknown!r}")
+            unknown_realizations = sorted(set(output_channel.compatible_realizations) - known_realizations)
             if unknown_realizations:
-                raise ValueError(
-                    f"model {self.id!r} output channel {channel.id!r} references unknown realizations {unknown_realizations!r}"
-                )
-            if channel.frame is not None and channel.frame not in set(frame_ids):
-                raise ValueError(f"model {self.id!r} output channel {channel.id!r} references unknown frame {channel.frame!r}")
+                raise ValueError(f"model {self.id!r} output channel {output_channel.id!r} references unknown realizations {unknown_realizations!r}")
+            if output_channel.frame is not None and output_channel.frame not in set(frame_ids):
+                raise ValueError(f"model {self.id!r} output channel {output_channel.id!r} references unknown frame {output_channel.frame!r}")
         if self.presentation.default_fidelity_id is not None and self.presentation.default_fidelity_id not in known:
             raise ValueError(f"model {self.id!r} presentation references an unknown default fidelity")
-        mission_ids = {item.id for item in self.mission_templates}
         if self.presentation.default_mission_template_id is not None and self.presentation.default_mission_template_id not in mission_ids:
             raise ValueError(f"model {self.id!r} presentation references an unknown default mission template")
         unknown_default_channels = sorted(set(self.presentation.default_output_channel_ids) - set(channel_ids))
@@ -1315,6 +1614,96 @@ class ConfigurableTrajectoryProvider(Protocol):
     def validate_configuration(self, configuration: TrajectoryConfigurationInstance) -> PreparedTrajectoryConfiguration:
         """Validate one typed configuration tree without running a model."""
         ...
+
+    ####
+
+
+class ConfigurableTrajectoryProviderRegistry:
+    """Typed composer-facing registry for independently installed providers.
+
+    Provider and model identities remain separately scoped, so two plug-ins
+    may publish the same model spelling without an accidental cross-provider
+    lookup. The registry stores provider objects but never constructs plants.
+    """
+
+    def __init__(self, providers: Sequence[ConfigurableTrajectoryProvider] = ()) -> None:
+        self._providers = tuple(providers)
+        provider_ids = tuple(item.metadata.id for item in self._providers)
+        if len(provider_ids) != len(set(provider_ids)):
+            raise ValueError("Mission Composition provider registry contains duplicate provider IDs")
+        self._by_id = {item.metadata.id: item for item in self._providers}
+        ####
+
+    @property
+    def providers(self) -> tuple[ConfigurableTrajectoryProvider, ...]:
+        """Return providers in deterministic plug-in registration order."""
+
+        return self._providers
+        ####
+
+    def provider(self, provider_id: str) -> ConfigurableTrajectoryProvider:
+        """Resolve one exact provider identity."""
+
+        try:
+            return self._by_id[provider_id]
+        except KeyError as error:
+            raise KeyError(f"unknown Mission Composition provider {provider_id!r}") from error
+        ####
+
+    def list_models(self, provider_id: str) -> tuple[TrajectoryModelMetadata, ...]:
+        """Return the advertised models for one provider."""
+
+        return self.provider(provider_id).list_models()
+        ####
+
+    def model(self, provider_id: str, model_id: str) -> TrajectoryModelMetadata:
+        """Resolve a model only within its provider namespace."""
+
+        match = next((item for item in self.list_models(provider_id) if item.id == model_id), None)
+        if match is None:
+            raise KeyError(f"provider {provider_id!r} does not advertise model {model_id!r}")
+        return match
+        ####
+
+    def get_model_schema(self, provider_id: str, model_id: str) -> TrajectoryConfigurationSchema:
+        """Return the model's exact portable configuration grammar."""
+
+        self.model(provider_id, model_id)
+        return self.provider(provider_id).get_model_schema(model_id)
+        ####
+
+    def get_model_output_schema(self, provider_id: str, model_id: str) -> TrajectoryOutputSchema:
+        """Return the model's exact portable output grammar."""
+
+        self.model(provider_id, model_id)
+        return self.provider(provider_id).get_model_output_schema(model_id)
+        ####
+
+    def validate_configuration(
+        self,
+        provider_id: str,
+        configuration: TrajectoryConfigurationInstance,
+    ) -> PreparedTrajectoryConfiguration:
+        """Validate through the exact provider selected by the composer."""
+
+        self.model(provider_id, configuration.model_id)
+        return self.provider(provider_id).validate_configuration(configuration)
+        ####
+
+    def public_dict(self) -> dict[str, object]:
+        """Return a JSON-safe provider/model catalog without executable values."""
+
+        return {
+            "schema": "taoryx.mission-composition-provider-catalog/v1",
+            "providers": [
+                {
+                    "metadata": provider.metadata.model_dump(mode="json", by_alias=True),
+                    "models": [item.model_dump(mode="json") for item in provider.list_models()],
+                }
+                for provider in self._providers
+            ],
+        }
+        ####
 
     ####
 

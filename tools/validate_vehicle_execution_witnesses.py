@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from taoryx.vehicle_execution_parity_witnesses import validate_vehicle_execution_parity_witnesses
+
 from taoryx.vehicle_execution_witnesses import validate_vehicle_execution_witnesses, validate_vehicle_variant_witnesses
 
 
@@ -21,7 +22,25 @@ def main() -> int:
     parser.add_argument(
         "--execute-batch",
         action="store_true",
-        help="run every batch witness through the public compose-to-run entry point",
+        help="run selected batch witnesses through the public compose-to-run entry point",
+    )
+    parser.add_argument(
+        "--results-dir",
+        type=Path,
+        help="retain generated batch packets in an empty directory and write an aggregate release catalog",
+    )
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument(
+        "--family",
+        action="append",
+        metavar="FAMILY_ID",
+        help="limit validation to one vehicle family; repeat to select several families",
+    )
+    selection.add_argument(
+        "--witness",
+        action="append",
+        metavar="WITNESS_ID",
+        help="limit validation to one exact endpoint witness; repeat to select several",
     )
     parser.add_argument(
         "--variants-only",
@@ -34,12 +53,21 @@ def main() -> int:
         help="replay every checked-in trace for pairs with registered batch/episode parity evidence",
     )
     arguments = parser.parse_args()
-    if arguments.variants_only and (arguments.execute_batch or arguments.execute_parity):
-        parser.error("--variants-only cannot be combined with --execute-batch or --execute-parity")
+    if arguments.variants_only and (arguments.execute_batch or arguments.execute_parity or arguments.witness or arguments.results_dir):
+        parser.error("--variants-only cannot be combined with --execute-batch, --execute-parity, --results-dir, or --witness")
+    if arguments.results_dir is not None and not arguments.execute_batch:
+        parser.error("--results-dir requires --execute-batch")
+    if arguments.execute_parity and (arguments.family or arguments.witness):
+        parser.error("--execute-parity currently requires the full witness matrix; omit --family and --witness")
     if arguments.variants_only:
-        report = validate_vehicle_variant_witnesses()
+        report = validate_vehicle_variant_witnesses(family_ids=arguments.family)
     else:
-        report = validate_vehicle_execution_witnesses(execute_batch=arguments.execute_batch)
+        report = validate_vehicle_execution_witnesses(
+            execute_batch=arguments.execute_batch,
+            family_ids=arguments.family,
+            witness_ids=arguments.witness,
+            retained_results_directory=arguments.results_dir,
+        )
         if arguments.execute_parity:
             parity = validate_vehicle_execution_parity_witnesses()
             report["batch_episode_parity_witnesses"] = parity

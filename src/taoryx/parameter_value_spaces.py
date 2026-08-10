@@ -17,10 +17,15 @@ from typing import Literal
 
 import yaml
 
+from .plugins.resources import packaged_resource_fallback
 from .value_space import ValueSpaceSpec, bounded_interval, euclidean, finite_set, periodic_circle, positive_half_line, quaternion_so3
 from .vehicle_registry import ROOT
 
-PARAMETER_VALUE_SPACE_CATALOG = ROOT / "verification/parameter_value_space_catalog.yaml"
+PARAMETER_VALUE_SPACE_CATALOG = packaged_resource_fallback(
+    ROOT / "verification/parameter_value_space_catalog.yaml",
+    package="taoryx_reference_models",
+    resource="data/verification/parameter_value_space_catalog.yaml",
+)
 
 ParameterValueType = Literal["scalar", "vector3", "vector4", "enum"]
 ParameterValueSpaceProfile = Literal[

@@ -60,6 +60,12 @@ its measurement provider is still a separate Alpha 3 component. The explicit
 `RuntimeProblem.required_truth_times` stream remains available for externally
 scheduled truth consumers. Neither path permits post-step sensor interpolation.
 
+The declaration's `kind` is a provider-neutral family, not a plug-in ID. A
+same-named sensor sidecar selects the concrete provider and its error model;
+the provider manifest must advertise compatibility with the declared family.
+The language clock remains authoritative when both are present. See the
+[sensor plug-in API](sensor-plugin-api.md) for the complete ownership rule.
+
 ## What is committed
 
 At every accepted boundary, the runtime must commit one coherent truth point:

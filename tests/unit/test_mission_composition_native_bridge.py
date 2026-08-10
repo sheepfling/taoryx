@@ -1,13 +1,6 @@
 import pytest
-
 from taoryx.passive_tumbling_mission_translation import compile_passive_tumbling_mission
-from taoryx.trajectory.configuration_contract import ConfigurationParameterValue
-from taoryx.trajectory.execution_contract import (
-    MissionCompositionOutputSelection,
-    MissionCompositionRunRequest,
-    parse_mission_composition_response,
-    resolve_output_selection,
-)
+from taoryx.trajectory.dual_launch_mission_composition import DUAL_LAUNCH_MODEL_ID
 from taoryx.trajectory.native_mission_composition import (
     build_registry_mission_composition_runner,
     compile_prepared_vehicle_composition,
@@ -15,6 +8,14 @@ from taoryx.trajectory.native_mission_composition import (
 )
 from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.trajectory.simple_aero_mission_composition import build_simple_aero_example_configuration
+
+from taoryx.trajectory.configuration_contract import ConfigurationParameterValue
+from taoryx.trajectory.execution_contract import (
+    MissionCompositionOutputSelection,
+    MissionCompositionRunRequest,
+    parse_mission_composition_response,
+    resolve_output_selection,
+)
 from taoryx.vehicle_batch_execution import registered_vehicle_batch_factory_ids
 from taoryx.vehicle_composition import load_vehicle_composition_request
 from taoryx.vehicle_execution_bindings import load_vehicle_execution_binding_catalog
@@ -23,9 +24,28 @@ from taoryx.vehicle_registry import ROOT
 
 PROVIDER = RegistryMissionCompositionProvider()
 RUNNER = build_registry_mission_composition_runner(PROVIDER)
-BATCH_WITNESSES = tuple(
-    item for item in load_vehicle_execution_witness_catalog().witnesses if item.operation == "batch"
-)
+BATCH_WITNESSES = tuple(item for item in load_vehicle_execution_witness_catalog().witnesses if item.operation == "batch")
+_SLOW_BATCH_WITNESS_IDS = frozenset({"b747-direct-wrench-batch"})
+
+
+def _batch_witness_parameters() -> tuple[object, ...]:
+    """Keep the 66k-step B747 direct-route proof out of the inner loop.
+
+    The marked witness still executes its exact advertised common-runner path
+    in the complete suite.  Its separate marker prevents one full transport
+    route from turning every focused native-output edit into a many-minute
+    test run.
+    """
+
+    return tuple(
+        pytest.param(
+            witness,
+            id=witness.id,
+            marks=pytest.mark.slow if witness.id in _SLOW_BATCH_WITNESS_IDS else (),
+        )
+        for witness in BATCH_WITNESSES
+    )
+    ####
 
 
 def _request(witness: object, *, mode: str = "all") -> tuple[MissionCompositionRunRequest, object]:
@@ -64,9 +84,7 @@ def _named_tumbling_request(shape: str, fidelity: str) -> MissionCompositionRunR
     configuration = configuration.model_copy(
         update={
             "realization_id": shape,
-            "root": root.model_copy(
-                update={"values": {**root.values, "initialization": initialization}}
-            ),
+            "root": root.model_copy(update={"values": {**root.values, "initialization": initialization}}),
         }
     )
     return MissionCompositionRunRequest(
@@ -81,26 +99,18 @@ def _named_tumbling_request(shape: str, fidelity: str) -> MissionCompositionRunR
 
 def test_batch_factory_registry_exactly_covers_native_catalog() -> None:
     catalog = load_vehicle_execution_binding_catalog()
-    declared = {
-        item.factory_id
-        for item in catalog.bindings
-        if item.operation == "batch" and item.status == "runnable" and item.factory_id is not None
-    }
+    declared = {item.factory_id for item in catalog.bindings if item.operation == "batch" and item.status == "runnable" and item.factory_id is not None}
     assert set(registered_vehicle_batch_factory_ids()) == declared
     ####
 
 
 def test_common_runner_registrations_match_batch_ready_models() -> None:
-    advertised = {
-        (PROVIDER.metadata.id, item.id)
-        for item in PROVIDER.list_models()
-        if "batch" in item.common_runner_operations
-    }
+    advertised = {(PROVIDER.metadata.id, item.id) for item in PROVIDER.list_models() if "batch" in item.common_runner_operations}
     assert set(RUNNER.registrations()) == advertised
     ####
 
 
-@pytest.mark.parametrize("witness", BATCH_WITNESSES, ids=lambda item: item.id)
+@pytest.mark.parametrize("witness", _batch_witness_parameters())
 def test_every_native_batch_tuple_executes_through_common_runner(witness: object) -> None:
     request, composition = _request(witness)
     response = RUNNER.run(request)
@@ -163,7 +173,30 @@ def test_available_batch_operation_matrix_exactly_matches_witnesses() -> None:
         for fidelity in ("point_mass_3dof", "pseudo_6dof")
         for shape in ("cylinder", "sphere", "cone", "triaxial_ellipsoid")
     )
-    witnessed.add(("simple_aero", "fixed_ld_baseline", "point_mass_3dof", "fixed_ld_point_mass"))
+    witnessed.update(
+        ("simple_aero", mission.id, "point_mass_3dof", "fixed_ld_point_mass")
+        for mission in PROVIDER.model("simple_aero").mission_templates
+    )
+    witnessed.add(
+        (
+            "a320_openap_3dof",
+            "powered_fixed_wing_racetrack_v1",
+            "pseudo_6dof",
+            "jsbsim_surrogate_composite_pseudo6dof",
+        )
+    )
+    witnessed.add(
+        (
+            "a320_openap_3dof",
+            "a320_local_native_coordinate_lqi_screen_v1",
+            "pseudo_6dof",
+            "jsbsim_surrogate_composite_pseudo6dof",
+        )
+    )
+    witnessed.update(
+        (DUAL_LAUNCH_MODEL_ID, mission_id, "point_mass_3dof", "generated_native_problem")
+        for mission_id in ("air_release_waypoint", "attached_booster_waypoint")
+    )
     assert advertised == witnessed
     ####
 
@@ -178,16 +211,12 @@ def test_every_named_tumbling_realization_executes_through_common_runner(shape: 
     assert response.kind == "trajectory", response.model_dump(mode="json", by_alias=True)
     assert response.result.status == "completed"
     assert response.result.primary_model_id == "tumbling_body"
-    assert {item.id for item in response.result.objects[0].channels} == {
-        item.id for item in PROVIDER.get_model_output_schema("tumbling_body").channels
-    }
+    assert {item.id for item in response.result.objects[0].channels} == {item.id for item in PROVIDER.get_model_output_schema("tumbling_body").channels}
     ####
 
 
 def test_simple_aero_registered_baseline_executes_through_common_runner() -> None:
-    prepared = PROVIDER.validate_configuration(
-        build_simple_aero_example_configuration(PROVIDER.get_model_schema("simple_aero"))
-    )
+    prepared = PROVIDER.validate_configuration(build_simple_aero_example_configuration(PROVIDER.get_model_schema("simple_aero")))
     request = MissionCompositionRunRequest(
         request_id="common-simple-aero-fixed-ld",
         provider_id=PROVIDER.metadata.id,
@@ -201,7 +230,5 @@ def test_simple_aero_registered_baseline_executes_through_common_runner() -> Non
     assert len(response.result.objects) == 1
     primary = response.result.objects[0]
     assert len(primary.samples) == 17
-    assert {item.id for item in primary.channels} == {
-        item.id for item in PROVIDER.get_model_output_schema("simple_aero").channels
-    }
+    assert {item.id for item in primary.channels} == {item.id for item in PROVIDER.get_model_output_schema("simple_aero").channels}
     ####

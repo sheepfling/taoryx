@@ -1,0 +1,18 @@
+schema_version: 1
+kind: taoryx.reference-reduction-contract/v1
+family: reference_f16_s119
+reduction_id: f16-attitude-response-pseudo6dof-v1
+qualification_class: surrogate_composite
+status: verified_surrogate_response
+parent:
+  family_id: reference_f16_s119
+  fidelity: rigid_body_6dof
+  manifest: families/reference_f16_s119/family.yaml
+  source_package_sha256: eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c
+preserves: [translation, quaternion_kinematics, scheduled_attitude_response, direct_control_channels]
+omits: [full_moment_balance, physical_actuator_states, source_controller_contract]
+comparison:
+  required_evidence: [matched_control_pulse, body_rate_history, attitude_history, bounded_response_error]
+  pass_rule: response_error_must_be_reported_against_parent_without_source_equivalence_claim
+  evidence_artifact: verification/daveml_f16_reduction_qualification.json
+nonclaims: [source_exact_controller, actuator_fidelity, flight_qualification]

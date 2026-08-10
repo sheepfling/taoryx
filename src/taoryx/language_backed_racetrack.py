@@ -12,7 +12,7 @@ from __future__ import annotations
 import copy
 import math
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -98,6 +98,7 @@ def materialize_language_backed_racetrack(
     mission["id"] = f"{source_mission_id}-candidate"
     source_problem = _ROOT / str(source_mission["problem"])
     source_problem_text = source_problem.read_text(encoding="utf-8")
+    proposal = _retain_source_owned_direct_wrench_route_settings(proposal, source_problem_text)
     step_match = re.search(r"\*integ\b[^\n]*\bdt=([-+0-9.eE]+)", source_problem_text)
     if step_match is None or float(step_match.group(1)) <= 0.0:
         raise ValueError(f"{source_problem} has no positive integration dt for candidate max-step derivation")
@@ -184,6 +185,66 @@ def _binding_values(proposal: CapabilityScaledRacetrack) -> dict[str, Any]:
     ####
 
 
+def _retain_source_owned_direct_wrench_route_settings(
+    proposal: CapabilityScaledRacetrack,
+    source_problem_text: str,
+) -> CapabilityScaledRacetrack:
+    """Keep source-owned direct-controller settings outside generic segments.
+
+    A composition owns the mission geometry, gates, and initial condition.  A
+    source direct-wrench packet also owns the closed-loop capture gains and
+    its simulation settling margin; neither is an externally advertised
+    command nor an invented generic segment input.  Replacing those settings
+    with the capability planner's zero defaults silently changes the nominal
+    source controller.  Preserve and record their exact source values instead.
+    """
+
+    if proposal.route.fidelity != "rigid_body_6dof_direct_wrench":
+        return proposal
+    route_line = next(
+        (line for line in source_problem_text.splitlines() if line.lstrip().startswith("*runtime status route ")),
+        None,
+    )
+    if route_line is None:
+        raise ValueError("direct-wrench source problem has no runtime route declaration")
+    attributes = {
+        key: value
+        for token in route_line.split()
+        if "=" in token
+        for key, value in (token.split("=", 1),)
+    }
+    required = (
+        "duration-s",
+        "racetrack-altitude-capture-gain-per-s",
+        "racetrack-altitude-capture-max-mps",
+        "position-capture-gain",
+        "position-capture-max-correction-mps",
+    )
+    missing = sorted(set(required).difference(attributes))
+    if missing:
+        raise ValueError("direct-wrench source route omits required controller setting(s): " + ", ".join(missing))
+    stop_matches = re.findall(r"^\s*\*when time>([-+0-9.eE]+) stop\s*$", source_problem_text, flags=re.MULTILINE)
+    if len(stop_matches) != 1:
+        raise ValueError("direct-wrench source problem requires exactly one time-based terminal stop")
+    duration_s = float(attributes["duration-s"])
+    terminal_time_s = float(stop_matches[0])
+    simulation_margin_s = terminal_time_s - duration_s
+    if not math.isfinite(simulation_margin_s) or simulation_margin_s < 0.0:
+        raise ValueError("direct-wrench source terminal stop precedes the declared route duration")
+    return replace(
+        proposal,
+        route=replace(
+            proposal.route,
+            altitude_capture_gain_per_s=float(attributes["racetrack-altitude-capture-gain-per-s"]),
+            altitude_capture_max_mps=float(attributes["racetrack-altitude-capture-max-mps"]),
+            position_capture_gain=float(attributes["position-capture-gain"]),
+            position_capture_max_correction_mps=float(attributes["position-capture-max-correction-mps"]),
+            simulation_margin_s=simulation_margin_s,
+        ),
+    )
+    ####
+
+
 def _replace_route_attributes(problem_text: str, proposal: CapabilityScaledRacetrack) -> str:
     """Replace one route declaration with exact compiled runtime attributes."""
 
@@ -214,7 +275,59 @@ def _replace_route_attributes(problem_text: str, proposal: CapabilityScaledRacet
         raise ValueError("candidate materialization requires exactly one time-based terminal stop")
     indent = lines[stop_indices[0]][: len(lines[stop_indices[0]]) - len(lines[stop_indices[0]].lstrip())]
     lines[stop_indices[0]] = f"{indent}*when time>{proposal.route.horizon_s:.15g} stop"
+    _insert_composition_guidance_controls(lines, proposal)
     return "\n".join(lines) + "\n"
+    ####
+
+
+def _insert_composition_guidance_controls(lines: list[str], proposal: CapabilityScaledRacetrack) -> None:
+    """Add the explicit lower-tier guidance authority to a disposable input.
+
+    The checked-in source problem retains its autonomous mission baseline.
+    Composition materialization adds an opt-in, held external guidance mode
+    with a disabled default, so a caller can drive the same point-mass command
+    law interactively without changing the declared nominal batch mission.
+    """
+
+    bounds = _guidance_control_bounds(proposal)
+    if bounds is None:
+        return
+    existing = {
+        line.split()[2].casefold()
+        for line in lines
+        if len(line.split()) >= 3 and line.lstrip().startswith("*runtime control ")
+    }
+    controls = (
+        ("guidance-override-enabled", 0.0, 0.0, 1.0),
+        ("guidance-speed-mps", proposal.route.speed_m_s, bounds["speed"][0], bounds["speed"][1]),
+        ("guidance-flight-path-angle-deg", 0.0, bounds["flight_path"][0], bounds["flight_path"][1]),
+        ("guidance-heading-deg", 90.0, 0.0, 360.0),
+        *(
+            (("guidance-bank-deg", 0.0, bounds["bank"][0], bounds["bank"][1]),)
+            if proposal.route.fidelity == "pseudo_6dof_kinematic_bridge"
+            else ()
+        ),
+    )
+    insertion = next((index + 1 for index, line in enumerate(lines) if line.lstrip().startswith("*runtime status route ")), None)
+    if insertion is None:
+        raise ValueError("candidate materialization requires one runtime route declaration before guidance controls")
+    rendered = [
+        f"*runtime control {name} vehicle=1 default={default:.15g} lower={lower:.15g} upper={upper:.15g}"
+        for name, default, lower, upper in controls
+        if name not in existing
+    ]
+    lines[insertion:insertion] = rendered
+    ####
+
+
+def _guidance_control_bounds(proposal: CapabilityScaledRacetrack) -> dict[str, tuple[float, float]] | None:
+    """Return the declared external command bounds for one supported family."""
+
+    if proposal.route.vehicle_id == "skywalker_x8":
+        return {"speed": (2.0, 27.0), "flight_path": (-20.0, 20.0), "bank": (-45.0, 45.0)}
+    if proposal.route.vehicle_id == "b747":
+        return {"speed": (100.0, 220.0), "flight_path": (-10.0, 10.0), "bank": (-30.0, 30.0)}
+    return None
     ####
 
 

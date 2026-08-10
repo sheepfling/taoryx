@@ -83,7 +83,7 @@ def test_registry_witness_report_separates_executable_and_planned_families() -> 
     x8_direct = promotion_by_key[("skywalker_x8", "rigid_body_6dof_direct_wrench")]
     assert x8_direct["declared_status"] == "development"
     assert x8_direct["validation_status"] == "pass"
-    assert "nonlinear_direct_wrench_mission" in x8_direct["blockers"]
+    assert "envelope_robustness_and_flight_qualification" in x8_direct["blockers"]
     nesc_direct = promotion_by_key[("reference_nesc_two_stage_rocket", "rigid_body_6dof_direct_wrench")]
     assert nesc_direct["declared_status"] == "planned"
     assert nesc_direct["validation_status"] == "planned"

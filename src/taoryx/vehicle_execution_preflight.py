@@ -18,14 +18,14 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Callable, Literal
 
-from .hl20_glide_energy_mission_translation import compile_hl20_glide_energy_mission
-from .hl20_source_release_mission_translation import compile_hl20_source_booster_release_mission
-from .hummingbird_mission_translation import compile_hummingbird_pseudo_mission
 from .local_direct_wrench_mission_translation import compile_local_direct_wrench_screen_mission
 from .local_direct_wrench_screen_registry import resolve_local_direct_wrench_screen_definition
+from .local_native_coordinate_lqi_mission_translation import compile_local_native_coordinate_lqi_screen_mission
+from .local_native_coordinate_lqi_screen_registry import resolve_local_native_coordinate_lqi_screen_definition
 from .mission_capability import (
     MissionCapabilityEstimate,
     estimate_mission_capability,
@@ -35,8 +35,7 @@ from .mission_capability import (
 from .mission_capability import (
     compile_powered_fixed_wing_racetrack_from_composition as _compile_powered_fixed_wing_racetrack_from_composition,
 )
-from .nesc_mission_translation import compile_nesc_source_replay_mission
-from .passive_tumbling_mission_translation import compile_passive_tumbling_mission
+from .plugins import PluginCatalog, discover_plugins
 from .powered_fixed_wing_mission_compiler import CapabilityScaledRacetrack
 from .vehicle_composition import CompiledSegment, CompiledVehicleComposition
 from .vehicle_composition_registry import (
@@ -45,7 +44,6 @@ from .vehicle_composition_registry import (
     mission_graph_execution_contract,
     mission_semantic_translator_id,
 )
-from .x15_staged_mission_translation import compile_x15_staged_reachability_mission
 
 ExecutionPreflightStatus = Literal["translation_ready", "blocked", "not_applicable"]
 
@@ -323,17 +321,19 @@ def _capability_estimate_and_manifest(
     ####
 
 
-def _capability_estimate_evidence(
+def build_concrete_capability_preflight_evidence(
     composition: CompiledVehicleComposition,
     estimate: MissionCapabilityEstimate,
 ) -> dict[str, object]:
     """Return a fingerprinted capability projection for a concrete preflight.
 
     The full derived mission remains a sibling preflight field because native
-    lowerers already consume that representation.  This compact projection
+    lowerers already consume that representation.  This common projection
     lets discovery and endpoint witnesses prove which family-owned estimate
     produced it, its feasibility disposition, and that it belongs to this
-    exact immutable composition.
+    exact immutable composition. Its generic capability advertisement carries
+    family-owned data, control, resource, and runtime-admission metadata
+    without forcing every vehicle into one physical model.
     """
 
     try:
@@ -345,6 +345,9 @@ def _capability_estimate_evidence(
         ).encode("utf-8")
     except (TypeError, ValueError) as error:
         raise ValueError(f"capability adapter manifest is not fingerprintable: {error}") from error
+    family_owned_advertisement = estimate.manifest.get("capability")
+    if not isinstance(family_owned_advertisement, dict):
+        raise ValueError("capability adapter manifest has no generic capability advertisement")
     return {
         "schema": "taoryx.concrete-capability-preflight/v1alpha1",
         "composition_id": composition.id,
@@ -360,13 +363,133 @@ def _capability_estimate_evidence(
         "fidelity": estimate.fidelity,
         "feasibility": estimate.feasibility,
         "diagnostics": list(estimate.diagnostics),
+        "capability_advertisement": _public_capability_advertisement(
+            composition,
+            family_owned_advertisement,
+        ),
         "derived_mission_sha256": hashlib.sha256(encoded_manifest).hexdigest(),
         "claim_boundary": (
-            "This fingerprinted family-owned capability estimate establishes only semantic mission feasibility "
-            "for the selected composition. It does not establish native execution, control realization, "
-            "integration, truth-objective success, or qualification."
+            "This fingerprinted family-owned capability estimate and its generic advertisement establish only "
+            "semantic mission feasibility for the selected composition. They do not establish native execution, "
+            "control realization, integration, truth-objective success, or qualification."
         ),
     }
+    ####
+
+
+def _public_capability_advertisement(
+    composition: CompiledVehicleComposition,
+    family_owned_advertisement: dict[str, object],
+) -> dict[str, object]:
+    """Join generic interface metadata to one family-owned capability payload.
+
+    The resolved interface already owns availability, value-space, frame, and
+    execution-binding metadata. Keeping it in a stable common envelope lets
+    agents compare unlike vehicle plug-ins without flattening their distinct
+    physical data into a fictional shared plant schema.
+    """
+
+    from .vehicle_composition import resolve_vehicle_composition_interface_contract
+
+    interface = resolve_vehicle_composition_interface_contract(composition)
+    payload = {
+        "schema": "taoryx.vehicle-capability-advertisement/v1alpha1",
+        "selection": {
+            "composition_id": composition.id,
+            "composition_identity_sha256": composition.identity_sha256,
+            "vehicle_id": composition.vehicle_id,
+            "family_id": composition.family_id,
+            "mission_id": composition.mission,
+            "fidelity": composition.fidelity,
+        },
+        "interface": interface.as_dict(),
+        "family_owned": dict(family_owned_advertisement),
+        "claim_boundary": (
+            "This joins the exact generic interface contract to family-owned capability metadata. It does not "
+            "bind a runtime, create controls, establish trim, integrate a trajectory, or qualify a vehicle."
+        ),
+    }
+    return {**payload, "fingerprint_sha256": _mapping_fingerprint(payload)}
+    ####
+
+
+def validate_public_capability_advertisement(
+    advertisement: Mapping[str, object],
+    *,
+    expected_selection: Mapping[str, object],
+) -> tuple[str, ...]:
+    """Validate the common capability advertisement without recreating a plan.
+
+    Witnesses and result catalogs use this to bind the host-owned interface
+    projection and plug-in-owned capability facts to one exact composed
+    selection. It is intentionally an integrity check, not a new feasibility
+    calculation or a runtime admission decision.
+    """
+
+    errors: list[str] = []
+    if advertisement.get("schema") != "taoryx.vehicle-capability-advertisement/v1alpha1":
+        errors.append("capability advertisement has an unsupported schema")
+    selection = advertisement.get("selection")
+    if not isinstance(selection, Mapping):
+        errors.append("capability advertisement has no selection record")
+    else:
+        for field in (
+            "composition_id",
+            "composition_identity_sha256",
+            "vehicle_id",
+            "family_id",
+            "mission_id",
+            "fidelity",
+        ):
+            if selection.get(field) != expected_selection.get(field):
+                errors.append(
+                    f"capability advertisement selection {field!r} is {selection.get(field)!r}, "
+                    f"expected {expected_selection.get(field)!r}"
+                )
+    family_owned = advertisement.get("family_owned")
+    if not isinstance(family_owned, Mapping):
+        errors.append("capability advertisement has no family-owned metadata")
+    interface = advertisement.get("interface")
+    if not isinstance(interface, Mapping):
+        errors.append("capability advertisement has no interface contract")
+    elif isinstance(selection, Mapping):
+        expected_interface_id = f"{expected_selection.get('family_id')}/{expected_selection.get('fidelity')}"
+        if interface.get("interface_id") != expected_interface_id:
+            errors.append(
+                f"capability advertisement interface ID is {interface.get('interface_id')!r}, "
+                f"expected {expected_interface_id!r}"
+            )
+        interface_payload = dict(interface)
+        observed_interface_fingerprint = interface_payload.pop("fingerprint_sha256", None)
+        interface_payload.pop("interface_id", None)
+        if not isinstance(observed_interface_fingerprint, str) or observed_interface_fingerprint != _mapping_fingerprint(interface_payload):
+            errors.append("capability advertisement interface fingerprint is invalid")
+    fingerprint_payload = dict(advertisement)
+    observed_fingerprint = fingerprint_payload.pop("fingerprint_sha256", None)
+    if not isinstance(observed_fingerprint, str) or observed_fingerprint != _mapping_fingerprint(fingerprint_payload):
+        errors.append("capability advertisement fingerprint is invalid")
+    return tuple(errors)
+    ####
+
+
+def _mapping_fingerprint(payload: Mapping[str, object]) -> str:
+    """Return the canonical SHA-256 identity for one JSON-safe mapping."""
+
+    try:
+        encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"capability advertisement is not fingerprintable: {error}") from error
+    return hashlib.sha256(encoded).hexdigest()
+    ####
+
+
+def _capability_estimate_evidence(
+    composition: CompiledVehicleComposition,
+    estimate: MissionCapabilityEstimate,
+) -> dict[str, object]:
+    """Retain the internal name while custom translators use the public builder."""
+
+    return build_concrete_capability_preflight_evidence(composition, estimate)
     ####
 
 
@@ -382,6 +505,8 @@ def _capability_number(capability: dict[str, object], key: str) -> float:
 
 def _preflight_hummingbird_hover_yaw(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
     """Preflight the declared aggregate-thrust Hummingbird mission translator."""
+
+    from .hummingbird_mission_translation import compile_hummingbird_pseudo_mission
 
     plan = compile_hummingbird_pseudo_mission(composition)
     estimate, capability = _capability_estimate_and_manifest(composition)
@@ -424,6 +549,8 @@ def _preflight_hummingbird_hover_yaw(composition: CompiledVehicleComposition) ->
 def _preflight_nesc_source_replay(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
     """Preflight the source-pinned NESC replay chronology."""
 
+    from .nesc_mission_translation import compile_nesc_source_replay_mission
+
     plan = compile_nesc_source_replay_mission(composition)
     estimate, capability = _capability_estimate_and_manifest(composition)
     event_order_valid = bool(capability["stage_event_order_valid"])
@@ -455,126 +582,6 @@ def _preflight_nesc_source_replay(composition: CompiledVehicleComposition) -> Ve
     ####
 
 
-def _preflight_hl20_source_booster_release_replay(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
-    """Preflight the exact source-aerodynamic HL-20 release replay."""
-
-    plan = compile_hl20_source_booster_release_mission(composition)
-    estimate, capability = _capability_estimate_and_manifest(composition)
-    ordered = bool(capability["source_schedule_order_valid"])
-    return VehicleExecutionPreflight(
-        composition.id,
-        composition.identity_sha256,
-        composition.vehicle_id,
-        composition.family_id,
-        composition.fidelity,
-        "translation_ready" if ordered else "blocked",
-        "taoryx.hl20_source_booster_release_replay.v1",
-        (
-            ExecutionPreflightCheck(
-                "hl20.source_scheduled_release_plan",
-                "pinned_booster_release_opposing_bank_ground_contact_replay",
-                [segment.instance_id for segment in plan.segments],
-                None,
-                True,
-            ),
-            ExecutionPreflightCheck("hl20.source_schedule_order", True, ordered, None, ordered),
-        ),
-        (
-            "composition exactly matches the retained HL-20 source-aerodynamic/synthetic-booster scheduled witness",
-            *estimate.diagnostics,
-        ),
-        estimate.manifest,
-        _capability_estimate_evidence(composition, estimate),
-    )
-    ####
-
-
-def _preflight_hl20_glide_energy_intent(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
-    """Translate the public HL-20 glide intent without claiming a native runner."""
-
-    plan = compile_hl20_glide_energy_mission(composition)
-    estimate, capability = _capability_estimate_and_manifest(composition)
-    energy_margin_j_kg = _capability_number(capability, "available_specific_energy_margin_j_kg")
-    opposing_bank_intent = capability.get("opposing_bank_intent") is True
-    finite_bank_geometry = capability.get("finite_bank_geometry") is True
-    translatable = estimate.feasibility != "certainly_infeasible" and opposing_bank_intent and finite_bank_geometry
-    return VehicleExecutionPreflight(
-        composition.id,
-        composition.identity_sha256,
-        composition.vehicle_id,
-        composition.family_id,
-        composition.fidelity,
-        "translation_ready" if translatable else "blocked",
-        "taoryx.hl20_glide_energy_intent.v1",
-        (
-            ExecutionPreflightCheck(
-                "hl20.glide_energy_semantic_plan",
-                "release_trim_opposing_bank_energy_handoff",
-                [segment.instance_id for segment in plan.segments],
-                None,
-                True,
-            ),
-            ExecutionPreflightCheck(
-                "hl20.unpowered_specific_energy_margin",
-                0.0,
-                energy_margin_j_kg,
-                "J/kg",
-                energy_margin_j_kg >= 0.0,
-            ),
-            ExecutionPreflightCheck(
-                "hl20.opposing_finite_bank_intent",
-                True,
-                opposing_bank_intent and finite_bank_geometry,
-                None,
-                opposing_bank_intent and finite_bank_geometry,
-            ),
-        ),
-        (
-            "composition lowers exactly to the declared public HL-20 release/trim/opposing-bank/energy-handoff intent plan",
-            "no source-owned HL-20 reduced-fidelity runtime factory is declared; runtime lowering remains blocked",
-            *estimate.diagnostics,
-        ),
-        plan.manifest(),
-        _capability_estimate_evidence(composition, estimate),
-    )
-    ####
-
-
-def _preflight_x15_staged_reachability(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
-    """Preflight the retained X-15-scaled booster/release witness."""
-
-    plan = compile_x15_staged_reachability_mission(composition)
-    estimate, capability = _capability_estimate_and_manifest(composition)
-    chronology_ok = bool(capability["staging_and_horizon_order_valid"])
-    return VehicleExecutionPreflight(
-        composition.id,
-        composition.identity_sha256,
-        composition.vehicle_id,
-        composition.family_id,
-        composition.fidelity,
-        "translation_ready" if chronology_ok else "blocked",
-        estimate.adapter_id,
-        (
-            ExecutionPreflightCheck(
-                "x15.semantic_staged_reachability_plan",
-                "source_pinned_booster_coast_release_open_loop_glide_impact",
-                [segment.instance_id for segment in plan.segments],
-                None,
-                True,
-            ),
-            ExecutionPreflightCheck("x15.staging_and_horizon_order", True, chronology_ok, None, chronology_ok),
-        ),
-        (
-            "composition exactly matches the retained X-15-scaled local source-staging witness; "
-            "it remains separate from the synthetic California-to-Hawaii showcase",
-            *estimate.diagnostics,
-        ),
-        estimate.manifest,
-        _capability_estimate_evidence(composition, estimate),
-    )
-    ####
-
-
 def _preflight_local_direct_wrench(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
     """Preflight one source-local direct-wrench screen without effector claims."""
 
@@ -587,6 +594,7 @@ def _preflight_local_direct_wrench(composition: CompiledVehicleComposition) -> V
         family_id=definition.family_id,
         mission_id=definition.mission_id,
         initialization_id=definition.initialization_id,
+        segment_id=definition.segment_id,
         screen_config_id=config.id,
     )
     estimate, capability = _capability_estimate_and_manifest(composition)
@@ -631,38 +639,73 @@ def _preflight_local_direct_wrench(composition: CompiledVehicleComposition) -> V
     ####
 
 
-def _preflight_passive_tumbling_release(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
-    """Preflight the explicitly uncontrolled direct passive-cylinder release."""
+def _preflight_local_native_coordinate_lqi(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
+    """Preflight one exact named-control LQI screen without effector claims."""
 
-    plan = compile_passive_tumbling_mission(composition)
+    definition = resolve_local_native_coordinate_lqi_screen_definition(composition)
+    if definition is None:
+        raise ValueError("no installed local native-coordinate LQI screen matches this composition")
+    config = definition.config_factory()
+    compile_local_native_coordinate_lqi_screen_mission(
+        composition,
+        family_id=definition.family_id,
+        mission_id=definition.mission_id,
+        fidelity=definition.fidelity,
+        initialization_id=definition.initialization_id,
+        segment_id=definition.segment_id,
+        screen_config_id=config.id,
+    )
     estimate, capability = _capability_estimate_and_manifest(composition)
-    horizon_ok = bool(capability["horizon_contains_vacuum_fall_lower_bound"])
+    native_controls = capability.get("native_control_names")
+    native_limits = capability.get("native_control_limits")
+    if not isinstance(native_controls, list) or set(native_controls) != set(config.candidate.control_names):
+        raise ValueError(f"{definition.family_id} native-coordinate LQI capability control names are invalid")
+    if not isinstance(native_limits, dict) or not isinstance(native_limits.get("lower"), dict) or not isinstance(native_limits.get("upper"), dict):
+        raise ValueError(f"{definition.family_id} native-coordinate LQI capability limits are invalid")
+    lower = native_limits["lower"]
+    upper = native_limits["upper"]
+    if any(float(lower[name]) >= float(upper[name]) for name in config.candidate.control_names):
+        raise ValueError(f"{definition.family_id} native-coordinate LQI control bounds have no positive span")
     return VehicleExecutionPreflight(
         composition.id,
         composition.identity_sha256,
         composition.vehicle_id,
         composition.family_id,
         composition.fidelity,
-        "translation_ready" if horizon_ok else "blocked",
+        "translation_ready",
         estimate.adapter_id,
         (
             ExecutionPreflightCheck(
-                "tumbling_body.semantic_direct_release_plan",
-                "canonical_passive_cylinder_release_area_policy_impact",
-                [segment.instance_id for segment in plan.segments],
+                f"{definition.family_id}.semantic_local_native_coordinate_lqi_screen",
+                f"pinned_{definition.initialization_id}_local_lqi_screen",
+                [segment.instance_id for segment in composition.segments],
                 None,
                 True,
             ),
             ExecutionPreflightCheck(
-                "tumbling_body.release_horizon",
-                _capability_number(capability, "vacuum_fall_time_lower_bound_s"),
-                _capability_number(capability, "simulation_horizon_s"),
-                "s",
-                horizon_ok,
+                f"{definition.family_id}.native_control_authority_bounds",
+                "positive finite span on every declared native LQI coordinate",
+                {
+                    name: float(upper[name]) - float(lower[name])
+                    for name in config.candidate.control_names
+                },
+                "native coordinate by axis",
+                True,
+            ),
+            ExecutionPreflightCheck(
+                f"{definition.family_id}.local_lqi_candidate",
+                "safe retained LQI candidate with integral outputs",
+                {
+                    "candidate_status": config.candidate.status,
+                    "integral_output_names": list(config.candidate.lqi.output_names if config.candidate.lqi else ()),
+                },
+                None,
+                config.candidate.safe and config.candidate.lqi is not None,
             ),
         ),
         (
-            "composition exactly matches the declared direct passive-cylinder release witness; it exposes no control, wrench, or allocation path",
+            f"composition lowers exactly to the pinned {definition.family_id} local native-coordinate LQI recovery screen; "
+            "it is not a route, physical-effector, or navigation translator",
             *estimate.diagnostics,
         ),
         estimate.manifest,
@@ -750,7 +793,7 @@ def _preflight_powered_fixed_wing_racetrack(composition: CompiledVehicleComposit
         family_id=composition.family_id,
         fidelity=composition.fidelity,
         status="translation_ready" if not failed else "blocked",
-        translator_id="taoryx.powered_fixed_wing_racetrack.capability_scaled.v1",
+        translator_id=estimate.adapter_id,
         checks=checks,
         diagnostics=tuple(diagnostics),
         derived_mission=estimate.manifest,
@@ -759,52 +802,22 @@ def _preflight_powered_fixed_wing_racetrack(composition: CompiledVehicleComposit
     ####
 
 
-_DEFAULT_SEMANTIC_PREFLIGHT_HANDLER_REGISTRY = SemanticPreflightHandlerRegistry(
-    (
-        SemanticPreflightHandler(
-            "taoryx.powered_fixed_wing_racetrack.capability_scaled.v1",
-            _preflight_powered_fixed_wing_racetrack,
-        ),
-        SemanticPreflightHandler(
-            "taoryx.hummingbird.hover_yaw_contact.pseudo6dof.v1",
-            _preflight_hummingbird_hover_yaw,
-        ),
-        SemanticPreflightHandler(
-            "taoryx.nesc_staged_source_replay.capability.v1",
-            _preflight_nesc_source_replay,
-        ),
-        SemanticPreflightHandler(
-            "taoryx.hl20_source_booster_release_replay.v1",
-            _preflight_hl20_source_booster_release_replay,
-        ),
-        SemanticPreflightHandler(
-            "taoryx.hl20_glide_energy_intent.v1",
-            _preflight_hl20_glide_energy_intent,
-        ),
-        SemanticPreflightHandler(
-            "taoryx.x15_staged_reachability.capability.v1",
-            _preflight_x15_staged_reachability,
-        ),
-        SemanticPreflightHandler(
-            "taoryx.x15_local_direct_wrench_screen.capability.v1",
-            _preflight_local_direct_wrench,
-        ),
-        SemanticPreflightHandler(
-            "taoryx.hl20_local_direct_wrench_screen.capability.v1",
-            _preflight_local_direct_wrench,
-        ),
-        SemanticPreflightHandler(
-            "taoryx.passive_tumbling_release.capability.v1",
-            _preflight_passive_tumbling_release,
-        ),
-    )
-)
-
-
-def semantic_preflight_handler_registry() -> SemanticPreflightHandlerRegistry:
+def semantic_preflight_handler_registry(
+    *,
+    plugins: PluginCatalog | None = None,
+) -> SemanticPreflightHandlerRegistry:
     """Return the immutable registry of installed source-owned translators."""
 
-    return _DEFAULT_SEMANTIC_PREFLIGHT_HANDLER_REGISTRY
+    catalog = plugins or discover_plugins()
+    handlers: list[SemanticPreflightHandler] = []
+    for contribution in catalog.records("semantic_preflight_handler"):
+        if not isinstance(contribution.value, SemanticPreflightHandler):
+            raise TypeError(
+                f"plug-in {contribution.plugin.id!r} supplied an invalid semantic preflight handler "
+                f"for {contribution.id!r}"
+            )
+        handlers.append(contribution.value)
+    return SemanticPreflightHandlerRegistry(tuple(handlers))
     ####
 
 
@@ -1047,9 +1060,12 @@ __all__ = [
     "SemanticPreflightHandler",
     "SemanticPreflightHandlerRegistry",
     "VehicleExecutionPreflight",
+    "build_concrete_capability_preflight_evidence",
     "build_semantic_preflight_handler_report",
     "compile_powered_fixed_wing_racetrack_from_composition",
+    "_preflight_local_native_coordinate_lqi",
     "compile_x8_racetrack_from_composition",
     "preflight_vehicle_composition",
     "semantic_preflight_handler_registry",
+    "validate_public_capability_advertisement",
 ]

@@ -32,6 +32,10 @@ def test_x8_composition_episode_reuses_the_language_backed_interactive_kernel(tm
         "throttle",
         "collective-elevon-deg",
         "differential-elevon-deg",
+        "guidance-override-enabled",
+        "guidance-speed-mps",
+        "guidance-flight-path-angle-deg",
+        "guidance-heading-deg",
     }
     assert all(channel.value_space is not None for channel in episode.action_schema)
     action_spaces = {channel.name: channel.value_space for channel in episode.action_schema}
@@ -66,10 +70,13 @@ def test_x8_composition_episode_reuses_the_language_backed_interactive_kernel(tm
     "composition_name",
     (
         "x8_racetrack_capability_3dof_compose.yaml",
+        "x8_racetrack_capability_compose.yaml",
+        "b747_racetrack_capability_pseudo6dof_compose.yaml",
         "hummingbird_hover_yaw_sensor_episode_pseudo6dof_compose.yaml",
         "a320_racetrack_capability_pseudo6dof_compose.yaml",
         "f16_racetrack_capability_pseudo6dof_compose.yaml",
         "x15_local_direct_wrench_screen_compose.yaml",
+        "hl20_local_direct_wrench_screen_compose.yaml",
     ),
 )
 def test_runnable_episode_exposes_only_contract_bound_native_channels(composition_name: str) -> None:
@@ -107,9 +114,7 @@ def test_episode_contract_gate_rejects_an_unbound_native_action(monkeypatch: pyt
         "action_schema",
         property(action_schema_with_bypass),
     )
-    episode = open_vehicle_composition_episode(
-        _composition("hummingbird_hover_yaw_sensor_episode_pseudo6dof_compose.yaml")
-    )
+    episode = open_vehicle_composition_episode(_composition("hummingbird_hover_yaw_sensor_episode_pseudo6dof_compose.yaml"))
 
     report = validate_vehicle_composition_episode_contract(episode)
 
@@ -305,6 +310,8 @@ def test_x15_local_direct_wrench_episode_exposes_bounded_bridge_not_effectors(tm
     initial = episode.status_frame()
     assert initial.values["control.realization"] == "direct_wrench_screen"
     assert initial.values["control.wrench.saturated"] is False
+    assert initial.values["resources.mass.total"] == pytest.approx(episode.observe().values["mass_kg"])
+    assert initial.values["resources.mass.total"] > 0.0
 
     frame = ActionFrame(
         contract.id,
@@ -341,6 +348,9 @@ def test_hl20_local_direct_wrench_episode_reuses_the_bridge_without_promoting_th
     contract = episode.interface_contract
 
     assert contract.authority_profile("direct_wrench").availability == "available"
+    initial = episode.status_frame()
+    assert initial.values["resources.mass.total"] == pytest.approx(episode.observe().values["mass_kg"])
+    assert initial.values["resources.mass.total"] > 0.0
     result = episode.step_frame(
         ActionFrame(
             contract.id,

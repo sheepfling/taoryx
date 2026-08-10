@@ -34,6 +34,7 @@ from .analytical_mission_composition import (
 )
 from .configuration_contract import (
     ConfigurableTrajectoryProvider,
+    ConfigurableTrajectoryProviderRegistry,
     ConfigurationBound,
     ConfigurationChoiceSchema,
     ConfigurationChoiceValue,
@@ -59,6 +60,17 @@ from .configuration_contract import (
     TrajectoryActuatorType,
     TrajectoryConfigurationInstance,
     TrajectoryConfigurationSchema,
+    TrajectoryControlAdvertisement,
+    TrajectoryControlAuthorityKind,
+    TrajectoryControlAuthorityMetadata,
+    TrajectoryControlAvailability,
+    TrajectoryControlChannelKind,
+    TrajectoryControlChannelMetadata,
+    TrajectoryControlIntentMetadata,
+    TrajectoryControlIntentResolution,
+    TrajectoryControlNativeBindingMetadata,
+    TrajectoryControlSamplingSemantics,
+    TrajectoryControlStatus,
     TrajectoryDeploymentMetadata,
     TrajectoryDynamicsFidelity,
     TrajectoryEntityOutputMetadata,
@@ -117,12 +129,7 @@ from .execution_contract import (
     parse_mission_composition_response,
     resolve_output_selection,
 )
-from .reference_mission_composition import ReferenceMissionCompositionProvider
 from .runtime_mission_composition import RuntimeArtifactProjection, trajectory_result_from_run_artifact
-from .simple_aero_mission_composition import (
-    build_simple_aero_example_configuration,
-    build_simple_aero_prepared_configuration,
-)
 
 if TYPE_CHECKING:
     from .native_mission_composition import (
@@ -131,6 +138,7 @@ if TYPE_CHECKING:
         configuration_instance_from_vehicle_request,
         execute_registry_batch_request,
     )
+    from .reference_mission_composition import ReferenceMissionCompositionProvider
     from .registry_mission_composition import RegistryMissionCompositionProvider
     from .session_contract import (
         MissionCompositionClosedSession,
@@ -146,11 +154,28 @@ if TYPE_CHECKING:
         MissionCompositionSessionStepResult,
         SessionLifecycle,
     )
+    from .simple_aero_mission_composition import (
+        build_simple_aero_example_configuration,
+        build_simple_aero_prepared_configuration,
+        build_simple_aero_template_configuration,
+    )
 
 
 def __getattr__(name: str) -> object:
     """Load native adapters lazily to avoid runtime/family import cycles."""
 
+    if name == "ReferenceMissionCompositionProvider":
+        from .reference_mission_composition import ReferenceMissionCompositionProvider
+
+        return ReferenceMissionCompositionProvider
+    if name in {
+        "build_simple_aero_example_configuration",
+        "build_simple_aero_prepared_configuration",
+        "build_simple_aero_template_configuration",
+    }:
+        from . import simple_aero_mission_composition
+
+        return getattr(simple_aero_mission_composition, name)
     if name == "RegistryMissionCompositionProvider":
         from .registry_mission_composition import RegistryMissionCompositionProvider
 
@@ -187,6 +212,7 @@ def __getattr__(name: str) -> object:
 
 __all__ = [
     "ConfigurableTrajectoryProvider",
+    "ConfigurableTrajectoryProviderRegistry",
     "CONTRACT_PROBE_MODEL_ID",
     "CONTRACT_PROBE_PROVIDER_ID",
     "ConfigurationBound",
@@ -252,6 +278,17 @@ __all__ = [
     "RuntimeArtifactProjection",
     "TrajectoryConfigurationInstance",
     "TrajectoryConfigurationSchema",
+    "TrajectoryControlAdvertisement",
+    "TrajectoryControlAuthorityKind",
+    "TrajectoryControlAuthorityMetadata",
+    "TrajectoryControlAvailability",
+    "TrajectoryControlChannelKind",
+    "TrajectoryControlChannelMetadata",
+    "TrajectoryControlIntentMetadata",
+    "TrajectoryControlIntentResolution",
+    "TrajectoryControlNativeBindingMetadata",
+    "TrajectoryControlSamplingSemantics",
+    "TrajectoryControlStatus",
     "TrajectoryActuatorType",
     "TrajectoryDeploymentMetadata",
     "TrajectoryDynamicsFidelity",
@@ -284,6 +321,7 @@ __all__ = [
     "audit_provider_advertisement",
     "build_simple_aero_prepared_configuration",
     "build_simple_aero_example_configuration",
+    "build_simple_aero_template_configuration",
     "build_registry_mission_composition_runner",
     "compile_prepared_vehicle_composition",
     "configuration_instance_from_vehicle_request",

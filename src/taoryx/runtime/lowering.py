@@ -2936,6 +2936,27 @@ def _runtime_point_mass_route_commands(
     mode = route_attributes.get("mode", "").casefold()
     if mode not in {"great-circle", "rectangle", "racetrack"} or not {"lat", "long", "alt", "vel"}.issubset(values):
         return {}
+    # The language-backed X8/B747 composition materializer may opt into this
+    # explicitly bounded lower-tier authority.  It is a kinematic command
+    # seam, not an aerodynamic-surface or direct-wrench path: the point-mass
+    # rate law below is the same native commanded-state law used by the route
+    # resolver, with the caller supplying its targets instead of the
+    # autonomous racetrack reference.
+    if float(values.get("guidance-override-enabled", 0.0)) >= 0.5:
+        try:
+            speed_mps = float(values["guidance-speed-mps"])
+            gamma_deg = float(values["guidance-flight-path-angle-deg"])
+            heading_deg = float(values["guidance-heading-deg"])
+        except (KeyError, TypeError, ValueError):
+            return {"guidance_override_active": 0.0}
+        if not all(math.isfinite(value) for value in (speed_mps, gamma_deg, heading_deg)) or speed_mps <= 0.0:
+            return {"guidance_override_active": 0.0}
+        return {
+            "_command_vel": speed_mps / 0.3048,
+            "_command_psi": heading_deg % 360.0,
+            "_command_gamgd": gamma_deg,
+            "guidance_override_active": 1.0,
+        }
     duration = max(float(route_attributes.get("duration-s", "1.0")), 1.0)
     current_time = float(values.get("time", 0.0))
     latitude = math.radians(float(values["lat"]))
@@ -2991,6 +3012,7 @@ def _runtime_point_mass_route_commands(
             "_command_vel": speed_mps / 0.3048,
             "_command_psi": math.degrees(math.atan2(commanded_east, commanded_north)),
             "_command_gamgd": math.degrees(math.atan2(altitude_rate_mps, commanded_horizontal_speed)),
+            "guidance_override_active": 0.0,
         }
     else:
         required = ("rectangle-length-m", "rectangle-width-m", "duration-s")
@@ -3042,6 +3064,7 @@ def _runtime_point_mass_route_commands(
         "_command_vel": speed_mps / 0.3048,
         "_command_psi": math.degrees(math.atan2(delta_east, delta_north)),
         "_command_gamgd": math.degrees(math.atan2(altitude_rate_mps, max(speed_mps, 1.0e-6))),
+        "guidance_override_active": 0.0,
     }
     ####
 
@@ -4951,6 +4974,20 @@ def _build_kinematic_attitude_target_provider(problem: Problem) -> Callable[[Run
     )
 
     def route_target(state: RuntimeState) -> Vector3:
+        if float(state.named.get("guidance-override-enabled", 0.0)) >= 0.5:
+            try:
+                bank_deg = float(state.named["guidance-bank-deg"])
+                gamma_deg = float(state.named["guidance-flight-path-angle-deg"])
+                heading_deg = float(state.named["guidance-heading-deg"])
+            except (KeyError, TypeError, ValueError):
+                pass
+            else:
+                if all(math.isfinite(value) for value in (bank_deg, gamma_deg, heading_deg)):
+                    return Vector3(
+                        math.radians(bank_deg),
+                        math.radians(gamma_deg) + alpha_offset,
+                        math.radians(heading_deg % 360.0),
+                    )
         reference = _runtime_racetrack_local_reference(route_attributes, state.time)
         if reference is None:
             return static_target

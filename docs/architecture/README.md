@@ -26,6 +26,12 @@ and AI/RL observation boundary is defined in
 The portable Mission Composition vehicle/trajectory plug-in publication,
 request, and standard result envelope is defined in
 [Mission Composition Provider API](mission-composition-provider-api.md).
+Installable Python package discovery, typed registry aggregation, collision
+rules, and the current extraction state are defined in
+[Installable model and provider plug-ins](plugins.md).
+Package selection, source and wheel installation, contributor bootstrap, and
+installed-entry-point verification are covered by the
+[installation guide](../INSTALLATION.md).
 The shortest consumer-facing route through that contract is the
 [Mission Composition front door](../MISSION_COMPOSITION.md).
 The generated
@@ -47,11 +53,18 @@ described in
 The reusable trim, true-derivative linearization, and dimension-matched LQR
 tuning pipeline is described in
 [`generic-controller-tuning.md`](generic-controller-tuning.md).
+The common installed-model inventory, plain Python/YAML mission authoring,
+segment/waypoint scaffolding, and plug-in-owned campaign registration path is
+described in
+[Model-to-mission authoring and automation](model-authoring-automation.md).
 The promotion path from a direct-wrench LQR screen to bounded physical
 effectors and nonlinear validation is described in
 [`physically-realizable-lqr-control.md`](physically-realizable-lqr-control.md).
 The accepted-state, force-evaluation, and sensor timing boundary is defined in
 [`eom-timing-contract.md`](eom-timing-contract.md).
+The typed sensor-family extension boundary, committed scene context, payload
+codecs, and bundled inertial/IR/GNSS implementations are defined in
+[`sensor-plugin-api.md`](sensor-plugin-api.md).
 The language/implementation contract for pre/post truth around events is
 defined in [`../extensions/transition-truth.md`](../extensions/transition-truth.md).
 

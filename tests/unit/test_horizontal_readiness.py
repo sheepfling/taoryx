@@ -26,7 +26,7 @@ def test_horizontal_readiness_keeps_physical_claims_separate() -> None:
     assert tumbling.profile_id is None
 
 
-def test_horizontal_readiness_reports_unregistered_a320_rigid_tiers() -> None:
+def test_horizontal_readiness_reports_a320_reduced_evidence_without_promoting_rigid_tiers() -> None:
     report = build_horizontal_readiness_report()
 
     a320 = [item for item in report.records if item.family_id == "a320_openap_3dof"]
@@ -34,8 +34,18 @@ def test_horizontal_readiness_reports_unregistered_a320_rigid_tiers() -> None:
     assert direct.declared_status == "planned"
     assert direct.status == "planned"
 
+    point = next(item for item in a320 if item.tier == "point_mass_3dof")
+    assert point.data_status == "ready"
+    assert point.status == "probe_ready"
+    assert point.data_source == "verification/daveml_a320_openap_integration.json"
+    assert point.data_claim_boundary is not None
+    assert "rigid-body moments" in point.data_claim_boundary
+
     pseudo = next(item for item in a320 if item.tier == "pseudo_6dof")
-    assert pseudo.status == "blocked"
+    assert pseudo.data_status == "ready"
+    assert pseudo.status == "probe_ready"
+    assert pseudo.data_claim_boundary is not None
+    assert "physical surface allocation" in pseudo.data_claim_boundary
 
 
 def test_showcase_preflight_allows_checked_x8_surface_path_without_promoting_it() -> None:
@@ -53,10 +63,11 @@ def test_showcase_preflight_allows_checked_x8_surface_path_without_promoting_it(
     assert "end_to_end_surface_allocated_racetrack" in preflight.advisories
 
 
-def test_showcase_preflight_blocks_unavailable_a320_pseudo_path() -> None:
+def test_showcase_preflight_allows_evidenced_a320_pseudo_path_without_promoting_it() -> None:
     report = build_horizontal_readiness_report()
 
     preflight = preflight_horizontal_showcase("a320_openap_3dof", "pseudo_6dof", report=report)
 
-    assert preflight.allowed is False
-    assert preflight.readiness_status == "blocked"
+    assert preflight.allowed is True
+    assert preflight.readiness_status == "probe_ready"
+    assert "calibrated_response_model_and_operating_points" in preflight.advisories

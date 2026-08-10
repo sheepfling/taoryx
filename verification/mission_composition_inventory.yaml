@@ -37,12 +37,9 @@ assets:
     parent_id: a320_openap_3dof
     published_model_id: a320_openap_3dof
     realization_id: jsbsim_surrogate_composite_pseudo6dof
-    status: published_blocked
+    status: published
     catalog_ids:
       - verification/daveml_family_layer_dispositions.yaml#a320_openap_jsbsim_pseudo6dof
-    exclusion_reason: >-
-      Source/runtime qualification exists for the family layer, but no exact
-      vehicle-composition mission binding is registered for this realization.
   - id: f16_s119
     classification: family
     published_model_id: f16_s119
@@ -198,22 +195,16 @@ assets:
   - id: dual_launch_glider
     classification: family
     published_model_id: dual_launch_glider
-    status: published_blocked
+    status: published
     catalog_ids:
       - verification/alpha2_family_catalog.yaml#dual_launch_glider
-    exclusion_reason: >-
-      Both launch forms compile to native source, but no immutable vehicle-
-      composition declaration and exact native execution binding exist yet.
   - id: dual_launch_glider.generated_native_problem
     classification: realization
     parent_id: dual_launch_glider
     published_model_id: dual_launch_glider
     realization_id: generated_native_problem
-    status: published_blocked
+    status: published
     catalog_ids: []
-    exclusion_reason: >-
-      Portable authoring exists, but no exact common-runner batch or session
-      execution binding is registered for the generated native problem.
   - id: dual_launch_glider.attached_booster
     classification: stage_component
     parent_id: dual_launch_glider

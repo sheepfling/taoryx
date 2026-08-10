@@ -29,7 +29,7 @@ feature is implemented by every runtime adapter.
 | `*atmos`, `*wind` (problem) | `AtmosBlock`, `WindBlock` | adapter, table-data, or file dependent |
 | `aero_force`, `aero_moment`, `inertia` (tables) | typed table document | successor table families |
 | `*runtime ...` (problem) | `RuntimeBlock` | lowers to shared runtime contract where supported |
-| `*runtime sensor ...` (problem) | `RuntimeBlock` + `SensorClockSpec` | registers an accepted-truth clock; measurement providers remain explicit |
+| `*runtime sensor ...` (problem) | `RuntimeBlock` + `SensorClockSpec` | registers a provider-neutral accepted-truth clock; a compatible plug-in remains explicit |
 
 The explicit aliases are intentionally normalized in the AST: `*3dof` maps to
 `point-mass`, while `*6dof` and `*sixdof` map to `rigid-body-6dof`. Original
@@ -45,6 +45,15 @@ sensors consume the accepted segment. No post-hoc state interpolation is used
 to manufacture a measurement. A loaded program exposes normalized clock
 declarations as `sensor_clocks` metadata and requires a separate provider to
 produce physical measurements, noise, or estimator delivery.
+
+The language `kind` is a broad sensor family such as `imu`, `accelerometer`,
+`gyroscope`, `infrared`, `camera`, `gnss`/`gps`, `radar`, or `custom`. Concrete
+identifiers such as `imu-error-model`, `ir-bearing`, `ir-point-source`, and
+`gnss-fix` are plug-in-sidecar values, not language keywords. A plug-in
+manifest declares its compatible language families, and runtime attachment
+fails when the clock family and selected provider disagree. Bias, noise,
+outage, target selection, focal-plane dimensions, and other family physics
+belong to the plug-in configuration rather than `.prb` syntax.
 
 ### Segment-transition truth contract
 
@@ -84,7 +93,8 @@ audit record.
 *atmos rcc ktf-annual
 *wind geodetic file=wind.dat units=ft/sec
 *runtime sensor imu kind=imu cadence-s=0.01 sample=instantaneous delivery-s=0 truth=boundary rate-policy=split
-*runtime sensor camera kind=camera cadence-s=0.1 sample=interval delivery-s=0.05 truth=accepted-segment rate-policy=accumulate
+*runtime sensor nose_ir kind=infrared cadence-s=0.02 sample=instantaneous delivery-s=0.01 truth=boundary rate-policy=split
+*runtime sensor gnss kind=gnss cadence-s=1 sample=instantaneous delivery-s=0.15 truth=boundary rate-policy=split
 
 *trajectory 1 vehicle start on 1
   *initial ecic x=20925646 y=0 z=0 xdt=0 ydt=300 zdt=0 time=0 mass=100

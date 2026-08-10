@@ -387,10 +387,19 @@ latency are measurement paths.
 
 Current implementation status: S0 through S5 are exercised by the sensor
 contract, adapter, batch-bus, interactive-bus, observation-pipeline, and
-feedback tests. S5 is demonstrated at
+feedback tests. The sensor-family interface is now an internal registry with
+plug-in-owned configuration, explicit language-family compatibility, and
+versioned payload codecs. The existing IMU providers, bearing-only and
+point-source focal-plane IR proof models, and a receiver-level GNSS fix proof
+model use the same accepted-truth bus. Ideal/bias/noise witnesses demonstrate
+that immutable committed truth is projected into deterministic corrupted
+measurements rather than modified in place. S5 is demonstrated at
 the navigation consumer boundary: estimators receive packets only, while the
 runtime truth provider is used solely by the sensor/artifact path. The runtime
 IMU/navigation example exercises the S7 artifact shape for an IMU pipeline.
-Guidance integration, S6, and broader S7 sensor families remain future work.
+Guidance integration, a complete S6 focal-plane pipeline, raw GNSS
+observables, multisensor fusion, and broader S7 sensor families remain future
+work. The bearing-only IR model proves scene-context projection but does not
+by itself satisfy S6.
 
 ####

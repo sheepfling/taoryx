@@ -1,0 +1,10 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: hl20-local-direct-wrench-lqi-screen-v1
+vehicle: hl20_mod_k
+fidelity: rigid_body_6dof_direct_wrench
+initialization:
+  id: source_subsonic_local_point
+mission:
+  id: hl20_local_direct_wrench_lqi_screen_v1
+segments:
+  - id: local_wrench_lqi_recovery_screen

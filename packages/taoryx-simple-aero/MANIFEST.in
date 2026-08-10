@@ -1,0 +1,2 @@
+recursive-include src/taoryx_simple_aero/data *
+global-exclude __pycache__ *.py[cod]

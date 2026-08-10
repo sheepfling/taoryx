@@ -26,6 +26,7 @@ evidence-bounded toolchain that can:
 - `metadata/` - equation, figure, source-page, fixture, and catalog registries
 - `grammars/` - documentary EBNF for TAOS table and problem files
 - `src/taoryx/` - the installable Python package
+- `packages/` - separately buildable model and provider plug-ins
 - `tests/` - parser, runtime, equation, algorithm, Simple Aero, and artifact tests
 - `tools/` - build, audit, validation, and reporting commands
 - `analysis/` - focused numerical studies and generated analysis helpers
@@ -42,9 +43,13 @@ Set up the local Python environment first:
 ```bash
 python -m tools.dev bootstrap
 source .venv/bin/activate
+python -m tools.dev install-check
 python -m tools.dev doctor
 ```
 
+Bootstrap installs the core plus all four official model/provider plug-ins for
+contributors. Core-only, model-suite, full-suite, wheelhouse, optional sensor,
+and Windows instructions are in [Installing Taoryx and its model packages](docs/INSTALLATION.md).
 If you already have a working environment, the portable runner will use `.venv`
 automatically when it exists.
 
@@ -85,6 +90,36 @@ fixtures:
 python -m tools.dev test-simple_aero
 ```
 
+Inspect installed vehicle/model plug-ins without constructing a plant:
+
+```bash
+taoryx plugins list
+taoryx plugins list --json
+taoryx model list
+taoryx model assess --output build/model-assessment.json
+taoryx model plan taoryx.registry.mission-composition hummingbird --fidelity pseudo_6dof
+```
+
+`taoryx model assess` is the compact all-model readiness matrix: it shows
+advertisement, control, adapter, tuning, lowering, and declared-blocker status
+for every realization. Generate a plain-value mission draft, validate it
+through its exact provider, or run a model-owned campaign through the common
+automatic-tuning pipeline with `taoryx model scaffold`, `taoryx model compile`, and
+`taoryx model tune`. See
+[Model-to-mission authoring and automation](docs/architecture/model-authoring-automation.md)
+for the complete data, waypoint, segment, controller, and plug-in workflow.
+Model plug-ins can generate common LQR/LQI campaigns from the compact
+`ControlAutomationDeclaration`; `taoryx model tune` content-addresses reports
+under `build/controller-cache` unless `--no-cache` is selected.
+
+The core wheel contains the language and simulation host. Optional wheels own
+DAVE-ML, Simple Aero, reference vehicles, and the reachability workbench. The
+reachability commands become available when `taoryx-reachability` is installed;
+without it the core CLI fails closed with an installation hint.
+
+The plug-in contract and extraction status are documented in
+[Installable model and provider plug-ins](docs/architecture/plugins.md).
+
 Rebuild the reconstructed manual when you need the published PDF or want to
 refresh the page-normalized source build:
 
@@ -110,8 +145,10 @@ python tools/aero_drag_analysis.py --all --output-dir build/aero-drag
 
 ## What To Read Next
 
+- [Installation and package selection](docs/INSTALLATION.md)
 - [Agent workflows](docs/AGENT_WORKFLOWS.md)
 - [Mission Composition front door](docs/MISSION_COMPOSITION.md)
+- [Model-to-mission authoring and automation](docs/architecture/model-authoring-automation.md)
 - [Simulation Runtime onboarding: find, set up, step, and diagnose](docs/SIMULATION_RUNTIME_ONBOARDING.md)
 - [Authoring → Runtime → Composition showcase guide](docs/AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md)
 - [Simulation Runtime maturity plan](docs/plan/simulation-runtime-maturity.md)

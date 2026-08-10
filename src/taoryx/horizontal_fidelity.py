@@ -20,6 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from .family_adapter import ADAPTER_OPERATIONS, AdapterOperation
 from .fidelity_contracts import CANONICAL_FIDELITY_TIERS, FidelityTier
+from .plugins.resources import packaged_resource_fallback
 from .trajectory.pseudo6dof_profiles import (
     AutomaticLoweringReport,
     Pseudo6DOFCatalog,
@@ -29,9 +30,14 @@ from .trajectory.pseudo6dof_profiles import (
 )
 from .vehicle_registry import ROOT
 
-HORIZONTAL_REGISTRY = ROOT / "verification/horizontal_fidelity_registry.yaml"
+HORIZONTAL_REGISTRY = packaged_resource_fallback(
+    ROOT / "verification/horizontal_fidelity_registry.yaml",
+    package="taoryx_reference_models",
+    resource="data/verification/horizontal_fidelity_registry.yaml",
+)
 
 PromotionStatus = Literal["qualified", "development", "planned", "not_applicable"]
+DataEvidenceStatus = Literal["ready", "source_declared"]
 PROMOTION_OPERATIONS = frozenset(ADAPTER_OPERATIONS)
 
 
@@ -66,7 +72,39 @@ class HorizontalTierBinding(BaseModel):
         if self.promotion_status == "qualified" and self.blockers:
             raise ValueError("a qualified tier cannot declare promotion blockers")
         return self
+    ####
+
+
+class HorizontalTierDataEvidence(BaseModel):
+    """Checked-in model-data evidence for a tier without legacy vehicle metadata.
+
+    Some providers are derived or composite models rather than source-family
+    packages or entries in ``vehicle_models.yaml``.  They still need an exact,
+    inspectable data basis before a public Composition endpoint is treated as
+    ready for runtime probes.  This record deliberately stops at data
+    availability; it cannot promote a vehicle, controller, or mission.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    status: DataEvidenceStatus
+    paths: tuple[str, ...] = Field(min_length=1)
+    sha256: dict[str, str]
+    claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_paths(self) -> HorizontalTierDataEvidence:
+        if len(self.paths) != len(set(self.paths)):
+            raise ValueError("tier data-evidence paths must be unique")
+        if any(not path or Path(path).is_absolute() for path in self.paths):
+            raise ValueError("tier data-evidence paths must be non-empty repository-relative paths")
+        if set(self.sha256) != set(self.paths):
+            raise ValueError("tier data-evidence hashes must cover exactly the declared paths")
+        if any(len(digest) != 64 or any(character not in "0123456789abcdef" for character in digest) for digest in self.sha256.values()):
+            raise ValueError("tier data-evidence hashes must be lowercase SHA-256 values")
+        return self
         ####
+    ####
 
 
 class HorizontalFamilyManifest(BaseModel):
@@ -83,6 +121,7 @@ class HorizontalFamilyManifest(BaseModel):
     vehicle_registry_id: str | None = None
     source_manifest: str | None = None
     source_family_id: str | None = None
+    data_evidence: dict[FidelityTier, HorizontalTierDataEvidence] = Field(default_factory=dict)
     tiers: dict[FidelityTier, HorizontalTierBinding]
 
     @model_validator(mode="after")

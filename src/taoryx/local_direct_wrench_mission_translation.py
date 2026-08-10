@@ -24,6 +24,7 @@ class LocalDirectWrenchScreenMissionPlan:
     fidelity: str
     initialization_id: str
     segment_instance_id: str
+    segment_id: str
     screen_config_id: str
 
     def manifest(self) -> dict[str, object]:
@@ -38,7 +39,7 @@ class LocalDirectWrenchScreenMissionPlan:
             "segments": [
                 {
                     "instance_id": self.segment_instance_id,
-                    "id": "local_wrench_recovery_screen",
+                    "id": self.segment_id,
                     "transition_semantics": "screen_completion_only",
                 }
             ],
@@ -58,6 +59,7 @@ def compile_local_direct_wrench_screen_mission(
     family_id: str,
     mission_id: str,
     initialization_id: str,
+    segment_id: str,
     screen_config_id: str,
 ) -> LocalDirectWrenchScreenMissionPlan:
     """Validate one intentionally parameter-free local-screen composition.
@@ -81,8 +83,8 @@ def compile_local_direct_wrench_screen_mission(
     if len(composition.segments) != 1:
         raise ValueError("local direct-wrench screen requires exactly one semantic segment")
     segment = composition.segments[0]
-    if segment.id != "local_wrench_recovery_screen":
-        raise ValueError("local direct-wrench screen requires local_wrench_recovery_screen")
+    if segment.id != segment_id:
+        raise ValueError(f"local direct-wrench screen requires {segment_id!r}")
     if segment.inputs:
         raise ValueError("local direct-wrench screen does not accept segment overrides")
     return LocalDirectWrenchScreenMissionPlan(
@@ -91,6 +93,7 @@ def compile_local_direct_wrench_screen_mission(
         fidelity=composition.fidelity,
         initialization_id=initialization_id,
         segment_instance_id=segment.instance_id,
+        segment_id=segment_id,
         screen_config_id=screen_config_id,
     )
     ####

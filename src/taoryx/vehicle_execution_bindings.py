@@ -17,20 +17,33 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .fidelity_contracts import FidelityTier
+from .plugins.resources import packaged_resource_fallback
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_registry import ROOT
 
-VEHICLE_EXECUTION_BINDINGS = ROOT / "verification/vehicle_execution_bindings.yaml"
-VEHICLE_EXECUTION_PARITY = ROOT / "verification/vehicle_execution_parity.yaml"
+VEHICLE_EXECUTION_BINDINGS = packaged_resource_fallback(
+    ROOT / "verification/vehicle_execution_bindings.yaml",
+    package="taoryx_reference_models",
+    resource="data/verification/vehicle_execution_bindings.yaml",
+)
+VEHICLE_EXECUTION_PARITY = packaged_resource_fallback(
+    ROOT / "verification/vehicle_execution_parity.yaml",
+    package="taoryx_reference_models",
+    resource="data/verification/vehicle_execution_parity.yaml",
+)
 
 ExecutionOperation = Literal["batch", "episode"]
 ExecutionBindingStatus = Literal["runnable", "planned"]
 ExecutionMode = Literal[
     "closed_loop_controller",
+    "source_native_autonomous",
+    "native_autonomous",
     "source_history_replay",
     "source_scheduled_replay",
     "open_loop_witness",
     "local_direct_wrench_screen",
+    "local_native_coordinate_lqi_screen",
+    "source_surface_authority_screen",
     "passive_uncontrolled",
     "planned",
 ]
@@ -77,10 +90,20 @@ class VehicleExecutionBinding(BaseModel):
             raise ValueError("an episode execution binding must declare batch action tracing not_applicable")
         if self.operation == "batch" and self.status == "runnable" and self.batch_action_trace == "planned":
             raise ValueError("a runnable batch execution binding cannot declare planned batch action tracing")
-        if self.execution_mode in {"source_history_replay", "source_scheduled_replay", "passive_uncontrolled"} and self.operation != "batch":
-            raise ValueError(f"execution_mode {self.execution_mode!r} supports batch replay/release only")
+        if self.execution_mode in {
+            "source_native_autonomous",
+            "native_autonomous",
+            "source_history_replay",
+            "source_scheduled_replay",
+            "passive_uncontrolled",
+        } and self.operation != "batch":
+            raise ValueError(f"execution_mode {self.execution_mode!r} supports batch execution only")
         if self.execution_mode == "local_direct_wrench_screen" and self.fidelity != "rigid_body_6dof_direct_wrench":
             raise ValueError("local_direct_wrench_screen requires rigid_body_6dof_direct_wrench fidelity")
+        if self.execution_mode == "local_native_coordinate_lqi_screen" and self.operation != "batch":
+            raise ValueError("local_native_coordinate_lqi_screen supports batch execution only")
+        if self.execution_mode == "source_surface_authority_screen" and self.operation != "batch":
+            raise ValueError("source_surface_authority_screen supports batch execution only")
         return self
         ####
 ####

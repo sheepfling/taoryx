@@ -7,14 +7,9 @@ description: >-
 items:
   - id: dual-launch-independent-execution
     families: [dual_launch_glider]
-    category: native_model
-    description: Bind both launch forms to immutable native execution and return independently propagated attached-stack and released-glider histories.
-    dependency: A participating dual-launch plant and accepted separation/terminal-guidance execution evidence.
-  - id: a320-jsbsim-mission-binding
-    families: [a320_openap_3dof]
-    category: native_model
-    description: Bind the qualified JSBSim surrogate-composite realization to an exact Mission Composition mission.
-    dependency: A reviewed immutable JSBSim mission adapter and result projector.
+    category: spawned_entity_physics
+    description: Replace event-only separation with independently propagated attached-stack and released-glider histories.
+    dependency: A participating dual-launch plant, accepted separation-state transfer, and post-separation execution evidence.
   - id: source-daveml-mission-bindings
     families: [f16_s119, hl20_mod_k]
     category: native_model
@@ -50,11 +45,6 @@ items:
     category: spawned_entity_physics
     description: Propagate separated NESC stages as first-class child trajectories rather than event-only lineage.
     dependency: Detached-stage mass, aerodynamic, attitude, and separation-state definitions.
-  - id: remaining-simple-aero-segments
-    families: [simple_aero]
-    category: segment_physics
-    description: Add executable adapters for weave, pull-up, push-over, and other currently fixture-only Simple Aero segment templates.
-    dependency: Segment-specific dynamics and acceptance evidence beyond the fixed-L/D baseline.
   - id: rigid-body-tumbling-realizations
     families: [tumbling_body]
     category: mission_physics

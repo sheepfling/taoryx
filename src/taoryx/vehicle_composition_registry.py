@@ -30,6 +30,7 @@ from .parameter_value_spaces import (
     validate_parameter_value_space_coverage,
     value_space_for_parameter_profile,
 )
+from .plugins.resources import packaged_resource_fallback
 from .value_space import (
     ValueSpaceSpec,
     bounded_interval,
@@ -43,7 +44,11 @@ from .value_space import (
 )
 from .vehicle_registry import ROOT
 
-VEHICLE_COMPOSITION_REGISTRY = ROOT / "verification/vehicle_composition_registry.yaml"
+VEHICLE_COMPOSITION_REGISTRY = packaged_resource_fallback(
+    ROOT / "verification/vehicle_composition_registry.yaml",
+    package="taoryx_reference_models",
+    resource="data/verification/vehicle_composition_registry.yaml",
+)
 
 CompositionStatus = Literal["runnable", "development", "planned"]
 VariantBindingStatus = Literal["runnable", "planned"]
@@ -1203,10 +1208,45 @@ class ResolvedVehicleComposition:
                 elif semantic_translator_id is None:
                     next_steps.append("declare the exact semantic translator before preflight can report translation_ready")
                 status = "runnable" if "batch" in runnable_operations else "development" if selected else "planned"
+                operation_scope = (
+                    "local_controller_screen"
+                    if "local" in template.id and "screen" in template.id
+                    else "mission"
+                )
+                endpoint_maturity = (
+                    "batch_and_episode_ready"
+                    if {"batch", "episode"}.issubset(runnable_operations)
+                    else "batch_ready"
+                    if "batch" in runnable_operations
+                    else "episode_ready"
+                    if "episode" in runnable_operations
+                    else "declared_execution_gap"
+                    if selected
+                    else "unbound"
+                )
                 tier_worklists.append(
                     {
                         "tier": tier,
                         "status": status,
+                        "operational_maturity": {
+                            "scope": operation_scope,
+                            "endpoint_maturity": endpoint_maturity,
+                            "fidelity_promotion_status": None
+                            if not isinstance(fidelity, Mapping)
+                            else fidelity.get("promotion_status"),
+                            "interface_status": None
+                            if not isinstance(interface, Mapping)
+                            else interface.get("validation_status"),
+                            "control_realization": None
+                            if not isinstance(fidelity, Mapping)
+                            else fidelity.get("control_realization"),
+                            "qualification_boundary": (
+                                "A runnable local controller screen establishes only its declared local control path; "
+                                "it is not an end-to-end mission qualification."
+                                if operation_scope == "local_controller_screen"
+                                else "A runnable mission endpoint remains bounded by its selected fidelity promotion status and declared blockers."
+                            ),
+                        },
                         "interface_validation": None if not isinstance(interface, Mapping) else interface.get("validation_status"),
                         "fidelity_promotion_blockers": fidelity_promotion_blockers,
                         "runnable_operations": runnable_operations,
@@ -1392,6 +1432,7 @@ class ResolvedVehicleComposition:
                 "tier_promotion_status": selected_tier.get("promotion_status"),
                 "interface_validation": selected_interface.get("validation_status"),
                 "semantic_translator_id": tier_worklist.get("semantic_translator_id"),
+                "operational_maturity": tier_worklist.get("operational_maturity"),
             },
             "composition_request_shape": request_shape,
             "input_completion": _authoring_input_completion(initialization_options, segment_sequence, variant_inputs),

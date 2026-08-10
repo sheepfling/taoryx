@@ -804,6 +804,7 @@ def resolve_vehicle_composition_interface_contract(
     )
     contract = _gate_interface_to_composition_execution(
         contract,
+        mission_id=composition.mission,
         episode_runnable=episode_runnable,
         batch_runnable=batch_runnable,
         execution_records=exact_records,
@@ -826,6 +827,7 @@ def resolve_vehicle_composition_interface_contract(
 def _gate_interface_to_composition_execution(
     contract: VehicleInterfaceContract,
     *,
+    mission_id: str,
     episode_runnable: bool,
     batch_runnable: bool,
     execution_records: tuple[dict[str, object], ...],
@@ -839,6 +841,10 @@ def _gate_interface_to_composition_execution(
     and an end-to-end mission have intentionally different authority claims.
     """
 
+    batch_internal_controller_trace = batch_runnable and any(
+        item.get("execution_mode") == "local_direct_wrench_screen" for item in execution_records
+    )
+
     def runtime_channel(channel: InterfaceChannel) -> InterfaceChannel:
         if channel.availability not in {"available", "available_in_batch"}:
             return channel
@@ -851,13 +857,21 @@ def _gate_interface_to_composition_execution(
     def action_channel(channel: InterfaceChannel) -> InterfaceChannel:
         if channel.availability != "available":
             return channel
-        return replace(channel, availability="available" if episode_runnable else "unavailable_at_runtime")
+        if episode_runnable:
+            return channel
+        if batch_internal_controller_trace and bool(channel.binding.get("internal_controller_trace")):
+            return replace(channel, availability="available_in_batch")
+        return replace(channel, availability="unavailable_at_runtime")
         ####
 
     def authority_profile(profile: AuthorityProfile) -> AuthorityProfile:
         if profile.availability != "available":
             return profile
-        return replace(profile, availability="available" if episode_runnable else "unavailable_at_runtime")
+        if episode_runnable:
+            return profile
+        if batch_internal_controller_trace and profile.id == "direct_wrench":
+            return replace(profile, availability="available_in_batch")
+        return replace(profile, availability="unavailable_at_runtime")
         ####
 
     def observation_profile(profile: ObservationProfile) -> ObservationProfile:
@@ -884,18 +898,10 @@ def _gate_interface_to_composition_execution(
         execution_records=execution_records,
         claim_boundary=(
             f"{contract.claim_boundary} This composition-scoped projection exposes only the exact "
-            f"episode={episode_runnable} and batch={batch_runnable} execution bindings for mission {composition_mission_label(execution_records)!r}."
+            f"episode={episode_runnable} and batch={batch_runnable} execution bindings for mission {mission_id!r}."
         ),
         schema=contract.schema,
     )
-    ####
-
-
-def composition_mission_label(execution_records: tuple[dict[str, object], ...]) -> str:
-    """Return the one mission label retained by the exact execution projection."""
-
-    missions = {str(item.get("mission")) for item in execution_records if isinstance(item.get("mission"), str)}
-    return next(iter(missions)) if len(missions) == 1 else "unbound_mission"
     ####
 
 

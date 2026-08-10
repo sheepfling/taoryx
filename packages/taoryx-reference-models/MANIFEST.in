@@ -1,0 +1,2 @@
+recursive-include src/taoryx_reference_models/data *
+global-exclude __pycache__ *.py[cod]

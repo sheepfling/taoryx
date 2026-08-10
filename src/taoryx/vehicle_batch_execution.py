@@ -5,18 +5,11 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Protocol, cast
 
-from .hl20_source_release_composition_execution import execute_hl20_source_booster_release_composition
-from .hummingbird_composition_execution import execute_hummingbird_pseudo_composition
-from .language_backed_execution import execute_powered_fixed_wing_composition
-from .local_direct_wrench_composition_execution import execute_local_direct_wrench_composition
-from .nesc_composition_execution import execute_nesc_source_replay_composition
-from .passive_tumbling_composition_execution import execute_passive_tumbling_composition
-from .reduced_fixed_wing_execution import execute_reduced_fixed_wing_composition
+from .plugins import PluginCatalog, discover_plugins
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_bindings import VehicleExecutionBinding, resolve_vehicle_execution_binding
-from .x15_staged_composition_execution import execute_x15_staged_reachability_composition
 
 
 class NativeBatchExecution(Protocol):
@@ -52,47 +45,26 @@ class VehicleBatchExecution:
     ####
 
 
-def _language_backed(
-    composition: CompiledVehicleComposition,
-    output_dir: str | Path,
-    max_steps: int | None,
-) -> NativeBatchExecution:
-    return execute_powered_fixed_wing_composition(composition, output_dir, max_steps=max_steps)
+def _batch_factories(*, plugins: PluginCatalog | None = None) -> dict[str, BatchFactory]:
+    """Build the installed model-owned factory registry fail closed."""
+
+    catalog = plugins or discover_plugins()
+    factories: dict[str, BatchFactory] = {}
+    for contribution in catalog.records("execution_factory"):
+        if not callable(contribution.value):
+            raise TypeError(
+                f"plug-in {contribution.plugin.id!r} supplied a non-callable execution factory "
+                f"for {contribution.id!r}"
+            )
+        factories[contribution.id] = cast(BatchFactory, contribution.value)
+    return factories
     ####
 
 
-def _without_max_steps(factory: Callable[[CompiledVehicleComposition, str | Path], NativeBatchExecution]) -> BatchFactory:
-    def invoke(
-        composition: CompiledVehicleComposition,
-        output_dir: str | Path,
-        max_steps: int | None,
-    ) -> NativeBatchExecution:
-        if max_steps is not None:
-            raise ValueError(f"--max-steps is not available for batch factory {factory.__name__!r}")
-        return factory(composition, output_dir)
-        ####
-
-    return invoke
-    ####
-
-
-_BATCH_FACTORIES: dict[str, BatchFactory] = {
-    "language_backed_powered_fixed_wing.v1": _language_backed,
-    "reduced_fixed_wing_openap.v1": _without_max_steps(execute_reduced_fixed_wing_composition),
-    "reduced_fixed_wing_f16_source.v1": _without_max_steps(execute_reduced_fixed_wing_composition),
-    "hummingbird_aggregate_thrust_pseudo_batch.v1": _without_max_steps(execute_hummingbird_pseudo_composition),
-    "nesc_source_replay.v1": _without_max_steps(execute_nesc_source_replay_composition),
-    "hl20_source_booster_release_replay.v1": _without_max_steps(execute_hl20_source_booster_release_composition),
-    "x15_staged_reachability.v1": _without_max_steps(execute_x15_staged_reachability_composition),
-    "local_direct_wrench_screen.v1": _without_max_steps(execute_local_direct_wrench_composition),
-    "passive_tumbling_direct_release.v1": _without_max_steps(execute_passive_tumbling_composition),
-}
-
-
-def registered_vehicle_batch_factory_ids() -> tuple[str, ...]:
+def registered_vehicle_batch_factory_ids(*, plugins: PluginCatalog | None = None) -> tuple[str, ...]:
     """Return every concrete native batch factory behind the callable seam."""
 
-    return tuple(sorted(_BATCH_FACTORIES))
+    return tuple(sorted(_batch_factories(plugins=plugins)))
     ####
 
 
@@ -110,7 +82,7 @@ def execute_vehicle_composition_batch(
     if binding.factory_id is None:
         raise ValueError("runnable batch binding lacks a factory identifier")
     try:
-        factory = _BATCH_FACTORIES[binding.factory_id]
+        factory = _batch_factories()[binding.factory_id]
     except KeyError as error:
         raise ValueError(f"batch execution factory is declared but not implemented: {binding.factory_id!r}") from error
     execution = factory(composition, output_dir, max_steps)
