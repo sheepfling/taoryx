@@ -144,7 +144,7 @@ def test_showcase_artifact_can_retain_the_exact_vehicle_interface_contract() -> 
     assert artifact.vehicle_interface is not None
     assert artifact.vehicle_interface.interface_id == interface.id
     assert artifact.vehicle_interface.fingerprint_sha256 == interface.fingerprint
-    assert artifact.vehicle_interface.available_authority_profiles == ("native_control_bridge",)
+    assert artifact.vehicle_interface.available_authority_profiles == ("kinematic_guidance", "native_control_bridge")
     assert validate_showcase_run_artifact_boundary(artifact) == artifact
 
 

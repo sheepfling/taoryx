@@ -13,7 +13,7 @@ import json
 import shlex
 import tempfile
 from collections.abc import Iterable, Mapping
-from contextlib import nullcontext, redirect_stdout
+from contextlib import AbstractContextManager, nullcontext, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from typing import Literal
@@ -906,6 +906,7 @@ def _execute_batch_witness(
 
     from .runtime.cli import main
 
+    workspace: AbstractContextManager[str | Path]
     if output_root is None:
         workspace = tempfile.TemporaryDirectory(prefix=f"taoryx-execution-witness-{witness_id}-")
     else:
@@ -1404,6 +1405,11 @@ def _validate_batch_result_catalog(
     controller_execution = record.get("controller_execution_evidence")
     control_execution = record.get("control_execution_evidence")
     action_trace_execution = record.get("semantic_action_trace_evidence")
+    if not isinstance(control_execution, Mapping):
+        return {
+            "status": "fail",
+            "detail": "batch packet omitted control execution evidence",
+        }
     control_status = None if not isinstance(control_execution, Mapping) else control_execution.get("status")
     controller_status = None if not isinstance(controller_execution, Mapping) else controller_execution.get("status")
     if binding.execution_mode in _CONTROL_FREE_EXECUTION_MODES:
@@ -1463,13 +1469,14 @@ def _validate_batch_result_catalog(
                     f"observed status {controller_status!r}; expected {expected_controller_status!r}"
                 ),
             }
+    control_execution_evidence = dict(control_execution)
     return {
         "status": "pass",
         "record_kind": expected_kind,
         "outcome": record.get("outcome"),
         "qualification": record.get("qualification"),
         "graph_observation_status": graph_execution.get("observation_status"),
-        "control_execution_evidence": dict(control_execution),
+        "control_execution_evidence": control_execution_evidence,
         **({"controller_execution_evidence": dict(controller_execution)} if isinstance(controller_execution, Mapping) else {}),
         **({"semantic_action_trace_evidence": dict(action_trace_execution)} if isinstance(action_trace_execution, Mapping) else {}),
         "claim_boundary": "The batch packet is consumable by the normalized result catalog; this is not qualification.",

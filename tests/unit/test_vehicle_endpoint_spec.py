@@ -21,6 +21,7 @@ from taoryx.vehicle_endpoint_spec import (
 
 _ENDPOINT_IDS = (
     "hummingbird-source-hover-rotor-lqi",
+    "x8-source-surface-roll-pitch-lqi",
     "f16-source-node-surface-lqr-schedule-transition",
     "x15-source-surface-attitude-rate-lqi",
     "hl20-source-surface-attitude-rate-lqi",
@@ -45,11 +46,18 @@ def test_endpoint_catalog_lists_the_selected_physical_control_endpoints() -> Non
 def test_declared_robustness_screen_contract_fails_closed_and_accepts_its_standard_artifact(tmp_path: Path) -> None:
     endpoint = load_vehicle_endpoint_spec_catalog().endpoint("hummingbird-source-hover-rotor-lqi")
     screen = endpoint.robustness_screens[0]
+    planned_screen = screen.model_copy(update={"execution_readiness": "planned"})
+    planned_endpoint = endpoint.model_copy(update={"robustness_screens": (planned_screen,)})
     errors: list[str] = []
 
-    planned = _verify_disturbance_or_mass_evidence(endpoint, "planned-robustness", tmp_path, errors)
+    planned = _verify_disturbance_or_mass_evidence(planned_endpoint, "planned-robustness", tmp_path, errors)
     assert planned["status"] == "not_executed"
     assert errors == []
+
+    unavailable = _verify_disturbance_or_mass_evidence(endpoint, "missing-available-robustness", tmp_path, errors)
+    assert unavailable["status"] == "fail"
+    assert any(screen.artifact_filename in item for item in errors)
+    errors.clear()
 
     payload = {
         "schema": "taoryx.endpoint-robustness-screen/v1alpha1",
@@ -232,12 +240,66 @@ def test_retained_hummingbird_endpoint_packet_checks_emitted_outputs_and_tuning_
     assert acceptance["gates"]["batch_executed"]["status"] == "pass"
     assert acceptance["gates"]["tracking_passed"]["status"] == "pass"
     assert acceptance["gates"]["tuner_bound"]["status"] == "candidate_ready_not_runtime_bound"
-    assert acceptance["gates"]["disturbance_or_mass_screened"]["status"] == "not_executed"
+    assert acceptance["gates"]["disturbance_or_mass_screened"]["status"] == "pass"
     assert acceptance["finalization_status"] == "incomplete"
     performance = records["performance"]
     assert performance["cache"]["disposition"] in {"hit", "miss"}
     assert performance["phase_durations_s"]["witness.batch_execution_s"] > 0.0
     assert performance["phase_durations_s"]["witness.result_catalog_index_s"] >= 0.0
+    ####
+
+
+@pytest.mark.slow
+def test_x15_endpoint_packet_accepts_its_emitted_matched_offset_evidence() -> None:
+    """The generic endpoint verifier reads X-15's allocator-backed offset artifact."""
+
+    report = verify_vehicle_endpoint("x15-source-surface-attitude-rate-lqi", execute=True)
+
+    assert report["status"] == "pass", report["errors"]
+    records = report["records"]
+    assert isinstance(records, dict)
+    witness = records["witnesses"][0]
+    assert witness["tracking_evidence"]["status"] == "pass"
+    robustness = witness["disturbance_or_mass_evidence"]
+    assert robustness["status"] == "pass"
+    evidence = robustness["evidence"][0]
+    assert evidence["status"] == "pass"
+    assert [case["id"] for case in evidence["cases"]] == [
+        "nominal",
+        "positive-pitch-offset",
+        "negative-pitch-offset",
+    ]
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    acceptance = records["acceptance_gates"]
+    assert acceptance["gates"]["disturbance_or_mass_screened"]["status"] == "pass"
+    assert acceptance["finalization_status"] == "incomplete"
+    ####
+
+
+@pytest.mark.slow
+def test_x8_endpoint_packet_accepts_its_emitted_matched_offset_evidence() -> None:
+    """The generic endpoint verifier reads the source-table allocator-backed X8 artifact."""
+
+    report = verify_vehicle_endpoint("x8-source-surface-roll-pitch-lqi", execute=True)
+
+    assert report["status"] == "pass", report["errors"]
+    records = report["records"]
+    assert isinstance(records, dict)
+    witness = records["witnesses"][0]
+    assert witness["tracking_evidence"]["status"] == "pass"
+    robustness = witness["disturbance_or_mass_evidence"]
+    assert robustness["status"] == "pass"
+    evidence = robustness["evidence"][0]
+    assert evidence["status"] == "pass"
+    assert [case["id"] for case in evidence["cases"]] == [
+        "nominal",
+        "positive-pitch-offset",
+        "negative-pitch-offset",
+    ]
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    acceptance = records["acceptance_gates"]
+    assert acceptance["gates"]["disturbance_or_mass_screened"]["status"] == "pass"
+    assert acceptance["finalization_status"] == "incomplete"
     ####
 
 

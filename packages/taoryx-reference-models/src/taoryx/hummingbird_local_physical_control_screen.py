@@ -31,6 +31,7 @@ from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .mission_capability import MissionCapabilityEstimate
 from .physical_lqr import PhysicalWrenchLqiDesign, PhysicalWrenchLqiValidation, validate_nonlinear_wrench_lqi
+from .runtime_control_adapter import RuntimeRigidBodyLocalPlant
 from .source_table_multirotor import (
     build_hummingbird_individual_rotor_source_table_plant,
     build_hummingbird_local_physical_wrench_lqi_design,
@@ -128,7 +129,7 @@ _VERTICAL_PHASES = (
 # The source problem declares the nominal 0.5 kg mass explicitly.  These are
 # separate re-trimmed local cases with the *same* nominal-mass LQI design; they
 # are not gain-schedule nodes or an in-flight payload transition.
-_VERTICAL_MASS_VARIATION_FACTORS = (0.85, 1.0, 1.15)
+_MASS_VARIATION_FACTORS = (0.85, 1.0, 1.15)
 
 
 @dataclass(frozen=True, slots=True)
@@ -202,7 +203,7 @@ class HummingbirdLocalPhysicalControlScreenPlan:
             "dt_s": self.dt_s,
             "mass_variation_screen": {
                 "status": "executed_by_this_vertical_lqi_screen" if self.vertical_translation else "not_applicable",
-                "mass_factors": list(_VERTICAL_MASS_VARIATION_FACTORS) if self.vertical_translation else [],
+                "mass_factors": list(_MASS_VARIATION_FACTORS) if self.vertical_translation else [],
                 "controller_policy": "one_fixed_nominal_mass_lqi_design_across_each_retrimmed_case",
                 "claim_boundary": (
                     "Each declared mass case is an independent source-state re-trim of the same bounded local vertical "
@@ -381,7 +382,7 @@ class HummingbirdLocalPhysicalControlScreenCapabilityAdapter:
                 if vertical
                 else "not_applicable_to_this_endpoint"
             ),
-            "mass_variation_factors": list(_VERTICAL_MASS_VARIATION_FACTORS) if vertical else [],
+            "mass_variation_factors": list(_MASS_VARIATION_FACTORS) if vertical else [],
             "horizontal_translation": horizontal,
             "horizontal_phase_ids": [phase.id for phase in _HORIZONTAL_PHASES] if horizontal else [],
             "vertical_translation": vertical,
@@ -562,6 +563,7 @@ def execute_hummingbird_local_physical_control_screen(
         else build_hummingbird_local_physical_wrench_lqi_design()
     )
     mass_variation_report: dict[str, object] | None = None
+    robustness_report: dict[str, object] | None = None
     validation_payload: dict[str, object]
     if plan.horizontal_translation:
         rows = _run_horizontal_translation_screen(plant, trim, design, plan)
@@ -602,6 +604,15 @@ def execute_hummingbird_local_physical_control_screen(
     else:
         validation, rows = _run_screen(plant, trim, design, plan)
         validation_payload = validation.as_dict()
+        mass_variation_report = _hover_mass_variation_report(
+            plant,
+            trim,
+            design,
+            plan,
+            nominal_validation=validation,
+            nominal_rows=rows,
+        )
+        robustness_report = _hover_mass_variation_endpoint_artifact(mass_variation_report)
     for row in rows:
         row["mass_kg"] = float(plant.source_state.mass)
     finite = _finite_rows(rows)
@@ -614,7 +625,7 @@ def execute_hummingbird_local_physical_control_screen(
     )
     allocation_pass = all(
         row["allocation_status"] in {"feasible", "feasible_near_limit"}
-        and int(row["saturation_count"]) == 0
+        and _saturation_count(row) == 0
         for row in rows
     )
     integrators_exercised = (
@@ -740,6 +751,8 @@ def execute_hummingbird_local_physical_control_screen(
     _write_json(destination / "nonlinear_validation.json", validation_payload)
     if mass_variation_report is not None:
         _write_json(destination / "mass_variation_report.json", mass_variation_report)
+    if robustness_report is not None:
+        _write_json(destination / "robustness_report.json", robustness_report)
     _write_json(destination / "mission_graph_execution.json", runtime["mission_graph_execution"])
     _write_json(destination / "envelope_report.json", envelope)
     _write_json(destination / "objective_report.json", evaluation)
@@ -1322,7 +1335,7 @@ def _vertical_screen_evaluation(
                 },
                 "tolerance": {
                     "required_case_status": "pass",
-                    "required_factors": list(_VERTICAL_MASS_VARIATION_FACTORS),
+                    "required_factors": list(_MASS_VARIATION_FACTORS),
                 },
             }
         )
@@ -1377,8 +1390,164 @@ def _vertical_screen_evaluation(
     ####
 
 
+def _hover_mass_variation_report(
+    plant: RuntimeRigidBodyLocalPlant,
+    nominal_trim: TrimResult,
+    design: PhysicalWrenchLqiDesign,
+    plan: HummingbirdLocalPhysicalControlScreenPlan,
+    *,
+    nominal_validation: PhysicalWrenchLqiValidation,
+    nominal_rows: list[dict[str, object]],
+) -> dict[str, object]:
+    """Screen source-hover recovery under fixed-design, independently re-trimmed masses.
+
+    This stays deliberately narrower than a gain schedule: the nominal design
+    is retained exactly while each source mass has its own hover trim.  The
+    report supplies the source evidence from which the endpoint-standard
+    robustness artifact is projected.
+    """
+
+    nominal_mass_kg = float(plant.source_state.mass)
+    cases: list[dict[str, object]] = []
+    for factor in _MASS_VARIATION_FACTORS:
+        case_mass_kg = nominal_mass_kg * factor
+        if factor == 1.0:
+            case_plant = plant
+            trim = nominal_trim
+            validation = nominal_validation
+            rows = nominal_rows
+        else:
+            case_plant = replace(
+                plant,
+                source_state=replace(plant.source_state, mass=case_mass_kg),
+            )
+            trim = case_plant.trim(case_plant.source_local_state, case_plant.source_effectors)
+            if not trim.success:
+                cases.append(
+                    {
+                        "id": f"mass-{factor:.2f}x",
+                        "parameters": {"mass_factor": factor},
+                        "mass_factor": factor,
+                        "source_mass_kg": case_mass_kg,
+                        "status": "fail",
+                        "trim": trim.as_dict(),
+                        "metrics": {
+                            "final_attitude_rate_error_fraction": math.inf,
+                            "saturation_fraction": math.inf,
+                        },
+                        "blockers": ["source_hover_retrim_failed"],
+                    }
+                )
+                continue
+            validation, rows = _run_screen(case_plant, trim, design, plan)
+
+        finite = _finite_rows(rows)
+        envelope = _local_envelope(rows)
+        allocation_pass = all(
+            row["allocation_status"] in {"feasible", "feasible_near_limit"}
+            and _saturation_count(row) == 0
+            for row in rows
+        )
+        integrators_exercised = any(
+            abs(_number(row, name)) > 1.0e-10
+            for row in rows
+            for name in _INTEGRAL_NAMES
+        )
+        initial_error = _attitude_rate_error_norm(validation.initial_state)
+        final_error = _attitude_rate_error_norm(validation.final_state)
+        final_error_fraction = final_error / initial_error if initial_error > 0.0 else math.inf
+        saturation_fraction = (
+            sum(_saturation_count(row) > 0 for row in rows) / len(rows)
+            if rows
+            else math.inf
+        )
+        recovery_pass = final_error < initial_error
+        screen_pass = finite and bool(envelope["pass"]) and allocation_pass and integrators_exercised and recovery_pass
+        cases.append(
+            {
+                "id": f"mass-{factor:.2f}x",
+                "parameters": {"mass_factor": factor},
+                "mass_factor": factor,
+                "source_mass_kg": case_mass_kg,
+                "status": "pass" if screen_pass else "fail",
+                "trim": trim.as_dict(),
+                "finite_telemetry": finite,
+                "local_envelope_pass": envelope.get("pass") is True,
+                "allocation_pass": allocation_pass,
+                "integrators_exercised": integrators_exercised,
+                "metrics": {
+                    "initial_attitude_rate_error_norm": initial_error,
+                    "final_attitude_rate_error_norm": final_error,
+                    "final_attitude_rate_error_fraction": final_error_fraction,
+                    "saturation_fraction": saturation_fraction,
+                },
+            }
+        )
+    passed = len(cases) == len(_MASS_VARIATION_FACTORS) and all(case["status"] == "pass" for case in cases)
+    return {
+        "schema": "taoryx.hummingbird-local-hover-lqi-mass-variation/v1alpha1",
+        "status": "passed" if passed else "failed",
+        "pass": passed,
+        "mass_factors": list(_MASS_VARIATION_FACTORS),
+        "case_count": len(cases),
+        "nominal_source_mass_kg": nominal_mass_kg,
+        "controller_policy": "one_fixed_nominal_mass_lqi_design_across_each_retrimmed_case",
+        "controller_design_mass_kg": nominal_mass_kg,
+        "cases": cases,
+        "claim_boundary": (
+            "This is a discrete 85/100/115 percent source-mass attitude/rate recovery screen with an independently "
+            "re-trimmed plant and one fixed nominal-mass LQI design. It does not establish gain scheduling, an in-flight "
+            "mass transition, payload-envelope coverage, wind rejection, translation, or qualification."
+        ),
+    }
+    ####
+
+
+def _hover_mass_variation_endpoint_artifact(report: Mapping[str, object]) -> dict[str, object]:
+    """Project source-owned hover cases into the generic endpoint robustness format."""
+
+    raw_cases = report.get("cases")
+    if not isinstance(raw_cases, list):
+        raise ValueError("Hummingbird hover mass-variation report must contain a cases list")
+    cases: list[dict[str, object]] = []
+    for raw_case in raw_cases:
+        if not isinstance(raw_case, Mapping):
+            raise ValueError("Hummingbird hover mass-variation cases must be mappings")
+        identifier = raw_case.get("id")
+        parameters = raw_case.get("parameters")
+        metrics = raw_case.get("metrics")
+        status = raw_case.get("status")
+        if not isinstance(identifier, str) or not isinstance(parameters, Mapping) or not isinstance(metrics, Mapping):
+            raise ValueError("Hummingbird hover mass-variation case lacks endpoint fields")
+        cases.append(
+            {
+                "id": identifier,
+                "parameters": dict(parameters),
+                "status": status,
+                "metrics": {
+                    "final_attitude_rate_error_fraction": metrics.get("final_attitude_rate_error_fraction"),
+                    "saturation_fraction": metrics.get("saturation_fraction"),
+                },
+                "source_mass_kg": raw_case.get("source_mass_kg"),
+                "initial_attitude_rate_error_norm": metrics.get("initial_attitude_rate_error_norm"),
+                "final_attitude_rate_error_norm": metrics.get("final_attitude_rate_error_norm"),
+            }
+        )
+    return {
+        "schema": "taoryx.endpoint-robustness-screen/v1alpha1",
+        "id": "hummingbird-hover-fixed-lqi-mass-variation",
+        "kind": "mass_variation",
+        "status": "pass" if report.get("pass") is True else "fail",
+        "pass": report.get("pass") is True,
+        "cases": cases,
+        "controller_policy": report.get("controller_policy"),
+        "claim_boundary": report.get("claim_boundary"),
+    }
+    ####
+
+
 def _vertical_mass_variation_report(
-    plant: object,
+    plant: RuntimeRigidBodyLocalPlant,
     nominal_trim: TrimResult,
     design: PhysicalWrenchLqiDesign,
     plan: HummingbirdLocalPhysicalControlScreenPlan,
@@ -1393,9 +1562,9 @@ def _vertical_mass_variation_report(
     re-trim and control assumptions visible.  It is not a gain schedule.
     """
 
-    nominal_mass_kg = float(plant.source_state.mass)  # type: ignore[attr-defined]
+    nominal_mass_kg = float(plant.source_state.mass)
     cases: list[dict[str, object]] = []
-    for factor in _VERTICAL_MASS_VARIATION_FACTORS:
+    for factor in _MASS_VARIATION_FACTORS:
         case_mass_kg = nominal_mass_kg * factor
         if factor == 1.0:
             case_plant = plant
@@ -1404,7 +1573,7 @@ def _vertical_mass_variation_report(
         else:
             case_plant = replace(
                 plant,
-                source_state=replace(plant.source_state, mass=case_mass_kg),  # type: ignore[attr-defined]
+                source_state=replace(plant.source_state, mass=case_mass_kg),
             )
             trim = case_plant.trim(case_plant.source_local_state, case_plant.source_effectors)
             if not trim.success:
@@ -1425,7 +1594,7 @@ def _vertical_mass_variation_report(
         envelope = _vertical_local_envelope(rows)
         allocation_pass = all(
             row["allocation_status"] in {"feasible", "feasible_near_limit"}
-            and int(row["saturation_count"]) == 0
+            and _saturation_count(row) == 0
             for row in rows
         )
         integrators_exercised = any(
@@ -1456,12 +1625,12 @@ def _vertical_mass_variation_report(
                 "vertical_capture": evaluation,
             }
         )
-    passed = len(cases) == len(_VERTICAL_MASS_VARIATION_FACTORS) and all(case["status"] == "pass" for case in cases)
+    passed = len(cases) == len(_MASS_VARIATION_FACTORS) and all(case["status"] == "pass" for case in cases)
     return {
         "schema": "taoryx.hummingbird-local-vertical-lqi-mass-variation/v1alpha1",
         "status": "passed" if passed else "failed",
         "pass": passed,
-        "mass_factors": list(_VERTICAL_MASS_VARIATION_FACTORS),
+        "mass_factors": list(_MASS_VARIATION_FACTORS),
         "case_count": len(cases),
         "nominal_source_mass_kg": nominal_mass_kg,
         "controller_policy": "one_fixed_nominal_mass_lqi_design_across_each_retrimmed_case",
@@ -1550,7 +1719,7 @@ def _status_samples(rows: list[dict[str, object]], mass_kg: float) -> tuple[Batc
                 "achieved_moment_body_nm": [_number(row, f"achieved_moment_{axis}_nm") for axis in ("x", "y", "z")],
                 "residual_moment_body_nm": [_number(row, f"residual_moment_{axis}_nm") for axis in ("x", "y", "z")],
                 "wrench_status": str(row["allocation_status"]),
-                "wrench_saturated": int(row["saturation_count"]) > 0,
+                "wrench_saturated": _saturation_count(row) > 0,
                 "lqi_integral_error_rad_s": [
                     _number(row, "integral_roll_error_rad_s"),
                     _number(row, "integral_pitch_error_rad_s"),
@@ -1661,6 +1830,16 @@ def _number(row: Mapping[str, object], identifier: str) -> float:
     if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
         raise ValueError(f"Hummingbird physical-control telemetry {identifier!r} must be finite numeric")
     return float(value)
+    ####
+
+
+def _saturation_count(row: Mapping[str, object]) -> int:
+    """Read the integer saturation count from one committed local row."""
+
+    value = _number(row, "saturation_count")
+    if not value.is_integer():
+        raise ValueError("Hummingbird physical-control saturation count must be integral")
+    return int(value)
     ####
 
 

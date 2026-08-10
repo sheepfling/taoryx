@@ -41,6 +41,7 @@ from .trajectory.configuration_contract import (
     ConfigurationSequenceValue,
     PreparedTrajectoryConfiguration,
     TrajectoryConfigurationInstance,
+    TrajectoryMissionOperationMetadata,
     TrajectoryMissionTemplateMetadata,
     TrajectoryModelMetadata,
     TrajectoryRealizationMetadata,
@@ -702,7 +703,7 @@ def _execution_advertisement(selection: ModelAuthoringSelection) -> dict[str, ob
         }
 
     realization_id = selection.realization.id if selection.realization is not None else None
-    records_by_operation: dict[str, object] = {}
+    records_by_operation: dict[str, TrajectoryMissionOperationMetadata] = {}
     for record in mission.operations:
         if record.fidelity != selection.fidelity:
             continue

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any, cast
 
@@ -289,6 +290,13 @@ def test_hummingbird_source_hover_lqi_screen_runs_through_the_composition_factor
     assert derived_capability["physical_screen_status"] == "executed_by_this_lqi_screen"
     assert cast(dict[str, object], derived_capability["physical_screen_execution"])["operations"] == ["validate", "batch"]
     assert (batch.output_dir / "nonlinear_validation.json").is_file()
+    robustness = json.loads((batch.output_dir / "robustness_report.json").read_text(encoding="utf-8"))
+    assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["id"] == "hummingbird-hover-fixed-lqi-mass-variation"
+    assert robustness["pass"] is True
+    assert [case["id"] for case in robustness["cases"]] == ["mass-0.85x", "mass-1.00x", "mass-1.15x"]
+    assert all(case["metrics"]["final_attitude_rate_error_fraction"] < 1.0 for case in robustness["cases"])
+    assert all(case["metrics"]["saturation_fraction"] == 0.0 for case in robustness["cases"])
     ####
 
 

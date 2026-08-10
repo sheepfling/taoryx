@@ -3,6 +3,8 @@ from __future__ import annotations
 import math
 from pathlib import Path
 
+import pytest
+
 from taoryx.contracts import Vector3
 from taoryx.control_allocation import EffectorLimits
 from taoryx.language.grammar_contracts import GrammarProfile
@@ -23,7 +25,7 @@ TABLES = tuple(
 )
 
 
-def _plant():
+def _plant(*, external_moment_environment_keys: dict[str, str] | None = None):
     program = LoadedProgram.load(PROBLEM, TABLES, profile=GrammarProfile.TAORYX)
     return local_rigid_body_plant_from_vehicle(
         "skywalker-x8-table-plant",
@@ -60,6 +62,7 @@ def _plant():
             "moment_y_nm": 1.0,
             "moment_z_nm": 0.0,
         },
+        external_moment_environment_keys=external_moment_environment_keys,
     )
     ####
 
@@ -123,4 +126,21 @@ def test_x8_local_adapter_maps_a_requested_moment_through_actual_elevons() -> No
     assert all(math.isfinite(value) for value in step.achieved_wrench.values())
     assert step.achieved_residual_norm >= 0.0
     assert "direct_moment" not in step.actuator.actual_positions
+    ####
+
+
+def test_x8_local_adapter_applies_only_its_declared_external_body_moment_input() -> None:
+    """A local offset is physical plant load, not controller or allocator input."""
+
+    plant = _plant(external_moment_environment_keys={"moment_y_nm": "external_pitch_moment_bias_nm"})
+    state = plant.source_local_state
+    controls = plant.source_effectors
+    nominal = plant.state_derivative(state, controls, {})
+    biased = plant.state_derivative(state, controls, {"external_pitch_moment_bias_nm": 0.14})
+
+    assert biased["q_rad_s"] - nominal["q_rad_s"] == pytest.approx(1.0)
+    assert biased["p_rad_s"] == pytest.approx(nominal["p_rad_s"])
+    assert biased["r_rad_s"] == pytest.approx(nominal["r_rad_s"])
+    with pytest.raises(ValueError, match="external_pitch_moment_bias_nm"):
+        plant.state_derivative(state, controls, {"external_pitch_moment_bias_nm": "invalid"})
     ####

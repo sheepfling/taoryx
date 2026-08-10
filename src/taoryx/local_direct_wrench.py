@@ -170,7 +170,7 @@ class LocalDirectWrenchScreenExecution:
         if self.lqi is None:
             return False
         return any(
-            any(abs(float(value)) > 1.0e-12 for value in _mapping(row["integral_error"], "integral error").values())
+            any(abs(value) > 1.0e-12 for value in _float_mapping(row["integral_error"], "integral error").values())
             for row in self.rows
         )
         ####
@@ -391,7 +391,7 @@ def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> Loc
         and lqr.hurwitz
         and final_error < initial_error * config.final_error_fraction_limit
         and statuses == {"feasible"}
-        and (lqi is None or any(abs(float(value)) > 1.0e-12 for row in rows for value in _mapping(row["integral_error"], "integral error").values()))
+        and (lqi is None or any(abs(value) > 1.0e-12 for row in rows for value in _float_mapping(row["integral_error"], "integral error").values()))
     )
     return LocalDirectWrenchScreenExecution(
         config=config,
@@ -451,6 +451,18 @@ def _mapping(value: object, label: str) -> Mapping[str, object]:
     if not isinstance(value, Mapping):
         raise TypeError(f"{label} must be a mapping")
     return value
+    ####
+
+
+def _float_mapping(value: object, label: str) -> Mapping[str, float]:
+    """Return a nested telemetry mapping after coercing numeric values."""
+
+    result: dict[str, float] = {}
+    for name, item in _mapping(value, label).items():
+        if isinstance(item, bool) or not isinstance(item, int | float):
+            raise TypeError(f"{label} value {name!r} must be numeric")
+        result[name] = float(item)
+    return result
     ####
 
 

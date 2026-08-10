@@ -16,6 +16,7 @@ preflight gap, never permission to reuse fixed-wing geometry.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from typing import Any
 
 import yaml
@@ -198,7 +199,7 @@ class HummingbirdHoverTranslationCapabilityAdapter:
             else "aggregate-thrust reserve supports hover; translation/yaw tracking remains a response-law and mission-execution check"
         )
         manifest = plan.manifest()
-        manifest["capability"] = {
+        capability: dict[str, Any] = {
             "model_id": model.profile_id,
             "control_realization": "aggregate_thrust_vector_surrogate",
             "mass_kg": model.mass_kg,
@@ -209,6 +210,7 @@ class HummingbirdHoverTranslationCapabilityAdapter:
             "maximum_level_lateral_acceleration_m_s2": maximum_level_lateral_acceleration_m_s2,
             "physical_motor_allocation": False,
         }
+        manifest["capability"] = capability
         return MissionCapabilityEstimate(
             adapter_id=self.id,
             family_id=composition.family_id,
@@ -250,7 +252,7 @@ class NescSourceReplayCapabilityAdapter:
             for previous, current in zip(segments, segments[1:], strict=False)
         )
         manifest = plan.manifest()
-        manifest["capability"] = {
+        capability: dict[str, Any] = {
             "control_realization": (
                 "uncontrolled_source_replay"
                 if composition.fidelity == "point_mass_3dof"
@@ -264,6 +266,7 @@ class NescSourceReplayCapabilityAdapter:
             "stage_event_order_valid": event_order_valid,
             "required_truth_event_count": sum(len(segment.required_truth_events) for segment in segments),
         }
+        manifest["capability"] = capability
         feasibility: MissionFeasibility = "likely_feasible" if event_order_valid else "unknown"
         diagnostic = (
             "pinned source history provides ordered ignition, separation, cutoff, and terminal events; "
@@ -325,7 +328,7 @@ class LocalDirectWrenchScreenCapabilityAdapter:
             axis for axis in config.limits.axes if config.limits.rate_limit_per_s[axis] is not None
         )
         manifest = plan.manifest()
-        manifest["capability"] = {
+        capability: dict[str, Any] = {
             "control_realization": "direct_wrench",
             "participating_nonlinear_plant": True,
             "physical_effector_allocation": False,
@@ -357,13 +360,14 @@ class LocalDirectWrenchScreenCapabilityAdapter:
                 "rate_limited_axes": list(rate_limited_axes),
             },
         }
+        manifest["capability"] = capability
         if self.definition.paired_lqi_mission_id is not None:
             if (
                 self.definition.paired_lqi_capability_adapter_id is None
                 or self.definition.paired_lqi_campaign_id is None
             ):
                 raise ValueError("paired local direct-wrench LQI advertisement is incomplete")
-            manifest["capability"]["offset_free_tuning_candidate"] = {
+            capability["offset_free_tuning_candidate"] = {
                 "campaign_id": self.definition.paired_lqi_campaign_id,
                 "method": "lqi",
                 "availability": "executed_by_paired_composition_screen",
@@ -604,7 +608,7 @@ def compile_b747_source_direct_wrench_racetrack_from_composition(
         minimum_straight_length_m=straight_length_m,
         level_dwell_s=profile_intent.level_dwell_s,
         turn_radius_margin=profile_intent.turn_radius_margin,
-        simulation_margin_s=float(source_route["simulation_margin_s"]),
+        simulation_margin_s=_setting_number(source_route, "simulation_margin_s"),
         gate_corridor_m=_number(climb, "corridor_m"),
         gate_altitude_tolerance_m=profile_intent.gate_altitude_tolerance_m,
         gate_speed_tolerance_mps=profile_intent.gate_speed_tolerance_mps,
@@ -624,11 +628,11 @@ def compile_b747_source_direct_wrench_racetrack_from_composition(
             "descent_rate_m_s": _number(descent, "descent_rate_m_s"),
             "left_turn_bank_deg": -left_bank_deg,
             "right_turn_bank_deg": right_bank_deg,
-            "simulation_margin_s": float(source_route["simulation_margin_s"]),
-            "altitude_capture_gain_per_s": float(source_route["altitude_capture_gain_per_s"]),
-            "altitude_capture_max_mps": float(source_route["altitude_capture_max_mps"]),
-            "position_capture_gain": float(source_route["position_capture_gain_per_m"]),
-            "position_capture_max_correction_mps": float(source_route["position_capture_max_correction_mps"]),
+            "simulation_margin_s": _setting_number(source_route, "simulation_margin_s"),
+            "altitude_capture_gain_per_s": _setting_number(source_route, "altitude_capture_gain_per_s"),
+            "altitude_capture_max_mps": _setting_number(source_route, "altitude_capture_max_mps"),
+            "position_capture_gain": _setting_number(source_route, "position_capture_gain_per_m"),
+            "position_capture_max_correction_mps": _setting_number(source_route, "position_capture_max_correction_mps"),
             "gate_corridor_m": _number(climb, "corridor_m"),
             "gate_altitude_tolerance_m": profile_intent.gate_altitude_tolerance_m,
             "gate_speed_tolerance_mps": profile_intent.gate_speed_tolerance_mps,
@@ -732,7 +736,7 @@ def compile_x8_source_direct_wrench_racetrack_from_composition(
         minimum_straight_length_m=straight_length_m,
         level_dwell_s=profile_intent.level_dwell_s,
         turn_radius_margin=profile_intent.turn_radius_margin,
-        simulation_margin_s=float(source_route["simulation_margin_s"]),
+        simulation_margin_s=_setting_number(source_route, "simulation_margin_s"),
         gate_corridor_m=_number(climb, "corridor_m"),
         gate_altitude_tolerance_m=profile_intent.gate_altitude_tolerance_m,
         gate_speed_tolerance_mps=profile_intent.gate_speed_tolerance_mps,
@@ -751,12 +755,12 @@ def compile_x8_source_direct_wrench_racetrack_from_composition(
             "climb_rate_m_s": _number(climb, "climb_rate_m_s"),
             "descent_rate_m_s": _number(descent, "descent_rate_m_s"),
             "left_turn_bank_deg": -left_bank_deg,
-            "right_turn_bank_deg": float(source_route["right_turn_bank_sign"]) * right_bank_deg,
-            "simulation_margin_s": float(source_route["simulation_margin_s"]),
-            "altitude_capture_gain_per_s": float(source_route["altitude_capture_gain_per_s"]),
-            "altitude_capture_max_mps": float(source_route["altitude_capture_max_mps"]),
-            "position_capture_gain": float(source_route["position_capture_gain_per_m"]),
-            "position_capture_max_correction_mps": float(source_route["position_capture_max_correction_mps"]),
+            "right_turn_bank_deg": _setting_number(source_route, "right_turn_bank_sign") * right_bank_deg,
+            "simulation_margin_s": _setting_number(source_route, "simulation_margin_s"),
+            "altitude_capture_gain_per_s": _setting_number(source_route, "altitude_capture_gain_per_s"),
+            "altitude_capture_max_mps": _setting_number(source_route, "altitude_capture_max_mps"),
+            "position_capture_gain": _setting_number(source_route, "position_capture_gain_per_m"),
+            "position_capture_max_correction_mps": _setting_number(source_route, "position_capture_max_correction_mps"),
             "gate_corridor_m": _number(climb, "corridor_m"),
             "gate_altitude_tolerance_m": profile_intent.gate_altitude_tolerance_m,
             "gate_speed_tolerance_mps": profile_intent.gate_speed_tolerance_mps,
@@ -820,6 +824,16 @@ def _number(inputs: Any, field: str) -> float:
     value = values[field].value
     if isinstance(value, bool):
         raise ValueError(f"{field} must be numeric")
+    return float(value)
+    ####
+
+
+def _setting_number(settings: Mapping[str, object], field: str) -> float:
+    """Read one finite numeric source-route setting with a stable error."""
+
+    value = settings.get(field)
+    if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
+        raise ValueError(f"source route setting {field!r} must be finite numeric")
     return float(value)
     ####
 

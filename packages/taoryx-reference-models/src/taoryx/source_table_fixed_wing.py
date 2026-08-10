@@ -117,6 +117,9 @@ def build_x8_source_table_plant() -> RuntimeRigidBodyLocalPlant:
             "moment_y_nm": 1.0,
             "moment_z_nm": 0.0,
         },
+        external_moment_environment_keys={
+            "moment_y_nm": "external_pitch_moment_bias_nm",
+        },
     )
     ####
 
@@ -201,6 +204,9 @@ def build_b747_condition3_source_table_plant() -> RuntimeRigidBodyLocalPlant:
         },
         allocation_regularization=1.0e-14,
         allocation_feasibility_tolerance=1.0e-3,
+        external_moment_environment_keys={
+            "moment_y_nm": "external_pitch_moment_bias_nm",
+        },
     )
     ####
 
@@ -309,9 +315,8 @@ def build_b747_condition3_source_surface_physical_lqi_design() -> PhysicalWrench
     This shares the source-derived state, wrench, and engineering scales of
     the exercised LQR screen, then adds attitude-error integrators.  The
     retained integral weight passes the same deterministic local recovery and
-    allocation gates, while avoiding a claim of B747 wind or mass robustness:
-    the source-table adapter has no declared derivative-environment input for
-    such a disturbance witness.
+    allocation gates plus the bounded matched pitch-moment offset screen. It
+    remains a source-local result, not B747 wind or mass robustness.
     """
 
     lqr = build_b747_condition3_source_surface_physical_lqr_design()
@@ -321,7 +326,7 @@ def build_b747_condition3_source_surface_physical_lqi_design() -> PhysicalWrench
         output_names=("roll_error_rad", "pitch_error_rad", "yaw_error_rad"),
         q_diagonal=lqr.q_diagonal,
         r_diagonal=lqr.r_diagonal,
-        integral_q_diagonal=(0.15, 0.15, 0.15),
+        integral_q_diagonal=(0.025, 0.025, 0.025),
         state_scales=lqr.state_scales,
         wrench_scales=lqr.wrench_scales,
     )
@@ -459,6 +464,8 @@ def build_x8_source_surface_lqi_tuning_campaign() -> TuningCampaign:
         ),
         offset_free_outputs=("roll_error_rad", "pitch_error_rad"),
         profile_grid_id_prefix="x8-source-surface-local",
+        integral_weight_multiplier=0.15,
+        integral_weight_multipliers=(0.1, 1.0, 10.0, 100.0),
     ).build_campaign()
     ####
 
@@ -511,6 +518,8 @@ def build_b747_source_surface_lqi_tuning_campaign() -> TuningCampaign:
         ),
         offset_free_outputs=("roll_error_rad", "pitch_error_rad", "yaw_error_rad"),
         profile_grid_id_prefix="b747-source-surface-local",
+        integral_weight_multiplier=0.025,
+        integral_weight_multipliers=(0.1, 1.0, 10.0, 100.0),
     ).build_campaign()
     ####
 

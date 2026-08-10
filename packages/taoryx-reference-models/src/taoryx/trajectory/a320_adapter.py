@@ -366,10 +366,11 @@ def _cached_a320_local_native_coordinate_lqi_screen_config() -> LocalNativeCoord
     node = report.nodes[0]
     if node.trim is None or node.lqr is None or node.lqr.best is None or node.lqr.best.lqi is None:
         raise RuntimeError("A320 pseudo cruise LQI campaign has no retained safe LQI candidate")
+    trim = node.trim
     plant = adapter.plant
     if not isinstance(plant, A320Pseudo6DOFControlPlant):
         raise TypeError("A320 pseudo campaign adapter did not retain its pseudo-6DOF control plant")
-    initial_state = dict(node.trim.state)
+    initial_state = dict(trim.state)
     initial_state.update(
         {
             "bank_angle_rad": 0.08,
@@ -384,7 +385,7 @@ def _cached_a320_local_native_coordinate_lqi_screen_config() -> LocalNativeCoord
         plant_id="taoryx.a320.openap_jsbsim.pseudo6dof",
         fidelity="pseudo_6dof",
         plant=plant,
-        trim=node.trim,
+        trim=trim,
         candidate=candidate,
         campaign_id="a320-pseudo-cruise-attitude-v1",
         initial_state=initial_state,
@@ -403,7 +404,7 @@ def _cached_a320_local_native_coordinate_lqi_screen_config() -> LocalNativeCoord
         integral_lower={"bank_angle_rad": -0.5},
         integral_upper={"bank_angle_rad": 0.5},
         environment={"thrust_mode": "cruise"},
-        status_sample_mapper=lambda sample: _a320_native_lqi_status_sample(plant, node.trim, sample),
+        status_sample_mapper=lambda sample: _a320_native_lqi_status_sample(plant, trim, sample),
         final_error_fraction_limit=0.01,
         maximum_control_saturation_fraction=0.0,
     )

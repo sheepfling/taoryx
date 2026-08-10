@@ -6,7 +6,6 @@ import math
 from typing import Any, cast
 
 import pytest
-from taoryx.trajectory import build_simple_aero_template_configuration
 from taoryx.trajectory.native_mission_composition import build_registry_mission_composition_runner
 from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.trajectory.session_contract import (
@@ -20,6 +19,7 @@ from taoryx.trajectory.simple_aero_mission_composition import (
 
 from taoryx.model_authoring import build_model_authoring_plan
 from taoryx.plugins import PluginCatalog, discover_plugins
+from taoryx.trajectory import build_simple_aero_template_configuration
 from taoryx.trajectory.execution_contract import (
     MissionCompositionExecutionError,
     MissionCompositionOutputSelection,

@@ -145,15 +145,15 @@ def test_every_advertised_runnable_episode_factory_has_one_runtime_constructor()
     (
         (
             {"execution_mode": "source_history_replay", "operation": "episode", "batch_action_trace": "not_applicable"},
-            "supports batch replay/release only",
+            "supports batch execution only",
         ),
         (
             {"execution_mode": "source_scheduled_replay", "operation": "episode", "batch_action_trace": "not_applicable"},
-            "supports batch replay/release only",
+            "supports batch execution only",
         ),
         (
             {"execution_mode": "passive_uncontrolled", "operation": "episode", "batch_action_trace": "not_applicable"},
-            "supports batch replay/release only",
+            "supports batch execution only",
         ),
         (
             {"execution_mode": "local_direct_wrench_screen", "fidelity": "pseudo_6dof"},

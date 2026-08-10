@@ -98,7 +98,7 @@ vehicles:
         segment_sequence: [source_table_physical_lqr_screen]
       - id: x8_local_physical_surface_lqi_screen_v1
         status: runnable
-        description: Source-trim eight-second roll/pitch offset-free LQI recovery through bounded source-table elevon-coordinate allocation; not a racetrack or a persistent-disturbance claim.
+        description: Source-trim eight-second roll/pitch LQI recovery through bounded source-table elevon-coordinate allocation, including a matched external pitch-moment offset screen; not a racetrack, wind, or mass-robustness claim.
         mission_capability_adapter_id: taoryx.x8_local_physical_surface_lqi_screen.capability.v1
         mission_capability_fidelities: [rigid_body_6dof_surface_allocated]
         semantic_translator_id: taoryx.x8_local_physical_surface_lqi_screen.capability.v1
@@ -154,7 +154,7 @@ vehicles:
         required_control_intents: [attitude_rate]
       - id: condition3_source_table_physical_lqi_screen
         status: runnable
-        description: Eighty-second source-table condition-3 local three-axis offset-free LQI recovery through bounded elevator, aileron, and rudder allocation.
+        description: Eighty-second source-table condition-3 local three-axis LQI recovery through bounded elevator, aileron, and rudder allocation, including a matched external pitch-moment offset screen.
         compatible_fidelities: [rigid_body_6dof_surface_allocated]
         parameters: []
         required_control_intents: [attitude_rate]
@@ -216,7 +216,7 @@ vehicles:
         segment_sequence: [condition3_source_table_physical_lqr_screen]
       - id: b747_condition3_local_physical_surface_lqi_screen_v1
         status: runnable
-        description: NASA CR-2144 condition-3 source-trim local three-axis offset-free LQI recovery through bounded physical source-table surface allocation; not a racetrack or persistent-disturbance claim.
+        description: NASA CR-2144 condition-3 source-trim local three-axis LQI recovery through bounded physical source-table surface allocation, including a matched external pitch-moment offset screen; not a racetrack, wind, or mass-robustness claim.
         mission_capability_adapter_id: taoryx.b747_condition3_local_physical_surface_lqi_screen.capability.v1
         mission_capability_fidelities: [rigid_body_6dof_surface_allocated]
         semantic_translator_id: taoryx.b747_condition3_local_physical_surface_lqi_screen.capability.v1

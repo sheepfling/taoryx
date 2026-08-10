@@ -85,7 +85,7 @@ families:
       point_mass_3dof: {profile_id: x15.point_mass_3dof.v1, promotion_status: development, blockers: [release_burn_coast_terminal_handoff]}
       pseudo_6dof: {profile_id: x15.attitude_response_p6dof.v1, promotion_status: development, blockers: [powered_coast_atmospheric_schedule]}
       rigid_body_6dof_direct_wrench: {profile_id: x15.direct_wrench_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize], blockers: [full_source_physical_effector_trim, powered_coast_atmospheric_schedule]}
-      rigid_body_6dof_surface_allocated: {profile_id: x15.surface_allocated_6dof.v1, promotion_status: planned, required_operations: [state_derivative, trim, linearize, effectiveness, allocate], blockers: [source_trim_acceptance, stabilator_rudder_rcs_propulsion_effectivity]}
+      rigid_body_6dof_surface_allocated: {profile_id: x15.surface_allocated_6dof.v1, promotion_status: development, required_operations: [state_derivative, trim, linearize, effectiveness, allocate], blockers: [source_trim_acceptance, stabilator_rudder_rcs_propulsion_effectivity]}
   - family_id: hummingbird
     physical_family: multirotor
     strategy_id: multirotor_hover_translation.v1

@@ -87,6 +87,38 @@ def test_normalized_lqr_profile_grid_generates_a_bounded_deterministic_lattice()
     assert profiles[-1].r_diagonal == (2.0,)
 
 
+def test_normalized_lqr_profile_grid_can_vary_lqi_integral_priority() -> None:
+    """Offset-free candidate grids retain the selected integral priority in artifacts."""
+
+    grid = NormalizedLqrProfileGrid(
+        "synthetic-lqi",
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        integral_weight_multipliers=(0.5, 4.0),
+    )
+
+    profiles = grid.profiles(2, 1)
+    report = tune_lqi_profiles(
+        "synthetic_integral_grid",
+        ((0.0, 1.0), (-1.0, 0.0)),
+        ((0.0,), (1.0,)),
+        state_names=("position", "velocity"),
+        control_names=("force",),
+        state_scales=(0.2, 1.0),
+        control_scales=(1.0,),
+        profiles=profiles,
+        output_names=("position",),
+        integral_q_diagonal=(20.0,),
+    )
+
+    assert [profile.id for profile in profiles] == [
+        "synthetic-lqi.tracking-1.effort-1.integral-0.5",
+        "synthetic-lqi.tracking-1.effort-1.integral-4",
+    ]
+    assert [candidate.integral_q_diagonal for candidate in report.candidates] == [(10.0,), (80.0,)]
+    assert [candidate.as_dict()["integral_weight_multiplier"] for candidate in report.candidates] == [0.5, 4.0]
+
+
 def test_generic_lqr_tuning_accepts_arbitrary_state_and_control_dimensions() -> None:
     report = tune_lqr_profiles(
         "synthetic_second_order_vehicle",

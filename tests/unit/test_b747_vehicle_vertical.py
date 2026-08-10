@@ -422,10 +422,10 @@ def test_b747_source_surface_lqi_campaign_runs_through_the_common_host(
 def test_b747_physical_lqi_design_passes_the_bounded_source_local_baseline() -> None:
     """The named LQI design uses the real B747 allocator, not injected control.
 
-    This is deliberately a local recovery baseline.  The source-table adapter
-    does not accept a declared wind, bias, or mass perturbation at its
-    derivative boundary, so this test cannot imply B747 offset-disturbance
-    qualification.
+    This is deliberately a local recovery baseline.  The separately exercised
+    standard LQI screen admits only one fixed matched pitch-moment bias through
+    an explicit derivative seam; neither check implies wind, mass, or transport
+    offset-disturbance qualification.
     """
 
     plant = build_b747_condition3_source_table_plant()
@@ -457,7 +457,7 @@ def test_b747_physical_lqi_design_passes_the_bounded_source_local_baseline() -> 
     final_error_fraction = validation.final_normalized_feedback_error_norm / validation.initial_normalized_feedback_error_norm
     assert design.result.hurwitz
     assert design.result.output_names == ("roll_error_rad", "pitch_error_rad", "yaw_error_rad")
-    assert design.integral_q_diagonal == (0.15, 0.15, 0.15)
+    assert design.integral_q_diagonal == (0.025, 0.025, 0.025)
     assert validation.integrators_exercised
     assert final_error_fraction <= 0.10
     assert validation.final_controlled_actual_residual <= 10.0
@@ -493,7 +493,7 @@ def test_b747_condition3_source_table_surface_lqr_screen_runs_through_public_com
     assert lqi_candidate["method"] == "lqi"
     assert lqi_candidate["controller_id"] == "b747-condition3-source-surface-wrench-lqi-v1"
     assert lqi_candidate["physical_allocation_baseline"] == "focused_bounded_source_local_recovery_passed"
-    assert lqi_candidate["persistent_disturbance_status"] == "not_executable_without_a_declared_source_derivative_environment"
+    assert lqi_candidate["persistent_disturbance_status"] == "executed_by_paired_standard_lqi_screen"
     assert lqi_candidate["physical_screen_status"] == "not_executed_by_this_lqr_screen"
     lqi_execution = cast(dict[str, object], lqi_candidate["physical_screen_execution"])
     assert lqi_execution == {
@@ -515,7 +515,7 @@ def test_b747_condition3_source_table_surface_lqr_screen_runs_through_public_com
 def test_b747_condition3_source_table_surface_lqi_screen_runs_through_public_composition(
     tmp_path: Path,
 ) -> None:
-    """The offset-free condition-3 candidate is an exact public Composition endpoint."""
+    """The condition-3 LQI endpoint emits its bounded pitch-offset evidence."""
 
     composition = _b747_local_surface_lqi_composition()
     batch = execute_vehicle_composition_batch(composition, tmp_path / "b747-condition3-local-surface-lqi")
@@ -533,13 +533,32 @@ def test_b747_condition3_source_table_surface_lqi_screen_runs_through_public_com
     assert runtime["controller_method"] == "lqi"
     assert runtime["control_realization"] == "source_table_physical_wrench_lqi_allocation"
     assert runtime["physical_effector_allocation"] is True
+    assert runtime["integral_q_diagonal"] == [0.025, 0.025, 0.025]
+    offset_runtime = cast(dict[str, object], runtime["matched_pitch_offset_screen"])
+    assert offset_runtime["status"] == "applied"
+    assert offset_runtime["pass"] is True
     assert lqi_candidate["physical_screen_status"] == "executed_by_this_lqi_screen"
     assert cast(dict[str, object], lqi_candidate["physical_screen_execution"])["status"] == "executed_by_this_lqi_screen"
-    assert lqi_candidate["persistent_disturbance_status"] == "not_executable_without_a_declared_source_derivative_environment"
+    assert lqi_candidate["persistent_disturbance_status"] == "executed_by_this_screen"
+    automation = cast(dict[str, object], lqi_candidate["controller_automation"])
+    assert cast(dict[str, object], automation["integral_priority_grid"])["multipliers"] == [0.1, 1.0, 10.0, 100.0]
+    assert cast(dict[str, object], automation["physical_wrench_profile"])["integral_q_diagonal"] == [0.025, 0.025, 0.025]
     nonlinear_validation = cast(dict[str, object], json.loads((batch.output_dir / "nonlinear_validation.json").read_text()))
+    robustness = cast(dict[str, object], json.loads((batch.output_dir / "robustness_report.json").read_text()))
     metrics = cast(dict[str, object], nonlinear_validation["metrics"])
     assert nonlinear_validation["schema"] == "taoryx.physical-lqi-validation/v1alpha1"
     assert metrics["integrators_exercised"] is True
+    assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["id"] == "b747-local-lqi-matched-pitch-wrench-offset"
+    assert robustness["kind"] == "constant_offset"
+    assert robustness["pass"] is True
+    cases = cast(list[dict[str, object]], robustness["cases"])
+    assert [case["id"] for case in cases] == ["nominal", "positive-pitch-offset", "negative-pitch-offset"]
+    assert [cast(dict[str, float], case["parameters"])["pitch_wrench_bias_fraction"] for case in cases] == [0.0, 0.05, -0.05]
+    assert all(case["status"] == "pass" for case in cases)
+    assert all(cast(dict[str, float], case["metrics"])["final_feedback_error_fraction"] <= 0.10 for case in cases)
+    assert all(cast(dict[str, float], case["metrics"])["saturation_fraction"] <= 0.05 for case in cases)
+    assert (batch.output_dir / "robustness_report.json").is_file()
     assert (batch.output_dir / "status_trace.json").is_file()
     ####
 

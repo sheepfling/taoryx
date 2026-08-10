@@ -101,7 +101,7 @@ def test_vehicle_maturity_registry_keeps_intake_separate_from_alpha2() -> None:
     records = {record["id"]: record for record in payload["records"]}
     assert payload["release_policy"]["alpha2_finish_line"].startswith("M4")
     assert records["b747"]["maturity"] == "M4"
-    assert records["skywalker_x8"]["maturity"] == "M3"
+    assert records["skywalker_x8"]["maturity"] == "M4"
     assert records["r44_class"]["maturity"] == "M0"
     assert records["uh1h_scheduled"]["maturity"] == "M0"
     assert records["xv15_class"]["maturity"] == "M0"

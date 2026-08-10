@@ -1,5 +1,5 @@
 {
-  "claim_boundary": "A worklist determines admissible diagnostic and calibration work. It is neither controller tuning evidence nor a promotion claim.",
+  "claim_boundary": "A worklist determines admissible diagnostic and calibration work. A declared replay/release batch witness may admit its first source or release audit while pending generic adapter operations remain visible; it is neither controller tuning evidence nor a promotion claim.",
   "family_count": 9,
   "items": [
     {
@@ -39,6 +39,9 @@
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "source_audit",
         "trim_grid",
@@ -87,6 +90,9 @@
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "parent_parity_check",
         "response_identification",
@@ -108,7 +114,7 @@
         "operating_point_catalog"
       ],
       "declared_blockers": [
-        "nonlinear_direct_wrench_mission"
+        "envelope_robustness_and_flight_qualification"
       ],
       "family_id": "skywalker_x8",
       "family_inputs": [
@@ -124,7 +130,7 @@
       "pending_operations": [],
       "physical_family": "powered_fixed_wing",
       "readiness_blockers": [
-        "nonlinear_direct_wrench_mission"
+        "envelope_robustness_and_flight_qualification"
       ],
       "readiness_status": "development",
       "required_operations": [
@@ -132,6 +138,9 @@
         "trim",
         "linearize"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "trim_grid",
         "derivative_consistency",
@@ -183,6 +192,9 @@
         "effectiveness",
         "allocate"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "trim_grid",
         "derivative_consistency",
@@ -234,6 +246,9 @@
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "source_audit",
         "trim_grid",
@@ -282,6 +297,9 @@
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "parent_parity_check",
         "response_identification",
@@ -303,7 +321,7 @@
         "operating_point_catalog"
       ],
       "declared_blockers": [
-        "nonlinear_direct_wrench_mission"
+        "envelope_robustness_and_flight_qualification"
       ],
       "family_id": "b747",
       "family_inputs": [
@@ -319,7 +337,7 @@
       "pending_operations": [],
       "physical_family": "powered_fixed_wing",
       "readiness_blockers": [
-        "nonlinear_direct_wrench_mission"
+        "envelope_robustness_and_flight_qualification"
       ],
       "readiness_status": "development",
       "required_operations": [
@@ -327,6 +345,9 @@
         "trim",
         "linearize"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "trim_grid",
         "derivative_consistency",
@@ -378,6 +399,9 @@
         "effectiveness",
         "allocate"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "trim_grid",
         "derivative_consistency",
@@ -414,18 +438,20 @@
         "turn_climb_descent_envelope"
       ],
       "mission_overlay": "transport_racetrack",
-      "next_action": "resolve_declared_blocker:broader_operating_point_matrix",
+      "next_action": "run_strategy_stage:source_audit",
       "pending_operations": [],
       "physical_family": "powered_fixed_wing",
       "readiness_blockers": [
-        "broader_operating_point_matrix",
-        "no vehicle metadata or source-family profile is bound"
+        "broader_operating_point_matrix"
       ],
-      "readiness_status": "blocked",
+      "readiness_status": "probe_ready",
       "required_operations": [
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "source_audit",
         "trim_grid",
@@ -433,7 +459,7 @@
         "altitude_speed_turn_probe",
         "mission_objective_evaluation"
       ],
-      "status": "blocked",
+      "status": "strategy_probe_ready",
       "strategy_id": "powered_fixed_wing.v1",
       "tier": "point_mass_3dof"
     },
@@ -459,18 +485,20 @@
         "turn_climb_descent_envelope"
       ],
       "mission_overlay": "transport_racetrack",
-      "next_action": "resolve_declared_blocker:calibrated_response_model_and_operating_points",
+      "next_action": "run_strategy_stage:parent_parity_check",
       "pending_operations": [],
       "physical_family": "powered_fixed_wing",
       "readiness_blockers": [
-        "calibrated_response_model_and_operating_points",
-        "no vehicle metadata or source-family profile is bound"
+        "calibrated_response_model_and_operating_points"
       ],
-      "readiness_status": "blocked",
+      "readiness_status": "probe_ready",
       "required_operations": [
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "parent_parity_check",
         "response_identification",
@@ -478,7 +506,7 @@
         "altitude_speed_turn_probe",
         "mission_objective_evaluation"
       ],
-      "status": "blocked",
+      "status": "strategy_probe_ready",
       "strategy_id": "powered_fixed_wing.v1",
       "tier": "pseudo_6dof"
     },
@@ -515,7 +543,7 @@
       "readiness_blockers": [
         "participating_rigid_body_plant",
         "physical_surface_effectivity",
-        "no vehicle metadata or source-family profile is bound"
+        "no vehicle metadata, source-family profile, or tier data evidence is bound"
       ],
       "readiness_status": "planned",
       "required_operations": [
@@ -523,6 +551,9 @@
         "trim",
         "linearize"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "trim_grid",
         "derivative_consistency",
@@ -573,7 +604,7 @@
       "readiness_blockers": [
         "participating_rigid_body_plant",
         "physical_surface_effectivity",
-        "no vehicle metadata or source-family profile is bound"
+        "no vehicle metadata, source-family profile, or tier data evidence is bound"
       ],
       "readiness_status": "planned",
       "required_operations": [
@@ -583,6 +614,9 @@
         "effectiveness",
         "allocate"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "trim_grid",
         "derivative_consistency",
@@ -633,6 +667,9 @@
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "source_audit",
         "trim_grid",
@@ -679,6 +716,9 @@
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "parent_parity_check",
         "response_identification",
@@ -727,6 +767,9 @@
         "trim",
         "linearize"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "trim_grid",
         "derivative_consistency",
@@ -781,6 +824,9 @@
         "effectiveness",
         "allocate"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "trim_grid",
         "derivative_consistency",
@@ -816,7 +862,7 @@
         "high_energy_terminal_corridor"
       ],
       "mission_overlay": "rocket_aircraft_high_energy",
-      "next_action": "validate_adapter_operation:state_derivative",
+      "next_action": "run_strategy_stage:release_audit",
       "pending_operations": [
         "state_derivative",
         "trim"
@@ -831,6 +877,15 @@
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [
+        "Local-frame X-15-scaled reduced witness only; it preserves declared staging anchors but is not the synthetic California-to-Hawaii vehicle, a native X-15 rigid-body mission, or a controlled terminal handoff."
+      ],
+      "runnable_batch_execution_modes": [
+        "open_loop_witness"
+      ],
+      "runnable_batch_missions": [
+        "x15_staged_booster_reachability_v1"
+      ],
       "stages": [
         "release_audit",
         "phase_preflight",
@@ -838,7 +893,7 @@
         "terminal_corridor_probe",
         "mission_objective_evaluation"
       ],
-      "status": "waiting_for_adapter_operation",
+      "status": "strategy_development",
       "strategy_id": "rocket_aircraft_high_energy.v1",
       "tier": "point_mass_3dof"
     },
@@ -863,7 +918,7 @@
         "high_energy_terminal_corridor"
       ],
       "mission_overlay": "rocket_aircraft_high_energy",
-      "next_action": "validate_adapter_operation:state_derivative",
+      "next_action": "run_strategy_stage:parent_parity_check",
       "pending_operations": [
         "state_derivative",
         "trim"
@@ -878,6 +933,15 @@
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [
+        "Local-frame X-15-scaled response-law witness only; it does not establish source-derived moments, physical effectors, or a controlled terminal handoff."
+      ],
+      "runnable_batch_execution_modes": [
+        "open_loop_witness"
+      ],
+      "runnable_batch_missions": [
+        "x15_staged_booster_reachability_v1"
+      ],
       "stages": [
         "parent_parity_check",
         "phase_response_identification",
@@ -885,7 +949,7 @@
         "bank_pitch_reversal_probe",
         "terminal_corridor_probe"
       ],
-      "status": "waiting_for_adapter_operation",
+      "status": "strategy_development",
       "strategy_id": "rocket_aircraft_high_energy.v1",
       "tier": "pseudo_6dof"
     },
@@ -925,6 +989,9 @@
         "trim",
         "linearize"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "phase_trim_grid",
         "derivative_consistency",
@@ -982,6 +1049,9 @@
         "effectiveness",
         "allocate"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "phase_trim_grid",
         "authority_preflight",
@@ -1027,6 +1097,9 @@
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "hover_equilibrium",
         "translation_preflight",
@@ -1069,6 +1142,9 @@
         "state_derivative",
         "trim"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "parent_parity_check",
         "hover_attitude_probe",
@@ -1089,7 +1165,7 @@
         "hover_operating_point"
       ],
       "declared_blockers": [
-        "direct_wrench_is_debug_comparator"
+        "local_direct_wrench_comparator_scope_only"
       ],
       "family_id": "hummingbird",
       "family_inputs": [
@@ -1105,7 +1181,7 @@
       "pending_operations": [],
       "physical_family": "multirotor",
       "readiness_blockers": [
-        "direct_wrench_is_debug_comparator"
+        "local_direct_wrench_comparator_scope_only"
       ],
       "readiness_status": "development",
       "required_operations": [
@@ -1113,6 +1189,9 @@
         "trim",
         "linearize"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "hover_trim",
         "derivative_consistency",
@@ -1161,6 +1240,9 @@
         "effectiveness",
         "allocate"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "hover_trim",
         "authority_preflight",
@@ -1195,7 +1277,7 @@
         "surface_effectiveness_if_claimed"
       ],
       "mission_overlay": "glide_energy_management",
-      "next_action": "validate_adapter_operation:state_derivative",
+      "next_action": "run_strategy_stage:release_audit",
       "pending_operations": [
         "state_derivative",
         "trim_fragment"
@@ -1213,13 +1295,22 @@
         "state_derivative",
         "trim_fragment"
       ],
+      "runnable_batch_claim_boundaries": [
+        "Source-scheduled aerodynamic release witness only; it does not establish generic high-altitude glide guidance, trim, or physical effector allocation."
+      ],
+      "runnable_batch_execution_modes": [
+        "source_scheduled_replay"
+      ],
+      "runnable_batch_missions": [
+        "hl20_source_booster_release_replay_v1"
+      ],
       "stages": [
         "release_audit",
         "energy_preflight",
         "bank_reversal_energy_probe",
         "terminal_corridor_probe"
       ],
-      "status": "waiting_for_adapter_operation",
+      "status": "strategy_development",
       "strategy_id": "lifting_body_glide.v1",
       "tier": "point_mass_3dof"
     },
@@ -1244,7 +1335,7 @@
         "surface_effectiveness_if_claimed"
       ],
       "mission_overlay": "glide_energy_management",
-      "next_action": "validate_adapter_operation:state_derivative",
+      "next_action": "run_strategy_stage:parent_parity_check",
       "pending_operations": [
         "state_derivative",
         "trim_fragment"
@@ -1261,13 +1352,22 @@
         "state_derivative",
         "trim_fragment"
       ],
+      "runnable_batch_claim_boundaries": [
+        "Source-scheduled response-law witness only; it does not establish a user-driven guidance controller, source-derived moments, or physical effector allocation."
+      ],
+      "runnable_batch_execution_modes": [
+        "source_scheduled_replay"
+      ],
+      "runnable_batch_missions": [
+        "hl20_source_booster_release_replay_v1"
+      ],
       "stages": [
         "parent_parity_check",
         "bank_reversal_probe",
         "alpha_limit_probe",
         "terminal_corridor_probe"
       ],
-      "status": "waiting_for_adapter_operation",
+      "status": "strategy_development",
       "strategy_id": "lifting_body_glide.v1",
       "tier": "pseudo_6dof"
     },
@@ -1306,6 +1406,9 @@
         "state_derivative",
         "trim_fragment"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "source_channel_trim_check",
         "derivative_or_response_provenance",
@@ -1355,6 +1458,9 @@
         "effectiveness",
         "allocate"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "source_channel_trim_check",
         "authority_preflight",
@@ -1399,6 +1505,15 @@
       "required_operations": [
         "replay"
       ],
+      "runnable_batch_claim_boundaries": [
+        "Source-history point-mass replay only; no participating rocket plant, guidance, or gimbal-allocation claim."
+      ],
+      "runnable_batch_execution_modes": [
+        "source_history_replay"
+      ],
+      "runnable_batch_missions": [
+        "staged_rocket_launch_target_state_v1"
+      ],
       "stages": [
         "source_audit",
         "event_ordering_probe",
@@ -1439,6 +1554,15 @@
       "readiness_status": "probe_ready",
       "required_operations": [
         "replay"
+      ],
+      "runnable_batch_claim_boundaries": [
+        "Source translation plus named response-law evidence; no source-exact attitude, gimbal, or control-allocation claim."
+      ],
+      "runnable_batch_execution_modes": [
+        "source_history_replay"
+      ],
+      "runnable_batch_missions": [
+        "staged_rocket_launch_target_state_v1"
       ],
       "stages": [
         "parent_parity_check",
@@ -1486,6 +1610,9 @@
         "trim",
         "linearize"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "phase_trim_grid",
         "derivative_consistency",
@@ -1528,7 +1655,7 @@
       "physical_family": "mass_depleting_rocket",
       "readiness_blockers": [
         "time_aligned_attitude_gimbal_effectivity",
-        "no vehicle metadata or source-family profile is bound"
+        "no vehicle metadata, source-family profile, or tier data evidence is bound"
       ],
       "readiness_status": "planned",
       "required_operations": [
@@ -1538,6 +1665,9 @@
         "effectiveness",
         "allocate"
       ],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [
         "phase_trim_grid",
         "authority_preflight",
@@ -1567,7 +1697,7 @@
         "impact_contract"
       ],
       "mission_overlay": "release_damping_impact",
-      "next_action": "validate_adapter_operation:state_derivative",
+      "next_action": "run_strategy_stage:release_audit",
       "pending_operations": [
         "state_derivative"
       ],
@@ -1580,12 +1710,21 @@
       "required_operations": [
         "state_derivative"
       ],
+      "runnable_batch_claim_boundaries": [
+        "The passive 3DOF reduction cannot establish moment-driven rotational behavior or expose a control path."
+      ],
+      "runnable_batch_execution_modes": [
+        "passive_uncontrolled"
+      ],
+      "runnable_batch_missions": [
+        "tumbling_body_release_damping_impact_v1"
+      ],
       "stages": [
         "release_audit",
         "ballistic_coefficient_probe",
         "impact_evaluation"
       ],
-      "status": "waiting_for_adapter_operation",
+      "status": "strategy_development",
       "strategy_id": "passive_ballistic_tumbling.v1",
       "tier": "point_mass_3dof"
     },
@@ -1607,7 +1746,7 @@
         "impact_contract"
       ],
       "mission_overlay": "release_damping_impact",
-      "next_action": "validate_adapter_operation:state_derivative",
+      "next_action": "run_strategy_stage:release_audit",
       "pending_operations": [
         "state_derivative"
       ],
@@ -1619,12 +1758,21 @@
       "required_operations": [
         "state_derivative"
       ],
+      "runnable_batch_claim_boundaries": [
+        "Passive pseudo-6DOF has no control or allocation path; it reuses real rigid-body evidence explicitly."
+      ],
+      "runnable_batch_execution_modes": [
+        "passive_uncontrolled"
+      ],
+      "runnable_batch_missions": [
+        "tumbling_body_release_damping_impact_v1"
+      ],
       "stages": [
         "release_audit",
         "rotation_invariant_probe",
         "impact_evaluation"
       ],
-      "status": "waiting_for_adapter_operation",
+      "status": "strategy_probe_ready",
       "strategy_id": "passive_ballistic_tumbling.v1",
       "tier": "pseudo_6dof"
     },
@@ -1644,10 +1792,13 @@
       "pending_operations": [],
       "physical_family": "passive_ballistic_tumbling_body",
       "readiness_blockers": [
-        "no vehicle metadata or source-family profile is bound"
+        "no vehicle metadata, source-family profile, or tier data evidence is bound"
       ],
       "readiness_status": "not_applicable",
       "required_operations": [],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [],
       "status": "not_applicable",
       "strategy_id": "passive_ballistic_tumbling.v1",
@@ -1669,10 +1820,13 @@
       "pending_operations": [],
       "physical_family": "passive_ballistic_tumbling_body",
       "readiness_blockers": [
-        "no vehicle metadata or source-family profile is bound"
+        "no vehicle metadata, source-family profile, or tier data evidence is bound"
       ],
       "readiness_status": "not_applicable",
       "required_operations": [],
+      "runnable_batch_claim_boundaries": [],
+      "runnable_batch_execution_modes": [],
+      "runnable_batch_missions": [],
       "stages": [],
       "status": "not_applicable",
       "strategy_id": "passive_ballistic_tumbling.v1",
@@ -1683,12 +1837,11 @@
   "schema": "taoryx.family-strategy-worklist/v1alpha1",
   "status": "pass",
   "status_counts": {
-    "blocked": 2,
     "not_applicable": 2,
     "planned": 5,
-    "strategy_development": 9,
-    "strategy_probe_ready": 8,
-    "waiting_for_adapter_operation": 10
+    "strategy_development": 14,
+    "strategy_probe_ready": 11,
+    "waiting_for_adapter_operation": 4
   },
   "strategy_conformance": {
     "claim_boundary": "Strategy conformance only; a valid strategy mapping is not vehicle, controller, or mission qualification.",

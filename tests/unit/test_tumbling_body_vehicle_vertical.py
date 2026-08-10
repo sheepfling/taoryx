@@ -11,8 +11,7 @@ from taoryx.passive_tumbling_composition_execution import execute_passive_tumbli
 
 from taoryx.model_authoring import build_model_authoring_plan
 from taoryx.plugins import PluginCatalog, discover_plugins
-from taoryx.vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
-from taoryx.vehicle_composition import resolve_vehicle_composition_interface_contract
+from taoryx.vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request, resolve_vehicle_composition_interface_contract
 from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
 
 ROOT = Path(__file__).resolve().parents[2]

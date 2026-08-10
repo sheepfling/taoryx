@@ -530,13 +530,13 @@ def _channel(channel: EpisodeChannel, direction: Literal["action", "observation"
         id=channel.name,
         direction=direction,
         description=channel.description,
-        quantity=_quantity(channel.unit),
+        quantity="boolean" if data_type == "boolean" else _quantity(channel.unit),
         unit=None if data_type in {"boolean", "string", "json"} else channel.unit,
         data_type=data_type,
         shape=shape,
         sampling_semantics="discrete_sample" if data_type in {"boolean", "string", "json", "int64"} else "continuous_sample",
-        minimum=channel.lower,
-        maximum=channel.upper,
+        minimum=None if data_type in {"boolean", "string", "json"} else channel.lower,
+        maximum=None if data_type in {"boolean", "string", "json"} else channel.upper,
         value_space=channel.value_space.as_dict(),
     )
     ####

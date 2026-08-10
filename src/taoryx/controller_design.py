@@ -225,24 +225,32 @@ def build_lqi_controller(
         raise ValueError(f"controller design {design.id!r} states do not match trim {design.trim!r}")
     if tuple(design.controls) != tuple(trim.spec.control_names):
         raise ValueError(f"controller design {design.id!r} controls do not match trim {design.trim!r}")
-    solver = solve_continuous_lqi
-    kwargs: dict[str, object] = {}
     if state_scales is not None or control_scales is not None:
         if state_scales is None or control_scales is None:
             raise ValueError("scaled LQI requires both state_scales and control_scales")
-        solver = solve_scaled_continuous_lqi
-        kwargs = {"state_scales": state_scales, "control_scales": control_scales}
-    result = solver(
-        a,
-        b,
-        q,
-        r,
-        output_matrix=output_matrix,
-        output_names=design.integral_outputs,
-        state_names=design.states,
-        control_names=design.controls,
-        **kwargs,
-    )
+        result = solve_scaled_continuous_lqi(
+            a,
+            b,
+            q,
+            r,
+            output_matrix=output_matrix,
+            output_names=design.integral_outputs,
+            state_names=design.states,
+            control_names=design.controls,
+            state_scales=state_scales,
+            control_scales=control_scales,
+        )
+    else:
+        result = solve_continuous_lqi(
+            a,
+            b,
+            q,
+            r,
+            output_matrix=output_matrix,
+            output_names=design.integral_outputs,
+            state_names=design.states,
+            control_names=design.controls,
+        )
     realization = _build_lqi_realization(design, trim, result)
     import numpy as np
 

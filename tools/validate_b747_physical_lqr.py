@@ -18,6 +18,11 @@ import math
 from pathlib import Path
 from typing import Any
 
+from taoryx.source_table_fixed_wing import (
+    build_b747_condition3_source_surface_physical_lqr_design,
+    build_b747_condition3_source_table_plant,
+)
+
 from taoryx.control_allocation import EffectorEffectiveness
 from taoryx.generic_tuning import (
     GenericLqrProfile,
@@ -32,10 +37,6 @@ from taoryx.physical_lqr import (
     validate_nonlinear_wrench_lqr,
 )
 from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant
-from taoryx.source_table_fixed_wing import (
-    build_b747_condition3_source_surface_physical_lqr_design,
-    build_b747_condition3_source_table_plant,
-)
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBLEM = ROOT / "examples/generated/vehicles/b747_condition3_surface_trim_6dof.prb"

@@ -238,12 +238,15 @@ class GenericLqrProfile:
     id: str
     q_diagonal: tuple[float, ...]
     r_diagonal: tuple[float, ...]
+    integral_weight_multiplier: float = 1.0
 
     def __post_init__(self) -> None:
         if not self.id.strip() or not self.q_diagonal or not self.r_diagonal:
             raise ValueError("generic LQR profiles require an id and non-empty weights")
         if any(not math.isfinite(value) or value <= 0.0 for value in (*self.q_diagonal, *self.r_diagonal)):
             raise ValueError("generic LQR profile weights must be finite and positive")
+        if not math.isfinite(self.integral_weight_multiplier) or self.integral_weight_multiplier <= 0.0:
+            raise ValueError("generic LQR integral-weight multipliers must be finite and positive")
         ####
     ####
 
@@ -263,6 +266,7 @@ class NormalizedLqrProfileGrid:
     id_prefix: str
     state_weight_multipliers: tuple[float, ...] = (0.25, 1.0, 4.0)
     control_effort_multipliers: tuple[float, ...] = (2.0, 1.0, 0.25)
+    integral_weight_multipliers: tuple[float, ...] = (1.0,)
     state_base_weights: tuple[float, ...] = ()
     control_base_weights: tuple[float, ...] = ()
 
@@ -272,6 +276,7 @@ class NormalizedLqrProfileGrid:
         for label, values in (
             ("state weight multipliers", self.state_weight_multipliers),
             ("control effort multipliers", self.control_effort_multipliers),
+            ("integral weight multipliers", self.integral_weight_multipliers),
         ):
             if not values or any(not math.isfinite(value) or value <= 0.0 for value in values):
                 raise ValueError(f"normalized LQR {label} must be finite and positive")
@@ -299,13 +304,18 @@ class NormalizedLqrProfileGrid:
         profiles: list[GenericLqrProfile] = []
         for tracking in self.state_weight_multipliers:
             for effort in self.control_effort_multipliers:
-                profiles.append(
-                    GenericLqrProfile(
-                        f"{self.id_prefix}.tracking-{tracking:g}.effort-{effort:g}",
-                        tuple(value * tracking for value in state_base),
-                        tuple(value * effort for value in control_base),
+                for integral in self.integral_weight_multipliers:
+                    identifier = f"{self.id_prefix}.tracking-{tracking:g}.effort-{effort:g}"
+                    if self.integral_weight_multipliers != (1.0,):
+                        identifier = f"{identifier}.integral-{integral:g}"
+                    profiles.append(
+                        GenericLqrProfile(
+                            identifier,
+                            tuple(value * tracking for value in state_base),
+                            tuple(value * effort for value in control_base),
+                            integral,
+                        )
                     )
-                )
         return tuple(profiles)
         ####
 
@@ -316,6 +326,7 @@ class NormalizedLqrProfileGrid:
             "id_prefix": self.id_prefix,
             "state_weight_multipliers": list(self.state_weight_multipliers),
             "control_effort_multipliers": list(self.control_effort_multipliers),
+            "integral_weight_multipliers": list(self.integral_weight_multipliers),
             "state_base_weights": list(self.state_base_weights),
             "control_base_weights": list(self.control_base_weights),
         }
@@ -344,6 +355,7 @@ class GenericLqrCandidate:
     integral_output_names: tuple[str, ...] = ()
     integral_q_diagonal: tuple[float, ...] = ()
     lqi: LqiResult | None = None
+    integral_weight_multiplier: float = 1.0
 
     @property
     def safe(self) -> bool:
@@ -365,6 +377,7 @@ class GenericLqrCandidate:
             "vehicle_id": self.vehicle_id,
             "profile_id": self.profile_id,
             "method": self.method,
+            "integral_weight_multiplier": self.integral_weight_multiplier,
             "state_names": list(self.state_names),
             "control_names": list(self.control_names),
             "state_scales": list(self.state_scales),
@@ -968,7 +981,7 @@ def tune_lqi_profiles(
             scales_u,
             output,
             outputs,
-            integral_weights,
+            tuple(value * profile.integral_weight_multiplier for value in integral_weights),
             resolved_limits,
         )
         for profile in profiles
@@ -1052,6 +1065,7 @@ def _generic_lqi_candidate(
         integral_output_names=output_names,
         integral_q_diagonal=integral_q_diagonal,
         lqi=lqi,
+        integral_weight_multiplier=profile.integral_weight_multiplier,
     )
     ####
 

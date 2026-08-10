@@ -15,11 +15,12 @@ import math
 from pathlib import Path
 from typing import Any
 
+from taoryx.source_table_fixed_wing import build_x8_source_surface_physical_lqr_design, build_x8_source_table_plant
+
 from taoryx.airbreathing_control_mapping import x8_mapping_hypotheses, x8_source_mapping
 from taoryx.generic_tuning import LinearAuthorityRequirement, linear_authority_preflight
 from taoryx.physical_lqr import validate_nonlinear_wrench_lqr
 from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant
-from taoryx.source_table_fixed_wing import build_x8_source_surface_physical_lqr_design, build_x8_source_table_plant
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBLEM = ROOT / "examples/generated/vehicles/skywalker_x8_table_coordinate_trim_6dof.prb"

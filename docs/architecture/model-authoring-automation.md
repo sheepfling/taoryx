@@ -343,6 +343,13 @@ taoryx vehicle result build/hummingbird-lqi-screen \
   --composition build/hummingbird-lqi-screen.composition.json
 ```
 
+That source-hover result also emits `robustness_report.json` in the generic
+endpoint format. It records independently re-trimmed 85%, 100%, and 115%
+source-mass cases under the one fixed nominal LQI design, including final
+attitude/rate error fraction and allocation/actuator saturation fraction for
+each case. This is discrete local mass-mismatch evidence only; it is neither a
+gain schedule nor an in-flight mass-transition or payload-envelope claim.
+
 It proves a local source-backed individual-rotor control realization, not a
 wind-disturbance campaign, gain schedule, mission trajectory, envelope sweep,
 or flight qualification. The generic Hummingbird tuning campaign remains a
@@ -523,6 +530,14 @@ tunes it. The plug-in still owns the physical coordinate names, engineering
 scales, trim hints, authority intent, and outputs whose steady error is
 meaningful. A data table without a dynamics/derivative seam or
 control-effectiveness mapping remains an explicit integration blocker.
+
+For LQI, `integral_weight_multiplier` declares the base persistent-error
+priority and `integral_weight_multipliers` can add a bounded, named lattice of
+relative priorities. Every candidate serializes both the actual
+`integral_q_diagonal` and its multiplier, so an agent can distinguish a
+stronger offset-rejection candidate from a generic Q/R change. The host still
+does not silently choose a nonlinear winner: use the endpoint's declared
+allocator-backed robustness screen to select and retain a physical profile.
 
 Each `model tune` LQI candidate retains and serializes its output matrix,
 state gain, and integral gain under `lqi_controller`; it is therefore usable
@@ -947,6 +962,23 @@ therefore reports `trim.full_state.status = not_available` and does not claim
 propulsion/RCS allocation, feedback control, navigation, high-energy guidance,
 or flight qualification.
 
+### X-15 source-surface LQI offset screen
+
+`x15_source_surface_attitude_rate_lqi_screen_v1` is the corresponding
+two-second local attitude/rate LQI recovery through those same actual source
+surfaces. Its physical-wrench profile is explicit in the capability and
+runtime advertisements, including the integral-Q diagonal, and the batch
+packet emits `robustness_report.json`. That artifact tests the nominal case
+plus constant external pitch moments of ±5% of the declared pitch-wrench
+scale. The bias enters the plant's declared external-dynamics seam, then the
+controller must reject it through the normal wrench request and bounded
+surface allocator; it is never injected into the controller or allocator.
+
+This is useful bounded evidence of matched pitch-moment rejection at the
+frozen source fixture. It remains neither a wind model, mass variation,
+gain-scheduled/adaptive control law, propagated X-15 trajectory, nor flight
+qualification.
+
 ### HL-20 source-surface authority screen
 
 HL-20 also has a first-class source-surface Composition endpoint,
@@ -1059,7 +1091,12 @@ roll/pitch controller from the pinned nonlinear source-table plant, allocates
 each requested moment through bounded collective/differential elevon
 coordinates, and writes the requested, achieved, residual, actual-coordinate,
 resource, status, and control-trace artifacts. The LQI screen also retains the
-output-integrator state in its nonlinear validation artifact. Both leave yaw
+output-integrator state in its nonlinear validation artifact and emits
+`robustness_report.json`. That standard eight-second LQI packet retains its
+nominal recovery plus constant external pitch moments of ±5% of the declared
+pitch-wrench scale. The moment enters the explicit local plant-dynamics seam
+after source-table loads; it is never added to the controller request or
+allocator output. Both leave yaw
 as an unallocated *independent* axis and do not claim individual left/right
 servo wiring or a completed racetrack. Their advertisements also publish a
 source-linearized coupled-lateral diagnostic:
@@ -1074,8 +1111,10 @@ both its capability estimate and its execution, records the actual nonzero
 throttle and elevon coordinates, and then runs the same bounded roll/pitch
 LQI realization for twenty seconds at a fixed 0.02-second cadence. This is
 stronger local recovery evidence than the eight-second screen, but it remains
-neither a yaw/sideslip, wind/bias/mass-variation, racetrack, gain-schedule,
-servo-wiring, nor flight-qualification claim.
+neither a yaw/sideslip, wind/mass-variation, racetrack, gain-schedule,
+servo-wiring, nor flight-qualification claim. The separate standard LQI
+packet is the bounded fixed pitch-offset evidence; the long-recovery endpoint
+does not extend that screen.
 
 ```bash
 taoryx vehicle compose \
@@ -1087,24 +1126,25 @@ taoryx vehicle result build/x8-local-surface-screen \
   --composition build/x8-local-surface-screen.composition.json
 
 # Substitute x8_local_physical_surface_lqi_screen_compose.yaml to execute
-# the offset-free controller; it is a separate exact composition endpoint.
+# the LQI controller and its matched pitch-offset artifact; it is a separate
+# exact composition endpoint.
 
 # Use x8_local_physical_surface_lqi_long_recovery_screen_compose.yaml for
 # fresh source-powered trim plus the twenty-second extended LQI recovery.
 ```
 
 The `x8-source-surface-local-lqi-v1` campaign is the common-host
-candidate-design workflow for the same local operating point, and the LQI
-composition screen executes that named candidate. The capability advertisement
-names
-`skywalker-x8-source-trim-roll-pitch-wrench-lqi-v1`: it shares the
-source-derived wrench projection, bounded collective/differential-elevon
-allocation, and declared rate/lag model, and passes focused eight-second and
-twenty-second local roll/pitch recoveries. Its integrators deliberately exclude yaw. The source
-derivative seam has no declared wind, bias, or mass-variation input, so this
-is not a persistent-disturbance witness. Neither local LQI screen nor LQR
-screen promotes the X8 surface-allocated racetrack beyond its explicit
-development blocker.
+candidate-design workflow for the same local operating point. It exposes an
+integral-priority lattice around the physical profile's `(0.15, 0.15)` base
+weight, with multipliers `0.1`, `1`, `10`, and `100`. Those source-coordinate
+candidates are a design aid; they are not silently substituted for the
+allocator-runtime gain. The capability advertisement separately names the
+applied physical-wrench profile,
+`skywalker-x8-source-trim-roll-pitch-wrench-lqi-v1`, and ties its selected
+integral-Q diagonal to the emitted pitch-offset screen. Its integrators
+deliberately exclude yaw. This is bounded matched pitch-moment rejection, not
+wind or mass robustness. Neither local LQI screen nor LQR screen promotes the
+X8 surface-allocated racetrack beyond its explicit development blocker.
 
 ### X8 and B747 lower-tier kinematic guidance
 
@@ -1158,15 +1198,20 @@ surface-allocation evidence.
 
 ### B747 condition-3 physical screen
 
-The B747 now likewise has a batch-only physical local screen at
-`b747_condition3_local_physical_surface_lqr_screen_v1`. It uses the pinned
-NASA CR-2144 condition-3 source trim, derives the shared three-axis LQR from
-the nonlinear source-table plant, and allocates requested moments through the
-bounded elevator, aileron, and rudder coordinates. It emits requested,
+The B747 has batch-only physical local LQR and LQI screens at
+`b747_condition3_local_physical_surface_lqr_screen_v1` and
+`b747_condition3_local_physical_surface_lqi_screen_v1`. They use the pinned
+NASA CR-2144 condition-3 source trim, derive the shared three-axis LQR from
+the nonlinear source-table plant, and allocate requested moments through the
+bounded elevator, aileron, and rudder coordinates. They emit requested,
 achieved, residual, actual-coordinate, status, resource, and control-trace
 artifacts; the throttle coordinate is retained at trim. The source package has
 no servo rate or lag data, so the screen explicitly reports ideal bounded
-coordinates rather than inventing actuator dynamics.
+coordinates rather than inventing actuator dynamics. The standard LQI packet
+also emits `robustness_report.json`: nominal plus constant external pitch
+moments of ±5% of its declared condition-3 pitch-wrench scale. The load enters
+the explicit body-dynamics seam after source-table loads and must be rejected
+through the normal controller and bounded source-table allocation.
 
 ```bash
 taoryx vehicle compose \
@@ -1178,16 +1223,17 @@ taoryx vehicle result build/b747-condition3-local-surface-screen \
   --composition build/b747-condition3-local-surface-screen.composition.json
 ```
 
-`b747-source-surface-local-lqi-v1` remains the common-host candidate-design
-workflow for the same source operating point. The capability advertisement also
-names `b747-condition3-source-surface-wrench-lqi-v1`: its cached physical
-design shares the source-derived wrench projection and passes the same focused,
-bounded-allocation initial-recovery baseline as the LQR screen. The source-table
-derivative adapter has no declared wind, bias, or mass-variation input, so that
-baseline is not a persistent-disturbance-rejection test and does not replace
-the executed LQR endpoint. Neither route establishes a gain schedule, transport
-racetrack, mass/wind robustness, servo or engine dynamics, or B747 flight
-qualification.
+`b747-source-surface-local-lqi-v1` is the common-host candidate-design
+workflow for the same source operating point. It exposes an integral-priority
+lattice around the physical profile's `(0.025, 0.025, 0.025)` base weight, with
+multipliers `0.1`, `1`, `10`, and `100`. Those source-coordinate candidates are
+a design aid, not an implicit physical-wrench runtime binding. The capability
+advertisement separately names the applied physical profile,
+`b747-condition3-source-surface-wrench-lqi-v1`, and connects that selected
+profile to the emitted pitch-offset evidence. This is bounded matched
+pitch-moment rejection only—not wind or mass robustness. Neither route
+establishes a gain schedule, transport racetrack, servo or engine dynamics, or
+B747 flight qualification.
 
 ### B747 source direct-wrench route
 

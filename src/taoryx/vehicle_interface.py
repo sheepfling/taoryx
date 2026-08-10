@@ -1143,7 +1143,7 @@ def _effector_contract(
     controls = vehicle_definition.get("controls") if isinstance(vehicle_definition, Mapping) else None
     if not isinstance(controls, list | tuple):
         return ()
-    availability: InterfaceAvailability = "planned" if tier_declared else "not_available"
+    fallback_availability: InterfaceAvailability = "planned" if tier_declared else "not_available"
     channels: list[InterfaceChannel] = []
     for item in controls:
         if not isinstance(item, Mapping) or not isinstance(item.get("name"), str):
@@ -1158,7 +1158,7 @@ def _effector_contract(
                 f"Commanded {name} control coordinate.",
                 lower=_optional_number(item.get("lower")),
                 upper=_optional_number(item.get("upper")),
-                availability=availability,
+                availability=fallback_availability,
                 provenance="source_backed",
                 sampling="held_action",
                 binding={"native_effector": name, "family_id": family_id},
@@ -3542,10 +3542,13 @@ def _derived_status_value(
                 "kinematic_body_rate_r_rad_s",
             )
         )
-        components = [value.get(name) for name in component_names]
-        if any(isinstance(component, bool) or not isinstance(component, int | float) or not math.isfinite(float(component)) for component in components):
-            return _STATUS_MISSING
-        return [float(component) for component in components]
+        kinematic_components: list[float] = []
+        for name in component_names:
+            component = value.get(name)
+            if isinstance(component, bool) or not isinstance(component, int | float) or not math.isfinite(float(component)):
+                return _STATUS_MISSING
+            kinematic_components.append(float(component))
+        return kinematic_components
     if transform == "100_kg_s_times_min_time_20_s":
         if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
             return _STATUS_MISSING

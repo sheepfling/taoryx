@@ -12,7 +12,7 @@ from __future__ import annotations
 import csv
 import json
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Literal, cast
@@ -557,7 +557,10 @@ def _dual_launch_artifact(
         "diagnostics.segment_index": "phase.segment",
     }
     sampled_times = [source.times[index] for index in indexes]
-    values = {channel_id: _dual_launch_native_values(source, native_id, indexes) for channel_id, native_id in native_ids.items()}
+    values: dict[str, list[float | None]] = {
+        channel_id: _optional_channel_values(_dual_launch_native_values(source, native_id, indexes))
+        for channel_id, native_id in native_ids.items()
+    }
     all_indexes = tuple(range(len(source.times)))
     full_position = {
         "north": _dual_launch_native_values(source, "taos.north", all_indexes),
@@ -565,10 +568,10 @@ def _dual_launch_artifact(
     }
     altitude = _dual_launch_native_values(source, "position.altitude.geodetic", all_indexes)
     full_position["down"] = [altitude[0] - value for value in altitude]
-    values["position.local.down"] = [full_position["down"][index] for index in indexes]
+    values["position.local.down"] = _optional_channel_values(full_position["down"][index] for index in indexes)
     for axis, position in full_position.items():
         velocity = _finite_difference(source.times, position)
-        values[f"velocity.local.{axis}"] = [velocity[index] for index in indexes]
+        values[f"velocity.local.{axis}"] = _optional_channel_values(velocity[index] for index in indexes)
     metadata = {item.id: item for item in model.output_schema.channels}
     source_for_channel = {
         **native_ids,
@@ -621,6 +624,13 @@ def _dual_launch_native_values(
             raise ValueError(f"dual-launch source channel {channel_id!r} contains a non-finite accepted sample")
         values.append(float(value))
     return values
+    ####
+
+
+def _optional_channel_values(values: Iterable[float]) -> list[float | None]:
+    """Widen finite samples to the optional telemetry channel value contract."""
+
+    return [float(value) for value in values]
     ####
 
 

@@ -321,6 +321,7 @@ def execute_x15_source_surface_authority_screen(
         for name in X15_SOURCE_SURFACE_NAMES
     }
     actual = _zero_effectors()
+    allocation_status: str
     rows: list[dict[str, float | int | str]] = []
     for index in range(_STEP_COUNT + 1):
         if index:

@@ -445,7 +445,7 @@ def solve_scaled_continuous_lqi(
         state_to_normalized @ b_matrix @ normalized_to_control,
         q,
         r,
-        output_matrix=output @ normalized_to_state,
+        output_matrix=(output @ normalized_to_state).tolist(),
         output_names=output_names,
         state_names=state_names,
         control_names=control_names,

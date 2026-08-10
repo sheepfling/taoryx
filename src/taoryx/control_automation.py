@@ -40,6 +40,7 @@ class ControlAutomationDeclaration:
     preferred_method: AutomaticControllerMethod = "auto"
     profile_grid_id_prefix: str | None = None
     integral_weight_multiplier: float = 8.0
+    integral_weight_multipliers: tuple[float, ...] = (1.0,)
     maximum_omitted_state_coupling: float = 1.0e-8
     linearization_options: Mapping[str, float | str] = field(default_factory=dict)
 
@@ -75,6 +76,14 @@ class ControlAutomationDeclaration:
             raise ValueError("control-automation profile-grid ID prefixes must not be empty")
         if not math.isfinite(self.integral_weight_multiplier) or self.integral_weight_multiplier <= 0.0:
             raise ValueError("control-automation integral weight multiplier must be finite and positive")
+        if (
+            not self.integral_weight_multipliers
+            or any(not math.isfinite(value) or value <= 0.0 for value in self.integral_weight_multipliers)
+            or len(self.integral_weight_multipliers) != len(set(self.integral_weight_multipliers))
+        ):
+            raise ValueError("control-automation integral weight multipliers must be unique finite positive values")
+        if self.controller_method == "lqr" and self.integral_weight_multipliers != (1.0,):
+            raise ValueError("LQR-only control automation cannot vary integral weights")
         if not math.isfinite(self.maximum_omitted_state_coupling) or self.maximum_omitted_state_coupling < 0.0:
             raise ValueError("control-automation omitted-state coupling limit must be finite and nonnegative")
         ####
@@ -111,7 +120,10 @@ class ControlAutomationDeclaration:
                         f"{self.id}.authority",
                         tuple(authority_states),
                     ),
-                    profile_grid=NormalizedLqrProfileGrid(self.profile_grid_id_prefix or f"{self.id}.{method}"),
+                    profile_grid=NormalizedLqrProfileGrid(
+                        self.profile_grid_id_prefix or f"{self.id}.{method}",
+                        integral_weight_multipliers=self.integral_weight_multipliers,
+                    ),
                     design_state_names=states,
                     design_control_names=controls,
                     controller_method=method,
@@ -146,6 +158,7 @@ class ControlAutomationDeclaration:
             "profile_grid_id_prefix": self.profile_grid_id_prefix,
             "resolved_method": self.controller_method,
             "integral_weight_multiplier": self.integral_weight_multiplier,
+            "integral_weight_multipliers": list(self.integral_weight_multipliers),
             "maximum_omitted_state_coupling": self.maximum_omitted_state_coupling,
             "linearization_options": dict(self.linearization_options),
         }

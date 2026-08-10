@@ -82,6 +82,31 @@ def test_auto_declaration_can_preserve_a_public_profile_grid_identity() -> None:
     ####
 
 
+def test_auto_declaration_can_sweep_integral_priority_for_lqi() -> None:
+    """Plug-ins can request offset-rejection profiles without owning a tuner loop."""
+
+    declaration = ControlAutomationDeclaration(
+        id="synthetic-offset-rejection",
+        campaign_id="synthetic-offset-rejection-v1",
+        family_id="synthetic",
+        tier="pseudo_6dof",
+        strategy_id="synthetic.v1",
+        node_id="trim",
+        state_scales={"position": 1.0, "velocity": 1.0},
+        control_scales={"force": 1.0},
+        offset_free_outputs=("position",),
+        integral_weight_multiplier=2.0,
+        integral_weight_multipliers=(1.0, 10.0),
+    )
+
+    node = declaration.build_campaign().nodes[0]
+
+    assert node.integral_q_diagonal == (2.0,)
+    assert node.profile_grid is not None
+    assert node.profile_grid.integral_weight_multipliers == (1.0, 10.0)
+    ####
+
+
 def test_auto_declaration_can_select_a_closed_design_subsystem() -> None:
     declaration = ControlAutomationDeclaration(
         id="synthetic-sidecar",

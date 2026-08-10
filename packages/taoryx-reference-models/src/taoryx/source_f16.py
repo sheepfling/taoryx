@@ -8,9 +8,9 @@ release qualification remain separate integration gates.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import lru_cache
-from collections.abc import Mapping
 from typing import Any
 
 import yaml
@@ -514,7 +514,7 @@ def run_f16_source_physical_lqr_schedule_transition_cases(
         plant = plant_for_coordinate(coordinate_m)
         return {"altitude_m": plant.altitude_m, "trim_pitch_rad": plant.trim_pitch_rad}
 
-    cases: dict[str, dict[str, object]] = {}
+    cases: dict[str, dict[str, Any]] = {}
     for case_id, (start_point_id, end_point_id, perturbation) in F16_SOURCE_PHYSICAL_SCHEDULE_TRANSITION_CASES.items():
         start = node_by_point_id[start_point_id]
         end = node_by_point_id[end_point_id]

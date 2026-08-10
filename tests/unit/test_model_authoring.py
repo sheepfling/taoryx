@@ -372,8 +372,10 @@ def test_registered_reference_campaigns_use_the_common_runner(
         "hummingbird-source-rotor-local-lqi-v1",
         "x15-source-release-direct-wrench-v1",
         "x15-source-release-direct-wrench-lqi-v1",
+        "x15-source-surface-local-lqi-v1",
         "hl20-source-subsonic-direct-wrench-v1",
         "hl20-source-subsonic-direct-wrench-lqi-v1",
+        "hl20-source-surface-local-lqi-v1",
     )
     expected_methods = {
         "b747-source-surface-local-lqi-v1": ("lqi", True),
@@ -392,8 +394,10 @@ def test_registered_reference_campaigns_use_the_common_runner(
         "hummingbird-source-rotor-local-lqi-v1": ("lqi", True),
         "x15-source-release-direct-wrench-v1": ("lqr", False),
         "x15-source-release-direct-wrench-lqi-v1": ("lqi", True),
+        "x15-source-surface-local-lqi-v1": ("lqi", True),
         "hl20-source-subsonic-direct-wrench-v1": ("lqr", False),
         "hl20-source-subsonic-direct-wrench-lqi-v1": ("lqi", True),
+        "hl20-source-surface-local-lqi-v1": ("lqi", True),
     }
     for registration in registry.registrations:
         report = registration.run()

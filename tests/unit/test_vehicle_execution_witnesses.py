@@ -436,8 +436,8 @@ def test_batch_witness_smoke_evaluates_a_local_controller_screen_by_its_declared
     controller_metadata = report["controller_metadata"]
     assert isinstance(controller_metadata, dict)
     assert controller_metadata["status"] == "pass"
-    assert controller_metadata["method"] == "lqi"
-    assert controller_metadata["status_trace_method"] == "lqi"
+    assert controller_metadata["method"] == "lqr"
+    assert controller_metadata["status_trace_method"] == "lqr"
     action_trace = report["action_trace"]
     assert isinstance(action_trace, dict)
     assert action_trace["status"] == "pass"

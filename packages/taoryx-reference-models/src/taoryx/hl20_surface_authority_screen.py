@@ -304,6 +304,7 @@ def execute_hl20_source_surface_authority_screen(
     desired_wrench = dict(baseline_wrench)
     desired_wrench["moment_y_nm"] = baseline_wrench["moment_y_nm"] + _REQUESTED_PITCH_INCREMENT_NM
     actual = _zero_effectors()
+    allocation_status: str
     rows: list[dict[str, float | int | str]] = []
     for index in range(_STEP_COUNT + 1):
         if index:

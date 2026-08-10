@@ -27,6 +27,7 @@ from .composition_status_trace import build_committed_status_trace, status_trace
 from .hl20_adapter import (
     HL20_SOURCE_PITCH_TRIM_ALPHA_DEG,
     HL20_SURFACE_LOCAL_STATE_NAMES,
+    HL20SourceSurfaceLocalPlant,
     build_hl20_source_surface_local_plant,
     build_hl20_source_surface_physical_lqi_design,
 )
@@ -225,9 +226,11 @@ def preflight_hl20_local_physical_surface_lqi_screen(composition: CompiledVehicl
 
     plan = compile_hl20_local_physical_surface_lqi_screen(composition)
     estimate = estimate_mission_capability(composition)
-    if estimate is None or estimate.adapter_id != _ADAPTER_ID or not isinstance(estimate.manifest.get("capability"), Mapping):
+    if estimate is None or estimate.adapter_id != _ADAPTER_ID:
         raise ValueError("HL-20 local physical surface LQI screen has no matching capability adapter")
-    capability = estimate.manifest["capability"]
+    capability = estimate.manifest.get("capability")
+    if not isinstance(capability, Mapping):
+        raise ValueError("HL-20 local physical surface LQI screen has no matching capability record")
     design = build_hl20_source_surface_physical_lqi_design()
     trim = capability.get("local_moment_balance_trim")
     trim_ready = isinstance(trim, Mapping) and trim.get("status") == "verified"
@@ -414,7 +417,7 @@ def _rows(validation: PhysicalWrenchLqiValidation, plant: object) -> list[dict[s
     ####
 
 
-def _status_samples(rows: list[dict[str, float | int | str]], plant: object) -> tuple[BatchTruthSample, ...]:
+def _status_samples(rows: list[dict[str, float | int | str]], plant: HL20SourceSurfaceLocalPlant) -> tuple[BatchTruthSample, ...]:
     source = plant.reference_source_state
     samples: list[BatchTruthSample] = []
     for index, row in enumerate(rows):

@@ -441,7 +441,7 @@ def execute_f16_local_physical_control_screen(
 def _screen_proposal(plan: F16LocalPhysicalControlScreenPlan) -> CapabilityScaledRacetrack:
     """Derive the local screen's fixed first-entry reference from the F-16 profile."""
 
-    fidelity = (
+    fidelity: Literal["rigid_body_6dof_direct_wrench", "rigid_body_6dof_surface_allocated"] = (
         "rigid_body_6dof_direct_wrench"
         if plan.mode == "direct_wrench"
         else "rigid_body_6dof_surface_allocated"

@@ -757,7 +757,7 @@ def test_vehicle_cli_lists_and_exports_composition_sections(capsys: pytest.Captu
     assert point_mass["status"] == "runnable"
     assert {"batch", "episode"} <= set(point_mass["runnable_operations"])
     assert point_mass["batch_action_trace_dispositions"] == ["emits_committed_interval_trace"]
-    assert point_mass["execution_modes"] == ["closed_loop_controller"]
+    assert point_mass["execution_modes"] == ["closed_loop_controller", "source_native_autonomous"]
     assert not any("committed interval command history" in step for step in point_mass["next_steps"])
     assert point_mass["batch_episode_parity"]["availability"] == "registered"
     assert point_mass["mission_capability_adapter"] == "taoryx.x8_racetrack.source_route.v1"
@@ -796,7 +796,7 @@ def test_vehicle_cli_lists_and_exports_composition_sections(capsys: pytest.Captu
         "episode": "not_applicable",
     }
     assert {item["operation"]: item["execution_mode"] for item in kit["execution_endpoints"]} == {
-        "batch": "closed_loop_controller",
+        "batch": "source_native_autonomous",
         "episode": "closed_loop_controller",
     }
     assert "taoryx vehicle episode-info <composition.json>" in kit["authoring_commands"]

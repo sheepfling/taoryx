@@ -23,7 +23,7 @@ records:
     family: powered_fixed_wing
     maturity: M4
     evidence_strength: public_research_surrogate
-    status: local_source_anchored_and_composable
+    status: condition3_physical_lqi_and_matched_pitch_offset_screen_composable
     next_gate: extended_controller_mission_and_local_mode_correlation
   - id: a320_openap_3dof
     composition_family_id: a320_openap_3dof
@@ -37,7 +37,7 @@ records:
     family: powered_fixed_wing
     maturity: M4
     evidence_strength: public_research_surrogate
-    status: source_powered_trim_and_extended_physical_lqi_recovery_composable
+    status: source_powered_trim_extended_physical_lqi_recovery_and_matched_pitch_offset_screen_composable
     next_gate: nonlinear_lateral_yaw_recovery_and_surface_route
   - id: hummingbird
     composition_family_id: hummingbird

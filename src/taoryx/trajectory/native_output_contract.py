@@ -582,6 +582,8 @@ def native_output_channel_metadata(model_id: str) -> tuple[TrajectoryOutputChann
             quantity=item.quantity,
             canonical_unit=item.unit,
             display_unit=item.unit,
+            data_type="string" if item.quantity == "enum" else "float64",
+            sampling_semantics="discrete_sample" if item.quantity == "enum" else "continuous_sample",
             frame=item.frame,
             interpolation=item.interpolation,
             periodicity=(
@@ -668,8 +670,18 @@ def native_output_reference_frames(model_id: str) -> tuple[TrajectoryReferenceFr
     ####
 
 
-def extract_native_channel(row: dict[str, object], binding: NativeOutputBinding) -> float:
-    """Read one finite numeric channel from an accepted native truth row."""
+def extract_native_channel(row: dict[str, object], binding: NativeOutputBinding) -> float | str:
+    """Read one output value with the exact advertised representation."""
+
+    if binding.quantity == "enum":
+        for path in binding.source_paths:
+            try:
+                value = _path_value(row, path)
+            except (KeyError, IndexError, TypeError, ValueError):
+                continue
+            if isinstance(value, str) and value:
+                return value
+        raise ValueError(f"native truth row does not contain text source data for advertised enum channel {binding.id!r}")
 
     for path in binding.source_paths:
         try:

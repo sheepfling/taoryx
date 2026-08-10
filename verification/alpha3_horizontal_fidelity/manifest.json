@@ -73,7 +73,7 @@
         },
         "rigid_body_6dof_direct_wrench": {
           "blockers": [
-            "nonlinear_direct_wrench_mission"
+            "envelope_robustness_and_flight_qualification"
           ],
           "declared_status": "development",
           "required_operations": [
@@ -174,7 +174,7 @@
         },
         "rigid_body_6dof_direct_wrench": {
           "blockers": [
-            "nonlinear_direct_wrench_mission"
+            "envelope_robustness_and_flight_qualification"
           ],
           "declared_status": "development",
           "required_operations": [
@@ -461,7 +461,7 @@
             "source_trim_acceptance",
             "stabilator_rudder_rcs_propulsion_effectivity"
           ],
-          "declared_status": "planned",
+          "declared_status": "development",
           "required_operations": [
             "state_derivative",
             "trim",
@@ -549,7 +549,7 @@
         },
         "rigid_body_6dof_direct_wrench": {
           "blockers": [
-            "direct_wrench_is_debug_comparator"
+            "local_direct_wrench_comparator_scope_only"
           ],
           "declared_status": "development",
           "required_operations": [

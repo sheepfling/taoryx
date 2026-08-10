@@ -74,6 +74,7 @@ class RuntimeRigidBodyLocalPlant(ControlPlantAdapter):
     allocation_regularization: float = 1.0e-10
     allocation_feasibility_tolerance: float = 1.0e-6
     trim_residual_mode: Literal["body_force_equilibrium", "steady_direction_glide"] = "body_force_equilibrium"
+    external_moment_environment_keys: Mapping[str, str] = field(default_factory=dict)
     _control_values: MutableMapping[str, float] = field(init=False, repr=False)
     _source_local_state: dict[str, float] = field(init=False, repr=False)
     _derivative: Derivative = field(init=False, repr=False)
@@ -87,6 +88,13 @@ class RuntimeRigidBodyLocalPlant(ControlPlantAdapter):
         self._derivative = derivative
         if not math.isfinite(self.reference_length_m) or self.reference_length_m <= 0.0:
             raise ValueError("runtime control adapter reference length must be finite and positive")
+        for axis, inertia in (
+            ("x", self.inertia_kg_m2.x),
+            ("y", self.inertia_kg_m2.y),
+            ("z", self.inertia_kg_m2.z),
+        ):
+            if not math.isfinite(inertia) or inertia <= 0.0:
+                raise ValueError(f"runtime control adapter inertia about {axis!r} must be finite and positive")
         if not self.effector_limits:
             raise ValueError("runtime control adapter requires at least one physical effector")
         if set(self.effectiveness_steps) != set(self.effector_limits):
@@ -130,6 +138,17 @@ class RuntimeRigidBodyLocalPlant(ControlPlantAdapter):
             raise ValueError("allocation feasibility tolerance must be finite and positive")
         if self.trim_residual_mode not in {"body_force_equilibrium", "steady_direction_glide"}:
             raise ValueError(f"unsupported local trim residual mode {self.trim_residual_mode!r}")
+        supported_external_moment_axes = {"moment_x_nm", "moment_y_nm", "moment_z_nm"}
+        unknown_external_moment_axes = set(self.external_moment_environment_keys) - supported_external_moment_axes
+        if unknown_external_moment_axes:
+            raise ValueError(
+                "external moment environment names unknown axes: " + ", ".join(sorted(unknown_external_moment_axes))
+            )
+        environment_names = tuple(self.external_moment_environment_keys.values())
+        if any(not isinstance(name, str) or not name.strip() for name in environment_names):
+            raise ValueError("external moment environment keys must be nonempty strings")
+        if len(environment_names) != len(set(environment_names)):
+            raise ValueError("external moment environment keys must not map one input to multiple axes")
         ####
 
     @property
@@ -170,14 +189,17 @@ class RuntimeRigidBodyLocalPlant(ControlPlantAdapter):
 
         The current runtime environment remains authoritative.  ``environment``
         is accepted to satisfy the common adapter contract but cannot be used
-        to silently replace the source problem's atmosphere or wind model.
+        to silently replace the source problem's atmosphere or wind model. An
+        adapter may explicitly declare selected external body-moment inputs;
+        those are applied after the source runtime's physical loads and never
+        through its controller or allocator.
         """
 
-        del environment
         native = self._native_state(state)
         with self._physical_controls(effectors):
             runtime = _runtime_state(native)
             derivative = self._derivative(runtime)
+        external_moment = self._external_body_moment(environment)
         # The state order is position, ECIC velocity, quaternion, body rate,
         # and resources.  Resolve velocity derivatives by their state names
         # rather than relying on a magic positional index.
@@ -205,10 +227,32 @@ class RuntimeRigidBodyLocalPlant(ControlPlantAdapter):
             "u_m_s": body_velocity_derivative.x,
             "v_m_s": body_velocity_derivative.y,
             "w_m_s": body_velocity_derivative.z,
-            "p_rad_s": derivative[_state_index("wx")],
-            "q_rad_s": derivative[_state_index("wy")],
-            "r_rad_s": derivative[_state_index("wz")],
+            "p_rad_s": derivative[_state_index("wx")] + external_moment.x / self.inertia_kg_m2.x,
+            "q_rad_s": derivative[_state_index("wy")] + external_moment.y / self.inertia_kg_m2.y,
+            "r_rad_s": derivative[_state_index("wz")] + external_moment.z / self.inertia_kg_m2.z,
         }
+        ####
+
+    def _external_body_moment(self, environment: Mapping[str, float | str]) -> Vector3:
+        """Resolve only the opt-in local external-body-moment disturbance seam.
+
+        The runtime's own environment closure intentionally remains untouched.
+        This narrow seam is for an explicitly advertised local control screen,
+        such as a constant pitch-moment offset, and therefore fails closed for
+        malformed declared values instead of treating them as zero.
+        """
+
+        values: dict[str, float] = {}
+        for wrench_axis, environment_key in self.external_moment_environment_keys.items():
+            raw_value = environment.get(environment_key, 0.0)
+            if isinstance(raw_value, bool) or not isinstance(raw_value, int | float) or not math.isfinite(float(raw_value)):
+                raise ValueError(f"{environment_key} must be finite numeric")
+            values[wrench_axis] = float(raw_value)
+        return Vector3(
+            values.get("moment_x_nm", 0.0),
+            values.get("moment_y_nm", 0.0),
+            values.get("moment_z_nm", 0.0),
+        )
         ####
 
     def trim(self, target: Mapping[str, float], initial_guess: Mapping[str, float]) -> TrimResult:
@@ -708,8 +752,14 @@ def local_rigid_body_plant_from_vehicle(
     allocation_regularization: float = 1.0e-10,
     allocation_feasibility_tolerance: float = 1.0e-6,
     trim_residual_mode: Literal["body_force_equilibrium", "steady_direction_glide"] = "body_force_equilibrium",
+    external_moment_environment_keys: Mapping[str, str] | None = None,
 ) -> RuntimeRigidBodyLocalPlant:
-    """Build a local physical-control adapter from an accepted runtime state."""
+    """Build a local physical-control adapter from an accepted runtime state.
+
+    ``external_moment_environment_keys`` maps a physical body-moment axis to
+    one opt-in local derivative-environment input.  It deliberately does not
+    expose or replace the source runtime's atmosphere or wind closure.
+    """
 
     native = RigidBody6DofState.from_values(
         vehicle.state.time,
@@ -729,6 +779,7 @@ def local_rigid_body_plant_from_vehicle(
         allocation_regularization,
         allocation_feasibility_tolerance,
         trim_residual_mode,
+        dict(external_moment_environment_keys or {}),
     )
     ####
 

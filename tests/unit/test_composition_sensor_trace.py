@@ -33,6 +33,7 @@ def _x8_sample(time_s: float, *, altitude_ft: float) -> BatchTruthSample:
                 "gama": 0.0,
                 "psi": 90.0,
                 "mass": 12.5,
+                "guidance_override_active": 0.0,
             }
         },
     )

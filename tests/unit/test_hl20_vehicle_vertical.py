@@ -317,7 +317,7 @@ def test_hl20_public_adapters_exercise_direct_and_surface_operations(
     assert direct_operations["effectiveness"] == "not_applicable"
     assert direct_operations["allocate"] == "not_applicable"
     assert surface_operations["state_derivative"] == "pass"
-    assert surface_operations["trim_fragment"] == "not_applicable"
+    assert surface_operations["trim_fragment"] == "pass"
     assert surface_operations["effectiveness"] == "pass"
     assert surface_operations["allocate"] == "pass"
     assert surface_operations["trim"] == "pass"

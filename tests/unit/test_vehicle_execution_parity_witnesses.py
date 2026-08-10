@@ -5,12 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from taoryx.vehicle_execution_parity_witnesses import validate_vehicle_execution_parity_witnesses
 
 from taoryx.batch_episode_parity_dispatch import verify_serialized_declared_batch_episode_parity
 from taoryx.composition_episode import open_vehicle_composition_episode
 from taoryx.composition_policy import PolicyDecision, run_composition_policy
 from taoryx.vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
-from taoryx.vehicle_execution_parity_witnesses import validate_vehicle_execution_parity_witnesses
 
 ROOT = Path(__file__).resolve().parents[2]
 

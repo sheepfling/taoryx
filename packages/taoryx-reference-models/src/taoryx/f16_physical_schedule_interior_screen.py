@@ -436,6 +436,7 @@ def execute_f16_physical_schedule_interior_screen(
             initial_state.update(
                 {name: float(initial_state[name]) + value for name, value in perturbation.items()}
             )
+            validation: PhysicalWrenchLqrValidation | PhysicalWrenchLqiValidation
             if plan.controller_method == "lqr":
                 if not isinstance(node, F16SourcePhysicalScheduleNode):
                     raise TypeError("F-16 LQR schedule selected an LQI node")
@@ -490,7 +491,11 @@ def execute_f16_physical_schedule_interior_screen(
     runtime: dict[str, object] = {
         "adapter_id": "taoryx.fixed_wing.daveml.v1",
         "controller_method": plan.controller_method,
-        "integral_output_names": list(nodes[0].design.result.output_names) if plan.controller_method == "lqi" else [],
+        "integral_output_names": (
+            list(nodes[0].design.result.output_names)
+            if nodes and isinstance(nodes[0], F16SourcePhysicalScheduleLqiNode)
+            else []
+        ),
         "controller_selection": "discrete_source_node_held_for_each_recovery",
         "control_realization": "surface_allocated",
         "physical_effector_allocation": True,
@@ -582,12 +587,12 @@ def _assess_case(validation: PhysicalWrenchLqrValidation | PhysicalWrenchLqiVali
 def _schedule_report(reports: list[dict[str, object]], plan: F16PhysicalScheduleInteriorScreenPlan) -> dict[str, object]:
     """Build the complete node-by-node, case-by-case physical evidence record."""
 
-    cases = [
-        case
-        for node in reports
-        for case in node["cases"]
-        if isinstance(node.get("cases"), list) and isinstance(case, dict)
-    ]
+    cases: list[dict[str, object]] = []
+    for node in reports:
+        node_cases = node.get("cases")
+        if not isinstance(node_cases, list):
+            continue
+        cases.extend(case for case in node_cases if isinstance(case, dict))
     passed_count = sum(bool(cast_mapping(case["result"], "schedule case result")["mission_pass"]) for case in cases)
     return {
         "schema": f"taoryx.f16-physical-{plan.controller_method}-schedule-interior-screen/v1alpha1",

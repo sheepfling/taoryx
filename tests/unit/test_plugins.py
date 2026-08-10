@@ -80,17 +80,17 @@ def test_bundled_vehicle_registrations_cross_the_plugin_boundary_without_id_drif
     assert {item.plugin.id for item in catalog.records("family_adapter")} == {"taoryx.reference-models"}
     assert tuple(item.id for item in catalog.records("model")) == tuple(item.id for item in catalog.records("family_adapter"))
     assert {item.plugin.id for item in catalog.records("model")} == {"taoryx.reference-models"}
-    assert len(catalog.records("mission_capability_adapter")) == 22
+    assert len(catalog.records("mission_capability_adapter")) == 32
     assert {item.plugin.id for item in catalog.records("mission_capability_adapter")} == {"taoryx.reachability", "taoryx.reference-models"}
     assert sum(item.plugin.id == "taoryx.reachability" for item in catalog.records("mission_capability_adapter")) == 4
-    assert sum(item.plugin.id == "taoryx.reference-models" for item in catalog.records("mission_capability_adapter")) == 18
+    assert sum(item.plugin.id == "taoryx.reference-models" for item in catalog.records("mission_capability_adapter")) == 28
     assert registered_vehicle_batch_factory_ids(plugins=catalog) == tuple(sorted(item.id for item in catalog.records("execution_factory")))
     assert registered_episode_factory_ids(plugins=catalog) == tuple(sorted(item.id for item in catalog.records("episode_factory")))
-    assert len(catalog.records("execution_factory")) == 17
+    assert len(catalog.records("execution_factory")) == 27
     assert sum(item.plugin.id == "taoryx.reachability" for item in catalog.records("execution_factory")) == 3
-    assert sum(item.plugin.id == "taoryx.reference-models" for item in catalog.records("execution_factory")) == 14
+    assert sum(item.plugin.id == "taoryx.reference-models" for item in catalog.records("execution_factory")) == 24
     assert sum(item.plugin.id == "taoryx.reachability" for item in catalog.records("semantic_preflight_handler")) == 4
-    assert sum(item.plugin.id == "taoryx.reference-models" for item in catalog.records("semantic_preflight_handler")) == 18
+    assert sum(item.plugin.id == "taoryx.reference-models" for item in catalog.records("semantic_preflight_handler")) == 28
     assert len(catalog.records("episode_factory")) == 6
     assert len(catalog.records("batch_episode_parity_verifier")) == 6
     assert tuple(item.id for item in catalog.records("controller_tuning_campaign")) == (
@@ -110,8 +110,10 @@ def test_bundled_vehicle_registrations_cross_the_plugin_boundary_without_id_drif
         "hummingbird-source-rotor-local-lqi-v1",
         "x15-source-release-direct-wrench-v1",
         "x15-source-release-direct-wrench-lqi-v1",
+        "x15-source-surface-local-lqi-v1",
         "hl20-source-subsonic-direct-wrench-v1",
         "hl20-source-subsonic-direct-wrench-lqi-v1",
+        "hl20-source-surface-local-lqi-v1",
     )
     assert {item.plugin.id for item in catalog.records("controller_tuning_campaign")} == {"taoryx.reference-models"}
     assert tuple(item.id for item in catalog.records("local_controller_screen_advertisement")) == (
@@ -383,12 +385,12 @@ def test_disabling_reachability_removes_only_reachability_owned_overlays() -> No
     )
     assert len(catalog.records("family_adapter")) == 9
     assert len(catalog.records("model")) == 9
-    assert len(catalog.records("mission_capability_adapter")) == 18
-    assert len(catalog.records("semantic_preflight_handler")) == 18
-    assert len(catalog.records("execution_factory")) == 14
+    assert len(catalog.records("mission_capability_adapter")) == 28
+    assert len(catalog.records("semantic_preflight_handler")) == 28
+    assert len(catalog.records("execution_factory")) == 24
     assert len(catalog.records("episode_factory")) == 6
     assert len(catalog.records("batch_episode_parity_verifier")) == 6
-    assert len(catalog.records("controller_tuning_campaign")) == 18
+    assert len(catalog.records("controller_tuning_campaign")) == 20
     assert len(catalog.records("local_controller_screen_advertisement")) == 1
     assert catalog.records("reachability_provider") == ()
     assert [(item.plugin_id, item.status) for item in catalog.diagnostics] == [
@@ -491,9 +493,9 @@ assert tuple(item.id for item in catalog.plugins) == (
     "taoryx.simple-aero",
 )
 assert len(catalog.records("family_adapter")) == 9
-assert len(catalog.records("mission_capability_adapter")) == 18
-assert len(catalog.records("semantic_preflight_handler")) == 18
-assert len(catalog.records("execution_factory")) == 14
+assert len(catalog.records("mission_capability_adapter")) == 28
+assert len(catalog.records("semantic_preflight_handler")) == 28
+assert len(catalog.records("execution_factory")) == 24
 assert len(catalog.records("local_controller_screen_advertisement")) == 1
 assert catalog.records("reachability_provider") == ()
 assert "taoryx.reachability_envelope" not in sys.modules

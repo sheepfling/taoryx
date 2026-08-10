@@ -270,6 +270,21 @@ def test_x15_source_surface_authority_screen_advertises_actual_named_surfaces_an
     ####
 
 
+def test_source_surface_allocation_status_is_stepwise_text_in_the_common_output_contract() -> None:
+    """Allocator status is semantic text rather than a coerced numeric telemetry value."""
+
+    for model_id in ("x15", "hl20_mod_k"):
+        bindings = {item.id: item for item in native_output_bindings(model_id)}
+        metadata = {item.id: item for item in native_output_channel_metadata(model_id)}
+        status = bindings["control.allocation.status"]
+        advertised = metadata[status.id]
+        assert advertised.data_type == "string"
+        assert advertised.sampling_semantics == "discrete_sample"
+        assert advertised.interpolation == "step"
+        assert extract_native_channel({"allocation_status": "feasible_near_limit"}, status) == "feasible_near_limit"
+    ####
+
+
 def test_source_surface_lqi_screens_advertise_exact_state_and_allocation_evidence() -> None:
     """Both source-surface LQI runners make their propagated state and physical allocation selectable."""
 

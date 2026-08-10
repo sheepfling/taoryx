@@ -34,7 +34,7 @@ endpoints:
       - id: hummingbird-hover-fixed-lqi-mass-variation
         kind: mass_variation
         artifact_filename: robustness_report.json
-        execution_readiness: planned
+        execution_readiness: available
         cases:
           - id: mass-0.85x
             parameters: {mass_factor: 0.85}
@@ -55,13 +55,72 @@ endpoints:
             unit: fraction
             description: Fraction of committed control samples with an allocation or actuator saturation.
         claim_boundary: >-
-          Planned discrete source-mass screen under one fixed nominal LQI design and independent case re-trims. It will not
+          Discrete source-mass screen under one fixed nominal LQI design and independent case re-trims. It does not
           establish a gain schedule, an in-flight mass transition, wind rejection, or qualification.
     maturity_record_id: hummingbird
     claim_boundary: >-
       Local source-hover attitude/rate LQI and physical four-rotor allocation
       screen only; it does not establish translation, wind rejection, battery,
       landing, gain scheduling, or vehicle qualification.
+
+  - id: x8-source-surface-roll-pitch-lqi
+    family_id: skywalker_x8
+    model_id: skywalker_x8
+    mission_id: x8_local_physical_surface_lqi_screen_v1
+    fidelity: rigid_body_6dof_surface_allocated
+    execution_mode: closed_loop_controller
+    operations:
+      - operation: batch
+        factory_id: x8_local_physical_surface_lqi_screen.v1
+        witness_id: x8-local-physical-surface-lqi-screen-batch
+    controller_campaign_id: x8-source-surface-local-lqi-v1
+    required_tuning_operations: [state_derivative, trim, linearize, effectiveness, allocate]
+    required_core_output_ids:
+      - attitude.local.roll_error
+      - attitude.local.pitch_error
+      - angular_rate.body.x
+      - angular_rate.body.y
+    required_telemetry_output_ids:
+      - mass.total
+      - control.wrench.requested.moment.y
+      - control.wrench.achieved.moment.y
+      - control.wrench.residual.moment.y
+      - diagnostics.allocation_residual_norm
+      - diagnostics.saturation_count
+      - actuator.elevon.collective.actual
+      - actuator.elevon.differential.actual
+    robustness_screens:
+      - id: x8-local-lqi-matched-pitch-wrench-offset
+        kind: constant_offset
+        artifact_filename: robustness_report.json
+        execution_readiness: available
+        cases:
+          - id: nominal
+            parameters: {pitch_wrench_bias_fraction: 0.0}
+            description: Retain the pinned source-trim local LQI recovery as the nominal reference.
+          - id: positive-pitch-offset
+            parameters: {pitch_wrench_bias_fraction: 0.05}
+            description: Apply a constant positive pitch moment equal to five percent of the declared physical-wrench pitch scale.
+          - id: negative-pitch-offset
+            parameters: {pitch_wrench_bias_fraction: -0.05}
+            description: Apply a constant negative pitch moment equal to five percent of the declared physical-wrench pitch scale.
+        metrics:
+          - id: final_feedback_error_fraction
+            maximum: 0.05
+            unit: ratio
+            description: Final local feedback error norm divided by the initial norm using the standard X8 recovery gate.
+          - id: saturation_fraction
+            maximum: 0.05
+            unit: fraction
+            description: Fraction of committed samples with an allocator or source-coordinate saturation.
+        claim_boundary: >-
+          Fixed source-trim matched pitch-moment screen through the declared external body-moment plant seam. It does not
+          establish wind or mass robustness, nonlinear yaw/sideslip recovery, a gain schedule, route tracking, or qualification.
+    maturity_record_id: skywalker_x8
+    claim_boundary: >-
+      Local source-trim X8 roll/pitch LQI and bounded collective/differential-elevon allocation only, plus one fixed
+      matched external pitch-moment screen; it does not establish yaw authority, wind or mass robustness, a racetrack,
+      a gain schedule, individual-servo wiring, or flight qualification.
 
   - id: f16-source-node-surface-lqr-schedule-transition
     family_id: f16_s119
@@ -157,7 +216,7 @@ endpoints:
       - id: x15-local-lqi-matched-pitch-wrench-offset
         kind: constant_offset
         artifact_filename: robustness_report.json
-        execution_readiness: planned
+        execution_readiness: available
         cases:
           - id: nominal
             parameters: {pitch_wrench_bias_fraction: 0.0}
@@ -178,14 +237,13 @@ endpoints:
             unit: fraction
             description: Fraction of committed samples with an allocation or surface saturation.
         claim_boundary: >-
-          Planned matched-wrench offset screen at the frozen X-15 source fixture. It does not turn the local source fragment
+          Matched-wrench offset screen at the frozen X-15 source fixture. It does not turn the local source fragment
           into a wind model, full-state trim, propulsion/RCS, navigation, or qualification result.
     maturity_record_id: x15
     claim_boundary: >-
       Local frozen-translation X-15 source-surface attitude/rate LQI recovery
       only; it does not establish full-state trim, translation, propulsion or
-      RCS allocation, persistent-disturbance rejection, guidance, or flight
-      qualification.
+      RCS allocation, wind or mass robustness, guidance, or flight qualification.
 
   - id: hl20-source-surface-attitude-rate-lqi
     family_id: hl20_mod_k

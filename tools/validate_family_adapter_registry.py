@@ -23,6 +23,24 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from taoryx.hl20_adapter import build_hl20_source_adapter, build_hl20_source_surface_local_plant
+from taoryx.nesc_adapter import build_nesc_replay_adapter
+from taoryx.source_f16 import build_f16_source_physical_plant
+from taoryx.source_table_fixed_wing import (
+    build_b747_condition3_source_table_plant,
+    build_x8_source_table_plant,
+)
+from taoryx.source_table_multirotor import build_hummingbird_individual_rotor_source_table_plant
+from taoryx.trajectory.f16_reduced_adapter import F16PointMassControlPlant, F16Pseudo6DOFControlPlant
+from taoryx.trajectory.f16_reductions import F16AttitudeResponsePseudo6DOFModel, F16PointMass3DOFModel
+from taoryx.trajectory.hummingbird_adapter import build_hummingbird_reduced_control_plant
+from taoryx.x15_adapter import (
+    build_x15_source_direct_wrench_adapter,
+    build_x15_source_direct_wrench_plant,
+    build_x15_source_surface_local_adapter,
+    build_x15_source_surface_local_plant,
+)
+
 from taoryx.family_adapter import (
     AdapterChannel,
     FamilyAdapterDescriptor,
@@ -36,15 +54,7 @@ from taoryx.family_adapter_registry import (
     FamilyAdapterRegistry,
 )
 from taoryx.fidelity_contracts import FidelityTier
-from taoryx.hl20_adapter import build_hl20_source_adapter
 from taoryx.horizontal_fidelity import load_horizontal_registry, validate_horizontal_fidelity
-from taoryx.nesc_adapter import build_nesc_replay_adapter
-from taoryx.source_f16 import build_f16_source_physical_plant
-from taoryx.source_table_fixed_wing import (
-    build_b747_condition3_source_table_plant,
-    build_x8_source_table_plant,
-)
-from taoryx.source_table_multirotor import build_hummingbird_individual_rotor_source_table_plant
 from taoryx.trajectory import (
     A320OpenAPControlPlant,
     A320OpenAPModel,
@@ -52,14 +62,7 @@ from taoryx.trajectory import (
     A320Pseudo6DOFModel,
     F16ReferencePhysicalPlant,
 )
-from taoryx.trajectory.f16_reduced_adapter import F16PointMassControlPlant, F16Pseudo6DOFControlPlant
-from taoryx.trajectory.f16_reductions import F16AttitudeResponsePseudo6DOFModel, F16PointMass3DOFModel
-from taoryx.trajectory.hummingbird_adapter import build_hummingbird_reduced_control_plant
 from taoryx.trajectory.reduced_control_plant import ReducedOrderControlPlant
-from taoryx.x15_adapter import (
-    build_x15_source_direct_wrench_adapter,
-    build_x15_source_direct_wrench_plant,
-)
 
 OUTPUT = ROOT / "verification/alpha3_horizontal_fidelity/adapter_registry.json"
 _SURFACE: FidelityTier = "rigid_body_6dof_surface_allocated"
@@ -352,6 +355,17 @@ def _a320_probe(adapter: StandardFamilyAdapter) -> AdapterProbeCase:
 def _hl20_probe(adapter: StandardFamilyAdapter) -> AdapterProbeCase:
     """Build the declared local Mach-1, alpha-5 source-surface witness."""
 
+    if adapter.describe().tier == _SURFACE:
+        plant = build_hl20_source_surface_local_plant()
+        state = plant.reference_state
+        effectors = plant.reference_effectors
+        return AdapterProbeCase(
+            state=state,
+            effectors=effectors,
+            trim_target=state,
+            trim_initial_guess=effectors,
+            previous_effectors=effectors,
+        )
     speed = 340.294
     alpha_rad = 5.0 * 3.141592653589793 / 180.0
     state = {
@@ -375,7 +389,19 @@ def _hl20_probe(adapter: StandardFamilyAdapter) -> AdapterProbeCase:
 
 
 def _x15_probe(adapter: StandardFamilyAdapter) -> AdapterProbeCase:
-    """Build a local release/glide operating point for the direct bridge."""
+    """Build a local operating point for the direct or surface bridge."""
+
+    if adapter.describe().tier == _SURFACE:
+        plant = build_x15_source_surface_local_plant()
+        state = dict(plant.reference_state)
+        effectors = {name: 0.0 for name in plant.control_names}
+        return AdapterProbeCase(
+            state=state,
+            effectors=effectors,
+            trim_target=state,
+            trim_initial_guess=effectors,
+            previous_effectors=effectors,
+        )
 
     plant = build_x15_source_direct_wrench_plant()
     effectors = {name: 0.0 for name in adapter.control_names}
@@ -386,6 +412,15 @@ def _x15_probe(adapter: StandardFamilyAdapter) -> AdapterProbeCase:
         trim_initial_guess=effectors,
         previous_effectors=effectors,
     )
+    ####
+
+
+def _build_x15_adapter(tier: FidelityTier) -> StandardFamilyAdapter:
+    """Select the executable direct-wrench or source-surface local bridge."""
+
+    if tier == _SURFACE:
+        return build_x15_source_surface_local_adapter(tier)
+    return build_x15_source_direct_wrench_adapter(tier)
     ####
 
 
@@ -494,10 +529,10 @@ def build_registry() -> FamilyAdapterRegistry:
             "x15",
             "taoryx.high_energy.fixed_wing.v1",
             "available",
-            build_x15_source_direct_wrench_adapter,
+            _build_x15_adapter,
             probe_factory=_x15_probe,
-            supported_tiers=(_DIRECT,),
-            note="source rigid-body local release/glide loads are executable through the explicit direct-wrench bridge; physical effectors and regime scheduling remain planned",
+            supported_tiers=(_DIRECT, _SURFACE),
+            note="source direct-wrench release/glide and local source-surface attitude/rate bridges are executable; full physical trim, propulsion/RCS effectivity, and regime scheduling remain planned",
         ),
         FamilyAdapterRegistration(
             "hl20_mod_k",

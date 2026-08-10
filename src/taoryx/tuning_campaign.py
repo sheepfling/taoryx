@@ -117,6 +117,7 @@ class TuningCampaignNode:
                     "id": profile.id,
                     "q_diagonal": list(profile.q_diagonal),
                     "r_diagonal": list(profile.r_diagonal),
+                    "integral_weight_multiplier": profile.integral_weight_multiplier,
                 }
                 for profile in self.profiles
             ],
@@ -387,29 +388,36 @@ def _run_node(
 
     try:
         profiles = node.resolved_profiles(len(design_state_names), len(design_control_names))
-        report_args = {
-            "state_names": design_state_names,
-            "control_names": design_control_names,
-            "state_scales": node.state_scales,
-            "control_scales": node.control_scales,
-            "profiles": profiles,
-            "design_source": (
-                f"{campaign.campaign_id}:{node.node_id}:"
-                f"{provenance.nonlinear_plant_id}@{provenance.nonlinear_plant_revision}"
-            ),
-        }
-        report = (
-            tune_lqi_profiles(
+        design_source = (
+            f"{campaign.campaign_id}:{node.node_id}:"
+            f"{provenance.nonlinear_plant_id}@{provenance.nonlinear_plant_revision}"
+        )
+        if node.controller_method == "lqi":
+            report = tune_lqi_profiles(
                 campaign.family_id,
                 design_a_matrix,
                 design_b_matrix,
                 output_names=node.integral_output_names,
                 integral_q_diagonal=node.integral_q_diagonal,
-                **report_args,
+                state_names=design_state_names,
+                control_names=design_control_names,
+                state_scales=node.state_scales,
+                control_scales=node.control_scales,
+                profiles=profiles,
+                design_source=design_source,
             )
-            if node.controller_method == "lqi"
-            else tune_lqr_profiles(campaign.family_id, design_a_matrix, design_b_matrix, **report_args)
-        )
+        else:
+            report = tune_lqr_profiles(
+                campaign.family_id,
+                design_a_matrix,
+                design_b_matrix,
+                state_names=design_state_names,
+                control_names=design_control_names,
+                state_scales=node.state_scales,
+                control_scales=node.control_scales,
+                profiles=profiles,
+                design_source=design_source,
+            )
     except (TypeError, ValueError, RuntimeError) as error:
         return TuningCampaignNodeResult(
             node.node_id,

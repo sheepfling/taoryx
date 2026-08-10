@@ -262,7 +262,7 @@ vehicles:
     realization:
       force_source: coefficient_table
       moment_source: aerodynamic_tables
-      actuator_realization: source_aerodynamic_control_coordinates_not_promoted_to_physical_lqr
+      actuator_realization: source_aerodynamic_control_coordinates_local_surface_allocator
       propulsion_model: time_indexed_full_thrust_and_mass_flow_history_in_staged_cases
       resource_model: propellant_mass_flow_in_staged_cases
       claim: source-bounded X-15 aero/propulsion response in declared cases

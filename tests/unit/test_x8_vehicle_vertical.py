@@ -487,6 +487,11 @@ def test_x8_source_surface_lqi_campaign_runs_through_the_common_host(
     assert sources.get("realization_availability") in {None, "blocked_local_design_allowed_for_registered_campaign"}
     assert lqr["method"] == "lqi"
     assert lqr["integral_output_names"] == ["roll_error_rad", "pitch_error_rad"]
+    candidates = cast(list[dict[str, object]], lqr["candidates"])
+    assert any(
+        cast(dict[str, object], candidate["weights"])["integral_q_diagonal"] == [0.15, 0.15]
+        for candidate in candidates
+    )
     ####
 
 
@@ -495,8 +500,8 @@ def test_x8_physical_lqi_design_passes_the_bounded_source_local_baseline() -> No
 
     This only checks the declared roll/pitch local recovery.  The X8's
     differential-elevon coordinate has coupled lateral influence, but no
-    independent yaw-moment channel, and the source derivative seam does not
-    declare a wind, bias, or mass perturbation input.
+    independent yaw-moment channel. The declared external pitch-moment seam
+    is used only by the separate fixed-offset evidence screen, not tuning.
     """
 
     plant = build_x8_source_table_plant()
@@ -527,6 +532,7 @@ def test_x8_physical_lqi_design_passes_the_bounded_source_local_baseline() -> No
     assert design.result.hurwitz
     assert design.result.output_names == ("roll_error_rad", "pitch_error_rad")
     assert design.integral_q_diagonal == (0.15, 0.15)
+    assert plant.external_moment_environment_keys == {"moment_y_nm": "external_pitch_moment_bias_nm"}
     assert validation.integrators_exercised
     assert final_error_fraction <= 0.05
     assert validation.final_controlled_actual_residual <= 0.005
@@ -562,7 +568,7 @@ def test_x8_local_source_table_surface_lqr_screen_runs_through_public_compositio
     assert lqi_candidate["method"] == "lqi"
     assert lqi_candidate["controller_id"] == "skywalker-x8-source-trim-roll-pitch-wrench-lqi-v1"
     assert lqi_candidate["physical_allocation_baseline"] == "focused_bounded_source_local_recovery_passed"
-    assert lqi_candidate["persistent_disturbance_status"] == "not_executable_without_a_declared_source_derivative_environment"
+    assert lqi_candidate["persistent_disturbance_status"] == "executed_by_paired_standard_lqi_screen"
     assert lqi_candidate["physical_screen_status"] == "not_executed_by_this_lqr_screen"
     lqi_execution = cast(dict[str, object], lqi_candidate["physical_screen_execution"])
     assert lqi_execution == {
@@ -584,7 +590,7 @@ def test_x8_local_source_table_surface_lqr_screen_runs_through_public_compositio
 def test_x8_local_source_table_surface_lqi_screen_runs_through_public_composition(
     tmp_path: Path,
 ) -> None:
-    """The offset-free candidate is an exact public Composition endpoint."""
+    """The physical LQI profile emits its bounded pitch-offset evidence packet."""
 
     composition = _x8_local_surface_lqi_composition()
     batch = execute_vehicle_composition_batch(composition, tmp_path / "x8-local-surface-lqi")
@@ -602,15 +608,34 @@ def test_x8_local_source_table_surface_lqi_screen_runs_through_public_compositio
     assert runtime["controller_method"] == "lqi"
     assert runtime["control_realization"] == "source_table_coordinate_physical_wrench_lqi_allocation"
     assert runtime["physical_effector_allocation"] is True
+    assert runtime["integral_q_diagonal"] == [0.15, 0.15]
+    offset_runtime = cast(dict[str, object], runtime["matched_pitch_offset_screen"])
+    assert offset_runtime["status"] == "applied"
+    assert offset_runtime["pass"] is True
     assert lqi_candidate["physical_screen_status"] == "executed_by_this_lqi_screen"
     assert cast(dict[str, object], lqi_candidate["physical_screen_execution"])["status"] == "executed_by_this_lqi_screen"
-    assert lqi_candidate["persistent_disturbance_status"] == "not_executable_without_a_declared_source_derivative_environment"
+    assert lqi_candidate["persistent_disturbance_status"] == "executed_by_this_screen"
+    automation = cast(dict[str, object], lqi_candidate["controller_automation"])
+    assert cast(dict[str, object], automation["integral_priority_grid"])["multipliers"] == [0.1, 1.0, 10.0, 100.0]
+    assert cast(dict[str, object], automation["physical_wrench_profile"])["integral_q_diagonal"] == [0.15, 0.15]
     assert (batch.output_dir / "nonlinear_validation.json").is_file()
+    assert (batch.output_dir / "robustness_report.json").is_file()
     assert (batch.output_dir / "status_trace.json").is_file()
     nonlinear_validation = cast(dict[str, object], json.loads((batch.output_dir / "nonlinear_validation.json").read_text()))
+    robustness = cast(dict[str, object], json.loads((batch.output_dir / "robustness_report.json").read_text()))
     metrics = cast(dict[str, object], nonlinear_validation["metrics"])
     assert nonlinear_validation["schema"] == "taoryx.physical-lqi-validation/v1alpha1"
     assert metrics["integrators_exercised"] is True
+    assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["id"] == "x8-local-lqi-matched-pitch-wrench-offset"
+    assert robustness["kind"] == "constant_offset"
+    assert robustness["pass"] is True
+    cases = cast(list[dict[str, object]], robustness["cases"])
+    assert [case["id"] for case in cases] == ["nominal", "positive-pitch-offset", "negative-pitch-offset"]
+    assert [cast(dict[str, float], case["parameters"])["pitch_wrench_bias_fraction"] for case in cases] == [0.0, 0.05, -0.05]
+    assert all(case["status"] == "pass" for case in cases)
+    assert all(cast(dict[str, float], case["metrics"])["final_feedback_error_fraction"] <= 0.05 for case in cases)
+    assert all(cast(dict[str, float], case["metrics"])["saturation_fraction"] <= 0.05 for case in cases)
     ####
 
 

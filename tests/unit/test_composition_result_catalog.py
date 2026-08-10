@@ -335,7 +335,7 @@ def test_result_catalog_binds_interface_and_variant_provenance_to_the_compositio
     assert interface_provenance["status"] == "verified"
     assert interface_provenance["interface_id"] == "skywalker_x8/point_mass_3dof"
     assert interface_provenance["execution_bindings"][0]["factory_id"] == "language_backed_powered_fixed_wing.v1"
-    assert interface_provenance["execution_bindings"][0]["execution_mode"] == "closed_loop_controller"
+    assert interface_provenance["execution_bindings"][0]["execution_mode"] == "source_native_autonomous"
     reproduction = record["reproduction_evidence"]
     assert reproduction["status"] == "verified"
     assert reproduction["execution_factory_id"] == "language_backed_powered_fixed_wing.v1"
@@ -343,7 +343,7 @@ def test_result_catalog_binds_interface_and_variant_provenance_to_the_compositio
     identity = release["packets"][0]["execution_identity"]
     assert identity["composition"]["vehicle_id"] == "skywalker_x8"
     assert identity["composition"]["fidelity"] == "point_mass_3dof"
-    assert identity["interface"]["execution_bindings"][0]["execution_mode"] == "closed_loop_controller"
+    assert identity["interface"]["execution_bindings"][0]["execution_mode"] == "source_native_autonomous"
     assert identity["capability_preflight"]["status"] == "missing"
     assert identity["reproduction"]["status"] == "verified"
     assert record["graph_execution_evidence"]["status"] == "missing"

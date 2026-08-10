@@ -13,7 +13,7 @@ from __future__ import annotations
 import math
 import re
 import tempfile
-from collections.abc import Mapping
+from collections.abc import Mapping, MutableMapping
 from dataclasses import dataclass, replace
 from functools import lru_cache
 from pathlib import Path
@@ -96,6 +96,16 @@ X15_SOURCE_SURFACE_NAMES: tuple[str, ...] = (
     "differential_stabilator",
     "rudder",
 )
+X15_SOURCE_SURFACE_LQI_INTEGRAL_Q_DIAGONAL = (100_000.0, 100_000.0, 100_000.0)
+"""Pinned physical-wrench LQI profile selected for the local offset screen.
+
+The source-surface campaign remains available in native surface coordinates.
+This physical-wrench profile is deliberately separate: it is applied before
+the real source-surface allocator and was selected against the bounded,
+matched pitch-moment endpoint screen rather than by a hand-adjusted runtime
+gain.  The value is not a gain schedule, a mass adaptation law, or a claim
+outside the pinned release fixture.
+"""
 X15_SOURCE_SURFACE_BOUNDS_DEG: dict[str, tuple[float, float]] = {
     "symmetric_stabilator": (-14.9, 34.9),
     "differential_stabilator": (-20.05, 20.05),
@@ -308,6 +318,8 @@ class X15SourceDirectWrenchPlant:
                 raise ValueError(f"X-15 source-surface position for {name!r} lies outside its declared bounds")
         with _X15_SOURCE_EVALUATOR_LOCK:
             controls = self.vehicle.control_values
+            if not isinstance(controls, MutableMapping):
+                raise TypeError("X-15 source evaluator did not expose mutable control storage")
             previous = dict(controls)
             try:
                 for name, value in surface_positions_deg.items():
@@ -572,9 +584,15 @@ class X15SourceSurfaceLocalPlant:
         effectors: Mapping[str, float],
         environment: Mapping[str, float | str],
     ) -> Mapping[str, float]:
-        """Evaluate source loads plus local 3-2-1 attitude-error kinematics."""
+        """Evaluate source loads plus local 3-2-1 attitude-error kinematics.
 
-        del environment
+        ``external_pitch_moment_bias_nm`` is an explicit local-screen-only
+        disturbance seam.  It is applied to the physical pitch angular
+        acceleration after source-surface loads, never injected into the
+        controller or allocator.  Callers must name it in their endpoint
+        evidence; its presence is not a wind or full-flight environment model.
+        """
+
         self._validate_inputs(state, effectors)
         local_state = {
             **{
@@ -594,12 +612,14 @@ class X15SourceSurfaceLocalPlant:
         p = float(state["p_rad_s"])
         q = float(state["q_rad_s"])
         r = float(state["r_rad_s"])
-        return {
+        derivative = {
             "roll_error_rad": p + q * sine_roll * math.tan(pitch) + r * cosine_roll * math.tan(pitch),
             "pitch_error_rad": q * cosine_roll - r * sine_roll,
             "yaw_error_rad": (q * sine_roll + r * cosine_roll) / cosine_pitch,
             **{name: float(source_derivative[name]) for name in ("p_rad_s", "q_rad_s", "r_rad_s")},
         }
+        derivative["q_rad_s"] += _external_pitch_moment_bias_nm(environment) / X15_INERTIA_BODY_KG_M2.y
+        return derivative
         ####
 
     def _trim_spec(self, target: Mapping[str, float], initial_guess: Mapping[str, float]) -> TrimSpec:
@@ -710,7 +730,13 @@ class X15SourceSurfaceLocalPlant:
                 continue
             _, positive = self.source_plant.source_surface_loads(local_state, plus)
             _, negative = self.source_plant.source_surface_loads(local_state, minus)
-            columns.append(tuple((float(positive[axis]) - float(negative[axis])) / denominator for axis in axes))
+            columns.append(
+                (
+                    (float(positive["moment_x_nm"]) - float(negative["moment_x_nm"])) / denominator,
+                    (float(positive["moment_y_nm"]) - float(negative["moment_y_nm"])) / denominator,
+                    (float(positive["moment_z_nm"]) - float(negative["moment_z_nm"])) / denominator,
+                )
+            )
         return EffectorEffectiveness(
             wrench_names=axes,
             effector_names=self.control_names,
@@ -761,6 +787,16 @@ class X15SourceSurfaceLocalPlant:
         ####
 
 
+def _external_pitch_moment_bias_nm(environment: Mapping[str, float | str]) -> float:
+    """Resolve the one declared local external pitch-moment disturbance seam."""
+
+    value = environment.get("external_pitch_moment_bias_nm", 0.0)
+    if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
+        raise ValueError("external_pitch_moment_bias_nm must be finite numeric")
+    return float(value)
+    ####
+
+
 def build_x15_source_surface_local_plant() -> X15SourceSurfaceLocalPlant:
     """Build a caller-owned physical-source local feedback plant facade."""
 
@@ -784,7 +820,7 @@ def build_x15_source_surface_local_adapter(tier: FidelityTier) -> StandardFamily
     descriptor = descriptor_from_control_plant(
         plant,
         family_id="x15",
-        adapter_id="taoryx.x15_source_surface_local.v1",
+        adapter_id="taoryx.high_energy.fixed_wing.v1",
         physical_family="powered_fixed_wing",
         tier=tier,
         state_units={
@@ -877,7 +913,7 @@ def build_x15_source_surface_physical_lqi_design() -> PhysicalWrenchLqiDesign:
         output_names=("roll_error_rad", "pitch_error_rad", "yaw_error_rad"),
         q_diagonal=lqr.q_diagonal,
         r_diagonal=lqr.r_diagonal,
-        integral_q_diagonal=(0.1, 0.1, 0.1),
+        integral_q_diagonal=X15_SOURCE_SURFACE_LQI_INTEGRAL_Q_DIAGONAL,
         state_scales=lqr.state_scales,
         wrench_scales=lqr.wrench_scales,
     )
@@ -910,6 +946,7 @@ def build_x15_source_surface_lqi_tuning_campaign() -> TuningCampaign:
         authority_state_names=X15_SURFACE_LOCAL_STATE_NAMES,
         offset_free_outputs=("roll_error_rad", "pitch_error_rad", "yaw_error_rad"),
         integral_weight_multiplier=0.1,
+        integral_weight_multipliers=(1.0, 1.0e2, 1.0e4, 1.0e6),
         profile_grid_id_prefix="x15-source-surface-local-lqi",
         linearization_options={"comparison_absolute_floor": 1.0e-8},
     ).build_campaign()

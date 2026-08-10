@@ -146,6 +146,7 @@ def episode_channel_value_space(
     normalized = name.casefold()
     source_name = normalized.split(".", maxsplit=1)[1] if normalized.partition(".")[0].isdigit() else normalized
     if unit == "boolean" or normalized in {
+        "guidance-override-enabled",
         "motors_enabled",
         "contact",
         "wrench_saturated",
@@ -487,12 +488,14 @@ class LanguageBackedCompositionEpisode:
         return tuple(
             EpisodeChannel(
                 control.name,
-                semantic_by_native[control.name].canonical_unit if control.name in semantic_by_native else control.unit,
-                control.lower,
-                control.upper,
-                "language-backed runtime control",
+                semantic.canonical_unit if semantic is not None else control.unit,
+                semantic.lower if semantic is not None and semantic.value_type == "boolean" else control.lower,
+                semantic.upper if semantic is not None and semantic.value_type == "boolean" else control.upper,
+                semantic.description if semantic is not None and semantic.value_type == "boolean" else "language-backed runtime control",
+                semantic.value_space if semantic is not None and semantic.value_type == "boolean" else None,
             )
             for control in self._session.controls
+            for semantic in (semantic_by_native.get(control.name),)
         )
         ####
 

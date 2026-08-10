@@ -35,7 +35,6 @@ from .control_automation import ControlAutomationDeclaration
 from .direct_wrench import DIRECT_WRENCH_NAMES, DirectWrenchLimits, add_direct_wrench_to_local_derivative
 from .family_adapter import (
     AdapterChannel,
-    FamilyAdapterDescriptor,
     StandardFamilyAdapter,
     TrimFragmentResult,
     descriptor_from_control_plant,
@@ -836,7 +835,7 @@ class HL20SourceDirectWrenchTuningPlant:
         )
         ####
 
-    def effectiveness(self, state: Mapping[str, float], effectors: Mapping[str, float]) -> None:
+    def effectiveness(self, state: Mapping[str, float], effectors: Mapping[str, float]) -> EffectorEffectiveness:
         """Reject physical-effector effectiveness at the bridge tier."""
 
         del state, effectors
@@ -849,7 +848,7 @@ class HL20SourceDirectWrenchTuningPlant:
         desired_wrench: Mapping[str, float],
         previous_effectors: Mapping[str, float],
         dt_s: float,
-    ) -> None:
+    ) -> PhysicalAllocationStep:
         """Reject physical allocation at the direct-wrench bridge tier."""
 
         del state, desired_wrench, previous_effectors, dt_s
@@ -1213,7 +1212,11 @@ def build_hl20_source_surface_adapter(
             "closed-loop trajectory qualification",
         ),
     )
-    return StandardFamilyAdapter.from_control_plant(descriptor, plant)
+    return StandardFamilyAdapter.from_control_plant(
+        descriptor,
+        plant,
+        trim_fragment_provider=_hl20_trim_fragment,
+    )
     ####
 
 

@@ -82,6 +82,10 @@ def test_every_native_episode_tuple_uses_common_stateful_session(witness: object
         assert minimum == runtime_channel.minimum
         assert maximum == runtime_channel.maximum
         assert native.value_space.model_dump(mode="json") == runtime_channel.value_space
+        if channel_id == "guidance-override-enabled":
+            assert runtime_channel.data_type == "boolean"
+            assert runtime_channel.minimum is None
+            assert runtime_channel.maximum is None
     assert MissionCompositionSessionDescriptor.model_validate_json(descriptor.model_dump_json(by_alias=True)) == descriptor
 
     inspect_request = MissionCompositionInspectSessionRequest(session_id=session_id)

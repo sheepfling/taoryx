@@ -5,7 +5,7 @@
     "unexpected_registered_families": []
   },
   "claim_boundary": "This is adapter-contract conformance evidence; it is not a vehicle-family qualification or a claim that every advertised tier is implemented.",
-  "declared_tier_check_count": 20,
+  "declared_tier_check_count": 21,
   "executable_witness_count": 9,
   "horizontal_lowering": {
     "catalog": "verification/pseudo6dof_profiles.yaml",
@@ -418,7 +418,7 @@
               "source_trim_acceptance",
               "stabilator_rudder_rcs_propulsion_effectivity"
             ],
-            "declared_status": "planned",
+            "declared_status": "development",
             "required_operations": [
               "state_derivative",
               "trim",
@@ -775,9 +775,9 @@
   "planned_family_count": 0,
   "promotion_matrix": {
     "declared_status_counts": {
-      "development": 29,
+      "development": 30,
       "not_applicable": 2,
-      "planned": 5
+      "planned": 4
     },
     "entries": [
       {
@@ -1158,16 +1158,21 @@
       {
         "blockers": [
           "source_trim_acceptance",
-          "stabilator_rudder_rcs_propulsion_effectivity",
-          "operation_state_derivative_not_passed",
-          "operation_trim_not_passed",
-          "operation_linearize_not_passed",
-          "operation_effectiveness_not_passed",
-          "operation_allocate_not_passed"
+          "stabilator_rudder_rcs_propulsion_effectivity"
         ],
-        "declared_status": "planned",
+        "declared_status": "development",
         "family_id": "x15",
-        "operation_status": {},
+        "operation_status": {
+          "allocate": "pass",
+          "effectiveness": "pass",
+          "linearize": "pass",
+          "observe": "not_applicable",
+          "replay": "not_applicable",
+          "resource_rates": "not_applicable",
+          "state_derivative": "pass",
+          "trim": "pass",
+          "trim_fragment": "not_applicable"
+        },
         "profile_id": "x15.surface_allocated_6dof.v1",
         "required_operations": [
           "state_derivative",
@@ -1177,7 +1182,7 @@
           "allocate"
         ],
         "tier": "rigid_body_6dof_surface_allocated",
-        "validation_status": "planned"
+        "validation_status": "pass"
       },
       {
         "blockers": [
@@ -1336,12 +1341,12 @@
         "operation_status": {
           "allocate": "pass",
           "effectiveness": "pass",
-          "linearize": "not_applicable",
+          "linearize": "pass",
           "observe": "not_applicable",
           "replay": "not_applicable",
           "resource_rates": "not_applicable",
           "state_derivative": "pass",
-          "trim": "not_applicable",
+          "trim": "pass",
           "trim_fragment": "pass"
         },
         "profile_id": "hl20.surface_allocated_6dof.v1",
@@ -1491,8 +1496,8 @@
     "validation_status_counts": {
       "not_applicable": 2,
       "not_checked": 9,
-      "pass": 20,
-      "planned": 5
+      "pass": 21,
+      "planned": 4
     }
   },
   "registry": {
@@ -2056,7 +2061,7 @@
           "operations": [
             {
               "details": {
-                "channel_count": 7
+                "channel_count": 6
               },
               "message": "finite derivative returned",
               "operation": "state_derivative",
@@ -2064,9 +2069,9 @@
             },
             {
               "details": {},
-              "message": "open-loop or passive adapter has no declared operation",
+              "message": "physical trim returned an accepted result",
               "operation": "trim",
-              "status": "not_applicable"
+              "status": "pass"
             },
             {
               "details": {
@@ -2080,15 +2085,18 @@
               "status": "pass"
             },
             {
-              "details": {},
-              "message": "open-loop or passive adapter has no declared operation",
+              "details": {
+                "control_dimension": 7,
+                "state_dimension": 6
+              },
+              "message": "provenance-bearing A/B matrices returned",
               "operation": "linearize",
-              "status": "not_applicable"
+              "status": "pass"
             },
             {
               "details": {
                 "effector_channels": 7,
-                "wrench_channels": 6
+                "wrench_channels": 3
               },
               "message": "finite local effectiveness returned",
               "operation": "effectiveness",
@@ -2104,19 +2112,19 @@
             },
             {
               "details": {},
-              "message": "open-loop or passive adapter has no declared operation",
+              "message": "operation was not declared by the family adapter",
               "operation": "resource_rates",
               "status": "not_applicable"
             },
             {
               "details": {},
-              "message": "open-loop or passive adapter has no declared operation",
+              "message": "operation was not declared by the family adapter",
               "operation": "observe",
               "status": "not_applicable"
             },
             {
               "details": {},
-              "message": "state-derivative adapter does not expose source replay",
+              "message": "participating plant adapter does not expose source replay",
               "operation": "replay",
               "status": "not_applicable"
             }
@@ -3529,6 +3537,95 @@
         "tier": "rigid_body_6dof_direct_wrench"
       },
       {
+        "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+        "conformance": {
+          "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+          "family_id": "x15",
+          "findings": [],
+          "schema": "taoryx.family-adapter-conformance/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "family_id": "x15",
+        "message": "conformance and operation probes passed",
+        "probe": {
+          "adapter_id": "taoryx.high_energy.fixed_wing.v1",
+          "blocked_count": 0,
+          "family_id": "x15",
+          "operations": [
+            {
+              "details": {
+                "channel_count": 6
+              },
+              "message": "finite derivative returned",
+              "operation": "state_derivative",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "physical trim returned an accepted result",
+              "operation": "trim",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "trim_fragment",
+              "status": "not_applicable"
+            },
+            {
+              "details": {
+                "control_dimension": 3,
+                "state_dimension": 6
+              },
+              "message": "provenance-bearing A/B matrices returned",
+              "operation": "linearize",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "effector_channels": 3,
+                "wrench_channels": 3
+              },
+              "message": "finite local effectiveness returned",
+              "operation": "effectiveness",
+              "status": "pass"
+            },
+            {
+              "details": {
+                "status": "feasible"
+              },
+              "message": "bounded allocation returned achieved wrench",
+              "operation": "allocate",
+              "status": "pass"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "resource_rates",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "operation was not declared by the family adapter",
+              "operation": "observe",
+              "status": "not_applicable"
+            },
+            {
+              "details": {},
+              "message": "participating plant adapter does not expose source replay",
+              "operation": "replay",
+              "status": "not_applicable"
+            }
+          ],
+          "schema": "taoryx.family-adapter-probe/v1alpha1",
+          "status": "pass",
+          "tier": "rigid_body_6dof_surface_allocated"
+        },
+        "status": "pass",
+        "tier": "rigid_body_6dof_surface_allocated"
+      },
+      {
         "adapter_id": "taoryx.lifting_body.daveml.v1",
         "conformance": {
           "adapter_id": "taoryx.lifting_body.daveml.v1",
@@ -3633,7 +3730,7 @@
           "operations": [
             {
               "details": {
-                "channel_count": 7
+                "channel_count": 6
               },
               "message": "finite derivative returned",
               "operation": "state_derivative",
@@ -3641,9 +3738,9 @@
             },
             {
               "details": {},
-              "message": "open-loop or passive adapter has no declared operation",
+              "message": "physical trim returned an accepted result",
               "operation": "trim",
-              "status": "not_applicable"
+              "status": "pass"
             },
             {
               "details": {
@@ -3657,15 +3754,18 @@
               "status": "pass"
             },
             {
-              "details": {},
-              "message": "open-loop or passive adapter has no declared operation",
+              "details": {
+                "control_dimension": 7,
+                "state_dimension": 6
+              },
+              "message": "provenance-bearing A/B matrices returned",
               "operation": "linearize",
-              "status": "not_applicable"
+              "status": "pass"
             },
             {
               "details": {
                 "effector_channels": 7,
-                "wrench_channels": 6
+                "wrench_channels": 3
               },
               "message": "finite local effectiveness returned",
               "operation": "effectiveness",
@@ -3681,19 +3781,19 @@
             },
             {
               "details": {},
-              "message": "open-loop or passive adapter has no declared operation",
+              "message": "operation was not declared by the family adapter",
               "operation": "resource_rates",
               "status": "not_applicable"
             },
             {
               "details": {},
-              "message": "open-loop or passive adapter has no declared operation",
+              "message": "operation was not declared by the family adapter",
               "operation": "observe",
               "status": "not_applicable"
             },
             {
               "details": {},
-              "message": "state-derivative adapter does not expose source replay",
+              "message": "participating plant adapter does not expose source replay",
               "operation": "replay",
               "status": "not_applicable"
             }

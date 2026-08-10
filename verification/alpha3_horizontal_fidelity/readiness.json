@@ -9,6 +9,7 @@
         "family_flagship_mission",
         "adapter_probe_artifact_not_found"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "ready_for_runtime_probes",
       "declared_status": "development",
@@ -25,6 +26,7 @@
         "family_flagship_mission",
         "adapter_probe_artifact_not_found"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "ready_for_runtime_probes",
       "declared_status": "development",
@@ -38,8 +40,9 @@
     {
       "adapter_status": "pass",
       "blockers": [
-        "nonlinear_direct_wrench_mission"
+        "envelope_robustness_and_flight_qualification"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "partial",
       "declared_status": "development",
@@ -69,6 +72,7 @@
       "blockers": [
         "end_to_end_surface_allocated_racetrack"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "partial",
       "declared_status": "development",
@@ -101,6 +105,7 @@
         "family_flagship_mission",
         "adapter_probe_artifact_not_found"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "ready_for_runtime_probes",
       "declared_status": "development",
@@ -117,6 +122,7 @@
         "family_flagship_mission",
         "adapter_probe_artifact_not_found"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "ready_for_runtime_probes",
       "declared_status": "development",
@@ -130,8 +136,9 @@
     {
       "adapter_status": "pass",
       "blockers": [
-        "nonlinear_direct_wrench_mission"
+        "envelope_robustness_and_flight_qualification"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "partial",
       "declared_status": "development",
@@ -161,6 +168,7 @@
       "blockers": [
         "end_to_end_surface_allocated_racetrack"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "partial",
       "declared_status": "development",
@@ -190,11 +198,11 @@
     {
       "adapter_status": "pass",
       "blockers": [
-        "broader_operating_point_matrix",
-        "no vehicle metadata or source-family profile is bound"
+        "broader_operating_point_matrix"
       ],
-      "data_source": "",
-      "data_status": "not_registered",
+      "data_claim_boundary": "The checked OpenAP integration artifact establishes only the derived-exact point-mass data, trim, and linearization basis. It does not establish rigid-body moments, aircraft-authoritative fidelity, or mission qualification.",
+      "data_source": "verification/daveml_a320_openap_integration.json",
+      "data_status": "ready",
       "declared_status": "development",
       "family_id": "a320_openap_3dof",
       "operation_status": {
@@ -210,17 +218,17 @@
       },
       "profile_id": "a320_openap_3dof.point_mass_3dof.v1",
       "required_operations": [],
-      "status": "blocked",
+      "status": "probe_ready",
       "tier": "point_mass_3dof"
     },
     {
       "adapter_status": "pass",
       "blockers": [
-        "calibrated_response_model_and_operating_points",
-        "no vehicle metadata or source-family profile is bound"
+        "calibrated_response_model_and_operating_points"
       ],
-      "data_source": "",
-      "data_status": "not_registered",
+      "data_claim_boundary": "The checked OpenAP/JSBSim comparison establishes common-channel agreement for the declared surrogate-composite response route. Rotational channels, physical surface allocation, aircraft authority, and mission qualification remain outside this data-evidence claim.",
+      "data_source": "verification/daveml_a320_openap_integration.json, verification/daveml_a320_matched_comparison.json",
+      "data_status": "ready",
       "declared_status": "development",
       "family_id": "a320_openap_3dof",
       "operation_status": {
@@ -236,7 +244,7 @@
       },
       "profile_id": "a320.attitude_response_p6dof.v1",
       "required_operations": [],
-      "status": "blocked",
+      "status": "probe_ready",
       "tier": "pseudo_6dof"
     },
     {
@@ -244,8 +252,9 @@
       "blockers": [
         "participating_rigid_body_plant",
         "physical_surface_effectivity",
-        "no vehicle metadata or source-family profile is bound"
+        "no vehicle metadata, source-family profile, or tier data evidence is bound"
       ],
+      "data_claim_boundary": null,
       "data_source": "",
       "data_status": "not_registered",
       "declared_status": "planned",
@@ -261,8 +270,9 @@
       "blockers": [
         "participating_rigid_body_plant",
         "physical_surface_effectivity",
-        "no vehicle metadata or source-family profile is bound"
+        "no vehicle metadata, source-family profile, or tier data evidence is bound"
       ],
+      "data_claim_boundary": null,
       "data_source": "",
       "data_status": "not_registered",
       "declared_status": "planned",
@@ -281,6 +291,7 @@
         "omitted:aerodynamic_moments",
         "omitted:physical_actuator_states"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_f16_s119/family.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -308,6 +319,7 @@
         "omitted:moment_balance_as_response_source",
         "omitted:fuel_mass_evolution"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_f16_s119/family.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -336,6 +348,7 @@
         "omitted:actuator_dynamics",
         "omitted:runway_contact"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_f16_s119/family.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -368,6 +381,7 @@
         "omitted:fuel_mass_evolution",
         "omitted:runway_contact"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_f16_s119/family.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -400,6 +414,7 @@
         "release_burn_coast_terminal_handoff",
         "adapter_probe_artifact_not_found"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "ready_for_runtime_probes",
       "declared_status": "development",
@@ -416,6 +431,7 @@
         "powered_coast_atmospheric_schedule",
         "adapter_probe_artifact_not_found"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "ready_for_runtime_probes",
       "declared_status": "development",
@@ -432,6 +448,7 @@
         "full_source_physical_effector_trim",
         "powered_coast_atmospheric_schedule"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "partial",
       "declared_status": "development",
@@ -457,17 +474,27 @@
       "tier": "rigid_body_6dof_direct_wrench"
     },
     {
-      "adapter_status": "not_checked",
+      "adapter_status": "pass",
       "blockers": [
         "source_trim_acceptance",
-        "stabilator_rudder_rcs_propulsion_effectivity",
-        "allocator_declaration: value does not contain 'allocator'"
+        "stabilator_rudder_rcs_propulsion_effectivity"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
-      "data_status": "blocked",
-      "declared_status": "planned",
+      "data_status": "partial",
+      "declared_status": "development",
       "family_id": "x15",
-      "operation_status": {},
+      "operation_status": {
+        "allocate": "pass",
+        "effectiveness": "pass",
+        "linearize": "pass",
+        "observe": "not_applicable",
+        "replay": "not_applicable",
+        "resource_rates": "not_applicable",
+        "state_derivative": "pass",
+        "trim": "pass",
+        "trim_fragment": "not_applicable"
+      },
       "profile_id": "x15.surface_allocated_6dof.v1",
       "required_operations": [
         "state_derivative",
@@ -476,7 +503,7 @@
         "effectiveness",
         "allocate"
       ],
-      "status": "planned",
+      "status": "development",
       "tier": "rigid_body_6dof_surface_allocated"
     },
     {
@@ -484,6 +511,7 @@
       "blockers": [
         "translated_yaw_disturbance_landing_mission"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "ready_for_runtime_probes",
       "declared_status": "development",
@@ -509,6 +537,7 @@
       "blockers": [
         "rotor_response_and_yaw_authority_envelope"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "ready_for_runtime_probes",
       "declared_status": "development",
@@ -532,8 +561,9 @@
     {
       "adapter_status": "pass",
       "blockers": [
-        "direct_wrench_is_debug_comparator"
+        "local_direct_wrench_comparator_scope_only"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "partial",
       "declared_status": "development",
@@ -563,6 +593,7 @@
       "blockers": [
         "battery_voltage_contact_and_full_envelope"
       ],
+      "data_claim_boundary": "Vehicle-registry data completeness only; this does not establish runtime, control, or mission qualification.",
       "data_source": "verification/vehicle_models.yaml",
       "data_status": "partial",
       "declared_status": "development",
@@ -598,6 +629,7 @@
         "omitted:physical_actuator_states",
         "adapter_probe_artifact_not_found"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_hl20_mod_k/family.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -616,6 +648,7 @@
         "omitted:physical_actuator_states",
         "adapter_probe_artifact_not_found"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_hl20_mod_k/family.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -634,6 +667,7 @@
         "omitted:actuator_dynamics",
         "omitted:landing_contact"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_hl20_mod_k/family.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -665,6 +699,7 @@
         "omitted:closed_loop_controller",
         "omitted:landing_contact"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_hl20_mod_k/family.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -672,12 +707,12 @@
       "operation_status": {
         "allocate": "pass",
         "effectiveness": "pass",
-        "linearize": "not_applicable",
+        "linearize": "pass",
         "observe": "not_applicable",
         "replay": "not_applicable",
         "resource_rates": "not_applicable",
         "state_derivative": "pass",
-        "trim": "not_applicable",
+        "trim": "pass",
         "trim_fragment": "pass"
       },
       "profile_id": "hl20.surface_allocated_6dof.v1",
@@ -698,6 +733,7 @@
         "omitted:aerodynamic_moments",
         "omitted:body_rates"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_nesc_two_stage_rocket/family.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -725,6 +761,7 @@
         "omitted:full_moment_balance",
         "omitted:actuator_dynamics"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_nesc_two_stage_rocket/family.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -751,6 +788,7 @@
         "time_aligned_attitude_gimbal_effectivity",
         "omitted:independent_full_participating_simulation_equivalence"
       ],
+      "data_claim_boundary": "Source-family profile declaration only; omitted physics and separate runtime/qualification gates remain in force.",
       "data_source": "families/reference_nesc_two_stage_rocket/family.yaml",
       "data_status": "source_declared",
       "declared_status": "planned",
@@ -769,8 +807,9 @@
       "adapter_status": "not_checked",
       "blockers": [
         "time_aligned_attitude_gimbal_effectivity",
-        "no vehicle metadata or source-family profile is bound"
+        "no vehicle metadata, source-family profile, or tier data evidence is bound"
       ],
+      "data_claim_boundary": null,
       "data_source": "",
       "data_status": "not_registered",
       "declared_status": "planned",
@@ -793,6 +832,7 @@
         "orientation_averaged_area_is_not_tumble_proof",
         "adapter_probe_artifact_not_found"
       ],
+      "data_claim_boundary": "Declared passive-body profile only; this is not a controlled or actuator-backed path.",
       "data_source": "verification/pseudo6dof_profiles.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -808,6 +848,7 @@
       "blockers": [
         "passive_uncontrolled_rotation_evidence"
       ],
+      "data_claim_boundary": "Declared passive-body profile only; this is not a controlled or actuator-backed path.",
       "data_source": "verification/pseudo6dof_profiles.yaml",
       "data_status": "source_declared",
       "declared_status": "development",
@@ -821,8 +862,9 @@
     {
       "adapter_status": "not_checked",
       "blockers": [
-        "no vehicle metadata or source-family profile is bound"
+        "no vehicle metadata, source-family profile, or tier data evidence is bound"
       ],
+      "data_claim_boundary": null,
       "data_source": "",
       "data_status": "not_registered",
       "declared_status": "not_applicable",
@@ -836,8 +878,9 @@
     {
       "adapter_status": "not_checked",
       "blockers": [
-        "no vehicle metadata or source-family profile is bound"
+        "no vehicle metadata, source-family profile, or tier data evidence is bound"
       ],
+      "data_claim_boundary": null,
       "data_source": "",
       "data_status": "not_registered",
       "declared_status": "not_applicable",
@@ -852,12 +895,11 @@
   "schema": "taoryx.horizontal-readiness/v1alpha1",
   "status": "development",
   "status_counts": {
-    "blocked": 2,
     "data_ready": 3,
-    "development": 9,
+    "development": 10,
     "not_applicable": 2,
-    "planned": 5,
-    "probe_ready": 9,
+    "planned": 4,
+    "probe_ready": 11,
     "ready_for_runtime_probes": 6
   },
   "tier_count": 36

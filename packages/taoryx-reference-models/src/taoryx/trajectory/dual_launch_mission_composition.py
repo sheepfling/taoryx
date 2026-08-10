@@ -59,7 +59,7 @@ _FIDELITIES = (
     "pseudo_6dof",
     "rigid_body_6dof_direct_wrench",
 )
-_POINT_MASS = "point_mass_3dof"
+_POINT_MASS: Literal["point_mass_3dof"] = "point_mass_3dof"
 _REALIZATION_ID = "generated_native_problem"
 _FAMILY_CATALOG = simple_aero_resource_root() / "verification" / "alpha2_family_catalog.yaml"
 

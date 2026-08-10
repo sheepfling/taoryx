@@ -300,7 +300,7 @@ def test_every_realization_publishes_complete_generic_control_metadata() -> None
     assert {item.resolution for item in simple_aero.intents} == {"provider_internal"}
 
     f16_surface = next(item for item in provider.model("f16_s119").realizations if item.id == "rigid_body_6dof_surface_allocated")
-    assert f16_surface.controls.status == "blocked"
+    assert f16_surface.controls.status == "internally_generated"
     assert {item.native_channel_id for item in f16_surface.controls.channels} >= {
         "control.elevator",
         "control.aileron",

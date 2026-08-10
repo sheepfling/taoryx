@@ -10,8 +10,10 @@ from typing import Any, cast
 
 import pytest
 from taoryx.x15_adapter import (
+    X15_INERTIA_BODY_KG_M2,
     X15_SOURCE_SURFACE_NAMES,
     build_x15_source_direct_wrench_plant,
+    build_x15_source_surface_local_plant,
 )
 
 from taoryx.composition_episode import ActionFrame, open_vehicle_composition_episode
@@ -205,6 +207,9 @@ def test_x15_declared_controller_campaigns_run_through_the_common_host(
         assert report.nodes
         assert all(node.lqr is not None and node.lqr.method == method for node in report.nodes)
         assert all(bool(node.lqr is not None and node.lqr.integral_output_names) == expects_integral_outputs for node in report.nodes)
+        if campaign_id == "x15-source-surface-local-lqi-v1":
+            candidates = report.nodes[0].lqr.candidates if report.nodes[0].lqr is not None else ()
+            assert any(candidate.integral_q_diagonal == (100_000.0, 100_000.0, 100_000.0) for candidate in candidates)
     ####
 
 
@@ -447,11 +452,16 @@ def test_x15_source_surface_lqi_screen_runs_through_the_public_composition_path(
     runtime = cast(dict[str, object], payload["runtime"])
     control_screen = cast(dict[str, object], payload["control_screen"])
     trace = json.loads((batch.output_dir / "semantic_action_trace.json").read_text())
+    robustness = json.loads((batch.output_dir / "robustness_report.json").read_text())
 
     assert batch.passed is True
     assert runtime["physical_effector_allocation"] is True
     assert runtime["effector_names"] == list(X15_SOURCE_SURFACE_NAMES)
     assert runtime["controller_method"] == "lqi"
+    assert runtime["integral_q_diagonal"] == [100_000.0, 100_000.0, 100_000.0]
+    physical_profile = cast(dict[str, object], runtime["physical_wrench_profile"])
+    assert physical_profile["status"] == "applied"
+    assert cast(dict[str, object], physical_profile["matched_pitch_wrench_offset_screen"])["pass"] is True
     assert cast(dict[str, object], runtime["full_state_trim"])["status"] == "not_available"
     assert cast(dict[str, object], runtime["local_moment_balance_trim"])["status"] == "verified"
     assert control_screen["controller_method"] == "lqi"
@@ -468,6 +478,38 @@ def test_x15_source_surface_lqi_screen_runs_through_the_public_composition_path(
         row = next(csv.DictReader(stream))
     assert all(name in row and math.isfinite(float(row[name])) for name in ("u_m_s", "v_m_s", "w_m_s"))
     assert (batch.output_dir / "local_surface_lqi_screen.json").is_file()
+    assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["id"] == "x15-local-lqi-matched-pitch-wrench-offset"
+    assert robustness["kind"] == "constant_offset"
+    assert robustness["pass"] is True
+    cases = cast(list[dict[str, object]], robustness["cases"])
+    assert [case["id"] for case in cases] == ["nominal", "positive-pitch-offset", "negative-pitch-offset"]
+    assert [cast(dict[str, object], case["parameters"])["pitch_wrench_bias_fraction"] for case in cases] == [0.0, 0.05, -0.05]
+    for case in cases:
+        assert case["status"] == "pass"
+        robustness_metrics = cast(dict[str, object], case["metrics"])
+        assert float(robustness_metrics["final_feedback_error_fraction"]) <= 0.2
+        assert float(robustness_metrics["saturation_fraction"]) == 0.0
+    ####
+
+
+def test_x15_source_surface_plant_exposes_a_declared_external_pitch_moment_disturbance_seam() -> None:
+    """An offset screen perturbs source dynamics, never its LQI request path."""
+
+    plant = build_x15_source_surface_local_plant()
+    trim = plant.trim({}, {})
+    nominal = plant.state_derivative(trim.state, trim.controls, {})
+    biased = plant.state_derivative(
+        trim.state,
+        trim.controls,
+        {"external_pitch_moment_bias_nm": 50_000.0},
+    )
+
+    assert biased["q_rad_s"] - nominal["q_rad_s"] == pytest.approx(
+        50_000.0 / X15_INERTIA_BODY_KG_M2.y
+    )
+    with pytest.raises(ValueError, match="external_pitch_moment_bias_nm"):
+        plant.state_derivative(trim.state, trim.controls, {"external_pitch_moment_bias_nm": "bad"})
     ####
 
 

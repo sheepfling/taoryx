@@ -14,12 +14,12 @@ def test_registry_witness_report_separates_executable_and_planned_families() -> 
     lowering_by_family = {item["family_id"]: item for item in report["horizontal_lowering"]["families"]}
     assert lowering_by_family["skywalker_x8"]["lowering"]["selected"] == "rigid_body_6dof_direct_wrench"
     assert lowering_by_family["hl20_mod_k"]["lowering"]["selected"] == "rigid_body_6dof_direct_wrench"
-    assert report["declared_tier_check_count"] == 20
+    assert report["declared_tier_check_count"] == 21
     assert report["tier_matrix"]["status"] == "pass"
     promotion = report["promotion_matrix"]
     assert len(promotion["entries"]) == 36
     assert promotion["qualified_failures"] == []
-    assert promotion["declared_status_counts"]["planned"] == 5
+    assert promotion["declared_status_counts"]["planned"] == 4
 
     checks = report["registry"]["checks"]
     by_family = {item["family_id"]: item for item in checks}
@@ -57,6 +57,15 @@ def test_registry_witness_report_separates_executable_and_planned_families() -> 
     assert a320_operations["allocate"] == "not_applicable"
 
     matrix_by_key = {(item["family_id"], item["tier"]): item for item in report["tier_matrix"]["checks"]}
+    x15_surface_operations = {
+        item["operation"]: item["status"]
+        for item in matrix_by_key[("x15", "rigid_body_6dof_surface_allocated")]["probe"]["operations"]
+    }
+    assert x15_surface_operations["state_derivative"] == "pass"
+    assert x15_surface_operations["trim"] == "pass"
+    assert x15_surface_operations["linearize"] == "pass"
+    assert x15_surface_operations["effectiveness"] == "pass"
+    assert x15_surface_operations["allocate"] == "pass"
     for family_id in ("hummingbird", "f16_s119"):
         for tier in ("point_mass_3dof", "pseudo_6dof"):
             operations = {
@@ -71,9 +80,9 @@ def test_registry_witness_report_separates_executable_and_planned_families() -> 
 
     hl20_operations = {item["operation"]: item["status"] for item in by_family["hl20_mod_k"]["probe"]["operations"]}
     assert hl20_operations["state_derivative"] == "pass"
-    assert hl20_operations["trim"] == "not_applicable"
+    assert hl20_operations["trim"] == "pass"
     assert hl20_operations["trim_fragment"] == "pass"
-    assert hl20_operations["linearize"] == "not_applicable"
+    assert hl20_operations["linearize"] == "pass"
     assert hl20_operations["effectiveness"] == "pass"
     assert hl20_operations["allocate"] == "pass"
 
@@ -87,5 +96,9 @@ def test_registry_witness_report_separates_executable_and_planned_families() -> 
     nesc_direct = promotion_by_key[("reference_nesc_two_stage_rocket", "rigid_body_6dof_direct_wrench")]
     assert nesc_direct["declared_status"] == "planned"
     assert nesc_direct["validation_status"] == "planned"
+    x15_surface = promotion_by_key[("x15", "rigid_body_6dof_surface_allocated")]
+    assert x15_surface["declared_status"] == "development"
+    assert x15_surface["validation_status"] == "pass"
+    assert "source_trim_acceptance" in x15_surface["blockers"]
     tumbling_surface = promotion_by_key[("tumbling_body", "rigid_body_6dof_surface_allocated")]
     assert tumbling_surface["validation_status"] == "not_applicable"

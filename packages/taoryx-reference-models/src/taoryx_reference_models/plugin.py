@@ -45,17 +45,17 @@ from taoryx.hl20_adapter import (
     build_hl20_source_surface_local_plant,
     build_hl20_source_surface_lqi_tuning_campaign,
 )
-from taoryx.hl20_surface_authority_screen import (
-    HL20SourceSurfacePitchAuthorityScreenCapabilityAdapter,
-    execute_hl20_source_surface_authority_screen,
-    preflight_hl20_source_surface_authority_screen,
-)
+from taoryx.hl20_controls import HL20_SOURCE_SURFACE_BOUNDS_DEG
 from taoryx.hl20_local_physical_surface_lqi_screen import (
     HL20LocalPhysicalSurfaceLqiScreenCapabilityAdapter,
     execute_hl20_local_physical_surface_lqi_screen,
     preflight_hl20_local_physical_surface_lqi_screen,
 )
-from taoryx.hl20_controls import HL20_SOURCE_SURFACE_BOUNDS_DEG
+from taoryx.hl20_surface_authority_screen import (
+    HL20SourceSurfacePitchAuthorityScreenCapabilityAdapter,
+    execute_hl20_source_surface_authority_screen,
+    preflight_hl20_source_surface_authority_screen,
+)
 from taoryx.hummingbird_composition_execution import execute_hummingbird_pseudo_composition
 from taoryx.hummingbird_local_physical_control_screen import (
     HummingbirdLocalHorizontalTranslationLqiScreenCapabilityAdapter,
@@ -940,7 +940,10 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                 "b747_condition3_local_physical_surface_lqr_screen_v1",
                 "b747_condition3_local_physical_surface_lqi_screen_v1",
             ),
-            description="Scaled LQI condition-3 source-table local campaign over declared B747 elevator, aileron, rudder, and throttle coordinates.",
+            description=(
+                "Scaled LQI condition-3 source-table local campaign over declared B747 elevator, aileron, rudder, and "
+                "throttle coordinates, with an advertised integral-priority lattice and separate allocator-runtime profile."
+            ),
             adapter_factory=_b747_source_surface_tuning_adapter,
             campaign_factory=build_b747_source_surface_lqi_tuning_campaign,
             local_controller_screens=(
@@ -971,14 +974,33 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                     "control_realization": "source_table_surface_lqi_allocation",
                     "physical_effector_allocation": True,
                     "batch_action_trace": "emits_committed_interval_trace",
-                    "controller": {"method": "lqi", "campaign_id": "b747-source-surface-local-lqi-v1", "integral_output_names": ["roll_error_rad", "pitch_error_rad", "yaw_error_rad"], "fixed_cadence_s": 0.05, "screen_duration_s": 80.0},
+                    "controller": {
+                        "method": "lqi",
+                        "campaign_id": "b747-source-surface-local-lqi-v1",
+                        "integral_output_names": ["roll_error_rad", "pitch_error_rad", "yaw_error_rad"],
+                        "integral_weight_multiplier": 0.025,
+                        "integral_weight_multipliers": [0.1, 1.0, 10.0, 100.0],
+                        "physical_wrench_profile": {
+                            "integral_q_diagonal": [0.025, 0.025, 0.025],
+                            "selection_evidence": "matched external pitch-moment offset screen emitted by this batch",
+                        },
+                        "persistent_disturbance_screen": {
+                            "id": "b747-local-lqi-matched-pitch-wrench-offset",
+                            "environment_input": "external_pitch_moment_bias_nm",
+                            "body_moment_axis": "moment_y_nm",
+                            "fraction_of_declared_pitch_wrench_scale": 0.05,
+                            "artifact_filename": "robustness_report.json",
+                        },
+                        "fixed_cadence_s": 0.05,
+                        "screen_duration_s": 80.0,
+                    },
                     "effector_controls": [
                         {"id": "effector.elevator.position", "native_control_id": "elevator-deg", "unit": "deg", "lower": -10.0, "upper": 10.0},
                         {"id": "effector.aileron.position", "native_control_id": "aileron-deg", "unit": "deg", "lower": -10.0, "upper": 10.0},
                         {"id": "effector.rudder.position", "native_control_id": "rudder-deg", "unit": "deg", "lower": -15.0, "upper": 15.0},
                         {"id": "effector.throttle.position", "native_control_id": "throttle", "unit": "1", "lower": 0.0, "upper": 1.0},
                     ],
-                    "claim_boundary": "One condition-3 source-table local LQI recovery through ideal bounded coordinates; it does not establish wind rejection, a schedule, racetrack, or qualification.",
+                    "claim_boundary": "One condition-3 source-table local LQI recovery through ideal bounded coordinates plus a three-case matched external pitch-moment screen; it does not establish wind rejection, a schedule, racetrack, or qualification.",
                 },
             ),
             claim_boundary=(
@@ -1038,7 +1060,10 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                 "x8_local_physical_surface_lqi_screen_v1",
                 "x8_local_physical_surface_lqi_long_recovery_screen_v1",
             ),
-            description="Scaled LQI source-table local attitude/velocity campaign over the X8's declared elevon and throttle coordinates.",
+            description=(
+                "Scaled LQI source-table local attitude/velocity campaign over the X8's declared elevon and throttle "
+                "coordinates, with an advertised integral-priority lattice and a separate allocator-runtime profile."
+            ),
             adapter_factory=_x8_source_surface_tuning_adapter,
             campaign_factory=build_x8_source_surface_lqi_tuning_campaign,
             local_controller_screens=(
@@ -1068,13 +1093,32 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                     "control_realization": "source_table_surface_lqi_allocation",
                     "physical_effector_allocation": True,
                     "batch_action_trace": "emits_committed_interval_trace",
-                    "controller": {"method": "lqi", "campaign_id": "x8-source-surface-local-lqi-v1", "integral_output_names": ["roll_error_rad", "pitch_error_rad"], "fixed_cadence_s": 0.01, "screen_duration_s": 8.0},
+                    "controller": {
+                        "method": "lqi",
+                        "campaign_id": "x8-source-surface-local-lqi-v1",
+                        "integral_output_names": ["roll_error_rad", "pitch_error_rad"],
+                        "integral_weight_multiplier": 0.15,
+                        "integral_weight_multipliers": [0.1, 1.0, 10.0, 100.0],
+                        "physical_wrench_profile": {
+                            "integral_q_diagonal": [0.15, 0.15],
+                            "selection_evidence": "matched external pitch-moment offset screen emitted by this batch",
+                        },
+                        "persistent_disturbance_screen": {
+                            "id": "x8-local-lqi-matched-pitch-wrench-offset",
+                            "environment_input": "external_pitch_moment_bias_nm",
+                            "body_moment_axis": "moment_y_nm",
+                            "fraction_of_declared_pitch_wrench_scale": 0.05,
+                            "artifact_filename": "robustness_report.json",
+                        },
+                        "fixed_cadence_s": 0.01,
+                        "screen_duration_s": 8.0,
+                    },
                     "effector_controls": [
                         {"id": "effector.elevon.collective.position", "native_control_id": "collective-elevon-deg", "unit": "deg", "lower": -20.0, "upper": 20.0, "rate_limit_per_s": 120.0, "time_constant_s": 0.05},
                         {"id": "effector.elevon.differential.position", "native_control_id": "differential-elevon-deg", "unit": "deg", "lower": -20.0, "upper": 20.0, "rate_limit_per_s": 120.0, "time_constant_s": 0.05},
                         {"id": "effector.throttle.position", "native_control_id": "throttle", "unit": "1", "lower": 0.0, "upper": 1.0, "time_constant_s": 0.2},
                     ],
-                    "claim_boundary": "One source-table local LQI recovery through collective/differential elevon coordinates; it does not establish yaw authority, wind rejection, a racetrack, or qualification.",
+                    "claim_boundary": "One source-table local LQI recovery through collective/differential elevon coordinates plus a three-case matched external pitch-moment screen; it does not establish yaw authority, wind rejection, a racetrack, or qualification.",
                 },
                 {
                     "schema": "taoryx.local-controller-screen-advertisement/v1alpha1",

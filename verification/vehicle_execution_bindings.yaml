@@ -66,8 +66,8 @@ bindings:
     execution_mode: closed_loop_controller
     factory_id: x8_local_physical_surface_lqi_screen.v1
     batch_action_trace: emits_committed_interval_trace
-    description: Execute the pinned X8 source-table roll/pitch offset-free LQI recovery through bounded collective/differential elevon-coordinate allocation.
-    claim_boundary: Local source-trim source-coordinate allocation screen only; it does not establish persistent-disturbance rejection, a physical racetrack, gain schedule, individual-servo validation, or flight qualification.
+    description: Execute the pinned X8 source-table roll/pitch LQI recovery through bounded collective/differential elevon-coordinate allocation, including a three-case matched external pitch-moment offset screen.
+    claim_boundary: Local source-trim source-coordinate allocation screen plus one fixed matched external pitch-moment witness only; it does not establish wind or mass robustness, a physical racetrack, gain schedule, individual-servo validation, or flight qualification.
 
   - family_id: skywalker_x8
     mission: x8_local_physical_surface_lqi_long_recovery_screen_v1
@@ -110,8 +110,8 @@ bindings:
     execution_mode: closed_loop_controller
     factory_id: b747_condition3_local_physical_surface_lqi_screen.v1
     batch_action_trace: emits_committed_interval_trace
-    description: Execute the pinned B747 NASA CR-2144 condition-3 local offset-free LQI recovery through bounded elevator, aileron, and rudder source-table allocation.
-    claim_boundary: Local condition-3 surface-allocation screen only; it does not establish persistent-disturbance rejection, a physical racetrack, gain schedule, servo/engine-dynamics model, or transport flight qualification.
+    description: Execute the pinned B747 NASA CR-2144 condition-3 local LQI recovery through bounded elevator, aileron, and rudder source-table allocation, including a three-case matched external pitch-moment offset screen.
+    claim_boundary: Local condition-3 surface-allocation screen plus one fixed matched external pitch-moment witness only; it does not establish wind or mass robustness, a physical racetrack, gain schedule, servo/engine-dynamics model, or transport flight qualification.
 
   - family_id: b747
     mission: powered_fixed_wing_racetrack_v1
