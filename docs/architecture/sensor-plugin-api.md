@@ -191,6 +191,21 @@ bearing-only
   -> rendered scene and detector/electronics pipeline
 ```
 
+### Relative-state tracking
+
+`relative-state-track` projects one declared committed entity through a sensor
+mount and emits typed sensor-frame range, azimuth/elevation, relative position
+and velocity, closing speed, unit LOS, and LOS rate. It supports declared
+range/FOV invalidation and independent range, angle, and relative-velocity
+bias/noise.
+
+It is deliberately a direct geometric projection, not a radar propagation or
+signature model, seeker gimbal, tracker, or fire-control manager. A vehicle
+family can compose those specialised states above the packet while retaining a
+shared, serializable raw-observation contract. CADAC is the first such family;
+its local-NED adapter and composition boundary are documented in
+[`cadac-porting.md`](../cadac-porting.md#native-sensor-harmonization).
+
 ### GNSS fix
 
 `gnss-fix` emits a receiver-level ECI position/velocity fix with covariance,

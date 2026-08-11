@@ -45,6 +45,10 @@ taoryx-reference-models
 taoryx-reachability
   reachability envelopes, terminal criteria, plotting, continuation
   X-15/HL-20/passive-body mission overlays and reachability qualification
+
+taoryx-cadac
+  optional source-bound CADAC actor catalog, compatibility runtimes,
+  and canonical table conversion
 ```
 
 A package may contribute several coherent models. Package boundaries should
@@ -234,6 +238,7 @@ The monorepo builds five independent wheels:
 | `taoryx-simple-aero` | `taoryx.simple-aero` | Simple Aero builder, validation, fixtures, fidelity ladder, Mission Composition schema, and `reference.point_mass` provider |
 | `taoryx-reference-models` | `taoryx.reference-models` | X-15, HL-20, NESC, passive body, X8, B747, A320, F-16, and Hummingbird source models, non-reachability planners/adapters/executors, registered tuning campaigns, parity verifiers, Mission Composition providers/sessions, and model assets |
 | `taoryx-reachability` | `taoryx.reachability` | generic envelope solver, catalogs, terminal criteria, timeout continuation, plotting, X-15/HL-20/passive-release studies, four reachability planners/preflights, three execution factories, and `taoryx.reachability.workbench` |
+| `taoryx-cadac` | `taoryx.cadac` | source-bound CADAC actor catalog, compatibility runtimes, `taoryx.table.v1` conversion, and source-hash provenance; upstream CADAC values are not redistributed |
 
 The reference-model distribution depends on the DAVE-ML and Simple Aero
 distributions because its combined Mission Composition registry advertises

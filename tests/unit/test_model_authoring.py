@@ -985,13 +985,24 @@ def test_model_cli_lists_plans_and_scaffolds_installed_models(
         == 0
     )
 
-    assert sum(len(provider["models"]) for provider in inventory_payload["providers"]) == 14
+    model_counts = {
+        provider["metadata"]["id"]: len(provider["models"])
+        for provider in inventory_payload["providers"]
+    }
+    # The core inventory stays fixed while separately installed optional
+    # distributions, such as source-bound CADAC, legitimately add providers.
+    assert {
+        "taoryx.registry.mission-composition": 11,
+        "taoryx.reference.mission-composition": 2,
+        "taoryx.debug.mission-composition-contract-probe": 1,
+    }.items() <= model_counts.items()
+    model_count = sum(model_counts.values())
     assert assessment_payload["schema"] == "taoryx.model-automation-assessment/v1"
     assert assessment_payload["rslqr"]["status"] == "deferred"
     assert assessment_payload["advertisement_readiness_summary"] == {
         "status": "complete",
-        "model_count": 14,
-        "complete_model_count": 14,
+        "model_count": model_count,
+        "complete_model_count": model_count,
         "incomplete_models": [],
         "claim_boundary": (
             "Complete means the common plan/scaffold join consumed each typed advertisement. It does not execute a "

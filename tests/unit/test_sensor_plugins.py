@@ -11,13 +11,16 @@ from taoryx.runtime.sensor_scenario import SensorScenarioSpec, attach_sensor_sce
 from taoryx.sensor_api import (
     EntityTruth,
     MeasurementPacket,
+    SensorBuildContext,
     SensorContext,
+    SensorSampleRequest,
     packet_from_record,
     packet_to_record,
     sensor_plugin_registry,
 )
 from taoryx.sensor_plugins.gnss import GnssFix
 from taoryx.sensor_plugins.infrared import BearingDetection, FocalPlaneDetection
+from taoryx.sensor_plugins.relative_state import RelativeStateTrack
 from taoryx.sensors import TruthPoint
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -116,7 +119,55 @@ def test_registry_exposes_distinct_sensor_family_capabilities() -> None:
     assert manifests["gnss-fix"].language_kinds == {"gnss", "gps"}
     assert manifests["ir-bearing"].outputs[0].schema_id == "taoryx.ir.bearing-detection/v1"
     assert manifests["ir-point-source"].outputs[0].schema_id == "taoryx.ir.focal-plane-detection/v1"
+    assert manifests["relative-state-track"].family == "tracking"
+    assert manifests["relative-state-track"].outputs[0].schema_id == "taoryx.tracking.relative-state/v1"
     assert manifests["gnss-fix"].outputs[0].schema_id == "taoryx.gnss.fix/v1"
+
+
+def test_relative_state_tracker_projects_typed_sensor_frame_geometry() -> None:
+    host = TruthPoint(
+        2.0,
+        np.zeros(3),
+        np.asarray((10.0, 0.0, 0.0)),
+        np.asarray((10.0, 0.0, 0.0)),
+        np.eye(3),
+        np.zeros(3),
+        np.zeros(3),
+    )
+    context = SensorContext(
+        "track@2",
+        host,
+        {"target": EntityTruth("target", np.asarray((100.0, 10.0, 0.0)), np.asarray((0.0, 20.0, 0.0)))},
+    )
+    tracker = sensor_plugin_registry().create(
+        "relative-state-track",
+        {"target_id": "target"},
+        SensorBuildContext("tracker", 17),
+    )
+
+    packet = tracker.sample_request(SensorSampleRequest(point=context, rng=np.random.default_rng(19)))
+
+    assert packet.valid
+    assert packet.port == "track"
+    assert packet.schema_id == "taoryx.tracking.relative-state/v1"
+    assert isinstance(packet.payload, RelativeStateTrack)
+    payload = packet.payload
+    expected_relative_position = np.asarray((100.0, 10.0, 0.0))
+    expected_relative_velocity = np.asarray((-10.0, 20.0, 0.0))
+    expected_range = float(np.linalg.norm(expected_relative_position))
+    expected_unit = expected_relative_position / expected_range
+    assert payload.range_m == pytest.approx(expected_range)
+    assert payload.relative_position_sensor_m == pytest.approx(tuple(expected_relative_position))
+    assert payload.relative_velocity_sensor_mps == pytest.approx(tuple(expected_relative_velocity))
+    assert payload.unit_los_sensor == pytest.approx(tuple(expected_unit))
+    assert payload.closing_speed_mps == pytest.approx(-float(expected_unit @ expected_relative_velocity))
+    assert payload.line_of_sight_rate_sensor_rad_s == pytest.approx(tuple(np.cross(expected_unit, expected_relative_velocity) / expected_range))
+    record = packet_to_record(packet)
+    assert record["payload_contract"]["truth_position_output"] is False
+    recovered = packet_from_record(record)
+    assert isinstance(recovered.payload, RelativeStateTrack)
+    assert recovered.payload == payload
+    ####
 
 
 def test_existing_imu_scenario_is_constructed_through_plugin_registry() -> None:

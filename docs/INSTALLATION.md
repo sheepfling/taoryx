@@ -4,6 +4,11 @@ Taoryx is distributed as a small core host plus four official plug-in
 distributions. Choose the smallest profile that contains the work you need;
 contributors and automation agents should use the full profile.
 
+`taoryx-cadac` is a separately installable, source-bound CADAC integration.
+It is deliberately outside the default model and full profiles because it does
+not redistribute the upstream CADAC data. Use the dedicated `cadac` profile
+after obtaining an authorized local CADAC checkout.
+
 Python 3.12 or newer is required. Use `python -m pip` so the installer and the
 Python interpreter always refer to the same environment.
 
@@ -17,6 +22,8 @@ taoryx (language, compiler, engine, registries, common CLI)
     ├── requires taoryx-daveml
     ├── requires taoryx-simple-aero
     └── taoryx-reachability requires taoryx-reference-models
+
+taoryx-cadac (optional source-bound CADAC catalog and converter)
 ```
 
 | Distribution | Install it when you need | Direct Taoryx dependencies |
@@ -26,6 +33,7 @@ taoryx (language, compiler, engine, registries, common CLI)
 | `taoryx-simple-aero` | analytical Simple Aero models, fixtures, and the point-mass provider | `taoryx` |
 | `taoryx-reference-models` | X-15, HL-20, NESC, passive body, X8, B747, A320, F-16, and Hummingbird models plus registered tuning inputs | `taoryx`, `taoryx-daveml`, `taoryx-simple-aero` |
 | `taoryx-reachability` | reachability envelopes, continuation, plots, and reachability mission overlays | `taoryx`, `taoryx-reference-models` |
+| `taoryx-cadac` | CADAC actor catalog, compatibility runtimes, and canonical CADAC table conversion | `taoryx` |
 
 Installing `taoryx-reference-models` from a release index or wheelhouse pulls
 the DAVE-ML and Simple Aero distributions. Installing `taoryx-reachability`
@@ -190,6 +198,17 @@ taoryx.simple-aero
 taoryx.reference-models
 taoryx.reachability
 ```
+
+The CADAC plug-in remains an explicit source-bound installation:
+
+```bash
+python -m pip install -e . -e packages/taoryx-cadac
+taoryx plugins check --profile cadac
+taoryx-cadac convert-tree /path/to/CADAC --output build/cadac-tables
+```
+
+The converter retains source hashes but must not be used to commit or publish
+upstream coefficient data without a separate redistribution review.
 
 Profiles express minimum required packages; they do not uninstall additional
 plug-ins already present in an environment. Use a fresh virtual environment

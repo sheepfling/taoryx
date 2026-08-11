@@ -20,6 +20,7 @@ VENV_PYTHON = ROOT / ".venv" / ("Scripts/python.exe" if sys.platform == "win32" 
 SOURCE_ROOTS = (
     ROOT / "src",
     ROOT / "packages" / "taoryx-daveml" / "src",
+    ROOT / "packages" / "taoryx-cadac" / "src",
     ROOT / "packages" / "taoryx-simple-aero" / "src",
     ROOT / "packages" / "taoryx-reference-models" / "src",
     ROOT / "packages" / "taoryx-reachability" / "src",

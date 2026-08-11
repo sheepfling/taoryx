@@ -13,6 +13,9 @@ VENV = ROOT / ".venv"
 
 PROFILE_PROJECTS: dict[str, tuple[str, ...]] = {
     "core": (),
+    "cadac": (
+        "packages/taoryx-cadac",
+    ),
     "models": (
         "packages/taoryx-daveml",
         "packages/taoryx-simple-aero",

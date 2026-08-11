@@ -288,6 +288,64 @@ class SensorBus:
         current_time = max((vehicle.state.time for vehicle in problem.vehicles.values()), default=0.0)
         self.release_available(current_time)
 
+    def accepted_context(
+        self,
+        sensor_name: str,
+        truth: TruthPoint,
+        context: SensorContext | None = None,
+        *,
+        previous_truth: TruthPoint | None = None,
+        previous_context: SensorContext | None = None,
+    ) -> tuple[MeasurementPacket[Any], ...]:
+        """Publish one externally owned committed-truth boundary.
+
+        Source-compatible runtimes sometimes own their integration loop but
+        still need the standard Taoryx scheduling, delivery-latency, packet
+        sequencing, and consumer semantics.  This method admits exactly that
+        boundary without fabricating a :class:`RuntimeProblem` or treating
+        CADAC local coordinates as an Earth/environment runtime.
+
+        ``previous_truth`` is required for an interval sensor after its first
+        boundary.  Instantaneous sensors sample only when their declared
+        clock is due.  Returned packets are those that became deliverable at
+        this accepted time; all packets remain available through
+        :meth:`packets` as usual.
+        """
+
+        binding = self._binding(sensor_name)
+        if context is not None and not np.isclose(context.host.time_s, truth.time_s, atol=1.0e-12):
+            raise ValueError(f"sensor {sensor_name!r} context timestamp does not match committed truth")
+        if previous_context is not None and previous_truth is None:
+            raise ValueError("previous_context requires previous_truth")
+        if previous_truth is not None and previous_truth.time_s >= truth.time_s:
+            raise ValueError("previous_truth must precede committed truth")
+        if previous_context is not None and previous_truth is not None and not np.isclose(
+            previous_context.host.time_s,
+            previous_truth.time_s,
+            atol=1.0e-12,
+        ):
+            raise ValueError(f"sensor {sensor_name!r} previous context timestamp does not match previous truth")
+
+        selected_context = context or SensorContext.from_host(truth)
+        if binding.clock.sample_mode == "instantaneous":
+            if _due(binding.clock, truth.time_s):
+                self._queue(binding, binding.sample_point(truth, selected_context))
+        elif previous_truth is None:
+            if _due(binding.clock, truth.time_s):
+                binding.interval_start = truth
+                binding.interval_start_context = selected_context
+        else:
+            selected_previous_context = previous_context or SensorContext.from_host(previous_truth)
+            self._accept_interval(
+                binding,
+                previous_truth,
+                truth,
+                selected_previous_context,
+                selected_context,
+            )
+        self.initialized = True
+        return self.release_available(truth.time_s)
+
     def handle_transition(
         self,
         problem: RuntimeProblem,
@@ -373,6 +431,12 @@ class SensorBus:
         if binding.clock.delivery_s:
             packet = replace(packet, available_at_s=packet.available_at_s + binding.clock.delivery_s)
         self.queued[binding.name].append(packet)
+
+    def _binding(self, sensor_name: str) -> SensorBinding:
+        for binding in self.bindings:
+            if binding.name == sensor_name:
+                return binding
+        raise KeyError(f"unknown sensor binding {sensor_name!r}")
 
     @staticmethod
     def _vehicle(problem: RuntimeProblem, binding: SensorBinding) -> RuntimeVehicle:

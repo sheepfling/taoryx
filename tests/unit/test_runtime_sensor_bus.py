@@ -92,6 +92,29 @@ def test_sensor_drop_is_accounted_for_without_delivery() -> None:
     assert [packet.sampled_at_s for packet in bus.packets("imu")] == pytest.approx([0.0, 0.1])
 
 
+def test_sensor_bus_accepts_externally_owned_committed_truth_boundaries() -> None:
+    """A source-owned integration loop still gets native cadence and delivery semantics."""
+
+    bus = SensorBus()
+    bus.register(
+        SensorBinding(
+            "imu",
+            "external-source-loop",
+            SensorClockSpec("imu", "imu", cadence_s=0.1, delivery_s=0.05),
+            ImuErrorModelAdapter.from_config(seed=31),
+        )
+    )
+    initial = _truth(RuntimeState(0.0, (0.0,)))
+    current = _truth(RuntimeState(0.1, (0.1,)))
+
+    assert bus.accepted_context("imu", initial) == ()
+    released = bus.accepted_context("imu", current, previous_truth=initial)
+
+    assert [packet.sampled_at_s for packet in released] == pytest.approx([0.0])
+    assert [packet.sampled_at_s for packet in bus.packets("imu")] == pytest.approx([0.0])
+    assert [packet.sampled_at_s for packet in bus.packets("imu", delivered=False)] == pytest.approx([0.1])
+
+
 def test_instantaneous_and_interval_imus_ignore_adaptive_rejected_trial_states() -> None:
     """A forced RKF45 rejection must not manufacture a sensor truth sample."""
 

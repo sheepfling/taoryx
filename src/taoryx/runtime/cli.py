@@ -130,6 +130,7 @@ class _ArtifactInspectionPayload(TypedDict):
 
 
 _OFFICIAL_PLUGIN_DISTRIBUTIONS: dict[str, str] = {
+    "taoryx.cadac": "taoryx-cadac",
     "taoryx.daveml": "taoryx-daveml",
     "taoryx.simple-aero": "taoryx-simple-aero",
     "taoryx.reference-models": "taoryx-reference-models",
@@ -138,6 +139,7 @@ _OFFICIAL_PLUGIN_DISTRIBUTIONS: dict[str, str] = {
 
 _PLUGIN_INSTALL_PROFILES: dict[str, tuple[str, ...]] = {
     "core": (),
+    "cadac": ("taoryx.cadac",),
     "models": (
         "taoryx.daveml",
         "taoryx.simple-aero",
