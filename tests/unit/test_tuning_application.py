@@ -60,10 +60,10 @@ def test_lqi_application_context_carries_resolved_gains_and_requires_exact_coord
         control_names=("elevator_deg",),
         integral_output_names=("pitch_error_rad",),
     )
-    assert binding["campaign_id"] == "example-lqi-campaign"
-    assert binding["cache_key"] == "cache-key"
-    assert binding["applied_gain_fingerprint_sha256"] == context.resolved_gain_fingerprint_sha256
-    declared = _runtime_tuning_binding({"tuning_binding": binding}, "lqi")
+    assert binding.campaign_id == "example-lqi-campaign"
+    assert binding.cache_key == "cache-key"
+    assert binding.applied_gain_fingerprint_sha256 == context.resolved_gain_fingerprint_sha256
+    declared = _runtime_tuning_binding({"tuning_binding": binding.as_dict()}, "lqi")
     assert declared["applied_gain_fingerprint_sha256"] == context.resolved_gain_fingerprint_sha256
     with pytest.raises(ValueError, match="state names"):
         context.runtime_binding_after_application(

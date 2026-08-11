@@ -30,7 +30,7 @@ records:
     family: powered_fixed_wing
     maturity: M4
     evidence_strength: public_research_surrogate
-    status: openap_point_mass_and_pseudo6dof_native_coordinate_lqi_composable
+    status: openap_point_mass_and_pseudo6dof_native_coordinate_lqi_endpoint_composable
     next_gate: expanded_operating_point_schedule_and_source_grounded_surface_path
   - id: skywalker_x8
     composition_family_id: skywalker_x8
@@ -60,7 +60,7 @@ records:
     family: powered_fixed_wing
     maturity: M4
     evidence_strength: source_grounded_reference
-    status: nominal_multi_fidelity_racetrack_with_held_node_surface_lqr_lqi_schedule_interiors_and_bounded_physical_lqr_transition_screen
+    status: nominal_multi_fidelity_racetrack_with_candidate_bound_held_node_surface_lqr_lqi_schedule_interiors_and_bounded_physical_lqr_transition_screen
     next_gate: expanded_transition_envelope_wind_mass_robustness_and_r1_review
   - id: reference_hl20_mod_k
     composition_family_id: hl20_mod_k

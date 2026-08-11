@@ -242,8 +242,18 @@ class ReferenceFamilyManifest(BaseModel):
 ####
 
 
-def load_reference_family_manifest(path: str | Path) -> ReferenceFamilyManifest:
-    """Load one source-grounded family manifest from YAML."""
+def load_reference_family_manifest(
+    path: str | Path,
+    *,
+    validate_daveml_import: bool = True,
+) -> ReferenceFamilyManifest:
+    """Load one source-grounded family manifest from YAML.
+
+    ``validate_daveml_import`` retains the full source-sidecar cross-check for
+    provenance audits.  Metadata-only callers can disable it after selecting
+    this typed manifest, avoiding a full import-sidecar parse before they have
+    requested any DAVE-ML graph or function data.
+    """
 
     source = Path(path)
     try:
@@ -256,7 +266,7 @@ def load_reference_family_manifest(path: str | Path) -> ReferenceFamilyManifest:
         manifest = ReferenceFamilyManifest.model_validate(payload)
         manifest.fidelity_map()
         manifest.plant.validate_envelope()
-        if manifest.daveml_import is not None:
+        if validate_daveml_import and manifest.daveml_import is not None:
             import_record = load_daveml_family_import(source.parent / manifest.daveml_import)
             if import_record.family_id != manifest.family_id:
                 raise ValueError(

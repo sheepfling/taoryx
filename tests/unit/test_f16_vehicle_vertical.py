@@ -14,6 +14,7 @@ from taoryx.source_f16 import (
     build_f16_source_physical_schedule_lqi_nodes,
     build_f16_source_physical_schedule_nodes,
     f16_source_control_bounds,
+    run_f16_source_physical_lqr_schedule_transition_cases,
 )
 
 from taoryx.composition_episode import (
@@ -23,8 +24,13 @@ from taoryx.composition_episode import (
 )
 from taoryx.generic_tuning import validate_nonlinear_native_coordinate_lqi
 from taoryx.model_authoring import build_model_authoring_plan
-from taoryx.physical_lqr import validate_nonlinear_wrench_lqi
+from taoryx.physical_lqr import (
+    apply_tuning_context_to_physical_wrench_lqi_design,
+    apply_tuning_context_to_physical_wrench_lqr_design,
+    validate_nonlinear_wrench_lqi,
+)
 from taoryx.plugins import PluginCatalog, discover_plugins
+from taoryx.tuning_application import TuningApplicationContextSet
 from taoryx.vehicle_batch_execution import execute_vehicle_composition_batch
 from taoryx.vehicle_composition import (
     compile_vehicle_composition,
@@ -194,7 +200,9 @@ def test_f16_declared_controller_campaigns_run_through_the_common_host(
         "f16-point-source-trim-translation-v1": ("lqr", False),
         "f16-pseudo-source-trim-attitude-v1": ("lqi", True),
         "f16-source-surface-local-lqr-v1": ("lqr", False),
+        "f16-source-surface-schedule-lqr-v1": ("lqr", False),
         "f16-source-surface-local-lqi-v1": ("lqi", True),
+        "f16-source-surface-schedule-lqi-v1": ("lqi", True),
     }
 
     for campaign_id, (method, expects_integral_outputs) in expected_methods.items():
@@ -216,9 +224,7 @@ def test_f16_pseudo_lqi_candidate_recovers_through_bounded_source_coordinates(
     model realizes physical F-16 actuator dynamics or allocation.
     """
 
-    registration = plugins.build_controller_tuning_campaign_registry().registration(
-        "f16-pseudo-source-trim-attitude-v1"
-    )
+    registration = plugins.build_controller_tuning_campaign_registry().registration("f16-pseudo-source-trim-attitude-v1")
     adapter, _ = registration.build()
     assert adapter.plant is not None
     report = registration.run()
@@ -347,9 +353,7 @@ def test_f16_physical_schedule_interior_screen_runs_through_public_composition(
 ) -> None:
     """Four F-16 physical nodes expose exact held-node interior evidence."""
 
-    composition = compile_vehicle_composition(
-        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / SCHEDULE_INTERIOR_SCREEN_COMPOSITION)
-    )
+    composition = compile_vehicle_composition(load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / SCHEDULE_INTERIOR_SCREEN_COMPOSITION))
     batch = execute_vehicle_composition_batch(composition, tmp_path / "f16-surface-lqr-schedule-interior")
     payload = batch.as_dict()
     compact_report = cast(dict[str, object], payload["schedule_interior"])
@@ -383,10 +387,7 @@ def test_f16_physical_schedule_interior_screen_runs_through_public_composition(
         "f16-6km-152mps",
         "f16-9km-152mps",
     }
-    assert {
-        cast(dict[str, object], sample["values"])["control.schedule.selection"]
-        for sample in samples
-    } == {"discrete_source_node_held_for_each_recovery"}
+    assert {cast(dict[str, object], sample["values"])["control.schedule.selection"] for sample in samples} == {"discrete_source_node_held_for_each_recovery"}
     ####
 
 
@@ -396,9 +397,7 @@ def test_f16_physical_lqi_schedule_interior_screen_runs_through_public_compositi
     """The four source nodes retain a separate, source-feasible LQI interior."""
 
     composition = compile_vehicle_composition(
-        load_vehicle_composition_request(
-            ROOT / "examples/vehicle_composition" / LQI_SCHEDULE_INTERIOR_SCREEN_COMPOSITION
-        )
+        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_SCHEDULE_INTERIOR_SCREEN_COMPOSITION)
     )
     batch = execute_vehicle_composition_batch(composition, tmp_path / "f16-surface-lqi-schedule-interior")
     payload = batch.as_dict()
@@ -423,11 +422,7 @@ def test_f16_physical_lqi_schedule_interior_screen_runs_through_public_compositi
         "alpha_plus_0_25mps": {"w_m_s": 0.25},
         "alpha_minus_0_25mps": {"w_m_s": -0.25},
     }
-    assert all(
-        cast(dict[str, object], case["result"])["saturation_fraction"] == 0.0
-        for node in nodes
-        for case in cast(list[dict[str, object]], node["cases"])
-    )
+    assert all(cast(dict[str, object], case["result"])["saturation_fraction"] == 0.0 for node in nodes for case in cast(list[dict[str, object]], node["cases"]))
     assert capability["controller_method"] == "lqi"
     assert cast(dict[str, object], capability["physical_screen_execution"])["capability_adapter_id"] == (
         "taoryx.f16_local_physical_surface_lqi_schedule_interior_screen.capability.v1"
@@ -435,20 +430,18 @@ def test_f16_physical_lqi_schedule_interior_screen_runs_through_public_compositi
     ####
 
 
+@pytest.mark.slow
 def test_f16_physical_schedule_transition_screen_runs_through_public_composition(
     tmp_path: Path,
 ) -> None:
     """The common runner executes bounded source-node schedule transitions."""
 
-    composition = compile_vehicle_composition(
-        load_vehicle_composition_request(
-            ROOT / "examples/vehicle_composition" / SCHEDULE_TRANSITION_SCREEN_COMPOSITION
-        )
-    )
+    composition = compile_vehicle_composition(load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / SCHEDULE_TRANSITION_SCREEN_COMPOSITION))
     batch = execute_vehicle_composition_batch(composition, tmp_path / "f16-surface-lqr-schedule-transition")
     payload = batch.as_dict()
     compact_report = cast(dict[str, object], payload["schedule_transition"])
     full_report = cast(dict[str, object], json.loads((batch.output_dir / "schedule_transition_report.json").read_text()))
+    robustness = cast(dict[str, object], json.loads((batch.output_dir / "robustness_report.json").read_text()))
     runtime = cast(dict[str, object], payload["runtime"])
     preflight = cast(dict[str, object], payload["preflight"])
     capability = cast(dict[str, object], cast(dict[str, object], preflight["derived_mission"])["capability"])
@@ -468,11 +461,27 @@ def test_f16_physical_schedule_transition_screen_runs_through_public_composition
     assert full_report["direct_body_moment_injection"] is False
     assert all(cast(dict[str, object], case)["saturation_steps"] == 0 for case in cast(dict[str, object], full_report["cases"]).values())
     assert runtime["controller_selection"] == "linearly_interpolated_source_lqr_schedule_by_altitude_coordinate"
+    persistent_disturbance = cast(dict[str, object], runtime["persistent_disturbance_screen"])
+    assert persistent_disturbance["status"] == "applied"
+    assert persistent_disturbance["pass"] is True
+    assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["release_evidence_schema"] == "taoryx.claim-bound-release-evidence/v1alpha1"
+    assert robustness["release_evidence_kind"] == "robustness"
+    assert cast(dict[str, object], robustness["release_evidence_subject"])["composition_identity_sha256"] == composition.identity_sha256
+    assert robustness["id"] == "f16-schedule-matched-pitch-wrench-offset"
+    assert robustness["kind"] == "constant_offset"
+    assert robustness["pass"] is True
+    robustness_cases = cast(list[dict[str, object]], robustness["cases"])
+    assert [case["id"] for case in robustness_cases] == ["nominal", "positive-pitch-offset", "negative-pitch-offset"]
+    assert [cast(dict[str, float], case["parameters"])["pitch_wrench_bias_fraction"] for case in robustness_cases] == [0.0, 0.05, -0.05]
+    assert all(case["status"] == "pass" for case in robustness_cases)
+    assert all(cast(dict[str, float], case["metrics"])["maximum_final_normalized_error"] <= 0.25 for case in robustness_cases)
+    assert all(cast(dict[str, float], case["metrics"])["saturation_fraction"] == 0.0 for case in robustness_cases)
     assert cast(dict[str, object], capability["transition_execution"])["operations"] == ["validate", "batch"]
-    assert {
-        cast(dict[str, object], sample["values"])["control.schedule.selection"]
-        for sample in samples
-    } == {"linearly_interpolated_source_lqr_schedule_by_altitude_coordinate"}
+    assert capability["persistent_disturbance_status"] == "available_as_declared_matched_external_pitch_moment_screen"
+    assert {cast(dict[str, object], sample["values"])["control.schedule.selection"] for sample in samples} == {
+        "linearly_interpolated_source_lqr_schedule_by_altitude_coordinate"
+    }
     assert {cast(dict[str, object], sample["values"])["control.controller.method"] for sample in samples} == {"lqr"}
     ####
 
@@ -482,9 +491,7 @@ def test_f16_physical_surface_lqi_screen_runs_through_public_composition(
 ) -> None:
     """The source-local LQI evidence is a distinct public Composition endpoint."""
 
-    composition = compile_vehicle_composition(
-        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_SURFACE_SCREEN_COMPOSITION)
-    )
+    composition = compile_vehicle_composition(load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_SURFACE_SCREEN_COMPOSITION))
     batch = execute_vehicle_composition_batch(composition, tmp_path / "f16-surface-lqi")
     payload = batch.as_dict()
     runtime = cast(dict[str, object], payload["runtime"])
@@ -513,6 +520,150 @@ def test_f16_physical_surface_lqi_screen_runs_through_public_composition(
     assert metrics["integrators_exercised"] is True
     assert (batch.output_dir / "status_trace.json").is_file()
     assert (batch.output_dir / "semantic_action_trace.json").is_file()
+    ####
+
+
+def test_f16_source_surface_lqi_candidate_matches_the_physical_wrench_runtime(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The F-16 campaign and local LQI screen use one ordered wrench contract."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration("f16-source-surface-local-lqi-v1")
+    context = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))[0]
+    applied, binding = apply_tuning_context_to_physical_wrench_lqi_design(
+        build_f16_local_physical_wrench_lqi_design(),
+        context,
+    )
+
+    assert applied.projection.state_names == context.state_names
+    assert applied.projection.wrench_names == context.control_names
+    assert binding.campaign_id == registration.id
+    ####
+
+
+def test_f16_physical_surface_lqi_screen_applies_the_exact_common_tuning_candidate(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The public F-16 batch emits a binding only after applying its selected gains."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration("f16-source-surface-local-lqi-v1")
+    context = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))[0]
+    composition = compile_vehicle_composition(
+        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_SURFACE_SCREEN_COMPOSITION)
+    )
+
+    batch = execute_vehicle_composition_batch(
+        composition,
+        tmp_path / "f16-surface-lqi-tuned",
+        tuning_context=context,
+    )
+    runtime = cast(dict[str, object], batch.as_dict()["runtime"])
+    binding = cast(dict[str, object], runtime["tuning_binding"])
+
+    assert batch.passed is True
+    assert binding["campaign_id"] == registration.id
+    assert binding["controller_method"] == "lqi"
+    ####
+
+
+def test_f16_held_node_lqi_schedule_applies_every_exact_campaign_candidate(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The schedule cannot silently substitute one source-node gain for another."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration(
+        "f16-source-surface-schedule-lqi-v1"
+    )
+    context_set = TuningApplicationContextSet(
+        registration.application_contexts(registration.run_cached(tmp_path / "schedule-tuning-cache"))
+    )
+    composition = compile_vehicle_composition(
+        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_SCHEDULE_INTERIOR_SCREEN_COMPOSITION)
+    )
+
+    batch = execute_vehicle_composition_batch(
+        composition,
+        tmp_path / "f16-lqi-schedule-tuned",
+        tuning_context_set=context_set,
+    )
+    runtime = cast(dict[str, object], batch.as_dict()["runtime"])
+    bindings = cast(list[dict[str, object]], runtime["tuning_bindings"])
+
+    assert batch.passed is True
+    assert [binding["node_id"] for binding in bindings] == list(context_set.node_ids)
+    assert [binding["candidate_profile_id"] for binding in bindings] == [
+        context.candidate_profile_id for context in context_set.contexts
+    ]
+    assert all(binding["campaign_id"] == registration.id for binding in bindings)
+    ####
+
+
+def test_f16_held_node_lqr_schedule_applies_every_exact_campaign_candidate(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """A held LQR schedule uses every node-indexed candidate, not one default gain."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration(
+        "f16-source-surface-schedule-lqr-v1"
+    )
+    context_set = TuningApplicationContextSet(
+        registration.application_contexts(registration.run_cached(tmp_path / "schedule-tuning-cache"))
+    )
+    composition = compile_vehicle_composition(
+        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / SCHEDULE_INTERIOR_SCREEN_COMPOSITION)
+    )
+
+    batch = execute_vehicle_composition_batch(
+        composition,
+        tmp_path / "f16-lqr-schedule-tuned",
+        tuning_context_set=context_set,
+    )
+    runtime = cast(dict[str, object], batch.as_dict()["runtime"])
+    bindings = cast(list[dict[str, object]], runtime["tuning_bindings"])
+
+    assert batch.passed is True
+    assert [binding["node_id"] for binding in bindings] == list(context_set.node_ids)
+    assert [binding["candidate_profile_id"] for binding in bindings] == [
+        context.candidate_profile_id for context in context_set.contexts
+    ]
+    assert all(binding["campaign_id"] == registration.id for binding in bindings)
+    applied, receipt = apply_tuning_context_to_physical_wrench_lqr_design(
+        build_f16_source_physical_schedule_nodes()[0].design,
+        context_set.contexts[0],
+    )
+    assert applied.result.hurwitz is True
+    assert receipt.node_id == context_set.contexts[0].node_id
+    ####
+
+
+def test_f16_lqr_transition_applies_every_exact_candidate_before_interpolation(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The transition runner cannot interpolate one unbound default schedule."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration(
+        "f16-source-surface-schedule-lqr-v1"
+    )
+    context_set = TuningApplicationContextSet(
+        registration.application_contexts(registration.run_cached(tmp_path / "transition-tuning-cache"))
+    )
+
+    report = run_f16_source_physical_lqr_schedule_transition_cases(
+        duration_s=0.05,
+        dt_s=0.05,
+        sample_stride_steps=1,
+        tuning_context_set=context_set,
+    )
+    bindings = cast(list[dict[str, object]], report["tuning_bindings"])
+
+    assert report["controller_selection"] == "linearly_interpolated_source_lqr_schedule_by_altitude_coordinate"
+    assert [binding["node_id"] for binding in bindings] == list(context_set.node_ids)
+    assert all(binding["campaign_id"] == registration.id for binding in bindings)
     ####
 
 
@@ -574,9 +725,7 @@ def test_f16_physical_schedule_interior_screen_is_selectable_through_the_common_
     local_screen = cast(dict[str, object], controller["local_controller_screen"])
     details = cast(dict[str, object], local_screen["controller"])
 
-    assert [item["id"] for item in cast(list[dict[str, object]], controller["campaigns"])] == [
-        "f16-source-surface-local-lqr-v1"
-    ]
+    assert [item["id"] for item in cast(list[dict[str, object]], controller["campaigns"])] == ["f16-source-surface-schedule-lqr-v1"]
     assert details["method"] == "lqr"
     assert details["selection"] == "discrete_source_node_held_for_each_recovery"
     assert execution["available_operations"] == ["validate", "batch"]
@@ -604,9 +753,7 @@ def test_f16_physical_schedule_transition_screen_is_selectable_through_the_commo
     local_screen = cast(dict[str, object], controller["local_controller_screen"])
     details = cast(dict[str, object], local_screen["controller"])
 
-    assert [item["id"] for item in cast(list[dict[str, object]], controller["campaigns"])] == [
-        "f16-source-surface-local-lqr-v1"
-    ]
+    assert [item["id"] for item in cast(list[dict[str, object]], controller["campaigns"])] == ["f16-source-surface-schedule-lqr-v1"]
     assert details["method"] == "lqr"
     assert details["selection"] == "linearly_interpolated_source_lqr_schedule_by_altitude_coordinate"
     assert details["screen_duration_s"] == 240.0
@@ -635,9 +782,7 @@ def test_f16_physical_lqi_schedule_interior_screen_is_selectable_through_the_com
     local_screen = cast(dict[str, object], controller["local_controller_screen"])
     details = cast(dict[str, object], local_screen["controller"])
 
-    assert [item["id"] for item in cast(list[dict[str, object]], controller["campaigns"])] == [
-        "f16-source-surface-local-lqi-v1"
-    ]
+    assert [item["id"] for item in cast(list[dict[str, object]], controller["campaigns"])] == ["f16-source-surface-schedule-lqi-v1"]
     assert details["method"] == "lqi"
     assert details["integral_output_names"] == ["u_m_s", "v_m_s", "w_m_s"]
     assert details["selection"] == "discrete_source_node_held_for_each_recovery"
@@ -648,15 +793,9 @@ def test_f16_physical_lqi_schedule_interior_screen_is_selectable_through_the_com
 def test_f16_physical_surface_lqi_catalog_advertises_actual_overlay_effectors() -> None:
     """The LQI mission is batch-runnable without borrowing the LQR endpoint name."""
 
-    kit = (
-        load_resolved_vehicle_composition_catalog()
-        .vehicle(MODEL_ID)
-        .authoring_kit_dict(LQI_SURFACE_SCREEN_MISSION_ID, "rigid_body_6dof_surface_allocated")
-    )
+    kit = load_resolved_vehicle_composition_catalog().vehicle(MODEL_ID).authoring_kit_dict(LQI_SURFACE_SCREEN_MISSION_ID, "rigid_body_6dof_surface_allocated")
     endpoints = cast(list[dict[str, object]], kit["execution_endpoints"])
-    composition = compile_vehicle_composition(
-        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_SURFACE_SCREEN_COMPOSITION)
-    )
+    composition = compile_vehicle_composition(load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_SURFACE_SCREEN_COMPOSITION))
     interface = resolve_vehicle_composition_interface_contract(composition)
 
     assert {(item["operation"], item["factory_id"]) for item in endpoints if item["status"] == "runnable"} == {
@@ -693,6 +832,10 @@ def test_f16_physical_surface_campaign_is_selectable_through_the_common_host(
     assert selection["fidelity"] == "rigid_body_6dof_surface_allocated"
     assert selection["realization_id"] == "rigid_body_6dof_surface_allocated"
     assert controller["status"] == "provider_managed_with_campaign"
+    # Campaign applicability is part of the executable contract: the local
+    # source-trim screen must not advertise node-schedule controllers that
+    # require one of the dedicated schedule mission templates.  Those
+    # templates exercise their respective schedule campaigns above.
     assert [item["id"] for item in campaigns] == [
         "f16-source-surface-local-lqr-v1",
         "f16-source-surface-local-lqi-v1",
@@ -740,10 +883,7 @@ def test_f16_direct_wrench_screen_advertises_its_retained_source_lqr_profile(
         "external_override": False,
         "hard_limits": "not_declared",
     }
-    assert [
-        (item["channel_id"], item["component"], item["native_control_id"], item["normalization_scale"], item["hard_bounds"])
-        for item in controls
-    ] == [
+    assert [(item["channel_id"], item["component"], item["native_control_id"], item["normalization_scale"], item["hard_bounds"]) for item in controls] == [
         ("wrench.force.command", 0, "total_force_x_n", 5000.0, None),
         ("wrench.moment.command", 0, "total_moment_x_nm", 10000.0, None),
         ("wrench.moment.command", 1, "total_moment_y_nm", 10000.0, None),

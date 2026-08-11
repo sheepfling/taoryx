@@ -54,6 +54,16 @@ from .configuration_contract import (
     ConfigurationSequenceTemplate,
     ConfigurationSequenceValue,
     ConfigurationValueSpace,
+    ControlAgentNormalizationPolicy,
+    ControlCommandMode,
+    ControlCommandSemantics,
+    ControlQuantizationMetadata,
+    ControlQuantizationMode,
+    ControlQuantizationRounding,
+    ControlReleaseBehavior,
+    ControlRepeatPolicy,
+    ControlTemporalSemantics,
+    ControlValueDomain,
     NumericPresentationMetadata,
     PreparedTrajectoryConfiguration,
     PresentationLinkMetadata,
@@ -83,6 +93,7 @@ from .configuration_contract import (
     TrajectoryModelMetadata,
     TrajectoryModelPresentationMetadata,
     TrajectoryModelPropertyMetadata,
+    TrajectoryOpenSegmentSequenceMetadata,
     TrajectoryOutputChannelMetadata,
     TrajectoryOutputDataType,
     TrajectoryOutputSchema,
@@ -117,6 +128,7 @@ from .execution_contract import (
     MissionCompositionTrajectoryResult,
     ProviderAdvertisementConformanceReport,
     ProviderModelAdvertisementConformance,
+    RunnableMissionCompositionProvider,
     TrajectoryChannelMetadata,
     TrajectoryEntityRelationship,
     TrajectoryEvent,
@@ -129,6 +141,7 @@ from .execution_contract import (
     parse_mission_composition_response,
     resolve_output_selection,
 )
+from .rl_control import RLActionSpaceSpec, RLControlChannelSpec, build_rl_action_space, decode_agent_action, encode_agent_action
 from .runtime_mission_composition import RuntimeArtifactProjection, trajectory_result_from_run_artifact
 
 if TYPE_CHECKING:
@@ -138,7 +151,12 @@ if TYPE_CHECKING:
         configuration_instance_from_vehicle_request,
         execute_registry_batch_request,
     )
-    from .reference_mission_composition import ReferenceMissionCompositionProvider
+    from .reference_mission_composition import (
+        ReferenceBallisticLaunch,
+        ReferenceMissionCompositionProvider,
+        ReferenceWaypoint,
+        ReferenceWaypointCourseStart,
+    )
     from .registry_mission_composition import RegistryMissionCompositionProvider
     from .session_contract import (
         MissionCompositionClosedSession,
@@ -155,23 +173,58 @@ if TYPE_CHECKING:
         SessionLifecycle,
     )
     from .simple_aero_mission_composition import (
+        SimpleAeroCheckpoints,
+        SimpleAeroCutoffCondition,
+        SimpleAeroEarthModel,
+        SimpleAeroEndpoint,
+        SimpleAeroEndpointState,
+        SimpleAeroGeodeticAimpoint,
+        SimpleAeroLaunch,
+        SimpleAeroMission,
+        SimpleAeroRangeBearingEndpoint,
+        SimpleAeroRuntime,
+        SimpleAeroSegment,
+        SimpleAeroSegmentKind,
+        SimpleAeroSurrogate,
+        build_simple_aero_configuration,
         build_simple_aero_example_configuration,
         build_simple_aero_prepared_configuration,
         build_simple_aero_template_configuration,
+        prepare_simple_aero_mission,
     )
 
 
 def __getattr__(name: str) -> object:
     """Load native adapters lazily to avoid runtime/family import cycles."""
 
-    if name == "ReferenceMissionCompositionProvider":
-        from .reference_mission_composition import ReferenceMissionCompositionProvider
-
-        return ReferenceMissionCompositionProvider
     if name in {
+        "ReferenceBallisticLaunch",
+        "ReferenceMissionCompositionProvider",
+        "ReferenceWaypoint",
+        "ReferenceWaypointCourseStart",
+    }:
+        from . import reference_mission_composition
+
+        return getattr(reference_mission_composition, name)
+    if name in {
+        "SimpleAeroCheckpoints",
+        "SimpleAeroCutoffCondition",
+        "SimpleAeroEarthModel",
+        "SimpleAeroEndpoint",
+        "SimpleAeroEndpointState",
+        "SimpleAeroGeodeticAimpoint",
+        "SimpleAeroLaunch",
+        "SimpleAeroMission",
+        "SimpleAeroRangeBearingEndpoint",
+        "SimpleAeroRuntime",
+        "SimpleAeroSegment",
+        "SimpleAeroSegmentKind",
+        "SimpleAeroSurrogate",
+        "build_simple_aero_configuration",
         "build_simple_aero_example_configuration",
         "build_simple_aero_prepared_configuration",
         "build_simple_aero_template_configuration",
+        "prepare_simple_aero_mission",
     }:
         from . import simple_aero_mission_composition
 
@@ -234,6 +287,16 @@ __all__ = [
     "ConfigurationSequenceTemplate",
     "ConfigurationSequenceValue",
     "ConfigurationValueSpace",
+    "ControlAgentNormalizationPolicy",
+    "ControlCommandMode",
+    "ControlCommandSemantics",
+    "ControlQuantizationMetadata",
+    "ControlQuantizationMode",
+    "ControlQuantizationRounding",
+    "ControlReleaseBehavior",
+    "ControlRepeatPolicy",
+    "ControlTemporalSemantics",
+    "ControlValueDomain",
     "ContractProbeMissionCompositionProvider",
     "ExampleMissionCompositionProvider",
     "MissionCompositionCapability",
@@ -257,6 +320,7 @@ __all__ = [
     "MissionCompositionRunRequest",
     "MissionCompositionRunResponse",
     "MissionCompositionRunnerRegistry",
+    "RunnableMissionCompositionProvider",
     "MissionCompositionSegment",
     "MissionCompositionSegmentRequest",
     "MissionCompositionSegmentResult",
@@ -273,9 +337,25 @@ __all__ = [
     "PresentationLinkMetadata",
     "ProviderAdvertisementConformanceReport",
     "ProviderModelAdvertisementConformance",
+    "ReferenceBallisticLaunch",
     "ReferenceMissionCompositionProvider",
+    "ReferenceWaypoint",
+    "ReferenceWaypointCourseStart",
     "RegistryMissionCompositionProvider",
     "RuntimeArtifactProjection",
+    "SimpleAeroCheckpoints",
+    "SimpleAeroCutoffCondition",
+    "SimpleAeroEarthModel",
+    "SimpleAeroEndpoint",
+    "SimpleAeroEndpointState",
+    "SimpleAeroGeodeticAimpoint",
+    "SimpleAeroLaunch",
+    "SimpleAeroMission",
+    "SimpleAeroRangeBearingEndpoint",
+    "SimpleAeroRuntime",
+    "SimpleAeroSegment",
+    "SimpleAeroSegmentKind",
+    "SimpleAeroSurrogate",
     "TrajectoryConfigurationInstance",
     "TrajectoryConfigurationSchema",
     "TrajectoryControlAdvertisement",
@@ -297,6 +377,7 @@ __all__ = [
     "TrajectoryFidelityTransition",
     "TrajectoryMissionOperationMetadata",
     "TrajectoryMissionTemplateMetadata",
+    "TrajectoryOpenSegmentSequenceMetadata",
     "TrajectoryModelCapabilities",
     "TrajectoryModelMetadata",
     "TrajectoryModelPresentationMetadata",
@@ -319,6 +400,7 @@ __all__ = [
     "TrajectorySegmentResult",
     "TrajectoryStateSnapshot",
     "audit_provider_advertisement",
+    "build_simple_aero_configuration",
     "build_simple_aero_prepared_configuration",
     "build_simple_aero_example_configuration",
     "build_simple_aero_template_configuration",
@@ -330,12 +412,18 @@ __all__ = [
     "contract_probe_model_metadata",
     "diagnostic_from_exception",
     "parse_mission_composition_response",
+    "prepare_simple_aero_mission",
     "resolve_output_selection",
     "render_configuration_schema",
     "trajectory_result_from_run_artifact",
     "execute_registry_batch_request",
     "validate_configuration_instance",
     "ValuePresentationMetadata",
+    "RLActionSpaceSpec",
+    "RLControlChannelSpec",
+    "build_rl_action_space",
+    "decode_agent_action",
+    "encode_agent_action",
     "MissionCompositionClosedSession",
     "MissionCompositionCloseSessionRequest",
     "MissionCompositionInspectSessionRequest",

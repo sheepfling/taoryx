@@ -41,6 +41,7 @@ from taoryx.vehicle_execution_bindings import (
     batch_episode_parity_records,
     load_vehicle_batch_episode_parity_catalog,
     load_vehicle_execution_binding_catalog,
+    resolve_batch_episode_parity_advertisement,
     resolve_vehicle_execution_binding,
     validate_batch_episode_parity_bindings,
     validate_execution_bindings,
@@ -231,6 +232,30 @@ def test_batch_episode_parity_registry_is_explicit_and_never_inferred() -> None:
         hummingbird_vertical,
         hummingbird,
     ]
+    ####
+
+
+def test_batch_episode_parity_has_a_typed_contract_before_json_serialization() -> None:
+    """Authoring code can inspect parity without parsing an opaque record."""
+
+    registered = resolve_batch_episode_parity_advertisement(
+        "skywalker_x8",
+        "powered_fixed_wing_racetrack_v1",
+        "pseudo_6dof",
+    )
+    unavailable = resolve_batch_episode_parity_advertisement(
+        "hummingbird",
+        "hummingbird_local_direct_wrench_screen_v1",
+        "rigid_body_6dof_direct_wrench",
+    )
+
+    assert registered.availability == "registered"
+    assert registered.adapter_id == "taoryx.language_backed.action_trace_batch_episode_parity.v1"
+    assert registered.runnable_operations == ("batch", "episode")
+    assert unavailable.availability == "not_available"
+    assert unavailable.reason
+    assert unavailable.adapter_id is None
+    assert unavailable.as_dict()["availability"] == unavailable.availability
     ####
 
 
@@ -470,7 +495,7 @@ def test_hummingbird_timeout_recovery_graph_executes_safe_landing_branch_and_fai
         "07-touchdown_settle_disarm",
     ]
     assert all(item["segment_instance_id"] not in {"04-yaw_scan", "lateral-return", "06-hover_dwell"} for item in result.controller_transitions)
-    evaluation = cast(dict[str, object], result.truth_evaluation)
+    evaluation = result.truth_evaluation
     assert evaluation["mission_pass"] is False
     ####
 

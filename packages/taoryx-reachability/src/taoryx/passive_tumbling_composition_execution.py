@@ -216,6 +216,16 @@ def _truth_evaluation(
     return {
         "independent_truth_evaluation": True,
         "required_objectives": list(objectives),
+        "results": [
+            {
+                "id": item["id"],
+                "required": True,
+                "status": "pass" if item["truth_result"] == "PASS" else "fail",
+                "actual": item["truth_result"],
+                "critical_requirement": item["critical_requirement"],
+            }
+            for item in objectives
+        ],
         "required_passed": sum(item["truth_result"] == "PASS" for item in objectives),
         "required_total": len(objectives),
         "terminal_pass": impact_pass,

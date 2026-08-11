@@ -14,6 +14,7 @@ from taoryx.source_table_fixed_wing import (
 )
 
 from taoryx.composition_episode import ActionFrame, LanguageBackedCompositionEpisode, open_vehicle_composition_episode
+from taoryx.composition_result_catalog import index_composition_results
 from taoryx.language.diagnostics import Diagnostic, Severity
 from taoryx.language_backed_execution import execute_powered_fixed_wing_composition
 from taoryx.language_backed_racetrack import materialize_powered_fixed_wing_composition
@@ -358,10 +359,21 @@ def test_x8_public_batch_cli_records_a_capped_prefix_as_max_steps(tmp_path: Path
     execution = json.loads((output_dir / "execution.json").read_text(encoding="utf-8"))
     evaluation = json.loads((output_dir / "evaluation.json").read_text(encoding="utf-8"))
     run_manifest = json.loads((output_dir / "run-manifest.json").read_text(encoding="utf-8"))
+    assert execution["schema"] == "taoryx.vehicle-execution-packet/v1alpha1"
+    assert execution["provider_execution_schema"] == "taoryx.language-backed-composition-execution/v1alpha1"
     assert execution["execution_limit_reason"] == "max_steps"
+    assert execution["outcome"] == {
+        "scope": "mission",
+        "disposition": "failed",
+        "provider_status": "mission_failed",
+    }
     assert evaluation["outcome"] == "time_limited"
     assert run_manifest["status"] == "incomplete"
     assert run_manifest["termination"]["reason"] == "max_steps"
+    assert run_manifest["integration"]["execution_packet"]["packet_identity_sha256"] == execution["packet_identity_sha256"]
+    catalog = index_composition_results(output_dir)
+    assert catalog["status"] == "pass"
+    assert catalog["records"][0]["run_manifest_evidence"]["status"] == "verified"
     ####
 
 
@@ -616,7 +628,7 @@ def test_x8_local_source_table_surface_lqi_screen_runs_through_public_compositio
     assert cast(dict[str, object], lqi_candidate["physical_screen_execution"])["status"] == "executed_by_this_lqi_screen"
     assert lqi_candidate["persistent_disturbance_status"] == "executed_by_this_screen"
     automation = cast(dict[str, object], lqi_candidate["controller_automation"])
-    assert cast(dict[str, object], automation["integral_priority_grid"])["multipliers"] == [0.1, 1.0, 10.0, 100.0]
+    assert cast(dict[str, object], automation["integral_priority_grid"])["multipliers"] == [1.0]
     assert cast(dict[str, object], automation["physical_wrench_profile"])["integral_q_diagonal"] == [0.15, 0.15]
     assert (batch.output_dir / "nonlinear_validation.json").is_file()
     assert (batch.output_dir / "robustness_report.json").is_file()
@@ -627,6 +639,9 @@ def test_x8_local_source_table_surface_lqi_screen_runs_through_public_compositio
     assert nonlinear_validation["schema"] == "taoryx.physical-lqi-validation/v1alpha1"
     assert metrics["integrators_exercised"] is True
     assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["release_evidence_schema"] == "taoryx.claim-bound-release-evidence/v1alpha1"
+    assert robustness["release_evidence_kind"] == "robustness"
+    assert cast(dict[str, object], robustness["release_evidence_subject"])["composition_identity_sha256"] == composition.identity_sha256
     assert robustness["id"] == "x8-local-lqi-matched-pitch-wrench-offset"
     assert robustness["kind"] == "constant_offset"
     assert robustness["pass"] is True
@@ -636,6 +651,31 @@ def test_x8_local_source_table_surface_lqi_screen_runs_through_public_compositio
     assert all(case["status"] == "pass" for case in cases)
     assert all(cast(dict[str, float], case["metrics"])["final_feedback_error_fraction"] <= 0.05 for case in cases)
     assert all(cast(dict[str, float], case["metrics"])["saturation_fraction"] <= 0.05 for case in cases)
+    ####
+
+
+def test_x8_physical_lqi_screen_applies_the_exact_common_tuning_candidate(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The selected LQI candidate uses the screen's state-to-wrench contract."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration(SURFACE_CAMPAIGN_ID)
+    contexts = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))
+
+    assert len(contexts) == 1
+    batch = execute_vehicle_composition_batch(
+        _x8_local_surface_lqi_composition(),
+        tmp_path / "x8-local-surface-lqi-tuned",
+        tuning_context=contexts[0],
+    )
+    runtime = cast(dict[str, object], batch.as_dict()["runtime"])
+    binding = cast(dict[str, object], runtime["tuning_binding"])
+
+    assert batch.passed is True
+    assert binding["campaign_id"] == SURFACE_CAMPAIGN_ID
+    assert binding["candidate_profile_id"] == contexts[0].candidate_profile_id
+    assert binding["applied_gain_fingerprint_sha256"] == contexts[0].resolved_gain_fingerprint_sha256
     ####
 
 

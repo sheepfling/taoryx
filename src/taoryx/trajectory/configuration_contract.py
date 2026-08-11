@@ -12,9 +12,12 @@ import hashlib
 import json
 import math
 from collections.abc import Mapping, Sequence
-from typing import Annotated, Any, Literal, Protocol
+from typing import TYPE_CHECKING, Annotated, Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+if TYPE_CHECKING:
+    from .rl_control import RLActionSpaceSpec
 
 ConfigurationValueType = Literal["number", "integer", "boolean", "string", "enum", "vector3", "vector4"]
 ConfigurationRole = Literal["initialization", "segment", "constraint", "variant", "output"]
@@ -74,7 +77,25 @@ TrajectoryControlSamplingSemantics = Literal[
     "segment_generated",
     "not_sampled",
     "provider_reported",
+    "event",
 ]
+ControlValueDomain = Literal[
+    "continuous",
+    "periodic",
+    "boolean",
+    "enum",
+    "discrete_levels",
+    "event",
+    "vector",
+    "provider_defined",
+]
+ControlCommandMode = Literal["absolute", "rate", "increment", "event"]
+ControlTemporalSemantics = Literal["held", "sampled", "profile", "momentary", "latched", "pulse"]
+ControlReleaseBehavior = Literal["hold", "default", "failsafe", "release_value", "auto_reset"]
+ControlRepeatPolicy = Literal["repeatable", "once_per_episode", "once_until_reset"]
+ControlQuantizationMode = Literal["none", "step", "levels"]
+ControlQuantizationRounding = Literal["reject", "nearest", "floor", "ceil"]
+ControlAgentNormalizationPolicy = Literal["auto", "affine", "standardize", "identity", "periodic_wrap"]
 TrajectoryControlIntentResolution = Literal[
     "external_channel",
     "provider_internal",
@@ -119,6 +140,9 @@ class ValuePresentationMetadata(BaseModel):
         "slider",
         "toggle",
         "select",
+        "button",
+        "stepper",
+        "dial",
         "text",
         "vector_editor",
         "coordinate_picker",
@@ -150,6 +174,87 @@ class TrajectoryProviderPresentationMetadata(BaseModel):
     organization: str | None = None
     categories: tuple[str, ...] = ()
     links: tuple[PresentationLinkMetadata, ...] = ()
+
+
+class ControlQuantizationMetadata(BaseModel):
+    """Optional numeric grid or explicit detent set for a control channel."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    mode: ControlQuantizationMode = "none"
+    step: float | None = Field(default=None, gt=0.0)
+    origin: float = 0.0
+    levels: tuple[float, ...] = ()
+    rounding: ControlQuantizationRounding = "reject"
+
+    @model_validator(mode="after")
+    def validate_quantization(self) -> ControlQuantizationMetadata:
+        if not math.isfinite(self.origin):
+            raise ValueError("control quantization origin must be finite")
+        if any(not math.isfinite(level) for level in self.levels):
+            raise ValueError("control quantization levels must be finite")
+        if tuple(sorted(set(self.levels))) != self.levels:
+            raise ValueError("control quantization levels must be strictly increasing")
+        if self.mode == "none" and (self.step is not None or self.levels):
+            raise ValueError("unquantized controls cannot declare a step or levels")
+        if self.mode == "step" and (self.step is None or self.levels):
+            raise ValueError("step quantization requires exactly one positive step and no explicit levels")
+        if self.mode == "levels" and (self.step is not None or len(self.levels) < 2):
+            raise ValueError("level quantization requires at least two explicit levels and no step")
+        return self
+        ####
+
+    ####
+
+
+class ControlCommandSemantics(BaseModel):
+    """Value, temporal, release, and agent semantics for one control channel."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    value_domain: ControlValueDomain | None = None
+    command_mode: ControlCommandMode = "absolute"
+    temporal_semantics: ControlTemporalSemantics = "held"
+    release_behavior: ControlReleaseBehavior = "hold"
+    release_value: Any = None
+    pulse_duration_s: float | None = Field(default=None, gt=0.0)
+    repeat_policy: ControlRepeatPolicy = "repeatable"
+    rate_unit: str | None = None
+    quantization: ControlQuantizationMetadata = Field(default_factory=ControlQuantizationMetadata)
+    agent_normalization: ControlAgentNormalizationPolicy = "auto"
+    agent_center: float | None = None
+    agent_scale: float | None = Field(default=None, gt=0.0)
+    agent_clip: bool = False
+
+    @model_validator(mode="after")
+    def validate_command_semantics(self) -> ControlCommandSemantics:
+        if self.command_mode == "rate" and not self.rate_unit:
+            raise ValueError("rate controls must declare rate_unit")
+        if self.command_mode != "rate" and self.rate_unit is not None:
+            raise ValueError("rate_unit is only valid for rate controls")
+        if self.temporal_semantics == "pulse":
+            if self.command_mode != "event":
+                raise ValueError("pulse controls must use event command mode")
+            if self.pulse_duration_s is None:
+                raise ValueError("pulse controls must declare pulse_duration_s")
+        elif self.pulse_duration_s is not None:
+            raise ValueError("pulse_duration_s is only valid for pulse controls")
+        if self.command_mode == "event" and self.temporal_semantics not in {"pulse", "sampled"}:
+            raise ValueError("event controls must be sampled events or pulses")
+        if self.temporal_semantics == "momentary" and self.release_behavior == "hold":
+            raise ValueError("momentary controls cannot hold their previous value on release")
+        if self.release_behavior == "release_value" and self.release_value is None:
+            raise ValueError("release_value behavior requires release_value")
+        if self.release_behavior != "release_value" and self.release_value is not None:
+            raise ValueError("release_value is only valid with release_value behavior")
+        if self.agent_normalization == "standardize" and (self.agent_center is None or self.agent_scale is None):
+            raise ValueError("standardized agent controls require agent_center and agent_scale")
+        if self.agent_normalization != "standardize" and (self.agent_center is not None or self.agent_scale is not None):
+            raise ValueError("agent_center and agent_scale are only valid for standardize normalization")
+        return self
+        ####
+
+    ####
 
 
 class ConfigurationContractError(ValueError):
@@ -817,6 +922,7 @@ class TrajectoryControlNativeBindingMetadata(BaseModel):
     shape: tuple[int | Literal["variable"], ...] = ()
     interval: ConfigurationInterval | None = None
     value_space: ConfigurationValueSpace
+    semantics: ControlCommandSemantics | None = None
     provider_binding: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -830,6 +936,27 @@ class TrajectoryControlNativeBindingMetadata(BaseModel):
         return self
         ####
 
+    ####
+
+
+def _infer_control_value_domain(
+    value_space: ConfigurationValueSpace,
+    data_type: TrajectoryOutputDataType,
+) -> ControlValueDomain:
+    """Infer legacy channel domain from already-published type/value-space metadata."""
+
+    topology = value_space.topology
+    if topology == "periodic_circle":
+        return "periodic"
+    if topology == "boolean" or data_type == "boolean":
+        return "boolean"
+    if topology == "event":
+        return "event"
+    if topology == "finite_set":
+        return "enum"
+    if topology == "product" or value_space.representation.startswith("vector"):
+        return "vector"
+    return "continuous"
     ####
 
 
@@ -857,6 +984,7 @@ class TrajectoryControlChannelMetadata(BaseModel):
     frame: str | None = None
     sampling_semantics: TrajectoryControlSamplingSemantics = "held_action"
     value_space: ConfigurationValueSpace
+    semantics: ControlCommandSemantics = Field(default_factory=ControlCommandSemantics)
     availability: TrajectoryControlAvailability
     operations: tuple[Literal["batch", "step"], ...]
     native_channel_id: str | None = None
@@ -869,6 +997,33 @@ class TrajectoryControlChannelMetadata(BaseModel):
 
     @model_validator(mode="after")
     def validate_control_channel(self) -> TrajectoryControlChannelMetadata:
+        inferred_domain = _infer_control_value_domain(self.value_space, self.data_type)
+        semantics = self.semantics
+        if semantics.value_domain is None:
+            semantics = semantics.model_copy(update={"value_domain": inferred_domain})
+            object.__setattr__(self, "semantics", semantics)
+        if semantics.value_domain == "boolean" and self.data_type != "boolean":
+            raise ValueError(f"boolean control channel {self.id!r} must use boolean data_type")
+        if semantics.value_domain in {"enum", "event"} and self.data_type not in {"string", "json"}:
+            raise ValueError(f"{semantics.value_domain} control channel {self.id!r} must use string or json data_type")
+        if semantics.value_domain == "enum" and not self.choices:
+            raise ValueError(f"enum control channel {self.id!r} requires choices")
+        if semantics.value_domain == "event" and not self.choices:
+            raise ValueError(f"event control channel {self.id!r} requires named event choices")
+        if semantics.value_domain == "periodic" and self.value_space.topology != "periodic_circle":
+            raise ValueError(f"periodic control channel {self.id!r} requires periodic-circle value space")
+        if semantics.value_domain == "discrete_levels" and semantics.quantization.mode == "none":
+            raise ValueError(f"discrete-level control channel {self.id!r} requires quantization metadata")
+        if semantics.command_mode in {"rate", "increment"} and self.data_type not in {"float64", "int64"}:
+            raise ValueError(f"{semantics.command_mode} control channel {self.id!r} must be numeric")
+        if semantics.command_mode == "event" and semantics.value_domain != "event":
+            raise ValueError(f"event command channel {self.id!r} must use event value domain")
+        if self.sampling_semantics == "event" and semantics.command_mode != "event":
+            raise ValueError(f"event-sampled control channel {self.id!r} must use event command mode")
+        if semantics.temporal_semantics == "profile" and self.sampling_semantics != "batch_profile":
+            raise ValueError(f"profile control channel {self.id!r} must use batch_profile sampling")
+        if semantics.quantization.mode != "none" and self.data_type not in {"float64", "int64"}:
+            raise ValueError(f"quantized control channel {self.id!r} must be numeric")
         if self.display_unit is not None and self.canonical_unit is None:
             raise ValueError(f"control channel {self.id!r} cannot advertise a display unit without a canonical unit")
         if any(item != "variable" and item <= 0 for item in self.shape):
@@ -892,6 +1047,9 @@ class TrajectoryControlChannelMetadata(BaseModel):
             raise ValueError(f"control channel {self.id!r} must publish native identity and schema together")
         if self.native_binding is not None and self.native_channel_id != self.native_binding.id:
             raise ValueError(f"control channel {self.id!r} native ID and binding schema disagree")
+        if self.native_binding is not None and self.native_binding.semantics is not None:
+            if self.native_binding.semantics != semantics:
+                raise ValueError(f"control channel {self.id!r} semantic and native command semantics disagree")
         if "step" in self.operations and self.native_binding is None:
             raise ValueError(f"interactive control channel {self.id!r} requires an exact native binding schema")
         return self
@@ -974,6 +1132,14 @@ class TrajectoryControlAdvertisement(BaseModel):
     intents: tuple[TrajectoryControlIntentMetadata, ...]
     default_authority_id: str | None = None
     claim_boundary: str = Field(min_length=1)
+
+    def rl_action_space(self, *, operation: Literal["batch", "step"] = "step") -> RLActionSpaceSpec:
+        """Return the deterministic agent projection for this advertisement."""
+
+        from .rl_control import build_rl_action_space
+
+        return build_rl_action_space(self, operation=operation)
+        ####
 
     @model_validator(mode="after")
     def validate_control_advertisement(self) -> TrajectoryControlAdvertisement:
@@ -1221,8 +1387,48 @@ class TrajectoryMissionOperationMetadata(BaseModel):
     ####
 
 
+class TrajectoryOpenSegmentSequenceMetadata(BaseModel):
+    """Typed grammar for a caller-authored mission segment sequence.
+
+    A mission template normally names one exact ordered sequence.  This form
+    deliberately represents the different case where the caller selects the
+    order, while the provider still publishes the allowed vocabulary and
+    cardinality.  It prevents an open sequence from being encoded as an
+    invalid empty fixed-sequence tuple.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    configuration_node_id: str = Field(min_length=1)
+    allowed_segment_ids: tuple[str, ...] = Field(min_length=1)
+    minimum_items: int = Field(ge=1)
+    maximum_items: int | None = Field(default=None, ge=1)
+
+    @model_validator(mode="after")
+    def validate_cardinality_and_vocabulary(self) -> TrajectoryOpenSegmentSequenceMetadata:
+        if self.maximum_items is not None and self.maximum_items < self.minimum_items:
+            raise ValueError("open segment sequence maximum_items cannot be below minimum_items")
+        if any(not item for item in self.allowed_segment_ids):
+            raise ValueError("open segment sequence allowed_segment_ids cannot contain empty IDs")
+        if len(self.allowed_segment_ids) != len(set(self.allowed_segment_ids)):
+            raise ValueError("open segment sequence allowed_segment_ids must be unique")
+        return self
+        ####
+
+    def allows(self, segment_ids: tuple[str, ...]) -> bool:
+        """Return whether one caller-authored sequence satisfies this grammar."""
+
+        count = len(segment_ids)
+        if count < self.minimum_items or (self.maximum_items is not None and count > self.maximum_items):
+            return False
+        return set(segment_ids) <= set(self.allowed_segment_ids)
+        ####
+
+    ####
+
+
 class TrajectoryMissionTemplateMetadata(BaseModel):
-    """One advertised ordered mission recipe and its exact operation matrix."""
+    """One fixed recipe or typed caller-authored sequence and its operation matrix."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -1231,7 +1437,8 @@ class TrajectoryMissionTemplateMetadata(BaseModel):
     description: str = Field(min_length=1)
     status: str = Field(min_length=1)
     initialization_variants: tuple[str, ...] = Field(min_length=1)
-    segment_sequence: tuple[str, ...] = Field(min_length=1)
+    segment_sequence: tuple[str, ...] = ()
+    open_segment_sequence: TrajectoryOpenSegmentSequenceMetadata | None = None
     compatible_fidelities: tuple[str, ...] = Field(min_length=1)
     operations: tuple[TrajectoryMissionOperationMetadata, ...] = Field(min_length=1)
     provenance: str = ""
@@ -1239,6 +1446,13 @@ class TrajectoryMissionTemplateMetadata(BaseModel):
 
     @model_validator(mode="after")
     def validate_operation_keys(self) -> TrajectoryMissionTemplateMetadata:
+        if self.open_segment_sequence is None:
+            if not self.segment_sequence:
+                raise ValueError("a fixed mission template requires a non-empty segment_sequence")
+            if any(not item for item in self.segment_sequence):
+                raise ValueError("mission segment_sequence cannot contain empty IDs")
+        elif self.segment_sequence:
+            raise ValueError("an open mission template cannot also declare a fixed segment_sequence")
         keys = tuple((item.fidelity, item.realization_id, item.operation) for item in self.operations)
         if len(keys) != len(set(keys)):
             raise ValueError(f"mission template {self.id!r} has duplicate operation records")
@@ -1246,6 +1460,28 @@ class TrajectoryMissionTemplateMetadata(BaseModel):
         if unknown:
             raise ValueError(f"mission template {self.id!r} has operations for incompatible fidelities {unknown!r}")
         return self
+        ####
+
+    @property
+    def is_open_segment_sequence(self) -> bool:
+        """Whether the caller, rather than this template, supplies segment order."""
+
+        return self.open_segment_sequence is not None
+
+    @property
+    def advertised_segment_ids(self) -> tuple[str, ...]:
+        """Return fixed sequence IDs or the allowed vocabulary for an open sequence."""
+
+        if self.open_segment_sequence is not None:
+            return self.open_segment_sequence.allowed_segment_ids
+        return self.segment_sequence
+
+    def accepts_segment_sequence(self, segment_ids: tuple[str, ...]) -> bool:
+        """Check a candidate sequence against this template's typed sequence contract."""
+
+        if self.open_segment_sequence is not None:
+            return self.open_segment_sequence.allows(segment_ids)
+        return segment_ids == self.segment_sequence
         ####
 
     ####
@@ -1411,8 +1647,7 @@ class TrajectoryModelMetadata(BaseModel):
                         )
                     if operation.operation not in realization.operations:
                         raise ValueError(
-                            f"model {self.id!r} mission {mission.id!r} advertises available "
-                            f"{operation.operation!r} missing from realization {realization.id!r}"
+                            f"model {self.id!r} mission {mission.id!r} advertises available {operation.operation!r} missing from realization {realization.id!r}"
                         )
         deployment_ids = tuple(item.id for item in self.deployments)
         if len(deployment_ids) != len(set(deployment_ids)):
@@ -1429,6 +1664,12 @@ class TrajectoryModelMetadata(BaseModel):
             raise ValueError(f"model {self.id!r} has duplicate reference-frame metadata")
         mission_ids = {item.id for item in self.mission_templates}
         segment_ids = set(self.capabilities.segment_types)
+        for mission in self.mission_templates:
+            unknown_mission_segments = sorted(set(mission.advertised_segment_ids) - segment_ids)
+            if unknown_mission_segments:
+                raise ValueError(
+                    f"model {self.id!r} mission {mission.id!r} references unknown segment types {unknown_mission_segments!r}"
+                )
         for realization in self.realizations:
             unknown_missions = sorted(set(realization.mission_template_ids) - mission_ids)
             if unknown_missions:
@@ -2021,6 +2262,16 @@ __all__ = [
     "ConfigurationSequenceTemplate",
     "ConfigurationSequenceValue",
     "ConfigurationValueSpace",
+    "ControlAgentNormalizationPolicy",
+    "ControlCommandMode",
+    "ControlCommandSemantics",
+    "ControlQuantizationMetadata",
+    "ControlQuantizationMode",
+    "ControlQuantizationRounding",
+    "ControlReleaseBehavior",
+    "ControlRepeatPolicy",
+    "ControlTemporalSemantics",
+    "ControlValueDomain",
     "NumericPresentationMetadata",
     "PreparedTrajectoryConfiguration",
     "PresentationLinkMetadata",
@@ -2034,6 +2285,7 @@ __all__ = [
     "TrajectoryFidelityTransition",
     "TrajectoryMissionOperationMetadata",
     "TrajectoryMissionTemplateMetadata",
+    "TrajectoryOpenSegmentSequenceMetadata",
     "TrajectoryModelCapabilities",
     "TrajectoryModelMetadata",
     "TrajectoryModelPresentationMetadata",

@@ -5,7 +5,18 @@ from pathlib import Path
 
 import pytest
 
-from taoryx.outputs import DynamicsKind, RunArtifact, VehicleKind, build_output_evaluation_plan, build_run_artifact
+from taoryx.outputs import (
+    DynamicsKind,
+    RunArtifact,
+    RunCommandRecord,
+    RunLifecycleEvent,
+    RunSensorExecution,
+    RunTermination,
+    RunVisualizationMetadata,
+    VehicleKind,
+    build_output_evaluation_plan,
+    build_run_artifact,
+)
 from taoryx.runtime.common import RuntimeProblem, RuntimeState, RuntimeVehicle
 from taoryx.runtime.engine import ExecutionResult
 
@@ -117,3 +128,70 @@ def test_run_artifact_print_and_sqlite_sinks_preserve_plotter_inputs(tmp_path: P
     rows = csv_path.read_text(encoding="utf-8").splitlines()
     assert rows[0] == "vehicle_id,time,semantic_name,source_name,unit,value"
     assert rows[-1].endswith(",100.0")
+
+
+def test_run_artifact_types_lifecycle_sensor_and_visualization_metadata() -> None:
+    """Top-level run metadata is typed but remains mapping-compatible."""
+
+    artifact = RunArtifact(
+        problem="typed-run-artifact",
+        vehicles={},
+        commands=[RunCommandRecord(duration=0.25, commands={"throttle": 0.4})],
+        termination=RunTermination(completed=False, stop_reason="max_steps"),
+        events=[
+            RunLifecycleEvent(
+                event_id="deploy-1",
+                name="deployment",
+                action="spawn",
+                vehicle="carrier",
+                time=1.25,
+                status="committed",
+            )
+        ],
+        sensor_execution=RunSensorExecution.model_validate(
+            {
+                "schema_version": 1,
+                "execution": "accepted-truth-measurement-bus",
+                "spec": {"provider": "ideal"},
+                "measurement_summary": {
+                    "emitted": 4,
+                    "valid": 4,
+                    "invalid": 0,
+                    "dropped": 0,
+                    "delivered": 4,
+                    "queued": 0,
+                    "timeout": False,
+                },
+                "termination": {"completed": True, "stop_reason": "stop_condition"},
+            }
+        ),
+        visualization=RunVisualizationMetadata.model_validate(
+            {
+                "source": "typed-test",
+                "output_sampling": {"sample_interval": 0.1, "channels": ["position.altitude"], "include_events": True},
+            }
+        ),
+    )
+
+    assert artifact.termination["stop_reason"] == "max_steps"
+    assert "reason" not in artifact.termination
+    assert isinstance(artifact.events[0], RunLifecycleEvent)
+    assert artifact.events[0]["event_id"] == "deploy-1"
+    assert isinstance(artifact.sensor_execution, RunSensorExecution)
+    assert artifact.sensor_execution.provider == "ideal"
+    assert artifact.sensor_execution.measurement_summary is not None
+    assert artifact.sensor_execution.measurement_summary.valid == 4
+    assert isinstance(artifact.visualization, RunVisualizationMetadata)
+    assert artifact.visualization.output_sampling is not None
+    assert artifact.visualization.output_sampling.channels == ["position.altitude"]
+
+    with pytest.raises(ValueError, match="requires stop_reason"):
+        RunArtifact(problem="missing-stop-reason", vehicles={}, termination=RunTermination(completed=False))
+    with pytest.raises(ValueError, match="event time must be finite"):
+        RunArtifact(
+            problem="invalid-event-time",
+            vehicles={},
+            events=[RunLifecycleEvent(name="bad-time", action="signal", time=float("nan"))],
+        )
+    with pytest.raises(ValueError, match="extra_forbidden"):
+        RunArtifact(problem="unknown-top-level", vehicles={}, untyped_runtime_bag={})

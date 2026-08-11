@@ -14,12 +14,14 @@ from taoryx.x15_adapter import (
     X15_SOURCE_SURFACE_NAMES,
     build_x15_source_direct_wrench_plant,
     build_x15_source_surface_local_plant,
+    build_x15_source_surface_physical_lqi_design,
 )
 
 from taoryx.composition_episode import ActionFrame, open_vehicle_composition_episode
 from taoryx.generic_tuning import validate_nonlinear_native_coordinate_lqi
 from taoryx.local_direct_wrench_composition_execution import execute_local_direct_wrench_composition
 from taoryx.model_authoring import build_model_authoring_plan
+from taoryx.physical_lqr import apply_tuning_context_to_physical_wrench_lqi_design
 from taoryx.plugins import PluginCatalog, discover_plugins
 from taoryx.vehicle_batch_execution import execute_vehicle_composition_batch
 from taoryx.vehicle_composition import (
@@ -118,6 +120,12 @@ def test_x15_advertisement_builds_a_complete_direct_wrench_authoring_plan(
     campaigns = cast(list[dict[str, object]], controller["campaigns"])
     assert [item["id"] for item in campaigns] == ["x15-source-release-direct-wrench-v1"]
     assert cast(dict[str, object], plan["segment_automation"])["instances"]
+    endpoint = cast(dict[str, object], plan["focused_endpoint_verification"])
+    assert endpoint["selected_endpoint_status"] == "matching_endpoint_available"
+    assert endpoint["selected_endpoint_ids"] == ["x15-source-release-direct-wrench-lqr"]
+    assert cast(list[dict[str, object]], endpoint["endpoints"])[0]["command"] == (
+        "taoryx vehicle verify x15-source-release-direct-wrench-lqr"
+    )
     ####
 
 
@@ -147,9 +155,40 @@ def test_x15_composition_executes_the_source_local_direct_wrench_screen(
     assert cast(dict[str, object], cast(dict[str, object], lqi_candidate)["controller_screen_execution"])["mission_id"] == LQI_MISSION_ID
     assert result.screen.observed_statuses == ("feasible",)
     assert (result.output_dir / "local_screen.json").is_file()
+    objective = json.loads((result.output_dir / "objective_report.json").read_text(encoding="utf-8"))
+    assert objective["schema"] == "taoryx.local-direct-wrench-screen-evaluation/v1alpha1"
+    assert objective["mission_pass"] is True
+    assert all(item["status"] == "pass" and item["required"] is True for item in objective["results"])
     assert (result.output_dir / "status_trace.json").is_file()
     assert (result.output_dir / "semantic_action_trace.json").is_file()
     assert "not prove X-15 flight trim" in result.claim_boundary
+    ####
+
+
+def test_x15_direct_wrench_screen_applies_the_exact_common_tuning_candidate(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The batch bridge binds its runtime only after using the common candidate gain."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration(
+        "x15-source-release-direct-wrench-v1"
+    )
+    contexts = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))
+
+    assert len(contexts) == 1
+    result = execute_local_direct_wrench_composition(
+        _direct_wrench_composition(),
+        tmp_path / "x15-local-direct-wrench-tuned",
+        tuning_context=contexts[0],
+    )
+    runtime = cast(dict[str, object], result.as_dict()["runtime"])
+    binding = cast(dict[str, object], runtime["tuning_binding"])
+
+    assert result.screen_pass is True
+    assert binding["campaign_id"] == registration.id
+    assert binding["candidate_profile_id"] == contexts[0].candidate_profile_id
+    assert binding["applied_gain_fingerprint_sha256"] == contexts[0].resolved_gain_fingerprint_sha256
     ####
 
 
@@ -303,6 +342,7 @@ def test_x15_lqi_screen_runs_through_the_public_composition_path(
     local_screen = cast(dict[str, object], json.loads((batch.output_dir / "local_screen.json").read_text()))
 
     assert batch.passed is True
+    assert payload["screen_pass"] is True
     assert control_screen["controller_method"] == "lqi"
     assert control_screen["integrators_exercised"] is True
     assert capability["controller_tuning_campaign_id"] == "x15-source-release-direct-wrench-lqi-v1"
@@ -479,6 +519,8 @@ def test_x15_source_surface_lqi_screen_runs_through_the_public_composition_path(
     assert all(name in row and math.isfinite(float(row[name])) for name in ("u_m_s", "v_m_s", "w_m_s"))
     assert (batch.output_dir / "local_surface_lqi_screen.json").is_file()
     assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["release_evidence_schema"] == "taoryx.claim-bound-release-evidence/v1alpha1"
+    assert robustness["release_evidence_kind"] == "robustness"
     assert robustness["id"] == "x15-local-lqi-matched-pitch-wrench-offset"
     assert robustness["kind"] == "constant_offset"
     assert robustness["pass"] is True
@@ -490,6 +532,47 @@ def test_x15_source_surface_lqi_screen_runs_through_the_public_composition_path(
         robustness_metrics = cast(dict[str, object], case["metrics"])
         assert float(robustness_metrics["final_feedback_error_fraction"]) <= 0.2
         assert float(robustness_metrics["saturation_fraction"]) == 0.0
+    ####
+
+
+def test_x15_source_surface_lqi_screen_applies_the_exact_common_tuning_candidate(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The selected source-surface candidate is bound before physical allocation."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration("x15-source-surface-local-lqi-v1")
+    contexts = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))
+    batch = execute_vehicle_composition_batch(
+        _surface_lqi_composition(),
+        tmp_path / "x15-source-surface-lqi-tuned",
+        tuning_context=contexts[0],
+    )
+    runtime = cast(dict[str, object], batch.as_dict()["runtime"])
+    binding = cast(dict[str, object], runtime["tuning_binding"])
+
+    assert len(contexts) == 1
+    assert batch.passed is True
+    assert binding["campaign_id"] == registration.id
+    assert binding["candidate_profile_id"] == contexts[0].candidate_profile_id
+    assert binding["applied_gain_fingerprint_sha256"] == contexts[0].resolved_gain_fingerprint_sha256
+    ####
+
+
+def test_x15_source_surface_lqi_candidate_matches_the_physical_wrench_runtime(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The campaign cannot produce gains in raw surface-position coordinates."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration("x15-source-surface-local-lqi-v1")
+    context = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))[0]
+    design = build_x15_source_surface_physical_lqi_design()
+    applied, binding = apply_tuning_context_to_physical_wrench_lqi_design(design, context)
+
+    assert applied.projection.state_names == context.state_names
+    assert applied.projection.wrench_names == context.control_names
+    assert binding.campaign_id == registration.id
     ####
 
 

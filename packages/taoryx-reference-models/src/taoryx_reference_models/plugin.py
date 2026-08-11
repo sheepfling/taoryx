@@ -41,9 +41,9 @@ from taoryx.hl20_adapter import (
     build_hl20_direct_wrench_tuning_campaign,
     build_hl20_source_adapter,
     build_hl20_source_direct_wrench_tuning_adapter,
-    build_hl20_source_surface_adapter,
     build_hl20_source_surface_local_plant,
     build_hl20_source_surface_lqi_tuning_campaign,
+    build_hl20_source_surface_physical_lqi_design,
 )
 from taoryx.hl20_controls import HL20_SOURCE_SURFACE_BOUNDS_DEG
 from taoryx.hl20_local_physical_surface_lqi_screen import (
@@ -70,19 +70,30 @@ from taoryx.reduced_fixed_wing_batch_episode_parity import verify_serialized_red
 from taoryx.reduced_fixed_wing_execution import _f16_source_trim, execute_reduced_fixed_wing_composition
 from taoryx.reference_mission_capability import reference_mission_capability_adapters
 from taoryx.source_f16 import (
+    build_f16_local_physical_wrench_lqi_design,
     build_f16_source_physical_plant,
+    build_f16_source_physical_schedule_lqi_nodes,
+    build_f16_source_physical_schedule_lqi_tuning_campaign,
+    build_f16_source_physical_schedule_lqr_tuning_campaign,
+    build_f16_source_physical_schedule_nodes,
     build_f16_source_surface_lqi_tuning_campaign,
     build_f16_source_surface_lqr_tuning_campaign,
+    f16_source_physical_schedule_tuning_targets,
 )
 from taoryx.source_table_fixed_wing import (
+    build_b747_condition3_source_surface_physical_lqi_design,
     build_b747_condition3_source_table_plant,
     build_b747_source_surface_lqi_tuning_campaign,
     build_x8_source_surface_lqi_tuning_campaign,
+    build_x8_source_surface_physical_lqi_design,
     build_x8_source_table_plant,
 )
 from taoryx.source_table_multirotor import (
     build_hummingbird_individual_rotor_source_table_plant,
+    build_hummingbird_local_physical_wrench_lqi_design,
+    build_hummingbird_local_vertical_force_lqi_design,
     build_hummingbird_source_rotor_lqi_tuning_campaign,
+    build_hummingbird_source_rotor_vertical_lqi_tuning_campaign,
 )
 from taoryx.trajectory.a320_adapter import (
     A320OpenAPControlPlant,
@@ -117,8 +128,8 @@ from taoryx.x15_adapter import (
     build_x15_direct_wrench_tuning_campaign,
     build_x15_source_direct_wrench_adapter,
     build_x15_source_direct_wrench_plant,
-    build_x15_source_surface_local_adapter,
     build_x15_source_surface_lqi_tuning_campaign,
+    build_x15_source_surface_physical_lqi_design,
 )
 from taoryx.x15_local_physical_surface_lqi_screen import (
     X15LocalPhysicalSurfaceLqiScreenCapabilityAdapter,
@@ -156,6 +167,10 @@ from taoryx.local_controller_screen_advertisements import LocalControllerScreenA
 from taoryx.local_direct_wrench_batch_episode_parity import verify_serialized_local_direct_wrench_batch_episode_parity
 from taoryx.local_direct_wrench_composition_execution import execute_local_direct_wrench_composition
 from taoryx.local_native_coordinate_lqi_composition_execution import execute_local_native_coordinate_lqi_composition
+from taoryx.physical_wrench_tuning import (
+    build_projected_physical_wrench_tuning_adapter,
+    build_scheduled_projected_physical_wrench_tuning_adapter,
+)
 from taoryx.plugins import PluginDefinition, PluginMetadata, PluginRegistrar
 from taoryx.trajectory.contract_probe_mission_composition import ContractProbeMissionCompositionProvider
 from taoryx.trajectory.language_backed_guidance import (
@@ -165,6 +180,7 @@ from taoryx.trajectory.language_backed_guidance import (
     build_language_backed_pseudo_guidance_tuning_campaign,
 )
 from taoryx.trajectory.pseudo6dof_profiles import load_pseudo6dof_catalog
+from taoryx.vehicle_batch_execution import VehicleBatchExecutionRequest, batch_factory_request_v1
 from taoryx.vehicle_composition import CompiledVehicleComposition
 from taoryx.vehicle_composition_registry import (
     load_resolved_vehicle_composition_catalog,
@@ -650,13 +666,63 @@ def _hummingbird_pseudo_tuning_adapter() -> StandardFamilyAdapter:
 
 
 def _hummingbird_source_rotor_tuning_adapter() -> StandardFamilyAdapter:
-    """Build the source-hover individual-rotor plant for common tuning."""
+    """Build the exact source-hover attitude-wrench runtime projection."""
 
-    return _source_table_multirotor_factory(
-        build_hummingbird_individual_rotor_source_table_plant,
+    return build_projected_physical_wrench_tuning_adapter(
+        build_hummingbird_local_physical_wrench_lqi_design(),
         family_id="hummingbird",
-        adapter_id="taoryx.multirotor.native_quad_x.v1",
-    )("rigid_body_6dof_surface_allocated")
+        adapter_id="taoryx.multirotor.native_quad_x.attitude_wrench_tuning.v1",
+        physical_family="multirotor",
+        tier="rigid_body_6dof_surface_allocated",
+        state_units={
+            "roll_error_rad": "rad",
+            "pitch_error_rad": "rad",
+            "yaw_error_rad": "rad",
+            "p_rad_s": "rad/s",
+            "q_rad_s": "rad/s",
+            "r_rad_s": "rad/s",
+        },
+        validity_envelope=(
+            "Hummingbird source-hover attitude/rate physical-wrench projection; nonlinear execution allocates each "
+            "requested moment through bounded individual rotors with motor lag"
+        ),
+        omitted_physics=(
+            "motor-coordinate campaign synthesis",
+            "nonlinear rotor allocation in the campaign adapter",
+            "translation, wind, battery, landing, and qualification",
+        ),
+    )
+    ####
+
+
+def _hummingbird_source_rotor_vertical_tuning_adapter() -> StandardFamilyAdapter:
+    """Build the exact source-hover vertical-force runtime projection."""
+
+    return build_projected_physical_wrench_tuning_adapter(
+        build_hummingbird_local_vertical_force_lqi_design(),
+        family_id="hummingbird",
+        adapter_id="taoryx.multirotor.native_quad_x.vertical_wrench_tuning.v1",
+        physical_family="multirotor",
+        tier="rigid_body_6dof_surface_allocated",
+        state_units={
+            "roll_error_rad": "rad",
+            "pitch_error_rad": "rad",
+            "yaw_error_rad": "rad",
+            "w_m_s": "m/s",
+            "p_rad_s": "rad/s",
+            "q_rad_s": "rad/s",
+            "r_rad_s": "rad/s",
+        },
+        validity_envelope=(
+            "Hummingbird source-hover vertical-speed/attitude physical-wrench projection; nonlinear execution "
+            "allocates collective force and moments through bounded individual rotors with motor lag"
+        ),
+        omitted_physics=(
+            "motor-coordinate campaign synthesis",
+            "nonlinear rotor allocation in the campaign adapter",
+            "wind, battery, landing, gain scheduling, and qualification",
+        ),
+    )
     ####
 
 
@@ -720,6 +786,100 @@ def _f16_source_surface_tuning_adapter() -> StandardFamilyAdapter:
             "full-flight-envelope and release qualification",
         ),
     )("rigid_body_6dof_surface_allocated")
+    ####
+
+
+def _f16_source_surface_lqi_tuning_adapter() -> StandardFamilyAdapter:
+    """Build the exact source-trim F-16 state-to-wrench LQI projection."""
+
+    return build_projected_physical_wrench_tuning_adapter(
+        build_f16_local_physical_wrench_lqi_design(),
+        family_id="f16_s119",
+        adapter_id="taoryx.fixed_wing.daveml.f16_source_trim.physical_wrench_tuning.v1",
+        physical_family="powered_fixed_wing",
+        tier="rigid_body_6dof_surface_allocated",
+        state_units={
+            "u_m_s": "m/s",
+            "v_m_s": "m/s",
+            "w_m_s": "m/s",
+            "p_rad_s": "rad/s",
+            "q_rad_s": "rad/s",
+            "r_rad_s": "rad/s",
+        },
+        validity_envelope=(
+            "F-16 fixed-altitude source-trim velocity/rate physical-wrench projection; nonlinear execution allocates "
+            "each requested force/moment through the bounded surface/throttle overlay"
+        ),
+        omitted_physics=(
+            "raw source-surface campaign synthesis",
+            "nonlinear surface/throttle allocation in the campaign adapter",
+            "gain scheduling, navigation, wind/mass robustness, and qualification",
+        ),
+    )
+    ####
+
+
+def _f16_source_surface_schedule_lqi_tuning_adapter() -> StandardFamilyAdapter:
+    """Build the four exact source-node projections used by the held LQI schedule."""
+
+    nodes = build_f16_source_physical_schedule_lqi_nodes()
+    return build_scheduled_projected_physical_wrench_tuning_adapter(
+        {node.point_id: node.design for node in nodes},
+        node_trim_targets=f16_source_physical_schedule_tuning_targets(),
+        family_id="f16_s119",
+        adapter_id="taoryx.fixed_wing.daveml.f16_source_schedule.physical_wrench_tuning.v1",
+        physical_family="powered_fixed_wing",
+        tier="rigid_body_6dof_surface_allocated",
+        state_units={
+            "u_m_s": "m/s",
+            "v_m_s": "m/s",
+            "w_m_s": "m/s",
+            "p_rad_s": "rad/s",
+            "q_rad_s": "rad/s",
+            "r_rad_s": "rad/s",
+        },
+        validity_envelope=(
+            "Four explicit F-16 source-retrimmed velocity/rate physical-wrench projections; nonlinear execution "
+            "holds each selected candidate at its node and allocates requests through bounded surfaces/throttle"
+        ),
+        omitted_physics=(
+            "continuous gain interpolation",
+            "nonlinear surface/throttle allocation in the campaign adapter",
+            "node-transition flight, navigation, wind/mass robustness, and qualification",
+        ),
+    )
+    ####
+
+
+def _f16_source_surface_schedule_lqr_tuning_adapter() -> StandardFamilyAdapter:
+    """Build the four exact source-node projections used by the LQR schedule."""
+
+    nodes = build_f16_source_physical_schedule_nodes()
+    return build_scheduled_projected_physical_wrench_tuning_adapter(
+        {node.point_id: node.design for node in nodes},
+        node_trim_targets=f16_source_physical_schedule_tuning_targets(),
+        family_id="f16_s119",
+        adapter_id="taoryx.fixed_wing.daveml.f16_source_schedule.physical_wrench_lqr_tuning.v1",
+        physical_family="powered_fixed_wing",
+        tier="rigid_body_6dof_surface_allocated",
+        state_units={
+            "u_m_s": "m/s",
+            "v_m_s": "m/s",
+            "w_m_s": "m/s",
+            "p_rad_s": "rad/s",
+            "q_rad_s": "rad/s",
+            "r_rad_s": "rad/s",
+        },
+        validity_envelope=(
+            "Four explicit F-16 source-retrimmed velocity/rate physical-wrench projections; the runtime applies "
+            "one candidate per node before performing its declared gain interpolation and bounded allocation"
+        ),
+        omitted_physics=(
+            "continuous source-model interpolation during campaign synthesis",
+            "nonlinear surface/throttle allocation in the campaign adapter",
+            "navigation, wind/mass robustness, and qualification",
+        ),
+    )
     ####
 
 
@@ -816,9 +976,32 @@ def _x15_direct_wrench_tuning_adapter() -> StandardFamilyAdapter:
 
 
 def _x15_source_surface_tuning_adapter() -> StandardFamilyAdapter:
-    """Build the exact X-15 source-surface local feedback adapter for tuning."""
+    """Build the exact X-15 physical-wrench runtime projection for tuning."""
 
-    return build_x15_source_surface_local_adapter("rigid_body_6dof_surface_allocated")
+    return build_projected_physical_wrench_tuning_adapter(
+        build_x15_source_surface_physical_lqi_design(),
+        family_id="x15",
+        adapter_id="taoryx.x15.source_surface.physical_wrench_tuning.v1",
+        physical_family="powered_fixed_wing",
+        tier="rigid_body_6dof_surface_allocated",
+        state_units={
+            "roll_error_rad": "rad",
+            "pitch_error_rad": "rad",
+            "yaw_error_rad": "rad",
+            "p_rad_s": "rad/s",
+            "q_rad_s": "rad/s",
+            "r_rad_s": "rad/s",
+        },
+        validity_envelope=(
+            "X-15 frozen release-fixture local attitude/rate physical-wrench projection; nonlinear execution allocates "
+            "each moment request through the bounded source surfaces"
+        ),
+        omitted_physics=(
+            "raw source-surface campaign synthesis",
+            "nonlinear surface allocation in the campaign adapter",
+            "full flight trim, translation, guidance, and qualification",
+        ),
+    )
     ####
 
 
@@ -830,19 +1013,60 @@ def _hl20_direct_wrench_tuning_adapter() -> StandardFamilyAdapter:
 
 
 def _hl20_source_surface_tuning_adapter() -> StandardFamilyAdapter:
-    """Build the exact bounded local HL-20 physical surface adapter for tuning."""
+    """Build the exact HL-20 physical-wrench runtime projection for tuning."""
 
-    return build_hl20_source_surface_adapter("rigid_body_6dof_surface_allocated")
+    return build_projected_physical_wrench_tuning_adapter(
+        build_hl20_source_surface_physical_lqi_design(),
+        family_id="hl20_mod_k",
+        adapter_id="taoryx.hl20.source_surface.physical_wrench_tuning.v1",
+        physical_family="lifting_body",
+        tier="rigid_body_6dof_surface_allocated",
+        state_units={
+            "roll_error_rad": "rad",
+            "pitch_error_rad": "rad",
+            "yaw_error_rad": "rad",
+            "p_rad_s": "rad/s",
+            "q_rad_s": "rad/s",
+            "r_rad_s": "rad/s",
+        },
+        validity_envelope=(
+            "HL-20 frozen Mach-1 source-fixture local attitude/rate physical-wrench projection; nonlinear execution "
+            "allocates each requested moment through seven bounded source surfaces"
+        ),
+        omitted_physics=(
+            "raw source-surface campaign synthesis",
+            "nonlinear surface allocation in the campaign adapter",
+            "full glide trim, translation, guidance, and qualification",
+        ),
+    )
     ####
 
 
 def _x8_source_surface_tuning_adapter() -> StandardFamilyAdapter:
-    """Build the exact X8 source-table surface adapter for common tuning."""
+    """Build the exact X8 physical-wrench runtime projection for tuning."""
 
-    return _source_table_fixed_wing_factory(
-        build_x8_source_table_plant,
+    return build_projected_physical_wrench_tuning_adapter(
+        build_x8_source_surface_physical_lqi_design(),
         family_id="skywalker_x8",
-    )("rigid_body_6dof_surface_allocated")
+        adapter_id="taoryx.fixed_wing.source_table.physical_wrench_tuning.v1",
+        physical_family="powered_fixed_wing",
+        tier="rigid_body_6dof_surface_allocated",
+        state_units={
+            "roll_error_rad": "rad",
+            "pitch_error_rad": "rad",
+            "p_rad_s": "rad/s",
+            "q_rad_s": "rad/s",
+        },
+        validity_envelope=(
+            "X8 source-trim four-state roll/pitch physical-wrench projection; each nonlinear runtime command still "
+            "uses the bounded collective/differential-elevon allocator"
+        ),
+        omitted_physics=(
+            "broader source-table state/elevon coordinate tuning",
+            "nonlinear allocator execution in the campaign adapter",
+            "route tracking, gain scheduling, and flight qualification",
+        ),
+    )
     ####
 
 
@@ -916,12 +1140,35 @@ def _language_backed_pseudo_guidance_tuning_adapter(family_id: str) -> StandardF
 
 
 def _b747_source_surface_tuning_adapter() -> StandardFamilyAdapter:
-    """Build the exact B747 condition-3 surface adapter for common tuning."""
+    """Build the exact B747 condition-3 physical-wrench runtime projection."""
 
-    return _source_table_fixed_wing_factory(
-        build_b747_condition3_source_table_plant,
+    return build_projected_physical_wrench_tuning_adapter(
+        build_b747_condition3_source_surface_physical_lqi_design(),
         family_id="b747",
-    )("rigid_body_6dof_surface_allocated")
+        adapter_id="taoryx.fixed_wing.b747_condition3.physical_wrench_tuning.v1",
+        physical_family="powered_fixed_wing",
+        tier="rigid_body_6dof_surface_allocated",
+        state_units={
+            "roll_error_rad": "rad",
+            "pitch_error_rad": "rad",
+            "yaw_error_rad": "rad",
+            "u_m_s": "m/s",
+            "v_m_s": "m/s",
+            "w_m_s": "m/s",
+            "p_rad_s": "rad/s",
+            "q_rad_s": "rad/s",
+            "r_rad_s": "rad/s",
+        },
+        validity_envelope=(
+            "B747 NASA CR-2144 condition-3 local attitude/rate physical-wrench projection; nonlinear execution "
+            "allocates each requested moment through bounded source-table surfaces"
+        ),
+        omitted_physics=(
+            "raw source-effector campaign synthesis",
+            "nonlinear surface allocation in the campaign adapter",
+            "gain scheduling, transport routing, and flight qualification",
+        ),
+    )
     ####
 
 
@@ -941,8 +1188,8 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                 "b747_condition3_local_physical_surface_lqi_screen_v1",
             ),
             description=(
-                "Scaled LQI condition-3 source-table local campaign over declared B747 elevator, aileron, rudder, and "
-                "throttle coordinates, with an advertised integral-priority lattice and separate allocator-runtime profile."
+                "Exact scaled LQI candidate for the B747 condition-3 attitude/rate physical-wrench runtime; each "
+                "nonlinear moment request remains allocated through bounded source-table surfaces."
             ),
             adapter_factory=_b747_source_surface_tuning_adapter,
             campaign_factory=build_b747_source_surface_lqi_tuning_campaign,
@@ -979,7 +1226,7 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                         "campaign_id": "b747-source-surface-local-lqi-v1",
                         "integral_output_names": ["roll_error_rad", "pitch_error_rad", "yaw_error_rad"],
                         "integral_weight_multiplier": 0.025,
-                        "integral_weight_multipliers": [0.1, 1.0, 10.0, 100.0],
+                        "integral_weight_multipliers": [1.0],
                         "physical_wrench_profile": {
                             "integral_q_diagonal": [0.025, 0.025, 0.025],
                             "selection_evidence": "matched external pitch-moment offset screen emitted by this batch",
@@ -1061,8 +1308,8 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                 "x8_local_physical_surface_lqi_long_recovery_screen_v1",
             ),
             description=(
-                "Scaled LQI source-table local attitude/velocity campaign over the X8's declared elevon and throttle "
-                "coordinates, with an advertised integral-priority lattice and a separate allocator-runtime profile."
+                "Exact scaled LQI candidate for the X8 source-trim roll/pitch physical-wrench runtime, with each "
+                "nonlinear command subsequently allocated through the declared elevon coordinates."
             ),
             adapter_factory=_x8_source_surface_tuning_adapter,
             campaign_factory=build_x8_source_surface_lqi_tuning_campaign,
@@ -1098,7 +1345,7 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                         "campaign_id": "x8-source-surface-local-lqi-v1",
                         "integral_output_names": ["roll_error_rad", "pitch_error_rad"],
                         "integral_weight_multiplier": 0.15,
-                        "integral_weight_multipliers": [0.1, 1.0, 10.0, 100.0],
+                        "integral_weight_multipliers": [1.0],
                         "physical_wrench_profile": {
                             "integral_q_diagonal": [0.15, 0.15],
                             "selection_evidence": "matched external pitch-moment offset screen emitted by this batch",
@@ -1140,7 +1387,8 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                 },
             ),
             claim_boundary=(
-                "This campaign is a source-trim local surface-coordinate design screen. "
+                "This campaign is a source-trim local physical-wrench design screen whose nonlinear execution remains "
+                "allocator-backed. "
                 "It does not establish a full X8 racetrack, actuator hardware qualification, gain schedule, or flight envelope."
             ),
         ),
@@ -1243,11 +1491,7 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
             family_id="f16_s119",
             fidelity="rigid_body_6dof_surface_allocated",
             realization_ids=("rigid_body_6dof_surface_allocated",),
-            mission_template_ids=(
-                "f16_local_physical_control_screen_v1",
-                "f16_local_physical_surface_lqr_schedule_interior_screen_v1",
-                "f16_local_physical_surface_lqr_schedule_transition_screen_v1",
-            ),
+            mission_template_ids=("f16_local_physical_control_screen_v1",),
             description=("Scaled LQR source-trim local campaign over declared F-16 elevator, aileron, rudder, and throttle coordinates."),
             adapter_factory=_f16_source_surface_tuning_adapter,
             campaign_factory=build_f16_source_surface_lqr_tuning_campaign,
@@ -1270,6 +1514,30 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                     ],
                     "claim_boundary": "One source-trim physical allocation LQR entry screen. It is not an F-16 route, schedule, wind/mass robustness, envelope, or qualification claim.",
                 },
+            ),
+            claim_boundary=(
+                "This campaign exposes one source-trim physical-effector design screen. It does not establish a gain "
+                "schedule, navigation, wind/mass robustness, envelope coverage, or flight qualification."
+            ),
+        ),
+        ControllerTuningCampaignRegistration(
+            id="f16-source-surface-schedule-lqr-v1",
+            provider_id="taoryx.registry.mission-composition",
+            model_id="f16_s119",
+            family_id="f16_s119",
+            fidelity="rigid_body_6dof_surface_allocated",
+            realization_ids=("rigid_body_6dof_surface_allocated",),
+            mission_template_ids=(
+                "f16_local_physical_surface_lqr_schedule_interior_screen_v1",
+                "f16_local_physical_surface_lqr_schedule_transition_screen_v1",
+            ),
+            description=(
+                "Four exact source-node LQR candidates in the requested-force/moment coordinates consumed by the "
+                "F-16 held-node and interpolated surface/throttle schedule runtimes."
+            ),
+            adapter_factory=_f16_source_surface_schedule_lqr_tuning_adapter,
+            campaign_factory=build_f16_source_physical_schedule_lqr_tuning_campaign,
+            local_controller_screens=(
                 {
                     "schema": "taoryx.local-controller-screen-advertisement/v1alpha1",
                     "id": "f16-source-node-surface-lqr-schedule-interior-screen-v1",
@@ -1281,7 +1549,7 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                     "batch_action_trace": "emits_committed_interval_trace",
                     "controller": {
                         "method": "lqr",
-                        "campaign_id": "f16-source-surface-local-lqr-v1",
+                        "campaign_id": "f16-source-surface-schedule-lqr-v1",
                         "integral_output_names": [],
                         "fixed_cadence_s": 0.02,
                         "screen_duration_s": 16.0,
@@ -1306,7 +1574,7 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                     "batch_action_trace": "emits_committed_interval_trace",
                     "controller": {
                         "method": "lqr",
-                        "campaign_id": "f16-source-surface-local-lqr-v1",
+                        "campaign_id": "f16-source-surface-schedule-lqr-v1",
                         "integral_output_names": [],
                         "fixed_cadence_s": 0.05,
                         "screen_duration_s": 240.0,
@@ -1318,13 +1586,13 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                         {"id": "effector.rudder.position", "native_control_id": "rudder_deg", "unit": "deg", "lower": -30.0, "upper": 30.0, "rate_limit_per_s": 80.0, "time_constant_s": 0.08},
                         {"id": "effector.throttle.position", "native_control_id": "throttle_fraction", "unit": "1", "lower": 0.0, "upper": 1.0, "rate_limit_per_s": 2.5, "time_constant_s": 0.08},
                     ],
-                    "claim_boundary": "Four retained time-marching source-node F-16 physical LQR transitions with explicit endpoint derivative/effectiveness blending and bounded surface allocation. It is not navigation, wind/mass robustness, a full envelope, or qualification.",
+                    "claim_boundary": "Four retained time-marching source-node F-16 physical LQR transitions with exact candidate gains, explicit endpoint derivative/effectiveness blending, and bounded surface allocation. It is not navigation, wind/mass robustness, a full envelope, or qualification.",
                 },
             ),
             claim_boundary=(
-                "This campaign exposes a source-trim local physical-effector design screen, a discrete four-node "
-                "schedule-interior recovery campaign, and a separate bounded source-node interpolation transition screen. "
-                "It does not establish navigation, wind/mass robustness, envelope coverage, or flight qualification."
+                "This campaign applies one selected candidate at each retained source node before a schedule runtime "
+                "holds or interpolates those gains. It does not establish navigation, wind/mass robustness, an envelope, "
+                "or flight qualification."
             ),
         ),
         ControllerTuningCampaignRegistration(
@@ -1337,13 +1605,12 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
             mission_template_ids=(
                 "f16_local_physical_control_screen_v1",
                 "f16_local_physical_surface_lqi_screen_v1",
-                "f16_local_physical_surface_lqi_schedule_interior_screen_v1",
             ),
             description=(
-                "Scaled LQI source-trim local velocity campaign over declared F-16 elevator, aileron, rudder, "
-                "and throttle coordinates."
+                "Scaled LQI source-trim local velocity/rate campaign in the exact requested-force/moment coordinates "
+                "consumed by the bounded F-16 surface/throttle allocator."
             ),
-            adapter_factory=_f16_source_surface_tuning_adapter,
+            adapter_factory=_f16_source_surface_lqi_tuning_adapter,
             campaign_factory=build_f16_source_surface_lqi_tuning_campaign,
             local_controller_screens=(
                 {
@@ -1364,6 +1631,27 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                     ],
                     "claim_boundary": "One fixed-altitude source-trim physical allocation LQI recovery. It is not an F-16 route, wind/mass robustness, envelope, or qualification claim.",
                 },
+            ),
+            claim_boundary=(
+                "This campaign includes the fixed source-trim local physical-effector LQI design screen. It does not "
+                "establish a gain schedule, envelope robustness, or flight qualification."
+            ),
+        ),
+        ControllerTuningCampaignRegistration(
+            id="f16-source-surface-schedule-lqi-v1",
+            provider_id="taoryx.registry.mission-composition",
+            model_id="f16_s119",
+            family_id="f16_s119",
+            fidelity="rigid_body_6dof_surface_allocated",
+            realization_ids=("rigid_body_6dof_surface_allocated",),
+            mission_template_ids=("f16_local_physical_surface_lqi_schedule_interior_screen_v1",),
+            description=(
+                "Four exact source-node LQI candidates in the requested-force/moment coordinates consumed by the "
+                "held-node F-16 surface/throttle allocator."
+            ),
+            adapter_factory=_f16_source_surface_schedule_lqi_tuning_adapter,
+            campaign_factory=build_f16_source_physical_schedule_lqi_tuning_campaign,
+            local_controller_screens=(
                 {
                     "schema": "taoryx.local-controller-screen-advertisement/v1alpha1",
                     "id": "f16-source-node-surface-lqi-schedule-interior-screen-v1",
@@ -1375,7 +1663,7 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                     "batch_action_trace": "emits_committed_interval_trace",
                     "controller": {
                         "method": "lqi",
-                        "campaign_id": "f16-source-surface-local-lqi-v1",
+                        "campaign_id": "f16-source-surface-schedule-lqi-v1",
                         "integral_output_names": ["u_m_s", "v_m_s", "w_m_s"],
                         "fixed_cadence_s": 0.02,
                         "screen_duration_s": 16.0,
@@ -1391,8 +1679,9 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                 },
             ),
             claim_boundary=(
-                "This campaign includes a source-trim local physical-effector design screen and a separate narrow held-node schedule interior. It does not establish "
-                "a scheduled F-16 controller, envelope robustness, or flight qualification."
+                "This campaign creates and applies a separately selected source-node candidate to each retained F-16 "
+                "LQI recovery. It does not establish continuous gain scheduling, transition control, envelope robustness, "
+                "or flight qualification."
             ),
         ),
         ControllerTuningCampaignRegistration(
@@ -1417,9 +1706,11 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
             mission_template_ids=(
                 "hummingbird_local_individual_rotor_lqi_screen_v1",
                 "hummingbird_local_horizontal_translation_lqi_screen_v1",
-                "hummingbird_local_vertical_translation_lqi_screen_v1",
             ),
-            description=("Scaled LQI source-hover local campaign over declared individual Hummingbird rotor-speed coordinates and bounded horizontal and vertical reference tracking."),
+            description=(
+                "Exact scaled LQI candidate for the Hummingbird source-hover attitude/rate physical-wrench runtime; "
+                "each nonlinear command remains allocated through bounded individual rotors."
+            ),
             adapter_factory=_hummingbird_source_rotor_tuning_adapter,
             campaign_factory=build_hummingbird_source_rotor_lqi_tuning_campaign,
             local_controller_screens=(
@@ -1490,6 +1781,27 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                         "battery, contact, landing, gain-schedule, or vehicle qualification."
                     ),
                 },
+            ),
+            claim_boundary=(
+                "This campaign binds the source-hover attitude/rate physical-wrench LQI runtime to a common candidate. "
+                "It does not establish wind/battery robustness, contact or landing behavior, gain scheduling, or flight qualification."
+            ),
+        ),
+        ControllerTuningCampaignRegistration(
+            id="hummingbird-source-rotor-vertical-lqi-v1",
+            provider_id="taoryx.registry.mission-composition",
+            model_id="hummingbird",
+            family_id="hummingbird",
+            fidelity="rigid_body_6dof_surface_allocated",
+            realization_ids=("rigid_body_6dof_surface_allocated",),
+            mission_template_ids=("hummingbird_local_vertical_translation_lqi_screen_v1",),
+            description=(
+                "Exact scaled LQI candidate for Hummingbird's source-hover vertical-speed/attitude physical-wrench "
+                "runtime; collective force and moments remain allocated through bounded individual rotors."
+            ),
+            adapter_factory=_hummingbird_source_rotor_vertical_tuning_adapter,
+            campaign_factory=build_hummingbird_source_rotor_vertical_lqi_tuning_campaign,
+            local_controller_screens=(
                 {
                     "schema": "taoryx.local-controller-screen-advertisement/v1alpha1",
                     "id": "hummingbird-source-vertical-translation-individual-rotor-lqi-screen-v1",
@@ -1501,7 +1813,7 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                     "batch_action_trace": "emits_committed_interval_trace",
                     "controller": {
                         "method": "lqi",
-                        "campaign_id": "hummingbird-source-rotor-local-lqi-v1",
+                        "campaign_id": "hummingbird-source-rotor-vertical-lqi-v1",
                         "integral_output_names": ["roll_error_rad", "pitch_error_rad", "yaw_error_rad", "w_m_s"],
                         "fixed_cadence_s": 0.02,
                         "screen_duration_s": 16.0,
@@ -1527,8 +1839,8 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                 },
             ),
             claim_boundary=(
-                "This campaign includes bounded source-local horizontal and vertical reference tracking over rotor-coordinate LQI designs. "
-                "It does not establish wind/battery robustness, contact or landing behavior, gain scheduling, or flight qualification."
+                "This campaign binds only the source-hover vertical-speed/attitude physical-wrench LQI runtime to a "
+                "common candidate. It does not establish wind, battery, landing, gain scheduling, or qualification."
             ),
         ),
         ControllerTuningCampaignRegistration(
@@ -1572,8 +1884,8 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
             realization_ids=("rigid_body_6dof_surface_allocated",),
             mission_template_ids=("x15_source_surface_attitude_rate_lqi_screen_v1",),
             description=(
-                "Scaled LQI campaign over the frozen-translation X-15 local attitude-error/body-rate model with "
-                "symmetric stabilator, differential stabilator, and rudder source coordinates."
+                "Exact scaled LQI candidate for the frozen-translation X-15 attitude/rate physical-wrench runtime; "
+                "each nonlinear moment request remains allocated through bounded source surfaces."
             ),
             adapter_factory=_x15_source_surface_tuning_adapter,
             campaign_factory=build_x15_source_surface_lqi_tuning_campaign,
@@ -1651,7 +1963,10 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
             fidelity="rigid_body_6dof_surface_allocated",
             realization_ids=("rigid_body_6dof_surface_allocated",),
             mission_template_ids=("hl20_source_surface_attitude_rate_lqi_screen_v1",),
-            description="Scaled LQI campaign over the frozen-translation HL-20 Mach-1 local attitude-error/body-rate model through seven named source surfaces.",
+            description=(
+                "Exact scaled LQI candidate for the frozen-translation HL-20 attitude/rate physical-wrench runtime; "
+                "each nonlinear moment request remains allocated through seven bounded source surfaces."
+            ),
             adapter_factory=_hl20_source_surface_tuning_adapter,
             campaign_factory=build_hl20_source_surface_lqi_tuning_campaign,
             local_controller_screens=(
@@ -1664,15 +1979,33 @@ def _controller_tuning_campaigns() -> tuple[ControllerTuningCampaignRegistration
                     "control_realization": "source_surface_physical_wrench_lqi_allocation",
                     "physical_effector_allocation": True,
                     "batch_action_trace": "emits_committed_interval_trace",
-                    "controller": {"method": "lqi", "campaign_id": "hl20-source-surface-local-lqi-v1", "integral_output_names": ["roll_error_rad", "pitch_error_rad", "yaw_error_rad"], "fixed_cadence_s": 0.01, "screen_duration_s": 2.0},
+                    "controller": {
+                        "method": "lqi",
+                        "campaign_id": "hl20-source-surface-local-lqi-v1",
+                        "integral_output_names": ["roll_error_rad", "pitch_error_rad", "yaw_error_rad"],
+                        "integral_weight_multiplier": 1000.0,
+                        "physical_wrench_profile": {
+                            "integral_q_diagonal": [1000.0, 1000.0, 1000.0],
+                            "selection_evidence": "matched external pitch-moment offset screen emitted by this batch",
+                        },
+                        "persistent_disturbance_screen": {
+                            "id": "hl20-local-lqi-matched-pitch-wrench-offset",
+                            "environment_input": "external_pitch_moment_bias_nm",
+                            "body_moment_axis": "moment_y_nm",
+                            "fraction_of_declared_pitch_wrench_scale": 0.05,
+                            "artifact_filename": "robustness_report.json",
+                        },
+                        "fixed_cadence_s": 0.01,
+                        "screen_duration_s": 8.0,
+                    },
                     "effector_controls": [
                         {"id": f"effector.surface.{name}.position", "native_control_id": name, "unit": "deg", "lower": lower, "upper": upper}
                         for name, (lower, upper) in HL20_SOURCE_SURFACE_BOUNDS_DEG.items()
                     ],
-                    "claim_boundary": "This source-surface LQI screen holds the HL-20 Mach-1 source translational fixture fixed and controls only local attitude error/body rate through all seven bounded named surfaces. It does not establish full-state trim, translation, glide guidance, navigation, or flight qualification.",
+                    "claim_boundary": "This source-surface LQI screen holds the HL-20 Mach-1 source translational fixture fixed and controls only local attitude error/body rate through all seven bounded named surfaces. It also emits a bounded three-case matched external pitch-moment screen. It does not establish full-state trim, translation, glide guidance, navigation, wind or mass robustness, or flight qualification.",
                 },
             ),
-            claim_boundary="This campaign auto-tunes only the frozen-translation HL-20 local attitude/rate source-surface model. It does not establish a source-full-glide trim, gain schedule, robustness, guidance, or qualification.",
+            claim_boundary="This campaign auto-tunes only the frozen-translation HL-20 local attitude/rate source-surface model. The associated batch emits one bounded matched external pitch-moment screen; it does not establish a source-full-glide trim, gain schedule, wind or mass robustness, guidance, or qualification.",
         ),
     )
     ####
@@ -1697,17 +2030,150 @@ def _without_max_steps(
     ####
 
 
-def _language_backed_batch(
-    composition: CompiledVehicleComposition,
-    output_dir: str | Path,
-    max_steps: int | None,
-) -> Any:
-    """Adapt the language-backed executor to the common batch signature."""
+@batch_factory_request_v1
+def _language_backed_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Run the language-backed executor through the typed plug-in request."""
 
     return execute_powered_fixed_wing_composition(
-        composition,
-        output_dir,
-        max_steps=max_steps,
+        request.composition,
+        request.output_dir,
+        max_steps=request.max_steps,
+    )
+    ####
+
+
+@batch_factory_request_v1
+def _local_direct_wrench_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Apply an optional exact tuning context through the local-screen bridge."""
+
+    if request.max_steps is not None:
+        raise ValueError("--max-steps is not available for the local direct-wrench screen")
+    return execute_local_direct_wrench_composition(
+        request.composition,
+        request.output_dir,
+        tuning_context=request.tuning_context,
+    )
+    ####
+
+
+@batch_factory_request_v1
+def _local_native_coordinate_lqi_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Run a named-coordinate LQI screen with an optional exact candidate."""
+
+    if request.max_steps is not None:
+        raise ValueError("--max-steps is not available for the local native-coordinate LQI screen")
+    return execute_local_native_coordinate_lqi_composition(
+        request.composition,
+        request.output_dir,
+        tuning_context=request.tuning_context,
+    )
+    ####
+
+
+@batch_factory_request_v1
+def _x8_local_physical_surface_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Run the X8 source screen with an optional exact LQI candidate context."""
+
+    return execute_x8_local_physical_control_screen(
+        request.composition,
+        request.output_dir,
+        max_steps=request.max_steps,
+        tuning_context=request.tuning_context,
+    )
+    ####
+
+
+@batch_factory_request_v1
+def _hummingbird_local_physical_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Run a Hummingbird source screen with its exact optional LQI candidate."""
+
+    return execute_hummingbird_local_physical_control_screen(
+        request.composition,
+        request.output_dir,
+        max_steps=request.max_steps,
+        tuning_context=request.tuning_context,
+    )
+    ####
+
+
+@batch_factory_request_v1
+def _b747_local_physical_surface_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Run a B747 source screen with its exact optional LQI candidate."""
+
+    return execute_b747_condition3_local_physical_control_screen(
+        request.composition,
+        request.output_dir,
+        max_steps=request.max_steps,
+        tuning_context=request.tuning_context,
+    )
+    ####
+
+
+@batch_factory_request_v1
+def _x15_local_physical_surface_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Run the X-15 source surface screen with its exact optional LQI candidate."""
+
+    return execute_x15_local_physical_surface_lqi_screen(
+        request.composition,
+        request.output_dir,
+        max_steps=request.max_steps,
+        tuning_context=request.tuning_context,
+    )
+    ####
+
+
+@batch_factory_request_v1
+def _hl20_local_physical_surface_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Run the HL-20 source surface screen with its exact optional LQI candidate."""
+
+    return execute_hl20_local_physical_surface_lqi_screen(
+        request.composition,
+        request.output_dir,
+        max_steps=request.max_steps,
+        tuning_context=request.tuning_context,
+    )
+    ####
+
+
+@batch_factory_request_v1
+def _f16_local_physical_lqi_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Run the F-16 physical LQI screen with its optional exact candidate."""
+
+    return execute_f16_local_physical_lqi_screen(
+        request.composition,
+        request.output_dir,
+        max_steps=request.max_steps,
+        tuning_context=request.tuning_context,
+    )
+    ####
+
+
+@batch_factory_request_v1
+def _f16_physical_schedule_interior_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Run a held-node F-16 schedule with its complete optional candidate set."""
+
+    if request.tuning_context is not None:
+        raise ValueError("F-16 schedule-interior screens require a complete node-indexed tuning context set")
+    return execute_f16_physical_schedule_interior_screen(
+        request.composition,
+        request.output_dir,
+        max_steps=request.max_steps,
+        tuning_context_set=request.tuning_context_set,
+    )
+    ####
+
+
+@batch_factory_request_v1
+def _f16_physical_schedule_transition_batch(request: VehicleBatchExecutionRequest) -> Any:
+    """Run an F-16 schedule transition with its complete optional candidate set."""
+
+    if request.tuning_context is not None:
+        raise ValueError("F-16 schedule-transition screens require a complete node-indexed tuning context set")
+    return execute_f16_physical_schedule_transition_screen(
+        request.composition,
+        request.output_dir,
+        max_steps=request.max_steps,
+        tuning_context_set=request.tuning_context_set,
     )
     ####
 
@@ -1926,11 +2392,11 @@ def _register(registrar: PluginRegistrar) -> None:
     )
     registrar.register_execution_factory(
         "local_direct_wrench_screen.v1",
-        _without_max_steps(execute_local_direct_wrench_composition),
+        _local_direct_wrench_batch,
     )
     registrar.register_execution_factory(
         "local_native_coordinate_lqi_screen.v1",
-        _without_max_steps(execute_local_native_coordinate_lqi_composition),
+        _local_native_coordinate_lqi_batch,
     )
     registrar.register_execution_factory(
         "reduced_fixed_wing_openap.v1",
@@ -1946,39 +2412,39 @@ def _register(registrar: PluginRegistrar) -> None:
     )
     registrar.register_execution_factory(
         "f16_local_physical_surface_lqi_screen.v1",
-        execute_f16_local_physical_lqi_screen,
+        _f16_local_physical_lqi_batch,
     )
     registrar.register_execution_factory(
         "f16_local_physical_surface_lqr_schedule_interior_screen.v1",
-        execute_f16_physical_schedule_interior_screen,
+        _f16_physical_schedule_interior_batch,
     )
     registrar.register_execution_factory(
         "f16_local_physical_surface_lqi_schedule_interior_screen.v1",
-        execute_f16_physical_schedule_interior_screen,
+        _f16_physical_schedule_interior_batch,
     )
     registrar.register_execution_factory(
         "f16_local_physical_surface_lqr_schedule_transition_screen.v1",
-        execute_f16_physical_schedule_transition_screen,
+        _f16_physical_schedule_transition_batch,
     )
     registrar.register_execution_factory(
         "b747_condition3_local_physical_surface_lqr_screen.v1",
-        execute_b747_condition3_local_physical_control_screen,
+        _b747_local_physical_surface_batch,
     )
     registrar.register_execution_factory(
         "b747_condition3_local_physical_surface_lqi_screen.v1",
-        execute_b747_condition3_local_physical_control_screen,
+        _b747_local_physical_surface_batch,
     )
     registrar.register_execution_factory(
         "x8_local_physical_surface_lqr_screen.v1",
-        execute_x8_local_physical_control_screen,
+        _x8_local_physical_surface_batch,
     )
     registrar.register_execution_factory(
         "x8_local_physical_surface_lqi_screen.v1",
-        execute_x8_local_physical_control_screen,
+        _x8_local_physical_surface_batch,
     )
     registrar.register_execution_factory(
         "x8_local_physical_surface_lqi_long_recovery_screen.v1",
-        execute_x8_local_physical_control_screen,
+        _x8_local_physical_surface_batch,
     )
     registrar.register_execution_factory(
         "hl20_source_surface_pitch_authority_screen.v1",
@@ -1986,7 +2452,7 @@ def _register(registrar: PluginRegistrar) -> None:
     )
     registrar.register_execution_factory(
         "hl20_local_physical_surface_lqi_screen.v1",
-        execute_hl20_local_physical_surface_lqi_screen,
+        _hl20_local_physical_surface_batch,
     )
     registrar.register_execution_factory(
         "x15_source_surface_authority_screen.v1",
@@ -1994,19 +2460,19 @@ def _register(registrar: PluginRegistrar) -> None:
     )
     registrar.register_execution_factory(
         "x15_local_physical_surface_lqi_screen.v1",
-        execute_x15_local_physical_surface_lqi_screen,
+        _x15_local_physical_surface_batch,
     )
     registrar.register_execution_factory(
         "hummingbird_local_individual_rotor_lqi_screen.v1",
-        execute_hummingbird_local_physical_control_screen,
+        _hummingbird_local_physical_batch,
     )
     registrar.register_execution_factory(
         "hummingbird_local_horizontal_translation_lqi_screen.v1",
-        execute_hummingbird_local_physical_control_screen,
+        _hummingbird_local_physical_batch,
     )
     registrar.register_execution_factory(
         "hummingbird_local_vertical_translation_lqi_screen.v1",
-        execute_hummingbird_local_physical_control_screen,
+        _hummingbird_local_physical_batch,
     )
     registrar.register_execution_factory(
         "hummingbird_aggregate_thrust_pseudo_batch.v1",

@@ -51,6 +51,7 @@ from .trajectory.execution_contract import (
     MissionCompositionRunnerRegistry,
     MissionCompositionRunRequest,
     MissionCompositionRunResponse,
+    RunnableMissionCompositionProvider,
 )
 
 if TYPE_CHECKING:
@@ -425,14 +426,13 @@ def run_prepared_mission_composition(
             "the serialized prepared configuration differs from the current provider validation result",
             path="prepared_configuration.fingerprint",
         )
-    runner_builder = getattr(provider, "build_runner", None)
-    if not callable(runner_builder):
+    if not isinstance(provider, RunnableMissionCompositionProvider):
         raise ModelAuthoringError(
             "execution-runner-unavailable",
             f"provider {provider_id!r} does not publish a common batch runner for this model",
             path="provider_id",
         )
-    runner = runner_builder()
+    runner = provider.build_runner()
     if not isinstance(runner, MissionCompositionRunnerRegistry):
         raise ModelAuthoringError(
             "invalid-execution-runner",
@@ -542,6 +542,7 @@ def build_model_authoring_plan(
     )
     execution_advertisement = _execution_advertisement(selection)
     maturity_advertisement = _maturity_advertisement(selection)
+    focused_endpoint_verification = _focused_endpoint_verification_advertisement(selection)
     segment_instances = _segment_instances(schema.root, selection.mission)
     navigation_parameters = [item for item in _parameter_records(schema.root) if _is_navigation_parameter(item)]
     selection_gaps: list[str] = []
@@ -571,6 +572,7 @@ def build_model_authoring_plan(
         "controller_automation": controller,
         "execution_advertisement": execution_advertisement,
         "maturity_advertisement": maturity_advertisement,
+        "focused_endpoint_verification": focused_endpoint_verification,
         "navigation_automation": {
             "mission_template": selection.mission.model_dump(mode="json") if selection.mission is not None else None,
             "navigation_parameters": navigation_parameters,
@@ -756,6 +758,103 @@ def _execution_advertisement(selection: ModelAuthoringSelection) -> dict[str, ob
         "claim_boundary": (
             "This is the exact selected mission operation advertisement. It does not execute the endpoint, establish "
             "batch/step parity, create a controller, or promote qualification."
+        ),
+    }
+    ####
+
+
+def _focused_endpoint_verification_advertisement(selection: ModelAuthoringSelection) -> dict[str, object]:
+    """Advertise checked-in vertical proofs without conflating them with a plan.
+
+    Physical vehicle endpoints and provider-owned workflow endpoints have
+    distinct verifiers because they make different evidence claims. The
+    authoring plan joins both catalogs only by their published identity and
+    reports exactly how closely each proof matches the current selection. It
+    never treats a nearby mission or fidelity as evidence for the selected
+    configuration.
+    """
+
+    # These imports are intentionally local: the workflow verifier consumes
+    # authoring helpers, while this public plan needs to expose the verifier
+    # only after the module has finished importing.
+    from .mission_workflow_endpoint import load_mission_workflow_endpoint_catalog
+    from .vehicle_endpoint_spec import load_vehicle_endpoint_spec_catalog
+
+    selected_mission_id = selection.mission.id if selection.mission is not None else None
+    selected_realization_id = selection.realization.id if selection.realization is not None else None
+    endpoints: list[dict[str, object]] = []
+
+    if (
+        selection.provider_id == "taoryx.registry.mission-composition"
+        and selection.model.model_kind == "canonical_vehicle_family"
+    ):
+        for vehicle_endpoint in load_vehicle_endpoint_spec_catalog().endpoints:
+            if vehicle_endpoint.model_id != selection.model.id:
+                continue
+            matches_selected_mission_and_fidelity = (
+                vehicle_endpoint.mission_id == selected_mission_id and vehicle_endpoint.fidelity == selection.fidelity
+            )
+            endpoints.append(
+                {
+                    "id": vehicle_endpoint.id,
+                    "kind": "vehicle_composition",
+                    "maturity_record_id": vehicle_endpoint.maturity_record_id,
+                    "matches_selected_mission_and_fidelity": matches_selected_mission_and_fidelity,
+                    "match_scope": "model_id, mission_id, fidelity",
+                    "command": f"taoryx vehicle verify {vehicle_endpoint.id}",
+                    "execute_command": f"taoryx vehicle verify {vehicle_endpoint.id} --execute",
+                }
+            )
+
+    if selection.model.model_kind in {"trajectory_workflow", "composition_proof_family"}:
+        for workflow_endpoint in load_mission_workflow_endpoint_catalog().endpoints:
+            if workflow_endpoint.provider_id != selection.provider_id or workflow_endpoint.model_id != selection.model.id:
+                continue
+            matches_selected_configuration = (
+                workflow_endpoint.fidelity == selection.fidelity
+                and workflow_endpoint.realization_id == selected_realization_id
+                and workflow_endpoint.mission_template_id == selected_mission_id
+            )
+            endpoints.append(
+                {
+                    "id": workflow_endpoint.id,
+                    "kind": "mission_workflow",
+                    "maturity_record_id": workflow_endpoint.maturity_record_id,
+                    "matches_selected_configuration": matches_selected_configuration,
+                    "match_scope": "provider_id, model_id, mission_template_id, fidelity, realization_id",
+                    "command": f"taoryx model verify {workflow_endpoint.id}",
+                    "execute_command": f"taoryx model verify {workflow_endpoint.id} --execute",
+                }
+            )
+
+    endpoints.sort(key=lambda item: (str(item["kind"]), str(item["id"])))
+    selected_endpoint_ids = [
+        str(item["id"])
+        for item in endpoints
+        if item.get("matches_selected_mission_and_fidelity") is True
+        or item.get("matches_selected_configuration") is True
+    ]
+    if not endpoints:
+        status = "not_declared"
+        selected_status = "not_declared"
+    elif selected_mission_id is None:
+        status = "available"
+        selected_status = "selection_required"
+    elif selected_endpoint_ids:
+        status = "available"
+        selected_status = "matching_endpoint_available"
+    else:
+        status = "available"
+        selected_status = "different_declared_endpoint"
+    return {
+        "schema": "taoryx.focused-endpoint-advertisement/v1alpha1",
+        "status": status,
+        "selected_endpoint_status": selected_status,
+        "selected_endpoint_ids": selected_endpoint_ids,
+        "endpoints": endpoints,
+        "claim_boundary": (
+            "A focused verifier proves only its checked-in endpoint contract. A matching identity does not execute "
+            "the verifier, establish robustness beyond its declared screen, or qualify the selected model."
         ),
     }
     ####
@@ -982,6 +1081,14 @@ def _advertisement_exercise_record(
             "endpoint_maturity",
         },
         "maturity_advertisement": {"status", "family_id", "claim_boundary"},
+        "focused_endpoint_verification": {
+            "schema",
+            "status",
+            "selected_endpoint_status",
+            "selected_endpoint_ids",
+            "endpoints",
+            "claim_boundary",
+        },
     }
     findings: list[str] = []
     for section, required_fields in required_sections.items():

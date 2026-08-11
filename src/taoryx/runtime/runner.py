@@ -13,7 +13,7 @@ from taoryx.language.expressions import NumberExpression
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import Assignment, EarthBlock, ProblemDocument, TableDocument
-from taoryx.outputs import RunArtifact, build_run_artifact
+from taoryx.outputs import RunArtifact, RunSensorExecution, build_run_artifact
 from taoryx.simulation_runtime_contracts import SimulationRuntimeStatus, classify_runtime_outcome
 
 from .engine import ExecutionResult
@@ -228,7 +228,9 @@ def run_files(
         }
         runtime.write_manifest(destination, case.index)
         sensor_outputs.extend(str(path) for path in sorted(plot_directory.iterdir()) if path.is_file())
-        artifact_values.append(base_artifact.model_copy(update={"sensor_execution": runtime.artifact()}))
+        artifact_values.append(
+            base_artifact.model_copy(update={"sensor_execution": RunSensorExecution.model_validate(runtime.artifact())})
+        )
     outputs = outputs + tuple(sorted(set(sensor_outputs)))
     artifacts = tuple(artifact_values)
     metadata = tuple(

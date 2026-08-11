@@ -123,6 +123,11 @@ def test_run_returns_standard_trajectory_with_segment_spans_and_events(tmp_path:
     assert result.segments[1].start_time_s == pytest.approx(5.0)
     assert result.channel_units["maneuver.load_factor_g"] == "g0"
     assert all(sample.values["maneuver.load_factor_g"] == pytest.approx(1.0) for sample in result.samples)
+    assert result.samples[-1].values["position.east_m"] == pytest.approx(0.0)
+    assert [item.segment_instance_id for item in result.events if item.kind == "waypoint_captured"] == [
+        "01-waypoint_leg",
+        "02-waypoint_leg",
+    ]
     destination = tmp_path / "trajectory.json"
     result.write_json(destination)
     payload = json.loads(destination.read_text(encoding="utf-8"))

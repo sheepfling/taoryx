@@ -17,7 +17,7 @@ from taoryx.composition_episode import ActionFrame, LanguageBackedCompositionEpi
 from taoryx.language_backed_execution import execute_powered_fixed_wing_composition
 from taoryx.language_backed_racetrack import materialize_powered_fixed_wing_composition
 from taoryx.model_authoring import ModelAuthoringError, build_model_authoring_plan, resolve_model_authoring_selection
-from taoryx.physical_lqr import validate_nonlinear_wrench_lqi
+from taoryx.physical_lqr import apply_tuning_context_to_physical_wrench_lqi_design, validate_nonlinear_wrench_lqi
 from taoryx.plugins import PluginCatalog, discover_plugins
 from taoryx.runtime.cli import main
 from taoryx.vehicle_batch_execution import execute_vehicle_composition_batch
@@ -419,6 +419,27 @@ def test_b747_source_surface_lqi_campaign_runs_through_the_common_host(
     ####
 
 
+def test_b747_source_surface_lqi_candidate_matches_the_physical_wrench_runtime(
+    plugins: PluginCatalog,
+    tmp_path: Path,
+) -> None:
+    """The campaign produces one candidate that the allocator-backed screen can apply exactly."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration(SURFACE_CAMPAIGN_ID)
+    contexts = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))
+    applied, binding = apply_tuning_context_to_physical_wrench_lqi_design(
+        build_b747_condition3_source_surface_physical_lqi_design(),
+        contexts[0],
+    )
+
+    assert len(contexts) == 1
+    assert applied.projection.state_names == contexts[0].state_names
+    assert applied.projection.wrench_names == contexts[0].control_names
+    assert binding.campaign_id == SURFACE_CAMPAIGN_ID
+    assert binding.candidate_profile_id == contexts[0].candidate_profile_id
+    ####
+
+
 def test_b747_physical_lqi_design_passes_the_bounded_source_local_baseline() -> None:
     """The named LQI design uses the real B747 allocator, not injected control.
 
@@ -549,6 +570,9 @@ def test_b747_condition3_source_table_surface_lqi_screen_runs_through_public_com
     assert nonlinear_validation["schema"] == "taoryx.physical-lqi-validation/v1alpha1"
     assert metrics["integrators_exercised"] is True
     assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["release_evidence_schema"] == "taoryx.claim-bound-release-evidence/v1alpha1"
+    assert robustness["release_evidence_kind"] == "robustness"
+    assert cast(dict[str, object], robustness["release_evidence_subject"])["composition_identity_sha256"] == composition.identity_sha256
     assert robustness["id"] == "b747-local-lqi-matched-pitch-wrench-offset"
     assert robustness["kind"] == "constant_offset"
     assert robustness["pass"] is True

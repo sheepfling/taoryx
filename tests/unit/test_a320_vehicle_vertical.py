@@ -9,7 +9,7 @@ from typing import Any, cast
 
 import pytest
 from taoryx.reduced_fixed_wing_execution import execute_reduced_fixed_wing_composition
-from taoryx.trajectory.a320_adapter import A320Pseudo6DOFControlPlant
+from taoryx.trajectory.a320_adapter import A320Pseudo6DOFControlPlant, build_a320_local_native_coordinate_lqi_screen_config
 from taoryx.trajectory.a320_pseudo6dof import A320Pseudo6DOFModel
 from taoryx.trajectory.native_mission_composition import (
     build_registry_mission_composition_runner,
@@ -28,7 +28,9 @@ from taoryx.composition_episode import (
     ReducedFixedWingCompositionEpisode,
     open_vehicle_composition_episode,
 )
+from taoryx.composition_result_catalog import build_composition_release_catalog
 from taoryx.generic_tuning import validate_nonlinear_native_coordinate_lqi
+from taoryx.local_native_coordinate_lqi import apply_tuning_context_to_native_coordinate_lqi_config
 from taoryx.model_authoring import build_model_authoring_plan
 from taoryx.plugins import PluginCatalog, discover_plugins
 from taoryx.trajectory.execution_contract import MissionCompositionOutputSelection, MissionCompositionRunRequest
@@ -250,6 +252,28 @@ def test_a320_pseudo_lqi_candidate_recovers_through_declared_native_controls(
     ####
 
 
+def test_a320_native_coordinate_lqi_binds_the_exact_common_candidate(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The runtime can publish a receipt only for its retained six-state LQI contract."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration("a320-pseudo-cruise-attitude-v1")
+    contexts = registration.application_contexts(registration.run_cached(tmp_path / "a320-tuning-cache"))
+    assert len(contexts) == 1
+    config = build_a320_local_native_coordinate_lqi_screen_config()
+
+    applied, receipt = apply_tuning_context_to_native_coordinate_lqi_config(config, contexts[0])
+
+    assert applied.candidate.state_names == contexts[0].state_names
+    assert applied.candidate.control_names == contexts[0].control_names
+    assert applied.candidate.lqi is not None
+    assert applied.candidate.lqi.output_names == contexts[0].integral_output_names
+    assert receipt.campaign_id == "a320-pseudo-cruise-attitude-v1"
+    assert receipt.controller_method == "lqi"
+    ####
+
+
 def test_a320_native_coordinate_lqi_is_a_first_class_batch_composition_endpoint(
     tmp_path: Path,
     plugins: PluginCatalog,
@@ -292,6 +316,8 @@ def test_a320_native_coordinate_lqi_is_a_first_class_batch_composition_endpoint(
     assert result.screen.final_error_fraction < 0.01
     assert result.screen.validation.control_saturation_fraction == 0.0
     screen = json.loads((result.output_dir / "local_screen.json").read_text(encoding="utf-8"))
+    objective = json.loads((result.output_dir / "objective_report.json").read_text(encoding="utf-8"))
+    convergence = json.loads((result.output_dir / "convergence_report.json").read_text(encoding="utf-8"))
     assert screen["control_realization"] == "native_named_coordinates"
     assert screen["physical_effector_allocation"] is False
     assert screen["controller"]["tuning_campaign_id"] == "a320-pseudo-cruise-attitude-v1"
@@ -302,6 +328,17 @@ def test_a320_native_coordinate_lqi_is_a_first_class_batch_composition_endpoint(
         "saturation_fraction_limit": 0.0,
     }
     assert screen["evaluation"]["dt_s"] == cast(dict[str, object], advertisement["controller"])["fixed_cadence_s"]
+    assert objective["mission_pass"] is True
+    assert all(item["required"] is True and item["status"] == "pass" for item in objective["results"])
+    assert convergence["schema"] == "taoryx.endpoint-convergence-screen/v1alpha1"
+    assert convergence["status"] == "pass"
+    assert convergence["pass"] is True
+    assert convergence["release_evidence_schema"] == "taoryx.claim-bound-release-evidence/v1alpha1"
+    assert convergence["release_evidence_kind"] == "convergence"
+    assert cast(dict[str, object], convergence["release_evidence_subject"])["composition_identity_sha256"] == composition.identity_sha256
+    release_catalog = build_composition_release_catalog(result.output_dir)
+    assert release_catalog["status"] == "ready"
+    assert release_catalog["packets"][0]["release_evidence"]["convergence_report.json"]["contract_status"] == "typed_bound"
     action_trace = json.loads((result.output_dir / "semantic_action_trace.json").read_text(encoding="utf-8"))
     assert action_trace["requested_action_channels"] == []
     assert action_trace["achieved_effector_channels"] == []

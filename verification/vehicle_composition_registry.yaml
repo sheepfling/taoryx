@@ -6,6 +6,15 @@ description: >-
   templates without duplicating vehicle physics or promoting a fidelity tier.
 vehicles:
   - family_id: skywalker_x8
+    metadata:
+      summary: Small flying-wing research surrogate for fixed-wing navigation, energy management, and bounded elevon-control studies.
+      vehicle_class: powered_fixed_wing_aircraft
+      operating_domains: [atmospheric]
+      propulsion: [propeller]
+      model_basis: public_research_surrogate
+      roles: [small_uas, fixed_wing_navigation, control_allocation]
+      tags: [flying_wing, elevon, electric_propulsion]
+      claim_boundary: Public-research X8 surrogate; it is not a manufacturer-qualified airframe or flight-control system.
     initialization_contracts:
       - id: source_table_trim_local_point
         status: runnable
@@ -130,6 +139,15 @@ vehicles:
         qualification_missions: [x8-racetrack-altitude-turns-3dof-v1, x8-racetrack-altitude-turns-pseudo-6dof-v1, x8-racetrack-altitude-turns-direct-wrench-v1, x8-racetrack-altitude-turns-v1]
 
   - family_id: b747
+    metadata:
+      summary: Heavy transport research surrogate for source-table rigid-body response, transport energy management, and local surface control.
+      vehicle_class: powered_fixed_wing_aircraft
+      operating_domains: [atmospheric]
+      propulsion: [turbofan]
+      model_basis: public_research_surrogate
+      roles: [heavy_transport, fixed_wing_navigation, control_allocation]
+      tags: [transport, four_engine, conventional_surfaces]
+      claim_boundary: Public-research Boeing 747-100 surrogate; it is not manufacturer truth or flight qualification evidence.
     initialization_contracts:
       - id: airborne_trim
         status: runnable
@@ -238,6 +256,15 @@ vehicles:
         qualification_missions: [b747-racetrack-altitude-turns-3dof-v1, b747-racetrack-altitude-turns-pseudo-6dof-v1, b747-racetrack-altitude-turns-6dof-v1]
 
   - family_id: a320_openap_3dof
+    metadata:
+      summary: Source-derived A320 transport composite for OpenAP point-mass performance and a named surrogate attitude-response tier.
+      vehicle_class: powered_fixed_wing_aircraft
+      operating_domains: [atmospheric]
+      propulsion: [scheduled_thrust_model]
+      model_basis: source_derived_composite
+      roles: [transport_performance, reduced_order_navigation, surrogate_attitude_response]
+      tags: [openap, jsbsim_comparison, reduced_order]
+      claim_boundary: Derived transport composite; it does not claim Airbus-authoritative aerodynamics, moments, or physical control surfaces.
     variant_parameters:
       - id: operating_mass_kg
         canonical_unit: kg
@@ -354,6 +381,15 @@ vehicles:
         backing_templates: [powered_fixed_wing_racetrack_v1]
 
   - family_id: f16_s119
+    metadata:
+      summary: Source-grounded F-16 S-119 family for fighter energy maneuvers, DAVE-ML force/moment response, and bounded surface control.
+      vehicle_class: powered_fixed_wing_aircraft
+      operating_domains: [atmospheric]
+      propulsion: [jet]
+      model_basis: source_grounded_reference
+      roles: [fighter_energy_maneuver, high_agility_control, gain_scheduling]
+      tags: [daveml, fighter, scheduled_control]
+      claim_boundary: Source-grounded research family within its declared package envelope; it is not flight-qualified F-16 behavior.
     initialization_contracts:
       - id: source_physical_control_local_point
         status: runnable
@@ -522,6 +558,15 @@ vehicles:
         segment_sequence: [trim_hold, energy_climb, fly_by_turn, fly_by_turn, energy_recovery_gate]
 
   - family_id: x15
+    metadata:
+      summary: Rocket-aircraft research surrogate spanning staged boost, high-energy coast, atmospheric handoff, and local source-control screens.
+      vehicle_class: rocket_aircraft
+      operating_domains: [atmospheric, near_space]
+      propulsion: [rocket]
+      model_basis: public_research_surrogate
+      roles: [air_launch, high_energy_research, atmospheric_glide]
+      tags: [rocket_plane, staged_booster, unpowered_glide]
+      claim_boundary: Research X-15 surrogate and source-pinned witnesses; it is not a complete historical X-15 flight or guidance reproduction.
     initialization_contracts:
       - id: air_launch_release
         status: development
@@ -677,6 +722,15 @@ vehicles:
         qualification_missions: [x15-scaled-staged-reachability-v1]
 
   - family_id: hummingbird
+    metadata:
+      summary: Quad-X multirotor research surrogate for hover, translation, rotor allocation, and bounded landing composition.
+      vehicle_class: multirotor
+      operating_domains: [atmospheric]
+      propulsion: [electric_rotor]
+      model_basis: public_research_surrogate
+      roles: [hover, waypoint_translation, vertical_takeoff_and_landing]
+      tags: [quad_x, individual_rotors, rotor_allocation]
+      claim_boundary: Public-research Hummingbird surrogate; it omits blade-resolved flow, battery depletion, and flight qualification.
     variant_parameters:
       - id: grounded_operating_mass_kg
         canonical_unit: kg
@@ -839,6 +893,15 @@ vehicles:
           claim_boundary: This is the one declared Hummingbird timeout recovery extension. It does not make a timeout a successful mission or imply general branching for the multirotor family.
 
   - family_id: hl20_mod_k
+    metadata:
+      summary: Source-grounded unpowered lifting-body family for booster release, glide-energy management, and seven-surface control studies.
+      vehicle_class: lifting_body
+      operating_domains: [atmospheric, near_space]
+      propulsion: [unpowered]
+      model_basis: source_grounded_reference
+      roles: [lifting_body_glide, crossrange_management, terminal_energy_handoff]
+      tags: [daveml, lifting_body, seven_surfaces]
+      claim_boundary: Source-grounded HL-20 Mod K research model; local control and replay witnesses do not constitute a qualified end-to-end glide mission.
     initialization_contracts:
       - id: source_subsonic_local_point
         status: runnable
@@ -977,6 +1040,15 @@ vehicles:
         segment_sequence: [trim_capture, glide_bank_reversal, glide_bank_reversal, energy_handoff]
 
   - family_id: reference_nesc_two_stage_rocket
+    metadata:
+      summary: Source-grounded NASA/NESC two-stage launch vehicle for variable-mass ascent, staging, and terminal-state replay.
+      vehicle_class: staged_launch_vehicle
+      operating_domains: [atmospheric, near_space, space]
+      propulsion: [staged_rocket]
+      model_basis: source_grounded_reference
+      roles: [launch, staging, variable_mass_trajectory]
+      tags: [nesc, two_stage, scenario_17]
+      claim_boundary: Scenario-bounded reference replay; it is not an independently qualified launch vehicle or general guidance system.
     initialization_contracts:
       - id: pad_launch
         status: development
@@ -1016,6 +1088,15 @@ vehicles:
         segment_sequence: [ignition_ascent, stage_separation, ignition_ascent, coast_terminal_state]
 
   - family_id: tumbling_body
+    metadata:
+      summary: Passive geometry-driven atmospheric body family for release, tumbling drag, descent, and impact analysis.
+      vehicle_class: passive_atmospheric_body
+      operating_domains: [atmospheric]
+      propulsion: [none]
+      model_basis: analytical_geometry_model
+      roles: [passive_release, tumbling_aerodynamics, impact_reachability]
+      tags: [uncontrolled, geometry_variants, passive_descent]
+      claim_boundary: Analytical passive-body family; it has no actuator, controller, propulsion, or vehicle-specific performance claim.
     initialization_contracts:
       - id: atmospheric_release
         status: development

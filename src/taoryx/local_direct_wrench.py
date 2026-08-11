@@ -24,6 +24,7 @@ import numpy as np
 
 from .direct_wrench import DIRECT_WRENCH_NAMES, DirectWrenchLimits, DirectWrenchProjection
 from .runtime.lqr import LqiController, LqiResult, LqrResult, solve_scaled_continuous_lqr
+from .tuning_application import TuningApplicationContext
 
 LocalDerivative = Callable[[Mapping[str, float], Mapping[str, float]], Mapping[str, float]]
 LocalWrenchBias = Callable[[Mapping[str, float]], Mapping[str, float]]
@@ -248,8 +249,18 @@ class LocalDirectWrenchScreenExecution:
     ####
 
 
-def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> LocalDirectWrenchScreenExecution:
-    """Run one bounded LQR or source-selected LQI recovery witness."""
+def run_local_direct_wrench_screen(
+    config: LocalDirectWrenchScreenConfig,
+    *,
+    tuning_context: TuningApplicationContext | None = None,
+) -> LocalDirectWrenchScreenExecution:
+    """Run one bounded LQR or source-selected LQI recovery witness.
+
+    A supplied application context is applied only after exact named-coordinate
+    validation.  The source screen retains its own nonlinear acceptance gates,
+    so a candidate that is well formed but unsuitable for this screen fails
+    honestly rather than receiving a runtime binding by implication.
+    """
 
     reference = _named_values(config.reference_state, config.state_names, "reference state")
     state = _named_values(config.initial_state, config.state_names, "initial state")
@@ -313,18 +324,37 @@ def run_local_direct_wrench_screen(config: LocalDirectWrenchScreenConfig) -> Loc
         ) / (2.0 * config.control_derivative_step)
     lqi = config.lqi_result
     if config.controller_method == "lqr":
-        lqr = solve_scaled_continuous_lqr(
-            a_matrix.tolist(),
-            b_matrix.tolist(),
-            np.diag(config.state_cost_weights).tolist(),
-            np.diag(config.control_cost_weights).tolist(),
-            state_scales=config.state_scales,
-            control_scales=config.control_scales,
-            state_names=config.state_names,
-            control_names=DIRECT_WRENCH_NAMES,
-        )
+        if tuning_context is None:
+            lqr = solve_scaled_continuous_lqr(
+                a_matrix.tolist(),
+                b_matrix.tolist(),
+                np.diag(config.state_cost_weights).tolist(),
+                np.diag(config.control_cost_weights).tolist(),
+                state_scales=config.state_scales,
+                control_scales=config.control_scales,
+                state_names=config.state_names,
+                control_names=DIRECT_WRENCH_NAMES,
+            )
+        else:
+            tuning_context.require_runtime_compatibility(
+                controller_method="lqr",
+                state_names=config.state_names,
+                control_names=DIRECT_WRENCH_NAMES,
+            )
+            gain = np.asarray(tuning_context.resolved_gains["state_gain"], dtype=float)
+            closed_loop = np.linalg.eigvals(a_matrix - b_matrix @ gain)
+            lqr = LqrResult(
+                gain=gain,
+                closed_loop_eigenvalues=closed_loop,
+                controllable=True,
+                condition_number=1.0,
+                state_names=config.state_names,
+                control_names=DIRECT_WRENCH_NAMES,
+            )
         lqi_controller: LqiController | None = None
     else:
+        if tuning_context is not None:
+            raise ValueError("local direct-wrench LQI application contexts are not yet supported")
         if lqi is None:
             raise RuntimeError("validated LQI screen configuration has no LQI result")
         lqr = lqi.design

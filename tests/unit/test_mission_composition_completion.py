@@ -84,7 +84,7 @@ def test_production_advertisement_and_generated_completion_artifacts_are_current
     assert report.advertisement_status == "pass"
     assert report.family_count == 11
     assert report.realization_count == 45
-    assert report.registered_batch_tuple_count == 65
+    assert report.registered_batch_tuple_count == 66
     assert report.registered_interactive_tuple_count == 12
     assert MissionCompositionCompletionReport.model_validate_json(report.model_dump_json(by_alias=True)) == report
 

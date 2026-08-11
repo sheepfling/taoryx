@@ -119,7 +119,7 @@
             "state_step": 0.0001
           },
           "lqr": {
-            "best_profile_id": "hummingbird-pseudo-hover.tracking-0.25.effort-2",
+            "best_profile_id": "hummingbird-pseudo-hover.tracking-0.25.effort-0.25",
             "candidates": [
               {
                 "closed_loop_eigenvalues": [
@@ -1816,7 +1816,7 @@
             "state_step": 0.0001
           },
           "lqr": {
-            "best_profile_id": "a320-pseudo-cruise.tracking-0.25.effort-2",
+            "best_profile_id": "a320-pseudo-cruise.tracking-0.25.effort-0.25",
             "candidates": [
               {
                 "closed_loop_eigenvalues": [

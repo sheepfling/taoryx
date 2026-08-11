@@ -82,6 +82,32 @@ def test_auto_declaration_can_preserve_a_public_profile_grid_identity() -> None:
     ####
 
 
+def test_auto_declaration_can_pin_a_source_screen_weight_contract() -> None:
+    """A plug-in can retain a source-screen Q/R baseline without owning a tuner loop."""
+
+    declaration = ControlAutomationDeclaration(
+        id="source-screen",
+        campaign_id="source-screen-v1",
+        family_id="synthetic",
+        tier="pseudo_6dof",
+        strategy_id="synthetic.v1",
+        node_id="trim",
+        state_scales={"angle": 0.2, "rate": 1.0},
+        control_scales={"command": 0.3},
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        state_base_weights=(2.0, 3.0),
+        control_base_weights=(4.0,),
+    )
+
+    grid = declaration.build_campaign().nodes[0].profile_grid
+
+    assert grid is not None
+    assert grid.profiles(2, 1)[0].q_diagonal == (2.0, 3.0)
+    assert grid.profiles(2, 1)[0].r_diagonal == (4.0,)
+    ####
+
+
 def test_auto_declaration_can_sweep_integral_priority_for_lqi() -> None:
     """Plug-ins can request offset-rejection profiles without owning a tuner loop."""
 
@@ -104,6 +130,45 @@ def test_auto_declaration_can_sweep_integral_priority_for_lqi() -> None:
     assert node.integral_q_diagonal == (2.0,)
     assert node.profile_grid is not None
     assert node.profile_grid.integral_weight_multipliers == (1.0, 10.0)
+    ####
+
+
+def test_auto_declaration_can_preserve_nonuniform_source_lqi_integral_weights() -> None:
+    """Exact physical screens retain their declared output-priority contract."""
+
+    declaration = ControlAutomationDeclaration(
+        id="synthetic-source-lqi",
+        campaign_id="synthetic-source-lqi-v1",
+        family_id="synthetic",
+        tier="pseudo_6dof",
+        strategy_id="synthetic.v1",
+        node_id="trim",
+        state_scales={"roll": 1.0, "vertical_speed": 1.0},
+        control_scales={"force": 1.0},
+        offset_free_outputs=("roll", "vertical_speed"),
+        integral_base_weights=(40.0, 16.0),
+    )
+
+    node = declaration.build_campaign().nodes[0]
+
+    assert node.integral_q_diagonal == (40.0, 16.0)
+    assert declaration.as_dict()["integral_base_weights"] == [40.0, 16.0]
+    ####
+
+
+def test_lqr_declaration_rejects_integral_base_weights() -> None:
+    with pytest.raises(ValueError, match="integral base weights"):
+        ControlAutomationDeclaration(
+            id="synthetic-lqr",
+            campaign_id="synthetic-lqr-v1",
+            family_id="synthetic",
+            tier="pseudo_6dof",
+            strategy_id="synthetic.v1",
+            node_id="trim",
+            state_scales={"rate": 1.0},
+            control_scales={"moment": 1.0},
+            integral_base_weights=(2.0,),
+        )
     ####
 
 

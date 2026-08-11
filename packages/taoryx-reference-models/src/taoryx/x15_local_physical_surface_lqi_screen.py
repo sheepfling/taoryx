@@ -19,6 +19,7 @@ from pathlib import Path
 
 import numpy as np
 
+from .claim_bound_evidence import bind_release_evidence
 from .composition_control_trace import BatchControlSample, build_committed_control_trace, control_trace_summary
 from .composition_evaluation import build_composition_trajectory_evaluation
 from .composition_graph_evidence import unobserved_mission_graph_execution
@@ -26,8 +27,14 @@ from .composition_resource_ledger import build_committed_resource_ledger, resour
 from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .mission_capability import MissionCapabilityEstimate, estimate_mission_capability
-from .physical_lqr import PhysicalWrenchLqiDesign, PhysicalWrenchLqiValidation, validate_nonlinear_wrench_lqi
+from .physical_lqr import (
+    PhysicalWrenchLqiDesign,
+    PhysicalWrenchLqiValidation,
+    apply_tuning_context_to_physical_wrench_lqi_design,
+    validate_nonlinear_wrench_lqi,
+)
 from .trim import TrimResult
+from .tuning_application import TuningApplicationContext
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import (
     ExecutionPreflightCheck,
@@ -317,6 +324,8 @@ def execute_x15_local_physical_surface_lqi_screen(
     composition: CompiledVehicleComposition,
     output_dir: str | Path,
     max_steps: int | None = None,
+    *,
+    tuning_context: TuningApplicationContext | None = None,
 ) -> X15LocalPhysicalSurfaceLqiScreenExecution:
     """Run local LQI through the actual bounded source-surface allocator."""
 
@@ -335,6 +344,9 @@ def execute_x15_local_physical_surface_lqi_screen(
     if not trim.success:
         raise RuntimeError(f"X-15 source-surface moment-balance trim failed: {trim.as_dict()}")
     design = build_x15_source_surface_physical_lqi_design()
+    tuning_binding = None
+    if tuning_context is not None:
+        design, tuning_binding = apply_tuning_context_to_physical_wrench_lqi_design(design, tuning_context)
     initial_state = _initial_state(trim)
     validation = validate_nonlinear_wrench_lqi(
         plant,
@@ -390,6 +402,7 @@ def execute_x15_local_physical_surface_lqi_screen(
         "mass_kg": X15_MASS_KG,
         "source_effectiveness_rank": int(np.linalg.matrix_rank(plant.effectiveness(trim.state, trim.controls).array)),
         "hard_gates_passed": assessment["screen_pass"],
+        **({"tuning_binding": tuning_binding.as_dict()} if tuning_binding is not None else {}),
         "mission_graph_execution": unobserved_mission_graph_execution(
             composition,
             "The X-15 local source-surface LQI screen has no route dispatcher or transition execution.",
@@ -423,7 +436,10 @@ def execute_x15_local_physical_surface_lqi_screen(
     _write_json(destination / "runtime_report.json", runtime)
     _write_json(destination / "mission_graph_execution.json", runtime["mission_graph_execution"])
     _write_json(destination / "nonlinear_validation.json", validation.as_dict())
-    _write_json(destination / "robustness_report.json", robustness_report)
+    _write_json(
+        destination / "robustness_report.json",
+        bind_release_evidence(robustness_report, kind="robustness", composition=composition),
+    )
     _write_json(destination / "local_surface_lqi_screen.json", {"assessment": assessment, "rows": rows})
     _write_json(destination / "objective_report.json", evaluation)
     _write_json(destination / "status_trace.json", status_trace)

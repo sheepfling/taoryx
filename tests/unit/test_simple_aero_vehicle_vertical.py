@@ -6,6 +6,7 @@ import math
 from typing import Any, cast
 
 import pytest
+from pydantic import ValidationError
 from taoryx.trajectory.native_mission_composition import build_registry_mission_composition_runner
 from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.trajectory.session_contract import (
@@ -44,9 +45,7 @@ def plugins() -> PluginCatalog:
 def _prepared(provider: RegistryMissionCompositionProvider):
     """Build the checked fixed-L/D witness through the published schema."""
 
-    return provider.validate_configuration(
-        build_simple_aero_example_configuration(provider.get_model_schema(MODEL_ID))
-    )
+    return provider.validate_configuration(build_simple_aero_example_configuration(provider.get_model_schema(MODEL_ID)))
     ####
 
 
@@ -116,9 +115,7 @@ def test_simple_aero_fixed_ld_baseline_executes_through_the_public_common_runner
     assert len(response.result.objects) == 1
     primary = response.result.objects[0]
     assert len(primary.samples) == 17
-    assert {item.id for item in primary.channels} == {
-        item.id for item in provider.get_model_output_schema(MODEL_ID).channels
-    }
+    assert {item.id for item in primary.channels} == {item.id for item in provider.get_model_output_schema(MODEL_ID).channels}
     assert all(set(item.values) == {channel.id for channel in primary.channels} for item in primary.samples)
     assert all(math.isfinite(float(item.values["mass.total"])) for item in primary.samples)
     assert any(float(item.values["propulsion.thrust"]) > 0.0 for item in primary.samples)
@@ -126,12 +123,12 @@ def test_simple_aero_fixed_ld_baseline_executes_through_the_public_common_runner
     ####
 
 
-def test_simple_aero_published_templates_have_exact_fixed_ld_lowerings() -> None:
-    """Every advertised recipe is buildable, not merely schema-valid fixture text."""
+def test_simple_aero_reviewed_templates_have_exact_fixed_ld_lowerings() -> None:
+    """Every reviewed recipe is buildable, not merely schema-valid fixture text."""
 
     provider = RegistryMissionCompositionProvider()
     model = provider.model(MODEL_ID)
-    template_ids = tuple(item.id for item in model.mission_templates)
+    template_ids = tuple(item.id for item in model.mission_templates if item.id != "custom_composition")
 
     assert template_ids == (
         "fixed_ld_baseline",
@@ -145,16 +142,25 @@ def test_simple_aero_published_templates_have_exact_fixed_ld_lowerings() -> None
         "slalom",
         "weave",
     )
+    custom = next(item for item in model.mission_templates if item.id == "custom_composition")
+    assert custom.segment_sequence == ()
+    assert custom.is_open_segment_sequence
+    assert custom.open_segment_sequence is not None
+    assert custom.open_segment_sequence.configuration_node_id == "segments"
+    assert custom.open_segment_sequence.minimum_items == 1
+    assert custom.open_segment_sequence.maximum_items == 32
+    assert custom.advertised_segment_ids == custom.open_segment_sequence.allowed_segment_ids
+    assert custom.accepts_segment_sequence(("powered_ascent", "ballistic_coast", "weave", "terminal_pronav"))
+    assert not custom.accepts_segment_sequence(("not_an_advertised_segment",))
+    assert type(model).model_validate_json(model.model_dump_json()) == model
+    invalid_fixed_wire_contract = custom.model_copy(update={"open_segment_sequence": None})
+    with pytest.raises(ValidationError, match="fixed mission template requires a non-empty segment_sequence"):
+        type(custom).model_validate_json(invalid_fixed_wire_contract.model_dump_json())
+    assert next(item for item in custom.operations if item.operation == "batch").status == "available"
     for template_id in template_ids:
         prepared = _prepared_template(provider, template_id)
         build = build_simple_aero_prepared_configuration(prepared)
-        operation = next(
-            item
-            for mission in model.mission_templates
-            if mission.id == template_id
-            for item in mission.operations
-            if item.operation == "batch"
-        )
+        operation = next(item for mission in model.mission_templates if mission.id == template_id for item in mission.operations if item.operation == "batch")
         assert build.derived.total_duration_s > 0.0
         assert f"source Simple Aero segment {prepared.resolved['segments'][0]['selected']}" in build.problem_text
         assert operation.status == "available"
@@ -183,9 +189,7 @@ def test_simple_aero_phugoid_template_executes_through_the_same_public_runner() 
     assert primary.realization_id == REALIZATION_ID
     assert primary.fidelity == FIDELITY
     assert len(primary.samples) == 7
-    assert {item.id for item in primary.channels} == {
-        item.id for item in provider.get_model_output_schema(MODEL_ID).channels
-    }
+    assert {item.id for item in primary.channels} == {item.id for item in provider.get_model_output_schema(MODEL_ID).channels}
     assert all(math.isfinite(float(item.values["aerodynamics.angle_of_attack"])) for item in primary.samples)
     ####
 

@@ -152,8 +152,15 @@ def load_unified_family_manifest_catalog(
     horizontal: HorizontalFidelityRegistry | None = None,
     pseudo: Pseudo6DOFCatalog | None = None,
     root: Path = ROOT,
+    validate_source_imports: bool = True,
 ) -> UnifiedFamilyManifestCatalog:
-    """Resolve all family/tier bindings through one typed join."""
+    """Resolve all family/tier bindings through one typed join.
+
+    Set ``validate_source_imports`` to ``False`` for metadata-only discovery.
+    That still validates the typed source-family manifest and its declared
+    identity, while deferring the expensive DAVE-ML import-sidecar cross-check
+    to an explicit provenance or source-data operation.
+    """
 
     from .trajectory.reference_families import load_reference_family_manifest
 
@@ -200,7 +207,10 @@ def load_unified_family_manifest_catalog(
                 findings.append(UnifiedFamilyManifestFinding(family.family_id, "source-manifest-missing", f"source manifest {source_manifest_path!r} does not exist"))
             else:
                 try:
-                    source_manifest = load_reference_family_manifest(path)
+                    source_manifest = load_reference_family_manifest(
+                        path,
+                        validate_daveml_import=validate_source_imports,
+                    )
                     if family.source_family_id is not None and source_manifest.family_id != family.source_family_id:
                         findings.append(UnifiedFamilyManifestFinding(family.family_id, "source-family-id-mismatch", f"source manifest declares {source_manifest.family_id!r}, expected {family.source_family_id!r}"))
                 except (OSError, ValueError) as error:

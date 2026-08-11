@@ -12,8 +12,9 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping
 from functools import lru_cache
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from taoryx_simple_aero.resources import simple_aero_resource_root
 
 from ..fidelity_contracts import CANONICAL_FIDELITY_TIERS
@@ -30,7 +31,9 @@ from .configuration_contract import (
     ConfigurationGroupSchema,
     ConfigurationGroupValue,
     ConfigurationInterval,
+    ConfigurationNodeValue,
     ConfigurationOptionalSchema,
+    ConfigurationOptionalValue,
     ConfigurationParameterSchema,
     ConfigurationParameterValue,
     ConfigurationPeriodicity,
@@ -54,16 +57,19 @@ from .configuration_contract import (
     TrajectoryModelMetadata,
     TrajectoryModelPresentationMetadata,
     TrajectoryModelPropertyMetadata,
+    TrajectoryOpenSegmentSequenceMetadata,
     TrajectoryOutputChannelMetadata,
     TrajectoryOutputSchema,
     TrajectoryRealizationMetadata,
     TrajectoryReferenceFrameMetadata,
     TrajectoryTelemetryGroupMetadata,
     ValuePresentationMetadata,
+    validate_configuration_instance,
 )
 from .contracts import FamilyPackage, ParameterSchema
 
 SIMPLE_AERO_MODEL_ID = "simple_aero"
+SIMPLE_AERO_CUSTOM_COMPOSITION_ID = "custom_composition"
 _ROOT = simple_aero_resource_root()
 _FAMILY_CATALOG = _ROOT / "verification" / "alpha2_family_catalog.yaml"
 _MODEL_VERSION_SUFFIX = "mission-composition-v1"
@@ -103,6 +109,669 @@ _PARAMETER_DESCRIPTIONS = {
     "runtime.time_step": "Integrator time step for the generated point-mass problem.",
     "runtime.output_interval": "Requested output sampling interval for the generated problem.",
 }
+
+SimpleAeroSegmentKind = Literal[
+    "powered_ascent",
+    "ballistic_coast",
+    "bank_maneuver",
+    "cbcr",
+    "crossrange",
+    "marv",
+    "phugoid",
+    "range_extension",
+    "skip",
+    "slalom",
+    "weave",
+    "terminal_pronav",
+]
+SimpleAeroCutoffCondition = Literal["physical_burnout", "commanded_burnout_speed"]
+SimpleAeroEarthModel = Literal["standard_wgs84", "vacuum_spherical"]
+
+_SEGMENT_PARAMETER_UNITS: dict[SimpleAeroSegmentKind, dict[str, str | None]] = {
+    "powered_ascent": {"duration_s": "s", "cutoff_condition": None},
+    "ballistic_coast": {"duration_s": "s", "alpha_deg": "deg"},
+    "bank_maneuver": {"duration_s": "s", "bank_deg": "deg"},
+    "cbcr": {
+        "go_left": None,
+        "maneuver_altitude_start_m": "m",
+        "duration_s": "s",
+        "minimum_time_to_go_s": "s",
+    },
+    "crossrange": {"initial_heading_error_deg": "deg", "minimum_time_to_go_s": "s"},
+    "marv": {"maneuver_begin_time_to_go_s": "s", "minimum_time_to_go_s": "s"},
+    "phugoid": {
+        "start_range_to_go_m": "m",
+        "amplitude_deg": "deg",
+        "frequency_hz": "Hz",
+        "maneuver_roll_deg": "deg",
+    },
+    "range_extension": {"minimum_time_to_go_s": "s"},
+    "skip": {"maneuver_begin_time_to_go_s": "s"},
+    "slalom": {
+        "start_range_to_go_m": "m",
+        "end_range_to_go_m": "m",
+        "minimum_time_to_go_s": "s",
+    },
+    "weave": {"end_range_to_go_m": "m", "minimum_time_to_go_s": "s"},
+    "terminal_pronav": {"duration_s": "s", "capture_range_m": "m"},
+}
+_OPTIONAL_SEGMENT_PARAMETERS = frozenset(
+    {
+        ("phugoid", "start_range_to_go_m"),
+        ("slalom", "start_range_to_go_m"),
+        ("weave", "end_range_to_go_m"),
+    }
+)
+
+
+def _require_finite(value: float, name: str) -> None:
+    """Reject non-finite convenience inputs before configuration assembly."""
+
+    if not math.isfinite(value):
+        raise ValueError(f"{name} must be finite")
+    ####
+
+
+def _canonical_longitude_deg(value: float) -> float:
+    """Return a longitude in the portable grammar's ``[-180, 180)`` interval."""
+
+    return (value + 180.0) % 360.0 - 180.0
+    ####
+
+
+def _canonical_signed_heading_deg(value: float) -> float:
+    """Return a signed heading in the portable grammar's ``[-180, 180)`` interval."""
+
+    return (value + 180.0) % 360.0 - 180.0
+    ####
+
+
+class SimpleAeroLaunch(BaseModel):
+    """Friendly SI launch state for one Simple Aero mission."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    latitude_deg: float = Field(default=0.0, ge=-90.0, le=90.0)
+    longitude_deg: float = 0.0
+    altitude_m: float = Field(default=0.0, ge=0.0)
+    speed_m_s: float = Field(default=50.0, ge=0.0)
+    pitch_over_angle_deg: float = Field(default=80.0, ge=-89.0, le=89.0)
+    initial_heading_offset_deg: float = Field(default=0.0, ge=-180.0, le=180.0)
+
+    @model_validator(mode="after")
+    def validate_launch(self) -> SimpleAeroLaunch:
+        for name, value in self.__dict__.items():
+            _require_finite(float(value), name)
+        object.__setattr__(self, "longitude_deg", _canonical_longitude_deg(self.longitude_deg))
+        return self
+        ####
+
+    ####
+
+
+class SimpleAeroRangeBearingEndpoint(BaseModel):
+    """Endpoint expressed as spherical-Earth surface range and initial bearing."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    target_range_m: float = Field(default=100_000.0, ge=0.0)
+    target_bearing_deg: float = 90.0
+
+    @model_validator(mode="after")
+    def validate_endpoint(self) -> SimpleAeroRangeBearingEndpoint:
+        _require_finite(self.target_range_m, "target_range_m")
+        _require_finite(self.target_bearing_deg, "target_bearing_deg")
+        object.__setattr__(self, "target_bearing_deg", self.target_bearing_deg % 360.0)
+        return self
+        ####
+
+    ####
+
+
+class SimpleAeroGeodeticAimpoint(BaseModel):
+    """Endpoint expressed directly as a geodetic aimpoint."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    latitude_deg: float = Field(default=0.0, ge=-90.0, le=90.0)
+    longitude_deg: float = 0.0
+
+    @model_validator(mode="after")
+    def validate_aimpoint(self) -> SimpleAeroGeodeticAimpoint:
+        _require_finite(self.latitude_deg, "latitude_deg")
+        _require_finite(self.longitude_deg, "longitude_deg")
+        object.__setattr__(self, "longitude_deg", _canonical_longitude_deg(self.longitude_deg))
+        return self
+        ####
+
+    ####
+
+
+SimpleAeroEndpoint = SimpleAeroRangeBearingEndpoint | SimpleAeroGeodeticAimpoint
+
+
+class SimpleAeroEndpointState(BaseModel):
+    """Optional terminal target motion assigned by the fixed-L/D builder."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    altitude_m: float = Field(default=0.0, ge=0.0)
+    speed_m_s: float = Field(default=0.0, ge=0.0)
+    heading_deg: float = 0.0
+
+    @model_validator(mode="after")
+    def validate_endpoint_state(self) -> SimpleAeroEndpointState:
+        _require_finite(self.altitude_m, "altitude_m")
+        _require_finite(self.speed_m_s, "speed_m_s")
+        _require_finite(self.heading_deg, "heading_deg")
+        object.__setattr__(self, "heading_deg", _canonical_signed_heading_deg(self.heading_deg))
+        return self
+        ####
+
+    ####
+
+
+class SimpleAeroSurrogate(BaseModel):
+    """Fixed-coefficient point-mass surrogate inputs, all in canonical SI units."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    vehicle_id: str = Field(default="generic-3dof", min_length=1)
+    initial_mass_kg: float = Field(default=1000.0, ge=1.0)
+    thrust_n: float = Field(default=100_000.0, ge=0.0)
+    mass_flow_kg_s: float = Field(default=20.0, ge=0.0)
+    drag_coefficient: float = Field(default=0.02, ge=0.0)
+    lift_to_drag: float = Field(default=4.0, ge=0.0)
+
+    @model_validator(mode="after")
+    def validate_surrogate(self) -> SimpleAeroSurrogate:
+        if not self.vehicle_id.strip():
+            raise ValueError("vehicle_id must contain non-whitespace text")
+        for name, value in self.__dict__.items():
+            if name != "vehicle_id":
+                _require_finite(float(value), name)
+        return self
+        ####
+
+    ####
+
+
+class SimpleAeroCheckpoints(BaseModel):
+    """Convenience checkpoint targets for the reduced-order builder."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    burnout_speed_m_s: float = Field(default=1200.0, gt=0.0)
+    apogee_altitude_m: float = Field(default=80_000.0, gt=0.0)
+
+    @model_validator(mode="after")
+    def validate_checkpoints(self) -> SimpleAeroCheckpoints:
+        _require_finite(self.burnout_speed_m_s, "burnout_speed_m_s")
+        _require_finite(self.apogee_altitude_m, "apogee_altitude_m")
+        return self
+        ####
+
+    ####
+
+
+class SimpleAeroRuntime(BaseModel):
+    """Numerical and environment inputs for the generated batch problem."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    time_step_s: float = Field(default=0.05, gt=0.0)
+    output_interval_s: float = Field(default=0.5, gt=0.0)
+    earth_model: SimpleAeroEarthModel = "standard_wgs84"
+
+    @model_validator(mode="after")
+    def validate_runtime(self) -> SimpleAeroRuntime:
+        _require_finite(self.time_step_s, "time_step_s")
+        _require_finite(self.output_interval_s, "output_interval_s")
+        return self
+        ####
+
+    ####
+
+
+class SimpleAeroSegment(BaseModel):
+    """One source-shaped Simple Aero segment occurrence.
+
+    Use the named constructors instead of assembling ``parameters`` manually.
+    They expose every published source vocabulary parameter while this type
+    retains segment identity for an arbitrary ordered mission sequence.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    kind: SimpleAeroSegmentKind
+    instance_id: str | None = Field(default=None, min_length=1)
+    parameters: dict[str, float | str | bool] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_segment(self) -> SimpleAeroSegment:
+        if self.instance_id is not None and not self.instance_id.strip():
+            raise ValueError("instance_id must contain non-whitespace text")
+        units = _SEGMENT_PARAMETER_UNITS[self.kind]
+        unknown = set(self.parameters).difference(units)
+        if unknown:
+            raise ValueError(f"{self.kind} does not accept parameters {sorted(unknown)!r}")
+        for parameter_id, value in self.parameters.items():
+            if parameter_id == "go_left":
+                if not isinstance(value, bool):
+                    raise ValueError("go_left must be boolean")
+            elif parameter_id == "cutoff_condition":
+                if value not in {"physical_burnout", "commanded_burnout_speed"}:
+                    raise ValueError("cutoff_condition must select a published cutoff")
+            else:
+                if isinstance(value, bool) or not isinstance(value, int | float):
+                    raise ValueError(f"{parameter_id} must be numeric")
+                _require_finite(float(value), parameter_id)
+        return self
+        ####
+
+    ####
+
+    @classmethod
+    def powered_ascent(
+        cls,
+        *,
+        duration_s: float = 5.0,
+        cutoff_condition: SimpleAeroCutoffCondition = "physical_burnout",
+        instance_id: str | None = None,
+    ) -> SimpleAeroSegment:
+        """Create the thrust-driven segment and its declared cutoff mode."""
+
+        return cls(
+            kind="powered_ascent",
+            instance_id=instance_id,
+            parameters={"duration_s": duration_s, "cutoff_condition": cutoff_condition},
+        )
+        ####
+
+    @classmethod
+    def ballistic_coast(cls, *, duration_s: float = 10.0, alpha_deg: float = 0.0, instance_id: str | None = None) -> SimpleAeroSegment:
+        """Create a coast with an explicit constant alpha input."""
+
+        return cls(kind="ballistic_coast", instance_id=instance_id, parameters={"duration_s": duration_s, "alpha_deg": alpha_deg})
+        ####
+
+    @classmethod
+    def bank_maneuver(cls, *, duration_s: float = 5.0, bank_deg: float = 0.0, instance_id: str | None = None) -> SimpleAeroSegment:
+        """Create the generic bounded bank segment."""
+
+        return cls(kind="bank_maneuver", instance_id=instance_id, parameters={"duration_s": duration_s, "bank_deg": bank_deg})
+        ####
+
+    @classmethod
+    def cbcr(
+        cls,
+        *,
+        go_left: bool = True,
+        maneuver_altitude_start_m: float = 40_000.0,
+        duration_s: float = 35.0,
+        minimum_time_to_go_s: float = 60.0,
+        instance_id: str | None = None,
+    ) -> SimpleAeroSegment:
+        """Create the source-shaped CBCR vocabulary occurrence."""
+
+        return cls(
+            kind="cbcr",
+            instance_id=instance_id,
+            parameters={
+                "go_left": go_left,
+                "maneuver_altitude_start_m": maneuver_altitude_start_m,
+                "duration_s": duration_s,
+                "minimum_time_to_go_s": minimum_time_to_go_s,
+            },
+        )
+        ####
+
+    @classmethod
+    def crossrange(
+        cls,
+        *,
+        initial_heading_error_deg: float = 15.0,
+        minimum_time_to_go_s: float = 60.0,
+        instance_id: str | None = None,
+    ) -> SimpleAeroSegment:
+        """Create the source-shaped crossrange vocabulary occurrence."""
+
+        return cls(
+            kind="crossrange",
+            instance_id=instance_id,
+            parameters={"initial_heading_error_deg": initial_heading_error_deg, "minimum_time_to_go_s": minimum_time_to_go_s},
+        )
+        ####
+
+    @classmethod
+    def marv(
+        cls,
+        *,
+        maneuver_begin_time_to_go_s: float = 60.0,
+        minimum_time_to_go_s: float = 30.0,
+        instance_id: str | None = None,
+    ) -> SimpleAeroSegment:
+        """Create the source-shaped MARV vocabulary occurrence."""
+
+        return cls(
+            kind="marv",
+            instance_id=instance_id,
+            parameters={
+                "maneuver_begin_time_to_go_s": maneuver_begin_time_to_go_s,
+                "minimum_time_to_go_s": minimum_time_to_go_s,
+            },
+        )
+        ####
+
+    @classmethod
+    def phugoid(
+        cls,
+        *,
+        start_range_to_go_m: float | None = None,
+        amplitude_deg: float = 2.0,
+        frequency_hz: float = 0.015,
+        maneuver_roll_deg: float = 45.0,
+        instance_id: str | None = None,
+    ) -> SimpleAeroSegment:
+        """Create the source-shaped alpha-profile phugoid occurrence."""
+
+        return cls(
+            kind="phugoid",
+            instance_id=instance_id,
+            parameters={
+                **({"start_range_to_go_m": start_range_to_go_m} if start_range_to_go_m is not None else {}),
+                "amplitude_deg": amplitude_deg,
+                "frequency_hz": frequency_hz,
+                "maneuver_roll_deg": maneuver_roll_deg,
+            },
+        )
+        ####
+
+    @classmethod
+    def range_extension(cls, *, minimum_time_to_go_s: float = 60.0, instance_id: str | None = None) -> SimpleAeroSegment:
+        """Create the source-shaped range-extension occurrence."""
+
+        return cls(kind="range_extension", instance_id=instance_id, parameters={"minimum_time_to_go_s": minimum_time_to_go_s})
+        ####
+
+    @classmethod
+    def skip(cls, *, maneuver_begin_time_to_go_s: float = 400.0, instance_id: str | None = None) -> SimpleAeroSegment:
+        """Create the source-shaped skip occurrence."""
+
+        return cls(kind="skip", instance_id=instance_id, parameters={"maneuver_begin_time_to_go_s": maneuver_begin_time_to_go_s})
+        ####
+
+    @classmethod
+    def slalom(
+        cls,
+        *,
+        start_range_to_go_m: float | None = None,
+        end_range_to_go_m: float = 200_000.0,
+        minimum_time_to_go_s: float = 60.0,
+        instance_id: str | None = None,
+    ) -> SimpleAeroSegment:
+        """Create the source-shaped slalom occurrence."""
+
+        return cls(
+            kind="slalom",
+            instance_id=instance_id,
+            parameters={
+                **({"start_range_to_go_m": start_range_to_go_m} if start_range_to_go_m is not None else {}),
+                "end_range_to_go_m": end_range_to_go_m,
+                "minimum_time_to_go_s": minimum_time_to_go_s,
+            },
+        )
+        ####
+
+    @classmethod
+    def weave(
+        cls,
+        *,
+        end_range_to_go_m: float | None = None,
+        minimum_time_to_go_s: float = 60.0,
+        instance_id: str | None = None,
+    ) -> SimpleAeroSegment:
+        """Create the source-shaped weave occurrence."""
+
+        return cls(
+            kind="weave",
+            instance_id=instance_id,
+            parameters={
+                **({"end_range_to_go_m": end_range_to_go_m} if end_range_to_go_m is not None else {}),
+                "minimum_time_to_go_s": minimum_time_to_go_s,
+            },
+        )
+        ####
+
+    @classmethod
+    def terminal_pronav(
+        cls,
+        *,
+        duration_s: float = 5.0,
+        capture_range_m: float = 25.0,
+        instance_id: str | None = None,
+    ) -> SimpleAeroSegment:
+        """Create the terminal proportional-navigation vocabulary occurrence."""
+
+        return cls(
+            kind="terminal_pronav",
+            instance_id=instance_id,
+            parameters={"duration_s": duration_s, "capture_range_m": capture_range_m},
+        )
+        ####
+
+
+class SimpleAeroMission(BaseModel):
+    """A complete ergonomic Simple Aero composition over the advertised tree.
+
+    ``operation_template_id`` selects the published batch-operation binding.
+    It does not rewrite or restrict ``segments``: the caller-authored sequence
+    remains the exact source sequence given to the fixed-L/D lowering.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    configuration_id: str = Field(default="simple-aero-mission", min_length=1)
+    launch: SimpleAeroLaunch = Field(default_factory=SimpleAeroLaunch)
+    endpoint: SimpleAeroEndpoint = Field(default_factory=SimpleAeroRangeBearingEndpoint)
+    endpoint_state: SimpleAeroEndpointState = Field(default_factory=SimpleAeroEndpointState)
+    surrogate: SimpleAeroSurrogate = Field(default_factory=SimpleAeroSurrogate)
+    checkpoints: SimpleAeroCheckpoints = Field(default_factory=SimpleAeroCheckpoints)
+    runtime: SimpleAeroRuntime = Field(default_factory=SimpleAeroRuntime)
+    segments: tuple[SimpleAeroSegment, ...]
+    operation_template_id: str = Field(default=SIMPLE_AERO_CUSTOM_COMPOSITION_ID, min_length=1)
+
+    @model_validator(mode="after")
+    def validate_mission(self) -> SimpleAeroMission:
+        if not self.configuration_id.strip():
+            raise ValueError("configuration_id must contain non-whitespace text")
+        if not 1 <= len(self.segments) <= 32:
+            raise ValueError("segments must contain between 1 and 32 occurrences")
+        instance_ids = tuple(item.instance_id for item in self.segments if item.instance_id is not None)
+        if len(instance_ids) != len(set(instance_ids)):
+            raise ValueError("segment instance_id values must be unique")
+        if not self.operation_template_id.strip():
+            raise ValueError("operation_template_id must contain non-whitespace text")
+        return self
+        ####
+
+    ####
+
+    @classmethod
+    def template(
+        cls,
+        mission_template_id: str,
+        *,
+        configuration_id: str | None = None,
+        launch: SimpleAeroLaunch | None = None,
+        endpoint: SimpleAeroEndpoint | None = None,
+        endpoint_state: SimpleAeroEndpointState | None = None,
+        surrogate: SimpleAeroSurrogate | None = None,
+        checkpoints: SimpleAeroCheckpoints | None = None,
+        runtime: SimpleAeroRuntime | None = None,
+    ) -> SimpleAeroMission:
+        """Materialize a published template as named segment occurrences.
+
+        The materialized occurrences intentionally leave their parameter maps
+        empty, so the portable schema remains the authority for defaults.
+        Replace an occurrence with a named ``SimpleAeroSegment`` constructor
+        when a template parameter needs to change.
+        """
+
+        return cls(
+            configuration_id=configuration_id or f"simple-aero-{mission_template_id}",
+            launch=launch or SimpleAeroLaunch(),
+            endpoint=endpoint or SimpleAeroRangeBearingEndpoint(),
+            endpoint_state=endpoint_state or SimpleAeroEndpointState(),
+            surrogate=surrogate or SimpleAeroSurrogate(),
+            checkpoints=checkpoints or SimpleAeroCheckpoints(),
+            runtime=runtime or SimpleAeroRuntime(),
+            segments=tuple(SimpleAeroSegment(kind=kind) for kind in _template_segment_ids(mission_template_id)),
+            operation_template_id=mission_template_id,
+        )
+        ####
+
+
+def build_simple_aero_configuration(
+    mission: SimpleAeroMission,
+    *,
+    schema: TrajectoryConfigurationSchema | None = None,
+) -> TrajectoryConfigurationInstance:
+    """Build the exact portable configuration tree for an ergonomic mission.
+
+    This is the inverse of an advertisement renderer, not a parallel mission
+    format. Every typed convenience field below maps to one published schema
+    node, preserving choice, optional, sequence, unit, and instance identity
+    semantics for generic API consumers.
+    """
+
+    if not isinstance(mission, SimpleAeroMission):
+        raise TypeError("mission must be a SimpleAeroMission")
+    resolved_schema = schema or simple_aero_configuration_schema()
+    if resolved_schema.model_id != SIMPLE_AERO_MODEL_ID:
+        raise ValueError(f"expected Simple Aero schema, received {resolved_schema.model_id!r}")
+    template_ids = {item.id for item in _segments(resolved_schema).templates} | {SIMPLE_AERO_CUSTOM_COMPOSITION_ID}
+    if mission.operation_template_id not in template_ids:
+        raise KeyError(f"unknown Simple Aero operation template {mission.operation_template_id!r}")
+    if isinstance(mission.endpoint, SimpleAeroRangeBearingEndpoint):
+        endpoint = ConfigurationChoiceValue(
+            selected="range_bearing",
+            value=ConfigurationGroupValue(
+                values={
+                    "mission.target_range": _simple_aero_parameter(mission.endpoint.target_range_m, "m"),
+                    "mission.target_bearing": _simple_aero_parameter(mission.endpoint.target_bearing_deg, "deg"),
+                }
+            ),
+        )
+    else:
+        endpoint = ConfigurationChoiceValue(
+            selected="geodetic_aimpoint",
+            value=ConfigurationGroupValue(
+                values={
+                    "aimpoint.latitude_deg": _simple_aero_parameter(mission.endpoint.latitude_deg, "deg"),
+                    "aimpoint.longitude_deg": _simple_aero_parameter(mission.endpoint.longitude_deg, "deg"),
+                }
+            ),
+        )
+    return TrajectoryConfigurationInstance(
+        configuration_id=mission.configuration_id,
+        model_id=SIMPLE_AERO_MODEL_ID,
+        model_version=resolved_schema.model_version,
+        schema_fingerprint=resolved_schema.fingerprint,
+        fidelity=_POINT_MASS,
+        realization_id="fixed_ld_point_mass",
+        mission_template_id=mission.operation_template_id,
+        root=ConfigurationGroupValue(
+            values={
+                "launch_state": ConfigurationGroupValue(
+                    values={
+                        "launch.latitude_deg": _simple_aero_parameter(mission.launch.latitude_deg, "deg"),
+                        "launch.longitude_deg": _simple_aero_parameter(mission.launch.longitude_deg, "deg"),
+                        "mission.initial_altitude": _simple_aero_parameter(mission.launch.altitude_m, "m"),
+                        "mission.initial_speed": _simple_aero_parameter(mission.launch.speed_m_s, "m/s"),
+                        "mission.pitch_over_angle": _simple_aero_parameter(mission.launch.pitch_over_angle_deg, "deg"),
+                        "mission.initial_heading_offset": _simple_aero_parameter(mission.launch.initial_heading_offset_deg, "deg"),
+                    }
+                ),
+                "endpoint": endpoint,
+                "endpoint_state": ConfigurationGroupValue(
+                    values={
+                        "mission.target_altitude": _simple_aero_parameter(mission.endpoint_state.altitude_m, "m"),
+                        "mission.target_speed": _simple_aero_parameter(mission.endpoint_state.speed_m_s, "m/s"),
+                        "mission.target_heading": _simple_aero_parameter(mission.endpoint_state.heading_deg, "deg"),
+                    }
+                ),
+                "vehicle_surrogate": ConfigurationGroupValue(
+                    values={
+                        "vehicle.id": _simple_aero_parameter(mission.surrogate.vehicle_id, None),
+                        "vehicle.mass.initial": _simple_aero_parameter(mission.surrogate.initial_mass_kg, "kg"),
+                        "vehicle.booster.thrust": _simple_aero_parameter(mission.surrogate.thrust_n, "N"),
+                        "vehicle.booster.mass_flow": _simple_aero_parameter(mission.surrogate.mass_flow_kg_s, "kg/s"),
+                        "vehicle.aero.drag_coefficient": _simple_aero_parameter(mission.surrogate.drag_coefficient, "dimensionless"),
+                        "vehicle.aero.lift_to_drag": _simple_aero_parameter(mission.surrogate.lift_to_drag, "dimensionless"),
+                    }
+                ),
+                "trajectory_checkpoints": ConfigurationGroupValue(
+                    values={
+                        "mission.burnout_speed": _simple_aero_parameter(mission.checkpoints.burnout_speed_m_s, "m/s"),
+                        "mission.apogee_altitude": _simple_aero_parameter(mission.checkpoints.apogee_altitude_m, "m"),
+                    }
+                ),
+                "segments": ConfigurationSequenceValue(
+                    items=tuple(_simple_aero_segment_value(segment, index) for index, segment in enumerate(mission.segments, start=1))
+                ),
+                "runtime": ConfigurationGroupValue(
+                    values={
+                        "runtime.time_step": _simple_aero_parameter(mission.runtime.time_step_s, "s"),
+                        "runtime.output_interval": _simple_aero_parameter(mission.runtime.output_interval_s, "s"),
+                        "earth_model": _simple_aero_parameter(mission.runtime.earth_model, None),
+                    }
+                ),
+            }
+        ),
+    )
+    ####
+
+
+def prepare_simple_aero_mission(
+    mission: SimpleAeroMission,
+    *,
+    schema: TrajectoryConfigurationSchema | None = None,
+) -> PreparedTrajectoryConfiguration:
+    """Build and validate an ergonomic mission without a provider wrapper."""
+
+    resolved_schema = schema or simple_aero_configuration_schema()
+    return validate_configuration_instance(
+        resolved_schema,
+        build_simple_aero_configuration(mission, schema=resolved_schema),
+    )
+    ####
+
+
+def _simple_aero_parameter(value: object, unit: str | None) -> ConfigurationParameterValue:
+    """Return one explicit canonical parameter leaf."""
+
+    return ConfigurationParameterValue(value=value, unit=unit)
+    ####
+
+
+def _simple_aero_segment_value(segment: SimpleAeroSegment, index: int) -> ConfigurationChoiceValue:
+    """Project one named convenience segment onto its exact choice subtree."""
+
+    values: dict[str, ConfigurationNodeValue] = {}
+    for parameter_id, value in segment.parameters.items():
+        unit = _SEGMENT_PARAMETER_UNITS[segment.kind][parameter_id]
+        parameter = _simple_aero_parameter(value, unit)
+        if (segment.kind, parameter_id) in _OPTIONAL_SEGMENT_PARAMETERS:
+            values[parameter_id] = ConfigurationOptionalValue(enabled=True, value=parameter)
+        else:
+            values[parameter_id] = parameter
+    return ConfigurationChoiceValue(
+        selected=segment.kind,
+        instance_id=segment.instance_id or f"{segment.kind}-{index:02d}",
+        value=ConfigurationGroupValue(values=values),
+    )
+    ####
 
 
 def simple_aero_configuration_schema() -> TrajectoryConfigurationSchema:
@@ -286,7 +955,7 @@ def simple_aero_model_metadata(schema: TrajectoryConfigurationSchema | None = No
     family = _simple_aero_family()
     resolved_schema = schema or simple_aero_configuration_schema()
     sequence = _segments(resolved_schema)
-    missions = tuple(_mission_metadata(template) for template in sequence.templates)
+    missions = (*(_mission_metadata(template) for template in sequence.templates), _custom_composition_metadata())
     fidelities = tuple(_simple_aero_fidelity(tier) for tier in CANONICAL_FIDELITY_TIERS)
     transitions = tuple(
         transition
@@ -384,10 +1053,7 @@ def simple_aero_model_metadata(schema: TrajectoryConfigurationSchema | None = No
             TrajectoryRealizationMetadata(
                 id="fixed_ld_point_mass",
                 label="Fixed-L/D Point-Mass",
-                description=(
-                    "Generated native point-mass realization for fixed-L/D baseline and source-shaped "
-                    "parameter-mapped maneuver templates."
-                ),
+                description=("Generated native point-mass realization for fixed-L/D baseline and source-shaped parameter-mapped maneuver templates."),
                 status="available",
                 dynamics_fidelities=("point_mass_3dof",),
                 input_realization="guidance_command",
@@ -491,7 +1157,7 @@ def _simple_aero_control_advertisement(
         for index, item in enumerate(family.controls, start=1)
     )
     mission_ids = tuple(item.id for item in missions)
-    segment_ids = {segment for mission in missions for segment in mission.segment_sequence}
+    segment_ids = {segment for mission in missions for segment in mission.advertised_segment_ids}
     intents = (
         TrajectoryControlIntentMetadata(
             id="bank",
@@ -512,7 +1178,7 @@ def _simple_aero_control_advertisement(
             description="Generated powered-ascent throttle intent.",
             resolution="provider_internal",
             segment_ids=("powered_ascent",),
-            mission_template_ids=tuple(item.id for item in missions if "powered_ascent" in item.segment_sequence),
+            mission_template_ids=tuple(item.id for item in missions if "powered_ascent" in item.advertised_segment_ids),
             channel_ids=tuple(item.id for item in channels if item.id == "command.throttle"),
             operations=("batch",),
             source_refs=("verification/simple_aero_segment_catalog.yaml",),
@@ -1026,10 +1692,7 @@ def build_simple_aero_template_configuration(
                 "vehicle_surrogate": ConfigurationGroupValue(values={"vehicle.mass.initial": ConfigurationParameterValue(value=1000.0, unit="kg")}),
                 "trajectory_checkpoints": ConfigurationGroupValue(values={"mission.burnout_speed": ConfigurationParameterValue(value=1200.0, unit="m/s")}),
                 "segments": ConfigurationSequenceValue(
-                    items=tuple(
-                        ConfigurationChoiceValue(selected=identifier, value=empty)
-                        for identifier in template.item_variants
-                    )
+                    items=tuple(ConfigurationChoiceValue(selected=identifier, value=empty) for identifier in template.item_variants)
                 ),
                 "runtime": empty,
             }
@@ -1628,6 +2291,17 @@ def _segments(schema: TrajectoryConfigurationSchema) -> ConfigurationSequenceSch
     ####
 
 
+def _template_segment_ids(mission_template_id: str) -> tuple[SimpleAeroSegmentKind, ...]:
+    """Return the declared source sequence for one published mission template."""
+
+    try:
+        template = next(item for item in _segments(simple_aero_configuration_schema()).templates if item.id == mission_template_id)
+    except StopIteration as error:
+        raise KeyError(f"unknown Simple Aero mission template {mission_template_id!r}") from error
+    return cast(tuple[SimpleAeroSegmentKind, ...], template.item_variants)
+    ####
+
+
 def _mission_metadata(template: ConfigurationSequenceTemplate) -> TrajectoryMissionTemplateMetadata:
     batch = TrajectoryMissionOperationMetadata(
         fidelity=_POINT_MASS,
@@ -1677,6 +2351,46 @@ def _mission_metadata(template: ConfigurationSequenceTemplate) -> TrajectoryMiss
             "Template order and parameter vocabulary execute through a bounded synthetic fixed-L/D point-mass lowering. "
             "Vehicle-specific aerodynamics, control response, terminal accuracy, optimization, and promotion evidence "
             "remain outside this workflow-level contract."
+        ),
+    )
+    ####
+
+
+def _custom_composition_metadata() -> TrajectoryMissionTemplateMetadata:
+    """Return the explicit batch binding for arbitrary schema-valid segment orders."""
+
+    baseline = _mission_metadata(
+        ConfigurationSequenceTemplate(
+            id="fixed_ld_baseline",
+            label="Fixed-L/D Baseline",
+            description="The four-phase sequence implemented by the reduced-order Simple Aero builder.",
+            item_variants=("powered_ascent", "ballistic_coast", "bank_maneuver", "terminal_pronav"),
+            compatible_fidelities=(_POINT_MASS,),
+        )
+    )
+    return TrajectoryMissionTemplateMetadata(
+        id=SIMPLE_AERO_CUSTOM_COMPOSITION_ID,
+        name="Custom Composition (Open Sequence)",
+        description=(
+            "Caller-authored sequence of one through 32 published Simple Aero segment occurrences. "
+            "This is an execution binding, not a reviewed source fixture template."
+        ),
+        status=baseline.status,
+        initialization_variants=baseline.initialization_variants,
+        open_segment_sequence=TrajectoryOpenSegmentSequenceMetadata(
+            configuration_node_id="segments",
+            allowed_segment_ids=_segment_names(),
+            minimum_items=1,
+            maximum_items=32,
+        ),
+        compatible_fidelities=baseline.compatible_fidelities,
+        operations=baseline.operations,
+        provenance=baseline.provenance,
+        claim_boundary=(
+            "Any schema-valid ordered source segment vocabulary lowers through the bounded synthetic fixed-L/D "
+            "point-mass mapping. The order is caller-authored rather than a reviewed source fixture, and vehicle "
+            "performance, control response, terminal accuracy, optimization, and promotion evidence remain outside "
+            "this workflow-level contract."
         ),
     )
     ####
@@ -1748,9 +2462,24 @@ def _label(identifier: str) -> str:
 
 __all__ = [
     "SIMPLE_AERO_MODEL_ID",
+    "SimpleAeroCheckpoints",
+    "SimpleAeroCutoffCondition",
+    "SimpleAeroEarthModel",
+    "SimpleAeroEndpoint",
+    "SimpleAeroEndpointState",
+    "SimpleAeroGeodeticAimpoint",
+    "SimpleAeroLaunch",
+    "SimpleAeroMission",
+    "SimpleAeroRangeBearingEndpoint",
+    "SimpleAeroRuntime",
+    "SimpleAeroSegment",
+    "SimpleAeroSegmentKind",
+    "SimpleAeroSurrogate",
+    "build_simple_aero_configuration",
     "build_simple_aero_example_configuration",
     "build_simple_aero_prepared_configuration",
     "build_simple_aero_template_configuration",
+    "prepare_simple_aero_mission",
     "simple_aero_configuration_schema",
     "simple_aero_model_metadata",
 ]

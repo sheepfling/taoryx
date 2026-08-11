@@ -138,6 +138,11 @@ composer can validate an interactive action before opening a plant. Discovery
 tests then compare that record byte-for-byte at the field level with every live
 session action schema.
 
+The channel's command lifecycle is declared separately from its mathematical
+value space. See [Control semantics and agent action spaces](control-agent-action-space.md)
+for absolute/rate/increment/event commands, held/momentary/latched/pulse
+behavior, numeric detents, and the Torch-friendly action-space projection.
+
 An internally generated command is discoverable but is not presented as an
 interactive action. Likewise, planned source effectors remain visible with no
 execution operation, and an uncontrolled realization cannot silently inherit

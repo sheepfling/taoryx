@@ -1,6 +1,6 @@
 # Mission Composition provider example
 
-This directory has four complementary Mission Composition walkthroughs.
+This directory has five complementary Mission Composition walkthroughs.
 
 `mission_composition_catalog.py` exercises the self-describing configuration
 contract for all nine canonical vehicle families and the Simple Aero workflow:
@@ -21,10 +21,21 @@ not dispatch an execution binding.
 
 The `simple_aero` schema demonstrates launch and endpoint choices, initial
 mass/boost/aero parameters, open per-occurrence segment composition, and named
-ballistic, phugoid, skip, slalom, and weave templates. Its model metadata
-distinguishes the runnable fixed-L/D baseline from maneuver templates that are
-currently fixture-ready but do not yet have a generic configuration-to-runtime
-adapter.
+ballistic, phugoid, skip, slalom, and weave templates. Every reviewed template
+and the separately advertised `Custom Composition (Open Sequence)` binding has
+a real generic configuration-to-fixed-L/D batch path. This remains a synthetic
+workflow demonstration, not a vehicle-performance or qualification claim.
+
+`mission_composition_simple_aero.py` is the ergonomic counterpart: it creates
+the full typed mission form, uses every source segment constructor once,
+validates the resulting portable configuration tree, and runs it through the
+same registry batch runner:
+
+```bash
+PYTHONPATH=src:packages/taoryx-daveml/src:packages/taoryx-simple-aero/src:packages/taoryx-reference-models/src:packages/taoryx-reachability/src \
+  python3 examples/trajectory_provider/mission_composition_simple_aero.py \
+  --output /tmp/mission-composition-simple-aero.json
+```
 
 `mission_composition_reference.py` is the runnable analytical provider walkthrough:
 
@@ -65,9 +76,12 @@ PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_contract
 `mission_composition_consumer_models.py` is the end-to-end smoke path for the
 three leading deterministic consumer fixtures: basic ballistic, two-leg
 waypoint, and the full-contract debug probe. It discovers the installed
-providers, authors the two reference configurations, revalidates each prepared
+providers, uses the reference provider's friendly SI launch and waypoint
+builders for the two analytical configurations, revalidates each prepared
 configuration through the common consumer seam, and emits all three standard
-responses:
+responses. The builder API is the recommended normal path for these two small
+fixtures; the generic configuration grammar remains available when a consumer
+needs to exercise the underlying tree directly:
 
 ```bash
 PYTHONPATH=src:packages/taoryx-daveml/src:packages/taoryx-simple-aero/src:packages/taoryx-reference-models/src:packages/taoryx-reachability/src \

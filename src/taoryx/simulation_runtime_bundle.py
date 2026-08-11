@@ -14,7 +14,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-from taoryx.outputs import DynamicsKind, RunArtifact, TelemetryChannel, VehicleKind, VehicleTelemetry
+from taoryx.outputs import DynamicsKind, RunArtifact, RunVisualizationMetadata, TelemetryChannel, VehicleKind, VehicleTelemetry
 from taoryx.runtime.runner import run_files
 from taoryx.simulation_runtime_catalog import ROOT, SimulationRuntimeScenario
 from taoryx.simulation_runtime_contracts import SimulationRuntimeStatus
@@ -297,11 +297,13 @@ def write_composition_run_artifact(output_dir: str | Path, composition: object) 
             )
         },
         scenario_identity=str(getattr(composition, "identity_sha256", "")) or None,
-        visualization={
-            "source": "SimulationRuntimeCompositionTruthTelemetry",
-            "schema_version": 1,
-            "claim_boundary": "Generic scalar projection of family-owned truth telemetry; family-native artifacts remain authoritative.",
-        },
+        visualization=RunVisualizationMetadata.model_validate(
+            {
+                "source": "SimulationRuntimeCompositionTruthTelemetry",
+                "schema_version": 1,
+                "claim_boundary": "Generic scalar projection of family-owned truth telemetry; family-native artifacts remain authoritative.",
+            }
+        ),
     )
     return artifact.write_json(destination / "run-artifact.json")
     ####

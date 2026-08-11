@@ -28,7 +28,7 @@
       "plant_backed_linearization": false,
       "qualification_status": "screen_only",
       "report": {
-        "best_profile_id": "b747-gentle",
+        "best_profile_id": "b747-aggressive",
         "candidates": [
           {
             "closed_loop_eigenvalues": [
@@ -386,7 +386,7 @@
       "plant_backed_linearization": false,
       "qualification_status": "screen_only",
       "report": {
-        "best_profile_id": "hummingbird-gentle",
+        "best_profile_id": "hummingbird-aggressive",
         "candidates": [
           {
             "closed_loop_eigenvalues": [
@@ -765,7 +765,7 @@
       "plant_backed_linearization": false,
       "qualification_status": "screen_only",
       "report": {
-        "best_profile_id": "skywalker_x8-gentle",
+        "best_profile_id": "skywalker_x8-aggressive",
         "candidates": [
           {
             "closed_loop_eigenvalues": [
@@ -1111,7 +1111,7 @@
       "plant_backed_linearization": false,
       "qualification_status": "screen_only",
       "report": {
-        "best_profile_id": "x15-gentle",
+        "best_profile_id": "x15-aggressive",
         "candidates": [
           {
             "closed_loop_eigenvalues": [

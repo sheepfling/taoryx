@@ -39,7 +39,12 @@ class ControlAutomationDeclaration:
     offset_free_outputs: tuple[str, ...] = ()
     preferred_method: AutomaticControllerMethod = "auto"
     profile_grid_id_prefix: str | None = None
+    state_weight_multipliers: tuple[float, ...] = (0.25, 1.0, 4.0)
+    control_effort_multipliers: tuple[float, ...] = (2.0, 1.0, 0.25)
+    state_base_weights: tuple[float, ...] = ()
+    control_base_weights: tuple[float, ...] = ()
     integral_weight_multiplier: float = 8.0
+    integral_base_weights: tuple[float, ...] = ()
     integral_weight_multipliers: tuple[float, ...] = (1.0,)
     maximum_omitted_state_coupling: float = 1.0e-8
     linearization_options: Mapping[str, float | str] = field(default_factory=dict)
@@ -74,8 +79,31 @@ class ControlAutomationDeclaration:
             raise ValueError("an LQI declaration requires offset-free outputs")
         if self.profile_grid_id_prefix is not None and not self.profile_grid_id_prefix.strip():
             raise ValueError("control-automation profile-grid ID prefixes must not be empty")
+        for label, weight_values, expected_count in (
+            ("state weight multipliers", self.state_weight_multipliers, None),
+            ("control effort multipliers", self.control_effort_multipliers, None),
+            ("state base weights", self.state_base_weights, len(design_states)),
+            ("control base weights", self.control_base_weights, len(design_controls)),
+        ):
+            if not weight_values:
+                if expected_count is not None:
+                    continue
+                raise ValueError(f"control-automation {label} must not be empty")
+            if any(not math.isfinite(value) or value <= 0.0 for value in weight_values):
+                raise ValueError(f"control-automation {label} must be finite and positive")
+            if len(weight_values) != len(set(weight_values)) and expected_count is None:
+                raise ValueError(f"control-automation {label} must not contain duplicates")
+            if expected_count is not None and len(weight_values) != expected_count:
+                raise ValueError(f"control-automation {label} must match the selected coordinate count")
         if not math.isfinite(self.integral_weight_multiplier) or self.integral_weight_multiplier <= 0.0:
             raise ValueError("control-automation integral weight multiplier must be finite and positive")
+        if self.integral_base_weights:
+            if self.controller_method != "lqi":
+                raise ValueError("LQR-only control automation cannot declare integral base weights")
+            if len(self.integral_base_weights) != len(self.offset_free_outputs):
+                raise ValueError("control-automation integral base weights must match the selected LQI outputs")
+            if any(not math.isfinite(value) or value <= 0.0 for value in self.integral_base_weights):
+                raise ValueError("control-automation integral base weights must be finite and positive")
         if (
             not self.integral_weight_multipliers
             or any(not math.isfinite(value) or value <= 0.0 for value in self.integral_weight_multipliers)
@@ -122,13 +150,23 @@ class ControlAutomationDeclaration:
                     ),
                     profile_grid=NormalizedLqrProfileGrid(
                         self.profile_grid_id_prefix or f"{self.id}.{method}",
+                        state_weight_multipliers=self.state_weight_multipliers,
+                        control_effort_multipliers=self.control_effort_multipliers,
                         integral_weight_multipliers=self.integral_weight_multipliers,
+                        state_base_weights=self.state_base_weights,
+                        control_base_weights=self.control_base_weights,
                     ),
                     design_state_names=states,
                     design_control_names=controls,
                     controller_method=method,
                     integral_output_names=self.offset_free_outputs if method == "lqi" else (),
-                    integral_q_diagonal=(tuple(self.integral_weight_multiplier for _ in self.offset_free_outputs) if method == "lqi" else ()),
+                    integral_q_diagonal=(
+                        self.integral_base_weights
+                        if method == "lqi" and self.integral_base_weights
+                        else tuple(self.integral_weight_multiplier for _ in self.offset_free_outputs)
+                        if method == "lqi"
+                        else ()
+                    ),
                     maximum_omitted_state_coupling=self.maximum_omitted_state_coupling,
                     linearization_options=dict(self.linearization_options),
                 ),
@@ -156,8 +194,13 @@ class ControlAutomationDeclaration:
             "offset_free_outputs": list(self.offset_free_outputs),
             "preferred_method": self.preferred_method,
             "profile_grid_id_prefix": self.profile_grid_id_prefix,
+            "state_weight_multipliers": list(self.state_weight_multipliers),
+            "control_effort_multipliers": list(self.control_effort_multipliers),
+            "state_base_weights": list(self.state_base_weights),
+            "control_base_weights": list(self.control_base_weights),
             "resolved_method": self.controller_method,
             "integral_weight_multiplier": self.integral_weight_multiplier,
+            "integral_base_weights": list(self.integral_base_weights),
             "integral_weight_multipliers": list(self.integral_weight_multipliers),
             "maximum_omitted_state_coupling": self.maximum_omitted_state_coupling,
             "linearization_options": dict(self.linearization_options),

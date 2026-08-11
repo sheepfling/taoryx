@@ -9,6 +9,7 @@ from types import SimpleNamespace
 import pytest
 
 import taoryx.composition_result_catalog as result_catalog
+from taoryx.claim_bound_evidence import bind_release_evidence
 from taoryx.composition_control_trace import BatchControlSample, build_committed_control_trace
 from taoryx.composition_result_catalog import (
     build_composition_release_catalog,
@@ -109,9 +110,11 @@ def test_release_catalog_hashes_valid_packets_without_fabricating_missing_releas
     assert coverage["convergence_report.json"] == {"present_packet_count": 0, "missing_packet_count": 1}
     packet_evidence = manifest["packets"][0]["release_evidence"]
     assert packet_evidence["robustness_report.json"] == {
-        "status": "verified",
+        "status": "unbound",
         "format": "json",
         "reported_status": "not_applicable",
+        "contract_status": "legacy_unbound",
+        "claim_boundary": "fixture has no robustness campaign",
     }
     assert packet_evidence["reproduction.txt"]["status"] == "verified"
     assert validate_composition_release_catalog(tmp_path, manifest) == ()
@@ -127,6 +130,66 @@ def test_release_catalog_hashes_valid_packets_without_fabricating_missing_releas
     assert validate_composition_release_catalog(tmp_path, manifest) == (
         "release catalog artifact SHA-256 ledger disagrees with current validated packets",
     )
+    ####
+
+
+def test_release_catalog_binds_current_sidecar_to_the_exact_compiled_composition(tmp_path: Path) -> None:
+    """Typed evidence cannot be copied between otherwise valid compositions."""
+
+    packet = tmp_path / "x8"
+    packet.mkdir()
+    composition = compile_vehicle_composition(
+        load_vehicle_composition_request(ROOT / "examples/vehicle_composition/x8_racetrack_capability_3dof_compose.yaml")
+    )
+    evaluation = TrajectoryEvaluation(
+        scenario_id=composition.id,
+        scenario_contract_sha256=composition.identity_sha256,
+        validity="valid",
+        qualification="unqualified",
+        feasibility="feasible",
+        outcome="completed",
+        claim_boundary="typed-sidecar fixture",
+    )
+    (packet / "evaluation.json").write_text(json.dumps(evaluation.as_dict()), encoding="utf-8")
+    (packet / "composition.json").write_text(
+        json.dumps(composition.model_dump(mode="json", by_alias=True)), encoding="utf-8"
+    )
+    (packet / "robustness_report.json").write_text(
+        json.dumps(
+            bind_release_evidence(
+                {
+                    "schema": "taoryx.fixture-robustness/v1alpha1",
+                    "status": "pass",
+                    "pass": True,
+                    "claim_boundary": "Fixture-only constant-offset evidence.",
+                    "cases": [{"id": "nominal", "status": "pass"}],
+                },
+                kind="robustness",
+                composition=composition,
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    manifest = build_composition_release_catalog(tmp_path)
+
+    evidence = manifest["packets"][0]["release_evidence"]["robustness_report.json"]
+    assert evidence["contract_status"] == "typed_bound"
+    assert evidence["composition_id"] == composition.id
+    assert evidence["composition_identity_sha256"] == composition.identity_sha256
+    assert evidence["outcome_passed"] is True
+
+    payload = json.loads((packet / "robustness_report.json").read_text(encoding="utf-8"))
+    payload["release_evidence_subject"]["composition_identity_sha256"] = "0" * 64
+    (packet / "robustness_report.json").write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="release evidence subject disagrees"):
+        build_composition_release_catalog(tmp_path)
+
+    payload["release_evidence_subject"]["composition_identity_sha256"] = composition.identity_sha256
+    payload["release_evidence_outcome"] = {"status": "partial", "passed": None}
+    (packet / "robustness_report.json").write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="outcome status must equal top-level status"):
+        build_composition_release_catalog(tmp_path)
     ####
 
 

@@ -8,8 +8,11 @@ It is an interface witness, not a historical TAOS or qualified vehicle claim.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .analytical_mission_composition import (
     ExampleMissionCompositionProvider,
@@ -22,6 +25,10 @@ from .analytical_mission_composition import (
     MissionCompositionVehicle,
 )
 from .configuration_contract import (
+    ConfigurationChoiceValue,
+    ConfigurationGroupValue,
+    ConfigurationParameterValue,
+    ConfigurationSequenceValue,
     PreparedTrajectoryConfiguration,
     TrajectoryConfigurationInstance,
     TrajectoryConfigurationSchema,
@@ -48,6 +55,119 @@ from .execution_contract import (
 
 _PROVIDER_ID = "taoryx.reference.mission-composition"
 _PROVIDER_VERSION = "1.0.0"
+
+_BALLISTIC_MODEL_ID = "reference_ballistic_3dof"
+_WAYPOINT_MODEL_ID = "reference_constant_velocity_waypoint_3dof"
+
+
+class ReferenceBallisticLaunch(BaseModel):
+    """Friendly SI launch state for the analytical ballistic fixture.
+
+    ``heading_deg`` accepts any finite bearing and is stored in the canonical
+    interval ``[0, 360)``.  This keeps the convenience API friendlier than the
+    underlying portable configuration grammar while still authoring a
+    canonical configuration tree.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    north_m: float = 0.0
+    east_m: float = 0.0
+    altitude_m: float = Field(ge=0.0)
+    speed_m_s: float = Field(gt=0.001)
+    heading_deg: float
+    flight_path_angle_deg: float = Field(default=0.0, ge=-89.0, le=89.0)
+
+    @model_validator(mode="after")
+    def validate_launch(self) -> ReferenceBallisticLaunch:
+        _validate_finite_state_values(
+            north_m=self.north_m,
+            east_m=self.east_m,
+            altitude_m=self.altitude_m,
+            speed_m_s=self.speed_m_s,
+            heading_deg=self.heading_deg,
+            flight_path_angle_deg=self.flight_path_angle_deg,
+        )
+        object.__setattr__(self, "heading_deg", self.heading_deg % 360.0)
+        return self
+        ####
+
+    ####
+
+
+class ReferenceWaypointCourseStart(BaseModel):
+    """Friendly SI initial state for the analytical waypoint-course fixture."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    north_m: float = 0.0
+    east_m: float = 0.0
+    altitude_m: float = Field(ge=0.0)
+    speed_m_s: float = Field(gt=0.001)
+    heading_deg: float
+
+    @model_validator(mode="after")
+    def validate_initial_state(self) -> ReferenceWaypointCourseStart:
+        _validate_finite_state_values(
+            north_m=self.north_m,
+            east_m=self.east_m,
+            altitude_m=self.altitude_m,
+            speed_m_s=self.speed_m_s,
+            heading_deg=self.heading_deg,
+        )
+        object.__setattr__(self, "heading_deg", self.heading_deg % 360.0)
+        return self
+        ####
+
+    ####
+
+
+class ReferenceWaypoint(BaseModel):
+    """One route waypoint for the analytical constant-velocity fixture.
+
+    An omitted ``duration_s`` asks the builder to supply the direct
+    point-to-point travel time at the course's configured cruise speed.  The
+    result remains a normal portable sequence of ``waypoint_leg`` nodes.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    north_m: float
+    east_m: float
+    altitude_m: float = Field(ge=0.0)
+    arrival_tolerance_m: float = Field(default=25.0, ge=0.1)
+    duration_s: float | None = Field(default=None, gt=0.0)
+    instance_id: str | None = Field(default=None, min_length=1)
+
+    @model_validator(mode="after")
+    def validate_waypoint(self) -> ReferenceWaypoint:
+        for name, value in {
+            "north_m": self.north_m,
+            "east_m": self.east_m,
+            "altitude_m": self.altitude_m,
+            "arrival_tolerance_m": self.arrival_tolerance_m,
+        }.items():
+            _require_finite(value, name)
+        if self.duration_s is not None:
+            _require_finite(self.duration_s, "duration_s")
+        if self.instance_id is not None and not self.instance_id.strip():
+            raise ValueError("instance_id must contain non-whitespace text")
+        return self
+        ####
+
+    ####
+
+
+def _require_finite(value: float, name: str) -> None:
+    if not math.isfinite(value):
+        raise ValueError(f"{name} must be finite")
+    ####
+
+
+def _validate_finite_state_values(**values: float) -> None:
+    for name, value in values.items():
+        _require_finite(value, name)
+    ####
 
 
 class ReferenceMissionCompositionProvider:
@@ -120,6 +240,181 @@ class ReferenceMissionCompositionProvider:
         return self._analytical.validate_configuration(configuration)
         ####
 
+    def build_ballistic_configuration(
+        self,
+        launch: ReferenceBallisticLaunch,
+        coast_durations_s: float | Sequence[float],
+        *,
+        configuration_id: str = "reference-ballistic",
+    ) -> TrajectoryConfigurationInstance:
+        """Build a canonical, repeatable ballistic-coast composition.
+
+        All inputs use SI units.  ``coast_durations_s`` accepts one duration or
+        an ordered sequence, so the common single- and multi-coast cases do
+        not require callers to construct nested ``Group``/``Choice`` values.
+        """
+
+        durations = _positive_durations(coast_durations_s, field="coast_durations_s")
+        initialization = ConfigurationChoiceValue(
+            selected="launch_state",
+            value=ConfigurationGroupValue(
+                values={
+                    "north_m": ConfigurationParameterValue(value=launch.north_m, unit="m"),
+                    "east_m": ConfigurationParameterValue(value=launch.east_m, unit="m"),
+                    "altitude_m": ConfigurationParameterValue(value=launch.altitude_m, unit="m"),
+                    "speed_m_s": ConfigurationParameterValue(value=launch.speed_m_s, unit="m/s"),
+                    "heading_deg": ConfigurationParameterValue(value=launch.heading_deg, unit="deg"),
+                    "flight_path_angle_deg": ConfigurationParameterValue(value=launch.flight_path_angle_deg, unit="deg"),
+                }
+            ),
+        )
+        segments = ConfigurationSequenceValue(
+            items=tuple(
+                ConfigurationChoiceValue(
+                    selected="ballistic_coast",
+                    instance_id=f"coast-{index:02d}",
+                    value=ConfigurationGroupValue(
+                        values={"duration_s": ConfigurationParameterValue(value=duration_s, unit="s")}
+                    ),
+                )
+                for index, duration_s in enumerate(durations, start=1)
+            )
+        )
+        return self._configuration(
+            model_id=_BALLISTIC_MODEL_ID,
+            configuration_id=configuration_id,
+            initialization=initialization,
+            segments=segments,
+        )
+        ####
+
+    def prepare_ballistic(
+        self,
+        launch: ReferenceBallisticLaunch,
+        coast_durations_s: float | Sequence[float],
+        *,
+        configuration_id: str = "reference-ballistic",
+    ) -> PreparedTrajectoryConfiguration:
+        """Build and validate a friendly ballistic composition in one call."""
+
+        return self.validate_configuration(
+            self.build_ballistic_configuration(
+                launch,
+                coast_durations_s,
+                configuration_id=configuration_id,
+            )
+        )
+        ####
+
+    def build_waypoint_course_configuration(
+        self,
+        initial: ReferenceWaypointCourseStart,
+        waypoints: Sequence[ReferenceWaypoint],
+        *,
+        configuration_id: str = "reference-waypoint-course",
+    ) -> TrajectoryConfigurationInstance:
+        """Build a straight-line, constant-cruise-speed waypoint course.
+
+        Omitted leg durations are derived from the current planned position and
+        the configured cruise speed.  An explicitly timed short leg therefore
+        changes the starting point used to derive the following automatic leg.
+        This is a deterministic fixture convenience, not a turn-performance or
+        guidance-performance prediction.
+        """
+
+        if not isinstance(waypoints, Sequence) or isinstance(waypoints, str | bytes):
+            raise TypeError("waypoints must be an ordered sequence of ReferenceWaypoint values")
+        if not waypoints:
+            raise ValueError("waypoints must contain at least one waypoint")
+        initial_values = ConfigurationChoiceValue(
+            selected="initial_state",
+            value=ConfigurationGroupValue(
+                values={
+                    "north_m": ConfigurationParameterValue(value=initial.north_m, unit="m"),
+                    "east_m": ConfigurationParameterValue(value=initial.east_m, unit="m"),
+                    "altitude_m": ConfigurationParameterValue(value=initial.altitude_m, unit="m"),
+                    "speed_m_s": ConfigurationParameterValue(value=initial.speed_m_s, unit="m/s"),
+                    "heading_deg": ConfigurationParameterValue(value=initial.heading_deg, unit="deg"),
+                }
+            ),
+        )
+        planned_position = (initial.north_m, initial.east_m, initial.altitude_m)
+        segment_items: list[ConfigurationChoiceValue] = []
+        for index, waypoint in enumerate(waypoints, start=1):
+            if not isinstance(waypoint, ReferenceWaypoint):
+                raise TypeError("waypoints must contain only ReferenceWaypoint values")
+            target_position = (waypoint.north_m, waypoint.east_m, waypoint.altitude_m)
+            duration_s = waypoint.duration_s
+            if duration_s is None:
+                duration_s = _direct_leg_duration(planned_position, target_position, initial.speed_m_s)
+            segment_items.append(
+                ConfigurationChoiceValue(
+                    selected="waypoint_leg",
+                    instance_id=waypoint.instance_id or f"waypoint-{index:02d}",
+                    value=ConfigurationGroupValue(
+                        values={
+                            "duration_s": ConfigurationParameterValue(value=duration_s, unit="s"),
+                            "waypoint_north_m": ConfigurationParameterValue(value=waypoint.north_m, unit="m"),
+                            "waypoint_east_m": ConfigurationParameterValue(value=waypoint.east_m, unit="m"),
+                            "waypoint_altitude_m": ConfigurationParameterValue(value=waypoint.altitude_m, unit="m"),
+                            "arrival_tolerance_m": ConfigurationParameterValue(value=waypoint.arrival_tolerance_m, unit="m"),
+                        }
+                    ),
+                )
+            )
+            planned_position = _planned_position_after_leg(
+                planned_position,
+                target_position,
+                initial.speed_m_s,
+                duration_s,
+            )
+        return self._configuration(
+            model_id=_WAYPOINT_MODEL_ID,
+            configuration_id=configuration_id,
+            initialization=initial_values,
+            segments=ConfigurationSequenceValue(items=tuple(segment_items)),
+        )
+        ####
+
+    def prepare_waypoint_course(
+        self,
+        initial: ReferenceWaypointCourseStart,
+        waypoints: Sequence[ReferenceWaypoint],
+        *,
+        configuration_id: str = "reference-waypoint-course",
+    ) -> PreparedTrajectoryConfiguration:
+        """Build and validate a friendly waypoint-course composition in one call."""
+
+        return self.validate_configuration(
+            self.build_waypoint_course_configuration(
+                initial,
+                waypoints,
+                configuration_id=configuration_id,
+            )
+        )
+        ####
+
+    def _configuration(
+        self,
+        *,
+        model_id: str,
+        configuration_id: str,
+        initialization: ConfigurationChoiceValue,
+        segments: ConfigurationSequenceValue,
+    ) -> TrajectoryConfigurationInstance:
+        schema = self.get_model_schema(model_id)
+        return TrajectoryConfigurationInstance(
+            configuration_id=configuration_id,
+            model_id=model_id,
+            model_version=schema.model_version,
+            schema_fingerprint=schema.fingerprint,
+            fidelity="point_mass_3dof",
+            realization_id="analytical_point_mass",
+            mission_template_id=f"{model_id}_repeatable_sequence_v1",
+            root=ConfigurationGroupValue(values={"initialization": initialization, "segments": segments}),
+        )
+        ####
+
     def build_runner(self) -> MissionCompositionRunnerRegistry:
         """Return a common runner with both advertised executors registered."""
 
@@ -172,10 +467,11 @@ class ReferenceMissionCompositionProvider:
         for index, item in enumerate(segment_values, start=1):
             segment_id, values = _choice(item, path=f"/prepared_configuration/resolved/segments/{index - 1}")
             descriptor = vehicle.segment(segment_id)
+            instance_id = item.get("instance_id") if isinstance(item, Mapping) else None
             segments.append(
                 MissionCompositionSegmentRequest(
                     id=segment_id,
-                    instance_id=f"{index:02d}-{segment_id}",
+                    instance_id=instance_id if isinstance(instance_id, str) else f"{index:02d}-{segment_id}",
                     parameters=_parameter_values(
                         descriptor.parameters,
                         values,
@@ -310,6 +606,52 @@ class ReferenceMissionCompositionProvider:
         )
         ####
 
+    ####
+
+
+def _positive_durations(value: float | Sequence[float], *, field: str) -> tuple[float, ...]:
+    if isinstance(value, bool):
+        raise TypeError(f"{field} must be a positive duration or sequence of positive durations")
+    durations: tuple[float, ...]
+    if isinstance(value, int | float):
+        durations = (float(value),)
+    elif isinstance(value, Sequence) and not isinstance(value, str | bytes):
+        durations = tuple(float(item) for item in value)
+    else:
+        raise TypeError(f"{field} must be a positive duration or sequence of positive durations")
+    if not durations:
+        raise ValueError(f"{field} must contain at least one duration")
+    for duration_s in durations:
+        if not math.isfinite(duration_s) or duration_s <= 0.0:
+            raise ValueError(f"{field} must contain only finite positive durations")
+    return durations
+    ####
+
+
+def _direct_leg_duration(
+    origin: tuple[float, float, float],
+    target: tuple[float, float, float],
+    speed_m_s: float,
+) -> float:
+    return max(math.dist(origin, target) / speed_m_s, 0.001)
+    ####
+
+
+def _planned_position_after_leg(
+    origin: tuple[float, float, float],
+    target: tuple[float, float, float],
+    speed_m_s: float,
+    duration_s: float,
+) -> tuple[float, float, float]:
+    distance = math.dist(origin, target)
+    if distance <= 1.0e-12:
+        return target
+    fraction = min(speed_m_s * duration_s / distance, 1.0)
+    return (
+        origin[0] + (target[0] - origin[0]) * fraction,
+        origin[1] + (target[1] - origin[1]) * fraction,
+        origin[2] + (target[2] - origin[2]) * fraction,
+    )
     ####
 
 

@@ -50,7 +50,7 @@ def test_powered_fixed_wing_racetrack_uses_one_declared_capability_adapter() -> 
     assert capability_advertisement["selection"]["composition_id"] == composition.id
     assert capability_advertisement["interface"]["fingerprint_sha256"]
     assert capability_advertisement["family_owned"] == estimate.manifest["capability"]
-    assert preflight.as_dict()["capability_estimate"] == capability_evidence
+    assert preflight.as_dict()["capability_estimate"] == capability_evidence.as_dict()
     assert declared_mission_capability_adapter(
         composition.family_id,
         composition.mission,

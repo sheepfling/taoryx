@@ -19,6 +19,15 @@ The contracts live in `taoryx.control`:
 - `SegmentSchedule` and `SegmentController` own lifecycle resets and segment
   transitions.
 
+The provider-neutral `ControlSchema` below remains the numeric authority
+arbiter used by the legacy/runtime path. The public Mission Composition
+advertisement extends that vocabulary with typed value domains, event and
+detent controls, momentary/latched/pulse lifecycle semantics, and a
+framework-neutral RL action-space projection. Keep those command semantics
+when adapting a Mission Composition channel into this numeric arbiter; do not
+infer them from a UI widget or from units alone. See
+[control-agent-action-space.md](control-agent-action-space.md).
+
 ## Family adapters
 
 `taoryx.control_adapters` supplies the first adapters:

@@ -18,6 +18,7 @@ from pathlib import Path
 
 import numpy as np
 
+from .claim_bound_evidence import bind_release_evidence
 from .composition_control_trace import BatchControlSample, build_committed_control_trace, control_trace_summary
 from .composition_evaluation import build_composition_trajectory_evaluation
 from .composition_graph_evidence import unobserved_mission_graph_execution
@@ -33,7 +34,14 @@ from .hl20_adapter import (
 )
 from .hl20_controls import HL20_SURFACE_NAMES
 from .mission_capability import MissionCapabilityEstimate, estimate_mission_capability
-from .physical_lqr import PhysicalWrenchLqiValidation, validate_nonlinear_wrench_lqi
+from .physical_lqr import (
+    PhysicalWrenchLqiDesign,
+    PhysicalWrenchLqiValidation,
+    apply_tuning_context_to_physical_wrench_lqi_design,
+    validate_nonlinear_wrench_lqi,
+)
+from .trim import TrimResult
+from .tuning_application import TuningApplicationContext
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import (
     ExecutionPreflightCheck,
@@ -47,8 +55,9 @@ _MISSION_ID = "hl20_source_surface_attitude_rate_lqi_screen_v1"
 _SEGMENT_ID = "source_surface_attitude_rate_lqi_recovery_screen"
 _ADAPTER_ID = "taoryx.hl20_source_surface_attitude_rate_lqi_screen.capability.v1"
 _DT_S = 0.01
-_DURATION_S = 2.0
+_DURATION_S = 8.0
 _RECOVERY_LIMIT = 0.20
+_MATCHED_PITCH_WRENCH_BIAS_FRACTION = 0.05
 _STATE_NAMES = HL20_SURFACE_LOCAL_STATE_NAMES
 
 
@@ -90,6 +99,14 @@ class HL20LocalPhysicalSurfaceLqiScreenPlan:
                 "state_scope": list(_STATE_NAMES),
             },
             "source_pitch_trim_fragment": {"status": "verified", "scope": "scalar_pitch_coefficient_only"},
+            "persistent_disturbance_screen": {
+                "id": "hl20-local-lqi-matched-pitch-wrench-offset",
+                "kind": "constant_offset",
+                "input": "external_pitch_moment_bias_nm",
+                "body_moment_axis": "moment_y_nm",
+                "fraction_of_declared_pitch_wrench_scale": _MATCHED_PITCH_WRENCH_BIAS_FRACTION,
+                "artifact_filename": "robustness_report.json",
+            },
             "full_state_trim": {
                 "status": "not_available",
                 "reason": "the retained source binding fixes translation and has only a scalar pitch-trim fragment, not a gravity/force/attitude/full-glide equilibrium",
@@ -186,6 +203,9 @@ class HL20LocalPhysicalSurfaceLqiScreenCapabilityAdapter:
         trim = plant.trim({}, {})
         design = build_hl20_source_surface_physical_lqi_design()
         manifest = plan.manifest()
+        persistent_disturbance_screen = manifest.get("persistent_disturbance_screen")
+        if not isinstance(persistent_disturbance_screen, Mapping):
+            raise ValueError("HL-20 local physical LQI plan has no typed persistent-disturbance screen")
         manifest["capability"] = {
             "control_realization": "source_surface_physical_wrench_lqi_allocation",
             "participating_nonlinear_source_load_evaluation": True,
@@ -200,7 +220,18 @@ class HL20LocalPhysicalSurfaceLqiScreenCapabilityAdapter:
             "controlled_wrench_axes": list(design.projection.wrench_names),
             "local_moment_balance_trim": {"status": "verified" if trim.success else "failed", "max_residual_rad_s2": trim.max_residual, "controls_deg": dict(trim.controls)},
             "full_state_trim": plan.manifest()["full_state_trim"],
-            "controller_automation": {"campaign_id": "hl20-source-surface-local-lqi-v1", "availability": "available_through_model_tune", "method": "lqi", "state_scope": list(design.projection.state_names)},
+            "controller_automation": {
+                "campaign_id": "hl20-source-surface-local-lqi-v1",
+                "availability": "available_through_model_tune",
+                "method": "lqi",
+                "state_scope": list(design.projection.state_names),
+                "physical_wrench_profile": {
+                    "integral_q_diagonal": list(design.integral_q_diagonal),
+                    "screen_duration_s": plan.duration_s,
+                },
+            },
+            "persistent_disturbance_status": "available_as_declared_matched_external_pitch_moment_screen",
+            "persistent_disturbance_screen": dict(persistent_disturbance_screen),
             "navigation_guidance": False,
         }
         return MissionCapabilityEstimate(
@@ -211,7 +242,7 @@ class HL20LocalPhysicalSurfaceLqiScreenCapabilityAdapter:
             feasibility="likely_feasible",
             diagnostics=(
                 "a Mach-1 source-fragment moment balance, derivative-consistent LQI design, bounded seven-surface allocation, and nonlinear fixed-fixture recovery are available",
-                "full-state trim, translation, glide guidance, navigation, arrival behavior, robustness, and flight qualification remain separate gates",
+                "a three-case matched external pitch-moment screen is emitted with each batch; full-state trim, translation, glide guidance, navigation, arrival behavior, and flight qualification remain separate gates",
             ),
             manifest=manifest,
             plan=plan,
@@ -261,6 +292,8 @@ def execute_hl20_local_physical_surface_lqi_screen(
     composition: CompiledVehicleComposition,
     output_dir: str | Path,
     max_steps: int | None = None,
+    *,
+    tuning_context: TuningApplicationContext | None = None,
 ) -> HL20LocalPhysicalSurfaceLqiScreenExecution:
     """Run the local LQI demand through actual bounded seven-surface allocation."""
 
@@ -279,8 +312,10 @@ def execute_hl20_local_physical_surface_lqi_screen(
     if not trim.success:
         raise RuntimeError(f"HL-20 source-surface moment-balance trim failed: {trim.as_dict()}")
     design = build_hl20_source_surface_physical_lqi_design()
-    initial_state = dict(trim.state)
-    initial_state.update({"roll_error_rad": 0.005, "pitch_error_rad": -0.002, "yaw_error_rad": 0.004})
+    tuning_binding = None
+    if tuning_context is not None:
+        design, tuning_binding = apply_tuning_context_to_physical_wrench_lqi_design(design, tuning_context)
+    initial_state = _initial_state(trim)
     validation = validate_nonlinear_wrench_lqi(
         plant,
         trim,
@@ -292,6 +327,14 @@ def execute_hl20_local_physical_surface_lqi_screen(
         integral_upper={name: 0.5 for name in design.result.output_names},
     )
     assessment = _assess(validation)
+    robustness_report = _matched_pitch_wrench_offset_report(
+        plant,
+        trim,
+        design,
+        plan,
+        nominal_validation=validation,
+        nominal_assessment=assessment,
+    )
     rows = _rows(validation, plant)
     runtime: dict[str, object] = {
         "adapter_id": "taoryx.lifting_body.daveml.v1",
@@ -313,6 +356,16 @@ def execute_hl20_local_physical_surface_lqi_screen(
         "mass_kg": plant.source_plant.mass_kg,
         "source_effectiveness_rank": int(np.linalg.matrix_rank(plant.effectiveness(trim.state, trim.controls).array)),
         "hard_gates_passed": assessment["screen_pass"],
+        **({"tuning_binding": tuning_binding.as_dict()} if tuning_binding is not None else {}),
+        "persistent_disturbance_screen": {
+            "status": "applied",
+            "id": robustness_report["id"],
+            "artifact_filename": "robustness_report.json",
+            "pass": robustness_report["pass"],
+            "input": "external_pitch_moment_bias_nm",
+            "body_moment_axis": "moment_y_nm",
+            "fraction_of_declared_pitch_wrench_scale": _MATCHED_PITCH_WRENCH_BIAS_FRACTION,
+        },
         "mission_graph_execution": unobserved_mission_graph_execution(composition, "The HL-20 local source-surface LQI screen has no glide route or transition execution.").as_dict(),
     }
     evaluation = _evaluation(assessment, plan)
@@ -322,7 +375,7 @@ def execute_hl20_local_physical_surface_lqi_screen(
     runtime["resource_ledger"] = resource_ledger_summary(resource_ledger)
     result = HL20LocalPhysicalSurfaceLqiScreenExecution(
         composition, preflight, plan, destination, runtime, evaluation, status_trace, control_trace,
-        "This is one two-second nonlinear fixed-translation HL-20 attitude/rate recovery. The LQI controller requests three body moments, which are allocated to all seven named source surfaces at every step. It does not establish full trim, translation, glide guidance, navigation, robustness, or flight qualification.",
+        "This is one eight-second nonlinear fixed-translation HL-20 attitude/rate recovery. The LQI controller requests three body moments, which are allocated to all seven named source surfaces at every step. The paired robustness artifact covers only a constant matched external pitch moment through the source full-inertia dynamics seam. It does not establish full trim, translation, glide guidance, navigation, wind or mass robustness, or flight qualification.",
     )
     _write_json(destination / "composition.json", composition.model_dump(mode="json", by_alias=True))
     _write_json(destination / "preflight.json", preflight.as_dict())
@@ -331,6 +384,10 @@ def execute_hl20_local_physical_surface_lqi_screen(
     _write_json(destination / "runtime_report.json", runtime)
     _write_json(destination / "mission_graph_execution.json", runtime["mission_graph_execution"])
     _write_json(destination / "nonlinear_validation.json", validation.as_dict())
+    _write_json(
+        destination / "robustness_report.json",
+        bind_release_evidence(robustness_report, kind="robustness", composition=composition),
+    )
     _write_json(destination / "local_surface_lqi_screen.json", {"assessment": assessment, "rows": rows})
     _write_json(destination / "objective_report.json", evaluation)
     _write_json(destination / "status_trace.json", status_trace)
@@ -339,6 +396,107 @@ def execute_hl20_local_physical_surface_lqi_screen(
     _write_json(destination / "evaluation.json", build_composition_trajectory_evaluation(composition, preflight, evaluation, runtime=runtime, envelope={"local_moment_balance_trim": runtime["local_moment_balance_trim"]}, claim_boundary=result.claim_boundary, status_trace=status_trace, control_trace=control_trace).as_dict())
     _write_json(destination / "execution.json", result.as_dict())
     return result
+    ####
+
+
+def _initial_state(trim: TrimResult) -> dict[str, float]:
+    """Return the same bounded local perturbation for every HL-20 LQI case."""
+
+    state = {name: float(trim.state[name]) for name in _STATE_NAMES}
+    state.update(
+        {
+            "roll_error_rad": 0.005,
+            "pitch_error_rad": -0.002,
+            "yaw_error_rad": 0.004,
+        }
+    )
+    return state
+    ####
+
+
+def _matched_pitch_wrench_offset_report(
+    plant: HL20SourceSurfaceLocalPlant,
+    trim: TrimResult,
+    design: PhysicalWrenchLqiDesign,
+    plan: HL20LocalPhysicalSurfaceLqiScreenPlan,
+    *,
+    nominal_validation: PhysicalWrenchLqiValidation,
+    nominal_assessment: Mapping[str, object],
+) -> dict[str, object]:
+    """Screen matched external pitch moments through the actual seven surfaces.
+
+    The moment is applied only at the named local source-dynamics seam. It is
+    never folded into a requested wrench or an achieved allocator output, so
+    the two offset cases must be rejected by the LQI controller through the
+    declared bounded surface allocation.
+    """
+
+    try:
+        pitch_index = design.projection.wrench_names.index("moment_y_nm")
+    except ValueError as error:
+        raise ValueError("HL-20 source-surface LQI design does not control pitch moment") from error
+    pitch_wrench_scale_nm = float(design.wrench_scales[pitch_index])
+    cases: list[dict[str, object]] = []
+    for identifier, fraction, retained in (
+        ("nominal", 0.0, (nominal_validation, nominal_assessment)),
+        ("positive-pitch-offset", _MATCHED_PITCH_WRENCH_BIAS_FRACTION, None),
+        ("negative-pitch-offset", -_MATCHED_PITCH_WRENCH_BIAS_FRACTION, None),
+    ):
+        bias_nm = fraction * pitch_wrench_scale_nm
+        assessment: Mapping[str, object]
+        if retained is None:
+            validation = validate_nonlinear_wrench_lqi(
+                plant,
+                trim,
+                design,
+                initial_state=_initial_state(trim),
+                duration_s=plan.duration_s,
+                dt_s=plan.dt_s,
+                integral_lower={name: -0.5 for name in design.result.output_names},
+                integral_upper={name: 0.5 for name in design.result.output_names},
+                environment={"external_pitch_moment_bias_nm": bias_nm},
+            )
+            assessment = _assess(validation)
+        else:
+            validation, assessment = retained
+        final_fraction = _number(assessment, "final_feedback_error_fraction")
+        saturation_fraction = _number(assessment, "saturation_fraction")
+        case_pass = assessment.get("screen_pass") is True
+        cases.append(
+            {
+                "id": identifier,
+                "parameters": {"pitch_wrench_bias_fraction": fraction},
+                "status": "pass" if case_pass else "fail",
+                "metrics": {
+                    "final_feedback_error_fraction": final_fraction,
+                    "saturation_fraction": saturation_fraction,
+                },
+                "external_pitch_moment_bias_nm": bias_nm,
+                "allocation_statuses": list(validation.allocation_statuses),
+                "integrators_exercised": validation.integrators_exercised,
+            }
+        )
+    passed = all(case["status"] == "pass" for case in cases)
+    return {
+        "schema": "taoryx.endpoint-robustness-screen/v1alpha1",
+        "id": "hl20-local-lqi-matched-pitch-wrench-offset",
+        "kind": "constant_offset",
+        "status": "pass" if passed else "fail",
+        "pass": passed,
+        "controller": {
+            "id": design.id,
+            "method": "lqi",
+            "integral_q_diagonal": list(design.integral_q_diagonal),
+            "pitch_wrench_scale_nm": pitch_wrench_scale_nm,
+        },
+        "cases": cases,
+        "claim_boundary": (
+            "This screen covers only constant matched external pitch moments of plus or minus five percent of the "
+            "declared local pitch-wrench scale at the frozen HL-20 source fixture. The moment enters the local source "
+            "full-inertia dynamics seam after source-surface loads; it is never added to a controller request or "
+            "allocator output. It does not model wind, mass variation, translation, glide guidance, or qualification."
+        ),
+    }
     ####
 
 

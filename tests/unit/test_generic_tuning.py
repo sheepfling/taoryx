@@ -119,6 +119,33 @@ def test_normalized_lqr_profile_grid_can_vary_lqi_integral_priority() -> None:
     assert [candidate.as_dict()["integral_weight_multiplier"] for candidate in report.candidates] == [0.5, 4.0]
 
 
+def test_generic_lqi_prefers_nominal_integral_priority_when_linear_scores_tie() -> None:
+    """Automatic selection must not depend on the declared profile-list order."""
+
+    profiles = NormalizedLqrProfileGrid(
+        "synthetic-lqi-nominal",
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        integral_weight_multipliers=(0.1, 1.0, 10.0),
+    ).profiles(2, 1)
+    report = tune_lqi_profiles(
+        "synthetic_nominal_integral_selection",
+        ((0.0, 1.0), (-1.0, 0.0)),
+        ((0.0,), (1.0,)),
+        state_names=("position", "velocity"),
+        control_names=("force",),
+        state_scales=(0.2, 1.0),
+        control_scales=(1.0,),
+        profiles=profiles,
+        output_names=("position",),
+        integral_q_diagonal=(20.0,),
+    )
+
+    assert report.best is not None
+    assert report.best.integral_weight_multiplier == 1.0
+    ####
+
+
 def test_generic_lqr_tuning_accepts_arbitrary_state_and_control_dimensions() -> None:
     report = tune_lqr_profiles(
         "synthetic_second_order_vehicle",

@@ -18,9 +18,11 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from typing import Any, Callable, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .local_direct_wrench_mission_translation import compile_local_direct_wrench_screen_mission
 from .local_direct_wrench_screen_registry import resolve_local_direct_wrench_screen_definition
@@ -46,6 +48,115 @@ from .vehicle_composition_registry import (
 )
 
 ExecutionPreflightStatus = Literal["translation_ready", "blocked", "not_applicable"]
+
+_CAPABILITY_ADVERTISEMENT_SCHEMA = "taoryx.vehicle-capability-advertisement/v1alpha1"
+_CONCRETE_CAPABILITY_PREFLIGHT_SCHEMA = "taoryx.concrete-capability-preflight/v1alpha1"
+
+
+class _PortableMappingModel(BaseModel, Mapping[str, object]):
+    """Pydantic contract that remains readable through legacy mapping callers."""
+
+    def as_dict(self) -> dict[str, object]:
+        """Return the portable JSON-facing view of the validated contract."""
+
+        return self.model_dump(mode="json", by_alias=True)
+        ####
+
+    def __getitem__(self, key: str) -> object:
+        return self.as_dict()[key]
+        ####
+
+    def __iter__(self) -> Iterator[str]:  # type: ignore[override]
+        return iter(self.as_dict())
+        ####
+
+    def __len__(self) -> int:
+        return len(self.as_dict())
+        ####
+
+    ####
+
+
+class CapabilitySelection(_PortableMappingModel):
+    """Exact immutable composition selection advertised by a capability adapter."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    composition_id: str = Field(min_length=1)
+    composition_identity_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    vehicle_id: str = Field(min_length=1)
+    family_id: str = Field(min_length=1)
+    mission_id: str = Field(min_length=1)
+    fidelity: str = Field(min_length=1)
+    ####
+
+
+class CapabilityInterfaceAdvertisement(_PortableMappingModel):
+    """Typed identity fields for the rich generic interface projection."""
+
+    model_config = ConfigDict(frozen=True, extra="allow")
+
+    interface_id: str = Field(min_length=1)
+    fingerprint_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    ####
+
+    @model_validator(mode="after")
+    def verify_interface_fingerprint(self) -> CapabilityInterfaceAdvertisement:
+        payload = self.as_dict()
+        observed = payload.pop("fingerprint_sha256")
+        payload.pop("interface_id", None)
+        if observed != _mapping_fingerprint(payload):
+            raise ValueError("interface fingerprint is invalid")
+        return self
+        ####
+
+    ####
+
+
+class CapabilityAdvertisement(_PortableMappingModel):
+    """Common generic/family-owned capability advertisement boundary."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid", populate_by_name=True)
+
+    schema_id: Literal["taoryx.vehicle-capability-advertisement/v1alpha1"] = Field(alias="schema")
+    selection: CapabilitySelection
+    interface: CapabilityInterfaceAdvertisement
+    family_owned: Mapping[str, Any]
+    claim_boundary: str = Field(min_length=1)
+    fingerprint_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    ####
+
+    @model_validator(mode="after")
+    def verify_advertisement_fingerprint(self) -> CapabilityAdvertisement:
+        payload = self.as_dict()
+        observed = payload.pop("fingerprint_sha256")
+        if observed != _mapping_fingerprint(payload):
+            raise ValueError("capability advertisement fingerprint is invalid")
+        return self
+        ####
+
+    ####
+
+
+class ConcreteCapabilityPreflightEvidence(_PortableMappingModel):
+    """Validated capability evidence retained beside a semantic preflight."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid", populate_by_name=True)
+
+    schema_id: Literal["taoryx.concrete-capability-preflight/v1alpha1"] = Field(alias="schema")
+    composition_id: str = Field(min_length=1)
+    composition_identity_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    semantic_translator_id: str | None = Field(default=None, min_length=1)
+    adapter_id: str = Field(min_length=1)
+    family_id: str = Field(min_length=1)
+    mission_id: str = Field(min_length=1)
+    fidelity: str = Field(min_length=1)
+    feasibility: Literal["feasible", "likely_feasible", "unknown", "likely_infeasible", "certainly_infeasible"]
+    diagnostics: tuple[str, ...] = ()
+    capability_advertisement: CapabilityAdvertisement
+    derived_mission_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    claim_boundary: str = Field(min_length=1)
+    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,7 +198,7 @@ class VehicleExecutionPreflight:
     checks: tuple[ExecutionPreflightCheck, ...]
     diagnostics: tuple[str, ...]
     derived_mission: dict[str, Any] | None
-    capability_estimate: dict[str, object] | None = None
+    capability_estimate: ConcreteCapabilityPreflightEvidence | None = None
 
     def as_dict(self) -> dict[str, Any]:
         """Return the self-contained preflight artifact payload."""
@@ -104,7 +215,7 @@ class VehicleExecutionPreflight:
             "checks": [check.as_dict() for check in self.checks],
             "diagnostics": list(self.diagnostics),
             "derived_mission": self.derived_mission,
-            "capability_estimate": self.capability_estimate,
+            "capability_estimate": None if self.capability_estimate is None else self.capability_estimate.as_dict(),
             "claim_boundary": _preflight_claim_boundary(self.status, self.capability_estimate),
         }
         ####
@@ -117,7 +228,7 @@ TranslationPreflightHandler = Callable[[CompiledVehicleComposition], VehicleExec
 
 def _preflight_claim_boundary(
     status: ExecutionPreflightStatus,
-    capability_estimate: dict[str, object] | None,
+    capability_estimate: ConcreteCapabilityPreflightEvidence | None,
 ) -> str:
     """State exactly what a preflight disposition proves.
 
@@ -324,7 +435,7 @@ def _capability_estimate_and_manifest(
 def build_concrete_capability_preflight_evidence(
     composition: CompiledVehicleComposition,
     estimate: MissionCapabilityEstimate,
-) -> dict[str, object]:
+) -> ConcreteCapabilityPreflightEvidence:
     """Return a fingerprinted capability projection for a concrete preflight.
 
     The full derived mission remains a sibling preflight field because native
@@ -348,7 +459,11 @@ def build_concrete_capability_preflight_evidence(
     family_owned_advertisement = estimate.manifest.get("capability")
     if not isinstance(family_owned_advertisement, dict):
         raise ValueError("capability adapter manifest has no generic capability advertisement")
-    return {
+    advertisement = _public_capability_advertisement(
+        composition,
+        family_owned_advertisement,
+    )
+    return ConcreteCapabilityPreflightEvidence.model_validate({
         "schema": "taoryx.concrete-capability-preflight/v1alpha1",
         "composition_id": composition.id,
         "composition_identity_sha256": composition.identity_sha256,
@@ -363,24 +478,21 @@ def build_concrete_capability_preflight_evidence(
         "fidelity": estimate.fidelity,
         "feasibility": estimate.feasibility,
         "diagnostics": list(estimate.diagnostics),
-        "capability_advertisement": _public_capability_advertisement(
-            composition,
-            family_owned_advertisement,
-        ),
+        "capability_advertisement": advertisement,
         "derived_mission_sha256": hashlib.sha256(encoded_manifest).hexdigest(),
         "claim_boundary": (
             "This fingerprinted family-owned capability estimate and its generic advertisement establish only "
             "semantic mission feasibility for the selected composition. They do not establish native execution, "
             "control realization, integration, truth-objective success, or qualification."
         ),
-    }
+    })
     ####
 
 
 def _public_capability_advertisement(
     composition: CompiledVehicleComposition,
     family_owned_advertisement: dict[str, object],
-) -> dict[str, object]:
+) -> CapabilityAdvertisement:
     """Join generic interface metadata to one family-owned capability payload.
 
     The resolved interface already owns availability, value-space, frame, and
@@ -392,7 +504,7 @@ def _public_capability_advertisement(
     from .vehicle_composition import resolve_vehicle_composition_interface_contract
 
     interface = resolve_vehicle_composition_interface_contract(composition)
-    payload = {
+    payload: dict[str, object] = {
         "schema": "taoryx.vehicle-capability-advertisement/v1alpha1",
         "selection": {
             "composition_id": composition.id,
@@ -409,12 +521,13 @@ def _public_capability_advertisement(
             "bind a runtime, create controls, establish trim, integrate a trajectory, or qualify a vehicle."
         ),
     }
-    return {**payload, "fingerprint_sha256": _mapping_fingerprint(payload)}
+    payload["fingerprint_sha256"] = _mapping_fingerprint(payload)
+    return CapabilityAdvertisement.model_validate(payload)
     ####
 
 
 def validate_public_capability_advertisement(
-    advertisement: Mapping[str, object],
+    advertisement: Mapping[str, object] | CapabilityAdvertisement,
     *,
     expected_selection: Mapping[str, object],
 ) -> tuple[str, ...]:
@@ -426,48 +539,36 @@ def validate_public_capability_advertisement(
     calculation or a runtime admission decision.
     """
 
+    try:
+        parsed = (
+            advertisement
+            if isinstance(advertisement, CapabilityAdvertisement)
+            else CapabilityAdvertisement.model_validate(advertisement)
+        )
+    except ValueError as error:
+        return (f"capability advertisement violates the common contract: {error}",)
     errors: list[str] = []
-    if advertisement.get("schema") != "taoryx.vehicle-capability-advertisement/v1alpha1":
-        errors.append("capability advertisement has an unsupported schema")
-    selection = advertisement.get("selection")
-    if not isinstance(selection, Mapping):
-        errors.append("capability advertisement has no selection record")
-    else:
-        for field in (
-            "composition_id",
-            "composition_identity_sha256",
-            "vehicle_id",
-            "family_id",
-            "mission_id",
-            "fidelity",
-        ):
-            if selection.get(field) != expected_selection.get(field):
-                errors.append(
-                    f"capability advertisement selection {field!r} is {selection.get(field)!r}, "
-                    f"expected {expected_selection.get(field)!r}"
-                )
-    family_owned = advertisement.get("family_owned")
-    if not isinstance(family_owned, Mapping):
-        errors.append("capability advertisement has no family-owned metadata")
-    interface = advertisement.get("interface")
-    if not isinstance(interface, Mapping):
-        errors.append("capability advertisement has no interface contract")
-    elif isinstance(selection, Mapping):
-        expected_interface_id = f"{expected_selection.get('family_id')}/{expected_selection.get('fidelity')}"
-        if interface.get("interface_id") != expected_interface_id:
+    selection = parsed.selection
+    for field in (
+        "composition_id",
+        "composition_identity_sha256",
+        "vehicle_id",
+        "family_id",
+        "mission_id",
+        "fidelity",
+    ):
+        observed = getattr(selection, field)
+        if observed != expected_selection.get(field):
             errors.append(
-                f"capability advertisement interface ID is {interface.get('interface_id')!r}, "
-                f"expected {expected_interface_id!r}"
+                f"capability advertisement selection {field!r} is {observed!r}, "
+                f"expected {expected_selection.get(field)!r}"
             )
-        interface_payload = dict(interface)
-        observed_interface_fingerprint = interface_payload.pop("fingerprint_sha256", None)
-        interface_payload.pop("interface_id", None)
-        if not isinstance(observed_interface_fingerprint, str) or observed_interface_fingerprint != _mapping_fingerprint(interface_payload):
-            errors.append("capability advertisement interface fingerprint is invalid")
-    fingerprint_payload = dict(advertisement)
-    observed_fingerprint = fingerprint_payload.pop("fingerprint_sha256", None)
-    if not isinstance(observed_fingerprint, str) or observed_fingerprint != _mapping_fingerprint(fingerprint_payload):
-        errors.append("capability advertisement fingerprint is invalid")
+    expected_interface_id = f"{expected_selection.get('family_id')}/{expected_selection.get('fidelity')}"
+    if parsed.interface.interface_id != expected_interface_id:
+        errors.append(
+            f"capability advertisement interface ID is {parsed.interface.interface_id!r}, "
+            f"expected {expected_interface_id!r}"
+        )
     return tuple(errors)
     ####
 
@@ -486,7 +587,7 @@ def _mapping_fingerprint(payload: Mapping[str, object]) -> str:
 def _capability_estimate_evidence(
     composition: CompiledVehicleComposition,
     estimate: MissionCapabilityEstimate,
-) -> dict[str, object]:
+) -> ConcreteCapabilityPreflightEvidence:
     """Retain the internal name while custom translators use the public builder."""
 
     return build_concrete_capability_preflight_evidence(composition, estimate)
@@ -967,7 +1068,7 @@ def _blocked(
     checks: tuple[ExecutionPreflightCheck, ...],
     diagnostic: str,
     derived_mission: dict[str, Any] | None,
-    capability_estimate: dict[str, object] | None = None,
+    capability_estimate: ConcreteCapabilityPreflightEvidence | None = None,
 ) -> VehicleExecutionPreflight:
     declared_translator_id = mission_semantic_translator_id(
         composition.family_id,
@@ -1055,6 +1156,10 @@ def _categorical_check(identifier: str, expected: str, actual: str) -> Execution
 
 
 __all__ = [
+    "CapabilityAdvertisement",
+    "CapabilityInterfaceAdvertisement",
+    "CapabilitySelection",
+    "ConcreteCapabilityPreflightEvidence",
     "ExecutionPreflightCheck",
     "ExecutionPreflightStatus",
     "SemanticPreflightHandler",

@@ -1754,6 +1754,11 @@ class ExampleMissionCompositionProvider:
         events: list[MissionCompositionTrajectoryEvent] = []
         diagnostics: list[str] = []
         for segment in prepared.segments:
+            # A capture ends motion for the remainder of its own leg.  The
+            # next leg deliberately resumes the configured cruise speed so a
+            # route is a real piecewise waypoint sequence rather than a
+            # one-shot first-waypoint fixture.
+            state["speed_m_s"] = state["cruise_speed_m_s"]
             start = state["time_s"]
             duration = float(segment.parameters["duration_s"])
             segment_events: list[str] = []
@@ -1808,6 +1813,7 @@ class ExampleMissionCompositionProvider:
             "east_m": float(values.get("east_m", 0.0)),
             "altitude_m": float(values["altitude_m"]),
             "speed_m_s": float(values["speed_m_s"]),
+            "cruise_speed_m_s": float(values["speed_m_s"]),
             "heading_deg": float(values["heading_deg"]) % 360.0,
             "flight_path_angle_deg": float(values.get("flight_path_angle_deg", 0.0)),
             "load_factor_g": 1.0,

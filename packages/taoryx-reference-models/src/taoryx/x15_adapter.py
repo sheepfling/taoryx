@@ -921,34 +921,33 @@ def build_x15_source_surface_physical_lqi_design() -> PhysicalWrenchLqiDesign:
 
 
 def build_x15_source_surface_lqi_tuning_campaign() -> TuningCampaign:
-    """Declare the common auto-tuning path for physical X-15 surface controls."""
+    """Declare the exact physical-wrench LQI runtime for X-15 surfaces.
 
+    The common tuner sees the retained local attitude/rate-to-moment
+    projection used by the nonlinear screen.  Bounded source-surface
+    allocation remains runtime-owned evidence, rather than a late gain
+    reinterpretation in raw surface-position coordinates.
+    """
+
+    design = build_x15_source_surface_physical_lqi_design()
     return ControlAutomationDeclaration(
-        id="x15-source-release-surface-attitude-rate",
+        id="x15-source-release-surface-attitude-rate-wrench",
         campaign_id="x15-source-surface-local-lqi-v1",
         family_id="x15",
         tier="rigid_body_6dof_surface_allocated",
         strategy_id="high_energy_glide.v1",
-        node_id="source-release-frozen-translation-attitude-rate",
-        state_scales={
-            "roll_error_rad": 0.1,
-            "pitch_error_rad": 0.1,
-            "yaw_error_rad": 0.1,
-            "p_rad_s": 0.1,
-            "q_rad_s": 0.1,
-            "r_rad_s": 0.1,
-        },
-        control_scales={
-            "symmetric_stabilator": 10.0,
-            "differential_stabilator": 10.0,
-            "rudder": 10.0,
-        },
-        authority_state_names=X15_SURFACE_LOCAL_STATE_NAMES,
-        offset_free_outputs=("roll_error_rad", "pitch_error_rad", "yaw_error_rad"),
-        integral_weight_multiplier=0.1,
-        integral_weight_multipliers=(1.0, 1.0e2, 1.0e4, 1.0e6),
-        profile_grid_id_prefix="x15-source-surface-local-lqi",
-        linearization_options={"comparison_absolute_floor": 1.0e-8},
+        node_id="source-release-frozen-translation-attitude-rate-wrench",
+        state_scales=dict(zip(design.projection.state_names, design.state_scales, strict=True)),
+        control_scales=dict(zip(design.projection.wrench_names, design.wrench_scales, strict=True)),
+        authority_state_names=design.projection.state_names,
+        offset_free_outputs=design.result.output_names,
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        state_base_weights=design.q_diagonal,
+        control_base_weights=design.r_diagonal,
+        integral_base_weights=design.integral_q_diagonal,
+        integral_weight_multipliers=(1.0,),
+        profile_grid_id_prefix="x15-source-surface-wrench-lqi",
     ).build_campaign()
     ####
 
@@ -1074,6 +1073,7 @@ def build_x15_direct_wrench_tuning_campaign() -> TuningCampaign:
     must not be read as a stabilator, rudder, RCS, or propulsion allocation.
     """
 
+    screen = build_x15_local_direct_wrench_screen_config()
     return ControlAutomationDeclaration(
         id="x15-source-release-direct-wrench",
         campaign_id="x15-source-release-direct-wrench-v1",
@@ -1081,23 +1081,13 @@ def build_x15_direct_wrench_tuning_campaign() -> TuningCampaign:
         tier="rigid_body_6dof_direct_wrench",
         strategy_id="high_energy_glide.v1",
         node_id="source-release-local",
-        state_scales={
-            "u_m_s": 1000.0,
-            "v_m_s": 300.0,
-            "w_m_s": 300.0,
-            "p_rad_s": 0.5,
-            "q_rad_s": 0.5,
-            "r_rad_s": 0.5,
-        },
-        control_scales={
-            "force_x_n": 100_000.0,
-            "force_y_n": 100_000.0,
-            "force_z_n": 100_000.0,
-            "moment_x_nm": 100_000.0,
-            "moment_y_nm": 100_000.0,
-            "moment_z_nm": 100_000.0,
-        },
+        state_scales=dict(zip(X15_LOCAL_STATE_NAMES, screen.state_scales, strict=True)),
+        control_scales=dict(zip(DIRECT_WRENCH_NAMES, screen.control_scales, strict=True)),
         authority_state_names=X15_LOCAL_STATE_NAMES,
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        state_base_weights=screen.state_cost_weights,
+        control_base_weights=screen.control_cost_weights,
     ).build_campaign()
     ####
 

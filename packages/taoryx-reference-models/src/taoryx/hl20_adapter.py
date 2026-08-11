@@ -365,9 +365,14 @@ class HL20SourceSurfaceLocalPlant:
         effectors: Mapping[str, float],
         environment: Mapping[str, float | str],
     ) -> Mapping[str, float]:
-        """Evaluate source angular dynamics with local 3-2-1 error kinematics."""
+        """Evaluate source angular dynamics with local 3-2-1 error kinematics.
 
-        del environment
+        ``external_pitch_moment_bias_nm`` is the explicitly named local-screen
+        disturbance seam. It contributes only to physical pitch angular
+        acceleration after source-surface loads have been evaluated; it never
+        changes an LQI demand or an allocator result.
+        """
+
         self._validate_inputs(state, effectors)
         source_derivative = self.source_plant.state_derivative(
             self._source_state(state),
@@ -384,12 +389,14 @@ class HL20SourceSurfaceLocalPlant:
         p = float(state["p_rad_s"])
         q = float(state["q_rad_s"])
         r = float(state["r_rad_s"])
-        return {
+        derivative = {
             "roll_error_rad": p + q * sine_roll * math.tan(pitch) + r * cosine_roll * math.tan(pitch),
             "pitch_error_rad": q * cosine_roll - r * sine_roll,
             "yaw_error_rad": (q * sine_roll + r * cosine_roll) / cosine_pitch,
             **{name: float(source_derivative[name]) for name in ("p_rad_s", "q_rad_s", "r_rad_s")},
         }
+        derivative["q_rad_s"] += _external_pitch_moment_bias_nm(environment) / self.source_plant.inertia_body_kg_m2[1]
+        return derivative
         ####
 
     def _trim_spec(self, target: Mapping[str, float], initial_guess: Mapping[str, float]) -> TrimSpec:
@@ -537,6 +544,16 @@ def build_hl20_source_surface_local_plant() -> HL20SourceSurfaceLocalPlant:
     ####
 
 
+def _external_pitch_moment_bias_nm(environment: Mapping[str, float | str]) -> float:
+    """Resolve the one declared HL-20 local external pitch-moment seam."""
+
+    value = environment.get("external_pitch_moment_bias_nm", 0.0)
+    if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value)):
+        raise ValueError("external_pitch_moment_bias_nm must be finite numeric")
+    return float(value)
+    ####
+
+
 @lru_cache(maxsize=1)
 def build_hl20_source_surface_physical_lqr_design() -> PhysicalWrenchLqrDesign:
     """Design an actual-source-surface local HL-20 attitude/rate LQR."""
@@ -591,7 +608,11 @@ def build_hl20_source_surface_physical_lqi_design() -> PhysicalWrenchLqiDesign:
         output_names=("roll_error_rad", "pitch_error_rad", "yaw_error_rad"),
         q_diagonal=lqr.q_diagonal,
         r_diagonal=lqr.r_diagonal,
-        integral_q_diagonal=(0.1, 0.1, 0.1),
+        # The source fixture needs a deliberately strong integral penalty to
+        # reject the declared persistent 5% pitch-moment cases within the
+        # eight-second local screen.  This is a fixed fixture profile, not a
+        # gain schedule or a claim about the full glide vehicle.
+        integral_q_diagonal=(1000.0, 1000.0, 1000.0),
         state_scales=lqr.state_scales,
         wrench_scales=lqr.wrench_scales,
     )
@@ -599,22 +620,33 @@ def build_hl20_source_surface_physical_lqi_design() -> PhysicalWrenchLqiDesign:
 
 
 def build_hl20_source_surface_lqi_tuning_campaign() -> TuningCampaign:
-    """Declare the common automatic tuning path for physical HL-20 surfaces."""
+    """Declare the exact physical-wrench LQI runtime for HL-20 surfaces.
 
+    The campaign uses the same frozen-fixture attitude/rate-to-moment
+    projection as the nonlinear screen.  Its seven bounded source surfaces
+    remain allocator-owned runtime evidence, rather than becoming a second
+    raw-surface tuning coordinate system.
+    """
+
+    design = build_hl20_source_surface_physical_lqi_design()
     return ControlAutomationDeclaration(
-        id="hl20-source-mach1-surface-attitude-rate",
+        id="hl20-source-mach1-surface-attitude-rate-wrench",
         campaign_id="hl20-source-surface-local-lqi-v1",
         family_id="hl20_mod_k",
         tier="rigid_body_6dof_surface_allocated",
         strategy_id="lifting_body_glide.v1",
-        node_id="source-mach1-frozen-translation-attitude-rate",
-        state_scales={name: 0.1 for name in HL20_SURFACE_LOCAL_STATE_NAMES},
-        control_scales={name: 10.0 for name in HL20_SURFACE_NAMES},
-        authority_state_names=HL20_SURFACE_LOCAL_STATE_NAMES,
-        offset_free_outputs=("roll_error_rad", "pitch_error_rad", "yaw_error_rad"),
-        integral_weight_multiplier=0.1,
-        profile_grid_id_prefix="hl20-source-surface-local-lqi",
-        linearization_options={"comparison_absolute_floor": 1.0e-8},
+        node_id="source-mach1-frozen-translation-attitude-rate-wrench",
+        state_scales=dict(zip(design.projection.state_names, design.state_scales, strict=True)),
+        control_scales=dict(zip(design.projection.wrench_names, design.wrench_scales, strict=True)),
+        authority_state_names=design.projection.state_names,
+        offset_free_outputs=design.result.output_names,
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        state_base_weights=design.q_diagonal,
+        control_base_weights=design.r_diagonal,
+        integral_base_weights=design.integral_q_diagonal,
+        integral_weight_multipliers=(1.0,),
+        profile_grid_id_prefix="hl20-source-surface-wrench-lqi",
     ).build_campaign()
     ####
 

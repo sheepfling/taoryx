@@ -68,6 +68,7 @@ from .configuration_contract import (
     validate_configuration_instance,
 )
 from .dual_launch_mission_composition import dual_launch_configuration_schema, dual_launch_model_metadata
+from .execution_contract import MissionCompositionRunnerRegistry
 from .native_output_contract import (
     native_output_bindings,
     native_output_channel_metadata,
@@ -248,7 +249,18 @@ class RegistryMissionCompositionProvider:
                     f"mission {mission.id!r} does not accept initialization {initialization[0]!r}",
                     path="configuration.root.initialization",
                 )
-            if segments is not None and segments != mission.segment_sequence:
+            if segments is not None and not mission.accepts_segment_sequence(segments):
+                if mission.open_segment_sequence is not None:
+                    grammar = mission.open_segment_sequence
+                    raise ConfigurationContractError(
+                        "mission-open-sequence-mismatch",
+                        (
+                            f"mission {mission.id!r} accepts {grammar.minimum_items} through "
+                            f"{grammar.maximum_items if grammar.maximum_items is not None else 'unbounded'} occurrences "
+                            f"from {list(grammar.allowed_segment_ids)!r}"
+                        ),
+                        path=f"configuration.root.{grammar.configuration_node_id}",
+                    )
                 raise ConfigurationContractError(
                     "mission-sequence-mismatch",
                     f"mission {mission.id!r} requires segment sequence {list(mission.segment_sequence)!r}",
@@ -276,6 +288,20 @@ class RegistryMissionCompositionProvider:
                     path="configuration.root.initialization.body_shape",
                 )
         return prepared
+        ####
+
+    def build_runner(self) -> MissionCompositionRunnerRegistry:
+        """Build the exact common batch runner advertised by this registry.
+
+        The native bridge is imported only at the execution boundary because it
+        lowers typed portable configurations back into model-specific runtime
+        artifacts.  Discovery and authoring therefore stay importable without
+        constructing execution factories.
+        """
+
+        from .native_mission_composition import build_registry_mission_composition_runner
+
+        return build_registry_mission_composition_runner(self)
         ####
 
 
@@ -1164,9 +1190,7 @@ def _realization_metadata(
         else:
             status = "blocked"
         blockers = () if status == "available" else fidelity.blockers or ("no exact native execution binding is registered",)
-        realization_mission_ids = tuple(
-            dict.fromkeys(str(item["mission"]) for item in bindings if isinstance(item.get("mission"), str))
-        )
+        realization_mission_ids = tuple(dict.fromkeys(str(item["mission"]) for item in bindings if isinstance(item.get("mission"), str)))
         result.append(
             TrajectoryRealizationMetadata(
                 id=fidelity.id,
@@ -1590,9 +1614,7 @@ def _mission_templates(
     templates: list[TrajectoryMissionTemplateMetadata] = []
     for mission in vehicle.declaration.mission_templates:
         compatible_fidelities = tuple(
-            fidelity
-            for fidelity in mission.compatible_fidelities
-            if any(selectable(realization, mission.id, fidelity) for realization in realizations)
+            fidelity for fidelity in mission.compatible_fidelities if any(selectable(realization, mission.id, fidelity) for realization in realizations)
         )
         if not compatible_fidelities:
             continue
@@ -1651,9 +1673,7 @@ def _mission_templates(
                     )
             if vehicle.family.family_id == "tumbling_body":
                 selectable_shapes = tuple(
-                    shape
-                    for shape in _TUMBLING_BODY_SHAPES
-                    if selectable(next(item for item in realizations if item.id == shape), mission.id, fidelity)
+                    shape for shape in _TUMBLING_BODY_SHAPES if selectable(next(item for item in realizations if item.id == shape), mission.id, fidelity)
                 )
                 batch_available = any(
                     isinstance(item, Mapping)

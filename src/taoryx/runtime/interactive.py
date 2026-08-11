@@ -691,7 +691,16 @@ class InteractiveSession:
     def to_run_artifact(self) -> RunArtifact:
         """Project the session history into the batch telemetry contract."""
 
-        from taoryx.outputs import DynamicsKind, RunArtifact, TelemetryChannel, VehicleTelemetry
+        from taoryx.outputs import (
+            DynamicsKind,
+            RunArtifact,
+            RunCommandRecord,
+            RunLifecycleEvent,
+            RunSensorExecution,
+            RunVisualizationMetadata,
+            TelemetryChannel,
+            VehicleTelemetry,
+        )
 
         dynamics = {
             "point-mass": DynamicsKind.POINT_MASS_3DOF,
@@ -725,50 +734,56 @@ class InteractiveSession:
         return RunArtifact(
             problem="interactive-session",
             vehicles=vehicles,
-            commands=[{"duration": frame.duration, "commands": dict(frame.commands)} for frame in self.command_history],
-            events=[event.as_dict() for event in self.event_history],
-            sensor_execution={} if self.sensor_runtime is None else self.sensor_runtime.artifact(),
-            visualization={
-                "source": "InteractiveSession",
-                "controls": [
-                    {
-                        "name": control.name,
-                        "unit": control.unit,
-                        "default": control.default,
-                        "lower": control.lower,
-                        "upper": control.upper,
-                        "slew_rate": control.slew_rate,
-                        "modes": list(control.modes),
-                    }
-                    for control in self.controls
-                ],
-                "statuses": [
-                    {"name": status.name, "source": status.source, "unit": status.unit, "modes": list(status.modes)}
-                    for status in self.status_specs
-                ],
-                "subscriptions": [
-                    {"channels": list(subscription.channels), "sample_interval": subscription.sample_interval, "include_events": subscription.include_events}
-                    for subscription in self.output_subscriptions
-                ],
-                "model_fingerprint": self.model_fingerprint,
-                "command_stream_sha256": self.command_stream_sha256,
-                "replay_identity": self.replay_identity,
-                "step_records": [
-                    {
-                        "time_start": snapshot.time_start,
-                        "time_end": snapshot.time_end,
-                        "requested_duration": snapshot.requested_duration,
-                        "accepted_duration": snapshot.accepted_duration,
-                        "boundary_reason": snapshot.boundary_reason,
-                        "boundary_reasons": list(snapshot.boundary_reasons),
-                        "event_truncated": snapshot.event_truncated,
-                        "commands": [command.as_dict() for command in snapshot.commands],
-                        "accepted_boundaries": [boundary.as_dict() for boundary in snapshot.accepted_boundaries],
-                        "replay_identity": snapshot.replay_identity,
-                    }
-                    for snapshot in self.snapshots
-                ],
-            },
+            commands=[RunCommandRecord(duration=frame.duration, commands=dict(frame.commands)) for frame in self.command_history],
+            events=[RunLifecycleEvent.model_validate(event.as_dict()) for event in self.event_history],
+            sensor_execution=(
+                RunSensorExecution()
+                if self.sensor_runtime is None
+                else RunSensorExecution.model_validate(self.sensor_runtime.artifact())
+            ),
+            visualization=RunVisualizationMetadata.model_validate(
+                {
+                    "source": "InteractiveSession",
+                    "controls": [
+                        {
+                            "name": control.name,
+                            "unit": control.unit,
+                            "default": control.default,
+                            "lower": control.lower,
+                            "upper": control.upper,
+                            "slew_rate": control.slew_rate,
+                            "modes": list(control.modes),
+                        }
+                        for control in self.controls
+                    ],
+                    "statuses": [
+                        {"name": status.name, "source": status.source, "unit": status.unit, "modes": list(status.modes)}
+                        for status in self.status_specs
+                    ],
+                    "subscriptions": [
+                        {"channels": list(subscription.channels), "sample_interval": subscription.sample_interval, "include_events": subscription.include_events}
+                        for subscription in self.output_subscriptions
+                    ],
+                    "model_fingerprint": self.model_fingerprint,
+                    "command_stream_sha256": self.command_stream_sha256,
+                    "replay_identity": self.replay_identity,
+                    "step_records": [
+                        {
+                            "time_start": snapshot.time_start,
+                            "time_end": snapshot.time_end,
+                            "requested_duration": snapshot.requested_duration,
+                            "accepted_duration": snapshot.accepted_duration,
+                            "boundary_reason": snapshot.boundary_reason,
+                            "boundary_reasons": list(snapshot.boundary_reasons),
+                            "event_truncated": snapshot.event_truncated,
+                            "commands": [command.as_dict() for command in snapshot.commands],
+                            "accepted_boundaries": [boundary.as_dict() for boundary in snapshot.accepted_boundaries],
+                            "replay_identity": snapshot.replay_identity,
+                        }
+                        for snapshot in self.snapshots
+                    ],
+                }
+            ),
         )
     ####
 

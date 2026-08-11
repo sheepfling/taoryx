@@ -1,0 +1,77 @@
+schema: taoryx.mission-workflow-endpoint-specs/v1alpha1
+version: 1
+description: >-
+  Focused provider-owned vertical proofs for registered trajectory workflows
+  that intentionally do not claim membership in the physical vehicle-composition registry.
+endpoints:
+  - id: simple-aero-fixed-ld-batch
+    provider_id: taoryx.registry.mission-composition
+    model_id: simple_aero
+    model_kind: trajectory_workflow
+    fidelity: point_mass_3dof
+    realization_id: fixed_ld_point_mass
+    mission_template_id: fixed_ld_baseline
+    draft: verification/workflow_endpoint_witnesses/simple_aero_fixed_ld_baseline.yaml
+    batch_executor_id: taoryx.simple-aero.common-batch.v1
+    blocked_operations: [step]
+    required_core_output_ids:
+      - position.geodetic.altitude
+      - position.geodetic.latitude
+      - position.geodetic.longitude
+      - velocity.speed
+    required_telemetry_output_ids:
+      - mass.total
+      - propulsion.mass_flow
+      - propulsion.thrust
+      - propulsion.throttle_command
+      - aerodynamics.dynamic_pressure
+      - aerodynamics.angle_of_attack
+    expected_primary_object_count: 1
+    maximum_samples_per_object: 3
+    robustness_disposition: not_applicable
+    robustness_reason: >-
+      The fixed-L/D workflow does not expose an accepted persistent disturbance,
+      mass-variation, or controller-tuning injection seam at this boundary.
+    maturity_record_id: simple_aero
+    claim_boundary: >-
+      This is a source-shaped, fixed-L/D point-mass workflow proof. It is not a
+      physical vehicle, navigation, robustness, controller-tuning, or qualification claim.
+  - id: dual-launch-attached-booster-batch
+    provider_id: taoryx.registry.mission-composition
+    model_id: dual_launch_glider
+    model_kind: composition_proof_family
+    fidelity: point_mass_3dof
+    realization_id: generated_native_problem
+    mission_template_id: attached_booster_waypoint
+    draft: verification/workflow_endpoint_witnesses/dual_launch_attached_booster.yaml
+    batch_executor_id: taoryx.dual-launch.generated-native-problem.batch.v1
+    blocked_operations: [step]
+    required_core_output_ids:
+      - position.local.north
+      - position.local.east
+      - position.local.down
+      - velocity.local.north
+      - velocity.local.east
+      - velocity.local.down
+    required_telemetry_output_ids:
+      - mass.total
+      - propulsion.thrust
+      - propulsion.mass_flow
+      - control.bank.commanded
+      - control.throttle.commanded
+      - aerodynamics.dynamic_pressure
+      - diagnostics.segment_index
+    required_events:
+      - category: separation
+        kind: booster-glider-separation
+    expected_primary_object_count: 1
+    maximum_samples_per_object: 3
+    robustness_disposition: not_applicable
+    robustness_reason: >-
+      The source-generated attached stack publishes an event-only separation,
+      not an independently propagated child, controller-tuning, or disturbance seam.
+    maturity_record_id: dual_launch_glider
+    claim_boundary: >-
+      This is a source-generated point-mass attached-booster workflow proof.
+      It does not claim higher-fidelity dynamics, stateful stepping, independent
+      post-separation child propagation, robustness, or qualification.

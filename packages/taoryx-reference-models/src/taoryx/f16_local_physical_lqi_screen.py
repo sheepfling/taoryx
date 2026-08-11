@@ -23,8 +23,13 @@ from .composition_resource_ledger import build_committed_resource_ledger, resour
 from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .mission_capability import MissionCapabilityEstimate, estimate_mission_capability
-from .physical_lqr import PhysicalWrenchLqiValidation, validate_nonlinear_wrench_lqi
+from .physical_lqr import (
+    PhysicalWrenchLqiValidation,
+    apply_tuning_context_to_physical_wrench_lqi_design,
+    validate_nonlinear_wrench_lqi,
+)
 from .source_f16 import build_f16_local_physical_wrench_lqi_design, build_f16_source_physical_plant
+from .tuning_application import TuningApplicationContext
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import (
     ExecutionPreflightCheck,
@@ -293,6 +298,8 @@ def execute_f16_local_physical_lqi_screen(
     composition: CompiledVehicleComposition,
     output_dir: str | Path,
     max_steps: int | None = None,
+    *,
+    tuning_context: TuningApplicationContext | None = None,
 ) -> F16LocalPhysicalLqiScreenExecution:
     """Run the exact source-trim velocity LQI through actual F-16 effectors."""
 
@@ -311,6 +318,9 @@ def execute_f16_local_physical_lqi_screen(
     plant = build_f16_source_physical_plant()
     trim = plant.trim_result
     design = build_f16_local_physical_wrench_lqi_design()
+    tuning_binding = None
+    if tuning_context is not None:
+        design, tuning_binding = apply_tuning_context_to_physical_wrench_lqi_design(design, tuning_context)
     initial_state = dict(trim.state)
     initial_state.update(
         {
@@ -357,6 +367,7 @@ def execute_f16_local_physical_lqi_screen(
         "fixed_trim_pitch_rad": plant.trim_pitch_rad,
         "navigation_state": "fixed_local_origin_and_trim_attitude",
         "hard_gates_passed": assessment["screen_pass"],
+        **({"tuning_binding": tuning_binding.as_dict()} if tuning_binding is not None else {}),
         "mission_graph_execution": unobserved_mission_graph_execution(
             composition,
             "The fixed-altitude F-16 physical LQI screen has no route graph dispatcher and makes no mission-transition claim.",

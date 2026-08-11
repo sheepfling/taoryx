@@ -4,8 +4,8 @@ The contract probe is intentionally not a physical vehicle.  It gives plug-in
 hosts, generic editors, transports, and result consumers one deterministic
 advertisement that contains every configuration-node family, value type,
 presentation hint, fidelity transition, operation state, deployment state,
-reference-frame shape, output interpolation kind, and multi-object lineage
-path in the public contract.
+reference-frame shape, output interpolation kind, multi-object lineage path,
+and semantic control/agent-action mode in the public contract.
 """
 
 from __future__ import annotations
@@ -32,6 +32,8 @@ from .configuration_contract import (
     ConfigurationSequenceTemplate,
     ConfigurationSequenceValue,
     ConfigurationValueSpace,
+    ControlCommandSemantics,
+    ControlQuantizationMetadata,
     NumericPresentationMetadata,
     PreparedTrajectoryConfiguration,
     PresentationLinkMetadata,
@@ -223,9 +225,7 @@ class ContractProbeMissionCompositionProvider:
                 "contract-probe configuration requires a mission segment sequence",
                 path="configuration.root.segments",
             )
-        selected_segments = tuple(
-            item.selected for item in segments.items if isinstance(item, ConfigurationChoiceValue)
-        )
+        selected_segments = tuple(item.selected for item in segments.items if isinstance(item, ConfigurationChoiceValue))
         if selected_segments != mission.segment_sequence:
             raise ConfigurationContractError(
                 "mission-sequence-mismatch",
@@ -236,17 +236,14 @@ class ContractProbeMissionCompositionProvider:
             (
                 item
                 for item in mission.operations
-                if item.fidelity == configuration.fidelity
-                and item.realization_id == realization.id
-                and item.operation == operation
+                if item.fidelity == configuration.fidelity and item.realization_id == realization.id and item.operation == operation
             ),
             None,
         )
         if exact is None or exact.status != "available":
             raise ConfigurationContractError(
                 "operation-unavailable",
-                f"mission {mission.id!r} has no available {operation!r} operation for "
-                f"{configuration.fidelity!r}/{realization.id!r}",
+                f"mission {mission.id!r} has no available {operation!r} operation for {configuration.fidelity!r}/{realization.id!r}",
                 path="configuration.mission_template_id",
             )
         ####
@@ -920,12 +917,21 @@ def _probe_fidelities() -> tuple[TrajectoryFidelityMetadata, ...]:
 def _probe_control_advertisement(
     fidelity: TrajectoryFidelityMetadata,
 ) -> TrajectoryControlAdvertisement:
-    """Exercise scalar, vector, boolean, authority, and intent metadata."""
+    """Publish the exhaustive control and agent-action conformance surface.
+
+    This is deliberately an advertisement witness, not a claim that every
+    synthetic command changes the batch result.  A generic consumer must be
+    able to render, serialize, normalize, mask, and replay every channel
+    shape below without deriving semantics from a label or a UI widget.
+    """
 
     available = "batch" in fidelity.operations
     availability: TrajectoryControlAvailability = "available_in_batch" if available else "planned"
     operations: tuple[Literal["batch", "step"], ...] = ("batch",) if available else ()
     speed_interval = _interval(0.0, 500.0)
+    heading_interval = _interval(0.0, 360.0, maximum_inclusive=False)
+    flap_interval = _interval(-10.0, 20.0)
+    spoiler_interval = _interval(-1.0, 1.0)
     speed_space = ConfigurationValueSpace(
         topology="bounded_interval",
         representation="scalar",
@@ -942,92 +948,408 @@ def _probe_control_advertisement(
         equivalence="q and -q",
         coordinate_chart="S^3 / {q ~ -q}",
     )
+    periodic_heading_space = ConfigurationValueSpace(
+        topology="periodic_circle",
+        representation="scalar",
+        error_rule="wrapped signed angular difference",
+        interpolation_rule="shortest_arc",
+        period=360.0,
+        coordinate_chart="[0, 360)",
+    )
+    unbounded_scalar_space = ConfigurationValueSpace(
+        topology="euclidean",
+        representation="scalar",
+        error_rule="subtraction",
+        interpolation_rule="linear",
+        coordinate_chart="R",
+    )
     boolean_space = ConfigurationValueSpace(
         topology="boolean",
         representation="boolean",
         error_rule="exact equality",
         interpolation_rule="not interpolable",
     )
+    enum_space = ConfigurationValueSpace(
+        topology="finite_set",
+        representation="string",
+        error_rule="exact equality",
+        interpolation_rule="not interpolable",
+    )
+    event_space = ConfigurationValueSpace(
+        topology="event",
+        representation="named_event",
+        error_rule="event identity",
+        interpolation_rule="not interpolable",
+    )
+    detent_space = ConfigurationValueSpace(
+        topology="bounded_interval",
+        representation="scalar",
+        error_rule="difference after detent quantization",
+        interpolation_rule="step",
+    )
+    composite_effector_space = ConfigurationValueSpace(
+        topology="product",
+        representation="provider_defined_composite",
+        error_rule="provider-defined by component",
+        interpolation_rule="provider-defined by component",
+        components=(speed_space, enum_space, boolean_space),
+    )
+
+    def channel(
+        channel_id: str,
+        label: str,
+        description: str,
+        value_space: ConfigurationValueSpace,
+        semantics: ControlCommandSemantics,
+        *,
+        order: int,
+        channel_kind: Literal["action", "effector"] = "action",
+        quantity: str | None = None,
+        canonical_unit: str | None = None,
+        display_unit: str | None = None,
+        data_type: Literal["float64", "int64", "boolean", "string", "json"] = "float64",
+        shape: tuple[int | Literal["variable"], ...] = (),
+        interval: ConfigurationInterval | None = None,
+        choices: tuple[str, ...] = (),
+        frame: str | None = None,
+        sampling_semantics: Literal[
+            "held_action",
+            "batch_profile",
+            "segment_generated",
+            "not_sampled",
+            "provider_reported",
+            "event",
+        ] = "held_action",
+        control: Literal[
+            "automatic",
+            "number_input",
+            "slider",
+            "toggle",
+            "select",
+            "button",
+            "stepper",
+            "dial",
+            "text",
+            "vector_editor",
+            "coordinate_picker",
+        ] = "automatic",
+    ) -> TrajectoryControlChannelMetadata:
+        """Build a semantic/native pair with deliberately matching metadata."""
+
+        native_id = f"synthetic.{channel_id}"
+        return TrajectoryControlChannelMetadata(
+            id=channel_id,
+            label=label,
+            description=description,
+            channel_kind=channel_kind,
+            quantity=quantity,
+            canonical_unit=canonical_unit,
+            display_unit=display_unit,
+            data_type=data_type,
+            shape=shape,
+            interval=interval,
+            choices=choices,
+            frame=frame,
+            sampling_semantics=sampling_semantics,
+            value_space=value_space,
+            semantics=semantics,
+            availability=availability,
+            operations=operations,
+            native_channel_id=native_id,
+            native_binding=TrajectoryControlNativeBindingMetadata(
+                id=native_id,
+                quantity=quantity,
+                canonical_unit=canonical_unit,
+                data_type=data_type,
+                shape=shape,
+                interval=interval,
+                value_space=value_space,
+                semantics=semantics,
+                provider_binding={"debug_field": channel_id},
+            ),
+            provider_binding={"debug_field": channel_id},
+            presentation=ValuePresentationMetadata(group="controls", order=order, control=control),
+            source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
+            provenance="synthetic contract probe",
+            claim_boundary="Synthetic transport, renderer, and agent-action witness only.",
+        )
+        ####
+
     channels = (
-        TrajectoryControlChannelMetadata(
-            id="guidance.speed.command",
-            label="Speed Command",
-            description="Synthetic bounded scalar guidance command.",
-            channel_kind="action",
+        channel(
+            "guidance.speed.command",
+            "Speed Command",
+            "Bounded continuous profile command with an affine agent projection.",
+            speed_space,
+            ControlCommandSemantics(
+                value_domain="continuous",
+                command_mode="absolute",
+                temporal_semantics="profile",
+                release_behavior="hold",
+                agent_normalization="auto",
+                agent_clip=True,
+            ),
+            order=10,
             quantity="speed",
             canonical_unit="m/s",
             display_unit="m/s",
             interval=speed_interval,
             sampling_semantics="batch_profile",
-            value_space=speed_space,
-            availability=availability,
-            operations=operations,
-            native_channel_id="synthetic_speed_m_s",
-            native_binding=TrajectoryControlNativeBindingMetadata(
-                id="synthetic_speed_m_s",
-                quantity="speed",
-                canonical_unit="m/s",
-                interval=speed_interval,
-                value_space=speed_space,
-                provider_binding={"debug_field": "synthetic_speed_m_s"},
-            ),
-            provider_binding={"debug_field": "synthetic_speed_m_s"},
-            presentation=ValuePresentationMetadata(group="controls", order=10, control="slider"),
-            source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
-            provenance="synthetic contract probe",
-            claim_boundary="Synthetic transport and renderer witness only.",
+            control="slider",
         ),
-        TrajectoryControlChannelMetadata(
-            id="attitude.quaternion.command",
-            label="Attitude Quaternion Command",
-            description="Synthetic body-attitude vector command.",
-            channel_kind="action",
+        channel(
+            "attitude.quaternion.command",
+            "Attitude Quaternion Command",
+            "Fixed-size vector command with an explicit release value and identity agent projection.",
+            quaternion_space,
+            ControlCommandSemantics(
+                value_domain="vector",
+                command_mode="absolute",
+                temporal_semantics="held",
+                release_behavior="release_value",
+                release_value=(1.0, 0.0, 0.0, 0.0),
+                agent_normalization="identity",
+            ),
+            order=20,
             quantity="orientation",
-            data_type="float64",
             shape=(4,),
             frame="body",
-            sampling_semantics="batch_profile",
-            value_space=quaternion_space,
-            availability=availability,
-            operations=operations,
-            native_channel_id="synthetic_attitude_quaternion",
-            native_binding=TrajectoryControlNativeBindingMetadata(
-                id="synthetic_attitude_quaternion",
-                quantity="orientation",
-                data_type="float64",
-                shape=(4,),
-                value_space=quaternion_space,
-                provider_binding={"debug_field": "synthetic_attitude_quaternion"},
-            ),
-            provider_binding={"debug_field": "synthetic_attitude_quaternion"},
-            presentation=ValuePresentationMetadata(group="controls", order=20, control="vector_editor"),
-            source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
-            provenance="synthetic contract probe",
-            claim_boundary="Synthetic transport and renderer witness only.",
+            sampling_semantics="held_action",
+            control="vector_editor",
         ),
-        TrajectoryControlChannelMetadata(
-            id="mission.enable",
-            label="Mission Enable",
-            description="Synthetic boolean command channel.",
-            channel_kind="action",
+        channel(
+            "mission.enable",
+            "Mission Enable",
+            "Latched boolean switch with an explicit fail-safe release policy.",
+            boolean_space,
+            ControlCommandSemantics(
+                value_domain="boolean",
+                command_mode="absolute",
+                temporal_semantics="latched",
+                release_behavior="failsafe",
+            ),
+            order=30,
             data_type="boolean",
             sampling_semantics="segment_generated",
-            value_space=boolean_space,
-            availability=availability,
-            operations=operations,
-            native_channel_id="synthetic_mission_enabled",
-            native_binding=TrajectoryControlNativeBindingMetadata(
-                id="synthetic_mission_enabled",
-                quantity="boolean",
-                data_type="boolean",
-                value_space=boolean_space,
-                provider_binding={"debug_field": "synthetic_mission_enabled"},
+            control="toggle",
+        ),
+        channel(
+            "guidance.heading.command",
+            "Heading Command",
+            "Periodic absolute heading command; agent values wrap deterministically at the principal boundary.",
+            periodic_heading_space,
+            ControlCommandSemantics(
+                value_domain="periodic",
+                command_mode="absolute",
+                temporal_semantics="held",
+                release_behavior="hold",
+                agent_normalization="periodic_wrap",
             ),
-            provider_binding={"debug_field": "synthetic_mission_enabled"},
-            presentation=ValuePresentationMetadata(group="controls", order=30, control="toggle"),
-            source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
-            provenance="synthetic contract probe",
-            claim_boundary="Synthetic transport and renderer witness only.",
+            order=40,
+            quantity="angle",
+            canonical_unit="deg",
+            display_unit="deg",
+            interval=heading_interval,
+            sampling_semantics="held_action",
+            control="dial",
+        ),
+        channel(
+            "guidance.heading_rate.command",
+            "Heading-Rate Command",
+            "Unbounded rate command with provider-declared normalization statistics.",
+            unbounded_scalar_space,
+            ControlCommandSemantics(
+                value_domain="continuous",
+                command_mode="rate",
+                temporal_semantics="sampled",
+                release_behavior="default",
+                rate_unit="deg/s",
+                agent_normalization="standardize",
+                agent_center=0.0,
+                agent_scale=45.0,
+                agent_clip=True,
+            ),
+            order=50,
+            quantity="angular_rate",
+            canonical_unit="deg/s",
+            display_unit="deg/s",
+            sampling_semantics="held_action",
+            control="number_input",
+        ),
+        channel(
+            "guidance.acceleration.increment",
+            "Acceleration Increment",
+            "Unbounded incremental command that intentionally requires external training statistics.",
+            unbounded_scalar_space,
+            ControlCommandSemantics(
+                value_domain="continuous",
+                command_mode="increment",
+                temporal_semantics="sampled",
+                release_behavior="release_value",
+                release_value=0.0,
+                agent_normalization="auto",
+            ),
+            order=60,
+            quantity="acceleration",
+            canonical_unit="m/s^2",
+            display_unit="m/s^2",
+            sampling_semantics="held_action",
+            control="number_input",
+        ),
+        channel(
+            "aerodynamics.flap.detent",
+            "Flap Detent",
+            "Latched finite set of physically named flap detents.",
+            detent_space,
+            ControlCommandSemantics(
+                value_domain="discrete_levels",
+                command_mode="absolute",
+                temporal_semantics="latched",
+                release_behavior="hold",
+                quantization=ControlQuantizationMetadata(
+                    mode="levels",
+                    levels=(-10.0, 0.0, 10.0, 20.0),
+                    rounding="reject",
+                ),
+            ),
+            order=70,
+            quantity="angle",
+            canonical_unit="deg",
+            display_unit="deg",
+            interval=flap_interval,
+            sampling_semantics="held_action",
+            control="stepper",
+        ),
+        channel(
+            "aerodynamics.spoiler.increment",
+            "Spoiler Detent Increment",
+            "Sampled discrete increment with a fixed quantization grid and nearest-detent policy.",
+            detent_space,
+            ControlCommandSemantics(
+                value_domain="discrete_levels",
+                command_mode="increment",
+                temporal_semantics="sampled",
+                release_behavior="release_value",
+                release_value=0.0,
+                quantization=ControlQuantizationMetadata(
+                    mode="step",
+                    step=0.5,
+                    origin=0.0,
+                    rounding="nearest",
+                ),
+            ),
+            order=80,
+            quantity="normalized_control",
+            interval=spoiler_interval,
+            sampling_semantics="held_action",
+            control="stepper",
+        ),
+        channel(
+            "autopilot.mode.select",
+            "Autopilot Mode",
+            "Latched categorical selector with stable advertised ordering.",
+            enum_space,
+            ControlCommandSemantics(
+                value_domain="enum",
+                command_mode="absolute",
+                temporal_semantics="latched",
+                release_behavior="hold",
+            ),
+            order=90,
+            data_type="string",
+            choices=("manual", "hold", "track"),
+            sampling_semantics="held_action",
+            control="select",
+        ),
+        channel(
+            "safety.deadman",
+            "Deadman Switch",
+            "Momentary boolean control that returns to its provider default when released.",
+            boolean_space,
+            ControlCommandSemantics(
+                value_domain="boolean",
+                command_mode="absolute",
+                temporal_semantics="momentary",
+                release_behavior="default",
+            ),
+            order=100,
+            data_type="boolean",
+            sampling_semantics="held_action",
+            control="toggle",
+        ),
+        channel(
+            "payload.release.command",
+            "Release Payload",
+            "One-shot pulse event requiring an action mask after it fires in an episode.",
+            event_space,
+            ControlCommandSemantics(
+                value_domain="event",
+                command_mode="event",
+                temporal_semantics="pulse",
+                release_behavior="auto_reset",
+                pulse_duration_s=0.1,
+                repeat_policy="once_per_episode",
+            ),
+            order=110,
+            data_type="string",
+            choices=("release",),
+            sampling_semantics="event",
+            control="button",
+        ),
+        channel(
+            "payload.arm.command",
+            "Arm Payload",
+            "Pulse event that remains unavailable until the session is reset after it fires.",
+            event_space,
+            ControlCommandSemantics(
+                value_domain="event",
+                command_mode="event",
+                temporal_semantics="pulse",
+                release_behavior="auto_reset",
+                pulse_duration_s=0.1,
+                repeat_policy="once_until_reset",
+            ),
+            order=120,
+            data_type="string",
+            choices=("arm",),
+            sampling_semantics="event",
+            control="button",
+        ),
+        channel(
+            "debug.composite.effector",
+            "Provider-Defined Composite Effector",
+            "Heterogeneous recursive value-space tree retained for provider-specific consumers.",
+            composite_effector_space,
+            ControlCommandSemantics(
+                value_domain="provider_defined",
+                command_mode="absolute",
+                temporal_semantics="sampled",
+                release_behavior="failsafe",
+            ),
+            order=130,
+            channel_kind="effector",
+            data_type="json",
+            shape=("variable",),
+            sampling_semantics="provider_reported",
+            control="automatic",
+        ),
+        channel(
+            "debug.unsampled.effector",
+            "Unsampled Effector Declaration",
+            "Declared effect without an emitted sample, retained to exercise the explicit not-sampled state.",
+            composite_effector_space,
+            ControlCommandSemantics(
+                value_domain="provider_defined",
+                command_mode="absolute",
+                temporal_semantics="sampled",
+                release_behavior="failsafe",
+            ),
+            order=140,
+            channel_kind="effector",
+            data_type="json",
+            shape=("variable",),
+            sampling_semantics="not_sampled",
+            control="automatic",
         ),
     )
     resolution: Literal["provider_internal", "blocked"] = "provider_internal" if available else "blocked"

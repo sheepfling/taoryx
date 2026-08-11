@@ -16,9 +16,11 @@ responsibility.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Protocol
 
 import numpy as np
@@ -26,6 +28,7 @@ import numpy as np
 from .control_allocation import ControlPlantAdapter, EffectorEffectiveness, PhysicalAllocationStep, ProvenancedLinearization
 from .runtime.lqr import LqiController, LqiResult, LqrResult, solve_scaled_continuous_lqi, solve_scaled_continuous_lqr
 from .trim import TrimResult
+from .tuning_application import RuntimeTuningBindingReceipt, TuningApplicationContext
 
 
 @dataclass(frozen=True, slots=True)
@@ -311,6 +314,173 @@ class PhysicalWrenchLqiDesign:
         }
         ####
 
+    ####
+
+
+def apply_tuning_context_to_physical_wrench_lqr_design(
+    design: PhysicalWrenchLqrDesign,
+    context: TuningApplicationContext,
+) -> tuple[PhysicalWrenchLqrDesign, RuntimeTuningBindingReceipt]:
+    """Instantiate one exact common LQR candidate in a physical-wrench runtime.
+
+    The common campaign owns gain synthesis, while this seam verifies the
+    selected candidate still has the exact source-derived state-to-wrench
+    coordinates, scales, weights, and stable closed loop required by the
+    nonlinear allocator-backed runtime.
+    """
+
+    context.require_runtime_compatibility(
+        controller_method="lqr",
+        state_names=design.projection.state_names,
+        control_names=design.projection.wrench_names,
+    )
+    if tuple(context.state_scales) != design.state_scales:
+        raise ValueError("tuning application context state scales do not match the physical-wrench runtime")
+    if tuple(context.control_scales) != design.wrench_scales:
+        raise ValueError("tuning application context control scales do not match the physical-wrench runtime")
+
+    gain = np.asarray(context.resolved_gains["state_gain"], dtype=float)
+    q_diagonal = _context_weight_diagonal(context, "q_diagonal", design.projection.state_dimension)
+    r_diagonal = _context_weight_diagonal(context, "r_diagonal", design.projection.wrench_dimension)
+    a_matrix = np.asarray(design.projection.a_matrix, dtype=float)
+    b_matrix = np.asarray(design.projection.b_matrix, dtype=float)
+    closed_loop_eigenvalues = np.linalg.eigvals(a_matrix - b_matrix @ gain)
+    if not np.all(np.isfinite(closed_loop_eigenvalues)) or np.any(np.real(closed_loop_eigenvalues) >= 0.0):
+        raise ValueError("tuning application context is not Hurwitz in the physical-wrench runtime")
+
+    runtime_result = replace(
+        design.result,
+        gain=gain,
+        closed_loop_eigenvalues=closed_loop_eigenvalues,
+        q_sha256=_matrix_sha256(np.diag(q_diagonal)),
+        r_sha256=_matrix_sha256(np.diag(r_diagonal)),
+        k_sha256=_matrix_sha256(gain),
+    )
+    applied = replace(
+        design,
+        result=runtime_result,
+        q_diagonal=q_diagonal,
+        r_diagonal=r_diagonal,
+    )
+    receipt = context.runtime_binding_after_application(
+        controller_method="lqr",
+        state_names=applied.projection.state_names,
+        control_names=applied.projection.wrench_names,
+    )
+    return applied, receipt
+    ####
+
+
+def apply_tuning_context_to_physical_wrench_lqi_design(
+    design: PhysicalWrenchLqiDesign,
+    context: TuningApplicationContext,
+) -> tuple[PhysicalWrenchLqiDesign, RuntimeTuningBindingReceipt]:
+    """Instantiate one exact common LQI candidate in a physical-wrench runtime.
+
+    This is the reusable, fail-closed seam between a selected common campaign
+    candidate and an allocator-backed nonlinear screen.  It deliberately
+    rejects coordinate, scale, output-map, weight, and stability drift before
+    returning a receipt that can be published as runtime evidence.
+    """
+
+    context.require_runtime_compatibility(
+        controller_method="lqi",
+        state_names=design.projection.state_names,
+        control_names=design.projection.wrench_names,
+        integral_output_names=design.result.output_names,
+    )
+    if tuple(context.state_scales) != design.state_scales:
+        raise ValueError("tuning application context state scales do not match the physical-wrench runtime")
+    if tuple(context.control_scales) != design.wrench_scales:
+        raise ValueError("tuning application context control scales do not match the physical-wrench runtime")
+
+    output_matrix = np.asarray(context.resolved_gains["output_matrix"], dtype=float)
+    state_gain = np.asarray(context.resolved_gains["state_gain"], dtype=float)
+    integral_gain = np.asarray(context.resolved_gains["integral_gain"], dtype=float)
+    if not np.array_equal(output_matrix, np.asarray(design.result.output_matrix, dtype=float)):
+        raise ValueError("tuning application context output matrix does not match the physical-wrench runtime")
+
+    q_diagonal = _context_weight_diagonal(context, "q_diagonal", design.projection.state_dimension)
+    r_diagonal = _context_weight_diagonal(context, "r_diagonal", design.projection.wrench_dimension)
+    integral_q_diagonal = _context_weight_diagonal(
+        context,
+        "integral_q_diagonal",
+        len(design.result.output_names),
+    )
+    augmented_gain = np.hstack((state_gain, integral_gain))
+    a_matrix = np.asarray(design.projection.a_matrix, dtype=float)
+    b_matrix = np.asarray(design.projection.b_matrix, dtype=float)
+    integral_dimension = len(design.result.output_names)
+    augmented_a = np.block(
+        [
+            [a_matrix, np.zeros((a_matrix.shape[0], integral_dimension))],
+            [output_matrix, np.zeros((integral_dimension, integral_dimension))],
+        ]
+    )
+    augmented_b = np.vstack((b_matrix, np.zeros((integral_dimension, b_matrix.shape[1]))))
+    closed_loop_eigenvalues = np.linalg.eigvals(augmented_a - augmented_b @ augmented_gain)
+    if not np.all(np.isfinite(closed_loop_eigenvalues)) or np.any(np.real(closed_loop_eigenvalues) >= 0.0):
+        raise ValueError("tuning application context is not Hurwitz in the physical-wrench runtime")
+
+    q_matrix = np.diag((*q_diagonal, *integral_q_diagonal))
+    r_matrix = np.diag(r_diagonal)
+    runtime_design = replace(
+        design.result.design,
+        gain=augmented_gain,
+        closed_loop_eigenvalues=closed_loop_eigenvalues,
+        q_sha256=_matrix_sha256(q_matrix),
+        r_sha256=_matrix_sha256(r_matrix),
+        k_sha256=_matrix_sha256(augmented_gain),
+    )
+    runtime_result = replace(
+        design.result,
+        design=runtime_design,
+        output_matrix=output_matrix,
+        state_gain=state_gain,
+        integral_gain=integral_gain,
+    )
+    applied = replace(
+        design,
+        result=runtime_result,
+        q_diagonal=q_diagonal,
+        r_diagonal=r_diagonal,
+        integral_q_diagonal=integral_q_diagonal,
+    )
+    receipt = context.runtime_binding_after_application(
+        controller_method="lqi",
+        state_names=applied.projection.state_names,
+        control_names=applied.projection.wrench_names,
+        integral_output_names=applied.result.output_names,
+    )
+    return applied, receipt
+    ####
+
+
+def _context_weight_diagonal(
+    context: TuningApplicationContext,
+    name: str,
+    expected_dimension: int,
+) -> tuple[float, ...]:
+    """Read one finite positive diagonal from the exact selected candidate."""
+
+    values = context.weights.get(name)
+    if values is None or len(values) != expected_dimension:
+        raise ValueError(f"tuning application context {name!r} does not match the physical-wrench runtime")
+    resolved = tuple(float(value) for value in values)
+    if any(not math.isfinite(value) or value <= 0.0 for value in resolved):
+        raise ValueError(f"tuning application context {name!r} must contain finite positive weights")
+    return resolved
+    ####
+
+
+def _matrix_sha256(matrix: np.ndarray) -> str:
+    """Fingerprint one finite gain or weight matrix for runtime provenance."""
+
+    array = np.ascontiguousarray(np.asarray(matrix, dtype=np.float64))
+    if not np.isfinite(array).all():
+        raise ValueError("physical-wrench tuning matrix fingerprint requires finite values")
+    header = json.dumps({"shape": list(array.shape), "dtype": str(array.dtype)}, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(header + b"\0" + array.tobytes(order="C")).hexdigest()
     ####
 
 

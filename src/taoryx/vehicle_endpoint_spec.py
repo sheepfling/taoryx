@@ -24,12 +24,14 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .composition_episode import open_vehicle_composition_episode
 from .composition_result_catalog import index_composition_results
+from .family_adapter import AdapterOperation
 from .fidelity_contracts import FidelityTier
 from .plugins import discover_plugins
 from .plugins.resources import packaged_resource_fallback
 from .trajectory.native_output_contract import NativeOutputBinding, extract_native_channel, native_output_bindings
-from .vehicle_batch_execution import execute_vehicle_composition_batch
-from .vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
+from .tuning_application import RuntimeTuningBindingReceipt, TuningApplicationContextSet
+from .vehicle_batch_execution import VehicleBatchExecution, execute_vehicle_composition_batch
+from .vehicle_composition import CompiledVehicleComposition, compile_vehicle_composition, load_vehicle_composition_request
 from .vehicle_composition_registry import ResolvedVehicleCompositionCatalog, load_resolved_vehicle_composition_catalog
 from .vehicle_execution_bindings import (
     ExecutionMode,
@@ -139,6 +141,30 @@ class VehicleEndpointRobustnessScreenSpec(BaseModel):
         if self.execution_readiness == "blocked" and not self.availability_reason:
             raise ValueError(f"blocked robustness screen {self.id!r} needs an availability reason")
         return self
+    ####
+
+
+class VehicleEndpointRobustnessRequirement(BaseModel):
+    """State whether a runnable endpoint owns a robustness evidence seam.
+
+    A nonphysical local-control screen can be complete at its declared
+    fidelity without exposing a mass, wind, or persistent-offset input.  The
+    disposition makes that absence explicit and reviewable; an empty screen
+    list can never silently mean that robustness was forgotten.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    disposition: Literal["required", "not_applicable"] = "required"
+    reason: str | None = None
+
+    @model_validator(mode="after")
+    def validate_requirement_shape(self) -> VehicleEndpointRobustnessRequirement:
+        if self.disposition == "not_applicable" and (self.reason is None or not self.reason.strip()):
+            raise ValueError("a not_applicable robustness requirement needs a nonblank reason")
+        if self.disposition == "required" and self.reason is not None:
+            raise ValueError("a required robustness requirement must not carry a not-applicable reason")
+        return self
         ####
 
 
@@ -155,10 +181,17 @@ class VehicleEndpointSpec(BaseModel):
     execution_mode: ExecutionMode
     operations: tuple[VehicleEndpointOperationSpec, ...] = Field(min_length=1)
     controller_campaign_id: str | None = None
-    required_tuning_operations: tuple[str, ...] = ()
+    # These are capabilities used to build a campaign candidate.  They are
+    # intentionally distinct from the physical allocation exercised by the
+    # batch runtime, which is independently checked from the committed control
+    # trace by the result catalog.
+    required_tuning_operations: tuple[AdapterOperation, ...] = ()
     required_core_output_ids: tuple[str, ...] = ()
     required_telemetry_output_ids: tuple[str, ...] = ()
-    robustness_screens: tuple[VehicleEndpointRobustnessScreenSpec, ...] = Field(min_length=1)
+    robustness_requirement: VehicleEndpointRobustnessRequirement = Field(
+        default_factory=VehicleEndpointRobustnessRequirement
+    )
+    robustness_screens: tuple[VehicleEndpointRobustnessScreenSpec, ...] = ()
     maturity_record_id: str = Field(min_length=1)
     claim_boundary: str = Field(min_length=1)
 
@@ -167,6 +200,8 @@ class VehicleEndpointSpec(BaseModel):
         operations = tuple(item.operation for item in self.operations)
         if len(operations) != len(set(operations)):
             raise ValueError(f"endpoint {self.id!r} has duplicate operations")
+        if "batch" not in operations:
+            raise ValueError(f"endpoint {self.id!r} needs one batch operation for typed evidence artifacts")
         required_outputs = (*self.required_core_output_ids, *self.required_telemetry_output_ids)
         if len(required_outputs) != len(set(required_outputs)):
             raise ValueError(f"endpoint {self.id!r} repeats a required output ID")
@@ -174,14 +209,16 @@ class VehicleEndpointSpec(BaseModel):
             raise ValueError(f"endpoint {self.id!r} has an empty required output ID")
         if len(self.required_tuning_operations) != len(set(self.required_tuning_operations)):
             raise ValueError(f"endpoint {self.id!r} repeats a required tuning operation")
-        if any(not identifier.strip() for identifier in self.required_tuning_operations):
-            raise ValueError(f"endpoint {self.id!r} has an empty required tuning operation")
         if self.controller_campaign_id is None and self.required_tuning_operations:
             raise ValueError(f"endpoint {self.id!r} names tuning operations without a controller campaign")
         if self.controller_campaign_id is not None and not self.required_tuning_operations:
             raise ValueError(f"endpoint {self.id!r} needs required tuning operations for its controller campaign")
         robustness_ids = tuple(item.id for item in self.robustness_screens)
         robustness_artifacts = tuple(item.artifact_filename for item in self.robustness_screens)
+        if self.robustness_requirement.disposition == "required" and not self.robustness_screens:
+            raise ValueError(f"endpoint {self.id!r} requires at least one robustness screen")
+        if self.robustness_requirement.disposition == "not_applicable" and self.robustness_screens:
+            raise ValueError(f"endpoint {self.id!r} cannot combine a not-applicable robustness requirement with screens")
         if len(robustness_ids) != len(set(robustness_ids)):
             raise ValueError(f"endpoint {self.id!r} has duplicate robustness screen IDs")
         if len(robustness_artifacts) != len(set(robustness_artifacts)):
@@ -250,6 +287,7 @@ def vehicle_endpoint_spec_list() -> dict[str, object]:
                 "operations": [operation.operation for operation in item.operations],
                 "controller_campaign_id": item.controller_campaign_id,
                 "required_tuning_operations": list(item.required_tuning_operations),
+                "robustness_requirement": item.robustness_requirement.model_dump(mode="json"),
                 "robustness_screens": [screen.model_dump(mode="json") for screen in item.robustness_screens],
                 "maturity_record_id": item.maturity_record_id,
             }
@@ -354,7 +392,7 @@ def verify_vehicle_endpoint(
     output_record = _verify_output_contract(endpoint, errors)
     phase_durations_s["output_contract_s"] = _elapsed_s(output_started)
     controller_started = time.perf_counter()
-    controller_record = _verify_controller_campaign(endpoint, tune=tune, cache_dir=cache_dir, errors=errors)
+    controller_record, tuning_context_set = _verify_controller_campaign(endpoint, tune=tune, cache_dir=cache_dir, errors=errors)
     phase_durations_s["controller_campaign_s"] = _elapsed_s(controller_started)
     maturity_started = time.perf_counter()
     maturity_record = _verify_maturity_record(endpoint, errors)
@@ -405,6 +443,7 @@ def verify_vehicle_endpoint(
                 witness.composition,
                 execute=execute,
                 controller_record=controller_record,
+                tuning_context_set=tuning_context_set,
                 retained_results_root=retained_results_root,
                 vehicle_catalog=vehicle_catalog,
                 errors=errors,
@@ -416,6 +455,7 @@ def verify_vehicle_endpoint(
     acceptance_started = time.perf_counter()
     records["acceptance_gates"] = _build_endpoint_acceptance_gates(
         records,
+        endpoint=endpoint,
         execute=execute,
         tune=tune,
     )
@@ -502,6 +542,7 @@ def _verify_witness(
     *,
     execute: bool,
     controller_record: Mapping[str, object],
+    tuning_context_set: TuningApplicationContextSet | None,
     retained_results_root: Path | None,
     vehicle_catalog: ResolvedVehicleCompositionCatalog,
     errors: list[str],
@@ -585,7 +626,11 @@ def _verify_witness(
         try:
             if retained_results_root is not None:
                 output_directory = retained_results_root / witness_id
-                batch = execute_vehicle_composition_batch(composition, output_directory)
+                batch = _execute_endpoint_batch(
+                    composition,
+                    output_directory,
+                    tuning_context_set=tuning_context_set,
+                )
                 timings_s["batch_execution_s"] = _elapsed_s(batch_started)
                 record["result_directory"] = str(batch.output_dir)
                 _record_batch_evidence(
@@ -600,7 +645,11 @@ def _verify_witness(
                 )
             else:
                 with tempfile.TemporaryDirectory(prefix="taoryx-endpoint-") as temporary:
-                    batch = execute_vehicle_composition_batch(composition, Path(temporary) / "result")
+                    batch = _execute_endpoint_batch(
+                        composition,
+                        Path(temporary) / "result",
+                        tuning_context_set=tuning_context_set,
+                    )
                     timings_s["batch_execution_s"] = _elapsed_s(batch_started)
                     _record_batch_evidence(
                         endpoint,
@@ -631,6 +680,31 @@ def _verify_witness(
             errors.append(f"endpoint {endpoint.id}: witness {witness_id!r} episode execution failed: {error}")
         timings_s["episode_execution_s"] = _elapsed_s(episode_started)
     return record
+    ####
+
+
+def _execute_endpoint_batch(
+    composition: CompiledVehicleComposition,
+    output_directory: Path,
+    *,
+    tuning_context_set: TuningApplicationContextSet | None,
+) -> VehicleBatchExecution:
+    """Pass one local candidate or one complete schedule selection to batch execution."""
+
+    if tuning_context_set is None:
+        return execute_vehicle_composition_batch(composition, output_directory)
+    singular = tuning_context_set.singular
+    if singular is not None:
+        return execute_vehicle_composition_batch(
+            composition,
+            output_directory,
+            tuning_context=singular,
+        )
+    return execute_vehicle_composition_batch(
+        composition,
+        output_directory,
+        tuning_context_set=tuning_context_set,
+    )
     ####
 
 
@@ -769,7 +843,14 @@ def _verify_emitted_output_contract(
 
 
 def _native_telemetry_sources(output_directory: Path) -> tuple[list[tuple[Path, list[dict[str, object]]]], list[str]]:
-    """Load the common native telemetry files without assuming a family-specific row schema."""
+    """Load common row-oriented telemetry without assuming a family-specific encoding.
+
+    CSV remains the default packet encoding.  Native-coordinate controller
+    screens retain nested control and state values, so they emit the same
+    row-oriented truth surface as JSON instead of flattening it into an
+    untyped CSV string cell.  Both encodings feed the identical normalized
+    output extraction contract below.
+    """
 
     sources: list[tuple[Path, list[dict[str, object]]]] = []
     errors: list[str] = []
@@ -793,8 +874,26 @@ def _native_telemetry_sources(output_directory: Path) -> tuple[list[tuple[Path, 
             errors.append(f"{filename} has no telemetry rows")
             continue
         sources.append((source, rows))
+    json_source = output_directory / "truth_telemetry.json"
+    if json_source.is_file():
+        try:
+            payload = json.loads(json_source.read_text(encoding="utf-8"))
+            if not isinstance(payload, list):
+                raise ValueError("JSON telemetry must be a list of row mappings")
+            rows = []
+            for index, item in enumerate(payload):
+                if not isinstance(item, Mapping):
+                    raise ValueError(f"JSON telemetry row {index} is not a mapping")
+                rows.append(dict(item))
+        except (OSError, ValueError, json.JSONDecodeError) as error:
+            errors.append(f"could not read truth_telemetry.json: {error}")
+        else:
+            if not rows:
+                errors.append("truth_telemetry.json has no telemetry rows")
+            else:
+                sources.append((json_source, rows))
     if not sources and not errors:
-        errors.append("no truth_telemetry.csv or telemetry.csv artifact was emitted")
+        errors.append("no truth_telemetry.csv, telemetry.csv, or truth_telemetry.json artifact was emitted")
     return sources, errors
     ####
 
@@ -829,14 +928,28 @@ def _verify_execution_result_packet(
         }
     result = valid_records[0]
     controller_evidence = result.get("controller_execution_evidence")
-    if not isinstance(controller_evidence, Mapping) or controller_evidence.get("status") != "verified":
-        detail = "controller execution evidence is unavailable or not verified"
+    if not isinstance(controller_evidence, Mapping):
+        detail = "controller execution evidence is unavailable"
         errors.append(f"endpoint {endpoint.id}: witness {witness_id!r} {detail}")
         return {
             "status": "fail",
             "catalog_status": catalog.get("status"),
             "valid_result_count": len(valid_records),
-            "controller_execution_evidence": dict(controller_evidence) if isinstance(controller_evidence, Mapping) else {"status": "not_available"},
+            "controller_execution_evidence": {"status": "not_available"},
+        }
+    controller_status = controller_evidence.get("status")
+    expected_controller_status = "not_applicable" if endpoint.controller_campaign_id is None else "verified"
+    if controller_status != expected_controller_status:
+        detail = (
+            f"controller execution evidence is {controller_status!r}, expected {expected_controller_status!r} "
+            "for the endpoint controller contract"
+        )
+        errors.append(f"endpoint {endpoint.id}: witness {witness_id!r} {detail}")
+        return {
+            "status": "fail",
+            "catalog_status": catalog.get("status"),
+            "valid_result_count": len(valid_records),
+            "controller_execution_evidence": dict(controller_evidence),
         }
     return {
         "status": "pass",
@@ -845,8 +958,8 @@ def _verify_execution_result_packet(
         "controller_execution_evidence": dict(controller_evidence),
         "evaluation_path": result.get("evaluation_path"),
         "claim_boundary": (
-            "The result catalog validates the common normalized packet and controller runtime evidence without "
-            "re-executing or retuning the vehicle."
+            "The result catalog validates the common normalized packet and either the declared controller runtime "
+            "evidence or the explicit controller-free disposition, without re-executing or retuning the vehicle."
         ),
     }
     ####
@@ -913,6 +1026,20 @@ def _verify_disturbance_or_mass_evidence(
     visible even before its source-owning model can execute it.  A planned or
     blocked screen remains incomplete rather than becoming a passing result.
     """
+
+    requirement = endpoint.robustness_requirement
+    if requirement.disposition == "not_applicable":
+        return {
+            "status": "not_applicable",
+            "evidence": [],
+            "required_screen_count": 0,
+            "passed_required_screen_count": 0,
+            "reason": requirement.reason,
+            "claim_boundary": (
+                "This endpoint declares no mass, wind, or persistent-disturbance seam at its selected fidelity. "
+                "That absence is explicit and is not robustness evidence."
+            ),
+        }
 
     evidence: list[dict[str, object]] = []
     for screen in endpoint.robustness_screens:
@@ -1238,8 +1365,36 @@ def _resolve_tuning_binding(
             "status": "method_mismatch",
             "reason": f"runtime controller method {runtime_method!r} is not among tuned methods {candidate_methods!r}",
         }
-    runtime_binding = controller_evidence.get("tuning_binding")
-    if not isinstance(runtime_binding, Mapping) or runtime_binding.get("status") != "declared":
+    raw_runtime_binding = controller_evidence.get("tuning_binding")
+    raw_runtime_bindings = controller_evidence.get("tuning_bindings")
+    binding_shape: str
+    payloads: list[object]
+    if isinstance(raw_runtime_binding, Mapping) and raw_runtime_binding.get("status") == "declared":
+        binding_shape = "single"
+        single = dict(raw_runtime_binding)
+        single.pop("status", None)
+        payloads = [single]
+    elif isinstance(raw_runtime_binding, Mapping) and raw_runtime_binding.get("status") == "declared_set":
+        binding_shape = "set"
+        raw_items = raw_runtime_binding.get("bindings")
+        if not isinstance(raw_items, list):
+            return {
+                "status": "candidate_binding_mismatch",
+                "reason": "runtime tuning binding set has no receipt list",
+                "runtime_bindings": dict(raw_runtime_binding),
+            }
+        payloads = list(raw_items)
+    elif isinstance(raw_runtime_bindings, Mapping) and raw_runtime_bindings.get("status") == "declared_set":
+        binding_shape = "set"
+        raw_items = raw_runtime_bindings.get("bindings")
+        if not isinstance(raw_items, list):
+            return {
+                "status": "candidate_binding_mismatch",
+                "reason": "runtime tuning binding set has no receipt list",
+                "runtime_bindings": dict(raw_runtime_bindings),
+            }
+        payloads = list(raw_items)
+    else:
         return {
             "status": "candidate_ready_not_runtime_bound",
             "reason": (
@@ -1247,65 +1402,129 @@ def _resolve_tuning_binding(
                 "a campaign node/profile/configuration and applied-gain fingerprint"
             ),
         }
+    try:
+        runtime_bindings = tuple(RuntimeTuningBindingReceipt.model_validate(item) for item in payloads)
+    except ValueError as error:
+        return {
+            "status": "candidate_binding_mismatch",
+            "reason": f"runtime tuning binding violates the typed receipt contract: {error}",
+            "runtime_binding": (
+                raw_runtime_binding
+                if isinstance(raw_runtime_binding, Mapping)
+                else raw_runtime_bindings
+            ),
+        }
+    if not runtime_bindings:
+        return {
+            "status": "candidate_binding_mismatch",
+            "reason": "runtime tuning binding set is empty",
+        }
+
     expected_campaign = controller_record.get("campaign_id")
-    failures: list[str] = []
-    if runtime_binding.get("campaign_id") != expected_campaign:
-        failures.append("campaign_id")
-    candidate_matches = False
-    configurations = controller_record.get("selected_candidate_configurations")
-    if isinstance(configurations, list):
-        for item in configurations:
-            if not isinstance(item, Mapping):
-                continue
-            if (
-                item.get("node_id") == runtime_binding.get("node_id")
-                and item.get("profile_id") == runtime_binding.get("candidate_profile_id")
-                and item.get("candidate_configuration_fingerprint_sha256")
-                == runtime_binding.get("candidate_configuration_fingerprint_sha256")
-            ):
-                candidate_matches = True
-                break
-    if not candidate_matches:
-        failures.append("candidate_configuration_fingerprint_sha256")
-    expected_gain_fingerprint: object = None
     contexts = controller_record.get("tuning_application_contexts")
-    if isinstance(contexts, list):
-        for context in contexts:
-            if not isinstance(context, Mapping):
-                continue
-            if (
-                context.get("node_id") == runtime_binding.get("node_id")
-                and context.get("candidate_profile_id") == runtime_binding.get("candidate_profile_id")
-                and context.get("candidate_configuration_fingerprint_sha256")
-                == runtime_binding.get("candidate_configuration_fingerprint_sha256")
-            ):
-                expected_gain_fingerprint = context.get("resolved_gain_fingerprint_sha256")
-                break
-    if not isinstance(expected_gain_fingerprint, str):
-        failures.append("tuning_application_context")
-    elif runtime_binding.get("applied_gain_fingerprint_sha256") != expected_gain_fingerprint:
-        failures.append("applied_gain_fingerprint_sha256")
-    declared_method = runtime_binding.get("controller_method")
-    if declared_method is not None and declared_method != runtime_method:
-        failures.append("controller_method")
-    declared_cache_key = runtime_binding.get("cache_key")
+    context_items = contexts if isinstance(contexts, list) else []
+    expected_contexts: dict[str, Mapping[str, object]] = {}
+    for context in context_items:
+        if not isinstance(context, Mapping):
+            continue
+        node_id = context.get("node_id")
+        if isinstance(node_id, str):
+            expected_contexts[node_id] = context
+    expected_nodes = tuple(expected_contexts)
+    observed_nodes = tuple(binding.node_id for binding in runtime_bindings)
+    if len(observed_nodes) != len(set(observed_nodes)):
+        return {
+            "status": "candidate_binding_mismatch",
+            "reason": "runtime tuning binding set declares a node more than once",
+        }
+    if len(expected_nodes) > 1:
+        if binding_shape != "set":
+            return {
+                "status": "candidate_binding_mismatch",
+                "reason": "a multi-node tuned campaign requires a runtime binding receipt for every executed node",
+            }
+        if set(observed_nodes) != set(expected_nodes):
+            return {
+                "status": "candidate_binding_mismatch",
+                "reason": (
+                    "runtime tuning binding nodes do not match the selected campaign nodes: "
+                    f"expected {sorted(expected_nodes)!r}, got {sorted(observed_nodes)!r}"
+                ),
+            }
+    elif binding_shape != "single":
+        return {
+            "status": "candidate_binding_mismatch",
+            "reason": "a one-node tuned campaign must emit one singular runtime binding receipt",
+        }
+
+    configurations = controller_record.get("selected_candidate_configurations")
+    configuration_items = configurations if isinstance(configurations, list) else []
+    candidate_configurations = {
+        (
+            item.get("node_id"),
+            item.get("profile_id"),
+            item.get("candidate_configuration_fingerprint_sha256"),
+        )
+        for item in configuration_items
+        if isinstance(item, Mapping)
+    }
     expected_cache_key = controller_record.get("cache_key")
-    if declared_cache_key is not None and expected_cache_key is not None and declared_cache_key != expected_cache_key:
-        failures.append("cache_key")
+    failures: list[str] = []
+    for runtime_binding in runtime_bindings:
+        prefix = f"{runtime_binding.node_id}:"
+        if runtime_binding.campaign_id != expected_campaign:
+            failures.append(prefix + "campaign_id")
+        candidate_key = (
+            runtime_binding.node_id,
+            runtime_binding.candidate_profile_id,
+            runtime_binding.candidate_configuration_fingerprint_sha256,
+        )
+        if candidate_key not in candidate_configurations:
+            failures.append(prefix + "candidate_configuration_fingerprint_sha256")
+        context = expected_contexts.get(runtime_binding.node_id)
+        expected_gain_fingerprint = (
+            context.get("resolved_gain_fingerprint_sha256") if isinstance(context, Mapping) else None
+        )
+        if not isinstance(expected_gain_fingerprint, str):
+            failures.append(prefix + "tuning_application_context")
+        elif runtime_binding.applied_gain_fingerprint_sha256 != expected_gain_fingerprint:
+            failures.append(prefix + "applied_gain_fingerprint_sha256")
+        if runtime_binding.controller_method != runtime_method:
+            failures.append(prefix + "controller_method")
+        if (
+            runtime_binding.cache_key is not None
+            and expected_cache_key is not None
+            and runtime_binding.cache_key != expected_cache_key
+        ):
+            failures.append(prefix + "cache_key")
     if failures:
         return {
             "status": "candidate_binding_mismatch",
             "reason": "runtime tuning binding disagrees with the tuned candidate: " + ", ".join(failures),
-            "runtime_binding": dict(runtime_binding),
+            "runtime_binding": (
+                {"status": "declared", **runtime_bindings[0].as_dict()}
+                if binding_shape == "single"
+                else {"status": "declared_set", "bindings": [item.as_dict() for item in runtime_bindings]}
+            ),
         }
-    return {
+    result: dict[str, object] = {
         "status": "candidate_bound",
         "campaign_id": expected_campaign,
-        "node_id": runtime_binding.get("node_id"),
-        "candidate_profile_id": runtime_binding.get("candidate_profile_id"),
-        "candidate_configuration_fingerprint_sha256": runtime_binding.get("candidate_configuration_fingerprint_sha256"),
-        "applied_gain_fingerprint_sha256": runtime_binding.get("applied_gain_fingerprint_sha256"),
+        "node_count": len(runtime_bindings),
     }
+    if binding_shape == "single":
+        runtime_binding = runtime_bindings[0]
+        result.update(
+            {
+                "node_id": runtime_binding.node_id,
+                "candidate_profile_id": runtime_binding.candidate_profile_id,
+                "candidate_configuration_fingerprint_sha256": runtime_binding.candidate_configuration_fingerprint_sha256,
+                "applied_gain_fingerprint_sha256": runtime_binding.applied_gain_fingerprint_sha256,
+            }
+        )
+    else:
+        result["bindings"] = [item.as_dict() for item in runtime_bindings]
+    return result
     ####
 
 
@@ -1404,7 +1623,7 @@ def _verify_controller_campaign(
     tune: bool,
     cache_dir: str | Path | None,
     errors: list[str],
-) -> dict[str, object]:
+) -> tuple[dict[str, object], TuningApplicationContextSet | None]:
     """Verify the optional common tuning seam without inventing a controller."""
 
     started = time.perf_counter()
@@ -1414,7 +1633,7 @@ def _verify_controller_campaign(
             "campaign_id": None,
             "tuning_status": "not_requested",
             "timings_s": {"controller_campaign_s": _elapsed_s(started)},
-        }
+        }, None
     try:
         plugins = discover_plugins()
         providers = plugins.build_mission_composition_provider_registry()
@@ -1428,7 +1647,7 @@ def _verify_controller_campaign(
             "campaign_id": endpoint.controller_campaign_id,
             "tuning_status": "not_run",
             "timings_s": {"controller_campaign_s": _elapsed_s(started)},
-        }
+        }, None
     matches = registration.matches(
         provider_id=registration.provider_id,
         model_id=endpoint.model_id,
@@ -1505,6 +1724,7 @@ def _verify_controller_campaign(
         "campaign_registration_fingerprint_sha256": _canonical_json_fingerprint(campaign),
         "tuning_application_status": "not_requested",
     }
+    execution_tuning_context_set: TuningApplicationContextSet | None = None
     if tune:
         tuning_started = time.perf_counter()
         try:
@@ -1529,6 +1749,22 @@ def _verify_controller_campaign(
             else:
                 record["tuning_application_status"] = "ready"
                 record["tuning_application_contexts"] = [context.as_dict() for context in contexts]
+                execution_tuning_context_set = TuningApplicationContextSet(tuple(contexts))
+                if execution_tuning_context_set.singular is not None:
+                    execution_tuning_context = execution_tuning_context_set.singular
+                    record["execution_application_context"] = {
+                        "status": "available",
+                        "campaign_id": execution_tuning_context.campaign_id,
+                        "node_id": execution_tuning_context.node_id,
+                        "candidate_profile_id": execution_tuning_context.candidate_profile_id,
+                    }
+                else:
+                    record["execution_application_context_set"] = {
+                        "status": "available",
+                        "campaign_id": execution_tuning_context_set.campaign_id,
+                        "controller_method": execution_tuning_context_set.controller_method,
+                        "node_ids": list(execution_tuning_context_set.node_ids),
+                    }
             record["application_context_s"] = _elapsed_s(application_started)
             if candidate_status != "candidate_ready":
                 errors.append(
@@ -1540,7 +1776,7 @@ def _verify_controller_campaign(
             errors.append(f"endpoint {endpoint.id}: controller tuning failed: {error}")
         record["tuning_execution_s"] = _elapsed_s(tuning_started)
     record["timings_s"] = {"controller_campaign_s": _elapsed_s(started)}
-    return record
+    return record, execution_tuning_context_set
     ####
 
 
@@ -1626,6 +1862,7 @@ def _controller_adapter_advertisement_summary(advertisement: Mapping[str, object
 def _build_endpoint_acceptance_gates(
     records: Mapping[str, object],
     *,
+    endpoint: VehicleEndpointSpec,
     execute: bool,
     tune: bool,
 ) -> dict[str, object]:
@@ -1687,8 +1924,15 @@ def _build_endpoint_acceptance_gates(
 
     controller_record = records.get("controller")
     tuning_status = controller_record.get("tuning_status") if isinstance(controller_record, Mapping) else None
-    binding_statuses = _tuning_binding_statuses(witness_records)
-    if not tune:
+    batch_witness_records = _batch_evidence_witness_records(witness_records)
+    binding_statuses = _tuning_binding_statuses(batch_witness_records)
+    if controller_status == "not_applicable":
+        tuner_gate = {
+            "status": "not_applicable",
+            "required_for_finalization": False,
+            "reason": "the endpoint declares no controller campaign or controller runtime",
+        }
+    elif not tune:
         tuner_gate = {
             "status": "not_requested",
             "required_for_finalization": True,
@@ -1732,7 +1976,7 @@ def _build_endpoint_acceptance_gates(
             ),
         }
 
-    tracking_statuses = [_record_status(item.get("tracking_evidence")) for item in witness_records]
+    tracking_statuses = [_record_status(item.get("tracking_evidence")) for item in batch_witness_records]
     if not execute:
         tracking_gate = {
             "status": "not_requested",
@@ -1743,7 +1987,7 @@ def _build_endpoint_acceptance_gates(
         tracking_gate = {
             "status": "pass",
             "required_for_finalization": True,
-            "witness_count": len(witness_records),
+            "witness_count": len(batch_witness_records),
             "claim_boundary": "Pass is limited to the endpoint's declared local tracking/control screen.",
         }
     else:
@@ -1753,8 +1997,15 @@ def _build_endpoint_acceptance_gates(
             "tracking_statuses": tracking_statuses,
         }
 
-    disturbance_statuses = [_record_status(item.get("disturbance_or_mass_evidence")) for item in witness_records]
-    if not execute:
+    disturbance_statuses = [_record_status(item.get("disturbance_or_mass_evidence")) for item in batch_witness_records]
+    if endpoint.robustness_requirement.disposition == "not_applicable":
+        disturbance_gate = {
+            "status": "not_applicable",
+            "required_for_finalization": False,
+            "screen_statuses": disturbance_statuses,
+            "reason": endpoint.robustness_requirement.reason,
+        }
+    elif not execute:
         disturbance_gate = {
             "status": "not_requested",
             "required_for_finalization": True,
@@ -1770,7 +2021,7 @@ def _build_endpoint_acceptance_gates(
         disturbance_gate = {
             "status": "pass",
             "required_for_finalization": True,
-            "witness_count": len(witness_records),
+            "witness_count": len(batch_witness_records),
         }
     elif any(status == "blocked" for status in disturbance_statuses):
         disturbance_gate = {
@@ -1787,14 +2038,18 @@ def _build_endpoint_acceptance_gates(
             "reason": "the endpoint's declared disturbance or mass screen has not yet emitted passing evidence",
         }
 
-    gates = {
+    gates: dict[str, Mapping[str, object]] = {
         "contract_valid": contract_gate,
         "batch_executed": batch_gate,
         "tuner_bound": tuner_gate,
         "tracking_passed": tracking_gate,
         "disturbance_or_mass_screened": disturbance_gate,
     }
-    finalization_ready = all(_record_status(gate) == "pass" for gate in gates.values())
+    finalization_ready = all(
+        _record_status(gate) == "pass"
+        for gate in gates.values()
+        if gate.get("required_for_finalization") is True
+    )
     return {
         "schema": "taoryx.vehicle-endpoint-acceptance-gates/v1alpha1",
         "gate_order": list(gates),
@@ -1803,7 +2058,8 @@ def _build_endpoint_acceptance_gates(
         "claim_boundary": (
             "An endpoint is ready only when every ordered gate passes. 'not requested', 'not declared', and a "
             "method-only tuning match are intentionally incomplete rather than pass dispositions. A declared but "
-            "not-yet-executed robustness contract is likewise incomplete rather than a robustness pass."
+            "not-yet-executed robustness contract is likewise incomplete rather than a robustness pass. A typed "
+            "not-applicable robustness seam is excluded from finalization rather than counted as robustness evidence."
         ),
     }
     ####
@@ -1824,7 +2080,7 @@ def _record_status(record: object) -> object:
 
 
 def _tuning_binding_statuses(witness_records: list[Mapping[str, object]]) -> list[object]:
-    """Return every executed witness's explicit candidate-binding disposition."""
+    """Return every batch witness's explicit candidate-binding disposition."""
 
     statuses: list[object] = []
     for witness in witness_records:
@@ -1832,6 +2088,20 @@ def _tuning_binding_statuses(witness_records: list[Mapping[str, object]]) -> lis
         binding = provenance.get("binding") if isinstance(provenance, Mapping) else None
         statuses.append(_record_status(binding))
     return statuses
+    ####
+
+
+def _batch_evidence_witness_records(witness_records: list[Mapping[str, object]]) -> list[Mapping[str, object]]:
+    """Select the typed batch witnesses that can emit endpoint evidence.
+
+    Endpoint operations may also include an interactive episode.  Such an
+    episode is a separately validated public operation, but it cannot emit the
+    batch packet artifacts consumed by tracking, robustness, or tuning-binding
+    gates.  Keeping that boundary here prevents a valid episode from being
+    mislabeled as missing unrelated evidence.
+    """
+
+    return [item for item in witness_records if item.get("operation") == "batch"]
     ####
 
 

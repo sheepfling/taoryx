@@ -54,10 +54,12 @@ def test_readiness_does_not_claim_runtime_qualification() -> None:
     ####
 
 
-def test_ordered_blocker_is_the_first_blocked_tier() -> None:
+def test_x15_ordered_readiness_has_no_hard_blocker_after_local_surface_promotion() -> None:
     reports = tuple(validate_fidelity_readiness("x15", tier) for tier in MODULE.TIERS)
 
     blocker = MODULE._ordered_blocker(reports)
 
-    assert blocker is not None
-    assert blocker.tier == "rigid_body_6dof_surface_allocated"
+    assert blocker is None
+    surface = next(report for report in reports if report.tier == "rigid_body_6dof_surface_allocated")
+    assert surface.status == "partial"
+    assert {item.requirement_id for item in surface.warnings} == {"rotational_probes", "residual_telemetry"}

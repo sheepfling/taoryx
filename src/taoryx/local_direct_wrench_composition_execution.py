@@ -26,6 +26,7 @@ from .local_direct_wrench_mission_translation import (
     compile_local_direct_wrench_screen_mission,
 )
 from .local_direct_wrench_screen_registry import resolve_local_direct_wrench_screen_definition
+from .tuning_application import RuntimeTuningBindingReceipt, TuningApplicationContext
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import VehicleExecutionPreflight, preflight_vehicle_composition
 
@@ -43,6 +44,7 @@ class LocalDirectWrenchCompositionExecution:
     status_trace: dict[str, object]
     semantic_action_trace: dict[str, object]
     claim_boundary: str
+    tuning_binding: RuntimeTuningBindingReceipt | None = None
 
     @property
     def screen_pass(self) -> bool:
@@ -69,6 +71,7 @@ class LocalDirectWrenchCompositionExecution:
                 "physical_effector_allocation": False,
                 "integral_output_names": list(self.screen.lqi.output_names) if self.screen.lqi is not None else [],
                 "integrators_exercised": self.screen.integrators_exercised,
+                "tuning_binding": None if self.tuning_binding is None else self.tuning_binding.as_dict(),
             },
             "control_screen": {
                 "screen_pass": self.screen_pass,
@@ -91,9 +94,38 @@ class LocalDirectWrenchCompositionExecution:
     ####
 
 
+@dataclass(frozen=True, slots=True)
+class LocalDirectWrenchScreenRequirement:
+    """One typed local-screen requirement before endpoint JSON serialization."""
+
+    id: str
+    passed: bool
+    actual: object | None = None
+    limit: object | None = None
+
+    def __post_init__(self) -> None:
+        if not self.id.strip():
+            raise ValueError("local direct-wrench screen requirements need stable IDs")
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Serialize optional source-screen diagnostics without an argument bag."""
+
+        result: dict[str, object] = {"id": self.id, "passed": self.passed}
+        if self.actual is not None:
+            result["actual"] = self.actual
+        if self.limit is not None:
+            result["limit"] = self.limit
+        return result
+        ####
+    ####
+
+
 def execute_local_direct_wrench_composition(
     composition: CompiledVehicleComposition,
     output_dir: str | Path,
+    *,
+    tuning_context: TuningApplicationContext | None = None,
 ) -> LocalDirectWrenchCompositionExecution:
     """Execute the selected source-local direct-wrench screen without fallback."""
 
@@ -119,7 +151,17 @@ def execute_local_direct_wrench_composition(
         raise ValueError(f"execution output directory must be empty: {destination}")
     destination.mkdir(parents=True, exist_ok=True)
 
-    screen = run_local_direct_wrench_screen(config)
+    screen = run_local_direct_wrench_screen(config, tuning_context=tuning_context)
+    tuning_binding = (
+        None
+        if tuning_context is None
+        else tuning_context.runtime_binding_after_application(
+            controller_method=screen.controller_method,
+            state_names=config.state_names,
+            control_names=screen.lqr.control_names,
+            integral_output_names=() if screen.lqi is None else screen.lqi.output_names,
+        )
+    )
     truth_rows = [
         {
             **row,
@@ -144,6 +186,7 @@ def execute_local_direct_wrench_composition(
         status_trace=status_trace,
         semantic_action_trace=semantic_action_trace,
         claim_boundary=definition.claim_boundary,
+        tuning_binding=tuning_binding,
     )
     _write_json(destination / "composition.json", composition.model_dump(mode="json", by_alias=True))
     _write_json(destination / "preflight.json", preflight.as_dict())
@@ -161,42 +204,63 @@ def execute_local_direct_wrench_composition(
 
 
 def _screen_evaluation(screen: LocalDirectWrenchScreenExecution) -> dict[str, object]:
-    """Make the local pass condition independently inspectable in artifacts."""
+    """Emit the common endpoint tracking envelope for the local screen.
+
+    ``objective_report.json`` is consumed by the vehicle endpoint verifier.
+    Keep the source-screen-specific values in ``requirements``, while also
+    projecting each one into the verifier's typed, fail-closed
+    ``mission_pass``/``results`` contract.  This avoids a second ad-hoc
+    interpretation of the same local-control evidence downstream.
+    """
 
     final_fraction = screen.final_error_norm / max(screen.initial_error_norm, 1.0e-12)
     statuses = screen.observed_statuses
+    requirements = (
+        LocalDirectWrenchScreenRequirement(
+            id="equilibrium_wrench_feasible",
+            actual=screen.equilibrium_projection.status,
+            limit="feasible",
+            passed=screen.equilibrium_projection.status == "feasible",
+        ),
+        LocalDirectWrenchScreenRequirement(
+            id="equilibrium_reference_derivative",
+            actual=screen.equilibrium_derivative_norm,
+            limit=screen.config.equilibrium_derivative_norm_limit,
+            passed=screen.equilibrium_derivative_norm <= screen.config.equilibrium_derivative_norm_limit,
+        ),
+        LocalDirectWrenchScreenRequirement(id="closed_loop_hurwitz", passed=screen.lqr.hurwitz),
+        LocalDirectWrenchScreenRequirement(
+            id="final_error_fraction",
+            actual=final_fraction,
+            limit=screen.config.final_error_fraction_limit,
+            passed=final_fraction < screen.config.final_error_fraction_limit,
+        ),
+        LocalDirectWrenchScreenRequirement(
+            id="all_requests_feasible",
+            actual=list(statuses),
+            passed=statuses == ("feasible",),
+        ),
+        LocalDirectWrenchScreenRequirement(
+            id="integrators_exercised",
+            actual=screen.integrators_exercised,
+            passed=screen.lqi is None or screen.integrators_exercised,
+        ),
+    )
     return {
         "schema": "taoryx.local-direct-wrench-screen-evaluation/v1alpha1",
         "kind": "local_controller_recovery_screen",
         "controller_method": screen.controller_method,
         "screen_pass": screen.mission_pass,
-        "requirements": [
+        "mission_pass": screen.mission_pass,
+        "results": [
             {
-                "id": "equilibrium_wrench_feasible",
-                "actual": screen.equilibrium_projection.status,
-                "limit": "feasible",
-                "passed": screen.equilibrium_projection.status == "feasible",
-            },
-            {
-                "id": "equilibrium_reference_derivative",
-                "actual": screen.equilibrium_derivative_norm,
-                "limit": screen.config.equilibrium_derivative_norm_limit,
-                "passed": screen.equilibrium_derivative_norm <= screen.config.equilibrium_derivative_norm_limit,
-            },
-            {"id": "closed_loop_hurwitz", "passed": screen.lqr.hurwitz},
-            {
-                "id": "final_error_fraction",
-                "actual": final_fraction,
-                "limit": screen.config.final_error_fraction_limit,
-                "passed": final_fraction < screen.config.final_error_fraction_limit,
-            },
-            {"id": "all_requests_feasible", "actual": list(statuses), "passed": statuses == ("feasible",)},
-            {
-                "id": "integrators_exercised",
-                "actual": screen.integrators_exercised,
-                "passed": screen.lqi is None or screen.integrators_exercised,
-            },
+                "id": requirement.id,
+                "status": "pass" if requirement.passed else "fail",
+                "required": True,
+            }
+            for requirement in requirements
         ],
+        "requirements": [requirement.as_dict() for requirement in requirements],
         "claim_boundary": ("The result assesses one local screen only. It is not an independent route, terminal, or physical-effector mission evaluation."),
     }
     ####

@@ -182,48 +182,64 @@ def build_hummingbird_local_vertical_force_lqi_design() -> PhysicalWrenchLqiDesi
 
 
 def build_hummingbird_source_rotor_lqi_tuning_campaign() -> TuningCampaign:
-    """Declare the reusable source-hover rotor-coordinate LQI design screen.
+    """Declare the exact source-hover attitude LQI runtime projection.
 
-    The declaration keeps all local body states so the shared tuner checks
-    source-table attitude, velocity, and rate authority together.  The
-    controlled outputs stay limited to attitude error, matching the local
-    physical screen.  This produces a candidate motor-coordinate controller;
-    the separate bounded nonlinear screen remains the only rotor-allocation
-    execution proof.
+    The common tuner uses the same local attitude/rate-to-moment coordinates
+    and weights as the rotor-allocated nonlinear runtime.  It does not tune
+    motor speeds directly: each runtime wrench command remains subject to the
+    source rotor allocator and motor lag.
     """
 
+    design = build_hummingbird_local_physical_wrench_lqi_design()
     return ControlAutomationDeclaration(
-        id="hummingbird-source-rotor-full-local",
+        id="hummingbird-source-hover-attitude-wrench-local",
         campaign_id="hummingbird-source-rotor-local-lqi-v1",
         family_id="hummingbird",
         tier="rigid_body_6dof_surface_allocated",
         strategy_id="multirotor_hover_translation.v1",
         node_id="source-hover-local",
-        state_scales={
-            "roll_error_rad": 0.2,
-            "pitch_error_rad": 0.2,
-            "yaw_error_rad": 0.3,
-            "u_m_s": 3.0,
-            "v_m_s": 3.0,
-            "w_m_s": 3.0,
-            "p_rad_s": 1.0,
-            "q_rad_s": 1.0,
-            "r_rad_s": 1.0,
-        },
-        control_scales={f"rotor-{index}-speed": 500.0 for index in range(1, 5)},
-        authority_state_names=(
-            "roll_error_rad",
-            "pitch_error_rad",
-            "yaw_error_rad",
-            "u_m_s",
-            "v_m_s",
-            "w_m_s",
-            "p_rad_s",
-            "q_rad_s",
-            "r_rad_s",
-        ),
-        offset_free_outputs=("roll_error_rad", "pitch_error_rad", "yaw_error_rad"),
-        profile_grid_id_prefix="hummingbird-source-rotor-local",
+        state_scales=dict(zip(design.projection.state_names, design.state_scales, strict=True)),
+        control_scales=dict(zip(design.projection.wrench_names, design.wrench_scales, strict=True)),
+        authority_state_names=design.projection.state_names,
+        offset_free_outputs=design.result.output_names,
+        profile_grid_id_prefix="hummingbird-source-hover-attitude",
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        state_base_weights=design.q_diagonal,
+        control_base_weights=design.r_diagonal,
+        integral_base_weights=design.integral_q_diagonal,
+        integral_weight_multipliers=(1.0,),
+    ).build_campaign()
+    ####
+
+
+def build_hummingbird_source_rotor_vertical_lqi_tuning_campaign() -> TuningCampaign:
+    """Declare the exact source-hover vertical-speed/attitude LQI projection.
+
+    Vertical translation owns a separate four-wrench runtime design, so it
+    receives a distinct campaign instead of reinterpreting an attitude-only
+    candidate at the last execution boundary.
+    """
+
+    design = build_hummingbird_local_vertical_force_lqi_design()
+    return ControlAutomationDeclaration(
+        id="hummingbird-source-hover-vertical-wrench-local",
+        campaign_id="hummingbird-source-rotor-vertical-lqi-v1",
+        family_id="hummingbird",
+        tier="rigid_body_6dof_surface_allocated",
+        strategy_id="multirotor_hover_translation.v1",
+        node_id="source-hover-vertical-local",
+        state_scales=dict(zip(design.projection.state_names, design.state_scales, strict=True)),
+        control_scales=dict(zip(design.projection.wrench_names, design.wrench_scales, strict=True)),
+        authority_state_names=design.projection.state_names,
+        offset_free_outputs=design.result.output_names,
+        profile_grid_id_prefix="hummingbird-source-hover-vertical",
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        state_base_weights=design.q_diagonal,
+        control_base_weights=design.r_diagonal,
+        integral_base_weights=design.integral_q_diagonal,
+        integral_weight_multipliers=(1.0,),
     ).build_campaign()
     ####
 
@@ -376,5 +392,7 @@ __all__ = [
     "build_hummingbird_individual_rotor_source_table_plant",
     "build_hummingbird_local_direct_wrench_screen_config",
     "build_hummingbird_local_physical_wrench_lqi_design",
+    "build_hummingbird_local_vertical_force_lqi_design",
     "build_hummingbird_source_rotor_lqi_tuning_campaign",
+    "build_hummingbird_source_rotor_vertical_lqi_tuning_campaign",
 ]

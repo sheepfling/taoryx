@@ -420,105 +420,65 @@ def build_x8_source_surface_physical_lqi_design() -> PhysicalWrenchLqiDesign:
 def build_x8_source_surface_lqi_tuning_campaign() -> TuningCampaign:
     """Declare the X8 source-surface local LQI design screen.
 
-    The campaign keeps all nine local source states because the attitude/rate
-    dynamics are coupled to body velocity at this trim.  Its two integrated
-    outputs are roll and pitch error; yaw is retained as a feedback state but
-    is not represented as an independently trimmed flying-wing objective.
-    This is a local source-table surface candidate, not a racetrack or a
-    physical servo qualification.
+    The campaign uses the *same* source-derived roll/pitch state-to-wrench
+    projection as the allocator-backed nonlinear screen.  It intentionally
+    does not tune the broader source-table state/elevon model, because those
+    coordinates cannot be applied as an exact runtime gain by the bounded
+    physical-wrench controller.  This remains a local source-table candidate,
+    not a racetrack or physical-servo qualification.
     """
 
+    design = build_x8_source_surface_physical_lqi_design()
     return ControlAutomationDeclaration(
-        id="x8-source-surface-full-local",
+        id="x8-source-surface-roll-pitch-wrench-local",
         campaign_id="x8-source-surface-local-lqi-v1",
         family_id="skywalker_x8",
         tier="rigid_body_6dof_surface_allocated",
         strategy_id="powered_fixed_wing.v1",
         node_id="source-trim-local",
-        state_scales={
-            "roll_error_rad": 0.2,
-            "pitch_error_rad": 0.2,
-            "yaw_error_rad": 0.2,
-            "u_m_s": 20.0,
-            "v_m_s": 20.0,
-            "w_m_s": 20.0,
-            "p_rad_s": 1.0,
-            "q_rad_s": 1.0,
-            "r_rad_s": 1.0,
-        },
-        control_scales={
-            "collective-elevon-deg": 10.0,
-            "differential-elevon-deg": 10.0,
-            "throttle": 0.5,
-        },
-        authority_state_names=(
-            "roll_error_rad",
-            "pitch_error_rad",
-            "yaw_error_rad",
-            "u_m_s",
-            "v_m_s",
-            "w_m_s",
-            "p_rad_s",
-            "q_rad_s",
-            "r_rad_s",
-        ),
-        offset_free_outputs=("roll_error_rad", "pitch_error_rad"),
+        state_scales=dict(zip(design.projection.state_names, design.state_scales, strict=True)),
+        control_scales=dict(zip(design.projection.wrench_names, design.wrench_scales, strict=True)),
+        authority_state_names=design.projection.state_names,
+        offset_free_outputs=design.result.output_names,
         profile_grid_id_prefix="x8-source-surface-local",
-        integral_weight_multiplier=0.15,
-        integral_weight_multipliers=(0.1, 1.0, 10.0, 100.0),
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        state_base_weights=design.q_diagonal,
+        control_base_weights=design.r_diagonal,
+        integral_weight_multiplier=design.integral_q_diagonal[0],
+        integral_weight_multipliers=(1.0,),
     ).build_campaign()
     ####
 
 
 def build_b747_source_surface_lqi_tuning_campaign() -> TuningCampaign:
-    """Declare the B747 condition-3 source-surface local LQI design screen.
+    """Declare the exact B747 condition-3 physical-wrench LQI runtime.
 
-    The complete coupled local state is retained through synthesis.  The
-    condition-3 tables provide independent elevator, aileron, rudder, and
-    throttle coordinates, so roll, pitch, and yaw error are all meaningful
-    offset-free inner-loop outputs at this operating point.  The campaign is
-    source-local evidence only; it does not establish a scheduled transport
-    controller or an end-to-end racetrack.
+    Automatic tuning operates on the same retained local state-to-moment
+    projection as the nonlinear screen.  The screen still allocates each
+    request to its bounded elevator, aileron, rudder, and throttle coordinates;
+    the campaign neither synthesizes raw effector gains nor replaces that
+    physical execution evidence.
     """
 
+    design = build_b747_condition3_source_surface_physical_lqi_design()
     return ControlAutomationDeclaration(
-        id="b747-source-surface-full-local",
+        id="b747-condition3-source-wrench-local",
         campaign_id="b747-source-surface-local-lqi-v1",
         family_id="b747",
         tier="rigid_body_6dof_surface_allocated",
         strategy_id="powered_fixed_wing.v1",
-        node_id="condition3-trim-local",
-        state_scales={
-            "roll_error_rad": 0.2,
-            "pitch_error_rad": 0.2,
-            "yaw_error_rad": 0.2,
-            "u_m_s": 300.0,
-            "v_m_s": 100.0,
-            "w_m_s": 100.0,
-            "p_rad_s": 0.5,
-            "q_rad_s": 0.5,
-            "r_rad_s": 0.5,
-        },
-        control_scales={
-            "elevator-deg": 10.0,
-            "aileron-deg": 10.0,
-            "rudder-deg": 15.0,
-            "throttle": 0.5,
-        },
-        authority_state_names=(
-            "roll_error_rad",
-            "pitch_error_rad",
-            "yaw_error_rad",
-            "u_m_s",
-            "v_m_s",
-            "w_m_s",
-            "p_rad_s",
-            "q_rad_s",
-            "r_rad_s",
-        ),
-        offset_free_outputs=("roll_error_rad", "pitch_error_rad", "yaw_error_rad"),
-        profile_grid_id_prefix="b747-source-surface-local",
-        integral_weight_multiplier=0.025,
+        node_id="condition3-source-wrench-local",
+        state_scales=dict(zip(design.projection.state_names, design.state_scales, strict=True)),
+        control_scales=dict(zip(design.projection.wrench_names, design.wrench_scales, strict=True)),
+        authority_state_names=design.projection.state_names,
+        offset_free_outputs=design.result.output_names,
+        profile_grid_id_prefix="b747-condition3-source-wrench",
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        state_base_weights=design.q_diagonal,
+        control_base_weights=design.r_diagonal,
+        integral_base_weights=design.integral_q_diagonal,
         integral_weight_multipliers=(0.1, 1.0, 10.0, 100.0),
     ).build_campaign()
     ####

@@ -18,9 +18,11 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
+
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from .fidelity_contracts import FidelityTier
 from .interface_channel_value_spaces import interface_channel_value_space_profile, value_space_for_interface_channel_profile
@@ -30,7 +32,7 @@ from .value_space import (
     validate_value_space_value,
 )
 from .vehicle_composition_registry import resolved_control_realization_for
-from .vehicle_execution_bindings import bindings_for_family
+from .vehicle_execution_bindings import VehicleExecutionBinding, bindings_for_family
 
 if TYPE_CHECKING:
     from .vehicle_composition_registry import CompositionParameter, ResolvedVehicleComposition, ResolvedVehicleCompositionCatalog
@@ -68,6 +70,143 @@ SamplingSemantics = Literal["truth_boundary", "held_action", "reset_only", "segm
 ProvenanceKind = Literal["source_backed", "derived", "engineering_surrogate", "synthetic", "replayed", "not_applicable"]
 
 SCHEMA_ID = "taoryx.vehicle-interface/v1alpha1"
+
+BindingSourceKind = Literal[
+    "native_action",
+    "native_effector",
+    "batch_telemetry",
+    "batch_report",
+    "episode_value",
+    "runtime_state",
+    "derived",
+    "constant",
+    "composition_parameter",
+    "extension",
+]
+
+
+class InterfaceChannelBinding(BaseModel, Mapping[str, object]):
+    """Validated source/transform declaration for one advertised channel.
+
+    A channel may deliberately expose more than one source—for example a
+    batch telemetry field and an episode value.  The typed optional fields
+    capture the shared mini-language; additive family-owned metadata remains
+    available through ``extra='allow'`` for source-specific diagnostics.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="allow")
+
+    native_action: str | None = None
+    native_effector: str | None = None
+    batch_telemetry: str | None = None
+    batch_report: str | None = None
+    episode_value: str | None = None
+    episode_field: str | None = None
+    runtime_state: str | None = None
+    derived_from: str | None = None
+    transform: str | None = None
+    constant: str | float | bool | None = None
+    initialization_contract: str | None = None
+    segment_contract: str | None = None
+    parameter_id: str | None = None
+    scale: float | None = None
+    source_unit: str | None = None
+    frame: str | None = None
+    ####
+
+    @model_validator(mode="after")
+    def validate_source_and_transform(self) -> InterfaceChannelBinding:
+        for field_name in (
+            "native_action",
+            "native_effector",
+            "batch_telemetry",
+            "batch_report",
+            "episode_value",
+            "episode_field",
+            "runtime_state",
+            "derived_from",
+            "initialization_contract",
+            "segment_contract",
+            "parameter_id",
+            "source_unit",
+            "frame",
+        ):
+            value = getattr(self, field_name)
+            if value is not None and not value.strip():
+                raise ValueError(f"interface binding {field_name} must be nonempty when supplied")
+        if self.transform is not None:
+            if not self.transform.strip():
+                raise ValueError("interface binding transform must be nonempty when supplied")
+            if self.derived_from is None:
+                raise ValueError("interface binding transform requires derived_from")
+        if self.derived_from is not None and self.transform is None:
+            raise ValueError("interface binding derived_from requires an explicit transform")
+        if self.scale is not None and (not math.isfinite(self.scale) or self.scale == 0.0):
+            raise ValueError("interface binding scale must be finite and nonzero")
+        if self.source_unit is not None and self.scale is None:
+            raise ValueError("interface binding source_unit requires an explicit scale")
+        parameter_context = (self.initialization_contract, self.segment_contract, self.parameter_id)
+        if any(item is not None for item in parameter_context) and self.parameter_id is None:
+            raise ValueError("interface binding parameter context requires parameter_id")
+        if self.initialization_contract is not None and self.segment_contract is not None:
+            raise ValueError("interface binding cannot name both initialization and segment contracts")
+        return self
+        ####
+
+    @property
+    def source_kinds(self) -> tuple[BindingSourceKind, ...]:
+        """Return the declared source variants without flattening them to strings."""
+
+        result: list[BindingSourceKind] = []
+        sources: tuple[tuple[BindingSourceKind, str], ...] = (
+            ("native_action", "native_action"),
+            ("native_effector", "native_effector"),
+            ("batch_telemetry", "batch_telemetry"),
+            ("batch_report", "batch_report"),
+            ("episode_value", "episode_value"),
+            ("runtime_state", "runtime_state"),
+            ("derived", "derived_from"),
+            ("constant", "constant"),
+        )
+        for kind, source_field in sources:
+            if getattr(self, source_field) is not None:
+                result.append(kind)
+        if self.parameter_id is not None:
+            result.append("composition_parameter")
+        if not result and self.__pydantic_extra__:
+            result.append("extension")
+        return tuple(result)
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Return the stable flat compatibility projection."""
+
+        return self.model_dump(mode="json", exclude_none=True)
+        ####
+
+    def __getitem__(self, key: str) -> object:
+        return self.as_dict()[key]
+        ####
+
+    def __iter__(self) -> Iterator[str]:  # type: ignore[override]
+        return iter(self.as_dict())
+        ####
+
+    def __len__(self) -> int:
+        return len(self.as_dict())
+        ####
+
+    def __bool__(self) -> bool:
+        return bool(self.as_dict())
+        ####
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Mapping):
+            return self.as_dict() == dict(other)
+        return super().__eq__(other)
+        ####
+
+    ####
 
 
 def _declared_value_space(
@@ -108,11 +247,15 @@ class InterfaceChannel:
     availability: InterfaceAvailability = "available"
     provenance: ProvenanceKind = "derived"
     sampling: SamplingSemantics = "truth_boundary"
-    binding: Mapping[str, object] = field(default_factory=dict)
+    binding: InterfaceChannelBinding | Mapping[str, object] = field(default_factory=InterfaceChannelBinding)
     claim_boundary: str = ""
     value_space: ValueSpaceSpec | None = None
 
     def __post_init__(self) -> None:
+        if not isinstance(self.binding, InterfaceChannelBinding):
+            if not isinstance(self.binding, Mapping):
+                raise ValueError(f"interface channel {self.id!r} binding must be a mapping")
+            object.__setattr__(self, "binding", InterfaceChannelBinding.model_validate(self.binding))
         if not self.id.strip() or not self.description.strip():
             raise ValueError("interface channels require a stable ID and description")
         if self.kind == "parameter" and self.scope is None:
@@ -182,7 +325,7 @@ class InterfaceChannel:
             "sampling": self.sampling,
             "scope": self.scope,
             "description": self.description,
-            "binding": dict(self.binding),
+            "binding": cast(InterfaceChannelBinding, self.binding).as_dict(),
             "claim_boundary": self.claim_boundary,
         }
         ####
@@ -271,6 +414,58 @@ class ObservationProfile:
 
 
 @dataclass(frozen=True, slots=True)
+class VehicleControlAuthorityAdvertisement:
+    """Typed authority projection shared by vehicle discovery and interface APIs."""
+
+    interface_id: str
+    authority_profiles: tuple[AuthorityProfile, ...]
+    action_channels: tuple[InterfaceChannel, ...]
+    effector_channels: tuple[InterfaceChannel, ...]
+    claim_boundary: str
+
+    @property
+    def available_profiles(self) -> tuple[AuthorityProfile, ...]:
+        return tuple(item for item in self.authority_profiles if item.availability == "available")
+        ####
+
+    @property
+    def available_actions(self) -> tuple[InterfaceChannel, ...]:
+        return tuple(item for item in self.action_channels if item.availability == "available")
+        ####
+
+    @property
+    def available_effectors(self) -> tuple[InterfaceChannel, ...]:
+        return tuple(item for item in self.effector_channels if item.availability == "available")
+        ####
+
+    def summary_dict(self, *, details_path: str) -> dict[str, object]:
+        """Serialize the compact tier-card view at an explicit API boundary."""
+
+        return {
+            "interface_id": self.interface_id,
+            "available_profile_ids": [item.id for item in self.available_profiles],
+            "available_action_ids": [item.id for item in self.available_actions],
+            "available_effector_ids": [item.id for item in self.available_effectors],
+            "details_path": details_path,
+        }
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Serialize the full authority detail for discovery clients."""
+
+        return {
+            "interface_id": self.interface_id,
+            "profiles": [item.as_dict() for item in self.authority_profiles],
+            "action_channels": [item.as_dict() for item in self.action_channels],
+            "effector_channels": [item.as_dict() for item in self.effector_channels],
+            "available_action_count": len(self.available_actions),
+            "available_effector_count": len(self.available_effectors),
+            "claim_boundary": self.claim_boundary,
+        }
+        ####
+
+
+@dataclass(frozen=True, slots=True)
 class VehicleInterfaceContract:
     """Immutable caller-facing schema for one family/fidelity realization."""
 
@@ -288,7 +483,7 @@ class VehicleInterfaceContract:
     diagnostic_channels: tuple[InterfaceChannel, ...]
     authority_profiles: tuple[AuthorityProfile, ...]
     observation_profiles: tuple[ObservationProfile, ...]
-    execution_records: tuple[Mapping[str, object], ...]
+    execution_records: tuple[VehicleExecutionBinding, ...]
     claim_boundary: str
     schema: str = SCHEMA_ID
 
@@ -367,6 +562,18 @@ class VehicleInterfaceContract:
         raise KeyError(f"{self.id}: unknown observation profile {identifier!r}")
         ####
 
+    def authority_advertisement(self) -> VehicleControlAuthorityAdvertisement:
+        """Return the typed public authority contract without a dict handoff."""
+
+        return VehicleControlAuthorityAdvertisement(
+            interface_id=self.id,
+            authority_profiles=self.authority_profiles,
+            action_channels=self.action_channels,
+            effector_channels=self.effector_channels,
+            claim_boundary=self.claim_boundary,
+        )
+        ####
+
     def as_dict(self) -> dict[str, object]:
         """Return the complete portable contract for CLI, UI, and artifacts."""
 
@@ -390,7 +597,7 @@ class VehicleInterfaceContract:
             "diagnostics": [item.as_dict() for item in self.diagnostic_channels],
             "authority_profiles": [item.as_dict() for item in self.authority_profiles],
             "observation_profiles": [item.as_dict() for item in self.observation_profiles],
-            "execution_records": [dict(item) for item in self.execution_records],
+            "execution_records": [item.model_dump(mode="json") for item in self.execution_records],
             "claim_boundary": self.claim_boundary,
         }
         ####
@@ -437,7 +644,7 @@ def interface_contract_for_composition(
         batch_runnable,
     )
     execution_records = tuple(
-        item.model_dump(mode="json")
+        item
         for item in bindings_for_family(family.family_id)
         if item.fidelity == fidelity
     )
@@ -3639,7 +3846,7 @@ def build_vehicle_interface_catalog_report(
             contract = interface_contract_for_composition(composition, fidelity)
             findings = list(validate_vehicle_interface_contract(contract))
             episode_runnable = any(
-                item.get("operation") == "episode" and item.get("status") == "runnable"
+                item.operation == "episode" and item.status == "runnable"
                 for item in contract.execution_records
             )
             available_authority = tuple(
@@ -3752,6 +3959,7 @@ __all__ = [
     "ParameterScope",
     "SCHEMA_ID",
     "VehicleInterfaceContract",
+    "VehicleControlAuthorityAdvertisement",
     "bind_declared_sensor_profile",
     "interface_contract_for_composition",
     "resolve_vehicle_interface_contract",

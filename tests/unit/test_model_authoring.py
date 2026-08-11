@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 
 import pytest
+from taoryx.trajectory.dual_launch_mission_composition import build_dual_launch_example_configuration
+from taoryx.trajectory.simple_aero_mission_composition import build_simple_aero_example_configuration
 
 from taoryx.model_authoring import (
     ModelAuthoringError,
@@ -25,7 +27,7 @@ from taoryx.model_authoring import (
 from taoryx.plugins import PluginCatalog, discover_plugins
 from taoryx.runtime.cli import main
 from taoryx.trajectory.contract_probe_mission_composition import build_contract_probe_configuration
-from taoryx.trajectory.execution_contract import MissionCompositionOutputSelection
+from taoryx.trajectory.execution_contract import MissionCompositionOutputSelection, RunnableMissionCompositionProvider
 
 
 @pytest.fixture(scope="module")
@@ -64,9 +66,15 @@ def test_every_advertised_model_has_a_common_plan_and_plain_value_scaffold(
             assert plan["status"] in {"ready_to_author", "selection_required"}
             assert plan["data_contract"]["configuration_schema_fingerprint"] == draft.schema_fingerprint  # type: ignore[index]
             maturity = plan["maturity_advertisement"]
+            focused_endpoint = plan["focused_endpoint_verification"]
             if provider.metadata.id == "taoryx.registry.mission-composition":
                 assert maturity["status"] == "declared"
                 assert maturity["maturity"] in {"M4", "M5"}
+                assert focused_endpoint["status"] == "available"
+                assert focused_endpoint["endpoints"]
+            else:
+                assert focused_endpoint["status"] == "not_declared"
+                assert focused_endpoint["endpoints"] == []
             assert draft.model_id == model.id
             assert draft.provider_id == provider.metadata.id
             assert isinstance(draft.values, dict)
@@ -87,6 +95,34 @@ def test_every_advertised_model_has_a_common_plan_and_plain_value_scaffold(
         ("taoryx.registry.mission-composition", "skywalker_x8"),
         ("taoryx.registry.mission-composition", "b747"),
     }
+    ####
+
+
+def test_registry_workflow_models_execute_through_the_declared_provider_runner(
+    plugins: PluginCatalog,
+) -> None:
+    """The authoring run path uses an explicit execution-capable provider contract."""
+
+    providers = plugins.build_mission_composition_provider_registry()
+    provider = providers.provider("taoryx.registry.mission-composition")
+    assert isinstance(provider, RunnableMissionCompositionProvider)
+
+    simple_aero = provider.validate_configuration(
+        build_simple_aero_example_configuration(provider.get_model_schema("simple_aero"))
+    )
+    dual_launch = provider.validate_configuration(
+        build_dual_launch_example_configuration("attached_booster", provider.get_model_schema("dual_launch_glider"))
+    )
+    for prepared in (simple_aero, dual_launch):
+        response = run_prepared_mission_composition(
+            providers,
+            provider.metadata.id,
+            prepared,
+            output=MissionCompositionOutputSelection(mode="core", maximum_samples_per_object=3),
+        )
+        assert response.kind == "trajectory", response.model_dump(mode="json", by_alias=True)
+        assert response.result.status == "completed"
+        assert response.result.primary_model_id == prepared.configuration.model_id
     ####
 
 
@@ -367,9 +403,12 @@ def test_registered_reference_campaigns_use_the_common_runner(
         "f16-point-source-trim-translation-v1",
         "f16-pseudo-source-trim-attitude-v1",
         "f16-source-surface-local-lqr-v1",
+        "f16-source-surface-schedule-lqr-v1",
         "f16-source-surface-local-lqi-v1",
+        "f16-source-surface-schedule-lqi-v1",
         "hummingbird-pseudo-hover-attitude-v1",
         "hummingbird-source-rotor-local-lqi-v1",
+        "hummingbird-source-rotor-vertical-lqi-v1",
         "x15-source-release-direct-wrench-v1",
         "x15-source-release-direct-wrench-lqi-v1",
         "x15-source-surface-local-lqi-v1",
@@ -389,9 +428,12 @@ def test_registered_reference_campaigns_use_the_common_runner(
         "f16-point-source-trim-translation-v1": ("lqr", False),
         "f16-pseudo-source-trim-attitude-v1": ("lqi", True),
         "f16-source-surface-local-lqr-v1": ("lqr", False),
+        "f16-source-surface-schedule-lqr-v1": ("lqr", False),
         "f16-source-surface-local-lqi-v1": ("lqi", True),
+        "f16-source-surface-schedule-lqi-v1": ("lqi", True),
         "hummingbird-pseudo-hover-attitude-v1": ("lqi", True),
         "hummingbird-source-rotor-local-lqi-v1": ("lqi", True),
+        "hummingbird-source-rotor-vertical-lqi-v1": ("lqi", True),
         "x15-source-release-direct-wrench-v1": ("lqr", False),
         "x15-source-release-direct-wrench-lqi-v1": ("lqi", True),
         "x15-source-surface-local-lqi-v1": ("lqi", True),
@@ -446,7 +488,7 @@ def test_authoring_plan_advertises_explicit_tuner_selection_and_safe_cache_reuse
     selection = controller["tuner_selection"]
     cache = controller["tuning_cache"]
     assert isinstance(selection, dict) and isinstance(cache, dict)
-    assert selection["campaign_ids"] == ["hummingbird-source-rotor-local-lqi-v1"]
+    assert selection["campaign_ids"] == ["hummingbird-source-rotor-vertical-lqi-v1"]
     assert selection["cli_argument"] == "--campaign <campaign-id>"
     assert cache["status"] == "available"
     assert cache["default_directory"] == "build/controller-cache"
@@ -546,6 +588,7 @@ def test_model_automation_assessment_exercises_every_advertised_realization(
             "controller_automation",
             "execution_advertisement",
             "maturity_advertisement",
+            "focused_endpoint_verification",
             "navigation_automation",
             "mode_automation",
             "segment_automation",
@@ -575,7 +618,10 @@ def test_model_automation_assessment_exercises_every_advertised_realization(
     physical = next(item for item in hummingbird["realizations"] if item["id"] == "rigid_body_6dof_surface_allocated")
     physical_tuning = physical["fidelities"][0]["controller_automation"]
     assert physical_tuning["status"] == "provider_managed_with_campaign"
-    assert physical_tuning["campaign_ids"] == ["hummingbird-source-rotor-local-lqi-v1"]
+    assert physical_tuning["campaign_ids"] == [
+        "hummingbird-source-rotor-local-lqi-v1",
+        "hummingbird-source-rotor-vertical-lqi-v1",
+    ]
 
     a320 = next(item for item in models if item["id"] == "a320_openap_3dof")
     a320_point = next(item for item in a320["realizations"] if item["id"] == "point_mass_3dof")
@@ -625,7 +671,9 @@ def test_model_automation_assessment_exercises_every_advertised_realization(
     assert f16_surface_tuning["status"] == "provider_managed_with_campaign"
     assert f16_surface_tuning["campaign_ids"] == [
         "f16-source-surface-local-lqr-v1",
+        "f16-source-surface-schedule-lqr-v1",
         "f16-source-surface-local-lqi-v1",
+        "f16-source-surface-schedule-lqi-v1",
     ]
 
     x15 = next(item for item in models if item["id"] == "x15")
@@ -726,6 +774,20 @@ def test_model_plan_exposes_exact_selected_endpoint_maturity(
     a320_maturity = a320["maturity_advertisement"]
     assert a320_maturity["maturity"] == "M4"
     assert a320_maturity["next_gate"] == "expanded_operating_point_schedule_and_source_grounded_surface_path"
+    a320_endpoint = a320["focused_endpoint_verification"]
+    assert a320_endpoint["selected_endpoint_status"] == "different_declared_endpoint"
+    assert a320_endpoint["selected_endpoint_ids"] == []
+    assert a320_endpoint["endpoints"] == [
+        {
+            "id": "a320-pseudo6dof-native-coordinate-lqi",
+            "kind": "vehicle_composition",
+            "maturity_record_id": "a320_openap_3dof",
+            "matches_selected_mission_and_fidelity": False,
+            "match_scope": "model_id, mission_id, fidelity",
+            "command": "taoryx vehicle verify a320-pseudo6dof-native-coordinate-lqi",
+            "execute_command": "taoryx vehicle verify a320-pseudo6dof-native-coordinate-lqi --execute",
+        }
+    ]
 
     nesc = build_model_authoring_plan(
         providers,
@@ -743,6 +805,10 @@ def test_model_plan_exposes_exact_selected_endpoint_maturity(
     assert nesc_execution["available_operations"] == ["validate", "batch"]
     assert [item["operation"] for item in nesc_execution["blocked_operations"]] == ["step"]
     assert nesc["maturity_advertisement"]["maturity"] == "M4"
+    assert nesc["focused_endpoint_verification"]["selected_endpoint_status"] == "matching_endpoint_available"
+    assert nesc["focused_endpoint_verification"]["selected_endpoint_ids"] == [
+        "nesc-source-history-replay-pseudo6dof"
+    ]
 
     for model_id, mission_template_id in (
         ("x15", "x15_staged_booster_reachability_v1"),
@@ -765,6 +831,51 @@ def test_model_plan_exposes_exact_selected_endpoint_maturity(
         assert execution["endpoint_maturity"] == "batch_ready"
         assert execution["available_operations"] == ["validate", "batch"]
         assert [item["operation"] for item in execution["blocked_operations"]] == ["step"]
+    ####
+
+
+@pytest.mark.parametrize(
+    ("model_id", "realization_id", "mission_template_id", "endpoint_id"),
+    (
+        ("simple_aero", "fixed_ld_point_mass", "fixed_ld_baseline", "simple-aero-fixed-ld-batch"),
+        ("dual_launch_glider", "generated_native_problem", "attached_booster_waypoint", "dual-launch-attached-booster-batch"),
+    ),
+)
+def test_model_plan_advertises_exact_workflow_endpoint_verifier(
+    plugins: PluginCatalog,
+    model_id: str,
+    realization_id: str,
+    mission_template_id: str,
+    endpoint_id: str,
+) -> None:
+    """Nonphysical workflows expose their provider-owned proof command directly."""
+
+    plan = build_model_authoring_plan(
+        plugins.build_mission_composition_provider_registry(),
+        plugins.build_controller_tuning_campaign_registry(),
+        "taoryx.registry.mission-composition",
+        model_id,
+        family_adapters=plugins.build_family_adapter_registry(),
+        fidelity="point_mass_3dof",
+        realization_id=realization_id,
+        mission_template_id=mission_template_id,
+    )
+
+    endpoint = plan["focused_endpoint_verification"]
+    assert endpoint["status"] == "available"
+    assert endpoint["selected_endpoint_status"] == "matching_endpoint_available"
+    assert endpoint["selected_endpoint_ids"] == [endpoint_id]
+    assert endpoint["endpoints"] == [
+        {
+            "id": endpoint_id,
+            "kind": "mission_workflow",
+            "maturity_record_id": model_id,
+            "matches_selected_configuration": True,
+            "match_scope": "provider_id, model_id, mission_template_id, fidelity, realization_id",
+            "command": f"taoryx model verify {endpoint_id}",
+            "execute_command": f"taoryx model verify {endpoint_id} --execute",
+        }
+    ]
     ####
 
 

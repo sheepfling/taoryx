@@ -15,7 +15,7 @@ from __future__ import annotations
 import math
 import re
 from collections.abc import Callable, Mapping
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError, model_validator
 
@@ -693,6 +693,24 @@ class MissionCompositionRunnerRegistry:
     ####
 
 
+@runtime_checkable
+class RunnableMissionCompositionProvider(ConfigurableTrajectoryProvider, Protocol):
+    """Discovery provider that also publishes the common execution surface.
+
+    Configuration discovery remains useful without a local executor, so it is
+    intentionally modeled separately from this optional capability.  Hosts
+    that dispatch ``model run`` can now test an explicit contract rather than
+    reaching into a provider for an untyped attribute.
+    """
+
+    def build_runner(self) -> MissionCompositionRunnerRegistry:
+        """Build the provider-owned registry of common Mission Composition executors."""
+
+        ...
+
+    ####
+
+
 class ProviderModelAdvertisementConformance(BaseModel):
     """Conformance result for one advertised model and its full schema."""
 
@@ -1044,7 +1062,7 @@ def audit_provider_advertisement(
                             model_id=model.id,
                         )
                     )
-            segment_ids = {segment for mission in model.mission_templates for segment in mission.segment_sequence}
+            segment_ids = {segment for mission in model.mission_templates for segment in mission.advertised_segment_ids}
             for deployment in model.deployments:
                 unknown_segments = sorted(set(deployment.trigger_segment_ids) - segment_ids)
                 if unknown_segments:

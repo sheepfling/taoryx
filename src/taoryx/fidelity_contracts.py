@@ -9,6 +9,7 @@ the advertised realization tiers.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import Literal
 
 FidelityTier = Literal[
@@ -52,6 +53,66 @@ RUNTIME_FIDELITY_BY_TIER: Mapping[FidelityTier, RuntimeFidelity] = {
     "pseudo_6dof": "pseudo_6dof",
     "rigid_body_6dof_direct_wrench": "rigid_body_6dof",
     "rigid_body_6dof_surface_allocated": "rigid_body_6dof",
+}
+
+
+@dataclass(frozen=True, slots=True)
+class FidelityTierMetadata:
+    """Stable explanatory metadata for one canonical fidelity tier."""
+
+    display_name: str
+    model_kind: str
+    translational_degrees_of_freedom: int
+    attitude_representation: str
+    control_boundary: str
+    description: str
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "display_name": self.display_name,
+            "model_kind": self.model_kind,
+            "translational_degrees_of_freedom": self.translational_degrees_of_freedom,
+            "attitude_representation": self.attitude_representation,
+            "control_boundary": self.control_boundary,
+            "description": self.description,
+        }
+        ####
+    ####
+
+
+FIDELITY_TIER_METADATA: Mapping[FidelityTier, FidelityTierMetadata] = {
+    "point_mass_3dof": FidelityTierMetadata(
+        "Point-mass 3DOF",
+        "translational_force_model",
+        3,
+        "not_dynamically_propagated",
+        "force_or_guidance_intent",
+        "Translational motion with attitude and physical moment balance omitted.",
+    ),
+    "pseudo_6dof": FidelityTierMetadata(
+        "Pseudo-6DOF response model",
+        "translation_plus_attitude_response",
+        3,
+        "named_response_law_or_declared_rigid_body_reuse",
+        "attitude_or_guidance_intent",
+        "Translational motion plus a declared attitude-response realization; it is not automatically a physical moment or effector model.",
+    ),
+    "rigid_body_6dof_direct_wrench": FidelityTierMetadata(
+        "Rigid-body 6DOF — direct wrench",
+        "newton_euler_rigid_body",
+        3,
+        "integrated_rigid_body_attitude",
+        "generalized_body_force_and_moment",
+        "Rigid-body translation and rotation driven through a bounded generalized-wrench boundary without a physical-effector claim.",
+    ),
+    "rigid_body_6dof_surface_allocated": FidelityTierMetadata(
+        "Rigid-body 6DOF — allocated effectors",
+        "newton_euler_rigid_body_with_allocation",
+        3,
+        "integrated_rigid_body_attitude",
+        "named_bounded_effectors",
+        "Rigid-body translation and rotation with commands realized through declared bounded physical or logical effectors.",
+    ),
 }
 FidelityStatus = Literal[
     "planned",
@@ -145,10 +206,19 @@ def runtime_fidelity_for(tier: FidelityTier) -> RuntimeFidelity:
     ####
 
 
+def fidelity_tier_metadata(tier: FidelityTier) -> FidelityTierMetadata:
+    """Return the common explanatory card for a canonical tier."""
+
+    return FIDELITY_TIER_METADATA[tier]
+    ####
+
+
 __all__ = [
     "CANONICAL_FIDELITY_TIERS",
     "ControlRealization",
     "FIDELITY_TIER_RANK",
+    "FIDELITY_TIER_METADATA",
+    "FidelityTierMetadata",
     "FidelityStatus",
     "FidelityTier",
     "LEGACY_FIDELITY_ORDER",
@@ -159,6 +229,7 @@ __all__ = [
     "canonicalize_fidelity",
     "canonical_tier_for_runtime",
     "control_realization_for",
+    "fidelity_tier_metadata",
     "parent_fidelity",
     "runtime_fidelity_for",
 ]

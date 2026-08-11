@@ -15,18 +15,29 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Literal, cast
 
+from .claim_bound_evidence import (
+    RELEASE_EVIDENCE_SCHEMA,
+    ClaimBoundEvidenceArtifact,
+    LegacyClaimBoundEvidenceArtifact,
+)
 from .composition_control_trace import validate_committed_control_trace_against_status
 from .composition_graph_evidence import GraphExecutionDispatch, observed_mission_graph_execution
 from .composition_resource_ledger import validate_committed_resource_ledger
 from .composition_status_trace import validate_committed_status_trace
+from .controller_runtime_contract import ControllerRuntimeDeclaration
 from .fidelity_contracts import FidelityTier
+from .simulation_runtime_contracts import SimulationRuntimeStatus
+from .simulation_runtime_manifest import read_simulation_runtime_run_manifest
 from .trajectory.evaluation import TrajectoryEvaluation
+from .tuning_application import RuntimeTuningBindingReceipt
 from .vehicle_composition import CompiledVehicleComposition
+from .vehicle_execution_artifact import read_vehicle_execution_packet
 from .vehicle_execution_bindings import batch_episode_parity_record, resolve_vehicle_execution_binding
 from .vehicle_execution_preflight import validate_public_capability_advertisement
 
 _KNOWN_ARTIFACTS = (
     "execution.json",
+    "run-manifest.json",
     "composition.json",
     "preflight.json",
     "local_screen.json",
@@ -105,6 +116,21 @@ def index_composition_results(directory: str | Path) -> dict[str, object]:
                     "status": "invalid",
                     "error": detail,
                     "composition_provenance": provenance,
+                }
+            )
+            continue
+        run_manifest_evidence = _run_manifest_evidence(output_directory, provenance)
+        if run_manifest_evidence["status"] == "invalid":
+            detail = str(run_manifest_evidence["error"])
+            errors.append(f"{relative_path}: invalid composition run manifest: {detail}")
+            records.append(
+                {
+                    "evaluation_path": str(relative_path),
+                    "output_directory": str(output_directory.relative_to(root)),
+                    "status": "invalid",
+                    "error": detail,
+                    "composition_provenance": provenance,
+                    "run_manifest_evidence": run_manifest_evidence,
                 }
             )
             continue
@@ -281,6 +307,7 @@ def index_composition_results(directory: str | Path) -> dict[str, object]:
                 evaluation_path,
                 evaluation,
                 provenance,
+                run_manifest_evidence,
                 capability_preflight_evidence,
                 interface_provenance,
                 action_trace_evidence,
@@ -376,7 +403,11 @@ def build_composition_release_catalog(directory: str | Path) -> dict[str, object
             if not isinstance(path, str):
                 raise ValueError(f"result catalog record {index} has malformed {name} path")
             evidence_counts[name] += 1
-            release_evidence[name] = _validate_release_evidence_artifact(root / path, name)
+            release_evidence[name] = _validate_release_evidence_artifact(
+                root / path,
+                name,
+                expected_subject=_release_evidence_subject(record),
+            )
         packet_records.append(
             {
                 "record_kind": record.get("record_kind"),
@@ -407,8 +438,9 @@ def build_composition_release_catalog(directory: str | Path) -> dict[str, object
             name: {"present_packet_count": count, "missing_packet_count": len(packet_records) - count} for name, count in evidence_counts.items()
         },
         "claim_boundary": (
-            "This is a hash-bound inventory of already validated result packets. It does not rerun vehicles, "
-            "recompute objectives, validate the content of optional release evidence, or promote any result to qualification."
+            "This is a hash-bound inventory of already validated result packets. It validates the common schema, "
+            "kind, outcome, and compiled-composition binding of typed release sidecars, but does not rerun vehicles, "
+            "recompute family-specific evidence metrics, or promote any result to qualification."
         ),
     }
     ####
@@ -461,6 +493,16 @@ def _release_execution_identity(record: Mapping[str, object]) -> dict[str, objec
                 "derived_mission_sha256",
             ),
         ),
+        "run_manifest": _release_identity_evidence(
+            record.get("run_manifest_evidence"),
+            (
+                "run_identity",
+                "execution_packet_identity_sha256",
+                "execution_packet_artifact_sha256",
+                "outcome_scope",
+                "outcome_disposition",
+            ),
+        ),
         "reproduction": _release_identity_evidence(
             record.get("reproduction_evidence"),
             (
@@ -500,13 +542,48 @@ def _release_identity_evidence(raw: object, fields: tuple[str, ...]) -> dict[str
     ####
 
 
-def _validate_release_evidence_artifact(path: Path, name: str) -> dict[str, object]:
-    """Validate only the shared structural envelope of one optional sidecar.
+def _release_evidence_subject(record: Mapping[str, object]) -> dict[str, object] | None:
+    """Return the identity a typed release sidecar must bind, when available."""
 
-    Families retain ownership of the numerical content.  Release assembly
-    requires just enough common structure to ensure a present sidecar is not a
-    blank or malformed placeholder: JSON evidence must identify a status and
-    claim boundary, while a reproduction recipe must be nonempty text.
+    provenance = record.get("composition_provenance")
+    if not isinstance(provenance, Mapping) or provenance.get("status") != "verified":
+        return None
+    fields = (
+        "composition_id",
+        "composition_identity_sha256",
+        "vehicle_id",
+        "family_id",
+        "mission_id",
+        "fidelity",
+        "control_realization",
+    )
+    subject = {field: provenance.get(field) for field in fields}
+    if not all(isinstance(value, str) and value for value in subject.values()):
+        raise ValueError("verified composition provenance lacks a release evidence identity field")
+    return subject
+    ####
+
+
+def _release_evidence_kind(name: str) -> str:
+    """Map a release sidecar filename to its declared common evidence kind."""
+
+    return name.removesuffix("_report.json").removesuffix(".json")
+    ####
+
+
+def _validate_release_evidence_artifact(
+    path: Path,
+    name: str,
+    *,
+    expected_subject: Mapping[str, object] | None,
+) -> dict[str, object]:
+    """Validate a release sidecar and bind current evidence to its composition.
+
+    Current sidecars carry the versioned ``release_evidence_*`` fields.  The
+    catalog validates their kind, subject, and outcome before using them as
+    release evidence.  Older status/claim-only sidecars remain visible as
+    explicitly legacy evidence instead of being silently treated as equally
+    strong proof.
     """
 
     try:
@@ -518,13 +595,43 @@ def _validate_release_evidence_artifact(path: Path, name: str) -> dict[str, obje
         payload = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(payload, Mapping):
             raise ValueError("JSON sidecar is not an object")
-        status = payload.get("status")
-        if not isinstance(status, str) or not status.strip():
-            raise ValueError("JSON sidecar has no nonempty status")
-        claim = payload.get("claim_boundary", payload.get("claim"))
-        if not isinstance(claim, str) or not claim.strip():
-            raise ValueError("JSON sidecar has no nonempty claim or claim_boundary")
-        return {"status": "verified", "format": "json", "reported_status": status}
+        if payload.get("release_evidence_schema") != RELEASE_EVIDENCE_SCHEMA:
+            legacy = LegacyClaimBoundEvidenceArtifact.model_validate(payload)
+            return {
+                # A readable legacy report is still useful inventory, but it
+                # cannot serve as composition-bound release evidence.  Keep
+                # that distinction in the primary status so downstream
+                # release clients cannot accidentally promote it by only
+                # checking ``status``.
+                "status": "unbound",
+                "format": "json",
+                "reported_status": legacy.status,
+                "contract_status": "legacy_unbound",
+                "claim_boundary": legacy.claim_boundary,
+            }
+        evidence = ClaimBoundEvidenceArtifact.from_payload(payload)
+        expected_kind = _release_evidence_kind(name)
+        if evidence.release_evidence_kind != expected_kind:
+            raise ValueError(
+                f"release evidence kind mismatch: expected {expected_kind!r}, got {evidence.release_evidence_kind!r}"
+            )
+        if expected_subject is None:
+            raise ValueError("typed release evidence requires a verified compiled composition sidecar")
+        subject = evidence.release_evidence_subject.model_dump(mode="json")
+        mismatched = [field for field, expected in expected_subject.items() if subject.get(field) != expected]
+        if mismatched:
+            raise ValueError("release evidence subject disagrees with compiled composition: " + ", ".join(mismatched))
+        return {
+            "status": "verified",
+            "format": "json",
+            "reported_status": evidence.status,
+            "contract_status": "typed_bound",
+            "contract_schema": evidence.release_evidence_schema,
+            "evidence_kind": evidence.release_evidence_kind,
+            "composition_id": evidence.release_evidence_subject.composition_id,
+            "composition_identity_sha256": evidence.release_evidence_subject.composition_identity_sha256,
+            "outcome_passed": evidence.release_evidence_outcome.passed,
+        }
     except (OSError, ValueError, json.JSONDecodeError) as error:
         raise ValueError(f"invalid optional release evidence {name!r}: {error}") from error
     ####
@@ -585,6 +692,7 @@ def _mission_record(
     evaluation_path: Path,
     evaluation: TrajectoryEvaluation,
     provenance: dict[str, object],
+    run_manifest_evidence: dict[str, object],
     capability_preflight_evidence: dict[str, object],
     interface_provenance: dict[str, object],
     action_trace_evidence: dict[str, object],
@@ -612,6 +720,7 @@ def _mission_record(
         "gate_statuses": {gate.id: gate.status for gate in evaluation.gates},
         "evaluation_summary": _evaluation_summary(evaluation),
         "composition_provenance": provenance,
+        "run_manifest_evidence": run_manifest_evidence,
         "capability_preflight_evidence": capability_preflight_evidence,
         "interface_provenance": interface_provenance,
         "semantic_action_trace_evidence": action_trace_evidence,
@@ -856,15 +965,15 @@ def _controller_execution_evidence(
             }
         if not isinstance(runtime, Mapping):
             raise ValueError("execution runtime must be a mapping")
-        method = runtime.get("controller_method")
-        if method is None:
+        declared_method = runtime.get("controller_method")
+        if declared_method is None:
             return {
                 "status": "not_applicable",
                 "path": str(source),
                 "claim_boundary": "The execution runtime does not declare an LQR or LQI controller method.",
             }
-        if method not in {"lqr", "lqi"}:
-            raise ValueError("execution controller method must be 'lqr' or 'lqi'")
+        declaration = ControllerRuntimeDeclaration.model_validate(runtime)
+        method = declaration.controller_method
         tuning_binding = _runtime_tuning_binding(runtime, method)
         if composition_provenance.get("status") != "verified":
             raise ValueError("controller execution evidence requires verified compiled-composition provenance")
@@ -876,21 +985,8 @@ def _controller_execution_evidence(
             raise ValueError("execution composition ID disagrees with composition provenance")
         if composition.identity_sha256 != composition_provenance.get("composition_identity_sha256"):
             raise ValueError("execution composition fingerprint disagrees with composition provenance")
-        control_realization = runtime.get("control_realization")
-        if not isinstance(control_realization, str) or not control_realization.strip():
-            raise ValueError("execution controller runtime has no nonempty control realization")
-        raw_integral_names = runtime.get("integral_output_names", [])
-        if not isinstance(raw_integral_names, list) or any(
-            not isinstance(name, str) or not name.strip() for name in raw_integral_names
-        ):
-            raise ValueError("execution integral output names must be a list of nonempty strings")
-        integral_output_names = tuple(raw_integral_names)
-        if len(set(integral_output_names)) != len(integral_output_names):
-            raise ValueError("execution integral output names must be unique")
-        if method == "lqi" and not integral_output_names:
-            raise ValueError("LQI execution must identify at least one integral output")
-        if method == "lqr" and integral_output_names:
-            raise ValueError("LQR execution must not identify integral outputs")
+        control_realization = declaration.control_realization
+        integral_output_names = declaration.integral_output_names
         screen = payload.get("control_screen")
         if not isinstance(screen, Mapping):
             raise ValueError("controller execution has no control-screen mapping")
@@ -937,13 +1033,11 @@ def _controller_execution_evidence(
             "samples. It does not retune the controller, establish disturbance robustness, or promote qualification."
         ),
     }
-    controller_id = runtime.get("controller_id")
-    if isinstance(controller_id, str) and controller_id.strip():
-        result["controller_id"] = controller_id
+    if declaration.controller_id is not None:
+        result["controller_id"] = declaration.controller_id
     result["tuning_binding"] = tuning_binding
-    integrators_exercised = runtime.get("integrators_exercised")
-    if isinstance(integrators_exercised, bool):
-        result["integrators_exercised"] = integrators_exercised
+    if declaration.integrators_exercised is not None:
+        result["integrators_exercised"] = declaration.integrators_exercised
     return result
     ####
 
@@ -960,54 +1054,48 @@ def _runtime_tuning_binding(runtime: Mapping[str, object], method: object) -> di
     """
 
     raw_binding = runtime.get("tuning_binding")
-    if raw_binding is None:
+    raw_bindings = runtime.get("tuning_bindings")
+    if raw_binding is not None and raw_bindings is not None:
+        raise ValueError("execution runtime cannot declare both tuning_binding and tuning_bindings")
+    if raw_binding is None and raw_bindings is None:
         return {
             "status": "not_declared",
             "claim_boundary": (
                 "The runtime did not claim that this controller was instantiated from a common tuning-campaign candidate."
             ),
         }
-    if not isinstance(raw_binding, Mapping):
-        raise ValueError("execution tuning_binding must be a mapping when supplied")
-    required = (
-        "campaign_id",
-        "node_id",
-        "candidate_profile_id",
-        "candidate_configuration_fingerprint_sha256",
-        "applied_gain_fingerprint_sha256",
-    )
-    missing = [name for name in required if not isinstance(raw_binding.get(name), str) or not raw_binding[name].strip()]
-    if missing:
-        raise ValueError("execution tuning_binding is missing nonempty fields: " + ", ".join(missing))
-    fingerprint = raw_binding["candidate_configuration_fingerprint_sha256"]
-    if not isinstance(fingerprint, str) or len(fingerprint) != 64 or any(character not in "0123456789abcdef" for character in fingerprint):
-        raise ValueError("execution tuning_binding candidate configuration fingerprint must be a lowercase SHA-256 hex digest")
-    gain_fingerprint = raw_binding["applied_gain_fingerprint_sha256"]
-    if (
-        not isinstance(gain_fingerprint, str)
-        or len(gain_fingerprint) != 64
-        or any(character not in "0123456789abcdef" for character in gain_fingerprint)
-    ):
-        raise ValueError("execution tuning_binding applied gain fingerprint must be a lowercase SHA-256 hex digest")
-    binding_method = raw_binding.get("controller_method")
-    if binding_method is not None and binding_method != method:
-        raise ValueError("execution tuning_binding controller method disagrees with execution runtime")
-    result: dict[str, object] = {
-        "status": "declared",
-        "campaign_id": raw_binding["campaign_id"],
-        "node_id": raw_binding["node_id"],
-        "candidate_profile_id": raw_binding["candidate_profile_id"],
-        "candidate_configuration_fingerprint_sha256": fingerprint,
-        "applied_gain_fingerprint_sha256": gain_fingerprint,
+    if raw_binding is not None:
+        if not isinstance(raw_binding, Mapping):
+            raise ValueError("execution tuning_binding must be a mapping when supplied")
+        try:
+            binding = RuntimeTuningBindingReceipt.model_validate(raw_binding)
+        except ValueError as error:
+            raise ValueError(f"execution tuning_binding violates the runtime receipt contract: {error}") from error
+        binding.require_runtime_method(method)
+        return {
+            "status": "declared",
+            **binding.as_dict(),
+        }
+    if not isinstance(raw_bindings, list) or len(raw_bindings) < 2:
+        raise ValueError("execution tuning_bindings must be a list with at least two receipts when supplied")
+    try:
+        bindings = tuple(RuntimeTuningBindingReceipt.model_validate(item) for item in raw_bindings)
+    except ValueError as error:
+        raise ValueError(f"execution tuning_bindings violate the runtime receipt contract: {error}") from error
+    node_ids = tuple(binding.node_id for binding in bindings)
+    if len(node_ids) != len(set(node_ids)):
+        raise ValueError("execution tuning_bindings must contain one receipt per node")
+    campaign_ids = {binding.campaign_id for binding in bindings}
+    if len(campaign_ids) != 1:
+        raise ValueError("execution tuning_bindings must identify one campaign")
+    for binding in bindings:
+        binding.require_runtime_method(method)
+    return {
+        "status": "declared_set",
+        "campaign_id": next(iter(campaign_ids)),
+        "node_count": len(bindings),
+        "bindings": [binding.as_dict() for binding in bindings],
     }
-    if binding_method is not None:
-        result["controller_method"] = binding_method
-    cache_key = raw_binding.get("cache_key")
-    if cache_key is not None:
-        if not isinstance(cache_key, str) or not cache_key.strip():
-            raise ValueError("execution tuning_binding cache_key must be a nonempty string when supplied")
-        result["cache_key"] = cache_key
-    return result
     ####
 
 
@@ -1245,6 +1333,100 @@ def _composition_provenance(
         "runtime_fidelity": composition.runtime_fidelity,
         "control_realization": composition.control_realization,
         "variant": composition.variant.model_dump(mode="json"),
+    }
+    ####
+
+
+def _run_manifest_evidence(
+    output_directory: Path,
+    composition_provenance: Mapping[str, object],
+) -> dict[str, object]:
+    """Bind an optional host run manifest to its canonical execution packet.
+
+    Older provider packets remain indexable as explicitly unbound evidence.
+    A packet emitted through the current public batch command is stricter:
+    the manifest, execution packet, composition, factory, and execution-file
+    digest must all agree before a catalog can call the evidence verified.
+    """
+
+    source = output_directory / "run-manifest.json"
+    if not source.is_file():
+        return {
+            "status": "missing",
+            "path": None,
+            "claim_boundary": "No host Simulation Runtime manifest was supplied with this result packet.",
+        }
+    if composition_provenance.get("status") != "verified":
+        return {
+            "status": "unbound",
+            "path": str(source),
+            "claim_boundary": "The host manifest cannot be bound because this result has no verified compiled composition provenance.",
+        }
+    try:
+        manifest = read_simulation_runtime_run_manifest(source)
+        if manifest.operation != "composition_batch":
+            raise ValueError("run manifest operation is not composition_batch")
+        if manifest.scenario_id != composition_provenance.get("composition_id"):
+            raise ValueError("run manifest scenario ID disagrees with the compiled composition")
+        if manifest.fidelity != composition_provenance.get("fidelity"):
+            raise ValueError("run manifest fidelity disagrees with the compiled composition")
+        if manifest.realization != composition_provenance.get("control_realization"):
+            raise ValueError("run manifest realization disagrees with the compiled composition")
+        integration = manifest.integration
+        raw_packet = integration.get("execution_packet")
+        execution_path = output_directory / "execution.json"
+        if not isinstance(raw_packet, Mapping) or not execution_path.is_file():
+            return {
+                "status": "unbound",
+                "path": str(source),
+                "claim_boundary": (
+                    "This run manifest predates the canonical host execution-packet linkage. It remains portable runtime "
+                    "evidence but does not bind a provider execution sidecar to the manifest."
+                ),
+            }
+        packet = read_vehicle_execution_packet(execution_path)
+        factory_id = integration.get("factory_id")
+        if factory_id != packet.host_execution.request.factory_id:
+            raise ValueError("run manifest factory ID disagrees with the canonical execution packet")
+        if integration.get("execution_mode") != packet.host_execution.request.execution_mode:
+            raise ValueError("run manifest execution mode disagrees with the canonical execution packet")
+        if packet.host_execution.request.composition_id != composition_provenance.get("composition_id"):
+            raise ValueError("execution packet composition ID disagrees with the compiled composition")
+        if packet.host_execution.request.composition_identity_sha256 != composition_provenance.get("composition_identity_sha256"):
+            raise ValueError("execution packet composition fingerprint disagrees with the compiled composition")
+        if raw_packet.get("schema") != packet.schema_id:
+            raise ValueError("run manifest execution-packet schema disagrees with execution.json")
+        if raw_packet.get("packet_identity_sha256") != packet.packet_identity_sha256:
+            raise ValueError("run manifest execution-packet identity disagrees with execution.json")
+        execution_artifact = next((item for item in manifest.artifacts if item.path == "execution.json"), None)
+        if execution_artifact is None:
+            raise ValueError("run manifest does not inventory execution.json")
+        if raw_packet.get("artifact_sha256") != execution_artifact.sha256:
+            raise ValueError("run manifest execution-packet artifact digest disagrees with its inventory")
+        actual_execution_sha256 = hashlib.sha256(execution_path.read_bytes()).hexdigest()
+        if execution_artifact.sha256 != actual_execution_sha256:
+            raise ValueError("run manifest execution-packet artifact digest does not match execution.json")
+        expected_status = SimulationRuntimeStatus.PASSED if packet.outcome.passed else SimulationRuntimeStatus.INCOMPLETE
+        if manifest.status != expected_status:
+            raise ValueError("run manifest status disagrees with the canonical execution outcome")
+        if raw_packet.get("outcome_scope") != packet.outcome.scope:
+            raise ValueError("run manifest outcome scope disagrees with the canonical execution packet")
+        if raw_packet.get("outcome_disposition") != packet.outcome.disposition:
+            raise ValueError("run manifest outcome disposition disagrees with the canonical execution packet")
+    except (OSError, ValueError) as error:
+        return {"status": "invalid", "path": str(source), "error": str(error)}
+    return {
+        "status": "verified",
+        "path": str(source),
+        "run_identity": manifest.run_identity,
+        "execution_packet_identity_sha256": packet.packet_identity_sha256,
+        "execution_packet_artifact_sha256": actual_execution_sha256,
+        "outcome_scope": packet.outcome.scope,
+        "outcome_disposition": packet.outcome.disposition,
+        "claim_boundary": (
+            "This verifies the host runtime manifest against the canonical execution packet and its execution.json "
+            "inventory digest. It does not rerun dynamics or qualify the vehicle."
+        ),
     }
     ####
 
@@ -1875,6 +2057,7 @@ def _local_screen_composition_provenance(output_directory: Path) -> dict[str, ob
         "family_id": composition.family_id,
         "mission_id": composition.mission,
         "fidelity": composition.fidelity,
+        "control_realization": composition.control_realization,
     }
     ####
 

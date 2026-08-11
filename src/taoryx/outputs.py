@@ -6,14 +6,14 @@ import csv
 import json
 import math
 import sqlite3
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from taoryx.output_catalog import canonical_output_name, output_channel_spec
 
@@ -105,10 +105,277 @@ class VehicleTelemetry(BaseModel):
         return self
 
 
+class _PortableRunMetadata(BaseModel, Mapping[str, object]):
+    """Typed additive run metadata that preserves mapping-style consumers."""
+
+    model_config = ConfigDict(frozen=True, extra="allow")
+
+    def as_dict(self) -> dict[str, object]:
+        """Return a JSON-safe compatibility projection."""
+
+        return self.model_dump(mode="json", exclude_none=True)
+        ####
+
+    def __getitem__(self, key: str) -> object:
+        return self.as_dict()[key]
+        ####
+
+    def __iter__(self) -> Iterator[str]:  # type: ignore[override]
+        return iter(self.as_dict())
+        ####
+
+    def __len__(self) -> int:
+        return len(self.as_dict())
+        ####
+
+    def __bool__(self) -> bool:
+        return bool(self.as_dict())
+        ####
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Mapping):
+            return self.as_dict() == dict(other)
+        return super().__eq__(other)
+        ####
+
+    ####
+
+
+class RunTermination(_PortableRunMetadata):
+    """Typed completion disposition shared by batch and interactive runs."""
+
+    completed: bool | None = None
+    stop_reason: str | None = None
+    status: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_reason_alias(cls, value: object) -> object:
+        """Accept older ``reason`` producers while publishing ``stop_reason``."""
+
+        if isinstance(value, Mapping):
+            normalized = dict(value)
+            legacy_reason = normalized.pop("reason", None)
+            if normalized.get("stop_reason") is None and legacy_reason is not None:
+                normalized["stop_reason"] = legacy_reason
+            elif legacy_reason is not None and legacy_reason != normalized.get("stop_reason"):
+                raise ValueError("termination reason and stop_reason must agree when both are present")
+            return normalized
+        return value
+        ####
+
+    @field_validator("stop_reason", "status")
+    @classmethod
+    def nonblank_optional_text(cls, value: str | None) -> str | None:
+        """Reject empty lifecycle labels that cannot help a diagnostic client."""
+
+        if value is not None and not value.strip():
+            raise ValueError("run lifecycle text must not be blank")
+        return value
+        ####
+
+    @model_validator(mode="after")
+    def incomplete_runs_have_a_reason(self) -> RunTermination:
+        """Ensure a failed/incomplete run does not lose its terminal cause."""
+
+        if self.completed is False and self.stop_reason is None:
+            raise ValueError("an incomplete run artifact requires stop_reason")
+        return self
+        ####
+
+    ####
+
+
+class RunCommandRecord(_PortableRunMetadata):
+    """One held-command frame retained in an interactive run artifact."""
+
+    duration: float | None = Field(default=None, ge=0.0)
+    commands: dict[str, float | str | bool] | None = None
+
+    @field_validator("duration")
+    @classmethod
+    def finite_duration(cls, value: float | None) -> float | None:
+        """Reject non-finite command intervals before serialization."""
+
+        if value is not None and not math.isfinite(value):
+            raise ValueError("command duration must be finite")
+        return value
+        ####
+
+    @field_validator("commands")
+    @classmethod
+    def valid_command_values(cls, value: dict[str, float | str | bool] | None) -> dict[str, float | str | bool] | None:
+        """Make each command channel addressable and JSON-safe."""
+
+        if value is None:
+            return None
+        if any(not name.strip() for name in value):
+            raise ValueError("command names must not be blank")
+        for command in value.values():
+            if isinstance(command, float) and not math.isfinite(command):
+                raise ValueError("command values must be finite")
+        return value
+        ####
+
+    ####
+
+
+class RunLifecycleEvent(_PortableRunMetadata):
+    """A typed top-level runtime event with provider-specific details additive."""
+
+    name: str = Field(min_length=1)
+    action: str = Field(min_length=1)
+    event_id: str | None = None
+    vehicle: str | None = None
+    model_id: str | None = None
+    time: float | None = None
+    status: str | None = None
+    signal: str | None = None
+    source: str | None = None
+    segment_from: int | None = None
+    segment_to: int | None = None
+
+    @field_validator("name", "action", "event_id", "vehicle", "model_id", "status", "signal", "source")
+    @classmethod
+    def nonblank_event_text(cls, value: str | None) -> str | None:
+        """Reject labels that downstream event grouping cannot use."""
+
+        if value is not None and not value.strip():
+            raise ValueError("event text must not be blank")
+        return value
+        ####
+
+    @field_validator("time")
+    @classmethod
+    def finite_event_time(cls, value: float | None) -> float | None:
+        """Events may omit time, but a supplied timestamp must be usable."""
+
+        if value is not None and not math.isfinite(value):
+            raise ValueError("event time must be finite")
+        return value
+        ####
+
+    ####
+
+
+class RunSensorMeasurementSummary(BaseModel):
+    """Portable counters from an accepted-truth sensor execution."""
+
+    model_config = ConfigDict(frozen=True, extra="allow")
+
+    emitted: int = Field(ge=0)
+    valid: int = Field(ge=0)
+    invalid: int = Field(ge=0)
+    dropped: int = Field(ge=0)
+    delivered: int = Field(ge=0)
+    queued: int = Field(ge=0)
+    timeout: bool
+    last_accepted_truth_time_s: float | None = None
+    next_requested_sensor_time_s: float | None = None
+
+    @field_validator("last_accepted_truth_time_s", "next_requested_sensor_time_s")
+    @classmethod
+    def finite_optional_time(cls, value: float | None) -> float | None:
+        if value is not None and not math.isfinite(value):
+            raise ValueError("sensor execution time must be finite")
+        return value
+        ####
+
+    ####
+
+
+class RunSensorExecution(_PortableRunMetadata):
+    """Typed sensor-execution summary with provider detail retained additively."""
+
+    schema_version: int | None = Field(default=None, ge=1)
+    execution: str | None = None
+    scenario_identity: str | None = None
+    provider: str | None = None
+    spec: Mapping[str, object] | None = None
+    measurement_summary: RunSensorMeasurementSummary | None = None
+    termination: RunTermination | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def derive_provider_from_spec(cls, value: object) -> object:
+        """Promote the common provider identity while preserving the full spec."""
+
+        if isinstance(value, Mapping):
+            normalized = dict(value)
+            spec = normalized.get("spec")
+            if normalized.get("provider") is None and isinstance(spec, Mapping):
+                provider = spec.get("provider")
+                if isinstance(provider, str):
+                    normalized["provider"] = provider
+            return normalized
+        return value
+        ####
+
+    @field_validator("execution", "scenario_identity", "provider")
+    @classmethod
+    def nonblank_sensor_text(cls, value: str | None) -> str | None:
+        if value is not None and not value.strip():
+            raise ValueError("sensor execution text must not be blank")
+        return value
+        ####
+
+    ####
+
+
+class RunOutputSampling(_PortableRunMetadata):
+    """Typed sampling policy advertised to artifact readers."""
+
+    sample_interval: float | None = Field(default=None, gt=0.0)
+    channels: list[str] = Field(default_factory=list)
+    include_events: bool = True
+
+    @field_validator("sample_interval")
+    @classmethod
+    def finite_interval(cls, value: float | None) -> float | None:
+        if value is not None and not math.isfinite(value):
+            raise ValueError("output sample interval must be finite")
+        return value
+        ####
+
+    @field_validator("channels")
+    @classmethod
+    def nonblank_channels(cls, value: list[str]) -> list[str]:
+        if any(not channel.strip() for channel in value):
+            raise ValueError("output sampling channels must not be blank")
+        return value
+        ####
+
+    ####
+
+
+class RunVisualizationMetadata(_PortableRunMetadata):
+    """Renderer/runtime metadata exposed to visualizers and diagnostics."""
+
+    source: str | None = None
+    schema_version: int | None = Field(default=None, ge=1)
+    runtime: Mapping[str, object] | None = None
+    output_sampling: RunOutputSampling | None = None
+
+    @field_validator("source")
+    @classmethod
+    def nonblank_visualization_source(cls, value: str | None) -> str | None:
+        if value is not None and not value.strip():
+            raise ValueError("visualization source must not be blank")
+        return value
+        ####
+
+    ####
+
+
 class RunArtifact(BaseModel):
     """Persistable simulation-data contract for reports and visualizers."""
 
-    model_config = ConfigDict(frozen=True)
+    # A run artifact is the public runtime handoff, so a misspelled top-level
+    # field must fail at construction rather than disappear under Pydantic's
+    # default ``extra='ignore'`` behavior. Provider-specific details belong in
+    # the typed additive metadata records below, where they remain visible to
+    # their owner without weakening this envelope.
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     schema_version: int = 1
     problem: str
@@ -117,11 +384,11 @@ class RunArtifact(BaseModel):
     scenario_identity: str | None = None
     composition: list[dict[str, object]] = Field(default_factory=list)
     resolution_records: list[dict[str, object]] = Field(default_factory=list)
-    commands: list[dict[str, object]] = Field(default_factory=list)
-    termination: dict[str, object] = Field(default_factory=dict)
-    events: list[dict[str, object]] = Field(default_factory=list)
-    sensor_execution: dict[str, object] = Field(default_factory=dict)
-    visualization: dict[str, object] = Field(default_factory=dict)
+    commands: list[RunCommandRecord] = Field(default_factory=list)
+    termination: RunTermination = Field(default_factory=RunTermination)
+    events: list[RunLifecycleEvent] = Field(default_factory=list)
+    sensor_execution: RunSensorExecution = Field(default_factory=RunSensorExecution)
+    visualization: RunVisualizationMetadata = Field(default_factory=RunVisualizationMetadata)
 
     def write_json(self, path: str | Path) -> Path:
         """Persist this artifact as human-readable JSON."""
@@ -142,7 +409,7 @@ class RunArtifact(BaseModel):
         if self.resolution_records:
             output.write(f"Resolution records: {len(self.resolution_records)}\n")
         if self.termination:
-            output.write(f"Termination: {self.termination}\n")
+            output.write(f"Termination: {self.termination.as_dict()}\n")
         if self.parameters:
             output.write("Parameters:\n")
             for name, value in sorted(self.parameters.items()):
@@ -226,11 +493,11 @@ class RunArtifact(BaseModel):
                 (run_id, "scenario_identity", json.dumps(self.scenario_identity)),
                 (run_id, "composition", json.dumps(self.composition, sort_keys=True)),
                 (run_id, "resolution_records", json.dumps(self.resolution_records, sort_keys=True)),
-                (run_id, "commands", json.dumps(self.commands, sort_keys=True)),
-                (run_id, "termination", json.dumps(self.termination, sort_keys=True)),
-                (run_id, "events", json.dumps(self.events, sort_keys=True)),
-                (run_id, "sensor_execution", json.dumps(self.sensor_execution, sort_keys=True)),
-                (run_id, "visualization", json.dumps(self.visualization, sort_keys=True)),
+                (run_id, "commands", json.dumps([item.as_dict() for item in self.commands], sort_keys=True)),
+                (run_id, "termination", json.dumps(self.termination.as_dict(), sort_keys=True)),
+                (run_id, "events", json.dumps([item.as_dict() for item in self.events], sort_keys=True)),
+                (run_id, "sensor_execution", json.dumps(self.sensor_execution.as_dict(), sort_keys=True)),
+                (run_id, "visualization", json.dumps(self.visualization.as_dict(), sort_keys=True)),
             ],
         )
         connection.executemany(
@@ -410,10 +677,10 @@ def build_run_artifact(
         scenario_identity=scenario_identity,
         composition=[dict(item) for item in composition],
         resolution_records=[dict(item) for item in resolution_records],
-        commands=[dict(item) for item in commands],
-        termination=dict(termination or {"completed": result.completed, "stop_reason": result.stop_reason}),
-        events=[dict(item) for item in events],
-        visualization=dict(visualization or {}),
+        commands=[RunCommandRecord.model_validate(item) for item in commands],
+        termination=RunTermination.model_validate(termination or {"completed": result.completed, "stop_reason": result.stop_reason}),
+        events=[RunLifecycleEvent.model_validate(item) for item in events],
+        visualization=RunVisualizationMetadata.model_validate(visualization or {}),
     )
 
 
@@ -445,13 +712,19 @@ def apply_output_subscriptions(artifact: RunArtifact, subscriptions: Sequence[ob
                 "events": vehicle.events if include_events else [],
             }
         )
-    visualization = dict(artifact.visualization)
+    visualization = artifact.visualization.as_dict()
     visualization["output_sampling"] = {
         "sample_interval": interval,
         "channels": sorted(requested),
         "include_events": include_events,
     }
-    return artifact.model_copy(update={"vehicles": vehicles, "events": artifact.events if include_events else [], "visualization": visualization})
+    return artifact.model_copy(
+        update={
+            "vehicles": vehicles,
+            "events": artifact.events if include_events else [],
+            "visualization": RunVisualizationMetadata.model_validate(visualization),
+        }
+    )
 
 
 def _sample_indices(times: Sequence[float], interval: float | None) -> list[int]:

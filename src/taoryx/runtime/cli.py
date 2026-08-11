@@ -20,6 +20,10 @@ from taoryx.controller_tuning_registry import (
 from taoryx.integration import available_integrator_descriptions, available_integrators
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language_backed_racetrack import materialize_powered_fixed_wing_composition
+from taoryx.mission_workflow_endpoint import (
+    mission_workflow_endpoint_list,
+    verify_mission_workflow_endpoint,
+)
 from taoryx.model_authoring import (
     ModelAuthoringError,
     build_model_authoring_plan,
@@ -75,6 +79,7 @@ from taoryx.vehicle_composition_registry import (
     load_resolved_vehicle_composition_catalog,
 )
 from taoryx.vehicle_endpoint_spec import vehicle_endpoint_spec_list, verify_vehicle_endpoint
+from taoryx.vehicle_execution_artifact import read_vehicle_execution_packet
 from taoryx.vehicle_execution_bindings import VehicleExecutionBinding, resolve_vehicle_execution_binding
 from taoryx.vehicle_execution_preflight import build_semantic_preflight_handler_report, preflight_vehicle_composition
 from taoryx.vehicle_integration_intake import (
@@ -355,6 +360,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     model_tune.add_argument("--no-cache", action="store_true", help="rerun the campaign without reading or writing cache")
     model_tune.add_argument("--output", type=Path)
+    model_subparsers.add_parser(
+        "endpoint-specs",
+        help="list focused vertical proofs for registered non-physical trajectory workflows",
+    ).add_argument("--output", type=Path)
+    model_verify = model_subparsers.add_parser(
+        "verify",
+        help="verify one checked-in trajectory-workflow draft through provider validation and its common runner",
+    )
+    model_verify.add_argument("endpoint_id", help="ID from 'taoryx model endpoint-specs'")
+    model_verify.add_argument(
+        "--execute",
+        action="store_true",
+        help="run the exact workflow through its advertised common batch runner after static verification",
+    )
+    model_verify.add_argument("--output", type=Path)
     reachability = subparsers.add_parser("reachability", help="inspect Alpha 3 reachability catalogs")
     reachability_subparsers = reachability.add_subparsers(dest="reachability_command", required=True)
     reachability_list = reachability_subparsers.add_parser("list", help="list reachability catalog entries")
@@ -1483,6 +1503,17 @@ def _model_command(arguments: argparse.Namespace) -> int:
         providers = plugins.build_mission_composition_provider_registry()
         campaigns = plugins.build_controller_tuning_campaign_registry()
         campaigns.validate_against(providers)
+        if arguments.model_command == "endpoint-specs":
+            _print_json(mission_workflow_endpoint_list(), arguments.output)
+            return 0
+        if arguments.model_command == "verify":
+            report = verify_mission_workflow_endpoint(
+                arguments.endpoint_id,
+                execute=arguments.execute,
+                plugins=plugins,
+            )
+            _print_json(report, arguments.output)
+            return 0 if report["status"] == "pass" else 2
         if arguments.model_command == "list":
             selected_providers = providers.providers
             if arguments.provider is not None:
@@ -2503,20 +2534,29 @@ def _write_composition_run_manifest(
     """Write the common Simulation Runtime manifest for a composition-owned run."""
 
     write_composition_run_artifact(output_dir, composition)
-    pass_disposition = payload.get("mission_pass")
-    if pass_disposition is None:
-        pass_disposition = payload.get("screen_pass")
-    status = SimulationRuntimeStatus.PASSED if pass_disposition is True else SimulationRuntimeStatus.INCOMPLETE
+    packet = read_vehicle_execution_packet(output_dir / "execution.json")
+    request = packet.host_execution.request
+    if request.factory_id != binding.factory_id:
+        raise ValueError("canonical execution packet factory does not match the resolved batch binding")
+    if request.execution_mode != binding.execution_mode:
+        raise ValueError("canonical execution packet execution mode does not match the resolved batch binding")
+    if request.composition_id != composition.id or request.composition_identity_sha256 != composition.identity_sha256:
+        raise ValueError("canonical execution packet does not match the requested composition")
+    status = SimulationRuntimeStatus.PASSED if packet.outcome.passed else SimulationRuntimeStatus.INCOMPLETE
     execution_limit_reason = payload.get("execution_limit_reason")
     termination_reason = (
         "mission_pass"
-        if payload.get("mission_pass") is True
+        if packet.outcome.scope == "mission" and packet.outcome.passed
         else "local_screen_pass"
-        if payload.get("screen_pass") is True
+        if packet.outcome.scope == "local_screen" and packet.outcome.passed
         else str(execution_limit_reason)
         if isinstance(execution_limit_reason, str) and execution_limit_reason
         else "mission_or_screen_not_passed"
     )
+    artifacts = artifact_inventory(output_dir)
+    execution_artifact = next((item for item in artifacts if item.path == "execution.json"), None)
+    if execution_artifact is None:
+        raise ValueError("canonical execution packet was not included in the runtime artifact inventory")
     manifest = build_simulation_runtime_run_manifest(
         scenario_id=composition.id,
         status=status,
@@ -2526,13 +2566,24 @@ def _write_composition_run_manifest(
         realization=composition.control_realization,
         source_inputs=(source_input_record(composition_path, role="compiled_composition"),),
         runtime=default_runtime_identity(),
-        integration={"factory_id": binding.factory_id, "execution_mode": binding.execution_mode, "max_steps": max_steps},
+        integration={
+            "factory_id": binding.factory_id,
+            "execution_mode": binding.execution_mode,
+            "max_steps": max_steps,
+            "execution_packet": {
+                "schema": packet.schema_id,
+                "packet_identity_sha256": packet.packet_identity_sha256,
+                "artifact_sha256": execution_artifact.sha256,
+                "outcome_scope": packet.outcome.scope,
+                "outcome_disposition": packet.outcome.disposition,
+            },
+        },
         time={"requested_duration_s": None, "accepted_start_s": None, "accepted_end_s": None},
         termination={
             "completed": status is SimulationRuntimeStatus.PASSED,
             "reason": termination_reason,
         },
-        artifacts=artifact_inventory(output_dir),
+        artifacts=artifacts,
         claim_boundary=(
             "This manifest identifies one composition-owned execution packet. It does not prove numerical accuracy, "
             "physical-effector behavior, vehicle qualification, or historical fidelity."
@@ -2734,7 +2785,7 @@ def _artifact_inspection_payload(artifact: RunArtifact) -> _ArtifactInspectionPa
         "vehicles": vehicles,
         "event_count": len(artifact.events),
         "command_count": len(artifact.commands),
-        "termination": artifact.termination,
+        "termination": artifact.termination.as_dict(),
         "claim_boundary": (
             "This is an artifact-shape and telemetry-presence inspection. It does not establish model validity, "
             "controller quality, physical-effector behavior, or vehicle qualification."

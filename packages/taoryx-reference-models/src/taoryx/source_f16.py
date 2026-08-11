@@ -8,21 +8,25 @@ release qualification remain separate integration gates.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from typing import Any
 
+import numpy as np
 import yaml
 from taoryx_reference_models.resources import model_resource_root
 
 from .control_allocation import EffectorEffectiveness, EffectorLimits, PhysicalAllocationStep, allocate_and_advance_wrench
 from .control_automation import ControlAutomationDeclaration
+from .generic_tuning import LinearAuthorityRequirement, NormalizedLqrProfileGrid
 from .physical_lqr import (
     PhysicalWrenchLqiDesign,
     PhysicalWrenchLqrDesign,
     PhysicalWrenchLqrSchedule,
     PhysicalWrenchLqrScheduleNode,
+    apply_tuning_context_to_physical_wrench_lqr_design,
     design_physical_wrench_lqi,
     design_physical_wrench_lqr,
     project_linearization_to_wrench,
@@ -30,7 +34,8 @@ from .physical_lqr import (
 )
 from .trajectory.f16_operating_points import runtime_trim_result, solve_f16_source_trim
 from .trajectory.f16_reference import F16ReferencePhysicalPlant, load_f16_reference_plant
-from .tuning_campaign import TuningCampaign
+from .tuning_application import TuningApplicationContextSet
+from .tuning_campaign import TuningCampaign, TuningCampaignNode
 
 ROOT = model_resource_root()
 F16_OPERATING_POINT_CATALOG = ROOT / "families/reference_f16_s119/qualification/operating-points.yaml"
@@ -47,6 +52,7 @@ F16_SOURCE_PHYSICAL_SCHEDULE_POINT_IDS = (
 F16_SOURCE_PHYSICAL_SCHEDULE_TRANSITION_DURATION_S = 60.0
 F16_SOURCE_PHYSICAL_SCHEDULE_TRANSITION_DT_S = 0.05
 F16_SOURCE_PHYSICAL_SCHEDULE_TRANSITION_RECOVERY_THRESHOLD = 0.25
+F16_SOURCE_PHYSICAL_SCHEDULE_PITCH_WRENCH_BIAS_FRACTION = 0.05
 F16_SOURCE_PHYSICAL_SCHEDULE_TRANSITION_CASES: dict[str, tuple[str, str, dict[str, float]]] = {
     "upward_q_perturbation": (F16_SOURCE_PHYSICAL_SCHEDULE_POINT_IDS[0], F16_SOURCE_PHYSICAL_SCHEDULE_POINT_IDS[-1], {"q_rad_s": 0.0004}),
     "upward_coupled_reversal": (
@@ -144,10 +150,7 @@ def f16_source_control_bounds() -> dict[str, tuple[float, float]]:
     actuator response or physical allocation.
     """
 
-    return {
-        name: (limits.lower, limits.upper)
-        for name, limits in _f16_effectors().items()
-    }
+    return {name: (limits.lower, limits.upper) for name, limits in _f16_effectors().items()}
     ####
 
 
@@ -193,11 +196,7 @@ def _f16_schedule_catalog_by_id() -> dict[str, dict[str, Any]]:
     points = payload.get("points") if isinstance(payload, dict) else None
     if not isinstance(points, list):
         raise ValueError(f"{F16_OPERATING_POINT_CATALOG} must contain a points list")
-    catalog = {
-        str(point["id"]): point
-        for point in points
-        if isinstance(point, dict) and isinstance(point.get("id"), str)
-    }
+    catalog = {str(point["id"]): point for point in points if isinstance(point, dict) and isinstance(point.get("id"), str)}
     missing = [point_id for point_id in F16_SOURCE_PHYSICAL_SCHEDULE_POINT_IDS if point_id not in catalog]
     if missing:
         raise ValueError(f"F-16 physical schedule catalog is missing points: {missing}")
@@ -308,10 +307,7 @@ def build_f16_source_physical_schedule_lqi_node(point_id: str) -> F16SourcePhysi
 def build_f16_source_physical_schedule_lqi_nodes() -> tuple[F16SourcePhysicalScheduleLqiNode, ...]:
     """Return LQI designs at every exact source-schedule node in stable order."""
 
-    return tuple(
-        build_f16_source_physical_schedule_lqi_node(point_id)
-        for point_id in F16_SOURCE_PHYSICAL_SCHEDULE_POINT_IDS
-    )
+    return tuple(build_f16_source_physical_schedule_lqi_node(point_id) for point_id in F16_SOURCE_PHYSICAL_SCHEDULE_POINT_IDS)
     ####
 
 
@@ -331,10 +327,7 @@ def _blend_f16_schedule_mapping(
 
     if set(lower) != set(upper):
         raise ValueError("F-16 scheduled transition maps must have identical channel names")
-    return {
-        name: _blend_f16_schedule_scalar(lower[name], upper[name], fraction)
-        for name in lower
-    }
+    return {name: _blend_f16_schedule_scalar(lower[name], upper[name], fraction) for name in lower}
     ####
 
 
@@ -376,7 +369,14 @@ class _BlendedF16SourcePhysicalSchedulePlant:
         effectors: Mapping[str, float],
         environment: Mapping[str, float | str],
     ) -> Mapping[str, float]:
-        """Blend endpoint source derivatives at the scheduled local condition."""
+        """Blend source derivatives and apply an explicitly declared external moment.
+
+        The optional pitch bias is an external plant-dynamics load, not a
+        controller request or an allocator output.  Applying it after the
+        source-model derivatives preserves the source force/moment path and
+        keeps the robustness seam auditable at the exact point where an
+        external body moment changes angular acceleration.
+        """
 
         altitude_m = float(environment.get("altitude_m", self.altitude_m))
         trim_pitch_rad = float(environment.get("trim_pitch_rad", self.trim_pitch_rad))
@@ -390,10 +390,23 @@ class _BlendedF16SourcePhysicalSchedulePlant:
             effectors,
             {"altitude_m": altitude_m, "trim_pitch_rad": trim_pitch_rad},
         )
-        return {
-            name: _blend_f16_schedule_scalar(float(lower[name]), float(upper[name]), self.fraction)
-            for name in self.state_names
-        }
+        derivative = {name: _blend_f16_schedule_scalar(float(lower[name]), float(upper[name]), self.fraction) for name in self.state_names}
+        external_pitch_moment_bias_nm = float(environment.get("external_pitch_moment_bias_nm", 0.0))
+        if not math.isfinite(external_pitch_moment_bias_nm):
+            raise ValueError("F-16 scheduled external pitch moment must be finite")
+        if external_pitch_moment_bias_nm == 0.0:
+            return derivative
+        lower_inertia = np.asarray(self.lower.source.inertia_matrix_kg_m2, dtype=float)
+        upper_inertia = np.asarray(self.upper.source.inertia_matrix_kg_m2, dtype=float)
+        inertia = (1.0 - self.fraction) * lower_inertia + self.fraction * upper_inertia
+        external_angular_acceleration = np.linalg.solve(
+            inertia,
+            np.asarray((0.0, external_pitch_moment_bias_nm, 0.0), dtype=float),
+        )
+        derivative["p_rad_s"] += float(external_angular_acceleration[0])
+        derivative["q_rad_s"] += float(external_angular_acceleration[1])
+        derivative["r_rad_s"] += float(external_angular_acceleration[2])
+        return derivative
         ####
 
     def effectiveness(
@@ -406,10 +419,7 @@ class _BlendedF16SourcePhysicalSchedulePlant:
         lower = self.lower.effectiveness(state, effectors)
         upper = self.upper.effectiveness(state, effectors)
         matrix = tuple(
-            tuple(
-                _blend_f16_schedule_scalar(lower.matrix[row][column], upper.matrix[row][column], self.fraction)
-                for column in range(len(self.control_names))
-            )
+            tuple(_blend_f16_schedule_scalar(lower.matrix[row][column], upper.matrix[row][column], self.fraction) for column in range(len(self.control_names)))
             for row in range(len(lower.wrench_names))
         )
         return EffectorEffectiveness(
@@ -453,11 +463,40 @@ def build_f16_source_physical_lqr_schedule() -> tuple[
 ]:
     """Build the ordered source-node schedule used by the LQR transition screen."""
 
+    schedule, nodes, _ = _build_f16_source_physical_lqr_schedule_with_context_set()
+    return schedule, nodes
+    ####
+
+
+def _build_f16_source_physical_lqr_schedule_with_context_set(
+    tuning_context_set: TuningApplicationContextSet | None = None,
+) -> tuple[PhysicalWrenchLqrSchedule, tuple[F16SourcePhysicalScheduleNode, ...], tuple[dict[str, str], ...]]:
+    """Build the schedule after applying every exact selected LQR candidate.
+
+    A schedule interpolates four local gains, so accepting a single context
+    would make its provenance ambiguous.  The optional set must name every
+    retained source node before any transition replay begins.
+    """
+
     nodes = build_f16_source_physical_schedule_nodes()
+    tuning_bindings: tuple[dict[str, str], ...] = ()
+    if tuning_context_set is not None:
+        tuning_context_set.require_exact_nodes(tuple(node.point_id for node in nodes))
+        applied_nodes: list[F16SourcePhysicalScheduleNode] = []
+        receipts: list[dict[str, str]] = []
+        for node in nodes:
+            design, receipt = apply_tuning_context_to_physical_wrench_lqr_design(
+                node.design,
+                tuning_context_set.for_node(node.point_id),
+            )
+            applied_nodes.append(replace(node, design=design))
+            receipts.append(receipt.as_dict())
+        nodes = tuple(applied_nodes)
+        tuning_bindings = tuple(receipts)
     schedule = PhysicalWrenchLqrSchedule(
         tuple(PhysicalWrenchLqrScheduleNode(node.altitude_m, node.design) for node in nodes)
     )
-    return schedule, nodes
+    return schedule, nodes, tuning_bindings
     ####
 
 
@@ -495,6 +534,8 @@ def run_f16_source_physical_lqr_schedule_transition_cases(
     duration_s: float = F16_SOURCE_PHYSICAL_SCHEDULE_TRANSITION_DURATION_S,
     dt_s: float = F16_SOURCE_PHYSICAL_SCHEDULE_TRANSITION_DT_S,
     sample_stride_steps: int = 60,
+    external_pitch_wrench_bias_fraction: float = 0.0,
+    tuning_context_set: TuningApplicationContextSet | None = None,
 ) -> dict[str, object]:
     """Run the exact bounded four-case F-16 source schedule-transition campaign.
 
@@ -504,15 +545,30 @@ def run_f16_source_physical_lqr_schedule_transition_cases(
     aircraft controller.
     """
 
-    schedule, nodes = build_f16_source_physical_lqr_schedule()
+    if not math.isfinite(external_pitch_wrench_bias_fraction):
+        raise ValueError("F-16 scheduled external pitch wrench bias fraction must be finite")
+    schedule, nodes, tuning_bindings = _build_f16_source_physical_lqr_schedule_with_context_set(tuning_context_set)
     node_by_point_id = {node.point_id: node for node in nodes}
+    try:
+        pitch_wrench_index = nodes[0].design.projection.wrench_names.index("total_moment_y_nm")
+    except ValueError as error:  # pragma: no cover - checked controller-profile invariant
+        raise RuntimeError("F-16 schedule controller does not define a pitch wrench axis") from error
+    pitch_wrench_scales_nm = {float(node.design.wrench_scales[pitch_wrench_index]) for node in nodes}
+    if len(pitch_wrench_scales_nm) != 1:
+        raise ValueError("F-16 schedule nodes must declare one shared pitch wrench scale")
+    pitch_wrench_scale_nm = pitch_wrench_scales_nm.pop()
+    external_pitch_moment_bias_nm = external_pitch_wrench_bias_fraction * pitch_wrench_scale_nm
 
     def plant_for_coordinate(coordinate_m: float) -> _BlendedF16SourcePhysicalSchedulePlant:
         return _f16_source_physical_transition_plant(schedule, nodes, coordinate_m)
 
     def environment_for_coordinate(coordinate_m: float) -> dict[str, float]:
         plant = plant_for_coordinate(coordinate_m)
-        return {"altitude_m": plant.altitude_m, "trim_pitch_rad": plant.trim_pitch_rad}
+        return {
+            "altitude_m": plant.altitude_m,
+            "trim_pitch_rad": plant.trim_pitch_rad,
+            "external_pitch_moment_bias_nm": external_pitch_moment_bias_nm,
+        }
 
     cases: dict[str, dict[str, Any]] = {}
     for case_id, (start_point_id, end_point_id, perturbation) in F16_SOURCE_PHYSICAL_SCHEDULE_TRANSITION_CASES.items():
@@ -538,26 +594,27 @@ def run_f16_source_physical_lqr_schedule_transition_cases(
         case["end_point_id"] = end_point_id
         case["start_coordinate_m"] = case.pop("start_coordinate")
         case["end_coordinate_m"] = case.pop("end_coordinate")
-        case["plant_policy"] = (
-            "linear_blend_of_validated_source_endpoint_derivatives_and_effectiveness; "
-            "actual bounded effectors at every sample"
-        )
+        case["plant_policy"] = "linear_blend_of_validated_source_endpoint_derivatives_and_effectiveness; actual bounded effectors at every sample"
         cases[case_id] = case
-    return {
+    result: dict[str, object] = {
         "schema": "taoryx.f16-physical-effector-schedule-transition/v1alpha1",
-        "status": (
-            "pass"
-            if all(bool(case["passed"]) for case in cases.values())
-            else "failed"
-        ),
+        "status": ("pass" if all(bool(case["passed"]) for case in cases.values()) else "failed"),
         "family_id": "f16_s119",
         "controller_method": "lqr",
         "controller_selection": "linearly_interpolated_source_lqr_schedule_by_altitude_coordinate",
         "control_path": (
-            "scheduled source-derived wrench demand -> blended endpoint effectiveness -> "
-            "bounded physical effectors -> blended source nonlinear derivative"
+            "scheduled source-derived wrench demand -> blended endpoint effectiveness -> bounded physical effectors -> blended source nonlinear derivative"
         ),
         "direct_body_moment_injection": False,
+        "external_dynamics": {
+            "status": "applied" if external_pitch_moment_bias_nm != 0.0 else "nominal",
+            "input": "external_pitch_moment_bias_nm",
+            "body_moment_axis": "total_moment_y_nm",
+            "pitch_wrench_scale_nm": pitch_wrench_scale_nm,
+            "pitch_wrench_bias_fraction": external_pitch_wrench_bias_fraction,
+            "external_pitch_moment_bias_nm": external_pitch_moment_bias_nm,
+            "application": "post_source_derivative_full_inertia_angular_acceleration",
+        },
         "node_ids": list(F16_SOURCE_PHYSICAL_SCHEDULE_POINT_IDS),
         "source_mass_kg": float(nodes[0].plant.source.mass_kg),
         "cases": cases,
@@ -565,20 +622,20 @@ def run_f16_source_physical_lqr_schedule_transition_cases(
             "case_count": len(cases),
             "passed_case_count": sum(bool(case["passed"]) for case in cases.values()),
             "failed_case_count": sum(not bool(case["passed"]) for case in cases.values()),
-            "all_allocation_statuses": sorted(
-                {status for case in cases.values() for status in case["allocation_statuses"]}
-            ),
-            "maximum_controlled_allocation_residual": max(
-                float(case["maximum_controlled_allocation_residual"])
-                for case in cases.values()
-            ),
+            "all_allocation_statuses": sorted({status for case in cases.values() for status in case["allocation_statuses"]}),
+            "maximum_controlled_allocation_residual": max(float(case["maximum_controlled_allocation_residual"]) for case in cases.values()),
         },
         "claim_boundary": (
             "Local scheduled-transition evidence only. Endpoint source derivatives and effectiveness are linearly blended "
-            "by explicit policy; no new aerodynamic table, servo certification, wind robustness, mass variation, "
-            "statistical reliability, navigation, or full-envelope flight-control qualification is claimed."
+            "by explicit policy. When selected, a constant external pitch moment is converted through the blended full "
+            "source inertia after source derivative evaluation; it is not added to a controller request or allocator "
+            "output. No new aerodynamic table, servo certification, wind robustness, mass variation, statistical "
+            "reliability, navigation, or full-envelope flight-control qualification is claimed."
         ),
     }
+    if tuning_bindings:
+        result["tuning_bindings"] = list(tuning_bindings)
+    return result
     ####
 
 
@@ -680,40 +737,143 @@ def build_f16_source_surface_lqr_tuning_campaign() -> TuningCampaign:
 
 
 def build_f16_source_surface_lqi_tuning_campaign() -> TuningCampaign:
-    """Declare a selectable offset-free F-16 source-local velocity campaign.
+    """Declare the exact source-trim physical-wrench LQI runtime campaign.
 
-    This uses the same exact plant, state, and source-coordinate control
-    declaration as the retained LQR campaign. It makes the tuner choice
-    explicit for a plug-in author without changing which controller the
-    public one-second LQR screen executes.
+    The nonlinear F-16 LQI screen controls the frozen source-local velocity
+    and rate projection by requesting four body-wrench coordinates, then
+    allocates those requests through the bounded surface/throttle overlay.
+    Keep the automatic campaign in those same state-to-wrench coordinates;
+    tuning raw elevator/aileron/rudder/throttle gains would not be a candidate
+    that the allocator-backed runtime could truthfully apply.
     """
 
+    design = build_f16_local_physical_wrench_lqi_design()
+
     return ControlAutomationDeclaration(
-        id="f16-source-surface-velocity-local",
+        id="f16-source-trim-velocity-wrench-local",
         campaign_id="f16-source-surface-local-lqi-v1",
         family_id="f16_s119",
         tier="rigid_body_6dof_surface_allocated",
         strategy_id="powered_fixed_wing.v1",
-        node_id="source-trim-local",
-        state_scales={
-            "u_m_s": 50.0,
-            "v_m_s": 50.0,
-            "w_m_s": 50.0,
-            "p_rad_s": 0.5,
-            "q_rad_s": 0.5,
-            "r_rad_s": 0.5,
-        },
-        control_scales={
-            "elevator_deg": 10.0,
-            "aileron_deg": 10.0,
-            "rudder_deg": 10.0,
-            "throttle_fraction": 0.2,
-        },
-        authority_state_names=("u_m_s", "v_m_s", "w_m_s", "p_rad_s", "q_rad_s", "r_rad_s"),
-        offset_free_outputs=("u_m_s", "v_m_s", "w_m_s"),
-        integral_weight_multiplier=0.03,
-        profile_grid_id_prefix="f16-source-surface-local-lqi",
+        node_id="source-trim-local-velocity-wrench",
+        state_scales=dict(zip(design.projection.state_names, design.state_scales, strict=True)),
+        control_scales=dict(zip(design.projection.wrench_names, design.wrench_scales, strict=True)),
+        authority_state_names=design.projection.state_names,
+        offset_free_outputs=design.result.output_names,
+        state_weight_multipliers=(1.0,),
+        control_effort_multipliers=(1.0,),
+        state_base_weights=design.q_diagonal,
+        control_base_weights=design.r_diagonal,
+        integral_base_weights=design.integral_q_diagonal,
+        integral_weight_multipliers=(1.0,),
+        profile_grid_id_prefix="f16-source-velocity-wrench-lqi",
     ).build_campaign()
+    ####
+
+
+def f16_source_physical_schedule_tuning_targets() -> dict[str, dict[str, float]]:
+    """Return the explicit source-altitude selector for each retained node.
+
+    The selector identifies a discrete source retrimmed projection for the
+    common campaign.  It is not a gain-interpolation coordinate or a request
+    to synthesize an unlisted operating point.
+    """
+
+    return {
+        node.point_id: {"source_geometric_altitude_m": node.altitude_m}
+        for node in build_f16_source_physical_schedule_lqi_nodes()
+    }
+    ####
+
+
+def build_f16_source_physical_schedule_lqi_tuning_campaign() -> TuningCampaign:
+    """Declare one exact LQI candidate per executable F-16 source schedule node.
+
+    The scheduled interior runtime conducts independent, held-node
+    recoveries.  This campaign therefore creates four separate velocity/rate
+    wrench candidates in exactly those four source-derived coordinates; it
+    makes no claim of continuous gain scheduling or transition control.
+    """
+
+    nodes = build_f16_source_physical_schedule_lqi_nodes()
+    targets = f16_source_physical_schedule_tuning_targets()
+    return TuningCampaign(
+        campaign_id="f16-source-surface-schedule-lqi-v1",
+        family_id="f16_s119",
+        tier="rigid_body_6dof_surface_allocated",
+        strategy_id="powered_fixed_wing.v1",
+        nodes=tuple(
+            TuningCampaignNode(
+                node_id=node.point_id,
+                trim_target=targets[node.point_id],
+                trim_initial_guess={},
+                state_scales=node.design.state_scales,
+                control_scales=node.design.wrench_scales,
+                authority_requirement=LinearAuthorityRequirement(
+                    f"f16-source-schedule-lqi.{node.point_id}.authority",
+                    node.design.projection.state_names,
+                ),
+                profile_grid=NormalizedLqrProfileGrid(
+                    f"f16-source-schedule-lqi.{node.point_id}",
+                    state_weight_multipliers=(1.0,),
+                    control_effort_multipliers=(1.0,),
+                    integral_weight_multipliers=(1.0,),
+                    state_base_weights=node.design.q_diagonal,
+                    control_base_weights=node.design.r_diagonal,
+                ),
+                design_state_names=node.design.projection.state_names,
+                design_control_names=node.design.projection.wrench_names,
+                controller_method="lqi",
+                integral_output_names=node.design.result.output_names,
+                integral_q_diagonal=node.design.integral_q_diagonal,
+            )
+            for node in nodes
+        ),
+    )
+    ####
+
+
+def build_f16_source_physical_schedule_lqr_tuning_campaign() -> TuningCampaign:
+    """Declare the exact four-node physical-wrench LQR schedule campaign.
+
+    Every candidate has the same velocity/rate-to-wrench coordinates used by
+    the scheduled interior and transition runtimes.  Applying all four is a
+    prerequisite to any gain interpolation; this campaign is not a request
+    to synthesize an unlisted source operating point.
+    """
+
+    nodes = build_f16_source_physical_schedule_nodes()
+    targets = f16_source_physical_schedule_tuning_targets()
+    return TuningCampaign(
+        campaign_id="f16-source-surface-schedule-lqr-v1",
+        family_id="f16_s119",
+        tier="rigid_body_6dof_surface_allocated",
+        strategy_id="powered_fixed_wing.v1",
+        nodes=tuple(
+            TuningCampaignNode(
+                node_id=node.point_id,
+                trim_target=targets[node.point_id],
+                trim_initial_guess={},
+                state_scales=node.design.state_scales,
+                control_scales=node.design.wrench_scales,
+                authority_requirement=LinearAuthorityRequirement(
+                    f"f16-source-schedule-lqr.{node.point_id}.authority",
+                    node.design.projection.state_names,
+                ),
+                profile_grid=NormalizedLqrProfileGrid(
+                    f"f16-source-schedule-lqr.{node.point_id}",
+                    state_weight_multipliers=(1.0,),
+                    control_effort_multipliers=(1.0,),
+                    state_base_weights=node.design.q_diagonal,
+                    control_base_weights=node.design.r_diagonal,
+                ),
+                design_state_names=node.design.projection.state_names,
+                design_control_names=node.design.projection.wrench_names,
+                controller_method="lqr",
+            )
+            for node in nodes
+        ),
+    )
     ####
 
 
@@ -723,6 +883,7 @@ __all__ = [
     "F16_OPERATING_POINT_CATALOG",
     "F16_PHYSICAL_WRENCH_LQR_PROFILE",
     "F16_SOURCE_PHYSICAL_SCHEDULE_POINT_IDS",
+    "F16_SOURCE_PHYSICAL_SCHEDULE_PITCH_WRENCH_BIAS_FRACTION",
     "F16_SOURCE_SIDECAR",
     "F16SourcePhysicalScheduleLqiNode",
     "F16SourcePhysicalScheduleNode",
@@ -733,7 +894,11 @@ __all__ = [
     "build_f16_source_physical_schedule_node",
     "build_f16_source_physical_schedule_nodes",
     "build_f16_source_surface_lqi_tuning_campaign",
+    "build_f16_source_physical_schedule_lqi_tuning_campaign",
+    "build_f16_source_physical_schedule_lqr_tuning_campaign",
     "build_f16_source_surface_lqr_tuning_campaign",
     "build_f16_source_physical_plant",
     "f16_source_control_bounds",
+    "f16_source_physical_schedule_tuning_targets",
+    "run_f16_source_physical_lqr_schedule_transition_cases",
 ]

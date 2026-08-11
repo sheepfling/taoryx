@@ -24,8 +24,12 @@ from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .mission_capability import MissionCapabilityEstimate, estimate_mission_capability
 from .physical_lqr import (
+    PhysicalWrenchLqiDesign,
     PhysicalWrenchLqiValidation,
+    PhysicalWrenchLqrDesign,
     PhysicalWrenchLqrValidation,
+    apply_tuning_context_to_physical_wrench_lqi_design,
+    apply_tuning_context_to_physical_wrench_lqr_design,
     validate_nonlinear_wrench_lqi,
     validate_nonlinear_wrench_lqr,
 )
@@ -36,6 +40,7 @@ from .source_f16 import (
     build_f16_source_physical_schedule_lqi_nodes,
     build_f16_source_physical_schedule_nodes,
 )
+from .tuning_application import TuningApplicationContextSet
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import (
     ExecutionPreflightCheck,
@@ -85,7 +90,7 @@ _SCHEDULE_CONFIGURATIONS: dict[str, _ScheduleScreenConfiguration] = {
         capability_adapter_id=_CAPABILITY_ADAPTER_ID,
         controller_method="lqr",
         interior_cases=_INTERIOR_CASES,
-        campaign_id="f16-source-surface-local-lqr-v1",
+        campaign_id="f16-source-surface-schedule-lqr-v1",
     ),
     _LQI_MISSION_ID: _ScheduleScreenConfiguration(
         mission_id=_LQI_MISSION_ID,
@@ -93,7 +98,7 @@ _SCHEDULE_CONFIGURATIONS: dict[str, _ScheduleScreenConfiguration] = {
         capability_adapter_id=_LQI_CAPABILITY_ADAPTER_ID,
         controller_method="lqi",
         interior_cases=_LQI_INTERIOR_CASES,
-        campaign_id="f16-source-surface-local-lqi-v1",
+        campaign_id="f16-source-surface-schedule-lqi-v1",
     ),
 }
 
@@ -153,6 +158,7 @@ class F16PhysicalScheduleInteriorScreenPlan:
                 }
             ],
             "controller_method": self.controller_method,
+            "controller_campaign_id": configuration.campaign_id,
             "control_realization": "surface_allocated",
             "controller_selection": "discrete_source_node_held_for_each_recovery",
             "node_ids": list(F16_SOURCE_PHYSICAL_SCHEDULE_POINT_IDS),
@@ -275,6 +281,7 @@ class F16PhysicalScheduleInteriorScreenCapabilityAdapter:
             "source_physical_trim": True,
             "physical_effector_allocation": True,
             "controller_method": plan.controller_method,
+            "controller_campaign_id": _configuration_for_mission(plan.mission_id).campaign_id,
             "controller_selection": "discrete_source_node_held_for_each_recovery",
             "schedule_nodes": [
                 {
@@ -409,6 +416,8 @@ def execute_f16_physical_schedule_interior_screen(
     composition: CompiledVehicleComposition,
     output_dir: str | Path,
     max_steps: int | None = None,
+    *,
+    tuning_context_set: TuningApplicationContextSet | None = None,
 ) -> F16PhysicalScheduleInteriorScreenExecution:
     """Execute every retained interior case through actual F-16 effectors."""
 
@@ -429,6 +438,24 @@ def execute_f16_physical_schedule_interior_screen(
     time_offset_s = 0.0
     configuration = _configuration_for_mission(plan.mission_id)
     nodes = _nodes_for_plan(plan)
+    tuned_lqr_designs: dict[str, PhysicalWrenchLqrDesign] = {}
+    tuned_lqi_designs: dict[str, PhysicalWrenchLqiDesign] = {}
+    tuning_bindings: list[dict[str, str]] = []
+    if tuning_context_set is not None:
+        tuning_context_set.require_exact_nodes(tuple(node.point_id for node in nodes))
+        for node in nodes:
+            context = tuning_context_set.for_node(node.point_id)
+            if plan.controller_method == "lqr":
+                if not isinstance(node, F16SourcePhysicalScheduleNode):
+                    raise TypeError("F-16 LQR schedule selected an LQI node")
+                lqr_design, receipt = apply_tuning_context_to_physical_wrench_lqr_design(node.design, context)
+                tuned_lqr_designs[node.point_id] = lqr_design
+            else:
+                if not isinstance(node, F16SourcePhysicalScheduleLqiNode):
+                    raise TypeError("F-16 LQI schedule selected an LQR node")
+                lqi_design, receipt = apply_tuning_context_to_physical_wrench_lqi_design(node.design, context)
+                tuned_lqi_designs[node.point_id] = lqi_design
+            tuning_bindings.append(receipt.as_dict())
     for node in nodes:
         node_cases: list[dict[str, object]] = []
         for case_id, perturbation in configuration.interior_cases.items():
@@ -440,10 +467,11 @@ def execute_f16_physical_schedule_interior_screen(
             if plan.controller_method == "lqr":
                 if not isinstance(node, F16SourcePhysicalScheduleNode):
                     raise TypeError("F-16 LQR schedule selected an LQI node")
+                lqr_design = tuned_lqr_designs.get(node.point_id, node.design)
                 validation = validate_nonlinear_wrench_lqr(
                     node.plant,
                     node.trim,
-                    node.design,
+                    lqr_design,
                     initial_state=initial_state,
                     duration_s=plan.duration_s,
                     dt_s=plan.dt_s,
@@ -451,10 +479,11 @@ def execute_f16_physical_schedule_interior_screen(
             else:
                 if not isinstance(node, F16SourcePhysicalScheduleLqiNode):
                     raise TypeError("F-16 LQI schedule selected an LQR node")
+                lqi_design = tuned_lqi_designs.get(node.point_id, node.design)
                 validation = validate_nonlinear_wrench_lqi(
                     node.plant,
                     node.trim,
-                    node.design,
+                    lqi_design,
                     initial_state=initial_state,
                     duration_s=plan.duration_s,
                     dt_s=plan.dt_s,
@@ -491,6 +520,7 @@ def execute_f16_physical_schedule_interior_screen(
     runtime: dict[str, object] = {
         "adapter_id": "taoryx.fixed_wing.daveml.v1",
         "controller_method": plan.controller_method,
+        "controller_campaign_id": configuration.campaign_id,
         "integral_output_names": (
             list(nodes[0].design.result.output_names)
             if nodes and isinstance(nodes[0], F16SourcePhysicalScheduleLqiNode)
@@ -512,6 +542,8 @@ def execute_f16_physical_schedule_interior_screen(
             "The F-16 schedule-interior screen executes independent local recoveries and makes no route or node-transition claim.",
         ).as_dict(),
     }
+    if tuning_bindings:
+        runtime["tuning_bindings"] = tuning_bindings
     result = F16PhysicalScheduleInteriorScreenExecution(
         composition=composition,
         preflight=preflight,

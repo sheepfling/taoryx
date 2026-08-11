@@ -188,6 +188,47 @@ templates for `ballistic`, `cbcr`, `crossrange`, `marv`, `phugoid`,
 point-mass batch lowering. Segment parameters stay with each occurrence, so two
 weaves or ballistic coasts may carry different durations or checkpoints.
 
+For normal application authoring, use the typed convenience layer. It maps
+directly to the portable `Group` / `Choice` / `Optional` / `Sequence` tree, so
+it is easier to read without hiding any advertised consumer-facing semantics:
+
+```python
+from taoryx.trajectory import (
+    SimpleAeroGeodeticAimpoint,
+    SimpleAeroLaunch,
+    SimpleAeroMission,
+    SimpleAeroSegment,
+    prepare_simple_aero_mission,
+)
+
+mission = SimpleAeroMission(
+    configuration_id="crossrange-demo",
+    launch=SimpleAeroLaunch(altitude_m=1_000.0, speed_m_s=100.0, longitude_deg=190.0),
+    endpoint=SimpleAeroGeodeticAimpoint(latitude_deg=36.0, longitude_deg=-5.6),
+    segments=(
+        SimpleAeroSegment.powered_ascent(duration_s=4.0),
+        SimpleAeroSegment.ballistic_coast(duration_s=8.0, alpha_deg=1.0),
+        SimpleAeroSegment.crossrange(initial_heading_error_deg=12.0, minimum_time_to_go_s=30.0),
+        SimpleAeroSegment.terminal_pronav(duration_s=3.0, capture_range_m=50.0),
+    ),
+)
+prepared = prepare_simple_aero_mission(mission)
+```
+
+`SimpleAeroLaunch`, aimpoint and endpoint-state headings normalize periodic
+angles to the canonical advertised intervals. `SimpleAeroSegment` has named
+constructors for every variant: `powered_ascent`, `ballistic_coast`,
+`bank_maneuver`, `cbcr`, `crossrange`, `marv`, `phugoid`, `range_extension`,
+`skip`, `slalom`, `weave`, and `terminal_pronav`. Optional source checkpoints
+remain explicit optional nodes in the resulting tree, and generated occurrence
+IDs make repeated segment variants traceable. `SimpleAeroMission.template("phugoid")`
+materializes a reviewed starting sequence with schema-owned defaults.
+
+Arbitrary sequences use the separately advertised `Custom Composition (Open
+Sequence)` batch binding by default. That binding means only that a
+schema-valid sequence has a bounded fixed-L/D lowering; it does not relabel the
+sequence as a reviewed source template or make a vehicle-performance claim.
+
 Only `point_mass_3dof` is declared. The metadata explicitly marks all higher
 fidelity realizations and transitions unavailable; sharing a segment name with
 a pseudo-6-DOF or rigid-body implementation does not authorize automatic
@@ -299,10 +340,13 @@ node and value type, presentation controls and numeric formats, scalar/vector/
 range/unknown model properties, three reference frames, core and grouped
 telemetry channels, all output interpolation kinds, a fidelity ladder with
 available and blocked operations, all four deployment states, and a runnable
-parent/child/grandchild lineage result with explicit spawn initial states.
-Its control surface exercises scalar, vector, and boolean commands, a native
-binding for each, one authority profile, and available versus blocked intent
-resolution.
+parent/child/grandchild lineage result with explicit spawn initial states. Its
+control surface is the exhaustive consumer fixture: bounded and unbounded
+continuous commands, periodic values, vectors, booleans, enum selectors,
+detents, one-shot events, provider-defined composite effectors, every command
+lifecycle/release policy/sampling state, and a matching native binding for
+each. It is designed to produce the mixed Torch-friendly action-space and
+event masks that a generic agent consumer must support.
 
 The example also submits an invalid output channel. The same runner returns a
 normal trajectory for the valid request and a structured `unsupported` failure
@@ -346,7 +390,8 @@ segment, preparation, and trajectory-result architecture.
 
 Both models advertise native `point_mass_3dof` batch execution. The provider
 executes that fidelity directly. The waypoint model travels at
-constant speed toward its target and holds once it captures the waypoint.
+constant speed toward its target, holds for the remainder of a captured leg,
+and resumes its configured cruise speed at the next leg boundary.
 There is no automatic lowering step between composition and these reference
 executors. This is an intentionally small contract fixture, not source-grounded
 vehicle evidence or a claim of historical TAOS runtime compatibility.
@@ -355,8 +400,50 @@ vehicle evidence or a claim of historical TAOS runtime compatibility.
 
 `ReferenceMissionCompositionProvider` publishes the two analytical models,
 validates the portable configuration tree, and registers both batch executors
-with the common runner. The checked-in example contains the complete typed
-waypoint request and writes the discriminated common response.
+with the common runner. Its friendly builders are the recommended consumer
+entry point for these fixtures: callers provide SI-valued launch or route
+objects, while the provider still creates and validates the same portable
+`Group` / `Choice` / `Sequence` configuration tree that generic consumers use.
+
+```python
+from taoryx.trajectory import (
+    ReferenceBallisticLaunch,
+    ReferenceMissionCompositionProvider,
+    ReferenceWaypoint,
+    ReferenceWaypointCourseStart,
+)
+
+provider = ReferenceMissionCompositionProvider()
+ballistic = provider.prepare_ballistic(
+    ReferenceBallisticLaunch(
+        altitude_m=1_000.0,
+        speed_m_s=150.0,
+        heading_deg=360.0,  # normalized to the canonical 0-degree bearing
+        flight_path_angle_deg=20.0,
+    ),
+    coast_durations_s=(2.0, 2.0),
+)
+course = provider.prepare_waypoint_course(
+    ReferenceWaypointCourseStart(
+        altitude_m=1_000.0,
+        speed_m_s=100.0,
+        heading_deg=90.0,
+    ),
+    waypoints=(
+        ReferenceWaypoint(north_m=0.0, east_m=500.0, altitude_m=1_000.0, instance_id="outbound"),
+        ReferenceWaypoint(north_m=0.0, east_m=0.0, altitude_m=1_000.0, instance_id="return"),
+    ),
+)
+```
+
+`ReferenceWaypoint.duration_s` is optional. When omitted, the builder derives
+a direct Euclidean travel time at the configured cruise speed; an explicitly
+timed short leg changes the planned origin used for the next automatic leg.
+That convenience deliberately does not model turns, guidance performance, or
+vehicle capability. Callers that need arbitrary configuration-tree assembly
+can continue to use the provider-neutral authoring API.
+
+The checked-in example writes the discriminated common response.
 
 ```bash
 PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_reference.py \

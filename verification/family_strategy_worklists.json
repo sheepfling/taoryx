@@ -1027,21 +1027,14 @@
         "high_energy_terminal_corridor"
       ],
       "mission_overlay": "rocket_aircraft_high_energy",
-      "next_action": "resolve_declared_blocker:source_trim_acceptance",
-      "pending_operations": [
-        "state_derivative",
-        "trim",
-        "linearize",
-        "effectiveness",
-        "allocate"
-      ],
+      "next_action": "run_strategy_stage:phase_trim_grid",
+      "pending_operations": [],
       "physical_family": "powered_fixed_wing",
       "readiness_blockers": [
         "source_trim_acceptance",
-        "stabilator_rudder_rcs_propulsion_effectivity",
-        "allocator_declaration: value does not contain 'allocator'"
+        "stabilator_rudder_rcs_propulsion_effectivity"
       ],
-      "readiness_status": "planned",
+      "readiness_status": "development",
       "required_operations": [
         "state_derivative",
         "trim",
@@ -1060,7 +1053,7 @@
         "actuator_limit_probe",
         "mission_preflight"
       ],
-      "status": "planned",
+      "status": "strategy_development",
       "strategy_id": "rocket_aircraft_high_energy.v1",
       "tier": "rigid_body_6dof_surface_allocated"
     },
@@ -1838,8 +1831,8 @@
   "status": "pass",
   "status_counts": {
     "not_applicable": 2,
-    "planned": 5,
-    "strategy_development": 14,
+    "planned": 4,
+    "strategy_development": 15,
     "strategy_probe_ready": 11,
     "waiting_for_adapter_operation": 4
   },

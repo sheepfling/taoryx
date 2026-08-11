@@ -8,7 +8,7 @@
   "advertisement_status": "pass",
   "family_count": 11,
   "realization_count": 45,
-  "registered_batch_tuple_count": 65,
+  "registered_batch_tuple_count": 66,
   "registered_interactive_tuple_count": 12,
   "families": [
     {
@@ -2930,7 +2930,8 @@
         "range_extension",
         "skip",
         "slalom",
-        "weave"
+        "weave",
+        "custom_composition"
       ],
       "capabilities": [
         "custom_segments"
@@ -2961,7 +2962,8 @@
             "range_extension",
             "skip",
             "slalom",
-            "weave"
+            "weave",
+            "custom_composition"
           ],
           "dynamics_fidelities": [
             "point_mass_3dof"
@@ -2993,7 +2995,8 @@
             "range_extension/point_mass_3dof/fixed_ld_point_mass/batch",
             "skip/point_mass_3dof/fixed_ld_point_mass/batch",
             "slalom/point_mass_3dof/fixed_ld_point_mass/batch",
-            "weave/point_mass_3dof/fixed_ld_point_mass/batch"
+            "weave/point_mass_3dof/fixed_ld_point_mass/batch",
+            "custom_composition/point_mass_3dof/fixed_ld_point_mass/batch"
           ],
           "interactive_status": "blocked",
           "interactive_tuples": [],
@@ -3021,7 +3024,8 @@
             "range_extension/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
             "skip/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
             "slalom/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "weave/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered"
+            "weave/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
+            "custom_composition/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered"
           ]
         }
       ]

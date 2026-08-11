@@ -8,6 +8,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from .claim_bound_evidence import bind_release_evidence
 from .composition_control_trace import (
     build_uncontrolled_committed_control_trace,
     control_trace_summary,
@@ -18,6 +19,7 @@ from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .local_native_coordinate_lqi import (
     LocalNativeCoordinateLqiScreenExecution,
+    apply_tuning_context_to_native_coordinate_lqi_config,
     run_local_native_coordinate_lqi_screen,
 )
 from .local_native_coordinate_lqi_mission_translation import (
@@ -25,6 +27,7 @@ from .local_native_coordinate_lqi_mission_translation import (
     compile_local_native_coordinate_lqi_screen_mission,
 )
 from .local_native_coordinate_lqi_screen_registry import resolve_local_native_coordinate_lqi_screen_definition
+from .tuning_application import RuntimeTuningBindingReceipt, TuningApplicationContext
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import VehicleExecutionPreflight, preflight_vehicle_composition
 
@@ -42,6 +45,7 @@ class LocalNativeCoordinateLqiCompositionExecution:
     status_trace: dict[str, object]
     semantic_action_trace: dict[str, object]
     claim_boundary: str
+    tuning_binding: RuntimeTuningBindingReceipt | None = None
 
     @property
     def screen_pass(self) -> bool:
@@ -68,6 +72,7 @@ class LocalNativeCoordinateLqiCompositionExecution:
                     self.screen.config.candidate.lqi.output_names if self.screen.config.candidate.lqi else ()
                 ),
                 "integrators_exercised": self.screen.validation.integrators_exercised,
+                "tuning_binding": None if self.tuning_binding is None else self.tuning_binding.as_dict(),
             },
             "control_screen": {
                 "screen_pass": self.screen_pass,
@@ -93,6 +98,8 @@ class LocalNativeCoordinateLqiCompositionExecution:
 def execute_local_native_coordinate_lqi_composition(
     composition: CompiledVehicleComposition,
     output_dir: str | Path,
+    *,
+    tuning_context: TuningApplicationContext | None = None,
 ) -> LocalNativeCoordinateLqiCompositionExecution:
     """Run exactly one registered native-coordinate LQI screen without fallback."""
 
@@ -104,6 +111,9 @@ def execute_local_native_coordinate_lqi_composition(
     if definition is None:
         raise ValueError("no local native-coordinate LQI screen factory is registered for this composition")
     config = definition.config_factory()
+    tuning_binding = None
+    if tuning_context is not None:
+        config, tuning_binding = apply_tuning_context_to_native_coordinate_lqi_config(config, tuning_context)
     plan = compile_local_native_coordinate_lqi_screen_mission(
         composition,
         family_id=definition.family_id,
@@ -136,13 +146,23 @@ def execute_local_native_coordinate_lqi_composition(
         status_trace,
         semantic_action_trace,
         definition.claim_boundary,
+        tuning_binding,
     )
     _write_json(destination / "composition.json", composition.model_dump(mode="json", by_alias=True))
     _write_json(destination / "preflight.json", preflight.as_dict())
     _write_json(destination / "plan.json", plan.manifest())
+    evaluation = _screen_evaluation(screen)
     _write_json(destination / "local_screen.json", screen.as_dict())
     _write_json(destination / "truth_telemetry.json", _truth_rows(screen))
-    _write_json(destination / "objective_report.json", _screen_evaluation(screen))
+    _write_json(destination / "objective_report.json", evaluation)
+    _write_json(
+        destination / "convergence_report.json",
+        bind_release_evidence(
+            _convergence_report(screen),
+            kind="convergence",
+            composition=composition,
+        ),
+    )
     _write_json(destination / "mission_graph_execution.json", mission_graph_execution)
     _write_json(destination / "status_trace.json", status_trace)
     _write_json(destination / "semantic_action_trace.json", semantic_action_trace)
@@ -228,41 +248,78 @@ def _native_coordinate_control_trace(
 
 
 def _screen_evaluation(screen: LocalNativeCoordinateLqiScreenExecution) -> dict[str, object]:
-    """Publish only the bounded local recovery gates."""
+    """Publish the bounded local recovery gates in the common objective shape."""
+
+    requirements = [
+        {
+            "id": "closed_loop_candidate_safe",
+            "actual": screen.config.candidate.status,
+            "limit": "safe",
+            "passed": screen.config.candidate.safe,
+        },
+        {
+            "id": "final_error_fraction",
+            "actual": screen.final_error_fraction,
+            "limit": screen.config.final_error_fraction_limit,
+            "passed": screen.final_error_fraction < screen.config.final_error_fraction_limit,
+        },
+        {
+            "id": "control_saturation_fraction",
+            "actual": screen.validation.control_saturation_fraction,
+            "limit": screen.config.maximum_control_saturation_fraction,
+            "passed": screen.validation.control_saturation_fraction <= screen.config.maximum_control_saturation_fraction,
+        },
+        {
+            "id": "integrators_exercised",
+            "actual": screen.validation.integrators_exercised,
+            "passed": screen.validation.integrators_exercised,
+        },
+    ]
 
     return {
         "schema": "taoryx.local-native-coordinate-lqi-screen-evaluation/v1alpha1",
         "kind": "local_controller_recovery_screen",
         "controller_method": "lqi",
         "screen_pass": screen.screen_pass,
-        "requirements": [
+        "mission_pass": screen.screen_pass,
+        "results": [
             {
-                "id": "closed_loop_candidate_safe",
-                "actual": screen.config.candidate.status,
-                "limit": "safe",
-                "passed": screen.config.candidate.safe,
-            },
-            {
-                "id": "final_error_fraction",
-                "actual": screen.final_error_fraction,
-                "limit": screen.config.final_error_fraction_limit,
-                "passed": screen.final_error_fraction < screen.config.final_error_fraction_limit,
-            },
-            {
-                "id": "control_saturation_fraction",
-                "actual": screen.validation.control_saturation_fraction,
-                "limit": screen.config.maximum_control_saturation_fraction,
-                "passed": screen.validation.control_saturation_fraction <= screen.config.maximum_control_saturation_fraction,
-            },
-            {
-                "id": "integrators_exercised",
-                "actual": screen.validation.integrators_exercised,
-                "passed": screen.validation.integrators_exercised,
-            },
+                "id": str(requirement["id"]),
+                "required": True,
+                "status": "pass" if requirement["passed"] else "fail",
+                "actual": requirement["actual"],
+                **({"limit": requirement["limit"]} if "limit" in requirement else {}),
+            }
+            for requirement in requirements
         ],
+        "requirements": requirements,
         "claim_boundary": (
             "The result assesses one pinned local named-coordinate LQI recovery only. It is not a route, "
             "persistent-disturbance, physical-effector, or qualification evaluation."
+        ),
+    }
+    ####
+
+
+def _convergence_report(screen: LocalNativeCoordinateLqiScreenExecution) -> dict[str, object]:
+    """Bind the nominal local recovery result as a release-grade convergence sidecar."""
+
+    return {
+        "schema": "taoryx.endpoint-convergence-screen/v1alpha1",
+        "id": screen.config.id,
+        "kind": "local_controller_recovery",
+        "status": "pass" if screen.screen_pass else "fail",
+        "pass": screen.screen_pass,
+        "controller_method": "lqi",
+        "control_realization": "native_named_coordinates",
+        "metrics": {
+            "final_error_fraction": screen.final_error_fraction,
+            "control_saturation_fraction": screen.validation.control_saturation_fraction,
+            "integrators_exercised": screen.validation.integrators_exercised,
+        },
+        "claim_boundary": (
+            "This sidecar binds one nominal local named-coordinate LQI recovery to the compiled composition. "
+            "It does not establish a persistent-disturbance, mass, wind, physical-effector, route, or qualification claim."
         ),
     }
     ####

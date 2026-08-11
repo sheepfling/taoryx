@@ -26,6 +26,94 @@ The host never invents a waypoint, envelope limit, trim target, control axis,
 or actuator. Those omissions are integration blockers, not gain-tuning
 problems.
 
+### Native batch plug-in handoff
+
+New batch executors should use the typed request contract rather than the
+legacy positional `(composition, output_dir, max_steps)` signature:
+
+```python
+from taoryx.vehicle_batch_execution import (
+    VehicleBatchExecutionRequest,
+    batch_factory_request_v1,
+)
+
+
+@batch_factory_request_v1
+def execute_my_vehicle(request: VehicleBatchExecutionRequest) -> MyExecution:
+    composition = request.composition
+    output_dir = request.output_dir
+    # request.binding is the exact runnable factory declaration.
+    return run_source_owned_model(composition, output_dir, max_steps=request.max_steps)
+```
+
+The provider returns its own result and sidecars as usual. The host then
+validates that result against the requested immutable composition and replaces
+`execution.json` with a canonical
+`taoryx.vehicle-execution-packet/v1alpha1`. That packet preserves the full
+provider payload under `provider_execution`, while its common fields make
+cross-family diagnosis direct:
+
+- `host_execution.request` identifies the exact composition, factory, output
+  directory, and optional step cap;
+- `host_execution` records the advertised interface ID/fingerprint plus hashes
+  of the provider result and preflight;
+- `outcome.scope` is `mission` or `local_screen`, and
+  `outcome.disposition` is `passed` or `failed`; do not infer a common outcome
+  from a provider-specific status string;
+- the CLI run manifest inventories the canonical file and repeats its packet
+  identity and file digest. Result catalogs validate this chain when present.
+
+This means a plug-in can keep high-value family diagnostics such as allocation
+residuals, source-load fields, or controller traces without making every agent
+learn an incompatible top-level result shape.
+
+The request already binds the composition ID/fingerprint, family, mission,
+fidelity, exact batch factory ID, output directory, and optional step limit.
+The host rejects a returned artifact whose composition identity or output
+directory disagrees with this request. The returned `as_dict()` payload must
+also carry a schema, status, nonempty claim boundary, and one unambiguous
+mission or screen pass disposition. Plug-ins may retain arbitrary
+family-specific `runtime`, telemetry, envelope, and diagnostic fields as
+extensions.
+
+If a runtime declares an LQR or LQI controller, its method, realization,
+integral-output coordinates, and optional tuning receipt are validated as a
+common `ControllerRuntimeDeclaration` at batch execution. A common campaign
+receipt is produced by `context.runtime_binding_after_application(...)` and
+serialized with `.as_dict()`. Existing three-argument factories are supported
+while they migrate, but new families should use the request contract from the
+start.
+
+### Release evidence and run metadata
+
+A release-sidecar JSON file is evidence, not an opaque status note. Keep its
+family-owned schema and metrics, then bind it before writing it:
+
+```python
+from taoryx.claim_bound_evidence import bind_release_evidence
+
+payload = bind_release_evidence(
+    robustness_report,
+    kind="robustness",
+    composition=composition,
+)
+write_json(output_dir / "robustness_report.json", payload)
+```
+
+The helper adds `release_evidence_schema`, `release_evidence_kind`, a full
+compiled-composition subject (including its SHA-256 identity), and a typed
+outcome that must agree with the report's top-level status. The release catalog
+checks all of them. Older `status` + `claim` sidecars remain readable, but are
+reported as `legacy_unbound` rather than equally strong release evidence.
+
+For runtime artifacts, construct `RunCommandRecord`, `RunLifecycleEvent`,
+`RunTermination`, `RunSensorExecution`, and `RunVisualizationMetadata` rather
+than adding positional metadata maps. These records retain mapping-style reads
+for compatible consumers, while validating the fields integration code needs:
+finite command/event timing, named actions, nonblank channel/source labels,
+failure reasons, sensor counters, and output-sampling policy. Provider-native
+details remain additive extensions of the typed record.
+
 ## First use
 
 Install at least the model profile and verify real entry points:
@@ -78,6 +166,27 @@ executable controller, extend a source model beyond its validity envelope, or
 qualify a trajectory. For example, the HL-20 high-altitude glide intent
 advertises its Mach/altitude source-domain mismatch and missing runtime gates
 rather than falling back to its separate low-altitude source replay.
+
+The common selection, interface identity, capability fingerprint, feasibility,
+and derived-mission fingerprint are validated contracts. `family_owned` is the
+intentional extension point: include physical data, authority limits, control
+metadata, resource information, and runtime-admission details there rather
+than creating a second top-level capability schema.
+
+### Interface binding declarations
+
+Every advertised interface channel now validates its binding rather than
+passing an unchecked dictionary. The common source variants are native action,
+native effector, batch telemetry/report, episode value, runtime state, derived
+value, constant, and composition parameter. A channel may combine sources
+when a batch and interactive path expose the same semantic quantity.
+
+Bindings remain serialized as the established flat metadata for existing
+tools, but validation now rejects empty source names, transforms with no
+`derived_from`, ambiguous initialization/segment parameter context, non-finite
+or zero scales, and source units without an explicit scale. Family-owned
+binding metadata remains additive. This makes interface construction the place
+to catch a telemetry name, transform, frame, or unit seam before a vehicle run.
 
 ### Focused vertical endpoint contracts
 
@@ -293,9 +402,14 @@ controller demand by the declared altitude coordinate, linearly blends only
 the validated endpoint derivatives and effectiveness, and allocates every
 demand through bounded elevator, aileron, rudder, and throttle. Its report
 contains the blend policy, per-case allocation disposition, actuator history,
-and common status/resource/control traces. This is bounded local transition
-evidence—not an integrated navigation path, wind or mass robustness, a full
-envelope, or flight qualification.
+and common status/resource/control traces. It also emits a typed,
+composition-bound `robustness_report.json`: nominal plus constant external
+pitch moments of ±5% of the shared declared pitch-wrench scale. The offset is
+converted into angular acceleration only after source derivative evaluation,
+using the blended full inertia; it is never added to controller demand or the
+allocator result. This is bounded local transition evidence—not an integrated
+navigation path, wind or mass robustness, a full envelope, or flight
+qualification.
 
 Use `f16_local_physical_direct_wrench_screen_compose.yaml` to exercise the
 same source-trim controller through the direct-wrench comparison path. Both
@@ -386,6 +500,12 @@ nominal-mass LQI design through collective force/moment allocation and the
 motor lag; `mass_variation_report.json` keeps every trim and phase capture.
 This is local mass-mismatch evidence, not a gain schedule, an in-flight mass
 transition, or payload-envelope coverage.
+
+Its focused endpoint is `hummingbird-source-vertical-translation-rotor-lqi`:
+
+```bash
+taoryx vehicle verify hummingbird-source-vertical-translation-rotor-lqi --execute
+```
 
 It still does not establish wind rejection, battery/SOC behavior, contact,
 landing, gain scheduling, or flight qualification. Those are the Hummingbird
@@ -564,6 +684,14 @@ campaign ID, named-coordinate units and bounds, integral outputs, operation
 scope, and physical-allocation boundary. This static record is available
 without running a tuning campaign or executing the screen.
 
+The focused endpoint contract separately records whether that fidelity owns a
+mass, wind, or persistent-offset seam. A physical screen must declare its
+screen cases and pass its typed robustness sidecar. A native-coordinate screen
+such as A320's may instead declare `robustness_requirement: not_applicable`
+with a specific reason, but only when it exposes no such seam. The A320 packet
+therefore emits a composition-bound `convergence_report.json` for its nominal
+LQI recovery; that evidence is deliberately not mislabeled as robustness.
+
 The same `local_controller_screen` record covers the installed Hummingbird,
 X-15, and HL-20 local direct-wrench screens. It identifies all six body-force
 and body-moment coordinates with their exact local bounds, controller method,
@@ -604,6 +732,13 @@ family-level planning maturity, evidence strength, current composition status,
 and next gate separately from the selected endpoint's operation matrix. Thus a
 batch-ready local LQI screen can be discoverable without implying a
 vehicle-qualified controller or physical effector allocation.
+
+`focused_endpoint_verification` supplies the executable proof route for the
+model: physical families use `taoryx vehicle verify <endpoint-id>`, while
+nonphysical provider workflows use `taoryx model verify <endpoint-id>`. The
+advertisement distinguishes an exact selected mission/fidelity (and, for
+workflows, realization) match from a different published endpoint, so an
+agent cannot use a nearby local screen as evidence for another plan.
 
 The shipped A320 pseudo-cruise, F-16 point/pseudo source-trim, Hummingbird
 pseudo-hover, and X-15 local direct-wrench campaigns use this declaration
@@ -664,6 +799,28 @@ applicable telemetry, or `--output-mode selected --channel <id>` and
 `--telemetry-group <id>` for a bounded selection. `--maximum-objects` and
 `--no-spawned-objects` let consumers exercise lineage limits without changing
 the configuration.
+
+### Focused workflow endpoints
+
+`Simple Aero` and `dual_launch_glider` are registered model workflows, but
+they are not physical entries in the Vehicle Composition registry. Their
+checked-in endpoint catalog keeps that boundary visible while still proving
+the useful vertical path: authored draft → installed-provider validation →
+advertised common batch registration → normalized result surface.
+
+```bash
+taoryx model endpoint-specs
+taoryx model verify simple-aero-fixed-ld-batch
+taoryx model verify simple-aero-fixed-ld-batch --execute
+taoryx model verify dual-launch-attached-booster-batch --execute
+```
+
+The non-executing check catches stale model/schema identity, unfilled values,
+missing output advertisements, a missing executor registration, and a changed
+batch-only boundary. `--execute` additionally requires all declared core and
+telemetry channels, plus any endpoint-declared lifecycle event. It does not
+turn either witness into a vehicle, controller, robustness, or qualification
+claim; their explicit `not_applicable` robustness dispositions explain why.
 
 The shipped consumer fixtures are deliberately small and deterministic:
 `reference_ballistic_3dof`,
@@ -1013,6 +1170,30 @@ controller campaign, and no navigation/guidance claim. The next promotion is
 to supply that full-state trim binding before surface-feedback tuning can be
 made honest.
 
+### HL-20 source-surface attitude/rate LQI screen
+
+The separate `hl20_source_surface_attitude_rate_lqi_screen_v1` endpoint fixes
+the same checked Mach-1 translation fixture, then closes local roll, pitch,
+yaw, and body-rate feedback with all seven bounded source surfaces. Its
+eight-second batch retains requested/achieved/residual pitch moments, surface
+allocation status, source-fixture velocity telemetry, and a typed,
+composition-bound `robustness_report.json`.
+
+That report replays the nominal perturbation plus constant external pitch
+moments of ±5% of the declared 100,000 N m pitch-wrench scale. The disturbance
+is applied after source-surface loads through the full-inertia pitch dynamics
+seam; it is not added to the controller request or allocator output. This is
+executed narrow offset evidence only—not a wind model, mass-variation result,
+full-glide trim, route, gain schedule, or flight qualification.
+
+```bash
+taoryx vehicle compose \
+  examples/vehicle_composition/hl20_source_surface_attitude_rate_lqi_screen_compose.yaml \
+  --output build/hl20-source-surface-lqi.composition.json
+taoryx vehicle run build/hl20-source-surface-lqi.composition.json \
+  --output-dir build/hl20-source-surface-lqi
+```
+
 The A320 and F-16 pseudo-6DOF LQI candidates additionally have focused
 nonlinear native-coordinate recovery proofs. A320 uses its declared surrogate
 control bounds; F-16 uses its source-overlay coordinate travel bounds without
@@ -1027,6 +1208,58 @@ provider-internal controls report `provider_managed`, and a provider-owned
 screen that also offers a source-local tuning campaign reports
 `provider_managed_with_campaign`. Uncontrolled or source-replay models report
 tuning as not applicable.
+
+## Vehicle discovery cards and common taxonomy
+
+The full Vehicle Composition catalogue is the single developer-facing join
+for identity, source-owned physical characteristics, fidelity semantics,
+control authority, configuration inputs, and segment planning:
+
+```bash
+taoryx vehicle catalog --detail full
+taoryx vehicle describe x15
+taoryx vehicle parameters x15
+```
+
+Every family declares a concise summary, vehicle class, operating domains,
+propulsion kinds, normal roles, tags, model basis, and claim boundary. Numeric
+geometry, mass, envelope, and effector records are projected only from
+`vehicle_models.yaml` or a typed source-family manifest. An envelope value such
+as `max_mach` is a model-validity bound, not a demonstrated maximum vehicle
+speed. The card uses discriminated physical-characteristic alternatives rather
+than nulls: `fixed_reference_geometry`, `variant_geometry`,
+`fixed_mass_properties`, `scheduled_mass_properties`,
+`declared_validity_envelope`, `declared_effectors`, `not_applicable`, or
+`not_represented`. The serialized card retains `unavailable_fields` for quick
+UI filtering, but callers should preserve the typed alternative until their
+own final serialization boundary.
+
+Each of the four fidelity records includes a common display name and model
+meaning plus the family-specific profile. Pseudo-6DOF cards expose their
+declared roll, pitch, and yaw response limits. Direct-wrench cards expose
+force and moment axes. Allocated tiers expose the declared allocator and
+effector channels. Exact action bounds and authority modes remain in the
+fingerprinted interface and are joined back into each tier by the typed
+`VehicleControlAuthorityAdvertisement`; `control_authority` is its JSON/API
+projection.
+
+Initialization, runtime-variant, and segment inputs are deliberately separate
+configuration scopes. Their public records carry semantic roles such as
+position, speed, mass, event time, energy, or control limit; a runtime variant
+still requires its exact native binding and committed-status evidence.
+
+Internally, the catalogue keeps a typed `VehicleFidelityAdvertisement` and
+`VehicleAuthoringTierAssessment` for each tier/mission choice. Batch/episode
+parity is likewise resolved as a typed advertisement before producing the
+authoring worklist or kit. Plug-ins should use these contracts rather than
+serializing a catalogue card and reading it back as an argument bag.
+
+Every segment resolves to the common category, execution style, and lifecycle
+taxonomy. `segment_planning` compares the declared segment set with normal
+capability slots for its vehicle class and reports missing categories without
+promoting a planned segment or inventing an implementation. A plug-in may use
+a common segment ID or provide an inline typed taxonomy for a genuinely new
+segment kind.
 
 ## What a new model must provide
 
@@ -1349,8 +1582,11 @@ taoryx vehicle run build/tumbling-pseudo-release.composition.json \
   --output build/tumbling-pseudo-release
 taoryx vehicle result build/tumbling-pseudo-release \
   --composition build/tumbling-pseudo-release.composition.json
+taoryx vehicle verify tumbling-body-passive-release-pseudo6dof --execute
 ```
 
-The result is a declared geometry/release-to-impact witness, not an
-independent source-vehicle model, shape-wide damping qualification, or a
-qualified rigid-body 6DOF aerodynamic-moment contract.
+The focused endpoint explicitly reports its controller and robustness gates as
+`not_applicable`: it has no control or declared uncertainty seam. This is a
+declared geometry/release-to-impact witness, not an independent source-vehicle
+model, shape-wide damping qualification, or a qualified rigid-body 6DOF
+aerodynamic-moment contract.

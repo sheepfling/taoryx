@@ -42,6 +42,8 @@ def test_vehicle_slice_selects_only_the_declared_f16_vertical_contract(
             "-o",
             "addopts=",
             "--strict-markers",
+            "-m",
+            "not slow and not artifact and not simple_aero",
             "--basetemp",
             ".pytest-vehicle-f16_s119",
         ]

@@ -78,5 +78,5 @@ def test_every_realization_specific_operation_row_is_selectable_and_projected_ex
                             assert record.blockers
                     exercised.add((provider.metadata.id, model.id, mission.id, fidelity, realization_id))
 
-    assert len(exercised) == 69
+    assert len(exercised) == 70
     ####

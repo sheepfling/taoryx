@@ -50,8 +50,16 @@ VEHICLE_VERTICAL_TEST_PATHS: dict[str, tuple[str, ...]] = {
     "tumbling_body": ("tests/unit/test_tumbling_body_vehicle_vertical.py",),
     "skywalker_x8": ("tests/unit/test_x8_vehicle_vertical.py",),
     "b747": ("tests/unit/test_b747_vehicle_vertical.py",),
-    "simple_aero": ("tests/unit/test_simple_aero_vehicle_vertical.py",),
-    "dual_launch_glider": ("tests/unit/test_dual_launch_vehicle_vertical.py",),
+    "simple_aero": (
+        "tests/unit/test_simple_aero_vehicle_vertical.py",
+        "tests/unit/test_mission_workflow_endpoint.py::test_workflow_endpoints_compile_and_preflight_through_the_installed_provider[simple-aero-fixed-ld-batch]",
+        "tests/unit/test_mission_workflow_endpoint.py::test_workflow_endpoints_emit_their_declared_normalized_result_surface[simple-aero-fixed-ld-batch]",
+    ),
+    "dual_launch_glider": (
+        "tests/unit/test_dual_launch_vehicle_vertical.py",
+        "tests/unit/test_mission_workflow_endpoint.py::test_workflow_endpoints_compile_and_preflight_through_the_installed_provider[dual-launch-attached-booster-batch]",
+        "tests/unit/test_mission_workflow_endpoint.py::test_workflow_endpoints_emit_their_declared_normalized_result_surface[dual-launch-attached-booster-batch]",
+    ),
 }
 
 
@@ -242,6 +250,8 @@ def test_changed() -> None:
             "-o",
             "addopts=",
             "--strict-markers",
+            "-m",
+            "not slow and not artifact and not simple_aero",
             "--basetemp",
             ".pytest-changed",
         ]
@@ -338,6 +348,9 @@ def test_vehicle_vertical(family: str) -> None:
     except KeyError as error:
         available = ", ".join(sorted(VEHICLE_VERTICAL_TEST_PATHS))
         raise SystemExit(f"no focused vehicle slice is defined for {family!r}; available: {available}") from error
+    marker_expression = "not slow and not artifact"
+    if family != "simple_aero":
+        marker_expression += " and not simple_aero"
     run(
         [
             project_python(),
@@ -349,6 +362,8 @@ def test_vehicle_vertical(family: str) -> None:
             "-o",
             "addopts=",
             "--strict-markers",
+            "-m",
+            marker_expression,
             "--basetemp",
             f".pytest-vehicle-{family}",
         ]

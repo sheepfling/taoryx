@@ -30,6 +30,8 @@ PHYSICAL_LQI_COMPOSITION = "hummingbird_local_individual_rotor_lqi_screen_compos
 HORIZONTAL_LQI_COMPOSITION = "hummingbird_local_horizontal_translation_lqi_screen_compose.yaml"
 VERTICAL_LQI_COMPOSITION = "hummingbird_local_vertical_translation_lqi_screen_compose.yaml"
 DIRECT_WRENCH_COMPOSITION = "hummingbird_local_direct_wrench_screen_compose.yaml"
+HOVER_CAMPAIGN_ID = "hummingbird-source-rotor-local-lqi-v1"
+VERTICAL_CAMPAIGN_ID = "hummingbird-source-rotor-vertical-lqi-v1"
 
 
 @pytest.fixture(scope="module")
@@ -226,7 +228,7 @@ def test_hummingbird_physical_rotor_campaign_is_selectable_through_the_common_ho
         "effector.rotor.4.speed.position",
     ]
 
-    report = plugins.build_controller_tuning_campaign_registry().registration("hummingbird-source-rotor-local-lqi-v1").run()
+    report = plugins.build_controller_tuning_campaign_registry().registration(HOVER_CAMPAIGN_ID).run()
     node = report.nodes[0]
     assert report.status == "candidate_ready"
     assert node.lqr is not None and node.lqr.method == "lqi"
@@ -236,11 +238,51 @@ def test_hummingbird_physical_rotor_campaign_is_selectable_through_the_common_ho
         "yaw_error_rad",
     )
     assert node.lqr is not None and node.lqr.best is not None
-    assert node.lqr.best.control_names == (
-        "rotor-1-speed",
-        "rotor-2-speed",
-        "rotor-3-speed",
-        "rotor-4-speed",
+    assert node.lqr.best.control_names == ("moment_x_nm", "moment_y_nm", "moment_z_nm")
+    ####
+
+
+def test_hummingbird_hover_physical_lqi_screen_applies_the_exact_common_tuning_candidate(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The selected source-hover candidate is bound before rotor allocation."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration(HOVER_CAMPAIGN_ID)
+    contexts = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))
+
+    assert len(contexts) == 1
+    batch = execute_vehicle_composition_batch(
+        _physical_lqi_composition(),
+        tmp_path / "hummingbird-physical-lqi-tuned",
+        tuning_context=contexts[0],
+    )
+    runtime = cast(dict[str, object], batch.as_dict()["runtime"])
+    binding = cast(dict[str, object], runtime["tuning_binding"])
+
+    assert batch.passed is True
+    assert binding["campaign_id"] == HOVER_CAMPAIGN_ID
+    assert binding["candidate_profile_id"] == contexts[0].candidate_profile_id
+    assert binding["applied_gain_fingerprint_sha256"] == contexts[0].resolved_gain_fingerprint_sha256
+    ####
+
+
+def test_hummingbird_vertical_campaign_declares_its_own_force_and_moment_coordinates(
+    plugins: PluginCatalog,
+) -> None:
+    """Vertical translation cannot accidentally reuse the attitude-only candidate."""
+
+    report = plugins.build_controller_tuning_campaign_registry().registration(VERTICAL_CAMPAIGN_ID).run()
+    node = report.nodes[0]
+
+    assert report.status == "candidate_ready"
+    assert node.lqr is not None and node.lqr.best is not None
+    assert node.lqr.best.control_names == ("force_z_n", "moment_x_nm", "moment_y_nm", "moment_z_nm")
+    assert node.lqr.best.integral_output_names == (
+        "roll_error_rad",
+        "pitch_error_rad",
+        "yaw_error_rad",
+        "w_m_s",
     )
     ####
 
@@ -292,6 +334,9 @@ def test_hummingbird_source_hover_lqi_screen_runs_through_the_composition_factor
     assert (batch.output_dir / "nonlinear_validation.json").is_file()
     robustness = json.loads((batch.output_dir / "robustness_report.json").read_text(encoding="utf-8"))
     assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["release_evidence_schema"] == "taoryx.claim-bound-release-evidence/v1alpha1"
+    assert robustness["release_evidence_kind"] == "robustness"
+    assert robustness["release_evidence_subject"]["composition_identity_sha256"] == composition.identity_sha256
     assert robustness["id"] == "hummingbird-hover-fixed-lqi-mass-variation"
     assert robustness["pass"] is True
     assert [case["id"] for case in robustness["cases"]] == ["mass-0.85x", "mass-1.00x", "mass-1.15x"]
@@ -361,6 +406,14 @@ def test_hummingbird_vertical_lqi_screen_runs_through_collective_force_and_actua
     assert payload["control_trace"]["achieved_effector_channel_count"] == 4
     assert (batch.output_dir / "truth_telemetry.csv").is_file()
     assert (batch.output_dir / "mass_variation_report.json").is_file()
+    robustness = json.loads((batch.output_dir / "robustness_report.json").read_text(encoding="utf-8"))
+    assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["id"] == "hummingbird-vertical-fixed-lqi-mass-variation"
+    assert robustness["pass"] is True
+    assert [case["id"] for case in robustness["cases"]] == ["mass-0.85x", "mass-1x", "mass-1.15x"]
+    assert all(case["metrics"]["minimum_phase_capture_dwell_s"] >= 0.8 for case in robustness["cases"])
+    assert all(case["metrics"]["saturation_fraction"] == 0.0 for case in robustness["cases"])
+    assert robustness["release_evidence_schema"] == "taoryx.claim-bound-release-evidence/v1alpha1"
     ####
 
 
@@ -500,6 +553,12 @@ def test_hummingbird_horizontal_lqi_authoring_plan_selects_its_exact_screen(plug
     assert controller_detail["method"] == "lqi"
     assert controller_detail["reference_layer"] == "bounded_horizontal_position_error_to_tilt_yaw_reference"
     assert controller_detail["screen_duration_s"] == pytest.approx(38.0)
+    endpoint = cast(dict[str, object], plan["focused_endpoint_verification"])
+    matching = cast(list[dict[str, object]], endpoint["endpoints"])
+    horizontal = next(item for item in matching if item["id"] == "hummingbird-source-horizontal-translation-rotor-lqi")
+    assert endpoint["selected_endpoint_status"] == "matching_endpoint_available"
+    assert horizontal["matches_selected_mission_and_fidelity"] is True
+    assert horizontal["command"] == "taoryx vehicle verify hummingbird-source-horizontal-translation-rotor-lqi"
     ####
 
 
@@ -525,6 +584,12 @@ def test_hummingbird_vertical_lqi_authoring_plan_selects_collective_force(plugin
     assert controller_detail["reference_layer"] == "bounded_down_position_error_to_vertical_speed_reference"
     assert controller_detail["controlled_wrench_axes"] == ["force_z_n", "moment_x_nm", "moment_y_nm", "moment_z_nm"]
     assert controller_detail["screen_duration_s"] == pytest.approx(16.0)
+    endpoint = cast(dict[str, object], plan["focused_endpoint_verification"])
+    matching = cast(list[dict[str, object]], endpoint["endpoints"])
+    vertical = next(item for item in matching if item["id"] == "hummingbird-source-vertical-translation-rotor-lqi")
+    assert endpoint["selected_endpoint_status"] == "matching_endpoint_available"
+    assert vertical["matches_selected_mission_and_fidelity"] is True
+    assert vertical["command"] == "taoryx vehicle verify hummingbird-source-vertical-translation-rotor-lqi"
     ####
 
 

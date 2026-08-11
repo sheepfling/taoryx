@@ -105,9 +105,12 @@ def test_bundled_vehicle_registrations_cross_the_plugin_boundary_without_id_drif
         "f16-point-source-trim-translation-v1",
         "f16-pseudo-source-trim-attitude-v1",
         "f16-source-surface-local-lqr-v1",
+        "f16-source-surface-schedule-lqr-v1",
         "f16-source-surface-local-lqi-v1",
+        "f16-source-surface-schedule-lqi-v1",
         "hummingbird-pseudo-hover-attitude-v1",
         "hummingbird-source-rotor-local-lqi-v1",
+        "hummingbird-source-rotor-vertical-lqi-v1",
         "x15-source-release-direct-wrench-v1",
         "x15-source-release-direct-wrench-lqi-v1",
         "x15-source-surface-local-lqi-v1",
@@ -390,7 +393,7 @@ def test_disabling_reachability_removes_only_reachability_owned_overlays() -> No
     assert len(catalog.records("execution_factory")) == 24
     assert len(catalog.records("episode_factory")) == 6
     assert len(catalog.records("batch_episode_parity_verifier")) == 6
-    assert len(catalog.records("controller_tuning_campaign")) == 20
+    assert len(catalog.records("controller_tuning_campaign")) == 23
     assert len(catalog.records("local_controller_screen_advertisement")) == 1
     assert catalog.records("reachability_provider") == ()
     assert [(item.plugin_id, item.status) for item in catalog.diagnostics] == [

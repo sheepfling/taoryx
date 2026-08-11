@@ -14,17 +14,28 @@ development, and qualified availability.
 
 from __future__ import annotations
 
+import math
 from collections import Counter
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .family_manifest import UnifiedFamilyManifest, UnifiedFamilyManifestCatalog, load_unified_family_manifest_catalog
-from .fidelity_contracts import CANONICAL_FIDELITY_TIERS, ControlRealization, FidelityTier, control_realization_for, runtime_fidelity_for
+from .fidelity_contracts import (
+    CANONICAL_FIDELITY_TIERS,
+    ControlRealization,
+    FidelityTier,
+    FidelityTierMetadata,
+    RuntimeFidelity,
+    control_realization_for,
+    fidelity_tier_metadata,
+    runtime_fidelity_for,
+)
 from .parameter_value_spaces import (
     parameter_value_space_contract,
     validate_parameter_value_space_coverage,
@@ -42,7 +53,42 @@ from .value_space import (
     unit_interval,
     validate_value_space_value,
 )
+from .vehicle_discovery import (
+    VEHICLE_CLASS_SEGMENT_EXPECTATIONS,
+    AxisResponseLimit,
+    DeclaredEffector,
+    DeclaredEffectors,
+    DeclaredValidityEnvelope,
+    DirectWrenchTierProfile,
+    EnvelopeAxis,
+    FixedMassProperties,
+    FixedReferenceGeometry,
+    NotApplicableEffectors,
+    NotRepresentedEffectors,
+    NotRepresentedGeometry,
+    NotRepresentedMassProperties,
+    NotRepresentedValidityEnvelope,
+    ParameterSemanticRole,
+    PhaseResponseLimits,
+    PointMassTierProfile,
+    PrincipalInertia,
+    PseudoSixDofTierProfile,
+    ScheduledMassProperties,
+    SegmentTaxonomy,
+    SurfaceAllocatedTierProfile,
+    TierModelProfile,
+    VariantGeometry,
+    VehicleMetadata,
+    VehiclePhysicalCharacteristics,
+    parameter_semantic_role,
+    resolve_segment_taxonomy,
+)
 from .vehicle_registry import ROOT
+
+if TYPE_CHECKING:
+    from .horizontal_fidelity import HorizontalTierBinding
+    from .vehicle_execution_bindings import VehicleBatchEpisodeParityAdvertisement, VehicleExecutionBinding
+    from .vehicle_interface import VehicleControlAuthorityAdvertisement, VehicleInterfaceContract
 
 VEHICLE_COMPOSITION_REGISTRY = packaged_resource_fallback(
     ROOT / "verification/vehicle_composition_registry.yaml",
@@ -70,6 +116,7 @@ class ParameterSpec(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     id: str = Field(min_length=1)
+    semantic_role: ParameterSemanticRole | None = None
     canonical_unit: str | None = None
     value_type_declared: Literal["scalar", "vector3", "vector4", "enum"] | None = None
     required: bool = False
@@ -246,6 +293,7 @@ class ParameterSpec(BaseModel):
         payload = self.model_dump(mode="json")
         payload.update(
             {
+                "semantic_role": self.semantic_role or parameter_semantic_role(self.id),
                 "value_type": self.value_type,
                 "value_type_source": (
                     "declared"
@@ -398,12 +446,14 @@ class SegmentContract(BaseModel):
     required_control_intents: tuple[str, ...] = ()
     preserves_state: bool = True
     permitted_transition_events: tuple[str, ...] = ()
+    taxonomy: SegmentTaxonomy | None = None
 
     @model_validator(mode="after")
     def validate_parameters(self) -> SegmentContract:
         ids = [item.id for item in self.parameters]
         if len(ids) != len(set(ids)):
             raise ValueError(f"segment {self.id!r} has duplicate parameters")
+        resolve_segment_taxonomy(self.id, self.taxonomy)
         return self
         ####
 
@@ -522,6 +572,7 @@ class VariantParameterBinding(BaseModel):
 
         return {
             "id": self.id,
+            "semantic_role": parameter_semantic_role(self.id),
             "canonical_unit": self.canonical_unit,
             "value_type": "scalar",
             "value_space": self.value_space.as_dict(),
@@ -633,6 +684,7 @@ class VehicleCompositionDeclaration(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     family_id: str = Field(min_length=1)
+    metadata: VehicleMetadata
     initialization_contracts: tuple[InitializationContract, ...] = Field(min_length=1)
     segment_contracts: tuple[SegmentContract, ...] = Field(min_length=1)
     mission_templates: tuple[MissionTemplateContract, ...] = Field(min_length=1)
@@ -728,7 +780,449 @@ def _segment_public_dict(contract: SegmentContract) -> dict[str, object]:
 
     payload = contract.model_dump(mode="json")
     payload["parameters"] = [item.public_dict() for item in contract.parameters]
+    payload["taxonomy"] = resolve_segment_taxonomy(contract.id, contract.taxonomy).model_dump(mode="json")
     return payload
+    ####
+
+
+def _finite_number(value: object, field_name: str) -> float:
+    """Read one numeric legacy-registry field at the typed projection boundary."""
+
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)):
+        raise ValueError(f"legacy vehicle registry field {field_name!r} must be finite numeric")
+    return float(value)
+    ####
+
+
+def _optional_finite_number(value: object, field_name: str) -> float | None:
+    """Read a nullable numeric legacy-registry field without leaking ``Any``."""
+
+    return None if value is None else _finite_number(value, field_name)
+    ####
+
+
+def _registry_control_unit(identifier: str) -> str | None:
+    """Return a unit only when a legacy registry coordinate names one unambiguously."""
+
+    normalized = identifier.replace("_", "-")
+    if normalized.endswith("-deg"):
+        return "deg"
+    if "throttle" in normalized:
+        return "dimensionless"
+    if "rotor" in normalized and "speed" in normalized:
+        return "rad/s"
+    return None
+    ####
+
+
+def _registry_envelope_axes(envelope: Mapping[str, object]) -> tuple[EnvelopeAxis, ...]:
+    """Normalize legacy envelope keys into typed axis records."""
+
+    definitions: tuple[tuple[str, str | None, str | None, str | None, str], ...] = (
+        ("forward_speed_m_s", "m/s", "min_forward_speed_m_s", "max_speed_m_s", "Declared forward-speed validity bounds."),
+        ("mach", "dimensionless", "min_mach", "max_mach", "Declared Mach validity bounds."),
+        ("angle_of_attack", "deg", None, "max_alpha_deg", "Declared angle-of-attack validity bound."),
+        ("sideslip", "deg", None, "max_beta_deg", "Declared sideslip validity bound."),
+        ("altitude", "m", None, "max_altitude_m", "Declared altitude validity bound."),
+    )
+    axes: list[EnvelopeAxis] = []
+    for identifier, unit, lower_key, upper_key, description in definitions:
+        lower = _optional_finite_number(envelope.get(lower_key), lower_key) if lower_key is not None else None
+        upper = _optional_finite_number(envelope.get(upper_key), upper_key) if upper_key is not None else None
+        if lower is not None or upper is not None:
+            axes.append(EnvelopeAxis(id=identifier, canonical_unit=unit, lower=lower, upper=upper, description=description))
+    return tuple(axes)
+    ####
+
+
+def _source_envelope_axes(family: UnifiedFamilyManifest) -> tuple[EnvelopeAxis, ...]:
+    """Normalize a typed source-manifest envelope into portable axis records."""
+
+    if family.source_manifest is None:
+        return ()
+    envelope = family.source_manifest.plant.validity_envelope
+    return (
+        EnvelopeAxis(
+            id="mach",
+            canonical_unit="dimensionless",
+            lower=envelope.mach_min,
+            upper=envelope.mach_max,
+            description="Source-package Mach validity bounds.",
+        ),
+        EnvelopeAxis(
+            id="angle_of_attack",
+            canonical_unit="rad",
+            lower=envelope.alpha_min_rad,
+            upper=envelope.alpha_max_rad,
+            description="Source-package angle-of-attack validity bounds.",
+        ),
+        EnvelopeAxis(
+            id="sideslip",
+            canonical_unit="rad",
+            lower=envelope.beta_min_rad,
+            upper=envelope.beta_max_rad,
+            description="Source-package sideslip validity bounds.",
+        ),
+        EnvelopeAxis(
+            id="altitude",
+            canonical_unit="m",
+            lower=envelope.altitude_min_m,
+            upper=envelope.altitude_max_m,
+            description="Source-package altitude validity bounds.",
+        ),
+    )
+    ####
+
+
+def _not_represented_characteristics(reason: str) -> VehiclePhysicalCharacteristics:
+    """Construct one explicit all-gap card for a reduced composite family."""
+
+    boundary = "This field has no common source owner and must not be inferred by a catalogue client."
+    return VehiclePhysicalCharacteristics(
+        reference_geometry=NotRepresentedGeometry(reason=reason, claim_boundary=boundary),
+        mass_properties=NotRepresentedMassProperties(reason=reason, claim_boundary=boundary),
+        validity_envelope=NotRepresentedValidityEnvelope(reason=reason, claim_boundary=boundary),
+        effectors=NotRepresentedEffectors(reason=reason, claim_boundary=boundary),
+        claim_boundary=(
+            "The model is discoverable, but this common catalogue has no authoritative physical-characteristics owner. "
+            "Null-equivalent states are represented by typed not_represented variants."
+        ),
+    )
+    ####
+
+
+def _tumbling_body_characteristics() -> VehiclePhysicalCharacteristics:
+    """Return the family-variable contract for the passive tumbling body."""
+
+    return VehiclePhysicalCharacteristics(
+        reference_geometry=VariantGeometry(
+            selector_parameter_id="body_shape",
+            selectable_variant_ids=("cylinder", "sphere", "cone", "triaxial_ellipsoid"),
+            provenance="verification/vehicle_composition_registry.yaml",
+            claim_boundary=(
+                "The selected body_shape chooses a runtime geometry realization. The family does not advertise one fixed set of dimensions."
+            ),
+        ),
+        mass_properties=NotRepresentedMassProperties(
+            reason="Passive-body mass is not declared as one family-wide source-owned characteristic.",
+            claim_boundary="A client must use the selected composition/runtime realization rather than infer mass from body shape.",
+        ),
+        validity_envelope=NotRepresentedValidityEnvelope(
+            reason="No family-wide passive-body validity envelope is declared.",
+            claim_boundary="A passive-body client must inspect the selected reachability realization and its source bounds.",
+        ),
+        effectors=NotApplicableEffectors(
+            reason="The passive tumbling family has no externally controllable effector path.",
+            claim_boundary="No controller, actuator, or propulsion authority is implied by the passive model.",
+        ),
+        claim_boundary=(
+            "Geometry is selected per runtime variant; all remaining gaps are explicit and cannot be filled from a generic family default."
+        ),
+    )
+    ####
+
+
+def _physical_characteristics(family: UnifiedFamilyManifest) -> VehiclePhysicalCharacteristics:
+    """Project source-owned physical facts into typed alternatives, never bags."""
+
+    common_boundary = (
+        "Envelope values are model-validity bounds, not demonstrated maximum vehicle performance. "
+        "Every unavailable field is represented by a typed contract alternative rather than an inferred null."
+    )
+    if family.family_id == "tumbling_body":
+        return _tumbling_body_characteristics()
+    if family.vehicle_definition is not None:
+        vehicle = family.vehicle_definition
+        inertia = vehicle.get("inertia_kg_m2")
+        if not isinstance(inertia, Mapping):
+            raise ValueError(f"vehicle {family.family_id!r} has no typed principal-inertia source")
+        controls = vehicle.get("controls", ())
+        if not isinstance(controls, (list, tuple)):
+            raise ValueError(f"vehicle {family.family_id!r} controls must be a list or tuple")
+        effectors: list[DeclaredEffector] = []
+        for index, control in enumerate(controls):
+            if not isinstance(control, Mapping):
+                raise ValueError(f"vehicle {family.family_id!r} control {index} must be a mapping")
+            identifier = control.get("name")
+            if not isinstance(identifier, str) or not identifier.strip():
+                raise ValueError(f"vehicle {family.family_id!r} control {index} requires a name")
+            effectors.append(
+                DeclaredEffector(
+                    id=identifier,
+                    canonical_unit=_registry_control_unit(identifier),
+                    lower=_optional_finite_number(control.get("lower"), f"controls[{index}].lower"),
+                    upper=_optional_finite_number(control.get("upper"), f"controls[{index}].upper"),
+                    default=_optional_finite_number(control.get("default"), f"controls[{index}].default"),
+                    provenance="verification/vehicle_models.yaml",
+                    description="Declared legacy vehicle-registry control coordinate.",
+                )
+            )
+        envelope = vehicle.get("envelope", {})
+        if not isinstance(envelope, Mapping):
+            raise ValueError(f"vehicle {family.family_id!r} envelope must be a mapping")
+        envelope_axes = _registry_envelope_axes(envelope)
+        return VehiclePhysicalCharacteristics(
+            reference_geometry=FixedReferenceGeometry(
+                area_m2=_finite_number(vehicle.get("reference_area_m2"), "reference_area_m2"),
+                reference_length_m=_finite_number(vehicle.get("reference_length_m"), "reference_length_m"),
+                provenance="verification/vehicle_models.yaml",
+                claim_boundary="Reference geometry is copied from the checked vehicle-model registry.",
+            ),
+            mass_properties=FixedMassProperties(
+                dry_mass_kg=_finite_number(vehicle.get("dry_mass_kg"), "dry_mass_kg"),
+                nominal_mass_kg=_finite_number(vehicle.get("nominal_mass_kg"), "nominal_mass_kg"),
+                inertia=PrincipalInertia(
+                    x_kg_m2=_finite_number(inertia.get("x"), "inertia_kg_m2.x"),
+                    y_kg_m2=_finite_number(inertia.get("y"), "inertia_kg_m2.y"),
+                    z_kg_m2=_finite_number(inertia.get("z"), "inertia_kg_m2.z"),
+                ),
+                provenance="verification/vehicle_models.yaml",
+                claim_boundary="Mass and inertia are the fixed registry binding for this model, not an airframe qualification claim.",
+            ),
+            validity_envelope=(
+                DeclaredValidityEnvelope(
+                    axes=envelope_axes,
+                    notes=tuple(
+                        value for key, value in envelope.items() if key == "domain_scope" and isinstance(value, str)
+                    ),
+                    provenance="verification/vehicle_models.yaml",
+                    claim_boundary=common_boundary,
+                )
+                if envelope_axes
+                else NotRepresentedValidityEnvelope(
+                    reason="The legacy vehicle registry declares no portable validity-envelope axes.",
+                    claim_boundary=common_boundary,
+                )
+            ),
+            effectors=(
+                DeclaredEffectors(
+                    effectors=tuple(effectors),
+                    provenance="verification/vehicle_models.yaml",
+                    claim_boundary="These are declared model control coordinates; interface availability determines externally executable authority.",
+                )
+                if effectors
+                else NotRepresentedEffectors(
+                    reason="The legacy vehicle registry declares no effector/control coordinates.",
+                    claim_boundary="No effector set can be inferred from an absent registry list.",
+                )
+            ),
+            claim_boundary=common_boundary,
+        )
+    if family.source_manifest is not None:
+        manifest = family.source_manifest
+        geometry = manifest.plant.reference_geometry
+        mass = manifest.plant.mass_properties
+        source_effectors = tuple(
+            DeclaredEffector(
+                id=control.id,
+                canonical_unit=control.unit,
+                lower=control.minimum,
+                upper=control.maximum,
+                default=control.default,
+                provenance=family.source_manifest_path or "source_family_manifest",
+                description=control.description or "Declared source-family control coordinate.",
+            )
+            for control in manifest.controls
+        )
+        mass_layer = manifest.layers.get("mass_properties")
+        controller_layer = manifest.layers.get("controllers")
+        return VehiclePhysicalCharacteristics(
+            reference_geometry=FixedReferenceGeometry(
+                area_m2=geometry.area_m2,
+                mean_aerodynamic_chord_m=geometry.mean_aerodynamic_chord_m,
+                span_m=geometry.span_m,
+                provenance=family.source_manifest_path or "source_family_manifest",
+                claim_boundary="Reference geometry is copied from the typed source-family manifest.",
+            ),
+            mass_properties=(
+                FixedMassProperties(
+                    dry_mass_kg=mass.dry_mass_kg,
+                    inertia=PrincipalInertia(
+                        x_kg_m2=mass.inertia_body_kg_m2[0],
+                        y_kg_m2=mass.inertia_body_kg_m2[1],
+                        z_kg_m2=mass.inertia_body_kg_m2[2],
+                    ),
+                    binding_status=mass.binding_status,
+                    perturbation_policy=mass.perturbation_policy,
+                    provenance=family.source_manifest_path or "source_family_manifest",
+                    claim_boundary="Mass and inertia are the typed source-family fixed binding.",
+                )
+                if mass is not None
+                else ScheduledMassProperties(
+                    schedule_id=mass_layer.version,
+                    schedule_evidence=mass_layer.evidence,
+                    includes_staging_events=True,
+                    provenance=family.source_manifest_path or "source_family_manifest",
+                    claim_boundary="Mass is governed by the named source schedule and staging events, not a static family scalar.",
+                )
+                if mass_layer is not None and "scheduled" in mass_layer.version
+                else NotRepresentedMassProperties(
+                    reason="The source-family manifest has no fixed mass/inertia binding or typed mass schedule.",
+                    claim_boundary="Clients must not infer mass from geometry, mission inputs, or another family.",
+                )
+            ),
+            validity_envelope=DeclaredValidityEnvelope(
+                axes=_source_envelope_axes(family),
+                provenance=family.source_manifest_path or "source_family_manifest",
+                claim_boundary=common_boundary,
+            ),
+            effectors=(
+                DeclaredEffectors(
+                    effectors=source_effectors,
+                    provenance=family.source_manifest_path or "source_family_manifest",
+                    claim_boundary="These source-family coordinates remain subject to each fidelity interface and execution binding.",
+                )
+                if source_effectors
+                else NotApplicableEffectors(
+                    reason="The source-family controller layer explicitly declares no applicable controls."
+                    if controller_layer is not None and "not-applicable" in controller_layer.version
+                    else "No source-family effector contract is declared.",
+                    claim_boundary=(
+                        "The source-family controller layer does not expose an externally controllable effector route."
+                        if controller_layer is not None and "not-applicable" in controller_layer.version
+                        else "An absent source control list is not converted into an inferred effector set."
+                    ),
+                )
+            ),
+            claim_boundary=common_boundary,
+        )
+    return _not_represented_characteristics(
+        "No legacy vehicle registry entry or typed source-family manifest owns physical characteristics for this family."
+    )
+    ####
+
+
+def _axis_response_limit(axis: str, response: object) -> AxisResponseLimit:
+    """Convert one typed pseudo-profile response record without a dict round trip."""
+
+    if axis not in {"roll", "pitch", "yaw"}:
+        raise ValueError(f"unknown pseudo-6DOF response axis {axis!r}")
+    from .trajectory.pseudo6dof_profiles import AxisResponseProfile
+
+    if not isinstance(response, AxisResponseProfile):
+        raise TypeError(f"pseudo-6DOF response for {axis!r} is not an AxisResponseProfile")
+    return AxisResponseLimit(
+        axis=cast(Literal["roll", "pitch", "yaw"], axis),
+        time_constant_s=response.time_constant_s,
+        damping_ratio=response.damping_ratio,
+        maximum_rate_rad_s=response.maximum_rate_rad_s,
+        maximum_acceleration_rad_s2=response.maximum_acceleration_rad_s2,
+    )
+    ####
+
+
+def _tier_model_profile(family: UnifiedFamilyManifest, tier: FidelityTier) -> TierModelProfile:
+    """Return a discriminated family-specific tier profile without dict bags."""
+
+    if tier == "point_mass_3dof":
+        return PointMassTierProfile(profile_id=family.binding.point_mass_profile_id)
+    if tier == "pseudo_6dof":
+        pseudo_profile = family.pseudo_profile
+        default_response = tuple(
+            _axis_response_limit(axis, response)
+            for axis, response in pseudo_profile.response.items()
+        )
+        phase_response = tuple(
+            PhaseResponseLimits(
+                phase=phase,
+                axes=tuple(_axis_response_limit(axis, response) for axis, response in responses.items()),
+            )
+            for phase, responses in pseudo_profile.phase_response.items()
+        )
+        return PseudoSixDofTierProfile(
+            profile_id=pseudo_profile.id,
+            model_kind=pseudo_profile.model_kind,
+            control_realization=pseudo_profile.control_realization,
+            evidence_grade=pseudo_profile.evidence_grade,
+            default_response=default_response,
+            phase_response=phase_response,
+            unsupported_claims=pseudo_profile.unsupported_claims,
+        )
+    if tier == "rigid_body_6dof_direct_wrench":
+        direct_profile = family.direct_profile
+        return DirectWrenchTierProfile(
+            profile_id=None if direct_profile is None else direct_profile.id,
+            force_axes=() if direct_profile is None else direct_profile.force_axes,
+            moment_axes=() if direct_profile is None else direct_profile.moment_axes,
+            unsupported_claims=() if direct_profile is None else direct_profile.unsupported_claims,
+        )
+    surface_profile = family.surface_profile
+    return SurfaceAllocatedTierProfile(
+        profile_id=None if surface_profile is None else surface_profile.id,
+        allocator_id=None if surface_profile is None else surface_profile.allocator_id,
+        declared_effector_channels=() if surface_profile is None else surface_profile.effector_channels,
+        unsupported_claims=() if surface_profile is None else surface_profile.unsupported_claims,
+    )
+    ####
+
+
+def _segment_planning_dict(declaration: VehicleCompositionDeclaration) -> dict[str, object]:
+    """Compare a family's declared segment plan with its vehicle-class norm."""
+
+    taxonomy_by_id = {
+        segment.id: resolve_segment_taxonomy(segment.id, segment.taxonomy)
+        for segment in declaration.segment_contracts
+    }
+    expected = VEHICLE_CLASS_SEGMENT_EXPECTATIONS[declaration.metadata.vehicle_class]
+    covered = {
+        category
+        for taxonomy in taxonomy_by_id.values()
+        for category in (taxonomy.category, *taxonomy.additional_capabilities)
+    }
+    missing = [category for category in expected if category not in covered]
+    referenced = {
+        segment_id
+        for mission in declaration.mission_templates
+        for segment_id in mission.segment_sequence
+    }
+    category_counts = Counter(taxonomy.category for taxonomy in taxonomy_by_id.values())
+    return {
+        "status": "complete" if not missing else "needs_segment_design",
+        "vehicle_class": declaration.metadata.vehicle_class,
+        "expected_categories": list(expected),
+        "covered_categories": sorted(covered),
+        "missing_categories": missing,
+        "category_counts": dict(sorted(category_counts.items())),
+        "mission_referenced_segment_ids": sorted(referenced),
+        "unreferenced_segment_ids": sorted(set(taxonomy_by_id) - referenced),
+        "claim_boundary": (
+            "Expected categories are normal authoring slots for this vehicle class. Coverage means a typed segment is declared; "
+            "its own status and execution bindings still determine whether it runs."
+        ),
+    }
+    ####
+
+
+def _configuration_surface_dict(declaration: VehicleCompositionDeclaration) -> dict[str, object]:
+    """Summarize reset, variant, and per-segment inputs without conflating them."""
+
+    initialization_parameters = [
+        parameter
+        for contract in declaration.initialization_contracts
+        for parameter in contract.parameters
+    ]
+    segment_parameters = [
+        parameter
+        for contract in declaration.segment_contracts
+        for parameter in contract.parameters
+    ]
+    role_counts = Counter(
+        parameter.semantic_role or parameter_semantic_role(parameter.id)
+        for parameter in (*initialization_parameters, *segment_parameters)
+    )
+    return {
+        "episode_reset_parameter_count": len(initialization_parameters),
+        "runtime_variant_parameter_count": len(declaration.variant_parameters),
+        "runnable_runtime_variant_parameter_count": sum(
+            1 for parameter in declaration.variant_parameters if parameter.status == "runnable"
+        ),
+        "segment_parameter_count": len(segment_parameters),
+        "semantic_role_counts": dict(sorted(role_counts.items())),
+        "claim_boundary": (
+            "Episode-reset values initialize one run; runtime variants mutate an explicitly bound model input; "
+            "segment parameters configure one mission phase. These scopes are not interchangeable."
+        ),
+    }
     ####
 
 
@@ -992,43 +1486,430 @@ def _declared_mission_template(
 
 
 @dataclass(frozen=True, slots=True)
+class VehicleFidelityAdvertisement:
+    """Typed join of one fidelity binding, model profile, and interface.
+
+    Discovery, authoring, and validation all need the same cross-cutting facts
+    about a selected tier.  Keeping that join as a stable object prevents a
+    consumer from serializing ``ResolvedVehicleComposition.as_dict()``, then
+    reparsing loosely named fields to recover those facts.
+    """
+
+    tier: FidelityTier
+    binding: HorizontalTierBinding
+    tier_metadata: FidelityTierMetadata
+    model_profile: TierModelProfile
+    runtime_fidelity: RuntimeFidelity
+    control_realization: ControlRealization
+    interface: VehicleInterfaceContract
+    interface_findings: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if self.binding.profile_id != self.model_profile.profile_id:
+            raise ValueError(
+                f"{self.tier}: fidelity binding profile {self.binding.profile_id!r} does not match "
+                f"typed model profile {self.model_profile.profile_id!r}"
+            )
+        if self.interface.fidelity != self.tier:
+            raise ValueError(f"{self.tier}: interface fidelity does not match advertisement tier")
+        if self.interface.control_realization != self.control_realization:
+            raise ValueError(f"{self.tier}: interface control realization does not match advertisement")
+        ####
+
+    @property
+    def declared(self) -> bool:
+        """Return whether this tier has a concrete named profile binding."""
+
+        return self.binding.profile_id is not None
+        ####
+
+    @property
+    def validation_status(self) -> Literal["pass", "fail"]:
+        """Return the fail-closed interface validation state."""
+
+        return "pass" if not self.interface_findings else "fail"
+        ####
+
+    @property
+    def authority(self) -> VehicleControlAuthorityAdvertisement:
+        """Return the typed control-authority advertisement for this tier."""
+
+        return self.interface.authority_advertisement()
+        ####
+
+    def tier_dict(self) -> dict[str, object]:
+        """Serialize the compact fidelity card at the public discovery boundary."""
+
+        return {
+            "profile_id": self.binding.profile_id,
+            "declared": self.declared,
+            "tier_metadata": self.tier_metadata.as_dict(),
+            "model_profile": self.model_profile.model_dump(mode="json"),
+            "promotion_status": self.binding.promotion_status,
+            "blockers": list(self.binding.blockers),
+            "required_operations": list(self.binding.required_operations),
+            "runtime_fidelity": self.runtime_fidelity,
+            "control_realization": self.control_realization,
+            "control_authority": self.authority.summary_dict(
+                details_path=f"interfaces.{self.tier}.control_authority"
+            ),
+        }
+        ####
+
+    def interface_dict(self) -> dict[str, object]:
+        """Serialize the detailed interface card at the public discovery boundary."""
+
+        authority = self.authority
+        return {
+            "interface_id": self.interface.id,
+            "fingerprint_sha256": self.interface.fingerprint,
+            "validation_status": self.validation_status,
+            "available_authority_profiles": [item.id for item in authority.available_profiles],
+            "available_observation_profiles": [
+                item.id for item in self.interface.observation_profiles if item.availability == "available"
+            ],
+            "control_authority": authority.as_dict(),
+        }
+        ####
+
+
+@dataclass(frozen=True, slots=True)
+class VehicleAuthoringTierAssessment:
+    """Typed authoring readiness for one declared mission/fidelity pair.
+
+    The worklist is a derived view, not another registry.  This object keeps
+    its derivation in typed fields so the CLI/JSON worklist is the last step,
+    rather than a structure that later authoring code has to parse again.
+    """
+
+    family_id: str
+    mission: MissionTemplateContract
+    fidelity: VehicleFidelityAdvertisement
+    execution_bindings: tuple[VehicleExecutionBinding, ...]
+    parity: VehicleBatchEpisodeParityAdvertisement
+    graph_status: Literal["linear_sequence_only"]
+    mission_capability_adapter_id: str | None
+    semantic_translator_id: str | None
+
+    def __post_init__(self) -> None:
+        if self.fidelity.tier not in self.mission.compatible_fidelities:
+            raise ValueError(
+                f"mission {self.mission.id!r} does not support authoring fidelity {self.fidelity.tier!r}"
+            )
+        if any(
+            binding.family_id != self.family_id
+            or binding.mission != self.mission.id
+            or binding.fidelity != self.fidelity.tier
+            for binding in self.execution_bindings
+        ):
+            raise ValueError("authoring assessment received an execution binding outside its exact family/mission/tier")
+        if (
+            self.parity.family_id != self.family_id
+            or self.parity.mission != self.mission.id
+            or self.parity.fidelity != self.fidelity.tier
+        ):
+            raise ValueError("authoring assessment received parity status outside its exact family/mission/tier")
+        ####
+
+    @property
+    def runnable_operations(self) -> tuple[str, ...]:
+        """Return the exact runnable operations in stable order."""
+
+        return tuple(sorted(binding.operation for binding in self.execution_bindings if binding.status == "runnable"))
+        ####
+
+    @property
+    def batch_action_trace_dispositions(self) -> tuple[str, ...]:
+        """Return source-declared batch action-trace evidence states."""
+
+        return tuple(
+            sorted(
+                binding.batch_action_trace
+                for binding in self.execution_bindings
+                if binding.operation == "batch"
+            )
+        )
+        ####
+
+    @property
+    def execution_modes(self) -> tuple[str, ...]:
+        """Return all declared source execution modes in stable order."""
+
+        return tuple(sorted({binding.execution_mode for binding in self.execution_bindings}))
+        ####
+
+    @property
+    def planned_execution_blockers(self) -> dict[str, list[str]]:
+        """Project blockers only for planned exact operations."""
+
+        return {
+            binding.operation: list(binding.blockers)
+            for binding in self.execution_bindings
+            if binding.status == "planned"
+        }
+        ####
+
+    @property
+    def status(self) -> CompositionStatus:
+        """Return high-level worklist status without promoting evidence."""
+
+        if "batch" in self.runnable_operations:
+            return "runnable"
+        return "development" if self.execution_bindings else "planned"
+        ####
+
+    @property
+    def operation_scope(self) -> Literal["mission", "local_controller_screen"]:
+        """Distinguish a bounded local-controller screen from a mission endpoint."""
+
+        return (
+            "local_controller_screen"
+            if "local" in self.mission.id and "screen" in self.mission.id
+            else "mission"
+        )
+        ####
+
+    @property
+    def endpoint_maturity(self) -> Literal[
+        "batch_and_episode_ready",
+        "batch_ready",
+        "episode_ready",
+        "declared_execution_gap",
+        "unbound",
+    ]:
+        """Return operation-specific maturity without collapsing it to one score."""
+
+        operations = set(self.runnable_operations)
+        if {"batch", "episode"}.issubset(operations):
+            return "batch_and_episode_ready"
+        if "batch" in operations:
+            return "batch_ready"
+        if "episode" in operations:
+            return "episode_ready"
+        return "declared_execution_gap" if self.execution_bindings else "unbound"
+        ####
+
+    @property
+    def fidelity_promotion_blockers(self) -> tuple[str, ...]:
+        """Return declared promotion blockers only for named profiles."""
+
+        return tuple(sorted(self.fidelity.binding.blockers)) if self.fidelity.declared else ()
+        ####
+
+    @property
+    def next_steps(self) -> tuple[str, ...]:
+        """Return the exact non-promotional authoring work remaining."""
+
+        result: list[str] = []
+        if not self.fidelity.declared:
+            result.append("declare canonical fidelity profile or mark it not applicable")
+        elif self.fidelity.binding.promotion_status != "qualified":
+            if self.fidelity_promotion_blockers:
+                result.append(
+                    "retire declared fidelity-promotion blockers: "
+                    + ", ".join(self.fidelity_promotion_blockers)
+                )
+            else:
+                result.append("retain declared fidelity/evidence boundary and complete its promotion gates")
+        if self.fidelity.validation_status != "pass":
+            result.append("supply a fail-closed parameter/action/status interface contract")
+        if "batch" not in self.runnable_operations:
+            result.append("bind one source-owned batch factory and checked-in composition witness")
+        for operation, blockers in sorted(self.planned_execution_blockers.items()):
+            if blockers:
+                result.append(f"resolve declared {operation} execution blockers: {', '.join(blockers)}")
+        if "committed_interval_history_missing" in self.batch_action_trace_dispositions:
+            result.append(
+                "retain committed interval command history in the native batch runner before claiming semantic action evidence"
+            )
+        elif "not_emitted" in self.batch_action_trace_dispositions:
+            result.append(
+                "emit the standardized committed semantic action trace or retain action/effect evidence explicitly unavailable"
+            )
+        if self.graph_status != "linear_sequence_only":
+            result.append("implement declared graph-transition semantics in the selected native translator")
+        if self.mission_capability_adapter_id is None:
+            result.append("supply a family-owned first-pass mission capability adapter or retain explicit preflight gap")
+        elif self.semantic_translator_id is None:
+            result.append("declare the exact semantic translator before preflight can report translation_ready")
+        return tuple(result)
+        ####
+
+    def operational_maturity_dict(self) -> dict[str, object]:
+        """Serialize the maturity subrecord shared by worklist and authoring kit."""
+
+        return {
+            "scope": self.operation_scope,
+            "endpoint_maturity": self.endpoint_maturity,
+            "fidelity_promotion_status": self.fidelity.binding.promotion_status,
+            "interface_status": self.fidelity.validation_status,
+            "control_realization": self.fidelity.control_realization,
+            "qualification_boundary": (
+                "A runnable local controller screen establishes only its declared local control path; "
+                "it is not an end-to-end mission qualification."
+                if self.operation_scope == "local_controller_screen"
+                else "A runnable mission endpoint remains bounded by its selected fidelity promotion status and declared blockers."
+            ),
+        }
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Serialize the public authoring worklist tier record."""
+
+        return {
+            "tier": self.fidelity.tier,
+            "status": self.status,
+            "operational_maturity": self.operational_maturity_dict(),
+            "interface_validation": self.fidelity.validation_status,
+            "fidelity_promotion_blockers": list(self.fidelity_promotion_blockers),
+            "runnable_operations": list(self.runnable_operations),
+            "batch_action_trace_dispositions": list(self.batch_action_trace_dispositions),
+            "execution_modes": list(self.execution_modes),
+            "planned_execution_blockers": self.planned_execution_blockers,
+            "batch_episode_parity": self.parity.as_dict(),
+            "declared_binding_count": len(self.execution_bindings),
+            "mission_capability_adapter": self.mission_capability_adapter_id,
+            "semantic_translator_id": self.semantic_translator_id,
+            "graph_execution_contract": mission_graph_execution_contract(
+                self.family_id,
+                self.mission.id,
+                self.fidelity.tier,
+            ),
+            "next_steps": list(self.next_steps),
+        }
+        ####
+
+
+@dataclass(frozen=True, slots=True)
 class ResolvedVehicleComposition:
     """Composition entry joined to the canonical family/fidelity authority."""
 
     family: UnifiedFamilyManifest
     declaration: VehicleCompositionDeclaration
 
+    @property
+    def vehicle_id(self) -> str:
+        """Return the stable public vehicle identifier."""
+
+        return self.family.family.vehicle_registry_id or self.family.family_id
+        ####
+
+    @property
+    def display_name(self) -> str:
+        """Return the canonical human-facing name without a serialized detour."""
+
+        if self.family.vehicle_definition is not None:
+            value = self.family.vehicle_definition.get("display_name")
+            if isinstance(value, str) and value.strip():
+                return value
+        if self.family.source_manifest is not None:
+            return self.family.source_manifest.display_name
+        return self.family.family_id
+        ####
+
+    def physical_characteristics(self) -> VehiclePhysicalCharacteristics:
+        """Return the typed physical-characteristics contract for this family."""
+
+        return _physical_characteristics(self.family)
+        ####
+
+    def tier_model_profile(self, tier: FidelityTier) -> TierModelProfile:
+        """Return the typed family-specific profile for one canonical tier."""
+
+        return _tier_model_profile(self.family, tier)
+        ####
+
+    def fidelity_advertisement(self, tier: FidelityTier) -> VehicleFidelityAdvertisement:
+        """Join one fidelity binding to its typed model and interface contracts."""
+
+        # Keep this import local: vehicle_interface resolves parameter channels
+        # from this composition object, so importing it at module load time
+        # would recreate the registry/interface cycle.
+        from .vehicle_interface import interface_contract_for_composition, validate_vehicle_interface_contract
+
+        interface = interface_contract_for_composition(self, tier)
+        return VehicleFidelityAdvertisement(
+            tier=tier,
+            binding=self.family.family.tiers[tier],
+            tier_metadata=fidelity_tier_metadata(tier),
+            model_profile=self.tier_model_profile(tier),
+            runtime_fidelity=runtime_fidelity_for(tier),
+            control_realization=resolved_control_realization_for(self.family.family_id, tier),
+            interface=interface,
+            interface_findings=validate_vehicle_interface_contract(interface),
+        )
+        ####
+
+    def fidelity_advertisements(self) -> tuple[VehicleFidelityAdvertisement, ...]:
+        """Return every canonical tier as typed discovery contracts."""
+
+        return tuple(self.fidelity_advertisement(tier) for tier in CANONICAL_FIDELITY_TIERS)
+        ####
+
+    def execution_bindings(self) -> tuple[VehicleExecutionBinding, ...]:
+        """Return the exact typed execution declarations for this family."""
+
+        from .vehicle_execution_bindings import bindings_for_family
+
+        return bindings_for_family(self.family.family_id)
+        ####
+
+    def batch_episode_parity_advertisement(
+        self,
+        mission_id: str,
+        fidelity: FidelityTier,
+    ) -> VehicleBatchEpisodeParityAdvertisement:
+        """Return typed parity status without serializing through a dict."""
+
+        from .vehicle_execution_bindings import resolve_batch_episode_parity_advertisement
+
+        return resolve_batch_episode_parity_advertisement(self.family.family_id, mission_id, fidelity)
+        ####
+
+    def authoring_tier_assessment(
+        self,
+        mission: MissionTemplateContract,
+        fidelity: FidelityTier,
+    ) -> VehicleAuthoringTierAssessment:
+        """Return typed readiness for one mission/fidelity authoring choice."""
+
+        from .mission_capability import declared_mission_capability_adapter
+
+        return VehicleAuthoringTierAssessment(
+            family_id=self.family.family_id,
+            mission=mission,
+            fidelity=self.fidelity_advertisement(fidelity),
+            execution_bindings=tuple(
+                item
+                for item in self.execution_bindings()
+                if item.mission == mission.id and item.fidelity == fidelity
+            ),
+            parity=self.batch_episode_parity_advertisement(mission.id, fidelity),
+            # v1 declarations have a single fixed graph form.  The public
+            # graph serializer carries the nodes; this typed assessment only
+            # needs its explicit execution status.
+            graph_status="linear_sequence_only",
+            mission_capability_adapter_id=declared_mission_capability_adapter(
+                self.family.family_id,
+                mission.id,
+                fidelity,
+            ),
+            semantic_translator_id=mission_semantic_translator_id(
+                self.family.family_id,
+                mission.id,
+                fidelity,
+            ),
+        )
+        ####
+
     def as_dict(self) -> dict[str, object]:
         """Return the user-facing inspect payload without copying plant data."""
 
-        # Import here so the execution catalog can consume compiled
-        # compositions without turning this discovery projection into a
-        # registry-to-runtime import cycle.
-        from .vehicle_execution_bindings import batch_episode_parity_record, execution_binding_records
-        from .vehicle_interface import interface_contract_for_composition, validate_vehicle_interface_contract
-
-        tier_records: dict[str, object] = {}
-        interface_records: dict[str, object] = {}
-        for tier in CANONICAL_FIDELITY_TIERS:
-            binding = self.family.family.tiers[tier]
-            tier_records[tier] = {
-                "profile_id": binding.profile_id,
-                "declared": binding.profile_id is not None,
-                "promotion_status": binding.promotion_status,
-                "blockers": list(binding.blockers),
-                "required_operations": list(binding.required_operations),
-                "runtime_fidelity": runtime_fidelity_for(tier),
-                "control_realization": resolved_control_realization_for(self.family.family_id, tier),
-            }
-            interface = interface_contract_for_composition(self, tier)
-            findings = validate_vehicle_interface_contract(interface)
-            interface_records[tier] = {
-                "interface_id": interface.id,
-                "fingerprint_sha256": interface.fingerprint,
-                "validation_status": "pass" if not findings else "fail",
-                "available_authority_profiles": [item.id for item in interface.authority_profiles if item.availability == "available"],
-                "available_observation_profiles": [item.id for item in interface.observation_profiles if item.availability == "available"],
-            }
+        # Typed discovery joins are resolved before serialization so this
+        # public payload is not used as an internal transport object.
+        advertisements = self.fidelity_advertisements()
+        tier_records = {advertisement.tier: advertisement.tier_dict() for advertisement in advertisements}
+        interface_records = {advertisement.tier: advertisement.interface_dict() for advertisement in advertisements}
         parameter_records: tuple[CompositionParameter | VariantParameterBinding, ...] = (
             *(parameter for contract in self.declaration.initialization_contracts for parameter in contract.parameters),
             *(parameter for contract in self.declaration.segment_contracts for parameter in contract.parameters),
@@ -1036,30 +1917,28 @@ class ResolvedVehicleComposition:
         )
         return {
             "schema": "taoryx.vehicle-composition/v1alpha1",
-            "vehicle_id": self.family.family.vehicle_registry_id or self.family.family_id,
+            "vehicle_id": self.vehicle_id,
             "family_id": self.family.family_id,
-            "display_name": (
-                str(self.family.vehicle_definition.get("display_name"))
-                if self.family.vehicle_definition is not None
-                else self.family.source_manifest.display_name
-                if self.family.source_manifest is not None
-                else self.family.family_id
-            ),
+            "display_name": self.display_name,
+            "metadata": self.declaration.metadata.model_dump(mode="json"),
             "physical_family": self.family.family.physical_family,
             "mission_overlay": self.family.family.mission_overlay,
             "adapter_id": self.family.family.adapter_id,
             "automatic_lowering": self.family.family.automatic_lowering,
             "source_manifest": self.family.source_manifest_path,
+            "physical_characteristics": self.physical_characteristics().public_dict(),
             "fidelities": tier_records,
             "interfaces": interface_records,
             "initialization_contracts": [_initialization_public_dict(item) for item in self.declaration.initialization_contracts],
             "segment_contracts": [_segment_public_dict(item) for item in self.declaration.segment_contracts],
             "mission_templates": [_mission_public_dict(item) for item in self.declaration.mission_templates],
             "variant_parameters": [item.public_dict() for item in self.declaration.variant_parameters],
+            "configuration_surface": _configuration_surface_dict(self.declaration),
+            "segment_planning": _segment_planning_dict(self.declaration),
             "parameter_contract_maturity": _parameter_contract_maturity(parameter_records),
-            "execution_bindings": execution_binding_records(self.family.family_id),
+            "execution_bindings": [item.model_dump(mode="json") for item in self.execution_bindings()],
             "batch_episode_parity": [
-                batch_episode_parity_record(self.family.family_id, template.id, tier)
+                self.batch_episode_parity_advertisement(template.id, tier).as_dict()
                 for template in self.declaration.mission_templates
                 for tier in template.compatible_fidelities
             ],
@@ -1121,162 +2000,37 @@ class ResolvedVehicleComposition:
         qualification evidence.
         """
 
-        from .mission_capability import declared_mission_capability_adapter
-
-        descriptor = self.as_dict()
-        fidelities = descriptor["fidelities"]
-        interfaces = descriptor["interfaces"]
-        bindings = descriptor["execution_bindings"]
-        parity_records = descriptor["batch_episode_parity"]
-        parameter_maturity = descriptor["parameter_contract_maturity"]
-        if (
-            not isinstance(fidelities, Mapping)
-            or not isinstance(interfaces, Mapping)
-            or not isinstance(bindings, list)
-            or not isinstance(parity_records, list)
-            or not isinstance(parameter_maturity, Mapping)
-        ):
-            raise ValueError("resolved vehicle descriptor has invalid authoring fields")
+        parameter_records: tuple[CompositionParameter | VariantParameterBinding, ...] = (
+            *(parameter for contract in self.declaration.initialization_contracts for parameter in contract.parameters),
+            *(parameter for contract in self.declaration.segment_contracts for parameter in contract.parameters),
+            *self.declaration.variant_parameters,
+        )
+        parameter_maturity = _parameter_contract_maturity(parameter_records)
         variant_worklist = _variant_authoring_worklist(self.declaration.variant_parameters)
-        mission_worklists: list[dict[str, object]] = []
-        for template in self.declaration.mission_templates:
-            graph = _mission_public_dict(template)["graph"]
-            graph_status = str(graph["status"]) if isinstance(graph, Mapping) else "invalid"
-            tier_worklists: list[dict[str, object]] = []
-            for tier in template.compatible_fidelities:
-                fidelity = fidelities.get(tier)
-                interface = interfaces.get(tier)
-                selected = [item for item in bindings if isinstance(item, Mapping) and item.get("mission") == template.id and item.get("fidelity") == tier]
-                runnable_operations = sorted(
-                    str(item["operation"]) for item in selected if item.get("status") == "runnable" and isinstance(item.get("operation"), str)
-                )
-                batch_action_trace_dispositions = sorted(
-                    str(item["batch_action_trace"]) for item in selected if item.get("operation") == "batch" and isinstance(item.get("batch_action_trace"), str)
-                )
-                execution_modes = sorted(
-                    {
-                        str(item["execution_mode"])
-                        for item in selected
-                        if isinstance(item.get("execution_mode"), str)
-                    }
-                )
-                planned_execution_blockers = {
-                    str(item["operation"]): [str(blocker) for blocker in item.get("blockers", []) if isinstance(blocker, str)]
-                    for item in selected
-                    if item.get("status") == "planned" and isinstance(item.get("operation"), str)
-                }
-                next_steps: list[str] = []
-                capability_adapter_id = declared_mission_capability_adapter(self.family.family_id, template.id, tier)
-                semantic_translator_id = mission_semantic_translator_id(self.family.family_id, template.id, tier)
-                parity = next(
-                    (item for item in parity_records if isinstance(item, Mapping) and item.get("mission") == template.id and item.get("fidelity") == tier),
-                    None,
-                )
-                fidelity_promotion_blockers: list[str] = []
-                if not isinstance(fidelity, Mapping) or fidelity.get("declared") is not True:
-                    next_steps.append("declare canonical fidelity profile or mark it not applicable")
-                else:
-                    raw_promotion_blockers = fidelity.get("blockers", [])
-                    if not isinstance(raw_promotion_blockers, list) or not all(isinstance(item, str) for item in raw_promotion_blockers):
-                        raise ValueError(f"resolved fidelity {tier!r} has invalid promotion blockers")
-                    fidelity_promotion_blockers = sorted(raw_promotion_blockers)
-                    if fidelity.get("promotion_status") != "qualified":
-                        if fidelity_promotion_blockers:
-                            next_steps.append(
-                                "retire declared fidelity-promotion blockers: "
-                                + ", ".join(fidelity_promotion_blockers)
-                            )
-                        else:
-                            next_steps.append("retain declared fidelity/evidence boundary and complete its promotion gates")
-                if not isinstance(interface, Mapping) or interface.get("validation_status") != "pass":
-                    next_steps.append("supply a fail-closed parameter/action/status interface contract")
-                if "batch" not in runnable_operations:
-                    next_steps.append("bind one source-owned batch factory and checked-in composition witness")
-                for operation, blockers in sorted(planned_execution_blockers.items()):
-                    if blockers:
-                        next_steps.append(
-                            f"resolve declared {operation} execution blockers: {', '.join(blockers)}"
-                        )
-                if "committed_interval_history_missing" in batch_action_trace_dispositions:
-                    next_steps.append("retain committed interval command history in the native batch runner before claiming semantic action evidence")
-                elif "not_emitted" in batch_action_trace_dispositions:
-                    next_steps.append("emit the standardized committed semantic action trace or retain action/effect evidence explicitly unavailable")
-                if graph_status != "linear_sequence_only":
-                    next_steps.append("implement declared graph-transition semantics in the selected native translator")
-                if capability_adapter_id is None:
-                    next_steps.append("supply a family-owned first-pass mission capability adapter or retain explicit preflight gap")
-                elif semantic_translator_id is None:
-                    next_steps.append("declare the exact semantic translator before preflight can report translation_ready")
-                status = "runnable" if "batch" in runnable_operations else "development" if selected else "planned"
-                operation_scope = (
-                    "local_controller_screen"
-                    if "local" in template.id and "screen" in template.id
-                    else "mission"
-                )
-                endpoint_maturity = (
-                    "batch_and_episode_ready"
-                    if {"batch", "episode"}.issubset(runnable_operations)
-                    else "batch_ready"
-                    if "batch" in runnable_operations
-                    else "episode_ready"
-                    if "episode" in runnable_operations
-                    else "declared_execution_gap"
-                    if selected
-                    else "unbound"
-                )
-                tier_worklists.append(
-                    {
-                        "tier": tier,
-                        "status": status,
-                        "operational_maturity": {
-                            "scope": operation_scope,
-                            "endpoint_maturity": endpoint_maturity,
-                            "fidelity_promotion_status": None
-                            if not isinstance(fidelity, Mapping)
-                            else fidelity.get("promotion_status"),
-                            "interface_status": None
-                            if not isinstance(interface, Mapping)
-                            else interface.get("validation_status"),
-                            "control_realization": None
-                            if not isinstance(fidelity, Mapping)
-                            else fidelity.get("control_realization"),
-                            "qualification_boundary": (
-                                "A runnable local controller screen establishes only its declared local control path; "
-                                "it is not an end-to-end mission qualification."
-                                if operation_scope == "local_controller_screen"
-                                else "A runnable mission endpoint remains bounded by its selected fidelity promotion status and declared blockers."
-                            ),
-                        },
-                        "interface_validation": None if not isinstance(interface, Mapping) else interface.get("validation_status"),
-                        "fidelity_promotion_blockers": fidelity_promotion_blockers,
-                        "runnable_operations": runnable_operations,
-                        "batch_action_trace_dispositions": batch_action_trace_dispositions,
-                        "execution_modes": execution_modes,
-                        "planned_execution_blockers": planned_execution_blockers,
-                        "batch_episode_parity": parity,
-                        "declared_binding_count": len(selected),
-                        "mission_capability_adapter": capability_adapter_id,
-                        "semantic_translator_id": semantic_translator_id,
-                        "graph_execution_contract": mission_graph_execution_contract(self.family.family_id, template.id, tier),
-                        "next_steps": next_steps,
-                    }
-                )
-            mission_worklists.append(
-                {
-                    "mission_id": template.id,
-                    "mission_status": template.status,
-                    "graph_status": graph_status,
-                    "semantic_translator_id": template.semantic_translator_id,
-                    "initialization_contracts": list(template.initialization_contracts),
-                    "tiers": tier_worklists,
-                }
-            )
+        mission_worklists = [
+            {
+                "mission_id": template.id,
+                "mission_status": template.status,
+                "graph_status": "linear_sequence_only",
+                "semantic_translator_id": template.semantic_translator_id,
+                "initialization_contracts": list(template.initialization_contracts),
+                "tiers": [
+                    self.authoring_tier_assessment(template, tier).as_dict()
+                    for tier in template.compatible_fidelities
+                ],
+            }
+            for template in self.declaration.mission_templates
+        ]
         return {
             "schema": "taoryx.vehicle-composition-authoring-worklist/v1alpha1",
-            "vehicle_id": descriptor["vehicle_id"],
-            "family_id": descriptor["family_id"],
-            "physical_family": descriptor["physical_family"],
-            "variant_parameters": descriptor["variant_parameters"],
+            "vehicle_id": self.vehicle_id,
+            "family_id": self.family.family_id,
+            "metadata": self.declaration.metadata.model_dump(mode="json"),
+            "physical_characteristics": self.physical_characteristics().public_dict(),
+            "physical_family": self.family.family.physical_family,
+            "configuration_surface": _configuration_surface_dict(self.declaration),
+            "segment_planning": _segment_planning_dict(self.declaration),
+            "variant_parameters": [item.public_dict() for item in self.declaration.variant_parameters],
             "variant_worklist": variant_worklist,
             "parameter_contract_maturity": dict(parameter_maturity),
             "missions": mission_worklists,
@@ -1307,16 +2061,10 @@ class ResolvedVehicleComposition:
         mission = mission_matches[0]
         if fidelity not in mission.compatible_fidelities:
             raise ValueError(f"mission {mission_id!r} is not declared for fidelity {fidelity!r} in family {self.family.family_id!r}")
-        descriptor = self.as_dict()
-        fidelities = descriptor["fidelities"]
-        interfaces = descriptor["interfaces"]
-        binding_records = descriptor["execution_bindings"]
-        if not isinstance(fidelities, Mapping) or not isinstance(interfaces, Mapping) or not isinstance(binding_records, list):
-            raise ValueError("resolved vehicle descriptor has invalid fidelity/interface records")
-        selected_tier = fidelities.get(fidelity)
-        selected_interface = interfaces.get(fidelity)
-        if not isinstance(selected_tier, Mapping) or not isinstance(selected_interface, Mapping):
-            raise ValueError(f"resolved vehicle descriptor lacks fidelity {fidelity!r}")
+        selected_fidelity = fidelity
+        selected_tier = self.fidelity_advertisement(selected_fidelity)
+        tier_assessment = self.authoring_tier_assessment(mission, selected_fidelity)
+        variant_admission = _variant_authoring_worklist(self.declaration.variant_parameters)
         initialization_options: list[dict[str, object]] = [
             {
                 "id": item.id,
@@ -1324,7 +2072,7 @@ class ResolvedVehicleComposition:
                 "inputs": [_authoring_parameter_dict(parameter) for parameter in item.parameters],
             }
             for item in self.declaration.initialization_contracts
-            if item.id in mission.initialization_contracts and fidelity in item.compatible_fidelities
+            if item.id in mission.initialization_contracts and selected_fidelity in item.compatible_fidelities
         ]
         segments_by_id = {item.id: item for item in self.declaration.segment_contracts}
         counts = {segment_id: mission.segment_sequence.count(segment_id) for segment_id in mission.segment_sequence}
@@ -1345,45 +2093,20 @@ class ResolvedVehicleComposition:
                     "inputs": [_authoring_parameter_dict(parameter) for parameter in segment.parameters],
                 }
             )
-        worklist = self.authoring_worklist_dict()
-        worklist_missions = worklist.get("missions")
-        if not isinstance(worklist_missions, list):
-            raise ValueError("vehicle authoring worklist has invalid mission records")
-        mission_worklist = next(
-            (item for item in worklist_missions if isinstance(item, Mapping) and item.get("mission_id") == mission_id),
-            None,
-        )
-        if not isinstance(mission_worklist, Mapping):
-            raise ValueError(f"vehicle authoring worklist lacks mission {mission_id!r}")
-        mission_tiers = mission_worklist.get("tiers")
-        if not isinstance(mission_tiers, list):
-            raise ValueError(f"vehicle authoring worklist lacks tier records for mission {mission_id!r}")
-        tier_worklist = next(
-            (item for item in mission_tiers if isinstance(item, Mapping) and item.get("tier") == fidelity),
-            None,
-        )
-        if not isinstance(tier_worklist, Mapping):
-            raise ValueError(f"vehicle authoring worklist lacks fidelity {fidelity!r} for mission {mission_id!r}")
-        variant_admission = worklist.get("variant_worklist")
-        if not isinstance(variant_admission, Mapping):
-            raise ValueError("vehicle authoring worklist has invalid variant admission")
         execution_endpoints = [
             {
-                "operation": item.get("operation"),
-                "status": item.get("status"),
-                "execution_mode": item.get("execution_mode"),
-                "factory_id": item.get("factory_id"),
-                "batch_action_trace": item.get("batch_action_trace"),
-                "description": item.get("description"),
-                "claim_boundary": item.get("claim_boundary"),
-                "blockers": item.get("blockers", []),
+                "operation": item.operation,
+                "status": item.status,
+                "execution_mode": item.execution_mode,
+                "factory_id": item.factory_id,
+                "batch_action_trace": item.batch_action_trace,
+                "description": item.description,
+                "claim_boundary": item.claim_boundary,
+                "blockers": list(item.blockers),
             }
-            for item in binding_records
-            if isinstance(item, Mapping) and item.get("mission") == mission_id and item.get("fidelity") == fidelity
+            for item in tier_assessment.execution_bindings
         ]
-        runnable_operations = {
-            str(item["operation"]) for item in execution_endpoints if item.get("status") == "runnable" and isinstance(item.get("operation"), str)
-        }
+        runnable_operations = set(tier_assessment.runnable_operations)
         authoring_commands = [
             "taoryx vehicle compose <request.yaml> --output <composition.json>",
             "taoryx vehicle preflight <composition.json>",
@@ -1398,15 +2121,14 @@ class ResolvedVehicleComposition:
             )
         if "episode" in runnable_operations:
             authoring_commands.append("taoryx vehicle episode-info <composition.json>")
-        parity = tier_worklist.get("batch_episode_parity")
-        if isinstance(parity, Mapping) and parity.get("availability") == "registered":
+        if tier_assessment.parity.availability == "registered":
             authoring_commands.append("taoryx vehicle batch-episode-parity <composition.json> <policy-trace.json>")
         variant_inputs = [_authoring_parameter_dict(parameter) for parameter in self.declaration.variant_parameters]
         request_shape = {
             "schema": "taoryx.vehicle-compose-request/v1alpha1",
             "id_rule": "caller_assigned_stable_semantic_identifier",
-            "vehicle": descriptor["vehicle_id"],
-            "fidelity": fidelity,
+            "vehicle": self.vehicle_id,
+            "fidelity": selected_fidelity,
             "mission": {"id": mission_id},
             "initialization": {
                 "select_exactly_one": initialization_options,
@@ -1414,31 +2136,34 @@ class ResolvedVehicleComposition:
             },
             "segments": segment_sequence,
             "mission_graph": _mission_public_dict(mission)["graph"],
-            "graph_execution_contract": mission_graph_execution_contract(self.family.family_id, mission.id, fidelity),
+            "graph_execution_contract": mission_graph_execution_contract(self.family.family_id, mission.id, selected_fidelity),
             "variant_inputs": variant_inputs,
             "truth_objective_topology_schema": truth_objective_topology_schema(),
         }
         return {
             "schema": "taoryx.vehicle-composition-authoring-kit/v1alpha1",
-            "vehicle_id": descriptor["vehicle_id"],
-            "family_id": descriptor["family_id"],
-            "physical_family": descriptor["physical_family"],
+            "vehicle_id": self.vehicle_id,
+            "family_id": self.family.family_id,
+            "metadata": self.declaration.metadata.model_dump(mode="json"),
+            "physical_family": self.family.family.physical_family,
+            "physical_characteristics": self.physical_characteristics().public_dict(),
+            "segment_planning": _segment_planning_dict(self.declaration),
             "selection": {
                 "mission_id": mission_id,
-                "fidelity": fidelity,
-                "control_realization": selected_tier.get("control_realization"),
-                "runtime_fidelity": selected_tier.get("runtime_fidelity"),
-                "tier_declared": selected_tier.get("declared"),
-                "tier_promotion_status": selected_tier.get("promotion_status"),
-                "interface_validation": selected_interface.get("validation_status"),
-                "semantic_translator_id": tier_worklist.get("semantic_translator_id"),
-                "operational_maturity": tier_worklist.get("operational_maturity"),
+                "fidelity": selected_fidelity,
+                "control_realization": selected_tier.control_realization,
+                "runtime_fidelity": selected_tier.runtime_fidelity,
+                "tier_declared": selected_tier.declared,
+                "tier_promotion_status": selected_tier.binding.promotion_status,
+                "interface_validation": selected_tier.validation_status,
+                "semantic_translator_id": tier_assessment.semantic_translator_id,
+                "operational_maturity": tier_assessment.operational_maturity_dict(),
             },
             "composition_request_shape": request_shape,
             "input_completion": _authoring_input_completion(initialization_options, segment_sequence, variant_inputs),
-            "variant_admission": dict(variant_admission),
+            "variant_admission": variant_admission,
             "execution_endpoints": execution_endpoints,
-            "runtime_and_evidence_worklist": tier_worklist,
+            "runtime_and_evidence_worklist": tier_assessment.as_dict(),
             "authoring_commands": authoring_commands,
             "claim_boundary": (
                 "This kit exposes declared composition inputs, value spaces, graph shape, variant admission, "
@@ -1472,25 +2197,47 @@ class ResolvedVehicleCompositionCatalog:
     def list_dict(self) -> list[dict[str, object]]:
         """Return compact records suitable for a command-line listing."""
 
+        from .vehicle_execution_bindings import bindings_for_family
+
         result: list[dict[str, object]] = []
         for item in self.vehicles:
-            payload = item.as_dict()
-            fidelities = payload["fidelities"]
-            assert isinstance(fidelities, Mapping)
-            execution_bindings = payload["execution_bindings"]
-            assert isinstance(execution_bindings, list)
+            characteristics = item.physical_characteristics()
+            envelope = characteristics.validity_envelope
+            envelope_summary: dict[str, object]
+            if isinstance(envelope, DeclaredValidityEnvelope):
+                envelope_summary = {
+                    axis.id: {
+                        "canonical_unit": axis.canonical_unit,
+                        "lower": axis.lower,
+                        "upper": axis.upper,
+                    }
+                    for axis in envelope.axes
+                }
+            else:
+                envelope_summary = {
+                    "status": envelope.kind,
+                    "reason": envelope.reason,
+                }
+            execution_bindings = bindings_for_family(item.family.family_id)
+            metadata = item.declaration.metadata
             result.append(
                 {
-                    "vehicle_id": payload["vehicle_id"],
-                    "family_id": payload["family_id"],
-                    "display_name": payload["display_name"],
-                    "physical_family": payload["physical_family"],
+                    "vehicle_id": item.vehicle_id,
+                    "family_id": item.family.family_id,
+                    "display_name": item.display_name,
+                    "summary": metadata.summary,
+                    "vehicle_class": metadata.vehicle_class,
+                    "roles": list(metadata.roles),
+                    "physical_family": item.family.family.physical_family,
+                    "validity_envelope_summary": envelope_summary,
                     "fidelities": {
-                        name: record["promotion_status"] for name, record in fidelities.items() if isinstance(record, Mapping) and record["declared"]
+                        tier: binding.promotion_status
+                        for tier, binding in item.family.family.tiers.items()
+                        if binding.profile_id is not None
                     },
                     "mission_templates": [template.id for template in item.declaration.mission_templates],
                     "runnable_operations": sorted(
-                        {str(binding["operation"]) for binding in execution_bindings if isinstance(binding, Mapping) and binding.get("status") == "runnable"}
+                        {binding.operation for binding in execution_bindings if binding.status == "runnable"}
                     ),
                 }
             )
@@ -1590,6 +2337,7 @@ class ResolvedVehicleCompositionCatalog:
 ####
 
 
+@lru_cache(maxsize=8)
 def load_vehicle_composition_registry(path: str | Path | None = None) -> VehicleCompositionRegistry:
     """Load the declarative user-facing composition overlay."""
 
@@ -1632,11 +2380,19 @@ def load_resolved_vehicle_composition_catalog(
     *,
     registry: VehicleCompositionRegistry | None = None,
     manifests: UnifiedFamilyManifestCatalog | None = None,
+    validate_source_imports: bool = False,
 ) -> ResolvedVehicleCompositionCatalog:
-    """Join declared composition to authoritative family and fidelity records."""
+    """Join declared composition to authoritative family and fidelity records.
+
+    Routine composition discovery is metadata-only and therefore defers full
+    DAVE-ML import-sidecar validation.  Callers performing a provenance audit
+    may request it explicitly with ``validate_source_imports=True``.
+    """
 
     resolved_registry = registry or load_vehicle_composition_registry()
-    resolved_manifests = manifests or load_unified_family_manifest_catalog()
+    resolved_manifests = manifests or load_unified_family_manifest_catalog(
+        validate_source_imports=validate_source_imports,
+    )
     if resolved_manifests.errors:
         manifest_details = "; ".join(f"{item.family_id}: {item.code}" for item in resolved_manifests.errors)
         raise ValueError(f"unified family manifest cannot support composition registry: {manifest_details}")
@@ -1886,6 +2642,8 @@ __all__ = [
     "InitializationContract",
     "MissionTemplateContract",
     "ParameterSpec",
+    "VehicleAuthoringTierAssessment",
+    "VehicleFidelityAdvertisement",
     "ResolvedVehicleComposition",
     "ResolvedVehicleCompositionCatalog",
     "build_vehicle_composition_topology_report",

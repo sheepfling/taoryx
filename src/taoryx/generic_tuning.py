@@ -432,10 +432,30 @@ class GenericLqrReport:
 
     @property
     def best(self) -> GenericLqrCandidate | None:
-        """Return the lowest-scoring safe candidate, if one exists."""
+        """Return the best safe candidate with a deterministic nominal tie break.
+
+        Linear score ties are common when a profile lattice changes only LQI
+        integral priority: every candidate can meet the same pole and
+        conditioning gates while their nonlinear offset behavior differs.
+        Preserve the score as the primary decision, but when it is tied,
+        prefer the nominal integral multiplier (``1.0``) before using the
+        stable profile ID.  This prevents profile-list order from silently
+        selecting a deliberately weak or aggressive integrator.
+        """
 
         safe = tuple(candidate for candidate in self.candidates if candidate.safe)
-        return min(safe, key=lambda candidate: candidate.score) if safe else None
+        return (
+            min(
+                safe,
+                key=lambda candidate: (
+                    candidate.score,
+                    abs(math.log(candidate.integral_weight_multiplier)) if candidate.method == "lqi" else 0.0,
+                    candidate.profile_id,
+                ),
+            )
+            if safe
+            else None
+        )
         ####
 
     def as_dict(self) -> dict[str, Any]:

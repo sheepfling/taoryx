@@ -20,6 +20,7 @@ from taoryx.vehicle_composition import (
 )
 from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
 from taoryx.vehicle_interface import (
+    InterfaceChannelBinding,
     bind_declared_sensor_profile,
     build_vehicle_interface_catalog_report,
     interface_contract_for_composition,
@@ -58,6 +59,25 @@ def test_x8_pseudo_interface_separates_kinematic_guidance_from_source_load_probe
     assert contract.effector_channels == ()
     assert "physical actuator evidence" in actions["propulsion.command.fraction"].claim_boundary
     assert validate_vehicle_interface_contract(contract) == ()
+    ####
+
+
+def test_interface_binding_validates_common_source_and_transform_contracts() -> None:
+    binding = InterfaceChannelBinding.model_validate(
+        {
+            "batch_telemetry": "speed_m_s",
+            "derived_from": "batch_telemetry.speed_m_s",
+            "transform": "norm",
+            "frame": "body",
+        }
+    )
+
+    assert binding.source_kinds == ("batch_telemetry", "derived")
+    assert binding["batch_telemetry"] == "speed_m_s"
+    with pytest.raises(ValueError, match="transform requires derived_from"):
+        InterfaceChannelBinding.model_validate({"transform": "norm"})
+    with pytest.raises(ValueError, match="source_unit requires an explicit scale"):
+        InterfaceChannelBinding.model_validate({"runtime_state": "mass", "source_unit": "lb"})
     ####
 
 
@@ -361,7 +381,7 @@ def test_composition_interface_does_not_borrow_the_x15_local_screen_episode_for_
     assert contract.authority_profile("direct_wrench").availability == "unavailable_at_runtime"
     assert all(channel.availability == "unavailable_at_runtime" for channel in contract.action_channels)
     assert contract.observation_profile("truth_debug").availability == "unavailable_at_runtime"
-    assert {record["mission"] for record in contract.execution_records} == {"rocket_aircraft_high_energy_v1"}
+    assert {record.mission for record in contract.execution_records} == {"rocket_aircraft_high_energy_v1"}
     assert validate_vehicle_interface_contract(contract) == ()
     ####
 
@@ -485,7 +505,7 @@ def test_every_advertised_fidelity_resolves_a_fail_closed_interface_contract() -
             available_profiles = [item for item in contract.authority_profiles if item.availability == "available"]
             if available_profiles:
                 assert any(
-                    record["operation"] == "episode" and record["status"] == "runnable"
+                    record.operation == "episode" and record.status == "runnable"
                     for record in contract.execution_records
                 )
     ####

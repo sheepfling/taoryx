@@ -152,6 +152,14 @@ python tools/dev.py test-vehicle simple_aero
 # event-only/no-child-propagation boundary.
 python tools/dev.py test-vehicle dual_launch_glider
 
+# These two non-physical models have typed workflow endpoint witnesses rather
+# than physical Vehicle Composition endpoints. The verifier checks the exact
+# checked-in draft, installed provider advertisement, blocked step boundary,
+# common batch registration, and (with --execute) normalized result surface.
+taoryx model endpoint-specs
+taoryx model verify simple-aero-fixed-ld-batch --execute
+taoryx model verify dual-launch-attached-booster-batch --execute
+
 # Run the exact checked-in compose → preflight → public batch-run → normalized
 # result-artifact witnesses for one family. This installed command is the
 # focused endpoint smoke for agents; it does not substitute a local screen or
@@ -228,12 +236,18 @@ taoryx vehicle run build/x8-direct-wrench.composition.json \
 
 # The B747 condition-3 source-table paths are eighty-second local three-axis
 # LQR and LQI recoveries. They report actual bounded elevator, aileron, rudder,
-# and throttle source coordinates without claiming servo dynamics, persistent-
-# disturbance rejection, or a racetrack.
+# and throttle source coordinates without claiming servo dynamics or a
+# racetrack. The LQI witness also emits a typed robustness sidecar for its
+# bounded, matched ±5% pitch-moment screen; that is not wind or mass robustness.
 python tools/validate_vehicle_execution_witnesses.py \
   --witness b747-condition3-local-physical-surface-lqr-screen-batch --execute-batch
 python tools/validate_vehicle_execution_witnesses.py \
   --witness b747-condition3-local-physical-surface-lqi-screen-batch --execute-batch
+
+# Verify the same LQI path through the common endpoint contract. --execute
+# replays the exact batch witness and reads the typed result and robustness
+# sidecars; --tune may be added when candidate-tuning provenance is needed.
+taoryx vehicle verify b747-condition3-source-surface-attitude-rate-lqi --execute
 
 # The B747 direct-wrench racetrack is a complete 665-second, 66k-step source
 # route. It is intentionally marked slow: use the local-screen witnesses for
@@ -250,15 +264,25 @@ python tools/validate_vehicle_execution_witnesses.py \
 # The distinct A320 local LQI endpoint runs the retained common-host candidate
 # through its exact named aileron/elevator/rudder response coordinates. It is
 # batch-only: native controls and integral telemetry are recorded in
-# local_screen.json, while no external guidance action trace or physical
-# surface-allocation claim is made.
+# local_screen.json. It also emits a composition-bound convergence_report.json.
+# Its endpoint contract explicitly declares that no mass, wind, or persistent-
+# offset seam exists at this pseudo-6DOF fidelity; that is not robustness
+# evidence and no physical surface-allocation claim is made.
 python tools/validate_vehicle_execution_witnesses.py \
   --witness a320-local-native-coordinate-lqi-screen-batch --execute-batch
+taoryx vehicle verify a320-pseudo6dof-native-coordinate-lqi --execute
+
+# NESC is an exact source-history replay with a pseudo-6DOF response-law
+# projection. It has no participating derivative, guidance, gimbal, or
+# robustness seam, so the endpoint verifies its explicit controller-free
+# disposition instead of fabricating one.
+taoryx vehicle verify nesc-source-history-replay-pseudo6dof --execute
 
 # Passive tumbling has two batch-only, intentionally uncontrolled reductions.
 # This checks the exact point-mass and native-rigid-body-reuse release paths.
 python tools/validate_vehicle_execution_witnesses.py \
   --family tumbling_body --execute-batch
+taoryx vehicle verify tumbling-body-passive-release-pseudo6dof --execute
 
 # F-16 physical control has one-second LQR route-entry screens plus a distinct
 # five-second fixed-altitude physical LQI velocity-recovery screen. The surface
@@ -286,8 +310,12 @@ taoryx vehicle run build/f16-surface-lqr-schedule-interior-screen.composition.js
 # The separate F-16 transition screen time-marches four retained altitude-
 # coordinate cases. It linearly blends only the validated source endpoint
 # derivatives/effectiveness and allocates every scheduled wrench through actual
-# bounded elevator, aileron, rudder, and throttle. It is not navigation, wind
-# or mass robustness, a full envelope, or flight qualification.
+# bounded elevator, aileron, rudder, and throttle. Its bound robustness sidecar
+# replays all four transitions at nominal and under +/-5% of the shared declared
+# pitch-wrench scale (500 N m). The offset enters the post-source-derivative,
+# full-inertia dynamics seam—not the controller request or allocator output.
+# It is not navigation, wind or mass robustness, a full envelope, or flight
+# qualification.
 taoryx vehicle compose examples/vehicle_composition/f16_local_physical_surface_lqr_schedule_transition_screen_compose.yaml \
   --output build/f16-surface-lqr-schedule-transition-screen.composition.json
 taoryx vehicle run build/f16-surface-lqr-schedule-transition-screen.composition.json \
@@ -327,6 +355,12 @@ taoryx vehicle run build/hummingbird-vertical-lqi-screen.composition.json \
   --output-dir build/hummingbird-vertical-lqi-screen
 taoryx vehicle result build/hummingbird-vertical-lqi-screen \
   --composition build/hummingbird-vertical-lqi-screen.composition.json
+taoryx vehicle verify hummingbird-source-vertical-translation-rotor-lqi --execute
+
+# The horizontal companion has a separate source-local forward/yaw/lateral/
+# rearward/return capture proof. Its robustness status is explicitly
+# not_applicable because it has no declared persistent disturbance injection.
+taoryx vehicle verify hummingbird-source-horizontal-translation-rotor-lqi --execute
 
 # The companion direct-wrench screen uses the same pinned source-hover plant
 # for a bounded six-axis LQR recovery comparator. Its batch-visible requests
@@ -411,6 +445,11 @@ control intents, navigation parameters, initialization modes, mission
 templates, segments, family adapter, and tuning registrations. Fill only the
 generated `<REQUIRED>` and `<SELECT>` sites, then validate the ordinary YAML
 through the exact owning provider:
+
+`focused_endpoint_verification` names each checked-in vertical proof for that
+model and gives its exact static and `--execute` command. Its selected-match
+field is deliberately narrow: a proof for a different mission or fidelity is
+discoverable, but is not presented as evidence for the selected configuration.
 
 When a caller supplies `--fidelity` without `--mission`, `model plan` keeps
 that fidelity and selects its first runnable compatible mission. This prevents
@@ -586,7 +625,7 @@ skip, slalom, and weave recipes. It declares only point-mass fidelity. The
 templates are runnable fixed-L/D lowerings, not vehicle execution or
 qualification claims.
 
-For a minimal typed request for any published template, use the plug-in helper:
+For a minimal typed request for any reviewed template, use the plug-in helper:
 
 ```python
 from taoryx.trajectory import build_simple_aero_template_configuration
@@ -596,6 +635,32 @@ request = build_simple_aero_template_configuration("phugoid")
 
 Validate that request with the registry provider, then submit it to the normal
 batch runner; parameters can be replaced in the typed tree before validation.
+
+For readable typed authoring that still exercises the full configuration
+grammar, prefer `SimpleAeroMission` and the named `SimpleAeroSegment`
+constructors. The mission can use either endpoint type, all launch/target,
+surrogate, checkpoint, and runtime fields, and any ordered combination of the
+twelve published segment variants:
+
+```python
+from taoryx.trajectory import SimpleAeroMission, SimpleAeroSegment, prepare_simple_aero_mission
+
+prepared = prepare_simple_aero_mission(
+    SimpleAeroMission(
+        configuration_id="custom-simple-aero",
+        segments=(
+            SimpleAeroSegment.powered_ascent(duration_s=4.0),
+            SimpleAeroSegment.phugoid(frequency_hz=0.04, amplitude_deg=1.5),
+            SimpleAeroSegment.terminal_pronav(capture_range_m=50.0),
+        ),
+    )
+)
+```
+
+The default `Custom Composition (Open Sequence)` operation profile registers
+the generic fixed-L/D batch lowering without calling a caller-authored sequence
+a reviewed template. Use `SimpleAeroMission.template("phugoid")` when the
+published phugoid sequence itself is the intended starting point.
 
 Before composing a Simple Aero phase into a vehicle route, run the isolated fixture
 ladder:
@@ -827,6 +892,9 @@ earlier blocked convention or data check.
 Use the following commands as the normal progression:
 
 ```bash
+taoryx vehicle catalog --detail full
+taoryx vehicle describe new_vehicle
+taoryx vehicle authoring new_vehicle
 python tools/validate_vehicle_onboarding.py --vehicle new_vehicle --strict
 python tools/dev.py generate-problems
 python tools/dev.py vehicles
@@ -839,6 +907,18 @@ python tools/dev.py segment-run
 python tools/dev.py fidelity-packet
 python tools/dev.py maneuver-matrix
 ```
+
+The full catalogue card must expose a summary and taxonomy, explicit typed
+geometry/mass/envelope/effector alternatives (including `not_represented` or
+`not_applicable` where appropriate), all four fidelity meanings, per-tier
+control authority, semantic initialization/variant/segment inputs, and a
+complete class-normal segment plan. Keep the typed catalogue contracts through
+provider and authoring code; JSON cards are an API boundary, not an argument
+bag to deserialize internally. A mission template either names a nonempty
+fixed order or publishes an `open_segment_sequence` grammar with its node,
+allowed segment IDs, and cardinality; never encode caller-authored order as an
+empty fixed tuple. A maximum Mach, speed, or altitude in this card
+is a declared model-validity bound, not a performance or qualification claim.
 
 The onboarding validator answers whether the metadata path is complete; it
 does not prove trim or mission behavior. `vehicles` checks registry and

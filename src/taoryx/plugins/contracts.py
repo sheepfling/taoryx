@@ -256,7 +256,13 @@ class PluginRegistrar:
         ####
 
     def register_execution_factory(self, identifier: str, factory: object) -> None:
-        """Stage one callable execution factory under its advertised ID."""
+        """Stage one callable execution factory under its advertised ID.
+
+        New plug-ins should mark a one-argument typed factory with
+        :func:`taoryx.vehicle_batch_execution.batch_factory_request_v1`.
+        Existing ``(composition, output_dir, max_steps)`` callables remain a
+        temporary compatibility surface.
+        """
 
         if not callable(factory):
             raise TypeError("execution factory contributions must be callable")

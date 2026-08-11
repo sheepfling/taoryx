@@ -136,6 +136,7 @@ def test_tumbling_body_composition_executes_without_a_hidden_controller(
     assert result.envelope["realized_fidelity"] == realized_fidelity
     assert result.envelope["area_policy"] == area_policy
     assert result.truth_evaluation["required_passed"] == 3
+    assert all(item["required"] is True and item["status"] == "pass" for item in result.truth_evaluation["results"])
     action_trace = cast(
         dict[str, object],
         json.loads((result.output_dir / "semantic_action_trace.json").read_text(encoding="utf-8")),

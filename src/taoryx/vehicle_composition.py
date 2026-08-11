@@ -35,6 +35,7 @@ from .vehicle_composition_registry import (
 )
 
 if TYPE_CHECKING:
+    from .vehicle_execution_bindings import VehicleExecutionBinding
     from .vehicle_interface import AuthorityProfile, InterfaceAvailability, InterfaceChannel, ObservationProfile, VehicleInterfaceContract
 
 
@@ -798,7 +799,7 @@ def resolve_vehicle_composition_interface_contract(
     except VehicleExecutionBindingError:
         batch_runnable = False
     exact_records = tuple(
-        item.model_dump(mode="json")
+        item
         for item in bindings_for_family(composition.family_id)
         if item.mission == composition.mission and item.fidelity == composition.fidelity
     )
@@ -830,7 +831,7 @@ def _gate_interface_to_composition_execution(
     mission_id: str,
     episode_runnable: bool,
     batch_runnable: bool,
-    execution_records: tuple[dict[str, object], ...],
+    execution_records: tuple[VehicleExecutionBinding, ...],
 ) -> VehicleInterfaceContract:
     """Scope family/fidelity channels to one exact mission execution binding.
 
@@ -842,7 +843,7 @@ def _gate_interface_to_composition_execution(
     """
 
     batch_internal_controller_trace = batch_runnable and any(
-        item.get("execution_mode") == "local_direct_wrench_screen" for item in execution_records
+        item.execution_mode == "local_direct_wrench_screen" for item in execution_records
     )
 
     def runtime_channel(channel: InterfaceChannel) -> InterfaceChannel:

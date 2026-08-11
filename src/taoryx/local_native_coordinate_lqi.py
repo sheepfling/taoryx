@@ -13,16 +13,21 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+
+import numpy as np
 
 from .control_allocation import ControlPlantAdapter
 from .generic_tuning import (
     GenericLqrCandidate,
+    GenericLqrProfile,
     NativeCoordinateLqiSample,
     NativeCoordinateLqiValidation,
     validate_nonlinear_native_coordinate_lqi,
 )
+from .runtime.lqr import LqiResult
 from .trim import TrimResult
+from .tuning_application import RuntimeTuningBindingReceipt, TuningApplicationContext
 
 NativeStatusSampleMapper = Callable[[NativeCoordinateLqiSample], Mapping[str, object]]
 
@@ -201,6 +206,101 @@ class LocalNativeCoordinateLqiScreenExecution:
     ####
 
 
+def apply_tuning_context_to_native_coordinate_lqi_config(
+    config: LocalNativeCoordinateLqiScreenConfig,
+    context: TuningApplicationContext,
+) -> tuple[LocalNativeCoordinateLqiScreenConfig, RuntimeTuningBindingReceipt]:
+    """Bind one exact common candidate to a named-coordinate LQI screen.
+
+    Native-coordinate screens deliberately do not reinterpret their controls
+    as physical effectors.  They still need the same protection as an
+    allocator-backed runtime, though: the selected campaign candidate must
+    have the exact state, control, integral-output, scale, weight, output-map,
+    and resolved-gain contract already retained by the screen.  Checking all
+    of those pieces here makes a receipt impossible to emit for a merely
+    similar A320 response-law controller.
+    """
+
+    candidate = config.candidate
+    lqi = candidate.lqi
+    if candidate.method != "lqi" or lqi is None:
+        raise ValueError("native-coordinate LQI tuning requires a retained LQI candidate")
+    context.require_runtime_compatibility(
+        controller_method="lqi",
+        state_names=candidate.state_names,
+        control_names=candidate.control_names,
+        integral_output_names=lqi.output_names,
+    )
+    if tuple(context.state_scales) != candidate.state_scales:
+        raise ValueError("tuning application context state scales do not match the native-coordinate runtime")
+    if tuple(context.control_scales) != candidate.control_scales:
+        raise ValueError("tuning application context control scales do not match the native-coordinate runtime")
+
+    q_diagonal = _context_weight_diagonal(context, "q_diagonal", len(candidate.state_names))
+    r_diagonal = _context_weight_diagonal(context, "r_diagonal", len(candidate.control_names))
+    integral_q_diagonal = _context_weight_diagonal(context, "integral_q_diagonal", len(lqi.output_names))
+    if q_diagonal != candidate.weights.q_diagonal:
+        raise ValueError("tuning application context Q weights do not match the native-coordinate runtime")
+    if r_diagonal != candidate.weights.r_diagonal:
+        raise ValueError("tuning application context R weights do not match the native-coordinate runtime")
+    if integral_q_diagonal != candidate.integral_q_diagonal:
+        raise ValueError("tuning application context integral weights do not match the native-coordinate runtime")
+
+    output_matrix = np.asarray(context.resolved_gains["output_matrix"], dtype=float)
+    state_gain = np.asarray(context.resolved_gains["state_gain"], dtype=float)
+    integral_gain = np.asarray(context.resolved_gains["integral_gain"], dtype=float)
+    if not np.array_equal(output_matrix, np.asarray(lqi.output_matrix, dtype=float)):
+        raise ValueError("tuning application context output matrix does not match the native-coordinate runtime")
+    if not np.array_equal(state_gain, np.asarray(lqi.state_gain, dtype=float)):
+        raise ValueError("tuning application context state gain does not match the native-coordinate runtime")
+    if not np.array_equal(integral_gain, np.asarray(lqi.integral_gain, dtype=float)):
+        raise ValueError("tuning application context integral gain does not match the native-coordinate runtime")
+
+    applied_design = replace(lqi.design, gain=np.hstack((state_gain, integral_gain)))
+    applied_lqi = LqiResult(
+        design=applied_design,
+        state_names=lqi.state_names,
+        control_names=lqi.control_names,
+        output_names=lqi.output_names,
+        output_matrix=output_matrix,
+        state_gain=state_gain,
+        integral_gain=integral_gain,
+    )
+    applied_candidate = replace(
+        candidate,
+        weights=GenericLqrProfile(candidate.profile_id, q_diagonal, r_diagonal, candidate.integral_weight_multiplier),
+        lqr=applied_design,
+        integral_q_diagonal=integral_q_diagonal,
+        lqi=applied_lqi,
+    )
+    applied_config = replace(config, candidate=applied_candidate)
+    receipt = context.runtime_binding_after_application(
+        controller_method="lqi",
+        state_names=applied_candidate.state_names,
+        control_names=applied_candidate.control_names,
+        integral_output_names=applied_lqi.output_names,
+    )
+    return applied_config, receipt
+    ####
+
+
+def _context_weight_diagonal(
+    context: TuningApplicationContext,
+    name: str,
+    expected_dimension: int,
+) -> tuple[float, ...]:
+    """Read one exact finite positive tuning weight diagonal."""
+
+    values = context.weights.get(name)
+    if values is None or len(values) != expected_dimension:
+        raise ValueError(f"tuning application context {name!r} does not match the native-coordinate runtime")
+    resolved = tuple(float(value) for value in values)
+    if any(not math.isfinite(value) or value <= 0.0 for value in resolved):
+        raise ValueError(f"tuning application context {name!r} must contain finite positive weights")
+    return resolved
+    ####
+
+
 def run_local_native_coordinate_lqi_screen(
     config: LocalNativeCoordinateLqiScreenConfig,
 ) -> LocalNativeCoordinateLqiScreenExecution:
@@ -237,5 +337,6 @@ __all__ = [
     "LocalNativeCoordinateLqiScreenConfig",
     "LocalNativeCoordinateLqiScreenExecution",
     "NativeStatusSampleMapper",
+    "apply_tuning_context_to_native_coordinate_lqi_config",
     "run_local_native_coordinate_lqi_screen",
 ]

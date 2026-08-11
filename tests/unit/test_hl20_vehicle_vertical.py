@@ -9,12 +9,16 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
-from taoryx.hl20_adapter import build_hl20_source_direct_wrench_tuning_plant
+from taoryx.hl20_adapter import (
+    build_hl20_source_direct_wrench_tuning_plant,
+    build_hl20_source_surface_physical_lqi_design,
+)
 
 from taoryx.composition_episode import ActionFrame, open_vehicle_composition_episode
 from taoryx.generic_tuning import validate_nonlinear_native_coordinate_lqi
 from taoryx.local_direct_wrench_composition_execution import execute_local_direct_wrench_composition
 from taoryx.model_authoring import build_model_authoring_plan
+from taoryx.physical_lqr import apply_tuning_context_to_physical_wrench_lqi_design
 from taoryx.plugins import PluginCatalog, discover_plugins
 from taoryx.vehicle_batch_execution import execute_vehicle_composition_batch
 from taoryx.vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
@@ -297,6 +301,7 @@ def test_hl20_lqi_screen_runs_through_the_public_composition_path(
     ####
 
 
+@pytest.mark.slow
 def test_hl20_public_adapters_exercise_direct_and_surface_operations(
     plugins: PluginCatalog,
 ) -> None:
@@ -387,6 +392,7 @@ def test_hl20_surface_authority_authoring_plan_advertises_actual_surfaces_and_co
     ####
 
 
+@pytest.mark.slow
 def test_hl20_source_surface_lqi_screen_runs_through_the_public_composition_path(
     tmp_path: Path,
     plugins: PluginCatalog,
@@ -410,11 +416,13 @@ def test_hl20_source_surface_lqi_screen_runs_through_the_public_composition_path
     assert local_advertisement["control_realization"] == "source_surface_physical_wrench_lqi_allocation"
     assert cast(dict[str, object], local_advertisement["controller"])["method"] == "lqi"
 
-    batch = execute_vehicle_composition_batch(_surface_lqi_composition(), tmp_path / "hl20-source-surface-lqi")
+    composition = _surface_lqi_composition()
+    batch = execute_vehicle_composition_batch(composition, tmp_path / "hl20-source-surface-lqi")
     payload = batch.as_dict()
     runtime = cast(dict[str, object], payload["runtime"])
     control_screen = cast(dict[str, object], payload["control_screen"])
     trace = json.loads((batch.output_dir / "semantic_action_trace.json").read_text())
+    robustness = cast(dict[str, object], json.loads((batch.output_dir / "robustness_report.json").read_text()))
 
     assert batch.passed is True
     assert runtime["physical_effector_allocation"] is True
@@ -422,6 +430,9 @@ def test_hl20_source_surface_lqi_screen_runs_through_the_public_composition_path
     assert cast(dict[str, object], runtime["full_state_trim"])["status"] == "not_available"
     assert cast(dict[str, object], runtime["local_moment_balance_trim"])["status"] == "verified"
     assert runtime["integrators_exercised"] is True
+    persistent_disturbance = cast(dict[str, object], runtime["persistent_disturbance_screen"])
+    assert persistent_disturbance["status"] == "applied"
+    assert persistent_disturbance["pass"] is True
     assert control_screen["controller_method"] == "lqi"
     assert set(cast(dict[str, object], trace)["achieved_effector_channels"]) == {
         f"effector.surface.{name}.position" for name in HL20_SOURCE_SURFACES
@@ -430,6 +441,63 @@ def test_hl20_source_surface_lqi_screen_runs_through_the_public_composition_path
         row = next(csv.DictReader(stream))
     assert all(name in row and math.isfinite(float(row[name])) for name in ("u_m_s", "v_m_s", "w_m_s"))
     assert (batch.output_dir / "local_surface_lqi_screen.json").is_file()
+    assert robustness["schema"] == "taoryx.endpoint-robustness-screen/v1alpha1"
+    assert robustness["release_evidence_schema"] == "taoryx.claim-bound-release-evidence/v1alpha1"
+    assert robustness["release_evidence_kind"] == "robustness"
+    assert cast(dict[str, object], robustness["release_evidence_subject"])["composition_identity_sha256"] == composition.identity_sha256
+    assert robustness["id"] == "hl20-local-lqi-matched-pitch-wrench-offset"
+    assert robustness["kind"] == "constant_offset"
+    assert robustness["pass"] is True
+    robustness_cases = cast(list[dict[str, object]], robustness["cases"])
+    assert [case["id"] for case in robustness_cases] == ["nominal", "positive-pitch-offset", "negative-pitch-offset"]
+    assert [cast(dict[str, float], case["parameters"])["pitch_wrench_bias_fraction"] for case in robustness_cases] == [0.0, 0.05, -0.05]
+    assert all(case["status"] == "pass" for case in robustness_cases)
+    assert all(cast(dict[str, float], case["metrics"])["final_feedback_error_fraction"] <= 0.2 for case in robustness_cases)
+    assert all(cast(dict[str, float], case["metrics"])["saturation_fraction"] == 0.0 for case in robustness_cases)
+    ####
+
+
+@pytest.mark.slow
+def test_hl20_source_surface_lqi_candidate_matches_the_physical_wrench_runtime(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The surface campaign emits gains in the screen's moment coordinates."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration("hl20-source-surface-local-lqi-v1")
+    context = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))[0]
+    applied, binding = apply_tuning_context_to_physical_wrench_lqi_design(
+        build_hl20_source_surface_physical_lqi_design(),
+        context,
+    )
+
+    assert applied.projection.state_names == context.state_names
+    assert applied.projection.wrench_names == context.control_names
+    assert binding.campaign_id == registration.id
+    ####
+
+
+@pytest.mark.slow
+def test_hl20_source_surface_lqi_screen_applies_the_exact_common_tuning_candidate(
+    tmp_path: Path,
+    plugins: PluginCatalog,
+) -> None:
+    """The selected candidate is applied before the nonlinear seven-surface allocator."""
+
+    registration = plugins.build_controller_tuning_campaign_registry().registration("hl20-source-surface-local-lqi-v1")
+    context = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))[0]
+    batch = execute_vehicle_composition_batch(
+        _surface_lqi_composition(),
+        tmp_path / "hl20-source-surface-lqi-tuned",
+        tuning_context=context,
+    )
+    runtime = cast(dict[str, object], batch.as_dict()["runtime"])
+    binding = cast(dict[str, object], runtime["tuning_binding"])
+
+    assert batch.passed is True
+    assert binding["campaign_id"] == registration.id
+    assert binding["candidate_profile_id"] == context.candidate_profile_id
+    assert binding["applied_gain_fingerprint_sha256"] == context.resolved_gain_fingerprint_sha256
     ####
 
 

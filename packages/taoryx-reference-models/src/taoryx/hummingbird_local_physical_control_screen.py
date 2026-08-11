@@ -16,6 +16,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
 
+from .claim_bound_evidence import bind_release_evidence
 from .composition_control_trace import (
     BatchControlSample,
     build_committed_control_trace,
@@ -30,7 +31,12 @@ from .composition_resource_ledger import (
 from .composition_sensor_trace import BatchTruthSample
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .mission_capability import MissionCapabilityEstimate
-from .physical_lqr import PhysicalWrenchLqiDesign, PhysicalWrenchLqiValidation, validate_nonlinear_wrench_lqi
+from .physical_lqr import (
+    PhysicalWrenchLqiDesign,
+    PhysicalWrenchLqiValidation,
+    apply_tuning_context_to_physical_wrench_lqi_design,
+    validate_nonlinear_wrench_lqi,
+)
 from .runtime_control_adapter import RuntimeRigidBodyLocalPlant
 from .source_table_multirotor import (
     build_hummingbird_individual_rotor_source_table_plant,
@@ -38,6 +44,7 @@ from .source_table_multirotor import (
     build_hummingbird_local_vertical_force_lqi_design,
 )
 from .trim import TrimResult
+from .tuning_application import TuningApplicationContext
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import (
     ExecutionPreflightCheck,
@@ -538,6 +545,8 @@ def execute_hummingbird_local_physical_control_screen(
     composition: CompiledVehicleComposition,
     output_dir: str | Path,
     max_steps: int | None = None,
+    *,
+    tuning_context: TuningApplicationContext | None = None,
 ) -> HummingbirdLocalPhysicalControlScreenExecution:
     """Run the source motor/LQI path through the exact Composition binding."""
 
@@ -562,6 +571,9 @@ def execute_hummingbird_local_physical_control_screen(
         if plan.vertical_translation
         else build_hummingbird_local_physical_wrench_lqi_design()
     )
+    tuning_binding = None
+    if tuning_context is not None:
+        design, tuning_binding = apply_tuning_context_to_physical_wrench_lqi_design(design, tuning_context)
     mass_variation_report: dict[str, object] | None = None
     robustness_report: dict[str, object] | None = None
     validation_payload: dict[str, object]
@@ -588,6 +600,7 @@ def execute_hummingbird_local_physical_control_screen(
             plan,
             nominal_rows=rows,
         )
+        robustness_report = _vertical_mass_variation_endpoint_artifact(mass_variation_report)
         validation_payload = {
             "schema": "taoryx.hummingbird-local-vertical-translation-lqi-validation/v1alpha1",
             "design": design.as_dict(),
@@ -699,6 +712,7 @@ def execute_hummingbird_local_physical_control_screen(
         "initial_attitude_rate_error_norm": initial_error,
         "final_attitude_rate_error_norm": final_error,
         "hard_gates_passed": screen_pass,
+        **({"tuning_binding": tuning_binding.as_dict()} if tuning_binding is not None else {}),
         "mass_variation": mass_variation_report,
         "mission_graph_execution": unobserved_mission_graph_execution(
             composition,
@@ -752,7 +766,10 @@ def execute_hummingbird_local_physical_control_screen(
     if mass_variation_report is not None:
         _write_json(destination / "mass_variation_report.json", mass_variation_report)
     if robustness_report is not None:
-        _write_json(destination / "robustness_report.json", robustness_report)
+        _write_json(
+            destination / "robustness_report.json",
+            bind_release_evidence(robustness_report, kind="robustness", composition=composition),
+        )
     _write_json(destination / "mission_graph_execution.json", runtime["mission_graph_execution"])
     _write_json(destination / "envelope_report.json", envelope)
     _write_json(destination / "objective_report.json", evaluation)
@@ -1580,11 +1597,16 @@ def _vertical_mass_variation_report(
                 cases.append(
                     {
                         "id": f"mass-{factor:g}x",
+                        "parameters": {"mass_factor": factor},
                         "mass_factor": factor,
                         "source_mass_kg": case_mass_kg,
                         "status": "fail",
                         "trim": trim.as_dict(),
                         "blockers": ["source_local_retrim_failed"],
+                        "metrics": {
+                            "minimum_phase_capture_dwell_s": None,
+                            "saturation_fraction": None,
+                        },
                     }
                 )
                 continue
@@ -1614,6 +1636,7 @@ def _vertical_mass_variation_report(
         cases.append(
             {
                 "id": f"mass-{factor:g}x",
+                "parameters": {"mass_factor": factor},
                 "mass_factor": factor,
                 "source_mass_kg": case_mass_kg,
                 "status": "pass" if passed else "fail",
@@ -1623,6 +1646,14 @@ def _vertical_mass_variation_report(
                 "allocation_pass": allocation_pass,
                 "integrators_exercised": integrators_exercised,
                 "vertical_capture": evaluation,
+                "metrics": {
+                    "minimum_phase_capture_dwell_s": _minimum_vertical_phase_capture_dwell_s(evaluation),
+                    "saturation_fraction": (
+                        sum(_saturation_count(row) > 0 for row in rows) / len(rows)
+                        if rows
+                        else math.inf
+                    ),
+                },
             }
         )
     passed = len(cases) == len(_MASS_VARIATION_FACTORS) and all(case["status"] == "pass" for case in cases)
@@ -1642,6 +1673,67 @@ def _vertical_mass_variation_report(
             "mass transition, payload-envelope coverage, wind rejection, or qualification."
         ),
     }
+    ####
+
+
+def _vertical_mass_variation_endpoint_artifact(report: Mapping[str, object]) -> dict[str, object]:
+    """Project vertical source-mass captures into the generic endpoint schema."""
+
+    raw_cases = report.get("cases")
+    if not isinstance(raw_cases, list):
+        raise ValueError("Hummingbird vertical mass-variation report must contain a cases list")
+    cases: list[dict[str, object]] = []
+    for raw_case in raw_cases:
+        if not isinstance(raw_case, Mapping):
+            raise ValueError("Hummingbird vertical mass-variation cases must be mappings")
+        identifier = raw_case.get("id")
+        parameters = raw_case.get("parameters")
+        metrics = raw_case.get("metrics")
+        if not isinstance(identifier, str) or not isinstance(parameters, Mapping) or not isinstance(metrics, Mapping):
+            raise ValueError("Hummingbird vertical mass-variation case lacks endpoint fields")
+        cases.append(
+            {
+                "id": identifier,
+                "parameters": dict(parameters),
+                "status": raw_case.get("status"),
+                "metrics": {
+                    "minimum_phase_capture_dwell_s": metrics.get("minimum_phase_capture_dwell_s"),
+                    "saturation_fraction": metrics.get("saturation_fraction"),
+                },
+                "source_mass_kg": raw_case.get("source_mass_kg"),
+                "vertical_capture": raw_case.get("vertical_capture"),
+            }
+        )
+    return {
+        "schema": "taoryx.endpoint-robustness-screen/v1alpha1",
+        "id": "hummingbird-vertical-fixed-lqi-mass-variation",
+        "kind": "mass_variation",
+        "status": "pass" if report.get("pass") is True else "fail",
+        "pass": report.get("pass") is True,
+        "cases": cases,
+        "controller_policy": report.get("controller_policy"),
+        "claim_boundary": report.get("claim_boundary"),
+    }
+    ####
+
+
+def _minimum_vertical_phase_capture_dwell_s(evaluation: Mapping[str, object]) -> float:
+    """Return the weakest declared phase dwell for one vertical capture case."""
+
+    raw_results = evaluation.get("results")
+    if not isinstance(raw_results, list):
+        return math.inf
+    dwell_values: list[float] = []
+    for result in raw_results:
+        if not isinstance(result, Mapping):
+            continue
+        actual = result.get("actual")
+        if not isinstance(actual, Mapping):
+            continue
+        dwell_s = actual.get("longest_capture_dwell_s")
+        if isinstance(dwell_s, int | float) and not isinstance(dwell_s, bool) and math.isfinite(float(dwell_s)):
+            dwell_values.append(float(dwell_s))
+    return min(dwell_values) if dwell_values else math.inf
     ####
 
 

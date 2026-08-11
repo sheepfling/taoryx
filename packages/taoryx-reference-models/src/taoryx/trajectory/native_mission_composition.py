@@ -19,7 +19,7 @@ from typing import Any, Literal, cast
 
 from ..fidelity_contracts import FidelityTier
 from ..language.grammar_contracts import GrammarProfile
-from ..outputs import RunArtifact, TelemetryChannel, VehicleTelemetry
+from ..outputs import RunArtifact, RunLifecycleEvent, TelemetryChannel, VehicleTelemetry
 from ..runtime.runner import run_files
 from ..vehicle_batch_execution import VehicleBatchExecution, execute_vehicle_composition_batch
 from ..vehicle_composition import (
@@ -603,7 +603,11 @@ def _dual_launch_artifact(
         segments=source.segments,
         events=source.events,
     )
-    events = [_dual_launch_event(payload, object_id, launch_mode) for payload in artifact.events if payload.get("vehicle") == "1"]
+    events = [
+        RunLifecycleEvent.model_validate(_dual_launch_event(payload, object_id, launch_mode))
+        for payload in artifact.events
+        if payload.get("vehicle") == "1"
+    ]
     return artifact.model_copy(update={"vehicles": {object_id: primary}, "events": events})
     ####
 
@@ -655,7 +659,7 @@ def _finite_difference(times: Sequence[float], values: Sequence[float]) -> list[
 
 
 def _dual_launch_event(
-    payload: dict[str, object],
+    payload: Mapping[str, object],
     object_id: str,
     launch_mode: Literal["air_release", "attached_booster"],
 ) -> dict[str, object]:

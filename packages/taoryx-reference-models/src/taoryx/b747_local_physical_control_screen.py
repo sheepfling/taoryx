@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from .claim_bound_evidence import bind_release_evidence
 from .composition_control_trace import BatchControlSample, build_committed_control_trace, control_trace_summary
 from .composition_evaluation import build_composition_trajectory_evaluation
 from .composition_graph_evidence import unobserved_mission_graph_execution
@@ -29,6 +30,7 @@ from .physical_lqr import (
     PhysicalWrenchLqiValidation,
     PhysicalWrenchLqrDesign,
     PhysicalWrenchLqrValidation,
+    apply_tuning_context_to_physical_wrench_lqi_design,
     validate_nonlinear_wrench_lqi,
     validate_nonlinear_wrench_lqr,
 )
@@ -38,6 +40,7 @@ from .source_table_fixed_wing import (
     build_b747_condition3_source_table_plant,
 )
 from .trim import TrimResult
+from .tuning_application import TuningApplicationContext
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_preflight import (
     ExecutionPreflightCheck,
@@ -394,6 +397,8 @@ def execute_b747_condition3_local_physical_control_screen(
     composition: CompiledVehicleComposition,
     output_dir: str | Path,
     max_steps: int | None = None,
+    *,
+    tuning_context: TuningApplicationContext | None = None,
 ) -> B747LocalPhysicalControlScreenExecution:
     """Run the B747 nonlinear source-table plant through bounded allocation."""
 
@@ -414,6 +419,11 @@ def execute_b747_condition3_local_physical_control_screen(
     if not trim.success:
         raise RuntimeError(f"B747 condition-3 physical-control screen trim failed: {trim.as_dict()}")
     design = _design_for(plan.controller_method)
+    tuning_binding = None
+    if tuning_context is not None:
+        if not isinstance(design, PhysicalWrenchLqiDesign):
+            raise ValueError("the B747 LQI tuning context can only be applied to an LQI screen")
+        design, tuning_binding = apply_tuning_context_to_physical_wrench_lqi_design(design, tuning_context)
     initial_state = _initial_state(trim)
     validation: PhysicalWrenchLqrValidation | PhysicalWrenchLqiValidation
     if plan.controller_method == "lqr":
@@ -427,7 +437,9 @@ def execute_b747_condition3_local_physical_control_screen(
             dt_s=plan.dt_s,
         )
     else:
-        lqi_design = build_b747_condition3_source_surface_physical_lqi_design()
+        if not isinstance(design, PhysicalWrenchLqiDesign):
+            raise RuntimeError("the B747 LQI screen requires an LQI physical-wrench design")
+        lqi_design = design
         validation = validate_nonlinear_wrench_lqi(
             plant,
             trim,
@@ -472,6 +484,7 @@ def execute_b747_condition3_local_physical_control_screen(
         "mass_kg": mass_kg,
         "source_table_envelope": envelope,
         "hard_gates_passed": assessment["screen_pass"],
+        **({"tuning_binding": tuning_binding.as_dict()} if tuning_binding is not None else {}),
         "matched_pitch_offset_screen": (
             {
                 "status": "applied",
@@ -518,7 +531,10 @@ def execute_b747_condition3_local_physical_control_screen(
     _write_json(destination / "mission_graph_execution.json", runtime["mission_graph_execution"])
     _write_json(destination / "nonlinear_validation.json", validation.as_dict())
     if robustness_report is not None:
-        _write_json(destination / "robustness_report.json", robustness_report)
+        _write_json(
+            destination / "robustness_report.json",
+            bind_release_evidence(robustness_report, kind="robustness", composition=composition),
+        )
     _write_json(destination / "envelope_report.json", envelope)
     _write_json(destination / "objective_report.json", evaluation)
     _write_json(destination / "status_trace.json", status_trace)

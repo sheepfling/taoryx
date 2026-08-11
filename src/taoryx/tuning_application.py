@@ -21,7 +21,44 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Literal
 
+from pydantic import BaseModel, ConfigDict, Field
+
 TuningControllerMethod = Literal["lqr", "lqi"]
+
+
+class RuntimeTuningBindingReceipt(BaseModel):
+    """Typed receipt emitted only after a runtime applies one tuned candidate.
+
+    The receipt is intentionally small enough to live inside a provider-owned
+    ``runtime`` extension, while retaining every identity needed to bind that
+    runtime to a cached campaign candidate.  It replaces the previous
+    informal dictionary convention at the plug-in-to-result-catalog seam.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    campaign_id: str = Field(min_length=1)
+    node_id: str = Field(min_length=1)
+    candidate_profile_id: str = Field(min_length=1)
+    candidate_configuration_fingerprint_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    applied_gain_fingerprint_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    controller_method: TuningControllerMethod
+    cache_key: str | None = Field(default=None, min_length=1)
+
+    def require_runtime_method(self, controller_method: object) -> None:
+        """Reject a receipt that disagrees with the enclosing runtime method."""
+
+        if self.controller_method != controller_method:
+            raise ValueError("execution tuning_binding controller method disagrees with execution runtime")
+        ####
+
+    def as_dict(self) -> dict[str, str]:
+        """Return the JSON-safe receipt for a provider runtime extension."""
+
+        return self.model_dump(mode="json", exclude_none=True)
+        ####
+
+    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -220,7 +257,7 @@ class TuningApplicationContext:
         state_names: Sequence[str],
         control_names: Sequence[str],
         integral_output_names: Sequence[str] = (),
-    ) -> dict[str, str]:
+    ) -> RuntimeTuningBindingReceipt:
         """Return a runtime receipt after the caller verifies actual application.
 
         This does not build or mutate a controller.  Its compatibility check
@@ -236,14 +273,108 @@ class TuningApplicationContext:
             control_names=control_names,
             integral_output_names=integral_output_names,
         )
+        return RuntimeTuningBindingReceipt(
+            campaign_id=self.campaign_id,
+            node_id=self.node_id,
+            candidate_profile_id=self.candidate_profile_id,
+            candidate_configuration_fingerprint_sha256=self.candidate_configuration_fingerprint_sha256,
+            applied_gain_fingerprint_sha256=self.resolved_gain_fingerprint_sha256,
+            controller_method=self.controller_method,
+            cache_key=self.cache_key,
+        )
+        ####
+
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class TuningApplicationContextSet:
+    """One complete, non-ambiguous selection from a multi-node campaign.
+
+    A single context is sufficient for a local controller screen.  A discrete
+    schedule, however, must carry the selected candidate for *every* node it
+    executes.  This contract prevents an executor from receiving a loose list
+    and silently choosing one node, while preserving the existing singular
+    context path for local screens.
+    """
+
+    contexts: tuple[TuningApplicationContext, ...]
+
+    def __post_init__(self) -> None:
+        if not self.contexts:
+            raise ValueError("tuning application context sets require at least one context")
+        campaign_ids = {context.campaign_id for context in self.contexts}
+        if len(campaign_ids) != 1:
+            raise ValueError("tuning application context sets must select one campaign")
+        node_ids = tuple(context.node_id for context in self.contexts)
+        if len(node_ids) != len(set(node_ids)):
+            raise ValueError("tuning application context sets must contain one context per node")
+        methods = {context.controller_method for context in self.contexts}
+        if len(methods) != 1:
+            raise ValueError("tuning application context sets must contain one controller method")
+        ####
+
+    @property
+    def campaign_id(self) -> str:
+        """Return the one campaign represented by every selected context."""
+
+        return self.contexts[0].campaign_id
+        ####
+
+    @property
+    def controller_method(self) -> TuningControllerMethod:
+        """Return the one controller method shared by the selected nodes."""
+
+        return self.contexts[0].controller_method
+        ####
+
+    @property
+    def node_ids(self) -> tuple[str, ...]:
+        """Return selected node identities in execution order."""
+
+        return tuple(context.node_id for context in self.contexts)
+        ####
+
+    @property
+    def singular(self) -> TuningApplicationContext | None:
+        """Return the sole context when this is a one-node selection."""
+
+        return self.contexts[0] if len(self.contexts) == 1 else None
+        ####
+
+    def for_node(self, node_id: str) -> TuningApplicationContext:
+        """Return exactly the candidate selected for one executed node."""
+
+        for context in self.contexts:
+            if context.node_id == node_id:
+                return context
+        raise KeyError(f"tuning application context set has no node {node_id!r}")
+        ####
+
+    def require_exact_nodes(self, node_ids: Sequence[str]) -> None:
+        """Reject incomplete, extra, or differently ordered schedule selections."""
+
+        expected = tuple(node_ids)
+        if self.node_ids != expected:
+            raise ValueError(
+                "tuning application context set nodes do not match the runtime schedule: "
+                f"expected {expected!r}, got {self.node_ids!r}"
+            )
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Return the complete portable selection and each exact candidate."""
+
         return {
+            "schema": "taoryx.tuning-application-context-set/v1alpha1",
             "campaign_id": self.campaign_id,
-            "node_id": self.node_id,
-            "candidate_profile_id": self.candidate_profile_id,
-            "candidate_configuration_fingerprint_sha256": self.candidate_configuration_fingerprint_sha256,
-            "applied_gain_fingerprint_sha256": self.resolved_gain_fingerprint_sha256,
             "controller_method": self.controller_method,
-            "cache_key": self.cache_key,
+            "node_ids": list(self.node_ids),
+            "contexts": [context.as_dict() for context in self.contexts],
+            "claim_boundary": (
+                "This set selects one exact candidate for each declared node. It is not proof that a runtime applied "
+                "every candidate; the runtime must emit one binding receipt per executed node."
+            ),
         }
         ####
 
@@ -491,7 +622,9 @@ def _json_copy(value: Mapping[str, object]) -> dict[str, object]:
 
 
 __all__ = [
+    "RuntimeTuningBindingReceipt",
     "TuningApplicationContext",
+    "TuningApplicationContextSet",
     "TuningControllerMethod",
     "canonical_json_fingerprint",
     "tuning_application_contexts_from_campaign_payload",
