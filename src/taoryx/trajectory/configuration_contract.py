@@ -1185,13 +1185,30 @@ class TrajectoryControlSchemeSupportMetadata(BaseModel):
     operations: tuple[Literal["batch", "step"], ...]
     action_ids: tuple[str, ...]
     command_owner: TrajectoryControlCommandOwner
+    selection_scope: TrajectoryControlSelectionScope
     switching_policy: TrajectoryControlSwitchingPolicy
+    applicable_phase_ids: tuple[str, ...] = ()
+    runtime_availability_path: Literal[
+        "session.observation.control_authority.runtime_availability"
+    ] = "session.observation.control_authority.runtime_availability"
+    available_action_mask_path: Literal[
+        "session.observation.control_authority.available_action_ids"
+    ] = "session.observation.control_authority.available_action_ids"
+    step_feedback_path: Literal[
+        "session.step.control_feedback"
+    ] = "session.step.control_feedback"
     advertisement_source: Literal["declared", "authority_kind_fallback"]
     claim_boundary: str = Field(min_length=1)
 
     @model_validator(mode="after")
     def validate_support(self) -> TrajectoryControlSchemeSupportMetadata:
-        for name in ("consumer_roles", "fidelity_ids", "operations", "action_ids"):
+        for name in (
+            "consumer_roles",
+            "fidelity_ids",
+            "operations",
+            "action_ids",
+            "applicable_phase_ids",
+        ):
             values = getattr(self, name)
             if len(values) != len(set(values)):
                 raise ValueError(f"control-scheme support contains duplicate {name}")
@@ -1259,7 +1276,9 @@ def build_control_scheme_support(
                     operations=authority.operations,
                     action_ids=authority.channel_ids,
                     command_owner=authority.command_owner,
+                    selection_scope=authority.selection_scope,
                     switching_policy=authority.switching_policy,
+                    applicable_phase_ids=authority.applicable_phase_ids,
                     advertisement_source=(
                         "declared" if declared else "authority_kind_fallback"
                     ),
@@ -1323,12 +1342,34 @@ class TrajectoryControlAdvertisement(BaseModel):
     default_authority_id: str | None = None
     claim_boundary: str = Field(min_length=1)
 
-    def rl_action_space(self, *, operation: Literal["batch", "step"] = "step") -> RLActionSpaceSpec:
-        """Return the deterministic agent projection for this advertisement."""
+    def rl_action_space(
+        self,
+        *,
+        operation: Literal["batch", "step"] = "step",
+        authority_id: str | None = None,
+    ) -> RLActionSpaceSpec:
+        """Return the deterministic agent projection for all or one authority."""
 
         from .rl_control import build_rl_action_space
 
-        return build_rl_action_space(self, operation=operation)
+        channel_ids: tuple[str, ...] | None = None
+        if authority_id is not None:
+            authority = next(
+                (item for item in self.authorities if item.id == authority_id),
+                None,
+            )
+            if authority is None:
+                raise KeyError(f"unknown control authority {authority_id!r}")
+            if operation not in authority.operations:
+                raise ValueError(
+                    f"control authority {authority_id!r} is not available for {operation!r}"
+                )
+            channel_ids = authority.channel_ids
+        return build_rl_action_space(
+            self,
+            operation=operation,
+            channel_ids=channel_ids,
+        )
         ####
 
     @model_validator(mode="after")
@@ -2074,6 +2115,11 @@ class TrajectoryConfigurationInstance(BaseModel):
     fidelity: str = Field(min_length=1)
     realization_id: str | None = None
     mission_template_id: str | None = None
+    startup_authority_profile_id: str | None = Field(
+        default=None,
+        min_length=1,
+        exclude_if=lambda value: value is None,
+    )
     root: ConfigurationNodeValue
 
 

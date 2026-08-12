@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import math
 from typing import cast
 
 from ..composition_episode import EpisodeChannel
 from ..fidelity_contracts import FidelityTier
-from ..value_space import ValueSpaceSpec, default_value_space_for_value_type
+from ..value_space import (
+    ValueSpaceSpec,
+    ValueSpaceTopology,
+    default_value_space_for_value_type,
+)
 from ..vehicle_interface import (
     AuthorityProfile,
     InterfaceChannel,
@@ -145,13 +150,37 @@ def _action_channel(channel: TrajectoryControlChannelMetadata) -> InterfaceChann
     canonical_unit = channel.canonical_unit
     if canonical_unit is None and value_type in {"scalar", "vector3", "vector4"}:
         canonical_unit = "dimensionless"
+    feedback_channel_id = channel.provider_binding.get("feedback_channel_id")
+    feedback_binding = (
+        {"feedback_channel_id": feedback_channel_id}
+        if isinstance(feedback_channel_id, str) and feedback_channel_id
+        else {}
+    )
+    semantics = channel.semantics
+    semantic_binding = {
+        "command_mode": semantics.command_mode,
+        "temporal_semantics": semantics.temporal_semantics,
+        "repeat_policy": semantics.repeat_policy,
+        "agent_normalization": semantics.agent_normalization,
+        "agent_center": semantics.agent_center,
+        "agent_scale": semantics.agent_scale,
+        "agent_clip": semantics.agent_clip,
+        "action_values": list(_control_action_values(channel)),
+    }
     binding = (
-        {"native_action": channel.native_channel_id, "choices": list(channel.choices)}
+        {
+            "native_action": channel.native_channel_id,
+            "choices": list(channel.choices),
+            **feedback_binding,
+            **semantic_binding,
+        }
         if channel.native_channel_id is not None
         else {
             "episode_field": channel.id,
             "provider_binding": channel.provider_binding,
             "choices": list(channel.choices),
+            **feedback_binding,
+            **semantic_binding,
         }
     )
     return InterfaceChannel(
@@ -169,6 +198,32 @@ def _action_channel(channel: TrajectoryControlChannelMetadata) -> InterfaceChann
         binding=binding,
         claim_boundary=channel.claim_boundary,
         value_space=_value_space(channel.value_space, value_type),
+    )
+    ####
+
+
+def _control_action_values(
+    channel: TrajectoryControlChannelMetadata,
+) -> tuple[float, ...]:
+    """Materialize a finite numeric detent vocabulary for session clients."""
+
+    quantization = channel.semantics.quantization
+    if quantization.mode == "levels":
+        return quantization.levels
+    if quantization.mode != "step" or quantization.step is None:
+        return ()
+    lower = _bound(channel, "minimum")
+    upper = _bound(channel, "maximum")
+    if lower is None or upper is None:
+        raise ValueError(f"step control {channel.id!r} requires finite bounds")
+    first = math.ceil((lower - quantization.origin) / quantization.step - 1.0e-12)
+    last = math.floor((upper - quantization.origin) / quantization.step + 1.0e-12)
+    count = last - first + 1
+    if count < 2 or count > 4096:
+        raise ValueError(f"step control {channel.id!r} has an invalid detent count")
+    return tuple(
+        quantization.origin + index * quantization.step
+        for index in range(first, last + 1)
     )
     ####
 
@@ -272,7 +327,7 @@ def _value_space(source: object, value_type: InterfaceValueType) -> ValueSpaceSp
         _value_space(item, "scalar") for item in getattr(source, "components", ())
     )
     return ValueSpaceSpec(
-        topology=normalized,  # type: ignore[arg-type]
+        topology=cast(ValueSpaceTopology, normalized),
         representation=representation,
         error_rule=str(getattr(source, "error_rule")),
         interpolation_rule=str(getattr(source, "interpolation_rule")),

@@ -301,10 +301,24 @@ def build_rl_action_space(
     advertisement: TrajectoryControlAdvertisement,
     *,
     operation: Literal["batch", "step"] = "step",
+    channel_ids: tuple[str, ...] | None = None,
 ) -> RLActionSpaceSpec:
     """Project available semantic action channels into a Torch-friendly space."""
 
-    channels = tuple(channel for channel in advertisement.channels if channel.channel_kind == "action" and operation in channel.operations)
+    selected_ids = None if channel_ids is None else set(channel_ids)
+    channels = tuple(
+        channel
+        for channel in advertisement.channels
+        if channel.channel_kind == "action"
+        and operation in channel.operations
+        and (selected_ids is None or channel.id in selected_ids)
+    )
+    if channel_ids is not None and tuple(item.id for item in channels) != channel_ids:
+        available = {item.id for item in channels}
+        missing = tuple(identifier for identifier in channel_ids if identifier not in available)
+        raise ValueError(
+            f"control authority action channels are unavailable for {operation!r}: {missing!r}"
+        )
     if not channels:
         raise ValueError(f"control advertisement has no action channels for {operation!r}")
     projected: list[RLControlChannelSpec] = []

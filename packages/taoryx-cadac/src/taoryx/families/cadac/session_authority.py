@@ -3,12 +3,23 @@
 from __future__ import annotations
 
 from taoryx.trajectory.mission_composition import (
+    MissionCompositionAgentActionSpace,
     MissionCompositionControlAuthorityState,
     MissionCompositionSessionAuthorityProfile,
 )
 
 CADAC_SOURCE_PROGRAM_PROFILE_ID = "source_program_control"
 CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID = "cadac_source_program"
+
+_EMPTY_AGENT_ACTION_SPACE = MissionCompositionAgentActionSpace(
+    kind="empty",
+    channel_order=(),
+    flat_size=0,
+    channels=(),
+    claim_boundary=(
+        "The retained CADAC source program exposes no caller action head; duration is transport timing, not a control."
+    ),
+)
 
 _SOURCE_PROGRAM_PROFILE = MissionCompositionSessionAuthorityProfile(
     id=CADAC_SOURCE_PROGRAM_PROFILE_ID,
@@ -29,6 +40,8 @@ _SOURCE_PROGRAM_PROFILE = MissionCompositionSessionAuthorityProfile(
         "cadac_source_controller",
         "cadac_source_actuator_or_response_law",
     ),
+    action_schema=(),
+    agent_action_space=_EMPTY_AGENT_ACTION_SPACE,
     claim_boundary=(
         "This profile makes source ownership inspectable. It does not create an external command seam, replace "
         "source sensor/controller state, or claim that a caller may switch the retained controller during a session."
@@ -42,6 +55,8 @@ _SOURCE_PROGRAM_STATE = MissionCompositionControlAuthorityState(
     lowering_chain=_SOURCE_PROGRAM_PROFILE.lowering_chain,
     selection_scope="provider",
     switching_policy="provider_managed",
+    scheme_id="provider.program",
+    available_action_ids=(),
 )
 
 
@@ -50,6 +65,7 @@ def source_managed_session_authority_fields() -> dict[str, object]:
 
     return {
         "action_schema_projection": "selected_semantic_profile",
+        "agent_action_space": _EMPTY_AGENT_ACTION_SPACE,
         "authority_profiles": (_SOURCE_PROGRAM_PROFILE,),
         "default_authority_profile_id": CADAC_SOURCE_PROGRAM_PROFILE_ID,
         "active_authority_profile_id": CADAC_SOURCE_PROGRAM_PROFILE_ID,

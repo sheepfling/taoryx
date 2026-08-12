@@ -54,6 +54,11 @@ def test_every_published_authority_has_an_exact_ui_ready_support_record() -> Non
                     record = support[(realization.id, authority.id)]
                     assert record.action_ids == authority.channel_ids
                     assert record.operations == authority.operations
+                    assert record.selection_scope == authority.selection_scope
+                    assert record.applicable_phase_ids == authority.applicable_phase_ids
+                    assert record.runtime_availability_path.endswith("runtime_availability")
+                    assert record.available_action_mask_path.endswith("available_action_ids")
+                    assert record.step_feedback_path.endswith("control_feedback")
                     assert set(record.fidelity_ids) == set(realization.fidelity_aliases) & {
                         item.id for item in model.fidelities
                     }
@@ -116,6 +121,37 @@ def test_reduced_fixed_wing_keeps_common_schemes_across_fidelity_tiers() -> None
     }
     assert by_realization["point_mass_3dof"] == common
     assert by_realization["pseudo_6dof"] == common | {"body_motion.body_rate"}
+    ####
+
+
+def test_guidance_authority_has_its_own_normalization_ready_action_space() -> None:
+    model = next(
+        item
+        for item in ReferenceMissionCompositionProvider().list_models()
+        if item.id == "reference_constant_velocity_waypoint_3dof"
+    )
+    controls = model.realizations[0].controls
+
+    kinematic = controls.rl_action_space(
+        authority_id="kinematic_velocity_command"
+    )
+    assert tuple(item.channel_id for item in kinematic.channels) == (
+        "guidance.speed.command",
+        "guidance.heading.command",
+        "guidance.flight_path_angle.command",
+    )
+    assert kinematic.channel_map["guidance.heading.command"].normalization == "periodic_wrap"
+
+    waypoint = controls.rl_action_space(authority_id="live_waypoint_guidance")
+    assert tuple(item.channel_id for item in waypoint.channels) == (
+        "navigation.waypoint.north.command",
+        "navigation.waypoint.east.command",
+        "navigation.waypoint.altitude.command",
+        "navigation.waypoint.capture_radius.command",
+        "navigation.waypoint.speed.command",
+    )
+    assert waypoint.channel_map["navigation.waypoint.north.command"].requires_external_statistics
+    assert waypoint.requires_external_statistics
     ####
 
 

@@ -81,12 +81,15 @@ def _assert_source_program_authority(
 
     assert descriptor.action_schema == ()
     assert descriptor.action_schema_projection == "selected_semantic_profile"
+    assert descriptor.agent_action_space is not None
+    assert descriptor.agent_action_space.kind == "empty"
     assert descriptor.default_authority_profile_id == "source_program_control"
     assert descriptor.active_authority_profile_id == "source_program_control"
     assert descriptor.command_source_id == "cadac_source_program"
     assert len(descriptor.authority_profiles) == 1
     profile = descriptor.authority_profiles[0]
     assert profile.action_ids == ()
+    assert profile.agent_action_space == descriptor.agent_action_space
     assert profile.command_owner == "source_program"
     assert profile.scheme_id == "provider.program"
     assert profile.selection_scope == "provider"
@@ -96,6 +99,7 @@ def _assert_source_program_authority(
     assert step.authority_profile_id == profile.id
     assert step.command_source_id == "cadac_source_program"
     assert step.lowered_action == {}
+    assert step.control_feedback == ()
     assert step.lowering_evidence["command_owner"] == "source_program"
     assert step.observation.control_authority == descriptor.initial_observation.control_authority
     ####

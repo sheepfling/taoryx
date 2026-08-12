@@ -877,6 +877,40 @@ lowered adapter values and lowering evidence. `control_authority` in every
 committed observation identifies the active owner and source. Omitting
 `authority_profile_id` on open retains the legacy native-action schema.
 
+To make the selection part of a reusable prepared composition, set
+`startup_authority_profile_id` before validation:
+
+```python
+configured = configuration.model_copy(
+    update={"startup_authority_profile_id": "live_waypoint_guidance"}
+)
+prepared = provider.validate_configuration(configured)
+descriptor = sessions.open(
+    MissionCompositionOpenSessionRequest(
+        session_id="remote-waypoint-composition",
+        provider_id=provider.metadata.id,
+        provider_version=provider.metadata.version,
+        prepared_configuration=prepared,
+    )
+)
+```
+
+An explicit open-session authority may be used instead, but it must agree with
+the prepared selection. This prevents a deployment configuration and a remote
+client from silently training or operating against different action spaces.
+
+Every `descriptor.authority_profiles` item is normalization-ready even while
+inactive. `action_schema` contains units, frames, topology, and bounds;
+`agent_action_space` contains channel order, flattening offsets, encodings,
+native/agent ranges, periodic wrap periods, discrete choices, and external
+statistics requirements. The same authority-specific projection is available
+before startup from
+`realization.controls.rl_action_space(authority_id=..., operation="step")`.
+Use `observation.control_authority.available_action_ids` as the runtime mask,
+and use `result.control_feedback` for requested/applied/achieved readback. Do
+not treat the presence of a static profile as proof that it is available in
+the current phase.
+
 The first provider-neutral streaming acceptance ladder is deliberately small:
 
 | Model | Default profile | Selectable live profiles | Boundary |

@@ -163,10 +163,13 @@ if TYPE_CHECKING:
     )
     from .registry_mission_composition import RegistryMissionCompositionProvider
     from .session_contract import (
+        MissionCompositionAgentActionChannel,
+        MissionCompositionAgentActionSpace,
         MissionCompositionAuthorityTransition,
         MissionCompositionClosedSession,
         MissionCompositionCloseSessionRequest,
         MissionCompositionControlAuthorityState,
+        MissionCompositionControlChannelFeedback,
         MissionCompositionInspectSessionRequest,
         MissionCompositionOpenSessionRequest,
         MissionCompositionResetSessionRequest,
@@ -251,10 +254,13 @@ def __getattr__(name: str) -> object:
 
         return getattr(native_mission_composition, name)
     if name in {
+        "MissionCompositionAgentActionChannel",
+        "MissionCompositionAgentActionSpace",
         "MissionCompositionAuthorityTransition",
         "MissionCompositionCloseSessionRequest",
         "MissionCompositionClosedSession",
         "MissionCompositionControlAuthorityState",
+        "MissionCompositionControlChannelFeedback",
         "MissionCompositionInspectSessionRequest",
         "MissionCompositionOpenSessionRequest",
         "MissionCompositionResetSessionRequest",
@@ -440,10 +446,13 @@ __all__ = [
     "build_rl_action_space",
     "decode_agent_action",
     "encode_agent_action",
+    "MissionCompositionAgentActionChannel",
+    "MissionCompositionAgentActionSpace",
     "MissionCompositionAuthorityTransition",
     "MissionCompositionClosedSession",
     "MissionCompositionCloseSessionRequest",
     "MissionCompositionControlAuthorityState",
+    "MissionCompositionControlChannelFeedback",
     "MissionCompositionInspectSessionRequest",
     "MissionCompositionOpenSessionRequest",
     "MissionCompositionResetSessionRequest",

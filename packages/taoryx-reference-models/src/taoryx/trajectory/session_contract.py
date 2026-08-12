@@ -26,6 +26,10 @@ from ..control_schemes import (
 from ..vehicle_interface import AuthorityProfile, InterfaceChannel
 from .configuration_contract import (
     ConfigurableTrajectoryProvider,
+    ControlAgentNormalizationPolicy,
+    ControlCommandMode,
+    ControlRepeatPolicy,
+    ControlTemporalSemantics,
     PreparedTrajectoryConfiguration,
     TrajectoryControlSamplingSemantics,
     TrajectoryModelMetadata,
@@ -58,6 +62,15 @@ class MissionCompositionSessionChannel(BaseModel):
     maximum: float | None = None
     choices: tuple[str, ...] = ()
     value_space: dict[str, Any]
+    feedback_channel_id: str | None = Field(default=None, min_length=1)
+    command_mode: ControlCommandMode = "absolute"
+    temporal_semantics: ControlTemporalSemantics = "held"
+    repeat_policy: ControlRepeatPolicy = "repeatable"
+    agent_normalization: ControlAgentNormalizationPolicy = "auto"
+    agent_center: float | None = None
+    agent_scale: float | None = Field(default=None, gt=0.0)
+    agent_clip: bool = False
+    action_values: tuple[Any, ...] = ()
 
     @model_validator(mode="after")
     def validate_bounds(self) -> MissionCompositionSessionChannel:
@@ -71,6 +84,112 @@ class MissionCompositionSessionChannel(BaseModel):
             raise ValueError(f"session channel {self.id!r} choices require string data")
         if len(self.choices) != len(set(self.choices)):
             raise ValueError(f"session channel {self.id!r} contains duplicate choices")
+        if self.agent_normalization == "standardize" and (
+            self.agent_center is None or self.agent_scale is None
+        ):
+            raise ValueError(f"session channel {self.id!r} standardized normalization requires center and scale")
+        if self.agent_normalization != "standardize" and (
+            self.agent_center is not None or self.agent_scale is not None
+        ):
+            raise ValueError(f"session channel {self.id!r} agent statistics require standardized normalization")
+        return self
+        ####
+
+    ####
+
+
+class MissionCompositionAgentActionChannel(BaseModel):
+    """Normalization-ready projection of one session action channel."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    channel_id: str = Field(min_length=1)
+    action_index: int = Field(ge=0)
+    flat_offset: int = Field(ge=0)
+    flat_size: int = Field(gt=0)
+    encoding: Literal["box", "discrete", "binary"]
+    data_type: Literal["float32", "int64", "bool"]
+    shape: tuple[int, ...] = ()
+    normalization: Literal["affine", "standardize", "periodic_wrap", "identity", "categorical_index", "binary"]
+    native_minimum: float | None = None
+    native_maximum: float | None = None
+    agent_minimum: float | None = None
+    agent_maximum: float | None = None
+    period: float | None = Field(default=None, gt=0.0)
+    choices: tuple[str, ...] = ()
+    action_values: tuple[Any, ...] = ()
+    command_mode: ControlCommandMode = "absolute"
+    temporal_semantics: ControlTemporalSemantics = "held"
+    repeat_policy: ControlRepeatPolicy = "repeatable"
+    standardize_center: float | None = None
+    standardize_scale: float | None = Field(default=None, gt=0.0)
+    agent_clip: bool = False
+    masking: Literal["runtime", "runtime_and_repeat"] = "runtime"
+    requires_external_statistics: bool = False
+    runtime_mask_source: Literal["observation.control_authority.available_action_ids"] = (
+        "observation.control_authority.available_action_ids"
+    )
+
+    @model_validator(mode="after")
+    def validate_channel(self) -> MissionCompositionAgentActionChannel:
+        if self.flat_size != (math.prod(self.shape) if self.shape else 1):
+            raise ValueError(f"agent action channel {self.channel_id!r} flat size disagrees with shape")
+        if self.encoding == "box" and self.data_type != "float32":
+            raise ValueError(f"agent action channel {self.channel_id!r} box encoding requires float32")
+        if self.encoding == "discrete" and (
+            self.data_type != "int64" or not (self.choices or self.action_values)
+        ):
+            raise ValueError(f"agent action channel {self.channel_id!r} discrete encoding requires values")
+        if self.encoding == "binary" and self.data_type != "bool":
+            raise ValueError(f"agent action channel {self.channel_id!r} binary encoding requires bool")
+        if self.normalization == "affine" and (
+            self.native_minimum is None or self.native_maximum is None
+        ):
+            raise ValueError(f"agent action channel {self.channel_id!r} affine normalization requires native bounds")
+        if self.normalization == "periodic_wrap" and self.period is None:
+            raise ValueError(f"agent action channel {self.channel_id!r} periodic normalization requires a period")
+        if self.normalization == "standardize" and (
+            self.standardize_center is None or self.standardize_scale is None
+        ):
+            raise ValueError(f"agent action channel {self.channel_id!r} standardization requires center and scale")
+        return self
+        ####
+
+    ####
+
+
+class MissionCompositionAgentActionSpace(BaseModel):
+    """Dependency-free action-space contract for UI, Gym, and Torch adapters."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid", populate_by_name=True)
+
+    schema_id: Literal["taoryx.mission-composition-agent-action-space/v1"] = Field(
+        default="taoryx.mission-composition-agent-action-space/v1",
+        alias="schema",
+        serialization_alias="schema",
+    )
+    kind: Literal["empty", "box", "discrete", "multi_discrete", "multi_binary", "dict"]
+    channel_order: tuple[str, ...]
+    flat_size: int = Field(ge=0)
+    channels: tuple[MissionCompositionAgentActionChannel, ...]
+    flattening: Literal["authority_action_schema_order"] = "authority_action_schema_order"
+    masking: Literal["runtime"] = "runtime"
+    requires_external_statistics: bool = False
+    claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_space(self) -> MissionCompositionAgentActionSpace:
+        channel_ids = tuple(item.channel_id for item in self.channels)
+        if channel_ids != self.channel_order:
+            raise ValueError("agent action-space channel order disagrees with its channel records")
+        if len(channel_ids) != len(set(channel_ids)):
+            raise ValueError("agent action space contains duplicate channel IDs")
+        if self.flat_size != sum(item.flat_size for item in self.channels):
+            raise ValueError("agent action-space flat size disagrees with its channels")
+        if self.kind == "empty" and self.channels:
+            raise ValueError("empty agent action space cannot contain channels")
+        if self.kind != "empty" and not self.channels:
+            raise ValueError("non-empty agent action space requires channels")
         return self
         ####
 
@@ -97,6 +216,8 @@ class MissionCompositionSessionAuthorityProfile(BaseModel):
     consumer_roles: tuple[ControlSchemeConsumerRole, ...] = ()
     streaming_preference: ControlSchemeStreamingPreference | None = None
     ui_order: int | None = Field(default=None, ge=0)
+    action_schema: tuple[MissionCompositionSessionChannel, ...] = ()
+    agent_action_space: MissionCompositionAgentActionSpace | None = None
     claim_boundary: str = Field(min_length=1)
 
     @model_validator(mode="before")
@@ -136,6 +257,11 @@ class MissionCompositionSessionAuthorityProfile(BaseModel):
             raise ValueError(f"session authority profile {self.id!r} contains duplicate consumer roles")
         if any(not item.strip() for item in (*self.action_ids, *self.applicable_phase_ids, *self.lowering_chain)):
             raise ValueError(f"session authority profile {self.id!r} contains an empty identifier")
+        schema_ids = tuple(item.id for item in self.action_schema)
+        if self.action_schema and schema_ids != self.action_ids:
+            raise ValueError(f"session authority profile {self.id!r} action schema disagrees with its action IDs")
+        if self.agent_action_space is not None and self.agent_action_space.channel_order != self.action_ids:
+            raise ValueError(f"session authority profile {self.id!r} agent action space disagrees with its action IDs")
         if self.command_owner not in {"caller", "source_program", "provider_controller", "open_loop"}:
             raise ValueError(f"session authority profile {self.id!r} has an unknown command owner")
         if self.selection_scope not in {"batch", "session", "phase", "step", "provider"}:
@@ -168,10 +294,19 @@ class MissionCompositionSessionAuthorityProfile(BaseModel):
         ####
 
     @classmethod
-    def from_interface(cls, profile: AuthorityProfile) -> MissionCompositionSessionAuthorityProfile:
+    def from_interface(
+        cls,
+        profile: AuthorityProfile,
+        action_channels: tuple[InterfaceChannel, ...] = (),
+    ) -> MissionCompositionSessionAuthorityProfile:
         """Project the immutable vehicle-interface profile without losing semantics."""
 
-        return cls.model_validate(profile.as_dict())
+        payload = profile.as_dict()
+        if action_channels or not profile.action_ids:
+            action_schema = _semantic_action_schema(action_channels, profile)
+            payload["action_schema"] = action_schema
+            payload["agent_action_space"] = _agent_action_space(action_schema)
+        return cls.model_validate(payload)
         ####
 
     ####
@@ -188,6 +323,18 @@ class MissionCompositionControlAuthorityState(BaseModel):
     lowering_chain: tuple[str, ...] = ()
     selection_scope: str | None = None
     switching_policy: str | None = None
+    scheme_id: str | None = None
+    runtime_availability: Literal[
+        "available",
+        "temporarily_unavailable",
+        "not_applicable",
+        "depleted",
+        "failed",
+    ] = "available"
+    phase_id: str | None = None
+    availability_reason_codes: tuple[str, ...] = ()
+    available_action_ids: tuple[str, ...] = ()
+    unavailable_action_reasons: dict[str, tuple[str, ...]] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def validate_state(self) -> MissionCompositionControlAuthorityState:
@@ -203,6 +350,21 @@ class MissionCompositionControlAuthorityState(BaseModel):
             raise ValueError("control-authority state without an active profile cannot claim ownership")
         if self.active_profile_id is None and self.lowering_chain:
             raise ValueError("control-authority state without an active profile cannot claim a lowering chain")
+        if self.active_profile_id is None and (
+            self.scheme_id is not None
+            or self.phase_id is not None
+            or self.availability_reason_codes
+            or self.available_action_ids
+            or self.unavailable_action_reasons
+        ):
+            raise ValueError("control-authority state without an active profile cannot publish availability metadata")
+        if len(self.available_action_ids) != len(set(self.available_action_ids)):
+            raise ValueError("control-authority state contains duplicate available action IDs")
+        overlap = set(self.available_action_ids) & set(self.unavailable_action_reasons)
+        if overlap:
+            raise ValueError(f"control-authority state marks actions both available and unavailable: {sorted(overlap)!r}")
+        if self.runtime_availability != "available" and self.available_action_ids:
+            raise ValueError("unavailable control-authority state cannot advertise available actions")
         return self
         ####
 
@@ -298,6 +460,7 @@ class MissionCompositionSessionDescriptor(BaseModel):
     supports_spawned_entities: bool = False
     action_schema: tuple[MissionCompositionSessionChannel, ...]
     action_schema_projection: Literal["native_union", "selected_semantic_profile"] = "native_union"
+    agent_action_space: MissionCompositionAgentActionSpace | None = None
     authority_profiles: tuple[MissionCompositionSessionAuthorityProfile, ...] = ()
     default_authority_profile_id: str | None = None
     active_authority_profile_id: str | None = None
@@ -336,6 +499,8 @@ class MissionCompositionSessionDescriptor(BaseModel):
                 raise ValueError("session initial observation command owner disagrees with its active profile")
         elif self.active_authority_profile_id is not None:
             raise ValueError("native-union session cannot claim an active semantic authority profile")
+        if self.agent_action_space is not None and self.agent_action_space.channel_order != action_ids:
+            raise ValueError("session agent action space disagrees with its action schema")
         if self.initial_observation.session_id != self.session_id:
             raise ValueError("session descriptor initial observation names another session")
         if self.initial_observation.sequence != 0:
@@ -365,6 +530,47 @@ class MissionCompositionSessionStepRequest(BaseModel):
     authority_profile_id: str | None = Field(default=None, min_length=1)
 
 
+class MissionCompositionControlChannelFeedback(BaseModel):
+    """Per-channel acceptance and achieved-response readback for one step."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    channel_id: str = Field(min_length=1)
+    unit: str | None = None
+    availability: Literal["available", "unavailable"]
+    request_present: bool
+    requested_value: Any = None
+    applied_present: bool
+    applied_value: Any = None
+    disposition: Literal[
+        "not_commanded",
+        "held",
+        "applied_as_requested",
+        "limited",
+        "withheld",
+        "unavailable",
+    ]
+    reason_codes: tuple[str, ...] = ()
+    feedback_channel_id: str | None = Field(default=None, min_length=1)
+    achievement_status: Literal["observed", "not_observed"] = "not_observed"
+    achieved_value: Any = None
+
+    @model_validator(mode="after")
+    def validate_feedback(self) -> MissionCompositionControlChannelFeedback:
+        if self.request_present != (self.disposition in {"applied_as_requested", "limited", "withheld", "unavailable"}):
+            raise ValueError(f"control feedback {self.channel_id!r} request flag disagrees with disposition")
+        if self.disposition in {"applied_as_requested", "limited", "held"} and not self.applied_present:
+            raise ValueError(f"control feedback {self.channel_id!r} applied disposition requires an applied value")
+        if self.disposition in {"not_commanded", "withheld", "unavailable"} and self.applied_present:
+            raise ValueError(f"control feedback {self.channel_id!r} disposition cannot claim an applied value")
+        if self.achievement_status == "observed" and self.feedback_channel_id is None:
+            raise ValueError(f"control feedback {self.channel_id!r} observed achievement requires a source channel")
+        return self
+        ####
+
+    ####
+
+
 class MissionCompositionSessionStepResult(BaseModel):
     """Auditable action-to-observation transition at committed truth boundaries."""
 
@@ -388,6 +594,7 @@ class MissionCompositionSessionStepResult(BaseModel):
     command_source_id: str | None = None
     lowered_action: dict[str, Any] = Field(default_factory=dict)
     lowering_evidence: dict[str, Any] = Field(default_factory=dict)
+    control_feedback: tuple[MissionCompositionControlChannelFeedback, ...] = ()
 
     @model_validator(mode="after")
     def validate_interval(self) -> MissionCompositionSessionStepResult:
@@ -404,6 +611,9 @@ class MissionCompositionSessionStepResult(BaseModel):
                 raise ValueError("session step observation disagrees with its active authority profile")
             if authority_state.command_source_id != self.command_source_id:
                 raise ValueError("session step observation disagrees with its command source")
+        feedback_ids = tuple(item.channel_id for item in self.control_feedback)
+        if len(feedback_ids) != len(set(feedback_ids)):
+            raise ValueError("session step contains duplicate control-feedback channel IDs")
         return self
         ####
 
@@ -444,6 +654,7 @@ class MissionCompositionAuthorityTransition(BaseModel):
     command_source_id: str | None = None
     transfer_semantics: Literal["state_continuous_reference_handoff"] = "state_continuous_reference_handoff"
     action_schema: tuple[MissionCompositionSessionChannel, ...]
+    agent_action_space: MissionCompositionAgentActionSpace | None = None
     observation: MissionCompositionSessionObservation
 
     @model_validator(mode="after")
@@ -464,6 +675,8 @@ class MissionCompositionAuthorityTransition(BaseModel):
         action_ids = tuple(item.id for item in self.action_schema)
         if len(action_ids) != len(set(action_ids)):
             raise ValueError("authority transition action schema contains duplicate channel IDs")
+        if self.agent_action_space is not None and self.agent_action_space.channel_order != action_ids:
+            raise ValueError("authority transition agent action space disagrees with action schema")
         return self
         ####
 
@@ -551,6 +764,23 @@ class MissionCompositionSessionManager:
         prepared = self.provider.validate_configuration(request.prepared_configuration.configuration)
         if prepared.fingerprint != request.prepared_configuration.fingerprint:
             raise _session_error("prepared-configuration-stale", "The prepared configuration is stale.", request.model_id)
+        configured_authority_profile_id = (
+            prepared.configuration.startup_authority_profile_id
+        )
+        if (
+            request.authority_profile_id is not None
+            and configured_authority_profile_id is not None
+            and request.authority_profile_id != configured_authority_profile_id
+        ):
+            raise _session_error(
+                "authority-selection-conflict",
+                "The open-session authority conflicts with the prepared composition startup selection.",
+                request.model_id,
+                details={
+                    "requested_authority_profile_id": request.authority_profile_id,
+                    "configured_authority_profile_id": configured_authority_profile_id,
+                },
+            )
         model = _provider_model(self.provider, prepared.configuration.model_id)
         mission_template_id = prepared.configuration.mission_template_id or ""
         fidelity = prepared.configuration.fidelity
@@ -582,10 +812,15 @@ class MissionCompositionSessionManager:
                 )
             contract = episode.interface_contract
             authority_profiles = tuple(
-                MissionCompositionSessionAuthorityProfile.from_interface(item)
+                MissionCompositionSessionAuthorityProfile.from_interface(
+                    item,
+                    contract.action_channels,
+                )
                 for item in contract.authority_profiles
             )
-            active_authority_profile_id = request.authority_profile_id
+            active_authority_profile_id = (
+                request.authority_profile_id or configured_authority_profile_id
+            )
             if active_authority_profile_id is None and getattr(episode, "auto_select_default_authority", False):
                 active_authority_profile_id = contract.default_authority_profile_id
             active_profile = (
@@ -606,12 +841,18 @@ class MissionCompositionSessionManager:
                 action_schema = _semantic_action_schema(contract.action_channels, active_profile)
                 action_schema_projection = "selected_semantic_profile"
             observation_schema = tuple(_channel(item, "observation") for item in episode.observation_schema)
+            observed = episode.observe()
             observation = _observation(
                 request.session_id,
                 0,
-                episode.observe(),
+                observed,
                 observation_schema,
-                control_authority=_authority_state(active_profile, command_source_id),
+                control_authority=_episode_authority_state(
+                    episode,
+                    active_profile,
+                    command_source_id,
+                    observed,
+                ),
             )
         except MissionCompositionExecutionError:
             raise
@@ -638,6 +879,7 @@ class MissionCompositionSessionManager:
             supports_spawned_entities=supports_spawned,
             action_schema=action_schema,
             action_schema_projection=action_schema_projection,
+            agent_action_space=_agent_action_space(action_schema),
             authority_profiles=authority_profiles,
             default_authority_profile_id=contract.default_authority_profile_id,
             active_authority_profile_id=None if active_profile is None else active_profile.id,
@@ -663,12 +905,17 @@ class MissionCompositionSessionManager:
         if record.closed:
             return record.observation
         try:
+            observed = record.episode.observe()
             record.observation = _observation(
                 session_id,
                 record.sequence,
-                record.episode.observe(),
+                observed,
                 record.descriptor.observation_schema,
-                control_authority=_descriptor_authority_state(record.descriptor),
+                control_authority=_episode_descriptor_authority_state(
+                    record.episode,
+                    record.descriptor,
+                    observed,
+                ),
             )
             return record.observation
         except (KeyError, RuntimeError, TypeError, ValueError) as error:
@@ -688,7 +935,11 @@ class MissionCompositionSessionManager:
                 0,
                 observed,
                 record.descriptor.observation_schema,
-                control_authority=_descriptor_authority_state(record.descriptor),
+                control_authority=_episode_descriptor_authority_state(
+                    record.episode,
+                    record.descriptor,
+                    observed,
+                ),
             )
             return record.observation
         except (KeyError, RuntimeError, TypeError, ValueError) as error:
@@ -737,6 +988,44 @@ class MissionCompositionSessionManager:
                     details={"channel_id": channel_id},
                 ) from error
         try:
+            availability = _episode_descriptor_authority_state(
+                record.episode,
+                record.descriptor,
+                record.episode.observe(),
+            )
+            unavailable_requested = (
+                ()
+                if availability is None
+                else tuple(
+                    sorted(
+                        set(request.action)
+                        - set(availability.available_action_ids)
+                    )
+                )
+            )
+            if availability is not None and unavailable_requested:
+                raise _session_error(
+                    "action-temporarily-unavailable",
+                    f"Authority profile {availability.active_profile_id!r} cannot currently accept "
+                    f"action channels {list(unavailable_requested)!r}.",
+                    record.descriptor.model_id,
+                    details={
+                        "authority_profile_id": availability.active_profile_id,
+                        "runtime_availability": availability.runtime_availability,
+                        "phase_id": availability.phase_id,
+                        "reason_codes": list(availability.availability_reason_codes),
+                        "unavailable_action_ids": list(unavailable_requested),
+                        "unavailable_action_reasons": {
+                            identifier: list(
+                                availability.unavailable_action_reasons.get(
+                                    identifier,
+                                    availability.availability_reason_codes,
+                                )
+                            )
+                            for identifier in unavailable_requested
+                        },
+                    },
+                )
             if active_authority_profile_id is None:
                 native = record.episode.step(request.action, request.duration_s)
                 requested_action = dict(native.requested_action)
@@ -785,9 +1074,20 @@ class MissionCompositionSessionManager:
                 record.descriptor.observation_schema,
                 events=native.events,
                 diagnostics=diagnostics,
-                control_authority=_descriptor_authority_state(record.descriptor),
+                control_authority=_episode_descriptor_authority_state(
+                    record.episode,
+                    record.descriptor,
+                    native.observation,
+                ),
             )
             record.observation = observation
+            control_feedback = _control_feedback(
+                record.descriptor.action_schema,
+                requested_action,
+                applied_action,
+                observation,
+                lowering_evidence,
+            )
             return MissionCompositionSessionStepResult(
                 session_id=request.session_id,
                 sequence=record.sequence,
@@ -802,6 +1102,7 @@ class MissionCompositionSessionManager:
                 command_source_id=record.descriptor.command_source_id,
                 lowered_action=lowered_action,
                 lowering_evidence=lowering_evidence,
+                control_feedback=control_feedback,
             )
         except MissionCompositionExecutionError:
             raise
@@ -860,6 +1161,20 @@ class MissionCompositionSessionManager:
                 record.descriptor.model_id,
             )
         try:
+            current = record.episode.observe()
+            selected_availability = _episode_authority_state(
+                record.episode,
+                selected,
+                request.command_source_id,
+                current,
+            )
+            assert selected_availability is not None
+            if selected_availability.runtime_availability != "available":
+                raise ValueError(
+                    f"authority profile {selected.id!r} is {selected_availability.runtime_availability} "
+                    f"in phase {selected_availability.phase_id!r}: "
+                    f"{', '.join(selected_availability.availability_reason_codes) or 'no reason supplied'}"
+                )
             _select_episode_authority(record.episode, selected.id, require_transition_hook=True)
             action_schema = _semantic_action_schema(contract.action_channels, selected)
             command_source_id = _authority_command_source(
@@ -870,17 +1185,24 @@ class MissionCompositionSessionManager:
             record.descriptor = record.descriptor.model_copy(
                 update={
                     "action_schema": action_schema,
+                    "agent_action_space": _agent_action_space(action_schema),
                     "active_authority_profile_id": selected.id,
                     "command_source_id": command_source_id,
                 }
             )
+            observed = record.episode.observe()
             record.observation = _observation(
                 request.session_id,
                 record.sequence,
-                record.episode.observe(),
+                observed,
                 record.descriptor.observation_schema,
                 events=(f"authority_profile_changed:{previous.id}->{selected.id}",),
-                control_authority=_authority_state(selected, command_source_id),
+                control_authority=_episode_authority_state(
+                    record.episode,
+                    selected,
+                    command_source_id,
+                    observed,
+                ),
             )
         except MissionCompositionExecutionError:
             raise
@@ -900,6 +1222,7 @@ class MissionCompositionSessionManager:
             active_authority_profile_id=selected.id,
             command_source_id=command_source_id,
             action_schema=action_schema,
+            agent_action_space=_agent_action_space(action_schema),
             observation=record.observation,
         )
         ####
@@ -999,11 +1322,27 @@ def _semantic_channel(channel: InterfaceChannel) -> MissionCompositionSessionCha
             f"semantic action channel {channel.id!r} has non-control sampling semantics {channel.sampling!r}"
         )
     binding_choices = channel.binding.get("choices", ())
+    feedback_channel_id = channel.binding.get("feedback_channel_id")
+    if feedback_channel_id is not None and not isinstance(feedback_channel_id, str):
+        raise ValueError(f"semantic action channel {channel.id!r} has an invalid feedback channel ID")
     choices = (
         tuple(str(item) for item in binding_choices if isinstance(item, str))
         if isinstance(binding_choices, (list, tuple))
         else ()
     )
+    binding_action_values = channel.binding.get("action_values", ())
+    action_values = (
+        tuple(binding_action_values)
+        if isinstance(binding_action_values, (list, tuple))
+        else ()
+    )
+    command_mode = channel.binding.get("command_mode", "absolute")
+    temporal_semantics = channel.binding.get("temporal_semantics", "held")
+    repeat_policy = channel.binding.get("repeat_policy", "repeatable")
+    agent_normalization = channel.binding.get("agent_normalization", "auto")
+    agent_center = channel.binding.get("agent_center")
+    agent_scale = channel.binding.get("agent_scale")
+    agent_clip = channel.binding.get("agent_clip", False)
     return MissionCompositionSessionChannel(
         id=channel.id,
         direction="action",
@@ -1012,13 +1351,176 @@ def _semantic_channel(channel: InterfaceChannel) -> MissionCompositionSessionCha
         unit=None if data_type in {"boolean", "string", "json"} else channel.canonical_unit,
         frame=channel.frame,
         control_sampling_semantics=cast(TrajectoryControlSamplingSemantics, channel.sampling),
-        data_type=data_type,  # type: ignore[arg-type]
+        data_type=cast(TrajectoryOutputDataType, data_type),
         shape=shape,
         sampling_semantics="discrete_sample" if data_type in {"boolean", "string", "json", "int64"} else "continuous_sample",
         minimum=None if data_type in {"boolean", "string", "json"} else channel.lower,
         maximum=None if data_type in {"boolean", "string", "json"} else channel.upper,
         choices=choices,
         value_space=channel.value_space.as_dict(),
+        feedback_channel_id=feedback_channel_id,
+        command_mode=cast(ControlCommandMode, command_mode),
+        temporal_semantics=cast(ControlTemporalSemantics, temporal_semantics),
+        repeat_policy=cast(ControlRepeatPolicy, repeat_policy),
+        agent_normalization=cast(ControlAgentNormalizationPolicy, agent_normalization),
+        agent_center=(
+            float(agent_center)
+            if isinstance(agent_center, int | float) and not isinstance(agent_center, bool)
+            else None
+        ),
+        agent_scale=(
+            float(agent_scale)
+            if isinstance(agent_scale, int | float) and not isinstance(agent_scale, bool)
+            else None
+        ),
+        agent_clip=bool(agent_clip),
+        action_values=action_values,
+    )
+    ####
+
+
+def _agent_action_space(
+    channels: tuple[MissionCompositionSessionChannel, ...],
+) -> MissionCompositionAgentActionSpace:
+    """Build a JSON-safe normalization and masking contract from one profile."""
+
+    projected: list[MissionCompositionAgentActionChannel] = []
+    flat_offset = 0
+    for action_index, channel in enumerate(channels):
+        if any(item == "variable" for item in channel.shape):
+            raise ValueError(f"session agent action channel {channel.id!r} cannot have variable shape")
+        shape = tuple(cast(int, item) for item in channel.shape)
+        flat_size = math.prod(shape) if shape else 1
+        topology = str(channel.value_space.get("topology", ""))
+        if channel.data_type == "boolean":
+            item = MissionCompositionAgentActionChannel(
+                channel_id=channel.id,
+                action_index=action_index,
+                flat_offset=flat_offset,
+                flat_size=flat_size,
+                encoding="binary",
+                data_type="bool",
+                shape=shape,
+                normalization="binary",
+                command_mode=channel.command_mode,
+                temporal_semantics=channel.temporal_semantics,
+                repeat_policy=channel.repeat_policy,
+                agent_clip=channel.agent_clip,
+                masking=(
+                    "runtime_and_repeat"
+                    if channel.repeat_policy != "repeatable"
+                    else "runtime"
+                ),
+            )
+        elif channel.data_type == "string" or channel.action_values:
+            item = MissionCompositionAgentActionChannel(
+                channel_id=channel.id,
+                action_index=action_index,
+                flat_offset=flat_offset,
+                flat_size=flat_size,
+                encoding="discrete",
+                data_type="int64",
+                shape=shape,
+                normalization="categorical_index",
+                choices=channel.choices,
+                action_values=channel.action_values,
+                command_mode=channel.command_mode,
+                temporal_semantics=channel.temporal_semantics,
+                repeat_policy=channel.repeat_policy,
+                agent_clip=channel.agent_clip,
+                masking=(
+                    "runtime_and_repeat"
+                    if channel.repeat_policy != "repeatable"
+                    else "runtime"
+                ),
+            )
+        else:
+            period_value = channel.value_space.get("period")
+            period = (
+                float(period_value)
+                if isinstance(period_value, int | float) and not isinstance(period_value, bool)
+                else None
+            )
+            if topology == "periodic_circle":
+                normalization: Literal[
+                    "affine",
+                    "standardize",
+                    "periodic_wrap",
+                    "identity",
+                ] = "periodic_wrap"
+                agent_minimum = -1.0
+                agent_maximum = 1.0
+                requires_external_statistics = False
+            elif channel.agent_normalization == "standardize":
+                normalization = "standardize"
+                agent_minimum = None
+                agent_maximum = None
+                requires_external_statistics = False
+            elif channel.agent_normalization == "identity":
+                normalization = "identity"
+                agent_minimum = channel.minimum
+                agent_maximum = channel.maximum
+                requires_external_statistics = False
+            elif channel.minimum is not None and channel.maximum is not None:
+                normalization = "affine"
+                agent_minimum = -1.0
+                agent_maximum = 1.0
+                requires_external_statistics = False
+            else:
+                normalization = "identity"
+                agent_minimum = channel.minimum
+                agent_maximum = channel.maximum
+                requires_external_statistics = True
+            item = MissionCompositionAgentActionChannel(
+                channel_id=channel.id,
+                action_index=action_index,
+                flat_offset=flat_offset,
+                flat_size=flat_size,
+                encoding="box",
+                data_type="float32",
+                shape=shape,
+                normalization=normalization,
+                native_minimum=channel.minimum,
+                native_maximum=channel.maximum,
+                agent_minimum=agent_minimum,
+                agent_maximum=agent_maximum,
+                period=period,
+                requires_external_statistics=requires_external_statistics,
+                command_mode=channel.command_mode,
+                temporal_semantics=channel.temporal_semantics,
+                repeat_policy=channel.repeat_policy,
+                standardize_center=channel.agent_center,
+                standardize_scale=channel.agent_scale,
+                agent_clip=channel.agent_clip,
+                masking=(
+                    "runtime_and_repeat"
+                    if channel.repeat_policy != "repeatable"
+                    else "runtime"
+                ),
+            )
+        projected.append(item)
+        flat_offset += item.flat_size
+    encodings = {item.encoding for item in projected}
+    if not projected:
+        kind: Literal["empty", "box", "discrete", "multi_discrete", "multi_binary", "dict"] = "empty"
+    elif encodings == {"box"}:
+        kind = "box"
+    elif encodings == {"discrete"}:
+        kind = "discrete" if len(projected) == 1 else "multi_discrete"
+    elif encodings == {"binary"}:
+        kind = "multi_binary"
+    else:
+        kind = "dict"
+    return MissionCompositionAgentActionSpace(
+        kind=kind,
+        channel_order=tuple(item.channel_id for item in projected),
+        flat_size=flat_offset,
+        channels=tuple(projected),
+        requires_external_statistics=any(item.requires_external_statistics for item in projected),
+        claim_boundary=(
+            "Derived from the selected semantic session schema for UI, Gym, or Torch adapters. Runtime action "
+            "availability must be read from observation.control_authority; this does not qualify a policy or model fidelity."
+        ),
     )
     ####
 
@@ -1084,25 +1586,241 @@ def _authority_state(
         lowering_chain=profile.lowering_chain,
         selection_scope=profile.selection_scope,
         switching_policy=profile.switching_policy,
+        scheme_id=profile.scheme_id,
+        available_action_ids=profile.action_ids,
     )
     ####
 
 
-def _descriptor_authority_state(
+def _episode_authority_state(
+    episode: MissionCompositionEpisode,
+    profile: AuthorityProfile | None,
+    command_source_id: str | None,
+    observation: EpisodeObservation,
+) -> MissionCompositionControlAuthorityState | None:
+    """Resolve phase/resource-aware availability without guessing model physics."""
+
+    if profile is None:
+        return None
+    phase_id = _observation_phase_id(observation)
+    runtime_availability: Literal[
+        "available",
+        "temporarily_unavailable",
+        "not_applicable",
+        "depleted",
+        "failed",
+    ] = "available"
+    reason_codes: tuple[str, ...] = ()
+    available_action_ids = profile.action_ids
+    unavailable_action_reasons: dict[str, tuple[str, ...]] = {}
+    if observation.status in {"completed", "closed"}:
+        runtime_availability = "temporarily_unavailable"
+        reason_codes = ("episode_terminal",)
+    elif profile.applicable_phase_ids and phase_id is not None and phase_id not in profile.applicable_phase_ids:
+        runtime_availability = "not_applicable"
+        reason_codes = ("profile_not_applicable_in_phase",)
+
+    resolver = getattr(episode, "control_authority_availability", None)
+    if callable(resolver):
+        raw = resolver(profile.id, observation)
+        if not isinstance(raw, Mapping):
+            raise ValueError("episode control_authority_availability must return a mapping")
+        raw_availability = raw.get("runtime_availability", runtime_availability)
+        if raw_availability not in {
+            "available",
+            "temporarily_unavailable",
+            "not_applicable",
+            "depleted",
+            "failed",
+        }:
+            raise ValueError("episode control-authority availability is invalid")
+        runtime_availability = cast(Any, raw_availability)
+        raw_phase = raw.get("phase_id", phase_id)
+        if raw_phase is not None and not isinstance(raw_phase, str):
+            raise ValueError("episode control-authority phase_id must be a string")
+        phase_id = raw_phase
+        raw_reasons = raw.get("reason_codes", reason_codes)
+        if not isinstance(raw_reasons, (tuple, list)) or any(
+            not isinstance(item, str) or not item for item in raw_reasons
+        ):
+            raise ValueError("episode control-authority reason_codes must be non-empty strings")
+        reason_codes = tuple(raw_reasons)
+        raw_available = raw.get("available_action_ids")
+        if raw_available is None:
+            available_action_ids = (
+                profile.action_ids if runtime_availability == "available" else ()
+            )
+        else:
+            if not isinstance(raw_available, (tuple, list)) or any(
+                not isinstance(item, str) or not item for item in raw_available
+            ):
+                raise ValueError(
+                    "episode available_action_ids must be non-empty strings"
+                )
+            available_action_ids = tuple(raw_available)
+            if len(available_action_ids) != len(set(available_action_ids)):
+                raise ValueError("episode available_action_ids contains duplicates")
+            unknown_available = set(available_action_ids) - set(profile.action_ids)
+            if unknown_available:
+                raise ValueError(
+                    "episode available_action_ids names actions outside the profile: "
+                    f"{sorted(unknown_available)!r}"
+                )
+            if runtime_availability != "available" and available_action_ids:
+                raise ValueError(
+                    "an unavailable episode authority cannot advertise available actions"
+                )
+        raw_unavailable = raw.get("unavailable_action_reasons", {})
+        if not isinstance(raw_unavailable, Mapping):
+            raise ValueError("episode unavailable_action_reasons must be a mapping")
+        unavailable_action_reasons = {}
+        for identifier, reasons in raw_unavailable.items():
+            if not isinstance(identifier, str) or identifier not in profile.action_ids:
+                raise ValueError(
+                    "episode unavailable_action_reasons names an action outside the profile"
+                )
+            if not isinstance(reasons, (tuple, list)) or any(
+                not isinstance(item, str) or not item for item in reasons
+            ):
+                raise ValueError(
+                    "episode unavailable action reasons must be non-empty strings"
+                )
+            unavailable_action_reasons[identifier] = tuple(reasons)
+
+    if runtime_availability != "available":
+        available_action_ids = ()
+    unavailable_ids = set(profile.action_ids) - set(available_action_ids)
+    for identifier in unavailable_ids:
+        unavailable_action_reasons.setdefault(
+            identifier,
+            reason_codes or ("action_temporarily_unavailable",),
+        )
+    unexpected_reasons = set(unavailable_action_reasons) - unavailable_ids
+    if unexpected_reasons:
+        raise ValueError(
+            "episode marks available actions unavailable: "
+            f"{sorted(unexpected_reasons)!r}"
+        )
+    return MissionCompositionControlAuthorityState(
+        active_profile_id=profile.id,
+        command_source_id=command_source_id,
+        command_owner=profile.command_owner,
+        lowering_chain=profile.lowering_chain,
+        selection_scope=profile.selection_scope,
+        switching_policy=profile.switching_policy,
+        scheme_id=profile.scheme_id,
+        runtime_availability=runtime_availability,
+        phase_id=phase_id,
+        availability_reason_codes=reason_codes,
+        available_action_ids=available_action_ids,
+        unavailable_action_reasons=unavailable_action_reasons,
+    )
+    ####
+
+
+def _observation_phase_id(observation: EpisodeObservation) -> str | None:
+    """Read only explicit phase values; absence is not interpreted as global support."""
+
+    for identifier in ("phase.id", "phase.mode", "phase_id", "phase"):
+        value = observation.values.get(identifier)
+        if isinstance(value, str) and value:
+            return value
+    return None
+    ####
+
+
+def _episode_descriptor_authority_state(
+    episode: MissionCompositionEpisode,
     descriptor: MissionCompositionSessionDescriptor,
+    observation: EpisodeObservation,
 ) -> MissionCompositionControlAuthorityState | None:
     identifier = descriptor.active_authority_profile_id
     if identifier is None:
         return None
-    session_profile = next(item for item in descriptor.authority_profiles if item.id == identifier)
-    return MissionCompositionControlAuthorityState(
-        active_profile_id=session_profile.id,
-        command_source_id=descriptor.command_source_id,
-        command_owner=session_profile.command_owner,
-        lowering_chain=session_profile.lowering_chain,
-        selection_scope=session_profile.selection_scope,
-        switching_policy=session_profile.switching_policy,
+    profile = episode.interface_contract.authority_profile(identifier)
+    return _episode_authority_state(
+        episode,
+        profile,
+        descriptor.command_source_id,
+        observation,
     )
+    ####
+
+
+def _control_feedback(
+    action_schema: tuple[MissionCompositionSessionChannel, ...],
+    requested_action: Mapping[str, Any],
+    applied_action: Mapping[str, Any],
+    observation: MissionCompositionSessionObservation,
+    lowering_evidence: Mapping[str, Any],
+) -> tuple[MissionCompositionControlChannelFeedback, ...]:
+    """Return uniform requested/applied/achieved feedback for every active channel."""
+
+    authority = observation.control_authority
+    runtime_available = set(
+        item.id for item in action_schema
+        if authority is None or item.id in authority.available_action_ids
+    )
+    feedback: list[MissionCompositionControlChannelFeedback] = []
+    for channel in action_schema:
+        request_present = channel.id in requested_action
+        applied_present = channel.id in applied_action
+        available = channel.id in runtime_available or applied_present
+        reasons: tuple[str, ...] = ()
+        if request_present and not available:
+            disposition: Literal[
+                "not_commanded", "held", "applied_as_requested", "limited", "withheld", "unavailable"
+            ] = "unavailable"
+            reasons = (
+                ()
+                if authority is None
+                else authority.unavailable_action_reasons.get(
+                    channel.id,
+                    authority.availability_reason_codes,
+                )
+            )
+        elif request_present and not applied_present:
+            disposition = "withheld"
+            reasons = ("command_withheld",)
+        elif request_present:
+            disposition = (
+                "applied_as_requested"
+                if requested_action[channel.id] == applied_action[channel.id]
+                else "limited"
+            )
+            if disposition == "limited":
+                reasons = ("applied_value_differs_from_request",)
+        elif applied_present:
+            disposition = "held"
+            reasons = ("previous_value_held",)
+        else:
+            disposition = "not_commanded"
+
+        achieved_present = (
+            channel.feedback_channel_id is not None
+            and channel.feedback_channel_id in observation.values
+        )
+        feedback.append(
+            MissionCompositionControlChannelFeedback(
+                channel_id=channel.id,
+                unit=channel.unit,
+                availability="available" if available else "unavailable",
+                request_present=request_present,
+                requested_value=requested_action.get(channel.id),
+                applied_present=applied_present,
+                applied_value=applied_action.get(channel.id),
+                disposition=disposition,
+                reason_codes=reasons,
+                feedback_channel_id=channel.feedback_channel_id,
+                achievement_status="observed" if achieved_present else "not_observed",
+                achieved_value=(
+                    observation.values.get(channel.feedback_channel_id)
+                    if channel.feedback_channel_id is not None
+                    else None
+                ),
+            )
+        )
+    return tuple(feedback)
     ####
 
 
@@ -1367,10 +2085,13 @@ def _session_error(
 
 
 __all__ = [
+    "MissionCompositionAgentActionChannel",
+    "MissionCompositionAgentActionSpace",
     "MissionCompositionAuthorityTransition",
     "MissionCompositionCloseSessionRequest",
     "MissionCompositionClosedSession",
     "MissionCompositionControlAuthorityState",
+    "MissionCompositionControlChannelFeedback",
     "MissionCompositionInspectSessionRequest",
     "MissionCompositionOpenSessionRequest",
     "MissionCompositionResetSessionRequest",

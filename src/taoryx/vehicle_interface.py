@@ -607,6 +607,30 @@ class VehicleInterfaceContract:
             *(item.id for item in self.resource_channels),
             *(item.id for item in self.diagnostic_channels),
         }
+        observable_by_id = {
+            item.id: item
+            for item in (*self.status_channels, *self.resource_channels, *self.diagnostic_channels)
+        }
+        for action in self.action_channels:
+            feedback_channel_id = cast(InterfaceChannelBinding, action.binding).get(
+                "feedback_channel_id"
+            )
+            if feedback_channel_id is None:
+                continue
+            if not isinstance(feedback_channel_id, str) or feedback_channel_id not in observable_ids:
+                raise ValueError(
+                    f"action channel {action.id!r} references unknown feedback channel {feedback_channel_id!r}"
+                )
+            feedback = observable_by_id[feedback_channel_id]
+            unit_pair = {action.canonical_unit, feedback.canonical_unit}
+            units_match = (
+                action.canonical_unit == feedback.canonical_unit
+                or unit_pair == {"1", "dimensionless"}
+            )
+            if not units_match or action.value_type != feedback.value_type:
+                raise ValueError(
+                    f"action channel {action.id!r} feedback {feedback_channel_id!r} has an incompatible unit or shape"
+                )
         for observation_profile in self.observation_profiles:
             unknown = sorted(set(observation_profile.channel_ids) - observable_ids)
             if unknown:
@@ -879,6 +903,7 @@ def _action_contract(
                 "Held kinematic speed target for the declared reduced response law.",
                 "speed_m_s",
                 available,
+                binding={"feedback_channel_id": "velocity.speed"},
             ),
             _action(
                 "guidance.flight_path_angle.command",
@@ -888,6 +913,7 @@ def _action_contract(
                 "Held kinematic flight-path-angle target for the declared reduced response law.",
                 "flight_path_angle_deg",
                 available,
+                binding={"feedback_channel_id": "flight.path_angle"},
             ),
             _action(
                 "guidance.heading.command",
@@ -897,6 +923,7 @@ def _action_contract(
                 "Held kinematic heading target in the local navigation frame.",
                 "heading_deg",
                 available,
+                binding={"feedback_channel_id": "flight.heading"},
             ),
             _action(
                 "guidance.bank.command",
@@ -1254,6 +1281,12 @@ def _reduced_fixed_wing_high_order_controls(
             "Desired reduced-model speed while tracking the live waypoint.",
         ),
     )
+    waypoint_feedback = {
+        "navigation.waypoint.north.command": "position.north",
+        "navigation.waypoint.east.command": "position.east",
+        "navigation.waypoint.altitude.command": "position.altitude",
+        "navigation.waypoint.speed.command": "velocity.speed",
+    }
     waypoint_channels = tuple(
         InterfaceChannel(
             identifier,
@@ -1267,7 +1300,15 @@ def _reduced_fixed_wing_high_order_controls(
             availability=availability,
             provenance="engineering_surrogate",
             sampling="held_action",
-            binding={"native_action": native, **common_waypoint_binding},
+            binding={
+                "native_action": native,
+                **common_waypoint_binding,
+                **(
+                    {"feedback_channel_id": waypoint_feedback[identifier]}
+                    if identifier in waypoint_feedback
+                    else {}
+                ),
+            },
             claim_boundary=(
                 "The caller may update this value at an accepted session boundary. The provider lowers the held "
                 "waypoint into reduced guidance; no physical-effector or route-qualification claim is implied."
@@ -1365,7 +1406,11 @@ def _language_backed_guidance_controls(
             "Held speed target for the native lower-tier commanded-state response.",
             "guidance-speed-mps",
             availability,
-            binding={**common_binding, "controlled_state_channels": ["velocity.speed"]},
+            binding={
+                **common_binding,
+                "controlled_state_channels": ["velocity.speed"],
+                "feedback_channel_id": "velocity.speed",
+            },
             claim_boundary=(
                 "This target is effective only while guidance.override.enabled is true. It drives the declared "
                 "lower-tier speed response, not source thrust or physical actuator allocation."
@@ -1379,7 +1424,11 @@ def _language_backed_guidance_controls(
             "Held flight-path-angle target for the native lower-tier commanded-state response.",
             "guidance-flight-path-angle-deg",
             availability,
-            binding={**common_binding, "controlled_state_channels": ["position.altitude", "flight.path_angle"]},
+            binding={
+                **common_binding,
+                "controlled_state_channels": ["position.altitude", "flight.path_angle"],
+                "feedback_channel_id": "flight.path_angle",
+            },
             claim_boundary=(
                 "This target is effective only while guidance.override.enabled is true. It drives the declared "
                 "lower-tier flight-path response, not a physical pitch surface or moment."
@@ -1393,7 +1442,11 @@ def _language_backed_guidance_controls(
             "Held heading target for the native lower-tier commanded-state response.",
             "guidance-heading-deg",
             availability,
-            binding={**common_binding, "controlled_state_channels": ["flight.heading"]},
+            binding={
+                **common_binding,
+                "controlled_state_channels": ["flight.heading"],
+                "feedback_channel_id": "flight.heading",
+            },
             claim_boundary=(
                 "This target is effective only while guidance.override.enabled is true. It drives the declared "
                 "lower-tier heading response, not a physical lateral surface or moment."

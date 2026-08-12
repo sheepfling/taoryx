@@ -252,5 +252,12 @@ def test_simple_aero_advertises_generated_and_direct_throttle_session_profiles()
         )
     )
     assert direct.lowered_action["command.throttle"] == pytest.approx(0.4)
+    assert len(direct.control_feedback) == 1
+    throttle_feedback = direct.control_feedback[0]
+    assert throttle_feedback.channel_id == "propulsion.command.fraction"
+    assert throttle_feedback.disposition == "applied_as_requested"
+    assert throttle_feedback.feedback_channel_id == "propulsion.throttle_command"
+    assert throttle_feedback.achievement_status == "observed"
+    assert throttle_feedback.achieved_value == pytest.approx(0.4)
     assert "command.bank" not in {item.id for item in switched.action_schema}
     ####

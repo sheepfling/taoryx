@@ -12,6 +12,7 @@ from taoryx.trajectory.reference_mission_composition import (
     ReferenceWaypointCourseStart,
 )
 from taoryx.trajectory.session_contract import (
+    MissionCompositionControlAuthorityState,
     MissionCompositionOpenSessionRequest,
     MissionCompositionSessionManager,
     MissionCompositionSessionStepRequest,
@@ -66,6 +67,9 @@ def test_ballistic_session_is_explicit_zero_action_open_loop() -> None:
     assert descriptor.authority_profiles[0].streaming_preference == "provider_managed"
     assert descriptor.command_source_id is None
     assert descriptor.action_schema == ()
+    assert descriptor.agent_action_space is not None
+    assert descriptor.agent_action_space.kind == "empty"
+    assert descriptor.authority_profiles[0].agent_action_space == descriptor.agent_action_space
     assert descriptor.initial_observation.control_authority is not None
     assert descriptor.initial_observation.control_authority.command_owner == "open_loop"
     step = manager.step(
@@ -115,6 +119,14 @@ def test_waypoint_session_switches_configured_kinematic_and_live_profiles(
         "kinematic_velocity_command": "kinematic.flight_path",
         "live_waypoint_guidance": "mission.waypoint",
     }
+    for profile in descriptor.authority_profiles:
+        assert tuple(item.id for item in profile.action_schema) == profile.action_ids
+        assert profile.agent_action_space is not None
+        assert profile.agent_action_space.channel_order == profile.action_ids
+    configured_state = descriptor.initial_observation.control_authority
+    assert configured_state is not None
+    assert configured_state.runtime_availability == "available"
+    assert configured_state.available_action_ids == ()
     configured = manager.step(
         MissionCompositionSessionStepRequest(
             session_id=descriptor.session_id,
@@ -139,6 +151,13 @@ def test_waypoint_session_switches_configured_kinematic_and_live_profiles(
         "guidance.heading.command": "deg",
         "guidance.flight_path_angle.command": "deg",
     }
+    assert kinematic.agent_action_space is not None
+    kinematic_agent = {
+        item.channel_id: item for item in kinematic.agent_action_space.channels
+    }
+    assert kinematic_agent["guidance.speed.command"].normalization == "affine"
+    assert kinematic_agent["guidance.heading.command"].normalization == "periodic_wrap"
+    assert kinematic_agent["guidance.heading.command"].period == 360.0
     turned = manager.step(
         MissionCompositionSessionStepRequest(
             session_id=descriptor.session_id,
@@ -150,6 +169,12 @@ def test_waypoint_session_switches_configured_kinematic_and_live_profiles(
     assert turned.observation.values["position.east_m"] > 0.0
     assert turned.observation.values["velocity.speed_m_s"] == pytest.approx(100.0)
     assert turned.lowering_evidence["native_transition"] == "propagate_constant_velocity_waypoint_state"
+    feedback = {item.channel_id: item for item in turned.control_feedback}
+    assert feedback["guidance.heading.command"].disposition == "applied_as_requested"
+    assert feedback["guidance.heading.command"].feedback_channel_id == "attitude.heading_deg"
+    assert feedback["guidance.heading.command"].achieved_value == pytest.approx(90.0)
+    assert feedback["guidance.speed.command"].disposition == "held"
+    assert feedback["guidance.speed.command"].achievement_status == "observed"
 
     live = manager.switch_authority(
         MissionCompositionSwitchAuthorityRequest(
@@ -167,7 +192,7 @@ def test_waypoint_session_switches_configured_kinematic_and_live_profiles(
         "navigation.waypoint.capture_radius.command",
         "navigation.waypoint.speed.command",
     }
-    manager.step(
+    waypoint_step = manager.step(
         MissionCompositionSessionStepRequest(
             session_id=descriptor.session_id,
             action={
@@ -181,6 +206,12 @@ def test_waypoint_session_switches_configured_kinematic_and_live_profiles(
             expected_sequence=2,
         )
     )
+    waypoint_feedback = {
+        item.channel_id: item for item in waypoint_step.control_feedback
+    }
+    assert waypoint_feedback["navigation.waypoint.north.command"].feedback_channel_id == "position.north_m"
+    assert waypoint_feedback["navigation.waypoint.north.command"].achievement_status == "observed"
+    assert waypoint_feedback["navigation.waypoint.capture_radius.command"].achievement_status == "not_observed"
 
     episode = provider.open_session_episode(prepared)
     episode.select_authority_profile("kinematic_velocity_command")
@@ -197,6 +228,137 @@ def test_waypoint_session_switches_configured_kinematic_and_live_profiles(
     restored = episode.load_checkpoint(checkpoint)
     assert restored.time_s == checkpoint_time
     assert episode.active_authority_profile_id == "kinematic_velocity_command"
+    ####
+
+
+def test_prepared_composition_can_select_its_startup_authority() -> None:
+    provider = ReferenceMissionCompositionProvider()
+    baseline = provider.prepare_waypoint_course(
+        ReferenceWaypointCourseStart(
+            north_m=0.0,
+            east_m=0.0,
+            altitude_m=1000.0,
+            speed_m_s=100.0,
+            heading_deg=0.0,
+        ),
+        (ReferenceWaypoint(north_m=1000.0, east_m=0.0, altitude_m=1000.0),),
+    )
+    configuration = baseline.configuration.model_copy(
+        update={"startup_authority_profile_id": "live_waypoint_guidance"}
+    )
+    prepared = provider.validate_configuration(configuration)
+    descriptor = MissionCompositionSessionManager(provider).open(
+        _open_request(provider, "composition-selected-waypoint", prepared)
+    )
+
+    assert descriptor.active_authority_profile_id == "live_waypoint_guidance"
+    assert descriptor.action_schema_projection == "selected_semantic_profile"
+    assert descriptor.agent_action_space is not None
+    assert descriptor.agent_action_space.channel_order == (
+        "navigation.waypoint.north.command",
+        "navigation.waypoint.east.command",
+        "navigation.waypoint.altitude.command",
+        "navigation.waypoint.capture_radius.command",
+        "navigation.waypoint.speed.command",
+    )
+
+    conflict = _open_request(
+        provider,
+        "composition-authority-conflict",
+        prepared,
+    ).model_copy(update={"authority_profile_id": "kinematic_velocity_command"})
+    with pytest.raises(MissionCompositionExecutionError) as error:
+        MissionCompositionSessionManager(provider).open(conflict)
+    assert error.value.diagnostic.code == "authority-selection-conflict"
+    ####
+
+
+def test_runtime_authority_mask_can_report_phase_or_resource_loss(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state = MissionCompositionControlAuthorityState(
+        active_profile_id="powered_guidance",
+        command_source_id="remote-policy",
+        command_owner="caller",
+        selection_scope="phase",
+        switching_policy="explicit_bumpless",
+        scheme_id="mission.waypoint",
+        runtime_availability="depleted",
+        phase_id="terminal_glide",
+        availability_reason_codes=("fuel_depleted",),
+        available_action_ids=(),
+        unavailable_action_reasons={
+            "propulsion.command.fraction": ("fuel_depleted",),
+        },
+    )
+
+    assert state.runtime_availability == "depleted"
+    assert state.available_action_ids == ()
+    assert state.unavailable_action_reasons["propulsion.command.fraction"] == (
+        "fuel_depleted",
+    )
+    with pytest.raises(ValueError, match="both available and unavailable"):
+        MissionCompositionControlAuthorityState.model_validate(
+            {
+                **state.model_dump(),
+                "available_action_ids": ("propulsion.command.fraction",),
+            }
+        )
+
+    provider = ContractProbeMissionCompositionProvider()
+    prepared = provider.validate_configuration(
+        build_contract_probe_configuration(provider, fidelity="medium")
+    )
+    episode = provider.open_session_episode(prepared)
+    profile = episode.interface_contract.authority_profile(
+        "debug_guidance_control"
+    )
+    masked_channel = "guidance.acceleration.increment"
+    available = tuple(
+        identifier
+        for identifier in profile.action_ids
+        if identifier != masked_channel
+    )
+    monkeypatch.setattr(
+        episode,
+        "control_authority_availability",
+        lambda _profile_id, _observation: {
+            "runtime_availability": "available",
+            "available_action_ids": available,
+            "unavailable_action_reasons": {
+                masked_channel: ("synthetic_resource_depleted",),
+            },
+        },
+        raising=False,
+    )
+    monkeypatch.setattr(
+        provider,
+        "open_session_episode",
+        lambda *_args, **_kwargs: episode,
+    )
+    manager = MissionCompositionSessionManager(provider)
+    descriptor = manager.open(
+        _open_request(provider, "partially-masked-probe", prepared)
+    )
+    partial = descriptor.initial_observation.control_authority
+    assert partial is not None
+    assert partial.runtime_availability == "available"
+    assert partial.available_action_ids == available
+    assert partial.unavailable_action_reasons[masked_channel] == (
+        "synthetic_resource_depleted",
+    )
+    with pytest.raises(MissionCompositionExecutionError) as masked_error:
+        manager.step(
+            MissionCompositionSessionStepRequest(
+                session_id=descriptor.session_id,
+                action={masked_channel: 1.0},
+                duration_s=0.1,
+            )
+        )
+    assert masked_error.value.diagnostic.code == "action-temporarily-unavailable"
+    assert masked_error.value.diagnostic.details[
+        "unavailable_action_reasons"
+    ] == {masked_channel: ["synthetic_resource_depleted"]}
     ####
 
 
@@ -217,6 +379,15 @@ def test_contract_probe_live_schema_preserves_types_choices_and_event_policy() -
     assert actions["attitude.quaternion.command"].shape == (4,)
     assert actions["guidance.heading.command"].unit == "deg"
     assert actions["guidance.heading_rate.command"].unit == "deg/s"
+    assert descriptor.agent_action_space is not None
+    agent_channels = {
+        item.channel_id: item for item in descriptor.agent_action_space.channels
+    }
+    assert agent_channels["attitude.quaternion.command"].normalization == "identity"
+    assert agent_channels["guidance.heading.command"].normalization == "periodic_wrap"
+    assert agent_channels["guidance.heading_rate.command"].normalization == "standardize"
+    assert agent_channels["guidance.heading_rate.command"].standardize_scale == 45.0
+    assert agent_channels["guidance.acceleration.increment"].requires_external_statistics
     observations = {item.id: item for item in descriptor.observation_schema}
     assert observations["mode.index"].data_type == "int64"
     assert observations["diagnostics.payload"].data_type == "json"
@@ -230,6 +401,16 @@ def test_contract_probe_live_schema_preserves_types_choices_and_event_policy() -
     )
     discrete_actions = {item.id: item for item in discrete.action_schema}
     assert discrete_actions["autopilot.mode.select"].choices == ("manual", "hold", "track")
+    assert discrete.agent_action_space is not None
+    discrete_agent = {
+        item.channel_id: item for item in discrete.agent_action_space.channels
+    }
+    assert discrete_agent["aerodynamics.flap.detent"].action_values == (
+        -10.0,
+        0.0,
+        10.0,
+        20.0,
+    )
     with pytest.raises(MissionCompositionExecutionError, match="invalid-action-value"):
         manager.step(
             MissionCompositionSessionStepRequest(
@@ -247,6 +428,11 @@ def test_contract_probe_live_schema_preserves_types_choices_and_event_policy() -
     )
     event_actions = {item.id: item for item in event_profile.action_schema}
     assert event_actions["payload.arm.command"].choices == ("arm",)
+    assert event_profile.agent_action_space is not None
+    assert all(
+        item.masking == "runtime_and_repeat"
+        for item in event_profile.agent_action_space.channels
+    )
     first = manager.step(
         MissionCompositionSessionStepRequest(
             session_id=descriptor.session_id,

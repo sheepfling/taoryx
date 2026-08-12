@@ -623,14 +623,24 @@ to a policy by accident.
 `MissionCompositionOpenSessionRequest.authority_profile_id` opts into the
 semantic profile projection. The returned descriptor advertises every profile,
 the default and active IDs, command source, ownership, switching policy, and
-the action schema for the active profile only. Omitting the field preserves the
-legacy native-action session contract.
+the active action schema. Each profile also carries its own action schema and
+agent action-space projection, so clients can inspect inactive guidance,
+body-motion, pilot, or effector modes before a transfer. A composition can set
+`TrajectoryConfigurationInstance.startup_authority_profile_id`; an explicit
+open-session selection must match it. Omitting both fields preserves the
+legacy native-action session contract unless that provider explicitly selects
+its default authority.
 
 Every selected-profile step repeats the active authority ID and returns four
 separate records: requested semantic action, applied semantic action, lowered
 native adapter action, and lowering evidence. The committed observation also
 contains `control_authority`, so a remote client can determine who owned the
 command and which chain realized it without inferring from channel names.
+`control_feedback` adds one stable row per active action, including its unit,
+requested/applied presence, disposition, reason codes, and optional committed
+achieved-state binding. Runtime availability and the policy mask are read from
+`observation.control_authority.available_action_ids`; clients must not infer a
+mask from fidelity or from the static profile list.
 
 `MissionCompositionSessionManager.switch_authority(...)` performs an explicit
 same-session handoff. It requires the caller's expected sequence, both profiles
@@ -646,6 +656,25 @@ accepted boundary, and is lowered through the advertised navigator and response
 law. This is in-stream guidance authority, not a second trajectory API. A
 transport-level heartbeat/deadman policy is not yet part of this contract and
 must not be inferred from held-action timing.
+
+Fidelity and control abstraction are independent axes. A higher-fidelity plant
+may expose fewer externally selectable modes, while a reduced plant may expose
+several well-defined adapters:
+
+| Control abstraction | Typical input | What it does not imply |
+| --- | --- | --- |
+| Effector | Surface, rotor, gimbal, or thruster position | That every lower tier can realize physical allocation |
+| Wrench | Body force or moment | A physical effector or actuator implementation |
+| Body motion | Attitude, rate, or angular acceleration | Source flight-control-computer behavior |
+| Pilot/kinematic | Normalized axes, speed, path, heading, bank | Physical stick, pedal, or surface evidence |
+| Guidance/mission | Waypoint, route, destination, orbit, relative pose | Availability in every phase or for every family |
+
+Do not order these rows as a universal fidelity ladder. They are authority
+surfaces that a realization declares independently. In particular, waypoint
+guidance often gives a remote user a useful lower-bandwidth stream, but a
+ballistic coast, source-owned controller, terminal lifecycle, resource
+depletion, or an undeclared navigator can make it absent or temporarily
+unavailable.
 
 The provider-neutral low-fidelity witnesses use the same contract. Analytical
 ballistic flight selects a locked, zero-action `open_loop_coast` profile.

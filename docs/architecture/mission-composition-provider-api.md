@@ -351,11 +351,20 @@ configuration fingerprint, seed, integration timestep semantics, action and
 observation schemas, deterministic reset policy, claim boundary, and whether
 the session can emit spawned entities. It also advertises every authority
 profile, the default and active profile, command source, ownership, selection
-scope, switching policy, phase applicability, and lowering chain.
+scope, switching policy, phase applicability, and lowering chain. Every
+profile row includes its complete action schema and dependency-free agent
+action space, including stable order, flat offsets, native bounds, agent
+bounds, periodic wrapping, discrete choices, and whether external
+normalization statistics are required. A mode picker therefore does not need
+to switch authority merely to discover another mode's UI or policy-head shape.
 
 An open request with `authority_profile_id` receives a
 `selected_semantic_profile` action schema containing only that profile's
-semantic channels. Omitting it retains the legacy `native_union` schema. Action
+semantic channels. A prepared composition may instead set
+`startup_authority_profile_id`; an explicit open request must agree with that
+selection. Omitting both retains the legacy `native_union` schema for older
+canonical episodes, while low-fidelity fixtures that explicitly opt into
+default selection open their advertised default profile. Action
 and observation channels carry type, shape, quantity, unit, frame, bounds,
 sampling semantics, and explicit value space. Selected-profile steps separate
 requested and applied semantic values from lowered adapter values and lowering
@@ -363,6 +372,20 @@ evidence. Observations include lifecycle, sequence, time, events, diagnostics,
 spawned entity IDs, and inspectable control ownership. The current native
 episodes advertise no interactive child generation; that absence remains
 explicit.
+
+Runtime support is a second, changing contract rather than an inference from
+the model or fidelity label. `observation.control_authority` reports the active
+scheme, current phase when the provider exposes one,
+`runtime_availability`, stable reason codes, `available_action_ids`, and
+per-action unavailability reasons. An empty `applicable_phase_ids` means that
+no static phase restriction is declared; it does not promise that resources,
+faults, or terminal state can never make the profile unavailable. A provider
+with phase- or resource-dependent authority implements
+`control_authority_availability(profile_id, observation)` and returns the
+current status and, when only part of a profile is usable, its exact
+`available_action_ids`. The common manager refuses only requested channels
+outside that mask, includes their reason mapping in the structured error, and
+refuses a transfer into an unavailable profile.
 
 For every registered caller-controlled `step` tuple, advertisement conformance
 requires active semantic action channels with exact native or declared adapter
@@ -373,7 +396,33 @@ provider-controlled session may instead advertise a zero-action profile. CADAC
 uses that form to identify its retained source program and must not manufacture
 an external action seam.
 
-## Feedback and failure contract
+## Control readback, feedback, and failures
+
+Every selected-profile step returns `control_feedback` in active-schema order.
+Each row repeats the semantic channel and unit, distinguishes a newly requested
+value from a held value, records the applied value when one exists, and uses a
+closed disposition vocabulary:
+
+| Disposition | Meaning |
+| --- | --- |
+| `not_commanded` | No new or held semantic value was applied for this channel |
+| `held` | A previously accepted value remained active |
+| `applied_as_requested` | The accepted semantic value equals this request |
+| `limited` | The applied semantic value differs from the request |
+| `withheld` | The provider accepted the frame but suppressed this command or event |
+| `unavailable` | Runtime phase, resources, fault state, or lifecycle blocked it |
+
+An action channel may declare a same-unit, same-shape
+`feedback_channel_id`. When that committed observation exists, the feedback
+row reports `achievement_status="observed"` and its achieved value. Otherwise
+it reports `not_observed`; it never copies the request and calls that
+achievement. This makes throttle exhaustion, saturation, waypoint progress,
+and similar behavior machine-readable as providers add truthful status and
+resource bindings. The current analytical waypoint fixture binds kinematic
+and waypoint coordinates to committed position/velocity/attitude truth, and
+Simple Aero binds direct throttle to its committed realized throttle. A
+capture radius has no achieved coordinate and therefore remains explicitly
+`not_observed`.
 
 `MissionCompositionDiagnostic` is the common feedback vocabulary. It includes:
 

@@ -1280,6 +1280,23 @@ def _analytical_waypoint_step_channels() -> tuple[TrajectoryControlChannelMetada
         frame: str | None = None,
         order: int,
     ) -> TrajectoryControlChannelMetadata:
+        feedback_channel_id = {
+            "guidance.speed.command": "velocity.speed_m_s",
+            "guidance.heading.command": "attitude.heading_deg",
+            "guidance.flight_path_angle.command": "attitude.flight_path_angle_deg",
+            "navigation.waypoint.north.command": "position.north_m",
+            "navigation.waypoint.east.command": "position.east_m",
+            "navigation.waypoint.altitude.command": "position.altitude_m",
+            "navigation.waypoint.speed.command": "velocity.speed_m_s",
+        }.get(identifier)
+        provider_binding = {
+            "analytical_session_field": identifier,
+            **(
+                {"feedback_channel_id": feedback_channel_id}
+                if feedback_channel_id is not None
+                else {}
+            ),
+        }
         interval = (
             None
             if lower is None and upper is None
@@ -1325,9 +1342,9 @@ def _analytical_waypoint_step_channels() -> tuple[TrajectoryControlChannelMetada
                     agent_normalization="periodic_wrap" if value_space.topology == "periodic_circle" else "auto",
                     agent_clip=interval is not None,
                 ),
-                provider_binding={"analytical_session_field": identifier},
+                provider_binding=provider_binding,
             ),
-            provider_binding={"analytical_session_field": identifier},
+            provider_binding=provider_binding,
             presentation=ValuePresentationMetadata(group="session controls", order=order),
             source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
             provenance="analytical reference implementation",
