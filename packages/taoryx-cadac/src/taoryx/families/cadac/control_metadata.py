@@ -121,6 +121,17 @@ def batch_configuration_control_advertisement(
                 channel_ids=channel_ids,
                 operations=("batch",),
                 description=authority_description,
+                command_owner="caller",
+                selection_scope="batch",
+                switching_policy="locked",
+                scheme_id=(
+                    "effector.direct"
+                    if authority == "effector"
+                    else "wrench.direct"
+                    if authority == "wrench"
+                    else "provider.native_bridge"
+                ),
+                lowering_chain=("external_batch_command", "cadac_source_command_boundary"),
                 source_refs=source_refs,
                 provenance="CADAC schema-to-batch-control projection",
                 claim_boundary=claim_boundary,
@@ -418,6 +429,11 @@ def source_managed_control_advertisement(
                 channel_ids=(),
                 operations=operations,
                 description="The source program resolves its own controller, guidance, or fixed trajectory command path at its declared source boundary.",
+                command_owner="source_program",
+                selection_scope="provider",
+                switching_policy="provider_managed",
+                scheme_id="provider.program",
+                lowering_chain=("cadac_source_program", "cadac_source_guidance", "cadac_source_controller"),
                 source_refs=source_refs,
                 provenance="CADAC source-order compatibility boundary",
                 claim_boundary=claim_boundary,

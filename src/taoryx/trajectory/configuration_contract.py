@@ -16,6 +16,14 @@ from typing import TYPE_CHECKING, Annotated, Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from ..control_schemes import (
+    ControlSchemeConsumerRole,
+    ControlSchemeLayer,
+    ControlSchemeStreamingPreference,
+    control_scheme_definition,
+    default_control_scheme_id,
+)
+
 if TYPE_CHECKING:
     from .rl_control import RLActionSpaceSpec
 
@@ -71,6 +79,9 @@ TrajectoryControlAuthorityKind = Literal[
     "open_loop",
     "provider_defined",
 ]
+TrajectoryControlCommandOwner = Literal["caller", "source_program", "provider_controller", "open_loop"]
+TrajectoryControlSelectionScope = Literal["batch", "session", "phase", "step", "provider"]
+TrajectoryControlSwitchingPolicy = Literal["locked", "explicit_bumpless", "provider_managed"]
 TrajectoryControlSamplingSemantics = Literal[
     "held_action",
     "batch_profile",
@@ -1069,9 +1080,44 @@ class TrajectoryControlAuthorityMetadata(BaseModel):
     channel_ids: tuple[str, ...]
     operations: tuple[Literal["batch", "step"], ...]
     description: str = Field(min_length=1)
+    command_owner: TrajectoryControlCommandOwner = "caller"
+    selection_scope: TrajectoryControlSelectionScope = "session"
+    switching_policy: TrajectoryControlSwitchingPolicy = "locked"
+    scheme_id: str | None = Field(default=None, pattern=r"^[a-z0-9]+(?:[._-][a-z0-9]+)*$")
+    scheme_layer: ControlSchemeLayer | None = None
+    consumer_roles: tuple[ControlSchemeConsumerRole, ...] = ()
+    streaming_preference: ControlSchemeStreamingPreference | None = None
+    ui_order: int | None = Field(default=None, ge=0)
+    applicable_phase_ids: tuple[str, ...] = ()
+    lowering_chain: tuple[str, ...] = ()
     source_refs: tuple[str, ...] = ()
     provenance: str = ""
     claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def populate_scheme_defaults(cls, payload: object) -> object:
+        """Materialize canonical scheme metadata for portable authority rows."""
+
+        if not isinstance(payload, Mapping):
+            return payload
+        scheme_id = payload.get("scheme_id")
+        if not isinstance(scheme_id, str):
+            return payload
+        definition = control_scheme_definition(scheme_id)
+        if definition is None:
+            return payload
+        values = dict(payload)
+        if values.get("scheme_layer") is None:
+            values["scheme_layer"] = definition.layer
+        if not values.get("consumer_roles"):
+            values["consumer_roles"] = definition.consumer_roles
+        if values.get("streaming_preference") is None:
+            values["streaming_preference"] = definition.streaming_preference
+        if values.get("ui_order") is None:
+            values["ui_order"] = definition.ui_order
+        return values
+        ####
 
     @model_validator(mode="after")
     def validate_authority(self) -> TrajectoryControlAuthorityMetadata:
@@ -1079,6 +1125,36 @@ class TrajectoryControlAuthorityMetadata(BaseModel):
             raise ValueError(f"control authority {self.id!r} has duplicate channel IDs")
         if len(self.operations) != len(set(self.operations)):
             raise ValueError(f"control authority {self.id!r} has duplicate operations")
+        if len(self.applicable_phase_ids) != len(set(self.applicable_phase_ids)):
+            raise ValueError(f"control authority {self.id!r} has duplicate phase IDs")
+        if len(self.lowering_chain) != len(set(self.lowering_chain)):
+            raise ValueError(f"control authority {self.id!r} has duplicate lowering-chain stages")
+        if any(not item.strip() for item in (*self.applicable_phase_ids, *self.lowering_chain)):
+            raise ValueError(f"control authority {self.id!r} contains an empty phase or lowering-chain stage")
+        if self.command_owner == "caller" and self.selection_scope == "provider":
+            raise ValueError(f"caller-owned control authority {self.id!r} cannot use provider selection scope")
+        if self.switching_policy == "provider_managed" and self.command_owner == "caller":
+            raise ValueError(f"caller-owned control authority {self.id!r} cannot use provider-managed switching")
+        if self.scheme_id is None and any(
+            item is not None
+            for item in (self.scheme_layer, self.streaming_preference, self.ui_order)
+        ):
+            raise ValueError(f"control authority {self.id!r} scheme metadata requires scheme_id")
+        if self.scheme_id is None and self.consumer_roles:
+            raise ValueError(f"control authority {self.id!r} consumer roles require scheme_id")
+        if len(self.consumer_roles) != len(set(self.consumer_roles)):
+            raise ValueError(f"control authority {self.id!r} contains duplicate consumer roles")
+        if self.scheme_id is not None:
+            definition = control_scheme_definition(self.scheme_id)
+            if definition is None and self.scheme_layer is None:
+                raise ValueError(
+                    f"provider-specific control scheme {self.scheme_id!r} requires scheme_layer"
+                )
+            if definition is not None and self.scheme_layer not in {None, definition.layer}:
+                raise ValueError(
+                    f"control scheme {self.scheme_id!r} belongs to {definition.layer!r}, "
+                    f"not {self.scheme_layer!r}"
+                )
         active = self.availability in {"available", "available_in_batch"}
         if active != bool(self.operations):
             raise ValueError(f"control authority {self.id!r} availability {self.availability!r} disagrees with its operations")
@@ -1087,6 +1163,120 @@ class TrajectoryControlAuthorityMetadata(BaseModel):
         return self
         ####
 
+    ####
+
+
+class TrajectoryControlSchemeSupportMetadata(BaseModel):
+    """Flattened UI-ready support for one realization authority and tier set."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    scheme_id: str = Field(pattern=r"^[a-z0-9]+(?:[._-][a-z0-9]+)*$")
+    label: str = Field(min_length=1)
+    description: str = Field(min_length=1)
+    layer: ControlSchemeLayer
+    consumer_roles: tuple[ControlSchemeConsumerRole, ...]
+    streaming_preference: ControlSchemeStreamingPreference
+    ui_order: int = Field(ge=0)
+    realization_id: str = Field(min_length=1)
+    fidelity_ids: tuple[str, ...] = Field(min_length=1)
+    authority_profile_id: str = Field(min_length=1)
+    availability: TrajectoryControlAvailability
+    operations: tuple[Literal["batch", "step"], ...]
+    action_ids: tuple[str, ...]
+    command_owner: TrajectoryControlCommandOwner
+    switching_policy: TrajectoryControlSwitchingPolicy
+    advertisement_source: Literal["declared", "authority_kind_fallback"]
+    claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_support(self) -> TrajectoryControlSchemeSupportMetadata:
+        for name in ("consumer_roles", "fidelity_ids", "operations", "action_ids"):
+            values = getattr(self, name)
+            if len(values) != len(set(values)):
+                raise ValueError(f"control-scheme support contains duplicate {name}")
+        return self
+        ####
+
+    ####
+
+
+def build_control_scheme_support(
+    realizations: Sequence[TrajectoryRealizationMetadata],
+    fidelities: Sequence[TrajectoryFidelityMetadata],
+) -> tuple[TrajectoryControlSchemeSupportMetadata, ...]:
+    """Flatten nested authorities into one model/fidelity discovery matrix."""
+
+    fidelity_order = {item.id: index for index, item in enumerate(fidelities)}
+    records: list[TrajectoryControlSchemeSupportMetadata] = []
+    for realization in realizations:
+        fidelity_ids = tuple(
+            sorted(
+                (item for item in realization.fidelity_aliases if item in fidelity_order),
+                key=fidelity_order.__getitem__,
+            )
+        )
+        if not fidelity_ids:
+            raise ValueError(
+                f"realization {realization.id!r} has no exact model fidelity for control-scheme support"
+            )
+        for authority in realization.controls.authorities:
+            declared = authority.scheme_id is not None
+            scheme_id = authority.scheme_id or default_control_scheme_id(
+                authority.authority,
+                authority.id,
+            )
+            definition = control_scheme_definition(scheme_id)
+            if definition is None:
+                if authority.scheme_layer is None:
+                    raise ValueError(
+                        f"provider-specific control scheme {scheme_id!r} requires a declared layer"
+                    )
+                label = scheme_id.replace(".", " ").replace("_", " ").title()
+                layer = authority.scheme_layer
+                consumer_roles = authority.consumer_roles or ("provider", "test_engineer")
+                streaming_preference = authority.streaming_preference or "diagnostic"
+                ui_order = authority.ui_order if authority.ui_order is not None else 1000
+            else:
+                label = definition.label
+                layer = authority.scheme_layer or definition.layer
+                consumer_roles = authority.consumer_roles or definition.consumer_roles
+                streaming_preference = authority.streaming_preference or definition.streaming_preference
+                ui_order = authority.ui_order if authority.ui_order is not None else definition.ui_order
+            records.append(
+                TrajectoryControlSchemeSupportMetadata(
+                    scheme_id=scheme_id,
+                    label=label,
+                    description=authority.description,
+                    layer=layer,
+                    consumer_roles=consumer_roles,
+                    streaming_preference=streaming_preference,
+                    ui_order=ui_order,
+                    realization_id=realization.id,
+                    fidelity_ids=fidelity_ids,
+                    authority_profile_id=authority.id,
+                    availability=authority.availability,
+                    operations=authority.operations,
+                    action_ids=authority.channel_ids,
+                    command_owner=authority.command_owner,
+                    switching_policy=authority.switching_policy,
+                    advertisement_source=(
+                        "declared" if declared else "authority_kind_fallback"
+                    ),
+                    claim_boundary=authority.claim_boundary,
+                )
+            )
+    return tuple(
+        sorted(
+            records,
+            key=lambda item: (
+                min(fidelity_order[identifier] for identifier in item.fidelity_ids),
+                item.ui_order,
+                item.realization_id,
+                item.authority_profile_id,
+            ),
+        )
+    )
     ####
 
 
@@ -1575,6 +1765,7 @@ class TrajectoryModelMetadata(BaseModel):
     common_runner_operations: tuple[Literal["batch", "step"], ...] = ()
     capabilities: TrajectoryModelCapabilities
     realizations: tuple[TrajectoryRealizationMetadata, ...] = Field(min_length=1)
+    control_scheme_support: tuple[TrajectoryControlSchemeSupportMetadata, ...] = ()
     mission_templates: tuple[TrajectoryMissionTemplateMetadata, ...] = ()
     deployments: tuple[TrajectoryDeploymentMetadata, ...] = ()
     reference_frames: tuple[TrajectoryReferenceFrameMetadata, ...] = ()
@@ -1588,6 +1779,43 @@ class TrajectoryModelMetadata(BaseModel):
     source_refs: tuple[str, ...] = ()
     provenance: str = ""
     claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def populate_control_scheme_support(cls, payload: object) -> object:
+        """Materialize the flattened matrix from exact authority metadata."""
+
+        if not isinstance(payload, Mapping) or "control_scheme_support" in payload:
+            return payload
+        values = dict(payload)
+        raw_realizations = values.get("realizations")
+        raw_fidelities = values.get("fidelities")
+        if not isinstance(raw_realizations, Sequence) or isinstance(
+            raw_realizations, (str, bytes)
+        ):
+            return payload
+        if not isinstance(raw_fidelities, Sequence) or isinstance(
+            raw_fidelities, (str, bytes)
+        ):
+            return payload
+        realizations = tuple(
+            item
+            if isinstance(item, TrajectoryRealizationMetadata)
+            else TrajectoryRealizationMetadata.model_validate(item)
+            for item in raw_realizations
+        )
+        fidelities = tuple(
+            item
+            if isinstance(item, TrajectoryFidelityMetadata)
+            else TrajectoryFidelityMetadata.model_validate(item)
+            for item in raw_fidelities
+        )
+        values["control_scheme_support"] = build_control_scheme_support(
+            realizations,
+            fidelities,
+        )
+        return values
+        ####
 
     @property
     def output_channels(self) -> tuple[TrajectoryOutputChannelMetadata, ...]:
@@ -1606,6 +1834,48 @@ class TrajectoryModelMetadata(BaseModel):
         if len(realization_ids) != len(set(realization_ids)):
             raise ValueError(f"model {self.id!r} has duplicate realization metadata")
         known_realizations = set(realization_ids)
+        expected_control_scheme_keys = {
+            (realization.id, authority.id)
+            for realization in self.realizations
+            for authority in realization.controls.authorities
+        }
+        actual_control_scheme_keys = {
+            (item.realization_id, item.authority_profile_id)
+            for item in self.control_scheme_support
+        }
+        if actual_control_scheme_keys != expected_control_scheme_keys:
+            raise ValueError(
+                f"model {self.id!r} control-scheme support does not cover every authority profile"
+            )
+        expected_control_scheme_support = build_control_scheme_support(
+            self.realizations,
+            self.fidelities,
+        )
+        if self.control_scheme_support != expected_control_scheme_support:
+            raise ValueError(
+                f"model {self.id!r} control-scheme support is stale or not in canonical UI order"
+            )
+        for support in self.control_scheme_support:
+            realization = next(
+                item for item in self.realizations if item.id == support.realization_id
+            )
+            authority = next(
+                item
+                for item in realization.controls.authorities
+                if item.id == support.authority_profile_id
+            )
+            if set(support.fidelity_ids) != set(realization.fidelity_aliases) & known:
+                raise ValueError(
+                    f"model {self.id!r} control scheme {support.scheme_id!r} has stale fidelity support"
+                )
+            if support.action_ids != authority.channel_ids:
+                raise ValueError(
+                    f"model {self.id!r} control scheme {support.scheme_id!r} has stale action IDs"
+                )
+            if support.operations != authority.operations or support.availability != authority.availability:
+                raise ValueError(
+                    f"model {self.id!r} control scheme {support.scheme_id!r} has stale availability"
+                )
         if len(self.operations) != len(set(self.operations)):
             raise ValueError(f"model {self.id!r} has duplicate operations")
         if len(self.common_runner_operations) != len(set(self.common_runner_operations)):
@@ -2277,6 +2547,10 @@ __all__ = [
     "PresentationLinkMetadata",
     "TrajectoryConfigurationInstance",
     "TrajectoryConfigurationSchema",
+    "TrajectoryControlCommandOwner",
+    "TrajectoryControlSchemeSupportMetadata",
+    "TrajectoryControlSelectionScope",
+    "TrajectoryControlSwitchingPolicy",
     "TrajectoryDeploymentMetadata",
     "TrajectoryActuatorType",
     "TrajectoryDynamicsFidelity",
@@ -2301,6 +2575,7 @@ __all__ = [
     "TrajectorySamplingSemantics",
     "TrajectoryTelemetryGroupMetadata",
     "ValuePresentationMetadata",
+    "build_control_scheme_support",
     "render_configuration_schema",
     "validate_configuration_instance",
 ]

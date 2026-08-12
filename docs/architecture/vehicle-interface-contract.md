@@ -30,8 +30,9 @@ The central rule is:
 This addresses a present gap. The family-adapter and composition registries
 already declare native state, control, resource, initialization, and segment
 channels. The first composition episodes expose bounded native actions and
-committed truth. They do not yet project those different schemas into one
-stable AI-facing action, status, resource, and parameter vocabulary.
+committed truth. The common Mission Composition session layer now preserves
+that native action union for legacy callers and, when a caller selects an
+authority profile, projects only that profile's stable semantic action schema.
 
 ## Boundary and terminology
 
@@ -238,6 +239,30 @@ layers; that provenance remains visible in status. Direct effector authority
 is a deliberate debugging, test, or expert-control mode, never an implicit
 replacement for guidance or allocation.
 
+Fidelity, external control authority, and observation profile are independent
+selection axes. A high-fidelity plant may offer a high-level wrapper only when
+the controller and lowering path are actually registered; a reduced plant may
+offer pilot-like or waypoint inputs only when it labels their reduced response
+semantics. Fidelity alone neither grants low-level effectors nor forbids a
+truthfully implemented high-level controller.
+
+Every authority profile records:
+
+- a cross-family scheme ID/layer, intended consumer roles, streaming
+  preference, and UI order;
+- `command_owner`: caller, source program, provider controller, or open loop;
+- `selection_scope`: batch, session, phase, step, or provider;
+- `switching_policy`: locked, explicitly bumpless, or provider-managed;
+- the exact semantic action IDs and applicable phases; and
+- an ordered lowering chain from the external request to the plant seam.
+
+The reduced A320 and F-16 point-mass/pseudo-6DOF sessions currently implement
+three caller-owned surfaces: direct kinematic guidance, normalized reduced
+pilot commands, and a live local-navigation waypoint. The F-16 pseudo-6DOF
+session additionally implements body-frame roll-, pitch-, and yaw-rate
+references. Its roll/yaw path is explicitly labeled as a coupled engineering
+surrogate, not a source FCS, moment, actuator, or surface interface.
+
 The four canonical fidelity tiers map to expected, not mandatory, authority:
 
 | Fidelity tier | Primary semantic control | Required status boundary | Explicit nonclaim |
@@ -246,6 +271,39 @@ The four canonical fidelity tiers map to expected, not mandatory, authority:
 | pseudo_6dof | Kinematic or body-motion intent | Commanded/achieved attitude and rate response, lag, limits | Physical moment balance or effector activity unless separately modeled |
 | rigid_body_6dof_direct_wrench | Desired wrench | Requested/achieved force and moment, residual, direct-wrench label | Physical actuator realization |
 | rigid_body_6dof_surface_allocated | Body-motion/wrench or declared direct effector | Allocation, commanded and actual effectors, actuator limits, achieved wrench | Fidelity beyond declared data and validation envelope |
+
+### Cross-family scheme discovery
+
+The cross-family `scheme_id` is not the authority-profile ID. The scheme is a
+stable UI/autonomy grouping; the authority remains the model-specific action
+surface with exact channels, units, bounds, ownership, and lowering. Model
+metadata materializes `control_scheme_support` as a flat join over realization,
+fidelity, and authority so clients can follow this order without guessing:
+
+    model -> fidelity -> realization -> supported scheme
+          -> authority profile -> typed action channels
+
+A scheme may appear at multiple fidelities only when each tier implements a
+truthful response. The channel set and response law may differ by tier. A
+missing row means unsupported; it is not permission to borrow the neighboring
+tier's controls. Reduced tiers never advertise physical surfaces merely to
+look symmetrical with a 6DOF model.
+
+The rapid-turn development queue is:
+
+| Priority | Families/models | Schemes to establish first | Deliberate boundary |
+| --- | --- | --- | --- |
+| P0 | API stressor, analytical ballistic, analytical waypoint, Simple Aero | open loop/provider program, waypoint, flight path, energy, typed debug modes | Contract and streaming behavior before physical qualification |
+| P1 | Reduced A320 and F-16, then X8/B747 where executable | waypoint/route, flight path, normalized pilot axes; body rate only for a supporting pseudo-6DOF tier | 3DOF and pseudo-6DOF only |
+| P2 | Hummingbird, then future helicopter/tiltrotor models | attitude/body rate plus family-specific collective/cyclic/pedal or nacelle profiles | No fixed-wing axis relabeling and no rotor-allocation claim |
+| P3 | Rockets, missiles, air breathers, hypersonic gliders | destination/waypoint/route, flight path, energy, attitude/rate where implemented | Source programs remain provider-owned unless an external seam exists |
+| P4 | Spacecraft and proximity operations | orbit target, relative pose/motion, attitude, body rate | No invented thruster, wheel, or RCS allocation |
+| Separate qualification track | Any rigid-body source model | direct wrench and direct effectors | Retain discovery, but do not put these paths in the rapid P0/P1 loop |
+
+Promotion within a row requires discovery metadata, active session projection
+when `step` is advertised, requested/applied/lowered telemetry, focused tests,
+and an explicit claim boundary. It does not require retesting unrelated
+direct-wrench or effector models during each reduced-order API edit.
 
 Fidelity never causes a channel to masquerade as a different thing. For
 example, a pseudo-6DOF Hummingbird can publish
@@ -559,6 +617,53 @@ after validation/limiting, the resulting ObservationFrame, the StatusFrame
 available to debugging/evaluation, and declared events. This makes requested,
 achieved, and observed quantities auditable without exposing plant internals
 to a policy by accident.
+
+### Session profile negotiation and live transfer
+
+`MissionCompositionOpenSessionRequest.authority_profile_id` opts into the
+semantic profile projection. The returned descriptor advertises every profile,
+the default and active IDs, command source, ownership, switching policy, and
+the action schema for the active profile only. Omitting the field preserves the
+legacy native-action session contract.
+
+Every selected-profile step repeats the active authority ID and returns four
+separate records: requested semantic action, applied semantic action, lowered
+native adapter action, and lowering evidence. The committed observation also
+contains `control_authority`, so a remote client can determine who owned the
+command and which chain realized it without inferring from channel names.
+
+`MissionCompositionSessionManager.switch_authority(...)` performs an explicit
+same-session handoff. It requires the caller's expected sequence, both profiles
+to declare `explicit_bumpless`, and an episode-specific state-continuous
+transfer hook. The handoff changes neither simulation time nor sequence; it
+clears held references, preserves plant state, returns the new schema, and
+records the new command source. Locked and provider-managed profiles cannot be
+seized through this route.
+
+Live waypoints use the same step route as manual and rate commands. A waypoint
+action is held for the request's `duration_s`, may be replaced at the next
+accepted boundary, and is lowered through the advertised navigator and response
+law. This is in-stream guidance authority, not a second trajectory API. A
+transport-level heartbeat/deadman policy is not yet part of this contract and
+must not be inferred from held-action timing.
+
+The provider-neutral low-fidelity witnesses use the same contract. Analytical
+ballistic flight selects a locked, zero-action `open_loop_coast` profile.
+Analytical waypoint flight can hand off among configured provider guidance,
+three-channel kinematic velocity commands, and five-channel live waypoint
+retargeting. The non-physical contract probe separates continuous/vector,
+discrete, and event action schemas so consumers must honor types, enum choices,
+and event repeat policy. Simple Aero defaults to its provider-generated
+schedule and may switch to direct throttle only; its generated bank value is
+reported but has no interactive steering claim. Each witness preserves time,
+sequence, and checkpointed active-profile state across accepted handoffs.
+
+CADAC persistent source cases advertise a zero-action
+`source_program_control` profile instead of manufacturing external controls.
+Their descriptors, steps, and observations identify `cadac_source_program` as
+the command source and retain the source guidance/controller/actuator lowering
+chain. Existing source command and realized-response outputs remain the
+analysis evidence.
 
 `run_composition_policy` is the deliberately small generic execution harness
 for this boundary. It supplies a policy only the selected

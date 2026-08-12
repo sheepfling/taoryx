@@ -98,6 +98,12 @@ Use the narrowest audit that proves the change you made. These are separate
 evidence levels, not interchangeable green checks:
 
 ```bash
+# While changing the cross-family control taxonomy or the first streaming
+# implementations, run only the API stressor, ballistic, waypoint, Simple
+# Aero, and generic session tests. This does not execute direct-wrench or
+# physical-effector qualification paths.
+python tools/dev.py test-control-api-pilot
+
 # Start a model/plugin change with one explicit vertical endpoint instead of
 # the repository-wide maturity sweep. The default check compiles the endpoint
 # witness, validates its generic capability advertisement and interface,
@@ -137,14 +143,14 @@ python -m pytest tests/unit/test_vehicle_endpoint_spec.py -m slow
 # controller campaign. Current focused slices: f16_s119, a320_openap_3dof,
 # hummingbird, x15, hl20_mod_k, skywalker_x8, b747,
 # reference_nesc_two_stage_rocket, tumbling_body, all Simple Aero fixed-L/D
-# batch templates, and both source-generated point-mass dual-launch forms.
+# batch/session templates, and both source-generated point-mass dual-launch forms.
 python tools/dev.py test-vehicle skywalker_x8
 
-# Simple Aero is a batch-only fixed-L/D workflow. Its baseline and every
-# source-shaped maneuver template lower through the same common runner. This
-# checks generated command/control advertisement, representative alpha/bank
-# profile execution, and the explicit lack of an interactive session without
-# representing it as a physical vehicle.
+# Simple Aero is a non-physical fixed-L/D workflow with a common batch runner
+# and a persistent point-mass session. Its default provider-owned generated
+# schedule has an empty caller action schema; the selectable caller-owned
+# direct-throttle profile lowers exactly to command.throttle. Bank remains
+# generated schedule telemetry and is not advertised as interactive steering.
 python tools/dev.py test-vehicle simple_aero
 
 # Dual launch is also batch-only: this executes both air-release and attached-
@@ -154,8 +160,10 @@ python tools/dev.py test-vehicle dual_launch_glider
 
 # These two non-physical models have typed workflow endpoint witnesses rather
 # than physical Vehicle Composition endpoints. The verifier checks the exact
-# checked-in draft, installed provider advertisement, blocked step boundary,
-# common batch registration, and (with --execute) normalized result surface.
+# checked-in draft, installed provider advertisement, common batch
+# registration, and (with --execute) normalized result surface. Simple Aero's
+# persistent session is tested by its vehicle slice; dual launch remains
+# explicitly batch-only.
 taoryx model endpoint-specs
 taoryx model verify simple-aero-fixed-ld-batch --execute
 taoryx model verify dual-launch-attached-booster-batch --execute
@@ -999,6 +1007,26 @@ session = scenario.interactive_session()
 snapshot = session.step(0.02, {"fin_pitch": 0.1, "throttle": 0.7})
 artifact = session.to_run_artifact()
 ```
+
+For a Vehicle Composition model, prefer the common Mission Composition
+session contract and select one advertised authority profile at open. Reduced
+A320/F-16 sessions can expose kinematic, normalized pilot, live-waypoint, and
+(for F-16 pseudo-6DOF) body-rate profiles through the same step route. Use
+`MissionCompositionSessionManager.switch_authority` only for profiles that
+advertise `explicit_bumpless`; inspect each observation's `control_authority`
+and each step's lowering evidence. See
+[Vehicle interface contract](architecture/vehicle-interface-contract.md#session-profile-negotiation-and-live-transfer)
+and
+[Model-to-mission automation](architecture/model-authoring-automation.md#select-a-streaming-control-profile).
+
+The low-fidelity conformance ladder uses that same route before promotion to
+the F-16: the ballistic fixture is explicit zero-action open loop; the
+constant-velocity waypoint fixture switches among configured guidance,
+kinematic velocity commands, and live waypoint retargeting; the debug contract
+probe exercises continuous/vector, discrete/enum/boolean, and one-shot event
+profiles; and Simple Aero switches between its generated schedule and direct
+throttle. All four retain one session clock and sequence across allowed
+profile handoffs.
 
 Render from the artifact rather than reparsing source:
 

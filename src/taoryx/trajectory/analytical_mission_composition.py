@@ -35,13 +35,16 @@ from .configuration_contract import (
     ConfigurationPeriodicity,
     ConfigurationSequenceSchema,
     ConfigurationValueSpace,
+    ControlCommandSemantics,
     NumericPresentationMetadata,
     PreparedTrajectoryConfiguration,
     TrajectoryConfigurationInstance,
     TrajectoryConfigurationSchema,
     TrajectoryControlAdvertisement,
     TrajectoryControlAuthorityMetadata,
+    TrajectoryControlChannelMetadata,
     TrajectoryControlIntentMetadata,
+    TrajectoryControlNativeBindingMetadata,
     TrajectoryFidelityMetadata,
     TrajectoryMissionOperationMetadata,
     TrajectoryMissionTemplateMetadata,
@@ -882,7 +885,7 @@ def _example_model_metadata(
             runtime_fidelity=item,
             control_realization="force_model" if item == "point_mass_3dof" else "unspecified",
             promotion_status="analytical_fixture",
-            operations=("validate", "batch"),
+            operations=("validate", "batch", "step"),
             claim_boundary="Analytical reference-fixture fidelity only.",
         )
         for index, item in enumerate(vehicle.fidelities)
@@ -967,13 +970,13 @@ def _example_model_metadata(
         model_kind=vehicle.model_kind,
         status=vehicle.status,
         tags=("analytical-reference", vehicle.model_kind),
-        operations=("discover", "validate", "batch"),
-        common_runner_operations=("batch",),
+        operations=("discover", "validate", "batch", "step"),
+        common_runner_operations=("batch", "step"),
         capabilities=TrajectoryModelCapabilities(
             initialization_modes=tuple(item.id for item in vehicle.initializations),
             segment_types=tuple(item.id for item in vehicle.segments),
             termination_modes=("segment_duration", "ground_contact"),
-            operations=("discover", "validate", "batch"),
+            operations=("discover", "validate", "batch", "step"),
             supports_custom_segments=True,
         ),
         realizations=(
@@ -987,7 +990,7 @@ def _example_model_metadata(
                 controls=_analytical_control_advertisement(vehicle),
                 fidelity_aliases=("point_mass_3dof",),
                 mission_template_ids=(mission_template.id,),
-                operations=("validate", "batch"),
+                operations=("validate", "batch", "step"),
                 native_factory_ids=("analytical_reference.v1",),
                 source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
                 claim_boundary="Reference contract fixture only; no physical qualification claim.",
@@ -1014,7 +1017,7 @@ def _analytical_mission_template(
 
     The reference models accept a caller-authored nonempty repetition of one
     segment kind.  The template records that executable shape and its
-    batch-only runner boundary so a common authoring plan can expose the same
+    batch and session runner boundary so a common authoring plan can expose the same
     lifecycle as the canonical vehicle providers without turning the fixture
     into a physical mission claim.
     """
@@ -1061,15 +1064,20 @@ def _analytical_mission_template(
                 fidelity="point_mass_3dof",
                 realization_id="analytical_point_mass",
                 operation="step",
-                status="blocked",
-                common_runner_status="not_available",
-                blockers=("no stateful analytical-reference Mission Composition session is registered",),
-                claim_boundary="The analytical reference provider is batch-only.",
+                status="available",
+                execution_mode="provider_session",
+                availability_scope="provider_interface",
+                common_runner_status="registered",
+                executor_id="analytical-reference-session.v1",
+                claim_boundary=(
+                    "Stateful execution reuses the same analytical transition as batch execution; "
+                    "it is a contract fixture, not a physical-vehicle prediction."
+                ),
             ),
         ),
         provenance="analytical-reference-fixture",
         claim_boundary=(
-            "This template describes only the deterministic fixture's repeatable input shape and batch lifecycle. "
+            "This template describes only the deterministic fixture's repeatable input shape and lifecycle. "
             "It is not a physical vehicle mission, a controller, or qualification evidence."
         ),
     )
@@ -1079,7 +1087,7 @@ def _analytical_mission_template(
 def _analytical_control_advertisement(
     vehicle: MissionCompositionVehicle,
 ) -> TrajectoryControlAdvertisement:
-    """Describe open-loop ballistic or provider-internal waypoint authority."""
+    """Describe the explicit open-loop and selectable waypoint session surfaces."""
 
     if vehicle.model_kind == "ballistic_3dof":
         return TrajectoryControlAdvertisement(
@@ -1087,34 +1095,89 @@ def _analytical_control_advertisement(
             channels=(),
             authorities=(
                 TrajectoryControlAuthorityMetadata(
-                    id="no_external_action",
+                    id="open_loop_coast",
                     authority="open_loop",
-                    availability="not_applicable",
+                    availability="available",
                     channel_ids=(),
-                    operations=(),
-                    description="The ballistic coast is deliberately uncontrolled.",
+                    operations=("step",),
+                    description="Explicit zero-action authority for the uncontrolled ballistic coast.",
+                    command_owner="open_loop",
+                    selection_scope="session",
+                    switching_policy="locked",
+                    scheme_id="open_loop.coast",
+                    lowering_chain=("zero_action_frame", "constant_gravity_ballistic_transition"),
                     source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
                     provenance="analytical reference implementation",
                     claim_boundary="No external or provider-generated control is applied to ballistic propagation.",
                 ),
             ),
             intents=(),
+            default_authority_id="open_loop_coast",
             claim_boundary="This realization is an explicit open-loop analytical propagation fixture.",
         )
+
+    channels = _analytical_waypoint_step_channels()
     return TrajectoryControlAdvertisement(
-        status="internally_generated",
-        channels=(),
+        status="available",
+        channels=channels,
         authorities=(
             TrajectoryControlAuthorityMetadata(
-                id="waypoint_guidance",
+                id="configured_waypoint_guidance",
                 authority="mission",
-                availability="available_in_batch",
+                availability="available",
                 channel_ids=(),
-                operations=("batch",),
-                description="Provider-internal constant-velocity waypoint steering.",
+                operations=("batch", "step"),
+                description="Provider-owned steering through the prepared waypoint sequence.",
+                command_owner="provider_controller",
+                selection_scope="session",
+                switching_policy="explicit_bumpless",
+                scheme_id="mission.waypoint",
+                lowering_chain=("configured_waypoint_sequence", "constant_velocity_geometric_steering"),
                 source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
                 provenance="analytical reference implementation",
                 claim_boundary="Internal geometric steering only; no external action or physical actuator is exposed.",
+            ),
+            TrajectoryControlAuthorityMetadata(
+                id="kinematic_velocity_command",
+                authority="kinematic",
+                availability="available",
+                channel_ids=(
+                    "guidance.speed.command",
+                    "guidance.heading.command",
+                    "guidance.flight_path_angle.command",
+                ),
+                operations=("step",),
+                description="Caller-owned speed, heading, and flight-path-angle commands.",
+                command_owner="caller",
+                selection_scope="session",
+                switching_policy="explicit_bumpless",
+                scheme_id="kinematic.flight_path",
+                lowering_chain=("kinematic_command_hold", "constant_velocity_cartesian_increment"),
+                source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
+                provenance="analytical reference implementation",
+                claim_boundary="Instantaneous kinematic command tracking; no turn, actuator, or controller dynamics.",
+            ),
+            TrajectoryControlAuthorityMetadata(
+                id="live_waypoint_guidance",
+                authority="mission",
+                availability="available",
+                channel_ids=(
+                    "navigation.waypoint.north.command",
+                    "navigation.waypoint.east.command",
+                    "navigation.waypoint.altitude.command",
+                    "navigation.waypoint.capture_radius.command",
+                    "navigation.waypoint.speed.command",
+                ),
+                operations=("step",),
+                description="Caller-owned live waypoint and cruise-speed updates.",
+                command_owner="caller",
+                selection_scope="session",
+                switching_policy="explicit_bumpless",
+                scheme_id="mission.waypoint",
+                lowering_chain=("live_waypoint_hold", "constant_velocity_geometric_steering"),
+                source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
+                provenance="analytical reference implementation",
+                claim_boundary="Geometric waypoint steering only; no physical guidance-loop or actuator claim.",
             ),
         ),
         intents=(
@@ -1126,14 +1189,240 @@ def _analytical_control_advertisement(
                 segment_ids=("waypoint_leg",),
                 mission_template_ids=(),
                 channel_ids=(),
-                operations=("batch",),
+                operations=("batch", "step"),
                 source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
                 provenance="analytical reference implementation",
                 claim_boundary="Deterministic provider-local guidance semantics only.",
             ),
+            TrajectoryControlIntentMetadata(
+                id="kinematic_velocity_control",
+                label="Kinematic Velocity Control",
+                description="Set straight-line speed and direction at each session boundary.",
+                resolution="external_channel",
+                segment_ids=("waypoint_leg",),
+                mission_template_ids=(),
+                channel_ids=(
+                    "guidance.speed.command",
+                    "guidance.heading.command",
+                    "guidance.flight_path_angle.command",
+                ),
+                operations=("step",),
+                source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
+                provenance="analytical reference implementation",
+                claim_boundary="Direct kinematic state evolution without controller or actuator dynamics.",
+            ),
+            TrajectoryControlIntentMetadata(
+                id="live_waypoint_retargeting",
+                label="Live Waypoint Retargeting",
+                description="Update the held local waypoint without opening a second stream route.",
+                resolution="external_channel",
+                segment_ids=("waypoint_leg",),
+                mission_template_ids=(),
+                channel_ids=(
+                    "navigation.waypoint.north.command",
+                    "navigation.waypoint.east.command",
+                    "navigation.waypoint.altitude.command",
+                    "navigation.waypoint.capture_radius.command",
+                    "navigation.waypoint.speed.command",
+                ),
+                operations=("step",),
+                source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
+                provenance="analytical reference implementation",
+                claim_boundary="Live geometric retargeting only.",
+            ),
         ),
-        default_authority_id="waypoint_guidance",
-        claim_boundary="Waypoint guidance is generated internally and does not create an interactive control surface.",
+        default_authority_id="configured_waypoint_guidance",
+        claim_boundary=(
+            "The configured, direct-kinematic, and live-waypoint profiles share one stateful session; "
+            "all remain analytical reference-fixture controls."
+        ),
+    )
+    ####
+
+
+def _analytical_waypoint_step_channels() -> tuple[TrajectoryControlChannelMetadata, ...]:
+    """Return unit-complete action metadata for the two caller-owned profiles."""
+
+    euclidean = ConfigurationValueSpace(
+        topology="euclidean",
+        representation="scalar",
+        error_rule="subtraction",
+        interpolation_rule="linear",
+        coordinate_chart="R",
+    )
+    positive = ConfigurationValueSpace(
+        topology="bounded_interval",
+        representation="scalar",
+        error_rule="subtraction",
+        interpolation_rule="linear",
+        coordinate_chart="[0, +infinity)",
+    )
+    periodic = ConfigurationValueSpace(
+        topology="periodic_circle",
+        representation="scalar",
+        error_rule="wrapped signed angular difference",
+        interpolation_rule="shortest_arc",
+        normalization_rule="wrap_to_principal_interval",
+        period=360.0,
+        coordinate_chart="[0, 360)",
+    )
+
+    def channel(
+        identifier: str,
+        label: str,
+        description: str,
+        *,
+        quantity: str,
+        unit: str,
+        value_space: ConfigurationValueSpace,
+        lower: float | None = None,
+        upper: float | None = None,
+        frame: str | None = None,
+        order: int,
+    ) -> TrajectoryControlChannelMetadata:
+        interval = (
+            None
+            if lower is None and upper is None
+            else ConfigurationInterval(
+                minimum=None if lower is None else ConfigurationBound(value=lower),
+                maximum=None if upper is None else ConfigurationBound(value=upper),
+            )
+        )
+        return TrajectoryControlChannelMetadata(
+            id=identifier,
+            label=label,
+            description=description,
+            channel_kind="action",
+            quantity=quantity,
+            canonical_unit=unit,
+            display_unit=unit,
+            interval=interval,
+            frame=frame,
+            sampling_semantics="held_action",
+            value_space=value_space,
+            semantics=ControlCommandSemantics(
+                value_domain="periodic" if value_space.topology == "periodic_circle" else "continuous",
+                command_mode="absolute",
+                temporal_semantics="held",
+                release_behavior="hold",
+                agent_normalization="periodic_wrap" if value_space.topology == "periodic_circle" else "auto",
+                agent_clip=interval is not None,
+            ),
+            availability="available",
+            operations=("step",),
+            native_channel_id=f"analytical_session.{identifier}",
+            native_binding=TrajectoryControlNativeBindingMetadata(
+                id=f"analytical_session.{identifier}",
+                quantity=quantity,
+                canonical_unit=unit,
+                interval=interval,
+                value_space=value_space,
+                semantics=ControlCommandSemantics(
+                    value_domain="periodic" if value_space.topology == "periodic_circle" else "continuous",
+                    command_mode="absolute",
+                    temporal_semantics="held",
+                    release_behavior="hold",
+                    agent_normalization="periodic_wrap" if value_space.topology == "periodic_circle" else "auto",
+                    agent_clip=interval is not None,
+                ),
+                provider_binding={"analytical_session_field": identifier},
+            ),
+            provider_binding={"analytical_session_field": identifier},
+            presentation=ValuePresentationMetadata(group="session controls", order=order),
+            source_refs=("src/taoryx/trajectory/analytical_mission_composition.py",),
+            provenance="analytical reference implementation",
+            claim_boundary="Session-only analytical command; no physical control-system claim.",
+        )
+        ####
+
+    return (
+        channel(
+            "guidance.speed.command",
+            "Speed Command",
+            "Held kinematic scalar speed.",
+            quantity="speed",
+            unit="m/s",
+            value_space=positive,
+            lower=0.0,
+            upper=50_000.0,
+            order=10,
+        ),
+        channel(
+            "guidance.heading.command",
+            "Heading Command",
+            "Held local course bearing clockwise from north.",
+            quantity="angle",
+            unit="deg",
+            value_space=periodic,
+            lower=0.0,
+            upper=360.0,
+            frame="local_ned",
+            order=20,
+        ),
+        channel(
+            "guidance.flight_path_angle.command",
+            "Flight-Path-Angle Command",
+            "Held straight-line flight-path angle, positive upward.",
+            quantity="angle",
+            unit="deg",
+            value_space=euclidean,
+            lower=-89.0,
+            upper=89.0,
+            frame="local_ned",
+            order=30,
+        ),
+        channel(
+            "navigation.waypoint.north.command",
+            "Waypoint North",
+            "Held local-frame north target coordinate.",
+            quantity="length",
+            unit="m",
+            value_space=euclidean,
+            frame="local_ned",
+            order=40,
+        ),
+        channel(
+            "navigation.waypoint.east.command",
+            "Waypoint East",
+            "Held local-frame east target coordinate.",
+            quantity="length",
+            unit="m",
+            value_space=euclidean,
+            frame="local_ned",
+            order=50,
+        ),
+        channel(
+            "navigation.waypoint.altitude.command",
+            "Waypoint Altitude",
+            "Held geometric altitude target.",
+            quantity="length",
+            unit="m",
+            value_space=positive,
+            lower=0.0,
+            frame="local_ned",
+            order=60,
+        ),
+        channel(
+            "navigation.waypoint.capture_radius.command",
+            "Waypoint Capture Radius",
+            "Held three-dimensional capture radius.",
+            quantity="length",
+            unit="m",
+            value_space=positive,
+            lower=0.1,
+            order=70,
+        ),
+        channel(
+            "navigation.waypoint.speed.command",
+            "Waypoint Speed",
+            "Held geometric steering speed.",
+            quantity="speed",
+            unit="m/s",
+            value_space=positive,
+            lower=0.0,
+            upper=50_000.0,
+            order=80,
+        ),
     )
     ####
 
@@ -1807,17 +2096,7 @@ class ExampleMissionCompositionProvider:
     def _initial_state(values: Mapping[str, Any]) -> dict[str, float]:
         """Build the private analytical state from resolved initialization."""
 
-        return {
-            "time_s": 0.0,
-            "north_m": float(values.get("north_m", 0.0)),
-            "east_m": float(values.get("east_m", 0.0)),
-            "altitude_m": float(values["altitude_m"]),
-            "speed_m_s": float(values["speed_m_s"]),
-            "cruise_speed_m_s": float(values["speed_m_s"]),
-            "heading_deg": float(values["heading_deg"]) % 360.0,
-            "flight_path_angle_deg": float(values.get("flight_path_angle_deg", 0.0)),
-            "load_factor_g": 1.0,
-        }
+        return analytical_initial_state(values)
         ####
 
     @staticmethod
@@ -1856,49 +2135,89 @@ class ExampleMissionCompositionProvider:
     def _propagate_ballistic(state: dict[str, float], duration_s: float) -> None:
         """Advance the constant-gravity ballistic fixture."""
 
-        heading = math.radians(state["heading_deg"])
-        flight_path = math.radians(state["flight_path_angle_deg"])
-        horizontal_speed = state["speed_m_s"] * math.cos(flight_path)
-        state["north_m"] += horizontal_speed * math.cos(heading) * duration_s
-        state["east_m"] += horizontal_speed * math.sin(heading) * duration_s
-        state["altitude_m"] += state["speed_m_s"] * math.sin(flight_path) * duration_s - 0.5 * 9.80665 * duration_s * duration_s
-        vertical_speed = state["speed_m_s"] * math.sin(flight_path) - 9.80665 * duration_s
-        state["speed_m_s"] = max(0.0, math.hypot(horizontal_speed, vertical_speed))
-        state["flight_path_angle_deg"] = math.degrees(math.atan2(vertical_speed, max(horizontal_speed, 1.0e-12)))
-        state["load_factor_g"] = 1.0
-        state["time_s"] += duration_s
+        propagate_ballistic_state(state, duration_s)
         ####
 
     @staticmethod
     def _propagate_constant_velocity_waypoint(state: dict[str, float], values: Mapping[str, Any], duration_s: float) -> None:
         """Advance in a straight line toward a waypoint at constant speed."""
 
-        north_error = float(values["waypoint_north_m"]) - state["north_m"]
-        east_error = float(values["waypoint_east_m"]) - state["east_m"]
-        altitude_error = float(values["waypoint_altitude_m"]) - state["altitude_m"]
-        distance = math.sqrt(north_error * north_error + east_error * east_error + altitude_error * altitude_error)
-        speed = state["speed_m_s"]
-        if distance <= 1.0e-12 or speed <= 1.0e-12:
-            state["speed_m_s"] = 0.0
-            state["flight_path_angle_deg"] = 0.0
-            state["load_factor_g"] = 1.0
-            state["time_s"] += duration_s
-            return
+        propagate_constant_velocity_waypoint_state(state, values, duration_s)
+        ####
 
-        horizontal_distance = math.hypot(north_error, east_error)
-        state["heading_deg"] = math.degrees(math.atan2(east_error, north_error)) % 360.0
-        state["flight_path_angle_deg"] = math.degrees(math.atan2(altitude_error, horizontal_distance))
-        travel = min(speed * duration_s, distance)
-        fraction = travel / distance
-        state["north_m"] += north_error * fraction
-        state["east_m"] += east_error * fraction
-        state["altitude_m"] += altitude_error * fraction
-        if travel >= distance:
-            state["speed_m_s"] = 0.0
-            state["flight_path_angle_deg"] = 0.0
+
+def analytical_initial_state(values: Mapping[str, Any]) -> dict[str, float]:
+    """Build the shared state used by batch and stateful reference execution."""
+
+    return {
+        "time_s": 0.0,
+        "north_m": float(values.get("north_m", 0.0)),
+        "east_m": float(values.get("east_m", 0.0)),
+        "altitude_m": float(values["altitude_m"]),
+        "speed_m_s": float(values["speed_m_s"]),
+        "cruise_speed_m_s": float(values["speed_m_s"]),
+        "heading_deg": float(values["heading_deg"]) % 360.0,
+        "flight_path_angle_deg": float(values.get("flight_path_angle_deg", 0.0)),
+        "load_factor_g": 1.0,
+    }
+    ####
+
+
+def propagate_ballistic_state(state: dict[str, float], duration_s: float) -> None:
+    """Advance the shared constant-gravity ballistic state in place."""
+
+    heading = math.radians(state["heading_deg"])
+    flight_path = math.radians(state["flight_path_angle_deg"])
+    horizontal_speed = state["speed_m_s"] * math.cos(flight_path)
+    state["north_m"] += horizontal_speed * math.cos(heading) * duration_s
+    state["east_m"] += horizontal_speed * math.sin(heading) * duration_s
+    state["altitude_m"] += (
+        state["speed_m_s"] * math.sin(flight_path) * duration_s
+        - 0.5 * 9.80665 * duration_s * duration_s
+    )
+    vertical_speed = state["speed_m_s"] * math.sin(flight_path) - 9.80665 * duration_s
+    state["speed_m_s"] = max(0.0, math.hypot(horizontal_speed, vertical_speed))
+    state["flight_path_angle_deg"] = math.degrees(
+        math.atan2(vertical_speed, max(horizontal_speed, 1.0e-12))
+    )
+    state["load_factor_g"] = 1.0
+    state["time_s"] += duration_s
+    ####
+
+
+def propagate_constant_velocity_waypoint_state(
+    state: dict[str, float],
+    values: Mapping[str, Any],
+    duration_s: float,
+) -> None:
+    """Advance the shared straight-line constant-speed waypoint state."""
+
+    north_error = float(values["waypoint_north_m"]) - state["north_m"]
+    east_error = float(values["waypoint_east_m"]) - state["east_m"]
+    altitude_error = float(values["waypoint_altitude_m"]) - state["altitude_m"]
+    distance = math.sqrt(north_error * north_error + east_error * east_error + altitude_error * altitude_error)
+    speed = state["speed_m_s"]
+    if distance <= 1.0e-12 or speed <= 1.0e-12:
+        state["speed_m_s"] = 0.0
+        state["flight_path_angle_deg"] = 0.0
         state["load_factor_g"] = 1.0
         state["time_s"] += duration_s
-        ####
+        return
+
+    horizontal_distance = math.hypot(north_error, east_error)
+    state["heading_deg"] = math.degrees(math.atan2(east_error, north_error)) % 360.0
+    state["flight_path_angle_deg"] = math.degrees(math.atan2(altitude_error, horizontal_distance))
+    travel = min(speed * duration_s, distance)
+    fraction = travel / distance
+    state["north_m"] += north_error * fraction
+    state["east_m"] += east_error * fraction
+    state["altitude_m"] += altitude_error * fraction
+    if travel >= distance:
+        state["speed_m_s"] = 0.0
+        state["flight_path_angle_deg"] = 0.0
+    state["load_factor_g"] = 1.0
+    state["time_s"] += duration_s
+    ####
 
 
 __all__ = [
@@ -1924,5 +2243,8 @@ __all__ = [
     "MissionCompositionTrajectorySample",
     "MissionCompositionOutputRequest",
     "ExampleMissionCompositionProvider",
+    "analytical_initial_state",
+    "propagate_ballistic_state",
+    "propagate_constant_velocity_waypoint_state",
 ]
 ####

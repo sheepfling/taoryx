@@ -34,7 +34,10 @@ def test_workflow_endpoint_catalog_exposes_exact_nonphysical_boundaries() -> Non
         "composition_proof_family",
     }
     assert all(item.robustness_disposition == "not_applicable" for item in catalog.endpoints)
-    assert all(item.blocked_operations == ("step",) for item in catalog.endpoints)
+    assert catalog.endpoint("simple-aero-fixed-ld-batch").blocked_operations == ()
+    assert catalog.endpoint("dual-launch-attached-booster-batch").blocked_operations == (
+        "step",
+    )
     listing = mission_workflow_endpoint_list()
     assert [item["id"] for item in listing["endpoints"]] == [item.id for item in catalog.endpoints]  # type: ignore[index]
     ####

@@ -36,6 +36,7 @@ InterfaceChannelValueSpaceProfile = Literal[
     "bounded_interval",
     "euclidean_scalar",
     "euclidean_vector3",
+    "event",
     "finite_set",
     "periodic_degrees",
     "periodic_radians",
@@ -51,6 +52,7 @@ _INTERFACE_CHANNEL_VALUE_SPACE_PROFILES: frozenset[InterfaceChannelValueSpacePro
         "bounded_interval",
         "euclidean_scalar",
         "euclidean_vector3",
+        "event",
         "finite_set",
         "periodic_degrees",
         "periodic_radians",
@@ -77,6 +79,8 @@ def value_space_for_interface_channel_profile(
         return euclidean()
     if profile == "euclidean_vector3":
         return euclidean(3)
+    if profile == "event":
+        return finite_set(event=True)
     if profile == "finite_set":
         return finite_set()
     if profile == "periodic_degrees":

@@ -24,6 +24,12 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
+from .control_schemes import (
+    ControlSchemeConsumerRole,
+    ControlSchemeLayer,
+    ControlSchemeStreamingPreference,
+    control_scheme_definition,
+)
 from .fidelity_contracts import FidelityTier
 from .interface_channel_value_spaces import interface_channel_value_space_profile, value_space_for_interface_channel_profile
 from .value_space import (
@@ -66,6 +72,9 @@ ParameterScope = Literal[
     "derived_status",
 ]
 AuthorityKind = Literal["mission", "kinematic", "body_motion", "wrench", "effector", "native_bridge", "open_loop"]
+AuthorityCommandOwner = Literal["caller", "source_program", "provider_controller", "open_loop"]
+AuthoritySelectionScope = Literal["batch", "session", "phase", "step", "provider"]
+AuthoritySwitchingPolicy = Literal["locked", "explicit_bumpless", "provider_managed"]
 SamplingSemantics = Literal["truth_boundary", "held_action", "reset_only", "segment_transition", "event", "not_sampled"]
 ProvenanceKind = Literal["source_backed", "derived", "engineering_surrogate", "synthetic", "replayed", "not_applicable"]
 
@@ -342,12 +351,71 @@ class AuthorityProfile:
     action_ids: tuple[str, ...]
     description: str
     claim_boundary: str
+    command_owner: AuthorityCommandOwner = "caller"
+    selection_scope: AuthoritySelectionScope = "session"
+    switching_policy: AuthoritySwitchingPolicy = "locked"
+    applicable_phase_ids: tuple[str, ...] = ()
+    lowering_chain: tuple[str, ...] = ()
+    scheme_id: str | None = None
+    scheme_layer: ControlSchemeLayer | None = None
+    consumer_roles: tuple[ControlSchemeConsumerRole, ...] = ()
+    streaming_preference: ControlSchemeStreamingPreference | None = None
+    ui_order: int | None = None
 
     def __post_init__(self) -> None:
+        definition = (
+            None
+            if self.scheme_id is None
+            else control_scheme_definition(self.scheme_id)
+        )
+        if definition is not None:
+            if self.scheme_layer is None:
+                object.__setattr__(self, "scheme_layer", definition.layer)
+            if not self.consumer_roles:
+                object.__setattr__(self, "consumer_roles", definition.consumer_roles)
+            if self.streaming_preference is None:
+                object.__setattr__(
+                    self,
+                    "streaming_preference",
+                    definition.streaming_preference,
+                )
+            if self.ui_order is None:
+                object.__setattr__(self, "ui_order", definition.ui_order)
         if not self.id.strip() or not self.description.strip() or not self.claim_boundary.strip():
             raise ValueError("authority profiles require identity, description, and claim boundary")
         if len(self.action_ids) != len(set(self.action_ids)):
             raise ValueError(f"authority profile {self.id!r} has duplicate action IDs")
+        if len(self.applicable_phase_ids) != len(set(self.applicable_phase_ids)):
+            raise ValueError(f"authority profile {self.id!r} has duplicate phase IDs")
+        if len(self.lowering_chain) != len(set(self.lowering_chain)):
+            raise ValueError(f"authority profile {self.id!r} has duplicate lowering-chain stages")
+        if len(self.consumer_roles) != len(set(self.consumer_roles)):
+            raise ValueError(f"authority profile {self.id!r} has duplicate consumer roles")
+        if any(not item.strip() for item in (*self.applicable_phase_ids, *self.lowering_chain)):
+            raise ValueError(f"authority profile {self.id!r} contains an empty phase or lowering-chain stage")
+        if self.command_owner == "caller" and self.selection_scope == "provider":
+            raise ValueError(f"caller-owned authority profile {self.id!r} cannot use provider selection scope")
+        if self.switching_policy == "provider_managed" and self.command_owner == "caller":
+            raise ValueError(f"caller-owned authority profile {self.id!r} cannot use provider-managed switching")
+        if self.scheme_id is None and any(
+            item is not None
+            for item in (self.scheme_layer, self.streaming_preference, self.ui_order)
+        ):
+            raise ValueError(f"authority profile {self.id!r} scheme metadata requires scheme_id")
+        if self.scheme_id is None and self.consumer_roles:
+            raise ValueError(f"authority profile {self.id!r} consumer roles require scheme_id")
+        if self.ui_order is not None and self.ui_order < 0:
+            raise ValueError(f"authority profile {self.id!r} ui_order cannot be negative")
+        if self.scheme_id is not None:
+            if definition is None and self.scheme_layer is None:
+                raise ValueError(
+                    f"provider-specific control scheme {self.scheme_id!r} requires scheme_layer"
+                )
+            if definition is not None and self.scheme_layer not in {None, definition.layer}:
+                raise ValueError(
+                    f"control scheme {self.scheme_id!r} belongs to {definition.layer!r}, "
+                    f"not {self.scheme_layer!r}"
+                )
         ####
     ####
 
@@ -360,6 +428,16 @@ class AuthorityProfile:
             "availability": self.availability,
             "action_ids": list(self.action_ids),
             "description": self.description,
+            "command_owner": self.command_owner,
+            "selection_scope": self.selection_scope,
+            "switching_policy": self.switching_policy,
+            "applicable_phase_ids": list(self.applicable_phase_ids),
+            "lowering_chain": list(self.lowering_chain),
+            "scheme_id": self.scheme_id,
+            "scheme_layer": self.scheme_layer,
+            "consumer_roles": list(self.consumer_roles),
+            "streaming_preference": self.streaming_preference,
+            "ui_order": self.ui_order,
             "claim_boundary": self.claim_boundary,
         }
         ####
@@ -421,6 +499,7 @@ class VehicleControlAuthorityAdvertisement:
     authority_profiles: tuple[AuthorityProfile, ...]
     action_channels: tuple[InterfaceChannel, ...]
     effector_channels: tuple[InterfaceChannel, ...]
+    default_authority_profile_id: str | None
     claim_boundary: str
 
     @property
@@ -443,6 +522,7 @@ class VehicleControlAuthorityAdvertisement:
 
         return {
             "interface_id": self.interface_id,
+            "default_authority_profile_id": self.default_authority_profile_id,
             "available_profile_ids": [item.id for item in self.available_profiles],
             "available_action_ids": [item.id for item in self.available_actions],
             "available_effector_ids": [item.id for item in self.available_effectors],
@@ -455,6 +535,7 @@ class VehicleControlAuthorityAdvertisement:
 
         return {
             "interface_id": self.interface_id,
+            "default_authority_profile_id": self.default_authority_profile_id,
             "profiles": [item.as_dict() for item in self.authority_profiles],
             "action_channels": [item.as_dict() for item in self.action_channels],
             "effector_channels": [item.as_dict() for item in self.effector_channels],
@@ -485,6 +566,7 @@ class VehicleInterfaceContract:
     observation_profiles: tuple[ObservationProfile, ...]
     execution_records: tuple[VehicleExecutionBinding, ...]
     claim_boundary: str
+    default_authority_profile_id: str | None = None
     schema: str = SCHEMA_ID
 
     def __post_init__(self) -> None:
@@ -505,6 +587,21 @@ class VehicleInterfaceContract:
             unknown = sorted(set(profile.action_ids) - action_ids)
             if unknown:
                 raise ValueError(f"authority profile {profile.id!r} references unknown actions: {unknown}")
+        authority_ids = tuple(profile.id for profile in self.authority_profiles)
+        if len(authority_ids) != len(set(authority_ids)):
+            raise ValueError("vehicle interface contains duplicate authority-profile IDs")
+        available_authority_ids = tuple(
+            profile.id for profile in self.authority_profiles if profile.availability == "available"
+        )
+        default_authority_profile_id = self.default_authority_profile_id
+        if default_authority_profile_id is None and available_authority_ids:
+            default_authority_profile_id = available_authority_ids[0]
+            object.__setattr__(self, "default_authority_profile_id", default_authority_profile_id)
+        if default_authority_profile_id is not None:
+            if default_authority_profile_id not in authority_ids:
+                raise ValueError("vehicle interface default authority profile is unknown")
+            if default_authority_profile_id not in available_authority_ids:
+                raise ValueError("vehicle interface default authority profile is not available")
         observable_ids = {
             *(item.id for item in self.status_channels),
             *(item.id for item in self.resource_channels),
@@ -570,6 +667,7 @@ class VehicleInterfaceContract:
             authority_profiles=self.authority_profiles,
             action_channels=self.action_channels,
             effector_channels=self.effector_channels,
+            default_authority_profile_id=self.default_authority_profile_id,
             claim_boundary=self.claim_boundary,
         )
         ####
@@ -596,6 +694,7 @@ class VehicleInterfaceContract:
             "resources": [item.as_dict() for item in self.resource_channels],
             "diagnostics": [item.as_dict() for item in self.diagnostic_channels],
             "authority_profiles": [item.as_dict() for item in self.authority_profiles],
+            "default_authority_profile_id": self.default_authority_profile_id,
             "observation_profiles": [item.as_dict() for item in self.observation_profiles],
             "execution_records": [item.model_dump(mode="json") for item in self.execution_records],
             "claim_boundary": self.claim_boundary,
@@ -764,6 +863,7 @@ def _action_contract(
                 tuple(item.id for item in hummingbird_channels),
                 "Bounded roll, pitch, yaw, and aggregate-thrust response command.",
                 "Pseudo-6DOF body-motion response only; no individual rotor, motor, or moment-balance claim.",
+                scheme_id="body_motion.attitude",
             ),
         )
 
@@ -808,7 +908,16 @@ def _action_contract(
                 available,
             ),
         )
-        return guidance_channels, (
+        pilot_channels, waypoint_channels = _reduced_fixed_wing_high_order_controls(
+            family_id,
+            available,
+        )
+        body_rate_channels = (
+            _f16_reduced_body_rate_controls(available)
+            if family_id == "f16_s119" and fidelity == "pseudo_6dof"
+            else ()
+        )
+        profiles = [
             AuthorityProfile(
                 "kinematic_guidance",
                 "kinematic",
@@ -817,8 +926,64 @@ def _action_contract(
                 "Bounded speed, flight-path, heading, and bank intent for a reduced fixed-wing plant.",
                 "This is point-mass or named response-law guidance only; it does not establish physical surfaces, "
                 "actuator dynamics, allocation, or moment balance.",
+                switching_policy="explicit_bumpless",
+                lowering_chain=("external_kinematic_reference", "reduced_fixed_wing_response_law"),
+                scheme_id="kinematic.flight_path",
             ),
-        )
+            AuthorityProfile(
+                "reduced_pilot_command",
+                "kinematic",
+                available,
+                tuple(item.id for item in pilot_channels),
+                "Controller-friendly propulsion, longitudinal, and lateral inputs lowered through the reduced response law.",
+                "These are normalized pilot-like commands for the declared reduced response law. They are not "
+                "F-16 stick-force, A320 sidestick, throttle-lever, rudder-pedal, surface, or actuator evidence.",
+                switching_policy="explicit_bumpless",
+                lowering_chain=(
+                    "normalized_pilot_command",
+                    "kinematic_reference_adapter",
+                    "reduced_fixed_wing_response_law",
+                ),
+                scheme_id="pilot.normalized_axes",
+            ),
+            AuthorityProfile(
+                "live_waypoint_guidance",
+                "mission",
+                available,
+                tuple(item.id for item in waypoint_channels),
+                "A live local-navigation waypoint accepted through the same held-action session stream.",
+                "The external caller owns the waypoint while the declared navigator and reduced response law own "
+                "heading, path-angle, bank, and speed lowering. This is not route qualification or physical-effector evidence.",
+                switching_policy="explicit_bumpless",
+                lowering_chain=(
+                    "live_waypoint_navigator",
+                    "kinematic_reference_adapter",
+                    "reduced_fixed_wing_response_law",
+                ),
+                scheme_id="mission.waypoint",
+            ),
+        ]
+        if body_rate_channels:
+            profiles.insert(
+                2,
+                AuthorityProfile(
+                    "body_rate_command",
+                    "body_motion",
+                    available,
+                    ("propulsion.command.fraction", *(item.id for item in body_rate_channels)),
+                    "Body-frame roll-, pitch-, and yaw-rate references plus normalized propulsion for the F-16 pseudo-6DOF response.",
+                    "This is a bounded engineering-surrogate rate-reference adapter. Roll/yaw response remains coupled by "
+                    "the named pseudo-6DOF law; it is not a source flight-control computer, moment balance, or surface authority.",
+                    switching_policy="explicit_bumpless",
+                    lowering_chain=(
+                        "external_body_rate_reference",
+                        "pseudo_6dof_rate_reference_adapter",
+                        "reduced_fixed_wing_response_law",
+                    ),
+                    scheme_id="body_motion.body_rate",
+                ),
+            )
+        return (*guidance_channels, *pilot_channels, *body_rate_channels, *waypoint_channels), tuple(profiles)
 
     fixed_wing_controls = _fixed_wing_bridge_controls(family_id)
     if fixed_wing_controls and fidelity in {"point_mass_3dof", "pseudo_6dof"}:
@@ -855,6 +1020,7 @@ def _action_contract(
                 "Explicit bounded speed, flight-path, and heading targets for the native lower-tier command law.",
                 "This authority replaces the autonomous route target only when explicitly enabled. It is a point-mass "
                 "or kinematic-response command seam, not source surface allocation, moment balance, or a flight-control qualification.",
+                scheme_id="kinematic.flight_path",
             ),
             AuthorityProfile(
                 "native_control_bridge",
@@ -864,6 +1030,7 @@ def _action_contract(
                 "Explicit source-runtime load coordinates projected into stable semantic names.",
                 "The bridge preserves source-load visibility but does not own lower-tier trajectory state rates. It does not "
                 "prove trajectory authority, physical actuator allocation, servo dynamics, or moment balance.",
+                scheme_id="provider.native_bridge",
             ),
         )
 
@@ -943,6 +1110,7 @@ def _action_contract(
                         else "This profile remains unavailable until an exact native binding and achieved-wrench telemetry exist."
                     )
                 ),
+                scheme_id="wrench.direct",
             ),
         )
 
@@ -954,6 +1122,7 @@ def _action_contract(
             (),
             "No declared external action profile is available for this selected realization.",
             "The selected realization must not borrow controls from a neighboring family or fidelity.",
+            scheme_id="open_loop.coast",
         ),
     )
     ####
@@ -974,6 +1143,179 @@ def _fixed_wing_bridge_controls(
             ("control.longitudinal.bridge.command", "deg", -10.0, 10.0, "Elevator source-table coordinate accepted by the selected runtime.", "elevator-deg"),
         )
     return ()
+    ####
+
+
+def _reduced_fixed_wing_high_order_controls(
+    family_id: str,
+    availability: InterfaceAvailability,
+) -> tuple[tuple[InterfaceChannel, ...], tuple[InterfaceChannel, ...]]:
+    """Return truthful pilot-like and live-waypoint seams for reduced airbreathers."""
+
+    minimum_speed_m_s = 50.0
+    maximum_speed_m_s = 300.0 if family_id == "a320_openap_3dof" else 500.0
+    common_pilot_binding = {
+        "control_role": "reduced_pilot_command",
+        "action_adapter": "reduced_fixed_wing_pilot_v1",
+        "state_authority": "native_commanded_state_rate",
+    }
+    pilot_channels = (
+        InterfaceChannel(
+            "propulsion.command.fraction",
+            "action",
+            "scalar",
+            "dimensionless",
+            "Normalized propulsion/energy request accepted by the reduced pilot-command adapter.",
+            lower=0.0,
+            upper=1.0,
+            availability=availability,
+            provenance="engineering_surrogate",
+            sampling="held_action",
+            binding={"native_action": "pilot-throttle-fraction", **common_pilot_binding},
+            claim_boundary=(
+                "The adapter maps this fraction into the reduced speed-response envelope. It is not a physical "
+                "throttle lever, engine spool, fuel-flow, or installed-thrust command."
+            ),
+        ),
+        InterfaceChannel(
+            "pilot.longitudinal.command",
+            "action",
+            "scalar",
+            "dimensionless",
+            "Normalized pull/push request lowered into a bounded flight-path response.",
+            lower=-1.0,
+            upper=1.0,
+            availability=availability,
+            provenance="engineering_surrogate",
+            sampling="held_action",
+            binding={"native_action": "pilot-longitudinal-normalized", **common_pilot_binding},
+            claim_boundary="Reduced kinematic response only; this is not angle-of-attack, pitch-rate, elevator, or stick-force authority.",
+        ),
+        InterfaceChannel(
+            "pilot.lateral.command",
+            "action",
+            "scalar",
+            "dimensionless",
+            "Normalized roll-to-turn request lowered into bounded bank and heading response.",
+            lower=-1.0,
+            upper=1.0,
+            availability=availability,
+            provenance="engineering_surrogate",
+            sampling="held_action",
+            binding={"native_action": "pilot-lateral-normalized", **common_pilot_binding},
+            claim_boundary="Reduced coordinated-turn response only; this is not roll-rate, aileron, rudder, or lateral-force authority.",
+        ),
+    )
+    common_waypoint_binding = {
+        "control_role": "live_waypoint_guidance",
+        "action_adapter": "local_navigation_waypoint_v1",
+        "frame": "local_navigation_north_east_altitude",
+        "state_authority": "native_commanded_state_rate",
+    }
+    waypoint_specs = (
+        (
+            "navigation.waypoint.north.command",
+            "m",
+            -1_000_000.0,
+            1_000_000.0,
+            "waypoint-north-m",
+            "Absolute waypoint north coordinate in the composition local-navigation frame.",
+        ),
+        (
+            "navigation.waypoint.east.command",
+            "m",
+            -1_000_000.0,
+            1_000_000.0,
+            "waypoint-east-m",
+            "Absolute waypoint east coordinate in the composition local-navigation frame.",
+        ),
+        (
+            "navigation.waypoint.altitude.command",
+            "m",
+            -1_000.0,
+            100_000.0,
+            "waypoint-altitude-m",
+            "Absolute waypoint altitude above the composition local-navigation datum.",
+        ),
+        (
+            "navigation.waypoint.capture_radius.command",
+            "m",
+            1.0,
+            100_000.0,
+            "waypoint-capture-radius-m",
+            "Three-dimensional capture radius used by the live waypoint navigator.",
+        ),
+        (
+            "navigation.waypoint.speed.command",
+            "m/s",
+            minimum_speed_m_s,
+            maximum_speed_m_s,
+            "waypoint-speed-mps",
+            "Desired reduced-model speed while tracking the live waypoint.",
+        ),
+    )
+    waypoint_channels = tuple(
+        InterfaceChannel(
+            identifier,
+            "action",
+            "scalar",
+            unit,
+            description,
+            frame=("NED" if identifier.endswith(("north.command", "east.command")) else None),
+            lower=lower,
+            upper=upper,
+            availability=availability,
+            provenance="engineering_surrogate",
+            sampling="held_action",
+            binding={"native_action": native, **common_waypoint_binding},
+            claim_boundary=(
+                "The caller may update this value at an accepted session boundary. The provider lowers the held "
+                "waypoint into reduced guidance; no physical-effector or route-qualification claim is implied."
+            ),
+        )
+        for identifier, unit, lower, upper, native, description in waypoint_specs
+    )
+    return pilot_channels, waypoint_channels
+    ####
+
+
+def _f16_reduced_body_rate_controls(
+    availability: InterfaceAvailability,
+) -> tuple[InterfaceChannel, ...]:
+    """Expose the pseudo-6DOF F-16 rate-reference adapter without effector claims."""
+
+    specs = (
+        ("body_rate.roll.command", -0.5, 0.5, "body-roll-rate-command-rad-s", "Body-frame roll-rate reference p."),
+        ("body_rate.pitch.command", -0.35, 0.35, "body-pitch-rate-command-rad-s", "Body-frame pitch-rate reference q."),
+        ("body_rate.yaw.command", -0.35, 0.35, "body-yaw-rate-command-rad-s", "Body-frame yaw-rate reference r."),
+    )
+    return tuple(
+        InterfaceChannel(
+            identifier,
+            "action",
+            "scalar",
+            "rad/s",
+            description,
+            frame="body",
+            lower=lower,
+            upper=upper,
+            availability=availability,
+            provenance="engineering_surrogate",
+            sampling="held_action",
+            binding={
+                "native_action": native,
+                "control_role": "body_rate_command",
+                "action_adapter": "f16_pseudo_6dof_body_rate_v1",
+                "state_authority": "pseudo_6dof_rate_reference_adapter",
+                "frame": "body",
+            },
+            claim_boundary=(
+                "The pseudo-6DOF adapter converts this held rate reference into bounded attitude/kinematic references. "
+                "It does not expose source FCS, moment, actuator, or surface authority."
+            ),
+        )
+        for identifier, lower, upper, native, description in specs
+    )
     ####
 
 
@@ -3946,8 +4288,11 @@ def _contract_claim_boundary(family_id: str, fidelity: FidelityTier, evidence_st
 
 
 __all__ = [
+    "AuthorityCommandOwner",
     "AuthorityKind",
     "AuthorityProfile",
+    "AuthoritySelectionScope",
+    "AuthoritySwitchingPolicy",
     "build_vehicle_interface_catalog_report",
     "project_authority_action_values",
     "project_committed_status_values",

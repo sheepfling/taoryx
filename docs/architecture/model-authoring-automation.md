@@ -800,13 +800,114 @@ applicable telemetry, or `--output-mode selected --channel <id>` and
 `--no-spawned-objects` let consumers exercise lineage limits without changing
 the configuration.
 
+### Select a streaming control profile
+
+Stateful Vehicle Composition models advertise all authority profiles under
+each realization's `controls`, including the default authority, command owner,
+selection scope, switching policy, phase applicability, units, bounds, frames,
+sampling semantics, and lowering chain. A consumer selects one profile when
+opening the common Mission Composition session; it does not merge controls
+from several profiles into one action vector.
+
+For a live-switchable multi-profile realization, the common model-authoring
+plan's `controller_automation.channels` field is the default authority's
+immediately usable channel projection, while `available_channels` is the
+complete realization catalog. Legacy locked realizations retain their complete
+catalog in `channels` for compatibility. Join `available_channels` to
+`authorities[].channel_ids` to inspect any profile. `default_authority_id` and
+`channel_projection` make that distinction machine-readable; clients must not
+treat `available_channels` as one simultaneous action vector.
+
+The same plan returns `controller_automation.control_scheme_support`, already
+filtered to the selected realization and fidelity. Use that collection to
+build a mode picker; use the referenced authority and action records to build
+the actual control form. The full assessment summary also lists scheme IDs per
+realization. This avoids treating a common scheme label as permission to send
+the same numeric vector to unrelated families.
+
+```python
+from taoryx.trajectory import (
+    MissionCompositionOpenSessionRequest,
+    MissionCompositionSessionManager,
+    MissionCompositionSessionStepRequest,
+    MissionCompositionSwitchAuthorityRequest,
+)
+
+sessions = MissionCompositionSessionManager(provider)
+descriptor = sessions.open(
+    MissionCompositionOpenSessionRequest(
+        session_id="remote-f16",
+        provider_id=provider.metadata.id,
+        provider_version=provider.metadata.version,
+        prepared_configuration=prepared,
+        authority_profile_id="live_waypoint_guidance",
+        command_source_id="remote-waypoint-client",
+    )
+)
+
+result = sessions.step(
+    MissionCompositionSessionStepRequest(
+        session_id=descriptor.session_id,
+        authority_profile_id="live_waypoint_guidance",
+        expected_sequence=0,
+        duration_s=0.2,
+        action={
+            "navigation.waypoint.north.command": 2_000.0,
+            "navigation.waypoint.east.command": 500.0,
+            "navigation.waypoint.altitude.command": 3_000.0,
+            "navigation.waypoint.capture_radius.command": 25.0,
+            "navigation.waypoint.speed.command": 250.0,
+        },
+    )
+)
+
+handoff = sessions.switch_authority(
+    MissionCompositionSwitchAuthorityRequest(
+        session_id=descriptor.session_id,
+        authority_profile_id="reduced_pilot_command",
+        expected_sequence=result.sequence,
+        command_source_id="remote-gamepad",
+    )
+)
+```
+
+The open descriptor and handoff response each return the exact active action
+schema. A step returns requested/applied semantic values separately from the
+lowered adapter values and lowering evidence. `control_authority` in every
+committed observation identifies the active owner and source. Omitting
+`authority_profile_id` on open retains the legacy native-action schema.
+
+The first provider-neutral streaming acceptance ladder is deliberately small:
+
+| Model | Default profile | Selectable live profiles | Boundary |
+| --- | --- | --- | --- |
+| `reference_ballistic_3dof` | `open_loop_coast` | none | Zero-action analytical propagation; no controller is invented |
+| `reference_constant_velocity_waypoint_3dof` | `configured_waypoint_guidance` | `kinematic_velocity_command`, `live_waypoint_guidance` | Shared analytical transition with explicit speed/angle or waypoint units |
+| `contract_probe_vehicle` | `debug_guidance_control` | `debug_discrete_control`, `debug_event_control` | Non-physical API stress surface; tuning is not applicable |
+| `simple_aero` | `generated_mission_commands` | `direct_throttle_command` | Existing point-mass kernel; bank is non-steering schedule telemetry |
+
+These fixtures test open, observe, step, authority handoff, typed schemas,
+lowering evidence, and checkpoint restoration before the same pattern is
+promoted further into the F-16. A zero-action provider/open-loop profile is a
+first-class profile, not a missing schema: it accepts `{}` and reports its
+owner while rejecting invented caller coordinates.
+
+Only profiles declaring `explicit_bumpless` can use the live handoff. The
+current reduced A320/F-16 adapters preserve plant state and clear old held
+references during transfer. CADAC source-managed sessions instead advertise an
+empty `source_program_control` action schema with `provider_managed` switching;
+their retained source controller cannot be replaced through this API.
+
 ### Focused workflow endpoints
 
 `Simple Aero` and `dual_launch_glider` are registered model workflows, but
 they are not physical entries in the Vehicle Composition registry. Their
 checked-in endpoint catalog keeps that boundary visible while still proving
-the useful vertical path: authored draft → installed-provider validation →
-advertised common batch registration → normalized result surface.
+the useful batch vertical path: authored draft → installed-provider validation
+→ advertised common batch registration → normalized result surface. Simple
+Aero additionally exposes the persistent session described above; the focused
+endpoint witness remains a batch witness and does not silently broaden the
+dual-launch contract.
 
 ```bash
 taoryx model endpoint-specs
@@ -830,12 +931,13 @@ The shipped consumer fixtures are deliberately small and deterministic:
 testing complete metadata, typed telemetry, failures, and multi-object
 lineage; it remains a development fixture rather than a physics claim.
 
-The two analytical fixtures now also advertise their exact repeatable native
-sequence and operation matrix. Their plans select
+The two analytical fixtures advertise their exact repeatable native sequence
+and operation matrix. Their plans select
 `reference_ballistic_3dof_repeatable_sequence_v1` or
 `reference_constant_velocity_waypoint_3dof_repeatable_sequence_v1`, expose
-`validate` and common-runner `batch`, and explicitly block `step` because no
-stateful analytical session is registered. This makes their runnable contract
+`validate`, common-runner `batch`, and the registered persistent `step` route.
+Both modes call the same analytical transition helpers, so stepping does not
+introduce a second dynamics implementation. This makes their runnable contract
 visible to agents without misrepresenting either fixture as a physical vehicle
 or a control/qualification result.
 

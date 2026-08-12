@@ -67,6 +67,13 @@ from .agm6_plugin import Agm6PluginOverrides, Agm6VehiclePlugin
 from .configuration_defaults import materialize_configuration_defaults
 from .control_metadata import source_managed_control_advertisement
 from .output_metadata import cadac_output_quantity
+from .session_authority import (
+    CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID,
+    CADAC_SOURCE_PROGRAM_PROFILE_ID,
+    source_managed_session_authority_fields,
+    source_managed_session_authority_state,
+    validate_source_managed_session_request,
+)
 
 CADAC_PROVIDER_ID = "cadac"
 AGM6_MODEL_ID = "cadac.agm6.missile"
@@ -238,6 +245,7 @@ class CadacAgm6MissionCompositionProvider:
             raise ValueError("AGM6 session request names another provider version")
         if request.model_id != AGM6_MODEL_ID:
             raise ValueError("AGM6 session request names another model")
+        validate_source_managed_session_request(request.authority_profile_id, request.command_source_id)
         ####
         prepared = self.validate_configuration(request.prepared_configuration.configuration)
         if prepared.fingerprint != request.prepared_configuration.fingerprint:
@@ -275,6 +283,7 @@ class CadacAgm6MissionCompositionProvider:
             integration_step_s=definition.integration_step_s,
             supports_spawned_entities=False,
             action_schema=(),
+            **source_managed_session_authority_fields(),
             observation_schema=_agm6_session_observation_schema(),
             initial_observation=observation,
             claim_boundary=(
@@ -320,6 +329,7 @@ class CadacAgm6MissionCompositionProvider:
             raise ValueError(f"AGM6 expected sequence {request.expected_sequence}, current sequence is {record.sequence}")
         if request.action:
             raise ValueError("AGM6 source-managed session does not accept external action channels")
+        validate_source_managed_session_request(request.authority_profile_id, None)
         ####
         substeps = _agm6_session_substeps(request.duration_s, record.definition.integration_step_s)
         time_start_s = record.source.sim_time_s
@@ -365,6 +375,9 @@ class CadacAgm6MissionCompositionProvider:
             observation=record.observation,
             events=record.observation.events,
             diagnostics=record.observation.diagnostics,
+            authority_profile_id=CADAC_SOURCE_PROGRAM_PROFILE_ID,
+            command_source_id=CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID,
+            lowering_evidence=source_managed_session_authority_state().model_dump(mode="json"),
         )
     ####
 
@@ -702,6 +715,7 @@ def _agm6_session_observation(
             "native_relative_state_track": _agm6_native_track_value(sensor_bus),
         },
         events=events,
+        control_authority=source_managed_session_authority_state(),
     )
     ####
 

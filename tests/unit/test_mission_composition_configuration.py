@@ -295,9 +295,13 @@ def test_every_realization_publishes_complete_generic_control_metadata() -> None
                 assert all(item.native_channel_id for item in step_actions)
 
     simple_aero = provider.model("simple_aero").realizations[0].controls
-    assert simple_aero.status == "internally_generated"
-    assert {item.id for item in simple_aero.channels} == {"command.bank", "command.throttle"}
-    assert {item.resolution for item in simple_aero.intents} == {"provider_internal"}
+    assert simple_aero.status == "available"
+    assert {item.id for item in simple_aero.channels} == {
+        "command.bank",
+        "command.throttle",
+        "propulsion.command.fraction",
+    }
+    assert {item.resolution for item in simple_aero.intents} == {"provider_internal", "external_channel"}
 
     f16_surface = next(item for item in provider.model("f16_s119").realizations if item.id == "rigid_body_6dof_surface_allocated")
     assert f16_surface.controls.status == "internally_generated"

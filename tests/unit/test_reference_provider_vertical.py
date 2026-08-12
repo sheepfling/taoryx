@@ -46,7 +46,7 @@ def plugins() -> PluginCatalog:
         ),
     ),
 )
-def test_analytical_reference_models_advertise_exact_batch_only_endpoints(
+def test_analytical_reference_models_advertise_exact_batch_and_step_endpoints(
     plugins: PluginCatalog,
     model_id: str,
     mission_template_id: str,
@@ -73,9 +73,9 @@ def test_analytical_reference_models_advertise_exact_batch_only_endpoints(
     assert cast(dict[str, object], plan["selection"])["mission_template_id"] == mission_template_id
     assert cast(dict[str, object], mission)["segment_sequence"]
     assert execution["status"] == "runnable"
-    assert execution["endpoint_maturity"] == "batch_ready"
-    assert execution["available_operations"] == ["validate", "batch"]
-    assert [item["operation"] for item in cast(list[dict[str, object]], execution["blocked_operations"])] == ["step"]
+    assert execution["endpoint_maturity"] == "batch_and_step_ready"
+    assert execution["available_operations"] == ["validate", "batch", "step"]
+    assert execution["blocked_operations"] == []
     assert controller["status"] == controller_status
     assert controller["campaigns"] == []
     ####
@@ -184,9 +184,9 @@ def test_contract_probe_retains_its_exact_batch_advertisement_and_full_result_sh
 
     assert plan["status"] == "ready_to_author"
     assert execution["status"] == "runnable"
-    assert execution["endpoint_maturity"] == "batch_ready"
-    assert execution["available_operations"] == ["validate", "batch"]
-    assert [item["operation"] for item in cast(list[dict[str, object]], execution["blocked_operations"])] == ["step"]
+    assert execution["endpoint_maturity"] == "batch_and_step_ready"
+    assert execution["available_operations"] == ["validate", "batch", "step"]
+    assert execution["blocked_operations"] == []
 
     probe = providers.provider(PROBE_PROVIDER_ID)
     prepared = probe.validate_configuration(build_contract_probe_configuration(probe, fidelity=fidelity))  # type: ignore[arg-type]

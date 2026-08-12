@@ -13,7 +13,7 @@ endpoints:
     mission_template_id: fixed_ld_baseline
     draft: verification/workflow_endpoint_witnesses/simple_aero_fixed_ld_baseline.yaml
     batch_executor_id: taoryx.simple-aero.common-batch.v1
-    blocked_operations: [step]
+    blocked_operations: []
     required_core_output_ids:
       - position.geodetic.altitude
       - position.geodetic.latitude

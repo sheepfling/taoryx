@@ -14,7 +14,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
-from .vehicle_interface import InterfaceChannel, validate_interface_channel_value
+from .vehicle_interface import AuthorityProfile, InterfaceChannel, VehicleInterfaceContract, validate_interface_channel_value
 
 _SCHEMA = "taoryx.composition-semantic-action-trace/v1alpha1"
 
@@ -45,7 +45,10 @@ def build_committed_control_trace(
     if not samples:
         raise ValueError("committed control trace requires at least one sample")
     contract = resolve_vehicle_composition_interface_contract(composition)
-    actions = _batch_visible_channels(contract.action_channels)
+    actions, authority_profile = _batch_action_channels(
+        contract,
+        requested_action_ids=set(samples[0].requested_actions),
+    )
     effectors = _batch_visible_channels(contract.effector_channels)
     serialized: list[dict[str, object]] = []
     previous_truth_time: float | None = None
@@ -74,11 +77,14 @@ def build_committed_control_trace(
         "interface_id": contract.id,
         "interface_fingerprint_sha256": contract.fingerprint,
         "sampling": "held_action_interval_to_committed_truth_boundary",
+        "authority_profile_id": authority_profile.id if authority_profile is not None else None,
+        "command_owner": authority_profile.command_owner if authority_profile is not None else None,
+        "lowering_chain": list(authority_profile.lowering_chain) if authority_profile is not None else [],
         "requested_action_channels": sorted(actions),
         "achieved_effector_channels": sorted(effectors),
         "samples": serialized,
         "claim_boundary": (
-            "Each requested action is the command held over the interval ending at the named committed truth "
+            "Each requested action belongs to the named authority profile, or to an explicitly labeled legacy native union, and is held over the interval ending at the named committed truth "
             "sample. Achieved values are limited to explicitly declared effectors; absent effectors remain absent. "
             "The trace neither interpolates commands nor establishes physical allocation beyond the selected fidelity."
         ),
@@ -133,7 +139,16 @@ def validate_committed_control_trace(
     """Reject a command artifact that disagrees with the exact composition interface."""
 
     contract = resolve_vehicle_composition_interface_contract(composition)
-    actions = _batch_visible_channels(contract.action_channels)
+    raw_action_ids = trace.get("requested_action_channels")
+    requested_action_ids = (
+        set(raw_action_ids)
+        if isinstance(raw_action_ids, list) and all(isinstance(item, str) for item in raw_action_ids)
+        else None
+    )
+    actions, authority_profile = _batch_action_channels(
+        contract,
+        requested_action_ids=requested_action_ids,
+    )
     effectors = _batch_visible_channels(contract.effector_channels)
     if trace.get("schema") != _SCHEMA:
         raise ValueError("committed control trace has an unknown schema")
@@ -147,6 +162,15 @@ def validate_committed_control_trace(
         raise ValueError("committed control trace interface fingerprint disagrees with the composition")
     if trace.get("sampling") != "held_action_interval_to_committed_truth_boundary":
         raise ValueError("committed control trace must declare held-action interval sampling")
+    expected_authority_profile_id = authority_profile.id if authority_profile is not None else None
+    if trace.get("authority_profile_id") != expected_authority_profile_id:
+        raise ValueError("committed control trace authority profile disagrees with the interface")
+    expected_command_owner = authority_profile.command_owner if authority_profile is not None else None
+    if trace.get("command_owner") != expected_command_owner:
+        raise ValueError("committed control trace command owner disagrees with the interface")
+    expected_lowering_chain = list(authority_profile.lowering_chain) if authority_profile is not None else []
+    if trace.get("lowering_chain") != expected_lowering_chain:
+        raise ValueError("committed control trace lowering chain disagrees with the interface")
     if trace.get("requested_action_channels") != sorted(actions):
         raise ValueError("committed control trace action channel set disagrees with the interface")
     if trace.get("achieved_effector_channels") != sorted(effectors):
@@ -236,6 +260,37 @@ def _batch_visible_channels(channels: Sequence[InterfaceChannel]) -> dict[str, I
         for channel in channels
         if channel.availability in {"available", "available_in_batch"}
     }
+    ####
+
+
+def _batch_action_channels(
+    contract: VehicleInterfaceContract,
+    *,
+    requested_action_ids: set[str] | None,
+) -> tuple[dict[str, InterfaceChannel], AuthorityProfile | None]:
+    """Resolve a profile-shaped batch surface while retaining legacy unions."""
+
+    all_actions = _batch_visible_channels(contract.action_channels)
+    if requested_action_ids is None:
+        return all_actions, None
+    matches = tuple(
+        profile
+        for profile in contract.authority_profiles
+        if profile.availability in {"available", "available_in_batch"}
+        and {
+            identifier
+            for identifier in profile.action_ids
+            if identifier in all_actions
+        }
+        == requested_action_ids
+    )
+    if matches:
+        profile = next(
+            (item for item in matches if item.id == contract.default_authority_profile_id),
+            matches[0],
+        )
+        return ({identifier: all_actions[identifier] for identifier in profile.action_ids if identifier in all_actions}, profile)
+    return all_actions, None
     ####
 
 

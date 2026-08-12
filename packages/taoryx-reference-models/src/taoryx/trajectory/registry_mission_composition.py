@@ -74,7 +74,12 @@ from .native_output_contract import (
     native_output_channel_metadata,
     native_output_reference_frames,
 )
-from .simple_aero_mission_composition import simple_aero_configuration_schema, simple_aero_model_metadata
+from .simple_aero_mission_composition import (
+    SIMPLE_AERO_MODEL_ID,
+    open_simple_aero_session_episode,
+    simple_aero_configuration_schema,
+    simple_aero_model_metadata,
+)
 
 _MODEL_VERSION = "composition-registry-v1"
 _EXECUTOR_ID = "taoryx.registry.native-batch.v1"
@@ -288,6 +293,26 @@ class RegistryMissionCompositionProvider:
                     path="configuration.root.initialization.body_shape",
                 )
         return prepared
+        ####
+
+    def open_session_episode(
+        self,
+        prepared: PreparedTrajectoryConfiguration,
+        *,
+        seed: int | None = None,
+        integration_step_s: float = 0.02,
+    ) -> object:
+        """Dispatch noncanonical stateful workflows with exact registered factories."""
+
+        model = self.model(prepared.configuration.model_id)
+        if model.id == SIMPLE_AERO_MODEL_ID:
+            return open_simple_aero_session_episode(
+                model,
+                prepared,
+                seed=seed,
+                integration_step_s=integration_step_s,
+            )
+        raise TypeError(f"model {model.id!r} has no noncanonical session episode factory")
         ####
 
     def build_runner(self) -> MissionCompositionRunnerRegistry:
@@ -825,6 +850,11 @@ def _control_advertisement(
                 channel_ids=tuple(item.id for item in channels),
                 operations=() if status in {"blocked", "unsupported"} else ("batch",),
                 description="Source-declared control coordinates retained as explicit effector candidates.",
+                command_owner="source_program",
+                selection_scope="batch",
+                switching_policy="locked",
+                scheme_id="effector.direct",
+                lowering_chain=("source_declared_control_coordinate",),
                 source_refs=tuple(item for item in (vehicle.family.source_manifest_path,) if item is not None),
                 provenance="source family manifest",
                 claim_boundary=(
@@ -841,9 +871,13 @@ def _control_advertisement(
         operations=operations,
         channels=channels,
     )
-    active_authority = next(
-        (item.id for item in authorities if item.availability in {"available", "available_in_batch"}),
-        None,
+    active_authority = (
+        contract.default_authority_profile_id
+        if contract.default_authority_profile_id in {item.id for item in authorities}
+        else next(
+            (item.id for item in authorities if item.availability in {"available", "available_in_batch"}),
+            None,
+        )
     )
     return TrajectoryControlAdvertisement(
         status=status,
@@ -1033,6 +1067,16 @@ def _control_authority(
         channel_ids=tuple(authority.action_ids),  # type: ignore[attr-defined]
         operations=operations,
         description=str(authority.description),  # type: ignore[attr-defined]
+        command_owner=authority.command_owner,  # type: ignore[attr-defined]
+        selection_scope=authority.selection_scope,  # type: ignore[attr-defined]
+        switching_policy=authority.switching_policy,  # type: ignore[attr-defined]
+        applicable_phase_ids=tuple(authority.applicable_phase_ids),  # type: ignore[attr-defined]
+        lowering_chain=tuple(authority.lowering_chain),  # type: ignore[attr-defined]
+        scheme_id=authority.scheme_id,  # type: ignore[attr-defined]
+        scheme_layer=authority.scheme_layer,  # type: ignore[attr-defined]
+        consumer_roles=tuple(authority.consumer_roles),  # type: ignore[attr-defined]
+        streaming_preference=authority.streaming_preference,  # type: ignore[attr-defined]
+        ui_order=authority.ui_order,  # type: ignore[attr-defined]
         source_refs=("src/taoryx/vehicle_interface.py",),
         provenance="vehicle-interface authority profile",
         claim_boundary=str(authority.claim_boundary),  # type: ignore[attr-defined]

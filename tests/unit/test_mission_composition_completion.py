@@ -72,11 +72,11 @@ def test_production_advertisement_and_generated_completion_artifacts_are_current
     assert audit.status == "pass", audit.diagnostics
     assert audit.runner_checked
     assert all(item.status == "pass" for item in audit.models)
-    assert sum(item.control_channel_count for item in audit.models) == 133
-    assert sum(item.active_control_channel_count for item in audit.models) == 88
-    assert sum(item.native_bound_control_channel_count for item in audit.models) == 121
-    assert sum(item.control_authority_count for item in audit.models) == 57
-    assert sum(item.control_intent_count for item in audit.models) == 155
+    assert sum(item.control_channel_count for item in audit.models) == 177
+    assert sum(item.active_control_channel_count for item in audit.models) == 132
+    assert sum(item.native_bound_control_channel_count for item in audit.models) == 165
+    assert sum(item.control_authority_count for item in audit.models) == 69
+    assert sum(item.control_intent_count for item in audit.models) == 156
     assert ProviderAdvertisementConformanceReport.model_validate_json(audit.model_dump_json(by_alias=True)) == audit
 
     assert report.status == "pass", report.diagnostics
@@ -85,7 +85,7 @@ def test_production_advertisement_and_generated_completion_artifacts_are_current
     assert report.family_count == 11
     assert report.realization_count == 45
     assert report.registered_batch_tuple_count == 66
-    assert report.registered_interactive_tuple_count == 12
+    assert report.registered_interactive_tuple_count == 23
     assert MissionCompositionCompletionReport.model_validate_json(report.model_dump_json(by_alias=True)) == report
 
     expected_json = report.model_dump_json(indent=2, by_alias=True) + "\n"

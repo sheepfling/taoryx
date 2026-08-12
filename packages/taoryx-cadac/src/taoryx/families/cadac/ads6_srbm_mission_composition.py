@@ -68,6 +68,13 @@ from .aim5_mission_composition import CADAC_PROVIDER_ID
 from .configuration_defaults import materialize_configuration_defaults
 from .control_metadata import source_managed_control_advertisement
 from .output_metadata import cadac_output_quantity
+from .session_authority import (
+    CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID,
+    CADAC_SOURCE_PROGRAM_PROFILE_ID,
+    source_managed_session_authority_fields,
+    source_managed_session_authority_state,
+    validate_source_managed_session_request,
+)
 
 ADS6_SRBM_MODEL_ID = "cadac.ads6.srbm"
 ADS6_SRBM_MODEL_VERSION = "0.9.0"
@@ -183,6 +190,7 @@ class CadacAds6SrbmMissionCompositionProvider:
             raise ValueError("ADS6 SRBM session request names another provider version")
         if request.model_id != ADS6_SRBM_MODEL_ID:
             raise ValueError("ADS6 SRBM session request names another model")
+        validate_source_managed_session_request(request.authority_profile_id, request.command_source_id)
         prepared = self.validate_configuration(request.prepared_configuration.configuration)
         if prepared.fingerprint != request.prepared_configuration.fingerprint:
             raise ValueError("ADS6 SRBM session prepared configuration is stale")
@@ -217,6 +225,7 @@ class CadacAds6SrbmMissionCompositionProvider:
             integration_step_s=definition.integration_step_s,
             supports_spawned_entities=False,
             action_schema=(),
+            **source_managed_session_authority_fields(),
             observation_schema=_ads6_srbm_session_observation_schema(),
             initial_observation=observation,
             claim_boundary=(
@@ -262,6 +271,7 @@ class CadacAds6SrbmMissionCompositionProvider:
             raise ValueError(f"ADS6 SRBM expected sequence {request.expected_sequence}, current sequence is {record.sequence}")
         if request.action:
             raise ValueError("ADS6 SRBM source-managed session does not accept external action channels")
+        validate_source_managed_session_request(request.authority_profile_id, None)
         substeps = _ads6_srbm_session_substeps(request.duration_s, record.definition.integration_step_s)
         time_start_s = record.source.sim_time_s
         previous_context = record.source.native_sensor_context()
@@ -306,6 +316,9 @@ class CadacAds6SrbmMissionCompositionProvider:
             observation=observation,
             events=observation.events,
             diagnostics=observation.diagnostics,
+            authority_profile_id=CADAC_SOURCE_PROGRAM_PROFILE_ID,
+            command_source_id=CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID,
+            lowering_evidence=source_managed_session_authority_state().model_dump(mode="json"),
         )
         ####
 
@@ -581,6 +594,7 @@ def _ads6_srbm_session_observation(
             "native_relative_state_track": _ads6_srbm_native_track_value(sensor_bus),
         },
         events=events,
+        control_authority=source_managed_session_authority_state(),
     )
     ####
 

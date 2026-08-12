@@ -94,7 +94,8 @@ def test_runnable_episode_exposes_only_contract_bound_native_channels(compositio
         "template_success_sequence_only",
         "family_extension_declared",
     }
-    assert report["semantic_action_channel_count"] == report["native_action_channel_count"]
+    assert report["semantic_action_channel_count"] == report["profile_adapter_action_channel_count"]
+    assert report["native_action_channel_count"] <= report["profile_adapter_action_channel_count"]
     assert report["available_observation_profiles"]
     episode.close()
     ####
@@ -444,6 +445,39 @@ def test_f16_reduced_episode_uses_the_shared_kinematic_guidance_contract(tmp_pat
     episode.reset()
     episode.load_checkpoint(checkpoint)
     assert episode.observe().as_dict() == expected
+    ####
+
+
+def test_reduced_live_waypoint_profile_checkpoint_preserves_authority_and_held_target(tmp_path: Path) -> None:
+    composition = _composition("a320_racetrack_capability_pseudo6dof_compose.yaml")
+    episode = open_vehicle_composition_episode(composition)
+    contract = episode.interface_contract
+    initial_altitude_m = float(episode.status_frame().values["position.altitude"])
+
+    episode.step_frame(
+        ActionFrame(
+            contract.id,
+            contract.fingerprint,
+            "live_waypoint_guidance",
+            {
+                "navigation.waypoint.north.command": 2_000.0,
+                "navigation.waypoint.east.command": 500.0,
+                "navigation.waypoint.altitude.command": initial_altitude_m + 100.0,
+                "navigation.waypoint.capture_radius.command": 25.0,
+                "navigation.waypoint.speed.command": 250.0,
+            },
+            0.2,
+        )
+    )
+    checkpoint = episode.save_checkpoint(tmp_path / "a320-waypoint.checkpoint.json")
+    expected = episode.observe().as_dict()
+
+    episode.reset()
+    restored = episode.load_checkpoint(checkpoint)
+
+    assert restored.as_dict() == expected
+    assert restored.values["control_authority_profile_id"] == "live_waypoint_guidance"
+    assert restored.values["control_lowering"]["waypoint_range_m"] > 0.0
     ####
 
 

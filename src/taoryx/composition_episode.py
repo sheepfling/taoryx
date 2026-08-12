@@ -93,12 +93,24 @@ class EpisodeChannel:
     upper: float | None = None
     description: str = ""
     value_space: ValueSpaceSpec | None = field(default=None, repr=False)
+    data_type: Literal["float64", "int64", "boolean", "string", "json"] | None = None
+    shape: tuple[int | Literal["variable"], ...] = ()
+    sampling_semantics: Literal[
+        "continuous_sample",
+        "discrete_sample",
+        "event",
+        "interval",
+        "static",
+        "provider_reported",
+    ] | None = None
 
     def __post_init__(self) -> None:
         if not self.name.strip() or not self.description.strip():
             raise ValueError("episode channels require a stable name and description")
         if self.lower is not None and self.upper is not None and self.lower > self.upper:
             raise ValueError(f"episode channel {self.name!r} has inverted bounds")
+        if any(item != "variable" and item <= 0 for item in self.shape):
+            raise ValueError(f"episode channel {self.name!r} has a non-positive shape dimension")
         if self.value_space is None:
             object.__setattr__(
                 self,
@@ -122,6 +134,9 @@ class EpisodeChannel:
             "upper": self.upper,
             "description": self.description,
             "value_space": self.value_space.as_dict(),
+            "data_type": self.data_type,
+            "shape": list(self.shape),
+            "sampling_semantics": self.sampling_semantics,
         }
         ####
 
@@ -395,10 +410,9 @@ class EpisodeStep:
     ####
 
 
-class VehicleCompositionEpisode(Protocol):
-    """Common interactive projection of one immutable vehicle composition."""
+class MissionCompositionEpisode(Protocol):
+    """Provider-neutral interactive episode accepted by the session API."""
 
-    composition: CompiledVehicleComposition
     claim_boundary: str
     interface_contract: VehicleInterfaceContract
 
@@ -445,8 +459,14 @@ class VehicleCompositionEpisode(Protocol):
         ...
 
     def close(self) -> None:
-        """Close the episode without mutating the resolved composition."""
+        """Close provider-owned state without mutating the prepared configuration."""
         ...
+
+
+class VehicleCompositionEpisode(MissionCompositionEpisode, Protocol):
+    """Interactive projection of one immutable canonical vehicle composition."""
+
+    composition: CompiledVehicleComposition
 
 
 class LanguageBackedCompositionEpisode:
@@ -1033,6 +1053,33 @@ class HummingbirdPseudoCompositionEpisode:
     ####
 
 
+def _reduced_fixed_wing_high_order_episode_channels(maximum_speed_m_s: float) -> tuple[EpisodeChannel, ...]:
+    """Return native adapter coordinates shared by reduced fixed-wing profiles."""
+
+    return (
+        EpisodeChannel("pilot-throttle-fraction", "dimensionless", 0.0, 1.0, "held normalized reduced energy request"),
+        EpisodeChannel("pilot-longitudinal-normalized", "dimensionless", -1.0, 1.0, "held normalized reduced longitudinal request"),
+        EpisodeChannel("pilot-lateral-normalized", "dimensionless", -1.0, 1.0, "held normalized reduced roll-to-turn request"),
+        EpisodeChannel("waypoint-north-m", "m", -1_000_000.0, 1_000_000.0, "held live-waypoint north coordinate"),
+        EpisodeChannel("waypoint-east-m", "m", -1_000_000.0, 1_000_000.0, "held live-waypoint east coordinate"),
+        EpisodeChannel("waypoint-altitude-m", "m", -1_000.0, 100_000.0, "held live-waypoint altitude coordinate"),
+        EpisodeChannel("waypoint-capture-radius-m", "m", 1.0, 100_000.0, "held live-waypoint capture radius"),
+        EpisodeChannel("waypoint-speed-mps", "m/s", 50.0, maximum_speed_m_s, "held live-waypoint speed request"),
+    )
+    ####
+
+
+def _f16_reduced_body_rate_episode_channels() -> tuple[EpisodeChannel, ...]:
+    """Return the F-16 pseudo-6DOF rate-reference adapter coordinates."""
+
+    return (
+        EpisodeChannel("body-roll-rate-command-rad-s", "rad/s", -0.5, 0.5, "held body roll-rate reference p"),
+        EpisodeChannel("body-pitch-rate-command-rad-s", "rad/s", -0.35, 0.35, "held body pitch-rate reference q"),
+        EpisodeChannel("body-yaw-rate-command-rad-s", "rad/s", -0.35, 0.35, "held body yaw-rate reference r"),
+    )
+    ####
+
+
 class ReducedFixedWingCompositionEpisode:
     """Reusable accepted-truth contract for source-owned reduced fixed wing.
 
@@ -1072,10 +1119,13 @@ class ReducedFixedWingCompositionEpisode:
             raise ValueError(f"cannot create A320 episode for {composition.id!r}: {preflight.status}: {details}")
         self.composition = composition
         self.interface_contract = _interface_contract_for_composition(composition)
+        self._authority_action_schema_cache: dict[str, tuple[EpisodeChannel, ...]] = {}
         self.seed = seed
         self.preflight = preflight
         self._stepper = self._build_stepper(composition)
         self._held_native_action: dict[str, float] = {}
+        self._active_authority_profile_id: str | None = None
+        self._control_lowering_state: dict[str, object] = {}
         self._closed = False
         self._status: EpisodeStatus = "ready"
         ####
@@ -1083,6 +1133,45 @@ class ReducedFixedWingCompositionEpisode:
     @property
     def action_schema(self) -> tuple[EpisodeChannel, ...]:
         return self._ACTION_SCHEMA
+        ####
+
+    def authority_action_schema(self, authority_profile_id: str) -> tuple[EpisodeChannel, ...]:
+        """Return the adapter coordinates accepted by one semantic profile.
+
+        The legacy episode action schema remains the source-native kinematic
+        seam. Higher-order adapter coordinates are visible only after an
+        authority profile is selected through the semantic session contract.
+        """
+
+        cached = self._authority_action_schema_cache.get(authority_profile_id)
+        if cached is not None:
+            return cached
+        profile = self.interface_contract.authority_profile(authority_profile_id)
+        maximum_speed_m_s = 300.0 if self._FAMILY_ID == "a320_openap_3dof" else 500.0
+        candidates = {
+            channel.name: channel
+            for channel in (
+                *self.action_schema,
+                *_reduced_fixed_wing_high_order_episode_channels(maximum_speed_m_s),
+                *(
+                    _f16_reduced_body_rate_episode_channels()
+                    if self._FAMILY_ID == "f16_s119" and self.composition.fidelity == "pseudo_6dof"
+                    else ()
+                ),
+            )
+        }
+        semantic_channels = {channel.id: channel for channel in self.interface_contract.action_channels}
+        resolved: list[EpisodeChannel] = []
+        for identifier in profile.action_ids:
+            native = semantic_channels[identifier].binding.get("native_action")
+            if not isinstance(native, str) or native not in candidates:
+                raise ValueError(
+                    f"authority profile {authority_profile_id!r} has no reduced-episode adapter for {identifier!r}"
+                )
+            resolved.append(candidates[native])
+        schema = tuple(resolved)
+        self._authority_action_schema_cache[authority_profile_id] = schema
+        return schema
         ####
 
     @property
@@ -1106,6 +1195,7 @@ class ReducedFixedWingCompositionEpisode:
         self.seed = self.seed if seed is None else seed
         self._stepper.reset()
         self._held_native_action = {}
+        self._control_lowering_state = {}
         self._status = "ready"
         return self.observe()
         ####
@@ -1114,8 +1204,11 @@ class ReducedFixedWingCompositionEpisode:
         """Return current committed reduced-plant truth without interpolation."""
 
         self._require_open()
-        row = self._stepper.current_row(self._guidance_override(self._held_native_action))
-        return EpisodeObservation(self._stepper.state.time_s, self._status_values(row), self._status)
+        row = self._stepper.current_row(self._control_override(self._held_native_action))
+        values = self._status_values(row)
+        values["control_authority_profile_id"] = self._active_authority_profile_id or "legacy_native_union"
+        values["control_lowering"] = dict(self._control_lowering_state)
+        return EpisodeObservation(self._stepper.state.time_s, values, self._status)
         ####
 
     def status_frame(self) -> StatusFrame:
@@ -1141,7 +1234,7 @@ class ReducedFixedWingCompositionEpisode:
             raise ValueError("A320 episode duration_s must be positive and finite")
         requested, applied = self._resolve_action(action)
         start = self._stepper.state.time_s
-        rows = self._stepper.step(duration_s, self._guidance_override(applied))
+        rows = self._stepper.step(duration_s, self._control_override(applied, duration_s=duration_s))
         self._held_native_action = applied
         events: tuple[str, ...]
         if not self._stepper.state.numerical_valid:
@@ -1158,19 +1251,49 @@ class ReducedFixedWingCompositionEpisode:
         ####
 
     def step_frame(self, action: ActionFrame) -> EpisodeStep:
-        """Map a validated semantic guidance frame into the reduced native coordinates."""
+        """Map one selected high- or low-order profile into reduced native coordinates."""
 
         self._require_open()
+        previous_profile_id = self._active_authority_profile_id
+        self.select_authority_profile(action.authority_profile_id)
         step = self.step(_native_action_for_frame(self.interface_contract, action), action.duration_s)
+        transition_event = (
+            ()
+            if previous_profile_id in {None, action.authority_profile_id}
+            else (f"authority_profile_changed:{previous_profile_id}->{action.authority_profile_id}",)
+        )
         status = self.status_frame()
         observation = _observation_frame(status, self.interface_contract.observation_profile(self.composition.observation.profile_id))
         return replace(
             step,
+            events=(*step.events, *transition_event),
             action_frame=action,
             applied_semantic_action=_semantic_action_from_native(self.interface_contract, action, step.applied_action),
             observation_frame=observation,
             status_frame=status,
         )
+        ####
+
+    def select_authority_profile(self, authority_profile_id: str) -> None:
+        """Select or explicitly transfer between state-continuous reduced profiles."""
+
+        profile = self.interface_contract.authority_profile(authority_profile_id)
+        if profile.availability != "available":
+            raise ValueError(f"authority profile {authority_profile_id!r} is {profile.availability}, not executable")
+        previous_id = self._active_authority_profile_id
+        if previous_id == authority_profile_id:
+            return
+        if previous_id is not None:
+            previous = self.interface_contract.authority_profile(previous_id)
+            if previous.switching_policy != "explicit_bumpless" or profile.switching_policy != "explicit_bumpless":
+                raise ValueError(f"authority transfer {previous_id!r} -> {authority_profile_id!r} is not declared")
+        self._held_native_action = {}
+        self._control_lowering_state = {
+            "active_profile_id": authority_profile_id,
+            "lowering_chain": list(profile.lowering_chain),
+            "transfer": "initial_selection" if previous_id is None else "state_continuous_reference_handoff",
+        }
+        self._active_authority_profile_id = authority_profile_id
         ####
 
     def save_checkpoint(self, path: str | Path) -> Path:
@@ -1185,6 +1308,8 @@ class ReducedFixedWingCompositionEpisode:
             "seed": self.seed,
             "status": self._status,
             "held_native_action": dict(self._held_native_action),
+            "active_authority_profile_id": self._active_authority_profile_id,
+            "control_lowering_state": dict(self._control_lowering_state),
             "stepper_state": self._serialize_stepper_state(snapshot),
         }
         payload["integrity"] = _payload_digest(payload)
@@ -1217,7 +1342,25 @@ class ReducedFixedWingCompositionEpisode:
         held = payload.get("held_native_action")
         if not isinstance(held, Mapping):
             raise ValueError(f"{self._FAMILY_LABEL} checkpoint has no held native action")
-        _, self._held_native_action = self._resolve_action(held)
+        active_authority_profile_id = payload.get("active_authority_profile_id")
+        if active_authority_profile_id is not None and not isinstance(active_authority_profile_id, str):
+            raise ValueError(f"{self._FAMILY_LABEL} checkpoint has invalid authority-profile identity")
+        if active_authority_profile_id is not None:
+            profile = self.interface_contract.authority_profile(active_authority_profile_id)
+            if profile.availability != "available":
+                raise ValueError(f"{self._FAMILY_LABEL} checkpoint authority profile is unavailable")
+        lowering_state = payload.get("control_lowering_state", {})
+        if not isinstance(lowering_state, Mapping):
+            raise ValueError(f"{self._FAMILY_LABEL} checkpoint has invalid control-lowering state")
+        action_schema = (
+            self.action_schema
+            if active_authority_profile_id is None
+            else self.authority_action_schema(active_authority_profile_id)
+        )
+        _, held_native_action = self._resolve_action_against_schema(held, action_schema, {})
+        self._held_native_action = held_native_action
+        self._active_authority_profile_id = active_authority_profile_id
+        self._control_lowering_state = dict(lowering_state)
         self.seed = payload.get("seed") if isinstance(payload.get("seed"), int) else None
         self._status = _episode_status_literal(payload.get("status"))
         return self.observe()
@@ -1229,12 +1372,26 @@ class ReducedFixedWingCompositionEpisode:
         ####
 
     def _resolve_action(self, action: Mapping[str, object]) -> tuple[dict[str, float], dict[str, float]]:
-        unknown = sorted(set(action) - {channel.name for channel in self._ACTION_SCHEMA})
+        action_schema = (
+            self.action_schema
+            if self._active_authority_profile_id is None
+            else self.authority_action_schema(self._active_authority_profile_id)
+        )
+        return self._resolve_action_against_schema(action, action_schema, self._held_native_action)
+        ####
+
+    def _resolve_action_against_schema(
+        self,
+        action: Mapping[str, object],
+        action_schema: tuple[EpisodeChannel, ...],
+        held_action: Mapping[str, float],
+    ) -> tuple[dict[str, float], dict[str, float]]:
+        unknown = sorted(set(action) - {channel.name for channel in action_schema})
         if unknown:
             raise ValueError("unknown A320 reduced episode action(s): " + ", ".join(unknown))
-        requested = {**self._held_native_action, **dict(action)}
+        requested = {**held_action, **dict(action)}
         applied: dict[str, float] = {}
-        for channel in self._ACTION_SCHEMA:
+        for channel in action_schema:
             value = requested.get(channel.name)
             if value is None:
                 continue
@@ -1257,6 +1414,134 @@ class ReducedFixedWingCompositionEpisode:
     @staticmethod
     def _guidance_override(action: Mapping[str, float]) -> Any:
         return _a320_guidance_override(action)
+        ####
+
+    def _control_override(self, action: Mapping[str, float], *, duration_s: float | None = None) -> Any:
+        """Lower the selected semantic adapter into the existing guidance seam."""
+
+        profile_id = self._active_authority_profile_id
+        row = self._stepper.current_row()
+        current_north_m = _finite_number(row.get("north_m"), "reduced current north_m")
+        current_east_m = _finite_number(row.get("east_m"), "reduced current east_m")
+        current_altitude_m = _finite_number(row.get("altitude_m"), "reduced current altitude_m")
+        current_speed_m_s = _finite_number(row.get("speed_m_s"), "reduced current speed_m_s")
+        current_heading_rad = _finite_number(row.get("heading_rad"), "reduced current heading_rad")
+        if profile_id == "live_waypoint_guidance":
+            retained = self._control_lowering_state.get("lowered_guidance")
+            if duration_s is None and isinstance(retained, Mapping):
+                return self._guidance_override(retained)
+            required = ("waypoint-north-m", "waypoint-east-m", "waypoint-altitude-m")
+            missing = tuple(name for name in required if name not in action)
+            if missing:
+                if not any(name.startswith("waypoint-") for name in action):
+                    self._control_lowering_state.update(
+                        {
+                            "active_profile_id": profile_id,
+                            "waypoint_status": "awaiting_initial_target",
+                            "lowered_guidance": {},
+                        }
+                    )
+                    return self._guidance_override({})
+                raise ValueError("live waypoint guidance requires an initial north/east/altitude target; missing " + ", ".join(missing))
+            north_error_m = action["waypoint-north-m"] - current_north_m
+            east_error_m = action["waypoint-east-m"] - current_east_m
+            altitude_error_m = action["waypoint-altitude-m"] - current_altitude_m
+            horizontal_range_m = math.hypot(north_error_m, east_error_m)
+            range_m = math.hypot(horizontal_range_m, altitude_error_m)
+            capture_radius_m = action.get("waypoint-capture-radius-m", 100.0)
+            captured = range_m <= capture_radius_m
+            heading_rad = current_heading_rad if horizontal_range_m <= 1.0e-9 else math.atan2(east_error_m, north_error_m)
+            flight_path_angle_deg = 0.0 if captured else math.degrees(math.atan2(altitude_error_m, max(horizontal_range_m, 1.0e-9)))
+            flight_path_angle_deg = min(20.0, max(-20.0, flight_path_angle_deg))
+            heading_error_rad = (heading_rad - current_heading_rad + math.pi) % (2.0 * math.pi) - math.pi
+            bank_angle_deg = 0.0 if captured else min(60.0, max(-60.0, math.degrees(heading_error_rad)))
+            waypoint_guidance = {
+                "speed_m_s": current_speed_m_s if captured else action.get("waypoint-speed-mps", current_speed_m_s),
+                "flight_path_angle_deg": flight_path_angle_deg,
+                "heading_deg": math.degrees(heading_rad) % 360.0,
+                "bank_angle_deg": bank_angle_deg,
+            }
+            self._control_lowering_state.update(
+                {
+                    "active_profile_id": profile_id,
+                    "waypoint_range_m": range_m,
+                    "waypoint_captured": captured,
+                    "lowered_guidance": dict(waypoint_guidance),
+                }
+            )
+            return self._guidance_override(waypoint_guidance)
+        if profile_id == "reduced_pilot_command":
+            retained = self._control_lowering_state.get("lowered_guidance")
+            if duration_s is None and isinstance(retained, Mapping):
+                return self._guidance_override(retained)
+            pilot_guidance: dict[str, float] = {}
+            throttle = action.get("pilot-throttle-fraction")
+            if throttle is not None:
+                maximum_speed_m_s = 300.0 if self._FAMILY_ID == "a320_openap_3dof" else 500.0
+                pilot_guidance["speed_m_s"] = 50.0 + throttle * (maximum_speed_m_s - 50.0)
+            longitudinal = action.get("pilot-longitudinal-normalized")
+            if longitudinal is not None:
+                pilot_guidance["flight_path_angle_deg"] = 20.0 * longitudinal
+            lateral = action.get("pilot-lateral-normalized")
+            if lateral is not None:
+                pilot_guidance["heading_deg"] = (math.degrees(current_heading_rad) + 45.0 * lateral) % 360.0
+                pilot_guidance["bank_angle_deg"] = 60.0 * lateral
+            self._control_lowering_state.update(
+                {
+                    "active_profile_id": profile_id,
+                    "lowered_guidance": dict(pilot_guidance),
+                }
+            )
+            return self._guidance_override(pilot_guidance)
+        if profile_id == "body_rate_command":
+            retained = self._control_lowering_state.get("lowered_guidance")
+            if duration_s is None and isinstance(retained, Mapping):
+                return self._guidance_override(retained)
+            rate_guidance: dict[str, float] = {}
+            hold_duration_s = 0.0 if duration_s is None else duration_s
+            throttle = action.get("pilot-throttle-fraction")
+            if throttle is not None:
+                rate_guidance["speed_m_s"] = 50.0 + throttle * 450.0
+            roll_rate = action.get("body-roll-rate-command-rad-s")
+            if roll_rate is not None:
+                current_bank_deg = _finite_number(row.get("route_bank_achieved_deg"), "reduced current bank")
+                rate_guidance["bank_angle_deg"] = min(
+                    60.0,
+                    max(-60.0, current_bank_deg + math.degrees(roll_rate * hold_duration_s)),
+                )
+            pitch_rate = action.get("body-pitch-rate-command-rad-s")
+            if pitch_rate is not None:
+                current_path_deg = math.degrees(_finite_number(row.get("flight_path_angle_rad"), "reduced current flight path"))
+                rate_guidance["flight_path_angle_deg"] = min(
+                    20.0,
+                    max(-20.0, current_path_deg + math.degrees(pitch_rate * hold_duration_s)),
+                )
+            yaw_rate = action.get("body-yaw-rate-command-rad-s")
+            if yaw_rate is not None:
+                rate_guidance["heading_deg"] = (
+                    math.degrees(current_heading_rad) + math.degrees(yaw_rate * hold_duration_s)
+                ) % 360.0
+            self._control_lowering_state.update(
+                {
+                    "active_profile_id": profile_id,
+                    "rate_reference_frame": "body",
+                    "rate_reference_coupling": "pseudo_6dof_roll_yaw_coupled",
+                    "reference_hold_duration_s": hold_duration_s,
+                    "lowered_guidance": dict(rate_guidance),
+                }
+            )
+            return self._guidance_override(rate_guidance)
+        self._control_lowering_state.update(
+            {
+                "active_profile_id": profile_id or "legacy_native_union",
+                "lowered_guidance": {
+                    name: value
+                    for name, value in action.items()
+                    if name in {"speed_m_s", "flight_path_angle_deg", "heading_deg", "bank_angle_deg"}
+                },
+            }
+        )
+        return self._guidance_override(action)
         ####
 
     @staticmethod
@@ -1831,7 +2116,19 @@ def validate_vehicle_composition_episode_contract(
     available_profiles = tuple(profile for profile in contract.authority_profiles if profile.availability == "available")
     semantic_actions_by_id = {semantic_channel.id: semantic_channel for semantic_channel in contract.action_channels}
     semantic_to_native: dict[str, str] = {}
+    profile_schema_resolver = getattr(episode, "authority_action_schema", None)
     for profile in available_profiles:
+        profile_action_channels = raw_action_channels
+        if callable(profile_schema_resolver):
+            resolved_profile_schema = profile_schema_resolver(profile.id)
+            profile_action_channels = {channel.name: channel for channel in resolved_profile_schema}
+            if len(profile_action_channels) != len(resolved_profile_schema):
+                findings.append(f"authority profile {profile.id!r} adapter schema contains duplicate names")
+            for adapter_channel in resolved_profile_schema:
+                if adapter_channel.value_space is None:
+                    findings.append(
+                        f"authority profile {profile.id!r} adapter action {adapter_channel.name!r} omits a value-space declaration"
+                    )
         for identifier in profile.action_ids:
             semantic_channel = semantic_actions_by_id[identifier]
             if semantic_channel.availability != "available":
@@ -1842,9 +2139,11 @@ def validate_vehicle_composition_episode_contract(
                 findings.append(f"semantic action {identifier!r} has no episode-native binding")
                 continue
             semantic_to_native[identifier] = native
-            bound_native_channel = raw_action_channels.get(native)
+            bound_native_channel = profile_action_channels.get(native)
             if bound_native_channel is None:
-                findings.append(f"semantic action {identifier!r} maps to absent native episode action {native!r}")
+                findings.append(
+                    f"semantic action {identifier!r} maps to absent {profile.id!r} episode-adapter action {native!r}"
+                )
                 continue
             if bound_native_channel.value_space is None:
                 findings.append(f"native action {native!r} has no declared value space")
@@ -1941,6 +2240,7 @@ def validate_vehicle_composition_episode_contract(
         "interface_fingerprint_sha256": contract.fingerprint,
         "available_authority_profiles": [profile.id for profile in available_profiles],
         "semantic_action_channel_count": len(semantic_to_native),
+        "profile_adapter_action_channel_count": len(set(semantic_to_native.values())),
         "native_action_channel_count": len(raw_action_channels),
         "native_observation_channel_count": len(raw_observation_channels),
         "observation_schema_projection": observation_schema_projection,
@@ -1948,7 +2248,7 @@ def validate_vehicle_composition_episode_contract(
         "mission_graph": graph_summary,
         "findings": findings,
         "claim_boundary": (
-            "This confirms that the opened source-owned episode exposes its selected semantic action, status, "
+            "This confirms that the opened source-owned episode exposes its native and profile-adapter semantic action, status, "
             "observation, and immutable mission-graph contract without a native-control bypass. It does not establish "
             "graph transition execution, physical actuator realization, mission qualification, or batch/episode trajectory parity."
         ),
@@ -2593,6 +2893,7 @@ __all__ = [
     "F16ReducedCompositionEpisode",
     "HummingbirdPseudoCompositionEpisode",
     "LanguageBackedCompositionEpisode",
+    "MissionCompositionEpisode",
     "ReducedFixedWingCompositionEpisode",
     "X15LocalDirectWrenchCompositionEpisode",
     "VehicleCompositionEpisode",

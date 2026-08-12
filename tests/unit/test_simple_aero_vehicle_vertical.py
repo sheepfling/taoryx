@@ -12,6 +12,8 @@ from taoryx.trajectory.registry_mission_composition import RegistryMissionCompos
 from taoryx.trajectory.session_contract import (
     MissionCompositionOpenSessionRequest,
     MissionCompositionSessionManager,
+    MissionCompositionSessionStepRequest,
+    MissionCompositionSwitchAuthorityRequest,
 )
 from taoryx.trajectory.simple_aero_mission_composition import (
     build_simple_aero_example_configuration,
@@ -22,7 +24,6 @@ from taoryx.model_authoring import build_model_authoring_plan
 from taoryx.plugins import PluginCatalog, discover_plugins
 from taoryx.trajectory import build_simple_aero_template_configuration
 from taoryx.trajectory.execution_contract import (
-    MissionCompositionExecutionError,
     MissionCompositionOutputSelection,
     MissionCompositionRunRequest,
 )
@@ -86,7 +87,7 @@ def test_simple_aero_advertisement_builds_a_complete_batch_authoring_plan(
     assert data_contract["core_output_channels"]
     controller = cast(dict[str, object], plan["controller_automation"])
     assert controller["status"] == "provider_managed"
-    assert controller["control_status"] == "internally_generated"
+    assert controller["control_status"] == "available"
     channels = cast(list[dict[str, Any]], controller["channels"])
     assert {item["id"] for item in channels} == {"command.bank", "command.throttle"}
     assert all(item["availability"] == "available_in_batch" for item in channels)
@@ -194,8 +195,8 @@ def test_simple_aero_phugoid_template_executes_through_the_same_public_runner() 
     ####
 
 
-def test_simple_aero_advertises_and_enforces_its_batch_only_boundary() -> None:
-    """An unavailable interactive route returns the published, actionable blocker."""
+def test_simple_aero_advertises_generated_and_direct_throttle_session_profiles() -> None:
+    """Authority switches in-stream without falsely exposing bank steering."""
 
     provider = RegistryMissionCompositionProvider()
     model = provider.model(MODEL_ID)
@@ -206,21 +207,50 @@ def test_simple_aero_advertises_and_enforces_its_batch_only_boundary() -> None:
 
     assert batch.status == "available"
     assert batch.common_runner_status == "registered"
-    assert step.status == "blocked"
-    assert step.common_runner_status == "not_available"
-    assert step.blockers == ("no interactive Simple Aero Mission Composition session binding is registered",)
+    assert step.status == "available"
+    assert step.common_runner_status == "registered"
+    assert step.blockers == ()
 
-    with pytest.raises(MissionCompositionExecutionError) as error:
-        MissionCompositionSessionManager(provider).open(
-            MissionCompositionOpenSessionRequest(
-                session_id="simple-aero-workflow-boundary",
-                provider_id=provider.metadata.id,
-                provider_version=provider.metadata.version,
-                prepared_configuration=_prepared(provider),
-            )
+    manager = MissionCompositionSessionManager(provider)
+    descriptor = manager.open(
+        MissionCompositionOpenSessionRequest(
+            session_id="simple-aero-workflow-boundary",
+            provider_id=provider.metadata.id,
+            provider_version=provider.metadata.version,
+            prepared_configuration=_prepared(provider),
         )
+    )
+    assert descriptor.active_authority_profile_id == "generated_mission_commands"
+    assert descriptor.command_source_id is None
+    assert descriptor.action_schema == ()
+    generated = manager.step(
+        MissionCompositionSessionStepRequest(
+            session_id=descriptor.session_id,
+            action={},
+            duration_s=0.5,
+        )
+    )
+    assert generated.lowering_evidence["bank_effect"] == "telemetry_only_non_steering"
+    assert set(generated.lowered_action) == {"command.bank", "command.throttle"}
 
-    assert error.value.diagnostic.code == "interactive-operation-not-available"
-    assert error.value.diagnostic.phase == "preflight"
-    assert error.value.diagnostic.details["blockers"] == list(step.blockers)
+    switched = manager.switch_authority(
+        MissionCompositionSwitchAuthorityRequest(
+            session_id=descriptor.session_id,
+            authority_profile_id="direct_throttle_command",
+            expected_sequence=1,
+            command_source_id="test-client",
+        )
+    )
+    assert switched.command_source_id == "test-client"
+    assert [item.id for item in switched.action_schema] == ["propulsion.command.fraction"]
+    direct = manager.step(
+        MissionCompositionSessionStepRequest(
+            session_id=descriptor.session_id,
+            action={"propulsion.command.fraction": 0.4},
+            duration_s=0.5,
+            expected_sequence=1,
+        )
+    )
+    assert direct.lowered_action["command.throttle"] == pytest.approx(0.4)
+    assert "command.bank" not in {item.id for item in switched.action_schema}
     ####

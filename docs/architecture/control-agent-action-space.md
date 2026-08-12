@@ -12,6 +12,37 @@ and `select` is only a UI hint. A slider may represent a continuous throttle,
 a periodic bearing, or a detented discrete knob; consumers must use the
 semantic contract instead.
 
+## Scheme, authority, and action are separate
+
+A control scheme is the small cross-family concept a UI, remote client, or
+autonomy service can compare. An authority profile is the exact selectable
+surface supplied by one realization. An action channel is one typed coordinate
+inside that profile. Consumers must not infer a scheme from an action name.
+
+| Layer | Stable scheme examples | Meaning |
+| --- | --- | --- |
+| Open loop/provider | `open_loop.coast`, `provider.program` | No caller action, with ownership still explicit |
+| Mission | `mission.destination`, `mission.waypoint`, `mission.route` | A high-level objective lowered by registered guidance |
+| Kinematic | `kinematic.position`, `kinematic.velocity`, `kinematic.flight_path`, `kinematic.energy` | Reduced translational or energy response without physical-effector claims |
+| Pilot | `pilot.normalized_axes`, `pilot.rotorcraft`, `pilot.ground_vehicle`, `pilot.marine` | Family-specific human/controller-oriented axes |
+| Body motion/event | `body_motion.attitude`, `body_motion.body_rate`, `event.mission` | Rotational references or explicitly typed mission events |
+| Physical bridge | `wrench.direct`, `effector.direct` | Expert/diagnostic coordinates with separate qualification requirements |
+| Provider/debug | `provider.native_bridge`, `debug.*` | Explicit nonportable or nonphysical surfaces |
+
+The catalog reserves `mission.orbit_target`, `mission.relative_pose`, and
+`kinematic.relative_motion` for future spacecraft work. Reservation is not an
+availability claim. Likewise, the reserved rotorcraft, ground-vehicle, and
+marine pilot schemes do not pretend their collective/cyclic/pedals,
+steering/braking, or rudder/propulsion axes are fixed-wing pilot axes; an
+eventual profile must publish its family-specific channels and lowering chain.
+
+Every support record includes a scheme ID and layer, intended consumer roles,
+streaming preference, UI order, exact realization and fidelity IDs, authority
+profile ID, operations, action IDs, ownership, switching policy, and claim
+boundary. `wrench.direct` and `effector.direct` are deliberately marked
+`diagnostic`; generic clients should prefer mission, kinematic, pilot, or body-
+motion schemes when those are available.
+
 ## Value domains
 
 `ControlCommandSemantics.value_domain` covers the public control families:
@@ -90,14 +121,20 @@ fidelity of the underlying vehicle.
 `taoryx.debug.mission-composition-contract-probe` is the required consumer
 conformance fixture. Its `contract_probe_vehicle` model is available through
 the same Mission Composition provider registry as production vehicles, but is
-explicitly synthetic and batch-only. Its medium realization advertises every
-value domain, command and temporal mode, release behavior, quantization mode,
-sampling state, and agent normalization form. It also contains a recursive
-provider-defined composite effector whose value space has typed component
-spaces.
+explicitly synthetic. Its batch surface advertises every value domain, command
+and temporal mode, release behavior, quantization mode, sampling state, and
+agent normalization form. Its coarse and medium realizations also expose
+persistent step profiles for continuous/vector commands, discrete/enum/boolean
+commands, and one-shot events. The recursive provider-defined composite
+effector remains batch-only because no truthful scalar/vector live lowering
+exists for it.
 
 Use `realization.controls.rl_action_space(operation="batch")` against that
 model before assuming a consumer understands a physical vehicle's narrower
 surface. The generated action space is intentionally mixed and includes
 one-shot event masks plus an unbounded channel that requires external training
-statistics.
+statistics. For streaming conformance, select exactly one advertised authority
+profile through the Mission Composition session API; do not union the profiles
+into one action vector. The probe declares `physical_model=false`, so generic
+controller automation treats these transport stress surfaces as
+non-applicable to tuning and qualification.

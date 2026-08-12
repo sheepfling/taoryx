@@ -74,6 +74,13 @@ from .configuration_defaults import materialize_configuration_defaults
 from .control_metadata import source_managed_control_advertisement
 from .output_metadata import cadac_output_quantity
 from .sensor_adapter import cadac_local_ned_sensor_context
+from .session_authority import (
+    CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID,
+    CADAC_SOURCE_PROGRAM_PROFILE_ID,
+    source_managed_session_authority_fields,
+    source_managed_session_authority_state,
+    validate_source_managed_session_request,
+)
 
 ADS6_ENGAGEMENT_MODEL_ID = "cadac.ads6.engagement"
 ADS6_ENGAGEMENT_MODEL_VERSION = "0.13.0"
@@ -228,6 +235,7 @@ class CadacAds6EngagementMissionCompositionProvider:
             raise ValueError("ADS6 engagement session request names another provider version")
         if request.model_id != ADS6_ENGAGEMENT_MODEL_ID:
             raise ValueError("ADS6 engagement session request names another model")
+        validate_source_managed_session_request(request.authority_profile_id, request.command_source_id)
         ####
         prepared = self.validate_configuration(request.prepared_configuration.configuration)
         if prepared.fingerprint != request.prepared_configuration.fingerprint:
@@ -267,6 +275,7 @@ class CadacAds6EngagementMissionCompositionProvider:
             integration_step_s=self._definition.integration_step_s,
             supports_spawned_entities=False,
             action_schema=(),
+            **source_managed_session_authority_fields(),
             observation_schema=_engagement_session_observation_schema(),
             initial_observation=observation,
             claim_boundary=(
@@ -308,6 +317,7 @@ class CadacAds6EngagementMissionCompositionProvider:
             raise ValueError(f"ADS6 engagement expected sequence {request.expected_sequence}, current sequence is {record.sequence}")
         if request.action:
             raise ValueError("ADS6 source-managed session does not accept external action channels")
+        validate_source_managed_session_request(request.authority_profile_id, None)
         ####
         substeps = _engagement_session_substeps(request.duration_s, record.definition.integration_step_s)
         time_start_s = record.source.sim_time_s
@@ -355,6 +365,9 @@ class CadacAds6EngagementMissionCompositionProvider:
             observation=record.observation,
             events=record.observation.events,
             diagnostics=record.observation.diagnostics,
+            authority_profile_id=CADAC_SOURCE_PROGRAM_PROFILE_ID,
+            command_source_id=CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID,
+            lowering_evidence=source_managed_session_authority_state().model_dump(mode="json"),
         )
     ####
 
@@ -654,6 +667,7 @@ def _engagement_session_observation(
             },
         },
         events=events,
+        control_authority=source_managed_session_authority_state(),
     )
     ####
 

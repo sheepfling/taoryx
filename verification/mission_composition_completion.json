@@ -9,7 +9,7 @@
   "family_count": 11,
   "realization_count": 45,
   "registered_batch_tuple_count": 66,
-  "registered_interactive_tuple_count": 12,
+  "registered_interactive_tuple_count": 23,
   "families": [
     {
       "model_id": "skywalker_x8",
@@ -609,10 +609,20 @@
             "action:available:guidance.speed.command->speed_m_s",
             "action:available:guidance.flight_path_angle.command->flight_path_angle_deg",
             "action:available:guidance.heading.command->heading_deg",
-            "action:available:guidance.bank.command->bank_angle_deg"
+            "action:available:guidance.bank.command->bank_angle_deg",
+            "action:available:propulsion.command.fraction->pilot-throttle-fraction",
+            "action:available:pilot.longitudinal.command->pilot-longitudinal-normalized",
+            "action:available:pilot.lateral.command->pilot-lateral-normalized",
+            "action:available:navigation.waypoint.north.command->waypoint-north-m",
+            "action:available:navigation.waypoint.east.command->waypoint-east-m",
+            "action:available:navigation.waypoint.altitude.command->waypoint-altitude-m",
+            "action:available:navigation.waypoint.capture_radius.command->waypoint-capture-radius-m",
+            "action:available:navigation.waypoint.speed.command->waypoint-speed-mps"
           ],
           "control_authorities": [
-            "available:kinematic:kinematic_guidance"
+            "available:kinematic:kinematic_guidance",
+            "available:kinematic:reduced_pilot_command",
+            "available:mission:live_waypoint_guidance"
           ],
           "control_intents": [
             "external_channel:speed",
@@ -667,10 +677,20 @@
             "action:available:guidance.speed.command->speed_m_s",
             "action:available:guidance.flight_path_angle.command->flight_path_angle_deg",
             "action:available:guidance.heading.command->heading_deg",
-            "action:available:guidance.bank.command->bank_angle_deg"
+            "action:available:guidance.bank.command->bank_angle_deg",
+            "action:available:propulsion.command.fraction->pilot-throttle-fraction",
+            "action:available:pilot.longitudinal.command->pilot-longitudinal-normalized",
+            "action:available:pilot.lateral.command->pilot-lateral-normalized",
+            "action:available:navigation.waypoint.north.command->waypoint-north-m",
+            "action:available:navigation.waypoint.east.command->waypoint-east-m",
+            "action:available:navigation.waypoint.altitude.command->waypoint-altitude-m",
+            "action:available:navigation.waypoint.capture_radius.command->waypoint-capture-radius-m",
+            "action:available:navigation.waypoint.speed.command->waypoint-speed-mps"
           ],
           "control_authorities": [
-            "available:kinematic:kinematic_guidance"
+            "available:kinematic:kinematic_guidance",
+            "available:kinematic:reduced_pilot_command",
+            "available:mission:live_waypoint_guidance"
           ],
           "control_intents": [
             "external_channel:attitude_rate",
@@ -827,10 +847,20 @@
             "action:available:guidance.speed.command->speed_m_s",
             "action:available:guidance.flight_path_angle.command->flight_path_angle_deg",
             "action:available:guidance.heading.command->heading_deg",
-            "action:available:guidance.bank.command->bank_angle_deg"
+            "action:available:guidance.bank.command->bank_angle_deg",
+            "action:available:propulsion.command.fraction->pilot-throttle-fraction",
+            "action:available:pilot.longitudinal.command->pilot-longitudinal-normalized",
+            "action:available:pilot.lateral.command->pilot-lateral-normalized",
+            "action:available:navigation.waypoint.north.command->waypoint-north-m",
+            "action:available:navigation.waypoint.east.command->waypoint-east-m",
+            "action:available:navigation.waypoint.altitude.command->waypoint-altitude-m",
+            "action:available:navigation.waypoint.capture_radius.command->waypoint-capture-radius-m",
+            "action:available:navigation.waypoint.speed.command->waypoint-speed-mps"
           ],
           "control_authorities": [
-            "available:kinematic:kinematic_guidance"
+            "available:kinematic:kinematic_guidance",
+            "available:kinematic:reduced_pilot_command",
+            "available:mission:live_waypoint_guidance"
           ],
           "control_intents": [
             "external_channel:attitude_rate",
@@ -945,10 +975,20 @@
             "action:available:guidance.speed.command->speed_m_s",
             "action:available:guidance.flight_path_angle.command->flight_path_angle_deg",
             "action:available:guidance.heading.command->heading_deg",
-            "action:available:guidance.bank.command->bank_angle_deg"
+            "action:available:guidance.bank.command->bank_angle_deg",
+            "action:available:propulsion.command.fraction->pilot-throttle-fraction",
+            "action:available:pilot.longitudinal.command->pilot-longitudinal-normalized",
+            "action:available:pilot.lateral.command->pilot-lateral-normalized",
+            "action:available:navigation.waypoint.north.command->waypoint-north-m",
+            "action:available:navigation.waypoint.east.command->waypoint-east-m",
+            "action:available:navigation.waypoint.altitude.command->waypoint-altitude-m",
+            "action:available:navigation.waypoint.capture_radius.command->waypoint-capture-radius-m",
+            "action:available:navigation.waypoint.speed.command->waypoint-speed-mps"
           ],
           "control_authorities": [
-            "available:kinematic:kinematic_guidance"
+            "available:kinematic:kinematic_guidance",
+            "available:kinematic:reduced_pilot_command",
+            "available:mission:live_waypoint_guidance"
           ],
           "control_intents": [
             "external_channel:speed",
@@ -1006,10 +1046,24 @@
             "action:available:guidance.speed.command->speed_m_s",
             "action:available:guidance.flight_path_angle.command->flight_path_angle_deg",
             "action:available:guidance.heading.command->heading_deg",
-            "action:available:guidance.bank.command->bank_angle_deg"
+            "action:available:guidance.bank.command->bank_angle_deg",
+            "action:available:propulsion.command.fraction->pilot-throttle-fraction",
+            "action:available:pilot.longitudinal.command->pilot-longitudinal-normalized",
+            "action:available:pilot.lateral.command->pilot-lateral-normalized",
+            "action:available:body_rate.roll.command->body-roll-rate-command-rad-s",
+            "action:available:body_rate.pitch.command->body-pitch-rate-command-rad-s",
+            "action:available:body_rate.yaw.command->body-yaw-rate-command-rad-s",
+            "action:available:navigation.waypoint.north.command->waypoint-north-m",
+            "action:available:navigation.waypoint.east.command->waypoint-east-m",
+            "action:available:navigation.waypoint.altitude.command->waypoint-altitude-m",
+            "action:available:navigation.waypoint.capture_radius.command->waypoint-capture-radius-m",
+            "action:available:navigation.waypoint.speed.command->waypoint-speed-mps"
           ],
           "control_authorities": [
-            "available:kinematic:kinematic_guidance"
+            "available:kinematic:kinematic_guidance",
+            "available:kinematic:reduced_pilot_command",
+            "available:body_motion:body_rate_command",
+            "available:mission:live_waypoint_guidance"
           ],
           "control_intents": [
             "external_channel:speed",
@@ -2972,17 +3026,20 @@
           "actuator_types": [
             "not_applicable"
           ],
-          "control_status": "internally_generated",
+          "control_status": "available",
           "control_channels": [
             "action:available_in_batch:command.bank->command.bank",
-            "action:available_in_batch:command.throttle->command.throttle"
+            "action:available_in_batch:command.throttle->command.throttle",
+            "action:available:propulsion.command.fraction->command.throttle"
           ],
           "control_authorities": [
-            "available_in_batch:mission:generated_mission_commands"
+            "available:mission:generated_mission_commands",
+            "available:native_bridge:direct_throttle_command"
           ],
           "control_intents": [
             "provider_internal:bank",
-            "provider_internal:throttle"
+            "provider_internal:throttle",
+            "external_channel:direct_throttle"
           ],
           "batch_status": "available",
           "batch_tuples": [
@@ -2998,8 +3055,20 @@
             "weave/point_mass_3dof/fixed_ld_point_mass/batch",
             "custom_composition/point_mass_3dof/fixed_ld_point_mass/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "fixed_ld_baseline/point_mass_3dof/fixed_ld_point_mass/step",
+            "ballistic/point_mass_3dof/fixed_ld_point_mass/step",
+            "cbcr/point_mass_3dof/fixed_ld_point_mass/step",
+            "crossrange/point_mass_3dof/fixed_ld_point_mass/step",
+            "marv/point_mass_3dof/fixed_ld_point_mass/step",
+            "phugoid/point_mass_3dof/fixed_ld_point_mass/step",
+            "range_extension/point_mass_3dof/fixed_ld_point_mass/step",
+            "skip/point_mass_3dof/fixed_ld_point_mass/step",
+            "slalom/point_mass_3dof/fixed_ld_point_mass/step",
+            "weave/point_mass_3dof/fixed_ld_point_mass/step",
+            "custom_composition/point_mass_3dof/fixed_ld_point_mass/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -3014,19 +3083,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "fixed_ld_baseline/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "ballistic/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "cbcr/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "crossrange/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "marv/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "phugoid/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "range_extension/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "skip/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "slalom/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "weave/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered",
-            "custom_composition/point_mass_3dof/fixed_ld_point_mass/step: no interactive Simple Aero Mission Composition session binding is registered"
-          ]
+          "blockers": []
         }
       ]
     },

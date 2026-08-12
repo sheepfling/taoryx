@@ -13,12 +13,19 @@ profiles:
     - guidance.override.active
     - guidance.override.enabled
     - propulsion.enable
+    - health.valid
     - resources.booster.attached
+    - safety.deadman
   bounded_interval:
     - aerodynamics.alpha
+    - aerodynamics.flap.detent
+    - aerodynamics.spoiler.increment
     - aerodynamics.beta
     - attitude.pitch.command
     - attitude.roll.command
+    - body_rate.pitch.command
+    - body_rate.roll.command
+    - body_rate.yaw.command
     - control.lateral.bridge.command
     - control.longitudinal.bridge.command
     - effector.aileron.command
@@ -55,8 +62,14 @@ profiles:
     - effector.throttle.position
     - guidance.bank.command
     - guidance.flight_path_angle.command
-    - guidance.heading.command
     - guidance.speed.command
+    - navigation.waypoint.altitude.command
+    - navigation.waypoint.capture_radius.command
+    - navigation.waypoint.east.command
+    - navigation.waypoint.north.command
+    - navigation.waypoint.speed.command
+    - pilot.lateral.command
+    - pilot.longitudinal.command
     - initialization.pad_launch.latitude_deg
     - initialization.source_booster_launch.launch_elevation_deg
     - initialization.staged_booster_launch.glide_bank_deg
@@ -69,6 +82,10 @@ profiles:
     - aerodynamics.pitch_coefficient
     - control.lqi.integral_error.vertical_speed
     - flight.path_angle
+    - attitude.flight_path_angle_deg
+    - event.marker
+    - guidance.acceleration.increment
+    - guidance.heading_rate.command
     - initialization.airborne_hover.east_m
     - initialization.airborne_hover.north_m
     - initialization.airborne_trim.east_m
@@ -76,8 +93,15 @@ profiles:
     - initialization.grounded_idle.pad_east_m
     - initialization.grounded_idle.pad_north_m
     - position.altitude
+    - position.altitude_m
     - position.east
+    - position.east_m
     - position.north
+    - position.north_m
+    - mode.index
+    - velocity.east_m_s
+    - velocity.north_m_s
+    - velocity.vertical_m_s
     - control.pitch_moment.achieved
     - control.pitch_moment.requested
     - control.pitch_moment.residual
@@ -112,6 +136,7 @@ profiles:
     - wrench.force.command
     - wrench.moment.command
   finite_set:
+    - autopilot.mode.select
     - control.controller.method
     - control.realization
     - control.schedule.node_id
@@ -126,8 +151,14 @@ profiles:
     - segment.impact_witness.terminal_kind
     - segment.powered_climb.cutoff_condition
     - trim.full_state.status
+    - status.mode
+  event:
+    - payload.arm.command
+    - payload.release.command
   periodic_degrees:
+    - attitude.heading_deg
     - flight.heading
+    - guidance.heading.command
     - initialization.air_launch_release.heading_deg
     - initialization.airborne_hover.heading_deg
     - initialization.airborne_trim.heading_deg
@@ -150,12 +181,14 @@ profiles:
     - aerodynamics.mach
     - aerodynamics.projected_area
     - angular_rate.norm
+    - maneuver.load_factor_g
     - control.allocation.residual_norm
     - control.allocation.saturation_count
     - control.feedback_norm
     - control.source_effectiveness_rank
     - propulsion.thrust
     - resources.mass.fuel_flow
+    - velocity.speed_m_s
     - execution.time
     - initialization.air_launch_release.altitude_m
     - initialization.air_launch_release.mass_kg
@@ -221,6 +254,7 @@ profiles:
     - velocity.speed
     - control.wrench.residual_norm
   quaternion_so3:
+    - attitude.quaternion.command
     - attitude.quaternion
     - initialization.atmospheric_release.quaternion_wxyz
   rotation_euler:

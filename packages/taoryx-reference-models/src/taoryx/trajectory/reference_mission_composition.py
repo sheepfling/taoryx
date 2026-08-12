@@ -14,6 +14,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from ..fixture_composition_episode import FixtureCompositionEpisode, FixtureTransition
 from .analytical_mission_composition import (
     ExampleMissionCompositionProvider,
     MissionCompositionOutputRequest,
@@ -23,6 +24,9 @@ from .analytical_mission_composition import (
     MissionCompositionTrajectory,
     MissionCompositionTrajectoryRequest,
     MissionCompositionVehicle,
+    analytical_initial_state,
+    propagate_ballistic_state,
+    propagate_constant_velocity_waypoint_state,
 )
 from .configuration_contract import (
     ConfigurationChoiceValue,
@@ -52,6 +56,7 @@ from .execution_contract import (
     TrajectorySegmentResult,
     resolve_output_selection,
 )
+from .session_interface import build_session_interface_contract
 
 _PROVIDER_ID = "taoryx.reference.mission-composition"
 _PROVIDER_VERSION = "1.0.0"
@@ -175,10 +180,7 @@ class ReferenceMissionCompositionProvider:
 
     def __init__(self) -> None:
         self._analytical = ExampleMissionCompositionProvider()
-        self._models = tuple(
-            item.model_copy(update={"common_runner_operations": ("batch",)})
-            for item in self._analytical.list_models()
-        )
+        self._models = self._analytical.list_models()
         self._metadata = TrajectoryProviderMetadata(
             id=_PROVIDER_ID,
             name="TAORYX Analytical Mission Composition Reference",
@@ -238,6 +240,22 @@ class ReferenceMissionCompositionProvider:
         """Validate and fingerprint one portable configuration instance."""
 
         return self._analytical.validate_configuration(configuration)
+        ####
+
+    def open_session_episode(
+        self,
+        prepared: PreparedTrajectoryConfiguration,
+        *,
+        seed: int | None = None,
+        integration_step_s: float = 0.02,
+    ) -> FixtureCompositionEpisode:
+        """Open a stateful analytical episode using the batch transition itself."""
+
+        del integration_step_s
+        model = next((item for item in self._models if item.id == prepared.configuration.model_id), None)
+        if model is None:
+            raise KeyError(f"unknown analytical reference model {prepared.configuration.model_id!r}")
+        return _open_reference_session_episode(model, prepared, seed=seed)
         ####
 
     def build_ballistic_configuration(
@@ -606,6 +624,317 @@ class ReferenceMissionCompositionProvider:
         )
         ####
 
+    ####
+
+
+def _open_reference_session_episode(
+    model: TrajectoryModelMetadata,
+    prepared: PreparedTrajectoryConfiguration,
+    *,
+    seed: int | None,
+) -> FixtureCompositionEpisode:
+    """Create the ballistic or waypoint lifecycle around shared transitions."""
+
+    resolved = _mapping(prepared.resolved, path="/prepared_configuration/resolved")
+    _, initialization = _choice(
+        resolved.get("initialization"),
+        path="/prepared_configuration/resolved/initialization",
+    )
+    segment_payloads = _sequence(
+        resolved.get("segments"),
+        path="/prepared_configuration/resolved/segments",
+    )
+    segments: tuple[dict[str, Any], ...] = tuple(
+        {
+            **dict(_choice(item, path=f"/prepared_configuration/resolved/segments/{index}")[1]),
+            "segment_id": _choice(item, path=f"/prepared_configuration/resolved/segments/{index}")[0],
+            "instance_id": (
+                item.get("instance_id", f"segment-{index + 1:02d}")
+                if isinstance(item, Mapping)
+                else f"segment-{index + 1:02d}"
+            ),
+        }
+        for index, item in enumerate(segment_payloads)
+    )
+    realization_id = prepared.configuration.realization_id or "analytical_point_mass"
+    contract, observation_schema = build_session_interface_contract(
+        model,
+        realization_id=realization_id,
+        fidelity=prepared.configuration.fidelity,
+        family_id="analytical_reference",
+        physical_family="analytical_fixture",
+        claim_boundary=(
+            "Stateful analytical reference fixture. It reuses the batch transition and makes no "
+            "historical-runtime, controller, actuator, atmosphere, or qualification claim."
+        ),
+    )
+
+    def initial_state_factory(_: int | None) -> Mapping[str, object]:
+        state: dict[str, Any] = dict(analytical_initial_state(initialization))
+        state["configured_segments"] = [dict(item) for item in segments]
+        state["configured_segment_index"] = 0
+        state["configured_segment_elapsed_s"] = 0.0
+        state["held_kinematic"] = {}
+        state["held_live_waypoint"] = {}
+        return state
+        ####
+
+    transition = _ballistic_session_transition if model.id == _BALLISTIC_MODEL_ID else _waypoint_session_transition
+    return FixtureCompositionEpisode(
+        interface_contract=contract,
+        observation_schema=observation_schema,
+        initial_state_factory=initial_state_factory,
+        observation_factory=_analytical_session_observation,
+        transition=transition,
+        authority_selection_hook=_analytical_authority_handoff,
+        claim_boundary=contract.claim_boundary,
+        seed=seed,
+    )
+    ####
+
+
+def _numeric_analytical_state(state: Mapping[str, Any]) -> dict[str, float]:
+    return {
+        identifier: float(state[identifier])
+        for identifier in (
+            "time_s",
+            "north_m",
+            "east_m",
+            "altitude_m",
+            "speed_m_s",
+            "cruise_speed_m_s",
+            "heading_deg",
+            "flight_path_angle_deg",
+            "load_factor_g",
+        )
+    }
+    ####
+
+
+def _merge_numeric_state(state: Mapping[str, Any], numeric: Mapping[str, float]) -> dict[str, object]:
+    merged = dict(state)
+    merged.update(numeric)
+    return merged
+    ####
+
+
+def _ballistic_session_transition(
+    state: Mapping[str, Any],
+    profile_id: str,
+    action: Mapping[str, Any],
+    duration_s: float,
+    _: float,
+) -> FixtureTransition:
+    if profile_id != "open_loop_coast" or action:
+        raise ValueError("ballistic sessions accept only the zero-action open_loop_coast profile")
+    numeric = _numeric_analytical_state(state)
+    propagate_ballistic_state(numeric, duration_s)
+    events: tuple[str, ...] = ()
+    status = "active"
+    diagnostics: tuple[str, ...] = ()
+    if numeric["altitude_m"] <= 0.0:
+        numeric["altitude_m"] = 0.0
+        events = ("impact",)
+        diagnostics = ("analytical ballistic fixture reached the local altitude floor",)
+        status = "completed"
+    return FixtureTransition(
+        state=_merge_numeric_state(state, numeric),
+        applied_action={},
+        applied_semantic_action={},
+        lowering_evidence={
+            "authority_profile_id": profile_id,
+            "semantic_action": {},
+            "native_transition": "propagate_ballistic_state",
+            "gravity_m_s2": 9.80665,
+        },
+        events=events,
+        diagnostics=diagnostics,
+        status=status,  # type: ignore[arg-type]
+    )
+    ####
+
+
+def _waypoint_session_transition(
+    state: Mapping[str, Any],
+    profile_id: str,
+    action: Mapping[str, Any],
+    duration_s: float,
+    _: float,
+) -> FixtureTransition:
+    next_state = dict(state)
+    numeric = _numeric_analytical_state(state)
+    events: list[str] = []
+    applied_semantic: dict[str, object]
+    native: dict[str, object]
+
+    if profile_id == "configured_waypoint_guidance":
+        if action:
+            raise ValueError("configured waypoint guidance is provider-owned and accepts no caller action")
+        segments = next_state.get("configured_segments")
+        if not isinstance(segments, list) or not segments:
+            raise ValueError("configured waypoint session has no prepared segments")
+        remaining = duration_s
+        index = int(next_state.get("configured_segment_index", 0))
+        elapsed = float(next_state.get("configured_segment_elapsed_s", 0.0))
+        while remaining > 1.0e-12:
+            if index >= len(segments):
+                numeric["speed_m_s"] = 0.0
+                break
+            target = segments[index]
+            if not isinstance(target, dict):
+                raise ValueError("configured waypoint segment is malformed")
+            segment_duration = float(target["duration_s"])
+            step_s = min(remaining, max(segment_duration - elapsed, 0.0))
+            if step_s <= 1.0e-12:
+                events.append(f"segment_completed:{target.get('instance_id', index)}")
+                index += 1
+                elapsed = 0.0
+                if index < len(segments):
+                    numeric["speed_m_s"] = numeric["cruise_speed_m_s"]
+                continue
+            propagate_constant_velocity_waypoint_state(numeric, target, step_s)
+            remaining -= step_s
+            elapsed += step_s
+            if _waypoint_distance(numeric, target) <= float(target.get("arrival_tolerance_m", 25.0)):
+                marker = f"waypoint_captured:{target.get('instance_id', index)}"
+                if marker not in events:
+                    events.append(marker)
+            if elapsed >= segment_duration - 1.0e-12:
+                events.append(f"segment_completed:{target.get('instance_id', index)}")
+                index += 1
+                elapsed = 0.0
+                if index < len(segments):
+                    numeric["speed_m_s"] = numeric["cruise_speed_m_s"]
+        next_state["configured_segment_index"] = index
+        next_state["configured_segment_elapsed_s"] = elapsed
+        applied_semantic = {}
+        native = {
+            "configured_segment_index": index,
+            "configured_target": None if index >= len(segments) else segments[index],
+        }
+        lowering = ("configured_waypoint_sequence", "propagate_constant_velocity_waypoint_state")
+    elif profile_id == "kinematic_velocity_command":
+        held = dict(next_state.get("held_kinematic", {}))
+        held.update(action)
+        held.setdefault("guidance.speed.command", numeric["speed_m_s"])
+        held.setdefault("guidance.heading.command", numeric["heading_deg"])
+        held.setdefault("guidance.flight_path_angle.command", numeric["flight_path_angle_deg"])
+        speed = float(held["guidance.speed.command"])
+        heading_deg = float(held["guidance.heading.command"]) % 360.0
+        path_deg = float(held["guidance.flight_path_angle.command"])
+        horizontal = speed * math.cos(math.radians(path_deg))
+        target = {
+            "waypoint_north_m": numeric["north_m"] + horizontal * math.cos(math.radians(heading_deg)) * duration_s,
+            "waypoint_east_m": numeric["east_m"] + horizontal * math.sin(math.radians(heading_deg)) * duration_s,
+            "waypoint_altitude_m": max(0.0, numeric["altitude_m"] + speed * math.sin(math.radians(path_deg)) * duration_s),
+        }
+        numeric["speed_m_s"] = speed
+        propagate_constant_velocity_waypoint_state(numeric, target, duration_s)
+        # The shared waypoint propagator stops at a captured target. This
+        # synthetic target is exactly one hold interval away, so restore the
+        # commanded kinematic state for the next boundary instead of
+        # misreporting every accepted velocity command as a stop.
+        numeric["speed_m_s"] = speed
+        numeric["heading_deg"] = heading_deg
+        numeric["flight_path_angle_deg"] = path_deg
+        next_state["held_kinematic"] = held
+        applied_semantic = held
+        native = {"kinematic_target": target, "speed_m_s": speed}
+        lowering = ("kinematic_command_hold", "propagate_constant_velocity_waypoint_state")
+    elif profile_id == "live_waypoint_guidance":
+        held = dict(next_state.get("held_live_waypoint", {}))
+        held.update(action)
+        required = {
+            "navigation.waypoint.north.command",
+            "navigation.waypoint.east.command",
+            "navigation.waypoint.altitude.command",
+        }
+        missing = sorted(required - set(held))
+        if missing:
+            raise ValueError(f"first live-waypoint action must supply {missing!r}")
+        held.setdefault("navigation.waypoint.capture_radius.command", 25.0)
+        held.setdefault("navigation.waypoint.speed.command", numeric["cruise_speed_m_s"])
+        target = {
+            "waypoint_north_m": float(held["navigation.waypoint.north.command"]),
+            "waypoint_east_m": float(held["navigation.waypoint.east.command"]),
+            "waypoint_altitude_m": float(held["navigation.waypoint.altitude.command"]),
+        }
+        numeric["speed_m_s"] = float(held["navigation.waypoint.speed.command"])
+        propagate_constant_velocity_waypoint_state(numeric, target, duration_s)
+        if _waypoint_distance(numeric, target) <= float(held["navigation.waypoint.capture_radius.command"]):
+            events.append("live_waypoint_captured")
+        next_state["held_live_waypoint"] = held
+        applied_semantic = held
+        native = {**target, "speed_m_s": float(held["navigation.waypoint.speed.command"])}
+        lowering = ("live_waypoint_hold", "propagate_constant_velocity_waypoint_state")
+    else:
+        raise ValueError(f"unsupported analytical waypoint authority {profile_id!r}")
+
+    next_state.update(numeric)
+    return FixtureTransition(
+        state=next_state,
+        applied_action=native,
+        applied_semantic_action=applied_semantic,
+        lowering_evidence={
+            "authority_profile_id": profile_id,
+            "lowering_chain": list(lowering),
+            "native_transition": "propagate_constant_velocity_waypoint_state",
+            "native_action": native,
+        },
+        events=tuple(events),
+        status="active",
+    )
+    ####
+
+
+def _waypoint_distance(state: Mapping[str, float], target: Mapping[str, Any]) -> float:
+    return math.sqrt(
+        (float(target["waypoint_north_m"]) - state["north_m"]) ** 2
+        + (float(target["waypoint_east_m"]) - state["east_m"]) ** 2
+        + (float(target["waypoint_altitude_m"]) - state["altitude_m"]) ** 2
+    )
+    ####
+
+
+def _analytical_authority_handoff(
+    state: Mapping[str, Any],
+    _: str,
+    selected: str,
+) -> Mapping[str, object]:
+    """Seed newly selected holds from the accepted state for bumpless transfer."""
+
+    next_state = dict(state)
+    if selected == "kinematic_velocity_command":
+        next_state["held_kinematic"] = {
+            "guidance.speed.command": float(state["speed_m_s"]),
+            "guidance.heading.command": float(state["heading_deg"]),
+            "guidance.flight_path_angle.command": float(state["flight_path_angle_deg"]),
+        }
+    return next_state
+    ####
+
+
+def _analytical_session_observation(
+    state: Mapping[str, Any],
+    _: float,
+    __: str,
+) -> Mapping[str, object]:
+    numeric = _numeric_analytical_state(state)
+    heading = math.radians(numeric["heading_deg"])
+    path = math.radians(numeric["flight_path_angle_deg"])
+    horizontal = numeric["speed_m_s"] * math.cos(path)
+    return {
+        "position.north_m": numeric["north_m"],
+        "position.east_m": numeric["east_m"],
+        "position.altitude_m": numeric["altitude_m"],
+        "velocity.north_m_s": horizontal * math.cos(heading),
+        "velocity.east_m_s": horizontal * math.sin(heading),
+        "velocity.vertical_m_s": numeric["speed_m_s"] * math.sin(path),
+        "velocity.speed_m_s": numeric["speed_m_s"],
+        "attitude.heading_deg": numeric["heading_deg"] % 360.0,
+        "attitude.flight_path_angle_deg": numeric["flight_path_angle_deg"],
+        "maneuver.load_factor_g": numeric["load_factor_g"],
+    }
     ####
 
 

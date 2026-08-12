@@ -33,6 +33,50 @@ from taoryx.vehicle_interface import (
 ROOT = Path(__file__).resolve().parents[2]
 
 
+@pytest.mark.parametrize("family_id", ["a320_openap_3dof", "f16_s119"])
+@pytest.mark.parametrize("fidelity", ["point_mass_3dof", "pseudo_6dof"])
+def test_reduced_fixed_wing_interfaces_advertise_mutually_exclusive_stream_profiles(
+    family_id: str,
+    fidelity: str,
+) -> None:
+    contract = resolve_vehicle_interface_contract(family_id, fidelity)  # type: ignore[arg-type]
+    advertisement = contract.authority_advertisement()
+
+    expected_profiles = {"kinematic_guidance", "reduced_pilot_command", "live_waypoint_guidance"}
+    if family_id == "f16_s119" and fidelity == "pseudo_6dof":
+        expected_profiles.add("body_rate_command")
+    assert contract.default_authority_profile_id == "kinematic_guidance"
+    assert advertisement.default_authority_profile_id == "kinematic_guidance"
+    assert {profile.id for profile in advertisement.available_profiles} == expected_profiles
+    for profile in advertisement.available_profiles:
+        assert profile.command_owner == "caller"
+        assert profile.selection_scope == "session"
+        assert profile.switching_policy == "explicit_bumpless"
+        assert profile.lowering_chain
+
+    waypoint = contract.authority_profile("live_waypoint_guidance")
+    assert waypoint.authority == "mission"
+    assert waypoint.action_ids == (
+        "navigation.waypoint.north.command",
+        "navigation.waypoint.east.command",
+        "navigation.waypoint.altitude.command",
+        "navigation.waypoint.capture_radius.command",
+        "navigation.waypoint.speed.command",
+    )
+    channels = {channel.id: channel for channel in contract.action_channels}
+    assert channels["navigation.waypoint.north.command"].frame == "NED"
+    assert channels["navigation.waypoint.altitude.command"].frame is None
+    assert channels["navigation.waypoint.altitude.command"].canonical_unit == "m"
+    assert channels["pilot.lateral.command"].canonical_unit == "dimensionless"
+    if "body_rate_command" in expected_profiles:
+        body_rate = contract.authority_profile("body_rate_command")
+        assert body_rate.authority == "body_motion"
+        assert all(channels[identifier].frame == "body" for identifier in body_rate.action_ids if identifier.startswith("body_rate."))
+    else:
+        assert "body_rate_command" not in {profile.id for profile in contract.authority_profiles}
+    ####
+
+
 def test_x8_pseudo_interface_separates_kinematic_guidance_from_source_load_probes() -> None:
     contract = resolve_vehicle_interface_contract("skywalker_x8", "pseudo_6dof")
 

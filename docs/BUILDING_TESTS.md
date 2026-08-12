@@ -27,9 +27,10 @@ python -m tools.dev test-vehicle a320_openap_3dof
 python -m tools.dev test-vehicle hummingbird
 python -m tools.dev test-vehicle x15
 python -m tools.dev check-vehicle-maturity
-python -m tools.dev test-vehicle simple_aero  # runnable fixed-L/D workflow, batch only
+python -m tools.dev test-vehicle simple_aero  # runnable fixed-L/D batch and persistent-session workflow
 python -m tools.dev test-vehicle dual_launch_glider  # source-generated point-mass batch forms
 python -m tools.dev test-vehicle-catalogue  # campaign declarations must have vertical coverage
+python -m tools.dev test-control-api-pilot  # four reduced-order control/API fixtures only
 python -m tools.dev test-quick      # curated smoke/contracts; stop on first failure
 python -m tools.dev test-changed     # changed tests, or test-quick when no mapping exists
 python -m tools.dev test-parallel    # broad fast suite across workers, optional xdist
@@ -46,6 +47,14 @@ python -m pytest --lf -q -x
 # versus telemetry classification without executing a long route.
 python -m pytest tests/unit/test_native_output_contract.py -q
 ```
+
+`test-control-api-pilot` is the rapid loop for selectable control schemes. It
+covers the API stressor, analytical ballistic and waypoint sessions, Simple
+Aero, generic session switching, flattened discovery metadata, and the
+metadata-only reduced F-16 tier comparison. It intentionally does not execute
+direct-wrench screens, surface/effector allocation, every CADAC source case,
+or the broad vehicle catalogue. Run those separate vertical or release gates
+only when their implementation changes or at a promotion checkpoint.
 
 When changing a source executor's emitted fields or an advertised native
 output map, run that structural contract followed by the exact affected
@@ -73,8 +82,8 @@ The available physical-family slices are `f16_s119`, `a320_openap_3dof`,
 `hummingbird`, `x15`, `hl20_mod_k`, `reference_nesc_two_stage_rocket`,
 `tumbling_body`, `skywalker_x8`, and `b747`. `simple_aero` is the focused
 fixed-L/D workflow slice: it proves the provider-generated batch path and its
-explicitly blocked interactive boundary, not a physical vehicle or actuator
-claim. `dual_launch_glider` proves the source-generated point-mass batch path
+persistent generated-command/direct-throttle session boundary, not a physical
+vehicle or actuator claim. `dual_launch_glider` proves the source-generated point-mass batch path
 for both launch forms and reports attached-booster separation as an event; it
 does not claim an independently propagated released-glider history. Add the
 next slice only after its documented composition has a real runnable endpoint;

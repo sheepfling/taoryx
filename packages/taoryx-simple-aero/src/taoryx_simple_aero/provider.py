@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 
 from taoryx.trajectory.authority import ControlArbitrator
-from taoryx.trajectory.contracts import ControlFrame, ResolvedCase
+from taoryx.trajectory.contracts import ControlFrame, ControlSchema, ResolvedCase
 from taoryx.trajectory.providers import (
     CompiledCase,
     ProviderCapabilities,
@@ -76,13 +76,37 @@ class ReferencePointMassProvider:
     ####
 
 
-class _ReferenceSession:
-    """Constant-acceleration implementation kept private to the plug-in."""
+class ReferencePointMassSession:
+    """Public parameter-level session around the existing point-mass kernel."""
 
-    def __init__(self, compiled: CompiledCase) -> None:
-        self.compiled = compiled
-        self.case = compiled.case
-        self._arbitrator = ControlArbitrator(self.case.controls)
+    def __init__(
+        self,
+        *,
+        initial_speed_m_s: float,
+        initial_altitude_m: float,
+        mass_kg: float,
+        thrust_n: float,
+        controls: tuple[ControlSchema, ...],
+        provider_id: str = "reference.point_mass",
+        case_id: str = "simple-aero-session",
+        duration_s: float = 1.0,
+        time_step_s: float = 0.1,
+    ) -> None:
+        if mass_kg <= 0.0:
+            raise ValueError("point-mass session mass_kg must be positive")
+        if initial_speed_m_s < 0.0 or initial_altitude_m < 0.0 or thrust_n < 0.0:
+            raise ValueError("point-mass session speed, altitude, and thrust must be nonnegative")
+        if duration_s <= 0.0 or time_step_s <= 0.0:
+            raise ValueError("point-mass session duration and time step must be positive")
+        self._initial_speed_m_s = float(initial_speed_m_s)
+        self._initial_altitude_m = float(initial_altitude_m)
+        self._mass_kg = float(mass_kg)
+        self._thrust_n = float(thrust_n)
+        self._provider_id = provider_id
+        self._case_id = case_id
+        self._duration_s = float(duration_s)
+        self._time_step_s = float(time_step_s)
+        self._arbitrator = ControlArbitrator(controls)
         self._reset_values()
         ####
 
@@ -91,8 +115,8 @@ class _ReferenceSession:
 
         self._time = 0.0
         self._downrange = 0.0
-        self._speed = _case_number(self.case, "mission.initial_speed", 0.0)
-        self._altitude = _case_number(self.case, "mission.initial_altitude", 0.0)
+        self._speed = self._initial_speed_m_s
+        self._altitude = self._initial_altitude_m
         self._arbitrator.reset()
         self._history: list[SessionState] = [self._state()]
         self._controls: list[Mapping[str, float]] = []
@@ -121,6 +145,37 @@ class _ReferenceSession:
         return self._state()
         ####
 
+    def observe(self) -> SessionState:
+        """Return the accepted native point-mass boundary without advancing."""
+
+        return self._state()
+        ####
+
+    def restore_state(
+        self,
+        *,
+        time_s: float,
+        downrange_m: float,
+        altitude_m: float,
+        speed_m_s: float,
+    ) -> SessionState:
+        """Restore a committed boundary for checkpoint-backed wrappers."""
+
+        if min(time_s, downrange_m, altitude_m, speed_m_s) < 0.0:
+            raise ValueError("point-mass restored state values must be nonnegative")
+        self._time = float(time_s)
+        self._downrange = float(downrange_m)
+        self._altitude = float(altitude_m)
+        self._speed = float(speed_m_s)
+        self._arbitrator.reset()
+        self._history = [self._state()]
+        self._controls = []
+        self._requested_controls = []
+        self._resources = []
+        self._diagnostics = []
+        return self._state()
+        ####
+
     def step(self, duration_s: float, controls: ControlFrame | None = None) -> StepResult:
         """Advance with exact constant-acceleration kinematics."""
 
@@ -130,9 +185,7 @@ class _ReferenceSession:
         arbitration = self._arbitrator.apply(self._time, duration_s, frame)
         applied = arbitration.values
         throttle = float(applied.get("command.throttle", 0.0))
-        mass = _case_number(self.case, "vehicle.mass.initial", 1.0)
-        thrust = _case_number(self.case, "vehicle.booster.thrust", 0.0)
-        acceleration = throttle * thrust / mass
+        acceleration = throttle * self._thrust_n / self._mass_kg
         start = self._time
         self._downrange += self._speed * duration_s + 0.5 * acceleration * duration_s * duration_s
         self._speed += acceleration * duration_s
@@ -160,8 +213,8 @@ class _ReferenceSession:
         """Run for the configured duration using the supplied frames."""
 
         self.reset()
-        duration = _case_number(self.case, "mission.duration", 1.0)
-        dt = _case_number(self.case, "runtime.time_step", duration)
+        duration = self._duration_s
+        dt = self._time_step_s
         frames = tuple(controls)
         index = 0
         while self._time < duration - 1e-12:
@@ -170,8 +223,8 @@ class _ReferenceSession:
             self.step(step, frame)
             index += 1
         return TrajectoryResult(
-            self.compiled.provider_id,
-            self.case.case_id,
+            self._provider_id,
+            self._case_id,
             "completed",
             tuple(self._history),
             tuple(self._controls),
@@ -184,5 +237,27 @@ class _ReferenceSession:
     ####
 
 
-__all__ = ["ReferencePointMassProvider"]
+class _ReferenceSession(ReferencePointMassSession):
+    """Compatibility adapter from the older compiled-case provider API."""
+
+    def __init__(self, compiled: CompiledCase) -> None:
+        self.compiled = compiled
+        self.case = compiled.case
+        super().__init__(
+            initial_speed_m_s=_case_number(self.case, "mission.initial_speed", 0.0),
+            initial_altitude_m=_case_number(self.case, "mission.initial_altitude", 0.0),
+            mass_kg=_case_number(self.case, "vehicle.mass.initial", 1.0),
+            thrust_n=_case_number(self.case, "vehicle.booster.thrust", 0.0),
+            controls=self.case.controls,
+            provider_id=compiled.provider_id,
+            case_id=self.case.case_id,
+            duration_s=_case_number(self.case, "mission.duration", 1.0),
+            time_step_s=_case_number(self.case, "runtime.time_step", 1.0),
+        )
+        ####
+
+    ####
+
+
+__all__ = ["ReferencePointMassProvider", "ReferencePointMassSession"]
 ####

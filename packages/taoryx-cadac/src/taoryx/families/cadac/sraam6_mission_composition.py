@@ -65,6 +65,13 @@ from taoryx.trajectory.mission_composition import (
 from .configuration_defaults import materialize_configuration_defaults
 from .control_metadata import blocked_control_advertisement, source_managed_control_advertisement
 from .output_metadata import cadac_output_quantity
+from .session_authority import (
+    CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID,
+    CADAC_SOURCE_PROGRAM_PROFILE_ID,
+    source_managed_session_authority_fields,
+    source_managed_session_authority_state,
+    validate_source_managed_session_request,
+)
 from .sraam6 import Sraam6RunResult, Sraam6Sample, Sraam6ScenarioSession, Sraam6SourceDefinition, Sraam6TargetSample
 from .sraam6_plugin import Sraam6PluginOverrides, Sraam6VehiclePlugin
 
@@ -246,6 +253,7 @@ class CadacSraam6MissionCompositionProvider:
             raise ValueError("SRAAM6 session request names another provider version")
         if request.model_id != SRAAM6_MODEL_ID:
             raise ValueError("SRAAM6 session request names another model")
+        validate_source_managed_session_request(request.authority_profile_id, request.command_source_id)
         ####
         prepared = self.validate_configuration(request.prepared_configuration.configuration)
         if prepared.fingerprint != request.prepared_configuration.fingerprint:
@@ -285,6 +293,7 @@ class CadacSraam6MissionCompositionProvider:
             integration_step_s=definition.integration_step_s,
             supports_spawned_entities=False,
             action_schema=(),
+            **source_managed_session_authority_fields(),
             observation_schema=_sraam6_session_observation_schema(),
             initial_observation=observation,
             claim_boundary=(
@@ -330,6 +339,7 @@ class CadacSraam6MissionCompositionProvider:
             raise ValueError(f"SRAAM6 expected sequence {request.expected_sequence}, current sequence is {record.sequence}")
         if request.action:
             raise ValueError("SRAAM6 source-managed session does not accept external action channels")
+        validate_source_managed_session_request(request.authority_profile_id, None)
         ####
         substeps = _sraam6_session_substeps(request.duration_s, record.definition.integration_step_s)
         time_start_s = record.source.sim_time_s
@@ -372,6 +382,9 @@ class CadacSraam6MissionCompositionProvider:
             observation=observation,
             events=observation.events,
             diagnostics=observation.diagnostics,
+            authority_profile_id=CADAC_SOURCE_PROGRAM_PROFILE_ID,
+            command_source_id=CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID,
+            lowering_evidence=source_managed_session_authority_state().model_dump(mode="json"),
         )
         ####
 
@@ -590,6 +603,7 @@ def _sraam6_session_observation(
             "native_relative_state_track": _sraam6_native_track_value(sensor_bus),
         },
         events=events,
+        control_authority=source_managed_session_authority_state(),
     )
     ####
 

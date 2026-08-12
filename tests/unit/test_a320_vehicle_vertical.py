@@ -108,6 +108,15 @@ def test_a320_advertisement_builds_a_complete_pseudo6dof_authoring_plan(
         "guidance.heading.command",
         "guidance.bank.command",
     }
+    assert controller["default_authority_id"] == "kinematic_guidance"
+    assert controller["channel_projection"] == "default_authority"
+    available_channels = cast(list[dict[str, Any]], controller["available_channels"])
+    assert {item["id"] for item in available_channels} > {item["id"] for item in channels}
+    assert {item["id"] for item in cast(list[dict[str, object]], controller["authorities"])} == {
+        "kinematic_guidance",
+        "reduced_pilot_command",
+        "live_waypoint_guidance",
+    }
     campaigns = cast(list[dict[str, object]], controller["campaigns"])
     assert [item["id"] for item in campaigns] == ["a320-pseudo-cruise-attitude-v1"]
     assert controller["local_controller_screen"] is None

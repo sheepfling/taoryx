@@ -15,9 +15,11 @@ from functools import lru_cache
 from typing import Any, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from taoryx_simple_aero.provider import ReferencePointMassSession
 from taoryx_simple_aero.resources import simple_aero_resource_root
 
 from ..fidelity_contracts import CANONICAL_FIDELITY_TIERS
+from ..fixture_composition_episode import FixtureCompositionEpisode, FixtureTransition
 from ..simple_aero_builder import FixedLD3DOFParameters, SimpleAeroTrajectoryBuild, SimpleAeroTrajectoryBuilder
 from ..specialized_segments import SIMPLE_AERO_FAMILY_SEGMENTS, specialized_segment_contract
 from ..value_space import default_value_space_for_value_type
@@ -41,6 +43,7 @@ from .configuration_contract import (
     ConfigurationSequenceTemplate,
     ConfigurationSequenceValue,
     ConfigurationValueSpace,
+    ControlCommandSemantics,
     PreparedTrajectoryConfiguration,
     TrajectoryConfigurationInstance,
     TrajectoryConfigurationSchema,
@@ -66,7 +69,8 @@ from .configuration_contract import (
     ValuePresentationMetadata,
     validate_configuration_instance,
 )
-from .contracts import FamilyPackage, ParameterSchema
+from .contracts import ControlFrame, FamilyPackage, ParameterSchema
+from .session_interface import build_session_interface_contract
 
 SIMPLE_AERO_MODEL_ID = "simple_aero"
 SIMPLE_AERO_CUSTOM_COMPOSITION_ID = "custom_composition"
@@ -1040,13 +1044,13 @@ def simple_aero_model_metadata(schema: TrajectoryConfigurationSchema | None = No
         model_kind="trajectory_workflow",
         status="common_runner_ready",
         tags=("simple-aero", "workflow", "point-mass", "fixed-ld", "synthetic"),
-        operations=("discover", "validate", "batch"),
-        common_runner_operations=("batch",),
+        operations=("discover", "validate", "batch", "step"),
+        common_runner_operations=("batch", "step"),
         capabilities=TrajectoryModelCapabilities(
             initialization_modes=("launch_state", "range_bearing", "geodetic_aimpoint"),
             segment_types=_segment_names(),
             termination_modes=("time", "physical_burnout", "commanded_heading", "commanded_range"),
-            operations=("discover", "validate", "batch"),
+            operations=("discover", "validate", "batch", "step"),
             supports_custom_segments=True,
         ),
         realizations=(
@@ -1060,8 +1064,8 @@ def simple_aero_model_metadata(schema: TrajectoryConfigurationSchema | None = No
                 controls=_simple_aero_control_advertisement(family, missions),
                 fidelity_aliases=(_POINT_MASS,),
                 mission_template_ids=tuple(item.id for item in missions),
-                operations=("validate", "batch"),
-                native_factory_ids=("simple_aero_generated_problem.v1",),
+                operations=("validate", "batch", "step"),
+                native_factory_ids=("simple_aero_generated_problem.v1", "simple_aero_point_mass_session.v1"),
                 source_refs=("src/taoryx/simple_aero_builder.py",),
                 claim_boundary="Synthetic fixed-coefficient workflow only; this is not vehicle-family qualification.",
             ),
@@ -1111,7 +1115,7 @@ def _simple_aero_control_advertisement(
     """Publish generated control coordinates separately from caller inputs."""
 
     value_space = ConfigurationValueSpace.from_mapping(default_value_space_for_value_type("scalar").as_dict())
-    channels = tuple(
+    generated_channels = tuple(
         TrajectoryControlChannelMetadata(
             id=item.id,
             label=item.id.replace(".", " ").replace("_", " ").title(),
@@ -1156,6 +1160,60 @@ def _simple_aero_control_advertisement(
         )
         for index, item in enumerate(family.controls, start=1)
     )
+    direct_space = ConfigurationValueSpace(
+        topology="bounded_interval",
+        representation="scalar",
+        error_rule="subtraction",
+        interpolation_rule="held constant",
+        normalization_rule="bounded to [0, 1]",
+        coordinate_chart="[0, 1]",
+    )
+    direct_throttle = TrajectoryControlChannelMetadata(
+        id="propulsion.command.fraction",
+        label="Direct Throttle Fraction",
+        description="Caller-held normalized throttle for the native interactive point-mass provider.",
+        channel_kind="action",
+        quantity="dimensionless",
+        canonical_unit="dimensionless",
+        display_unit="dimensionless",
+        interval=ConfigurationInterval(
+            minimum=ConfigurationBound(value=0.0),
+            maximum=ConfigurationBound(value=1.0),
+        ),
+        sampling_semantics="held_action",
+        value_space=direct_space,
+        semantics=ControlCommandSemantics(
+            value_domain="continuous",
+            command_mode="absolute",
+            temporal_semantics="held",
+            release_behavior="hold",
+            agent_normalization="affine",
+            agent_clip=True,
+        ),
+        availability="available",
+        operations=("step",),
+        native_channel_id="command.throttle",
+        native_binding=TrajectoryControlNativeBindingMetadata(
+            id="command.throttle",
+            quantity="dimensionless",
+            canonical_unit="dimensionless",
+            interval=ConfigurationInterval(
+                minimum=ConfigurationBound(value=0.0),
+                maximum=ConfigurationBound(value=1.0),
+            ),
+            value_space=direct_space,
+            provider_binding={"provider": "ReferencePointMassSession", "field": "command.throttle"},
+        ),
+        provider_binding={"provider": "ReferencePointMassSession", "field": "command.throttle"},
+        presentation=ValuePresentationMetadata(group="interactive controls", order=10, control="slider"),
+        source_refs=("packages/taoryx-simple-aero/src/taoryx_simple_aero/provider.py",),
+        provenance="existing Simple Aero reference point-mass interactive provider",
+        claim_boundary=(
+            "Direct normalized thrust scaling only. The interactive proof has no bank steering, "
+            "aerodynamic response, atmosphere, or vehicle-specific engine dynamics."
+        ),
+    )
+    channels = (*generated_channels, direct_throttle)
     mission_ids = tuple(item.id for item in missions)
     segment_ids = {segment for mission in missions for segment in mission.advertised_segment_ids}
     intents = (
@@ -1185,26 +1243,66 @@ def _simple_aero_control_advertisement(
             provenance="Simple Aero segment grammar",
             claim_boundary="Synthetic point-mass propulsion command only; no physical throttle or engine qualification claim.",
         ),
+        TrajectoryControlIntentMetadata(
+            id="direct_throttle",
+            label="Direct Throttle",
+            description="Hold a normalized throttle fraction in the stateful point-mass session.",
+            resolution="external_channel",
+            segment_ids=_segment_names(),
+            mission_template_ids=mission_ids,
+            channel_ids=("propulsion.command.fraction",),
+            operations=("step",),
+            source_refs=("packages/taoryx-simple-aero/src/taoryx_simple_aero/provider.py",),
+            provenance="existing Simple Aero interactive provider",
+            claim_boundary="Normalized point-mass thrust scaling only; no engine or flight-control qualification.",
+        ),
     )
     return TrajectoryControlAdvertisement(
-        status="internally_generated",
+        status="available",
         channels=channels,
         authorities=(
             TrajectoryControlAuthorityMetadata(
                 id="generated_mission_commands",
                 authority="mission",
-                availability="available_in_batch",
-                channel_ids=tuple(item.id for item in channels),
-                operations=("batch",),
-                description="Provider-generated bank and throttle profiles for the native problem.",
+                availability="available",
+                channel_ids=tuple(item.id for item in generated_channels),
+                operations=("batch", "step"),
+                description="Provider-generated bank and throttle profiles for batch and zero-action session stepping.",
+                command_owner="provider_controller",
+                selection_scope="session",
+                switching_policy="explicit_bumpless",
+                scheme_id="provider.program",
+                lowering_chain=("simple_aero_segment_program", "generated_bank_throttle_profile"),
                 source_refs=("src/taoryx/simple_aero_builder.py",),
                 provenance="Simple Aero builder",
-                claim_boundary="This authority is internal to batch generation and cannot be supplied as an interactive action.",
+                claim_boundary=(
+                    "Provider-owned schedule. Session bank is advertised and recorded but deliberately has no steering "
+                    "effect in the existing point-mass interactive proof."
+                ),
+            ),
+            TrajectoryControlAuthorityMetadata(
+                id="direct_throttle_command",
+                authority="native_bridge",
+                availability="available",
+                channel_ids=("propulsion.command.fraction",),
+                operations=("step",),
+                description="Caller-owned normalized throttle mapped to the native command.throttle channel.",
+                command_owner="caller",
+                selection_scope="session",
+                switching_policy="explicit_bumpless",
+                scheme_id="kinematic.energy",
+                lowering_chain=("propulsion.command.fraction", "command.throttle", "point_mass_thrust_scaling"),
+                source_refs=("packages/taoryx-simple-aero/src/taoryx_simple_aero/provider.py",),
+                provenance="existing Simple Aero interactive provider",
+                claim_boundary="Direct point-mass thrust scaling only; bank remains provider-generated and non-steering.",
             ),
         ),
         intents=intents,
         default_authority_id="generated_mission_commands",
-        claim_boundary="Simple Aero publishes generated commands for inspection without presenting them as interactive controls.",
+        claim_boundary=(
+            "Generated mission commands and direct throttle share one stateful session. Only direct throttle is caller-owned; "
+            "generated bank remains visible but is not promoted to a steering control."
+        ),
     )
     ####
 
@@ -1246,7 +1344,18 @@ def _simple_aero_output_channels() -> tuple[TrajectoryOutputChannelMetadata, ...
             display_unit=unit,
             availability="guaranteed",
             compatible_fidelities=(_POINT_MASS,),
-            operations=("batch",),
+            operations=(
+                ("batch", "step")
+                if channel_id
+                in {
+                    "position.geodetic.altitude",
+                    "velocity.speed",
+                    "mass.total",
+                    "propulsion.thrust",
+                    "propulsion.throttle_command",
+                }
+                else ("batch",)
+            ),
             frame=frame,
             interpolation="periodic" if channel_id == "position.geodetic.longitude" else "linear",
             periodicity=(ConfigurationPeriodicity(period=360.0, canonical_minimum=-180.0) if channel_id == "position.geodetic.longitude" else None),
@@ -1317,6 +1426,186 @@ def _simple_aero_output_schema(schema: TrajectoryConfigurationSchema) -> Traject
             "outside this synthetic workflow contract."
         ),
     )
+    ####
+
+
+def open_simple_aero_session_episode(
+    model: TrajectoryModelMetadata,
+    prepared: PreparedTrajectoryConfiguration,
+    *,
+    seed: int | None = None,
+    integration_step_s: float = 0.02,
+) -> FixtureCompositionEpisode:
+    """Open the existing interactive point-mass kernel through Mission Composition."""
+
+    del integration_step_s
+    build = build_simple_aero_prepared_configuration(prepared)
+    parameters = build.parameters
+    family = _simple_aero_family()
+    kernel = ReferencePointMassSession(
+        initial_speed_m_s=parameters.initial_speed_m_s,
+        initial_altitude_m=parameters.initial_altitude_m,
+        mass_kg=parameters.mass_kg,
+        thrust_n=parameters.thrust_n,
+        controls=family.controls,
+        provider_id="taoryx.simple-aero.point-mass-session",
+        case_id=prepared.configuration.configuration_id,
+        duration_s=build.derived.total_duration_s,
+        time_step_s=parameters.time_step_s,
+    )
+    contract, observation_schema = build_session_interface_contract(
+        model,
+        realization_id=prepared.configuration.realization_id or "fixed_ld_point_mass",
+        fidelity=prepared.configuration.fidelity,
+        family_id=family.family_id,
+        physical_family="synthetic_fixed_ld_point_mass",
+        claim_boundary=(
+            "Interactive Simple Aero proof reusing ReferencePointMassSession. It implements constant-acceleration "
+            "downrange motion and normalized thrust scaling only; scheduled bank is observable but non-steering, "
+            "and no atmosphere or extra gravity model is carried into the session."
+        ),
+    )
+
+    def initial_state_factory(_: int | None) -> Mapping[str, object]:
+        native = kernel.reset()
+        return {
+            "downrange_m": float(native.values["position.downrange_m"]),
+            "altitude_m": float(native.values["position.altitude_m"]),
+            "speed_m_s": float(native.values["velocity.m_s"]),
+            "mass_kg": parameters.mass_kg,
+            "thrust_available_n": parameters.thrust_n,
+            "throttle_realized": 0.0,
+            "bank_command_deg": 0.0,
+            "held_direct_throttle": 0.0,
+            "generated_phase": "powered_ascent",
+        }
+        ####
+
+    def transition(
+        state: Mapping[str, Any],
+        profile_id: str,
+        action: Mapping[str, Any],
+        duration_s: float,
+        start_s: float,
+    ) -> FixtureTransition:
+        current = kernel.observe()
+        native_values = cast(Mapping[str, Any], current.values)
+        if (
+            abs(current.time_s - start_s) > 1.0e-9
+            or abs(float(native_values["position.downrange_m"]) - float(state["downrange_m"])) > 1.0e-9
+            or abs(float(native_values["velocity.m_s"]) - float(state["speed_m_s"])) > 1.0e-9
+        ):
+            kernel.restore_state(
+                time_s=start_s,
+                downrange_m=float(state["downrange_m"]),
+                altitude_m=float(state["altitude_m"]),
+                speed_m_s=float(state["speed_m_s"]),
+            )
+
+        if profile_id == "generated_mission_commands":
+            if action:
+                raise ValueError("generated Simple Aero mission commands accept no caller action")
+            throttle_request, bank_request, phase = _simple_aero_scheduled_commands(build, start_s)
+            applied_semantic: dict[str, object] = {}
+        elif profile_id == "direct_throttle_command":
+            held = float(action.get("propulsion.command.fraction", state["held_direct_throttle"]))
+            throttle_request = held
+            bank_request = 0.0
+            phase = "direct_throttle"
+            applied_semantic = {"propulsion.command.fraction": held}
+        else:
+            raise ValueError(f"unsupported Simple Aero authority profile {profile_id!r}")
+
+        result = kernel.step(
+            duration_s,
+            ControlFrame(
+                values={"command.throttle": throttle_request, "command.bank": bank_request},
+                authority={"command.throttle": "commanded", "command.bank": "commanded"},
+            ),
+        )
+        throttle_realized = float(result.applied_controls.get("command.throttle", 0.0))
+        bank_realized = float(result.applied_controls.get("command.bank", 0.0))
+        next_state = {
+            **dict(state),
+            "downrange_m": float(result.state.values["position.downrange_m"]),
+            "altitude_m": float(result.state.values["position.altitude_m"]),
+            "speed_m_s": float(result.state.values["velocity.m_s"]),
+            "throttle_realized": throttle_realized,
+            "bank_command_deg": bank_realized,
+            "generated_phase": phase,
+        }
+        if profile_id == "direct_throttle_command":
+            next_state["held_direct_throttle"] = throttle_request
+        return FixtureTransition(
+            state=next_state,
+            applied_action={
+                "command.throttle": throttle_realized,
+                "command.bank": bank_realized,
+            },
+            applied_semantic_action=applied_semantic,
+            lowering_evidence={
+                "authority_profile_id": profile_id,
+                "lowering_chain": (
+                    ["simple_aero_segment_program", "generated_bank_throttle_profile"]
+                    if profile_id == "generated_mission_commands"
+                    else ["propulsion.command.fraction", "command.throttle", "point_mass_thrust_scaling"]
+                ),
+                "requested_native_action": {
+                    "command.throttle": throttle_request,
+                    "command.bank": bank_request,
+                },
+                "achieved_native_action": dict(result.applied_controls),
+                "control_decisions": list(result.control_decisions),
+                "bank_effect": "telemetry_only_non_steering",
+                "kernel": "ReferencePointMassSession",
+            },
+            diagnostics=tuple(result.diagnostics),
+            status="active",
+        )
+        ####
+
+    return FixtureCompositionEpisode(
+        interface_contract=contract,
+        observation_schema=observation_schema,
+        initial_state_factory=initial_state_factory,
+        observation_factory=_simple_aero_session_observation,
+        transition=transition,
+        claim_boundary=contract.claim_boundary,
+        seed=seed,
+    )
+    ####
+
+
+def _simple_aero_scheduled_commands(
+    build: SimpleAeroTrajectoryBuild,
+    time_s: float,
+) -> tuple[float, float, str]:
+    boost_end = build.derived.boost_duration_s
+    coast_end = boost_end + build.derived.coast_duration_s
+    bank_end = coast_end + build.parameters.bank_duration_s
+    if time_s < boost_end:
+        return 1.0, 0.0, "powered_ascent"
+    if time_s < coast_end:
+        return 0.0, 0.0, "ballistic_coast"
+    if time_s < bank_end:
+        return 0.0, build.parameters.bank_deg, "bank_maneuver"
+    return 0.0, 0.0, "terminal"
+    ####
+
+
+def _simple_aero_session_observation(
+    state: Mapping[str, Any],
+    _: float,
+    __: str,
+) -> Mapping[str, object]:
+    throttle = float(state["throttle_realized"])
+    return {
+        "position.geodetic.altitude": float(state["altitude_m"]),
+        "velocity.speed": float(state["speed_m_s"]),
+        "mass.total": float(state["mass_kg"]),
+        "propulsion.thrust": throttle * float(state["thrust_available_n"]),
+        "propulsion.throttle_command": throttle,
+    }
     ####
 
 
@@ -2341,9 +2630,15 @@ def _mission_metadata(template: ConfigurationSequenceTemplate) -> TrajectoryMiss
                 fidelity=_POINT_MASS,
                 realization_id="fixed_ld_point_mass",
                 operation="step",
-                status="blocked",
-                blockers=("no interactive Simple Aero Mission Composition session binding is registered",),
-                claim_boundary="Batch or fixture readiness does not imply an interactive stepping contract.",
+                status="available",
+                execution_mode="simple_aero_point_mass_session",
+                availability_scope="provider_interface",
+                common_runner_status="registered",
+                executor_id="taoryx.simple-aero.point-mass-session.v1",
+                claim_boundary=(
+                    "Reuses the existing constant-acceleration ReferencePointMassSession. Direct throttle is active; "
+                    "bank is schedule telemetry only and does not steer the interactive proof."
+                ),
             ),
         ),
         provenance="verification/simple_aero_segment_catalog.yaml; tests/fixtures/simple_aero_v1",
@@ -2422,10 +2717,10 @@ def _simple_aero_fidelity(tier: str) -> TrajectoryFidelityMetadata:
         runtime_fidelity="point_mass_3dof" if declared else "not_available",
         control_realization="generated segment commands" if declared else "not_available",
         promotion_status="synthetic_contract_fixture" if declared else "not_declared",
-        operations=("validate", "batch") if declared else (),
+        operations=("validate", "batch", "step") if declared else (),
         profile_id="simple_aero.fixed_ld_3dof" if declared else None,
         blockers=() if declared else ("Simple Aero workflow does not declare this realization tier",),
-        required_operations=("configuration_validation", "generated_problem_batch") if declared else (),
+        required_operations=("configuration_validation", "generated_problem_batch", "point_mass_session") if declared else (),
         claim_boundary=(
             "Point-mass readiness applies to the synthetic fixed-coefficient workflow only."
             if declared
@@ -2478,6 +2773,7 @@ __all__ = [
     "build_simple_aero_configuration",
     "build_simple_aero_example_configuration",
     "build_simple_aero_prepared_configuration",
+    "open_simple_aero_session_episode",
     "build_simple_aero_template_configuration",
     "prepare_simple_aero_mission",
     "simple_aero_configuration_schema",

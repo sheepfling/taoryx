@@ -42,6 +42,7 @@ The public schemas are:
 | Configuration schema | `taoryx.trajectory-provider-configuration-schema/v1` |
 | Output schema | `taoryx.trajectory-provider-output-schema/v1` |
 | Per-realization control advertisement | Nested `TrajectoryControlAdvertisement` in model metadata |
+| Per-fidelity control-scheme matrix | `control_scheme_support` in model metadata |
 | Configuration instance | `taoryx.trajectory-provider-configuration/v1` |
 | Prepared configuration | `taoryx.trajectory-provider-prepared-configuration/v1` |
 | Run request | `taoryx.mission-composition-run-request/v1` |
@@ -51,6 +52,7 @@ The public schemas are:
 | Session descriptor | `taoryx.mission-composition-session/v1` |
 | Session observation | `taoryx.mission-composition-session-observation/v1` |
 | Session step request/result | `taoryx.mission-composition-session-step-request/v1`, `taoryx.mission-composition-session-step-result/v1` |
+| Authority switch/transition | `taoryx.mission-composition-switch-authority/v1`, `taoryx.mission-composition-authority-transition/v1` |
 | Reset/inspect/close session | `taoryx.mission-composition-reset-session/v1`, `taoryx.mission-composition-inspect-session/v1`, `taoryx.mission-composition-close-session/v1` |
 | Advertisement audit | `taoryx.mission-composition-advertisement-audit/v1` |
 | Asset inventory | `taoryx.mission-composition-inventory/v1` |
@@ -78,7 +80,8 @@ class ConfigurableTrajectoryProvider(Protocol):
 
 Discovery must not execute a trajectory. `list_models()` returns stable model
 identity, family and model kind, presentation metadata, typed read-only model
-properties, per-realization controls, reference frames, a fingerprinted output schema, exact operations,
+properties, per-realization controls, a flattened control-scheme support
+matrix, reference frames, a fingerprinted output schema, exact operations,
 mission templates, deployments, source references, fidelity records, and
 fidelity transitions.
 Each model record identifies its configuration schema and SHA-256 fingerprint.
@@ -147,6 +150,17 @@ An internally generated command is discoverable but is not presented as an
 interactive action. Likewise, planned source effectors remain visible with no
 execution operation, and an uncontrolled realization cannot silently inherit
 controls from another fidelity.
+
+`TrajectoryModelMetadata.control_scheme_support` is the UI-ready join over
+those exact authority profiles. Each row names one cross-family scheme, the
+realization and fidelity IDs that support it, the underlying authority and
+action IDs, intended consumer roles, streaming preference, operations,
+ownership, switching policy, and claim boundary. It is materialized in the
+serialized model record so a client does not reconstruct a taxonomy from
+channel spelling. Legacy undeclared profiles may be conservatively labeled
+`authority_kind_fallback`; promoted profiles and the low-fidelity pilot must
+use `declared` records. A model with no supported authority publishes an empty
+matrix rather than an invented open-loop or native bridge.
 
 ### Output capability and selection
 
@@ -325,6 +339,9 @@ The common session lifecycle consists of:
 - `inspect`: return the current committed observation without advancing time;
 - `step`: validate a typed action, hold it for an explicit caller duration,
   require an optional expected sequence, and return the committed observation;
+- `switch_authority`: for a semantic-profile session, require an expected
+  sequence and an explicitly bumpless pair of profiles, preserve plant state
+  and time, clear held references, and return the replacement action schema;
 - `reset`: deterministically reconstruct the prepared initial state using the
   declared seed semantics; and
 - `close`: release native state and retain a terminal acknowledgement.
@@ -332,17 +349,29 @@ The common session lifecycle consists of:
 The immutable descriptor publishes session identity, state ownership,
 configuration fingerprint, seed, integration timestep semantics, action and
 observation schemas, deterministic reset policy, claim boundary, and whether
-the session can emit spawned entities. Action and observation channels carry
-type, shape, quantity, unit, bounds, sampling semantics, and explicit value
-space. Observations include lifecycle, sequence, time, events, diagnostics, and
-spawned entity IDs. The current native episodes advertise no interactive child
-generation; that absence remains explicit.
+the session can emit spawned entities. It also advertises every authority
+profile, the default and active profile, command source, ownership, selection
+scope, switching policy, phase applicability, and lowering chain.
 
-For every registered `step` tuple, advertisement conformance requires active
-semantic action channels with exact native binding schemas. The vertical
-session suite opens every episode witness and checks native channel identity,
-type, shape, quantity, unit, bounds, and value-space topology against the
-descriptor returned by the live session.
+An open request with `authority_profile_id` receives a
+`selected_semantic_profile` action schema containing only that profile's
+semantic channels. Omitting it retains the legacy `native_union` schema. Action
+and observation channels carry type, shape, quantity, unit, frame, bounds,
+sampling semantics, and explicit value space. Selected-profile steps separate
+requested and applied semantic values from lowered adapter values and lowering
+evidence. Observations include lifecycle, sequence, time, events, diagnostics,
+spawned entity IDs, and inspectable control ownership. The current native
+episodes advertise no interactive child generation; that absence remains
+explicit.
+
+For every registered caller-controlled `step` tuple, advertisement conformance
+requires active semantic action channels with exact native or declared adapter
+binding schemas. The vertical session suite opens every episode witness and
+checks profile selection, identity, type, shape, quantity, unit, frame, bounds,
+value-space topology, lowering evidence, and state-continuous transfer. A
+provider-controlled session may instead advertise a zero-action profile. CADAC
+uses that form to identify its retained source program and must not manufacture
+an external action seam.
 
 ## Feedback and failure contract
 
@@ -483,8 +512,12 @@ family from existing authorities. It does not maintain a second model catalog.
 The Simple Aero schema publishes
 launch and endpoint choices, mass/boost/aero inputs, checkpoints, open segment
 composition, named maneuver templates, and an explicit point-mass-only fidelity
-boundary. Only its fixed-L/D baseline currently has a configuration-to-runtime
-binding; named maneuver fixtures remain blocked for batch execution. Both
+boundary. Every fixed-L/D template has a common batch binding and a registered
+persistent point-mass session. The session reuses the existing Simple Aero
+reference kernel: its default generated schedule is provider-owned and accepts
+no caller action, while the alternate direct-throttle profile lowers to the
+native `command.throttle` coordinate. Generated bank remains visible telemetry,
+not an invented steering input. Both
 dual-launch forms have a source-generated point-mass batch binding; they remain
 truthfully limited to one continuous primary trajectory and an event-only
 separation boundary, without independent attached-stack or released-glider
@@ -492,8 +525,12 @@ histories.
 
 `ReferenceMissionCompositionProvider` is the runnable interface witness. It
 publishes the analytical ballistic and constant-velocity waypoint models,
-validates the portable configuration, registers both common-runner executors,
-and converts their output to the standard trajectory response. Run it with:
+validates the portable configuration, registers common batch and persistent
+step executors, and converts their output to the standard trajectory response.
+Ballistic stepping is explicitly zero-action open loop. Waypoint stepping
+defaults to its configured provider guidance and can switch, without resetting
+time or state, to caller-owned kinematic velocity or live-waypoint authority.
+Run it with:
 
 ```bash
 PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_reference.py \
@@ -502,7 +539,9 @@ PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_referenc
 
 `ContractProbeMissionCompositionProvider` is the full-surface development
 witness. It publishes every metadata/configuration/deployment shape, returns a
-three-generation lineage result, and demonstrates a structured rejected request:
+three-generation lineage batch result, demonstrates a structured rejected
+request, and provides coarse/medium streaming profiles for typed continuous,
+discrete, and event controls:
 
 ```bash
 PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_contract_probe.py \

@@ -38,6 +38,13 @@ QUICK_TEST_PATHS = (
     "tests/unit/test_model_authoring.py",
     "tests/unit/test_tooling_entrypoints.py",
 )
+CONTROL_API_PILOT_TEST_PATHS = (
+    "tests/unit/test_control_scheme_advertisement.py",
+    "tests/unit/test_low_fidelity_control_sessions.py",
+    "tests/unit/test_reference_provider_vertical.py",
+    "tests/unit/test_simple_aero_vehicle_vertical.py",
+    "tests/unit/test_mission_composition_sessions.py",
+)
 VEHICLE_VERTICAL_TEST_PATHS: dict[str, tuple[str, ...]] = {
     # A vertical slice is deliberately one family rather than every test with
     # that family marker.  It proves the public Composition path from the
@@ -178,6 +185,24 @@ def test_quick() -> None:
             "-x",
             "--basetemp",
             ".pytest-quick",
+        ]
+    )
+    ####
+
+
+def test_control_api_pilot() -> None:
+    """Run the reduced-order control API pilot without rigid-body qualification."""
+
+    run(
+        [
+            project_python(),
+            "-m",
+            "pytest",
+            *CONTROL_API_PILOT_TEST_PATHS,
+            "-q",
+            "-x",
+            "--basetemp",
+            ".pytest-control-api-pilot",
         ]
     )
     ####
@@ -1606,6 +1631,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "legacy-close-check": legacy_close_check,
     "test": test,
     "test-quick": test_quick,
+    "test-control-api-pilot": test_control_api_pilot,
     "test-changed": test_changed,
     "test-parallel": test_parallel,
     "test-all": test_all,

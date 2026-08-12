@@ -75,6 +75,13 @@ from .configuration_defaults import materialize_configuration_defaults
 from .control_metadata import source_managed_control_advertisement
 from .output_metadata import cadac_output_quantity
 from .sensor_adapter import cadac_local_ned_sensor_context
+from .session_authority import (
+    CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID,
+    CADAC_SOURCE_PROGRAM_PROFILE_ID,
+    source_managed_session_authority_fields,
+    source_managed_session_authority_state,
+    validate_source_managed_session_request,
+)
 
 CADAC_PROVIDER_ID = "cadac"
 AIM5_MODEL_ID = "cadac.aim5.missile"
@@ -225,6 +232,7 @@ class CadacAim5MissionCompositionProvider:
             raise ValueError("AIM5 session request names another provider version")
         if request.model_id != AIM5_MODEL_ID:
             raise ValueError("AIM5 session request names another model")
+        validate_source_managed_session_request(request.authority_profile_id, request.command_source_id)
         prepared = self.validate_configuration(request.prepared_configuration.configuration)
         if prepared.fingerprint != request.prepared_configuration.fingerprint:
             raise ValueError("AIM5 session prepared configuration is stale")
@@ -261,6 +269,7 @@ class CadacAim5MissionCompositionProvider:
             integration_step_s=definition.integration_step_s,
             supports_spawned_entities=False,
             action_schema=(),
+            **source_managed_session_authority_fields(),
             observation_schema=observation_schema,
             initial_observation=observation,
             claim_boundary=(
@@ -306,6 +315,7 @@ class CadacAim5MissionCompositionProvider:
             raise ValueError(f"AIM5 session expected sequence {request.expected_sequence}, current sequence is {record.sequence}")
         if request.action:
             raise ValueError("AIM5 source-managed session does not accept external action channels")
+        validate_source_managed_session_request(request.authority_profile_id, None)
         time_start_s = record.source.sim_time
         previous_context = _aim5_sensor_context(record.source)
         substeps = _aim5_session_substeps(request.duration_s, record.definition.integration_step_s)
@@ -350,6 +360,9 @@ class CadacAim5MissionCompositionProvider:
             observation=observation,
             events=observation.events,
             diagnostics=observation.diagnostics,
+            authority_profile_id=CADAC_SOURCE_PROGRAM_PROFILE_ID,
+            command_source_id=CADAC_SOURCE_PROGRAM_COMMAND_SOURCE_ID,
+            lowering_evidence=source_managed_session_authority_state().model_dump(mode="json"),
         )
         ####
 
@@ -628,6 +641,7 @@ def _aim5_session_observation(
         lifecycle=lifecycle,
         values=values,
         events=events,
+        control_authority=source_managed_session_authority_state(),
     )
     ####
 

@@ -39,7 +39,9 @@ from test_sraam6 import _write_sraam6_case
 from taoryx.trajectory.execution_contract import MissionCompositionRunnerRegistry
 from taoryx.trajectory.mission_composition import (
     MissionCompositionOpenSessionRequest,
+    MissionCompositionSessionDescriptor,
     MissionCompositionSessionStepRequest,
+    MissionCompositionSessionStepResult,
 )
 
 
@@ -68,6 +70,34 @@ def _assert_persistent_analysis_outputs(
     assert all("step" in fidelity.operations for fidelity in model.fidelities)
     for channel_id in (*contract.controller_analysis.command_output_channel_ids, *contract.controller_analysis.response_output_channel_ids):
         assert "step" in channels[channel_id].operations
+    ####
+
+
+def _assert_source_program_authority(
+    descriptor: MissionCompositionSessionDescriptor,
+    step: MissionCompositionSessionStepResult,
+) -> None:
+    """Require CADAC sessions to expose source ownership without fake actions."""
+
+    assert descriptor.action_schema == ()
+    assert descriptor.action_schema_projection == "selected_semantic_profile"
+    assert descriptor.default_authority_profile_id == "source_program_control"
+    assert descriptor.active_authority_profile_id == "source_program_control"
+    assert descriptor.command_source_id == "cadac_source_program"
+    assert len(descriptor.authority_profiles) == 1
+    profile = descriptor.authority_profiles[0]
+    assert profile.action_ids == ()
+    assert profile.command_owner == "source_program"
+    assert profile.scheme_id == "provider.program"
+    assert profile.selection_scope == "provider"
+    assert profile.switching_policy == "provider_managed"
+    assert descriptor.initial_observation.control_authority is not None
+    assert descriptor.initial_observation.control_authority.active_profile_id == profile.id
+    assert step.authority_profile_id == profile.id
+    assert step.command_source_id == "cadac_source_program"
+    assert step.lowered_action == {}
+    assert step.lowering_evidence["command_owner"] == "source_program"
+    assert step.observation.control_authority == descriptor.initial_observation.control_authority
     ####
 
 
@@ -110,6 +140,7 @@ def test_catalog_provider_delegates_the_installed_aim5_persistent_session(tmp_pa
     step = provider.step_session(MissionCompositionSessionStepRequest(session_id="catalog-aim5", duration_s=0.01))
 
     assert descriptor.provider_version == provider.metadata.version
+    _assert_source_program_authority(descriptor, step)
     assert step.observation.values["native_relative_state_track"]["valid"]
     assert contract.step.state_semantics == "persistent_native_state"
     assert contract.sensor_integration.sensor_bus_status == "available"
@@ -145,6 +176,7 @@ def test_catalog_provider_delegates_the_installed_ads6_srbm_persistent_session(t
     step = provider.step_session(MissionCompositionSessionStepRequest(session_id="catalog-ads6-srbm", duration_s=0.01))
 
     assert descriptor.provider_version == provider.metadata.version
+    _assert_source_program_authority(descriptor, step)
     assert step.observation.values["native_relative_state_track"]["valid"]
     assert contract.step.state_semantics == "persistent_native_state"
     assert contract.sensor_integration.sensor_bus_status == "available"
@@ -181,6 +213,7 @@ def test_catalog_provider_delegates_the_installed_ads6_package_persistent_sessio
     )
 
     assert descriptor.provider_version == provider.metadata.version
+    _assert_source_program_authority(descriptor, step)
     assert step.observation.values["native_relative_state_tracks"]["ads6-engagement-m1-native-relative-state"]["valid"]
     assert contract.step.state_semantics == "persistent_native_state"
     assert contract.sensor_integration.sensor_bus_status == "available"
@@ -221,6 +254,7 @@ def test_catalog_provider_delegates_the_installed_sraam6_persistent_session(tmp_
     step = provider.step_session(MissionCompositionSessionStepRequest(session_id="catalog-sraam6", duration_s=0.01))
 
     assert descriptor.provider_version == provider.metadata.version
+    _assert_source_program_authority(descriptor, step)
     assert step.observation.values["native_relative_state_track"]["valid"]
     assert contract.step.state_semantics == "persistent_native_state"
     assert contract.sensor_integration.sensor_bus_status == "available"
@@ -253,6 +287,7 @@ def test_catalog_provider_delegates_the_installed_agm6_persistent_session(tmp_pa
     step = provider.step_session(MissionCompositionSessionStepRequest(session_id="catalog-agm6", duration_s=0.001))
 
     assert descriptor.provider_version == provider.metadata.version
+    _assert_source_program_authority(descriptor, step)
     assert step.observation.values["native_relative_state_track"]["valid"]
     assert contract.step.state_semantics == "persistent_native_state"
     assert contract.sensor_integration.sensor_bus_status == "available"

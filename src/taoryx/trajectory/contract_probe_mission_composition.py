@@ -11,8 +11,10 @@ and semantic control/agent-action mode in the public contract.
 from __future__ import annotations
 
 import math
-from typing import Literal
+from collections.abc import Mapping
+from typing import Any, Literal
 
+from ..fixture_composition_episode import FixtureCompositionEpisode, FixtureTransition
 from .configuration_contract import (
     ConfigurationBound,
     ConfigurationChoiceSchema,
@@ -80,6 +82,7 @@ from .execution_contract import (
     TrajectoryStateSnapshot,
     resolve_output_selection,
 )
+from .session_interface import build_session_interface_contract
 
 CONTRACT_PROBE_PROVIDER_ID = "taoryx.debug.mission-composition-contract-probe"
 CONTRACT_PROBE_MODEL_ID = "contract_probe_vehicle"
@@ -164,6 +167,20 @@ class ContractProbeMissionCompositionProvider:
         prepared = validate_configuration_instance(self._schema, configuration)
         self._validate_advertised_selection(configuration, operation="validate")
         return prepared
+        ####
+
+    def open_session_episode(
+        self,
+        prepared: PreparedTrajectoryConfiguration,
+        *,
+        seed: int | None = None,
+        integration_step_s: float = 0.02,
+    ) -> FixtureCompositionEpisode:
+        """Open the development-only interactive contract stressor."""
+
+        del integration_step_s
+        self._validate_advertised_selection(prepared.configuration, operation="step")
+        return _open_contract_probe_session_episode(self._model, prepared, seed=seed)
         ####
 
     def _validate_advertised_selection(
@@ -633,13 +650,13 @@ def contract_probe_model_metadata(schema: TrajectoryConfigurationSchema | None =
         model_kind="contract_probe",
         status="runnable_debug_contract",
         tags=("debug", "synthetic", "contract-probe", "do-not-use-for-analysis"),
-        operations=("discover", "validate", "batch"),
-        common_runner_operations=("batch",),
+        operations=("discover", "validate", "batch", "step"),
+        common_runner_operations=("batch", "step"),
         capabilities=TrajectoryModelCapabilities(
             initialization_modes=("geodetic", "local_cartesian"),
             segment_types=("hold", "maneuver", "deploy"),
             termination_modes=("duration", "event", "manual_close"),
-            operations=("discover", "validate", "batch"),
+            operations=("discover", "validate", "batch", "step"),
             supports_custom_segments=True,
             supports_deployment=True,
             supports_dynamic_child_generation=True,
@@ -683,6 +700,224 @@ def contract_probe_model_metadata(schema: TrajectoryConfigurationSchema | None =
         provenance="synthetic successor-side full-contract witness",
         claim_boundary="Must never be presented as a physical vehicle, qualified model, or mission-analysis result.",
     )
+    ####
+
+
+def _open_contract_probe_session_episode(
+    model: TrajectoryModelMetadata,
+    prepared: PreparedTrajectoryConfiguration,
+    *,
+    seed: int | None,
+) -> FixtureCompositionEpisode:
+    """Create the synthetic multi-type action and output stress episode."""
+
+    resolved = prepared.resolved
+    if not isinstance(resolved, Mapping):
+        raise ValueError("contract-probe prepared root must be an object")
+    initialization = resolved.get("initialization")
+    motion = resolved.get("motion_mode")
+    if not isinstance(initialization, Mapping) or not isinstance(motion, Mapping):
+        raise ValueError("contract-probe prepared initialization and motion must be objects")
+    selected_motion = motion.get("selected")
+    motion_values = motion.get("value")
+    if not isinstance(selected_motion, str) or not isinstance(motion_values, Mapping):
+        raise ValueError("contract-probe prepared motion choice is malformed")
+    position = initialization.get("initial_position_m", (0.0, 0.0, -1000.0))
+    quaternion = initialization.get("initial_attitude_quaternion", (1.0, 0.0, 0.0, 0.0))
+    if not isinstance(position, (list, tuple)) or len(position) != 3:
+        raise ValueError("contract-probe initial_position_m must contain three values")
+    if not isinstance(quaternion, (list, tuple)) or len(quaternion) != 4:
+        raise ValueError("contract-probe quaternion must contain four values")
+    initial_speed = float(
+        motion_values.get("speed_m_s", motion_values.get("initial_speed_m_s", 0.0))
+    )
+    acceleration = float(motion_values.get("acceleration_m_s2", 0.0))
+    realization_id = prepared.configuration.realization_id or prepared.configuration.fidelity
+    contract, observation_schema = build_session_interface_contract(
+        model,
+        realization_id=realization_id,
+        fidelity=prepared.configuration.fidelity,
+        family_id="debug.contract-probe",
+        physical_family="synthetic_debug",
+        claim_boundary=(
+            "Synthetic transport, renderer, switching, and action-schema stress fixture only; "
+            "it must not be used for physical analysis."
+        ),
+    )
+
+    def initial_state_factory(_: int | None) -> Mapping[str, object]:
+        return {
+            "north_m": float(position[0]),
+            "east_m": float(position[1]),
+            "altitude_m": max(0.0, -float(position[2])),
+            "speed_m_s": initial_speed,
+            "base_acceleration_m_s2": acceleration,
+            "heading_deg": float(initialization.get("heading_deg", 0.0)) % 360.0,
+            "quaternion": [float(item) for item in quaternion],
+            "held_guidance": {},
+            "flap_detent_deg": 0.0,
+            "spoiler_position": 0.0,
+            "autopilot_mode": "manual",
+            "deadman": False,
+            "event_marker": 0,
+            "fired_events": [],
+            "active_profile_id": contract.default_authority_profile_id,
+        }
+        ####
+
+    return FixtureCompositionEpisode(
+        interface_contract=contract,
+        observation_schema=observation_schema,
+        initial_state_factory=initial_state_factory,
+        observation_factory=_contract_probe_session_observation,
+        transition=_contract_probe_session_transition,
+        authority_selection_hook=_contract_probe_authority_handoff,
+        claim_boundary=contract.claim_boundary,
+        seed=seed,
+    )
+    ####
+
+
+def _contract_probe_session_transition(
+    state: Mapping[str, Any],
+    profile_id: str,
+    action: Mapping[str, Any],
+    duration_s: float,
+    _: float,
+) -> FixtureTransition:
+    next_state = dict(state)
+    events: list[str] = []
+    diagnostics: list[str] = []
+    applied_semantic: dict[str, object] = dict(action)
+    native: dict[str, object] = {}
+    heading_deg = float(next_state["heading_deg"])
+    speed_m_s = float(next_state["speed_m_s"])
+    acceleration = float(next_state["base_acceleration_m_s2"])
+
+    if profile_id == "debug_guidance_control":
+        held = dict(next_state.get("held_guidance", {}))
+        held.update(action)
+        if "attitude.quaternion.command" in held:
+            next_state["quaternion"] = [float(item) for item in held["attitude.quaternion.command"]]
+        if "guidance.heading.command" in action:
+            heading_deg = float(action["guidance.heading.command"]) % 360.0
+        elif "guidance.heading_rate.command" in action:
+            heading_deg = (
+                heading_deg + float(action["guidance.heading_rate.command"]) * duration_s
+            ) % 360.0
+        acceleration += float(action.get("guidance.acceleration.increment", 0.0))
+        next_state["held_guidance"] = held
+        native = {
+            "synthetic.heading_deg": heading_deg,
+            "synthetic.acceleration_m_s2": acceleration,
+            "synthetic.quaternion": next_state["quaternion"],
+        }
+        lowering = ("debug_guidance_hold", "synthetic_kinematic_transition")
+    elif profile_id == "debug_discrete_control":
+        if "aerodynamics.flap.detent" in action:
+            next_state["flap_detent_deg"] = float(action["aerodynamics.flap.detent"])
+        if "aerodynamics.spoiler.increment" in action:
+            next_state["spoiler_position"] = min(
+                1.0,
+                max(-1.0, float(next_state["spoiler_position"]) + float(action["aerodynamics.spoiler.increment"])),
+            )
+        if "autopilot.mode.select" in action:
+            next_state["autopilot_mode"] = str(action["autopilot.mode.select"])
+        next_state["deadman"] = bool(action.get("safety.deadman", False))
+        native = {
+            "synthetic.flap_detent_deg": next_state["flap_detent_deg"],
+            "synthetic.spoiler_position": next_state["spoiler_position"],
+            "synthetic.autopilot_mode": next_state["autopilot_mode"],
+            "synthetic.deadman": next_state["deadman"],
+        }
+        lowering = ("debug_discrete_hold", "synthetic_mode_transition")
+    elif profile_id == "debug_event_control":
+        fired = set(str(item) for item in next_state.get("fired_events", []))
+        for channel_id, expected, event_name in (
+            ("payload.arm.command", "arm", "payload_armed"),
+            ("payload.release.command", "release", "payload_released"),
+        ):
+            if action.get(channel_id) != expected:
+                continue
+            if channel_id in fired:
+                diagnostics.append(f"{channel_id} repeat suppressed by once-until-reset policy")
+                applied_semantic.pop(channel_id, None)
+                continue
+            fired.add(channel_id)
+            events.append(event_name)
+            next_state["event_marker"] = int(next_state["event_marker"]) + 1
+        next_state["fired_events"] = sorted(fired)
+        native = {"synthetic.events": list(events)}
+        lowering = ("debug_event_gate", "synthetic_event_record")
+    else:
+        raise ValueError(f"unsupported contract-probe session authority {profile_id!r}")
+
+    speed_m_s = max(0.0, speed_m_s + acceleration * duration_s)
+    heading_rad = math.radians(heading_deg)
+    next_state["north_m"] = float(next_state["north_m"]) + speed_m_s * math.cos(heading_rad) * duration_s
+    next_state["east_m"] = float(next_state["east_m"]) + speed_m_s * math.sin(heading_rad) * duration_s
+    next_state["speed_m_s"] = speed_m_s
+    next_state["heading_deg"] = heading_deg
+    next_state["active_profile_id"] = profile_id
+    return FixtureTransition(
+        state=next_state,
+        applied_action=native,
+        applied_semantic_action=applied_semantic,
+        lowering_evidence={
+            "authority_profile_id": profile_id,
+            "lowering_chain": list(lowering),
+            "native_action": native,
+            "synthetic_only": True,
+        },
+        events=tuple(events),
+        diagnostics=tuple(diagnostics),
+        status="active",
+    )
+    ####
+
+
+def _contract_probe_authority_handoff(
+    state: Mapping[str, Any],
+    _: str,
+    selected: str,
+) -> Mapping[str, object]:
+    next_state = dict(state)
+    next_state["active_profile_id"] = selected
+    if selected == "debug_guidance_control":
+        next_state["held_guidance"] = {
+            "guidance.heading.command": float(state["heading_deg"]),
+            "guidance.heading_rate.command": 0.0,
+            "guidance.acceleration.increment": 0.0,
+            "attitude.quaternion.command": list(state["quaternion"]),
+        }
+    return next_state
+    ####
+
+
+def _contract_probe_session_observation(
+    state: Mapping[str, Any],
+    _: float,
+    __: str,
+) -> Mapping[str, object]:
+    mode = str(state["autopilot_mode"])
+    return {
+        "position.north_m": float(state["north_m"]),
+        "velocity.speed_m_s": float(state["speed_m_s"]),
+        "attitude.heading_deg": float(state["heading_deg"]) % 360.0,
+        "mode.index": {"manual": 0, "hold": 1, "track": 2}.get(mode, -1),
+        "attitude.quaternion": list(state["quaternion"]),
+        "health.valid": True,
+        "status.mode": mode,
+        "diagnostics.payload": {
+            "synthetic": True,
+            "active_profile_id": state.get("active_profile_id"),
+            "flap_detent_deg": state.get("flap_detent_deg"),
+            "spoiler_position": state.get("spoiler_position"),
+            "deadman": state.get("deadman"),
+            "fired_events": list(state.get("fired_events", [])),
+        },
+        "event.marker": int(state["event_marker"]),
+    }
     ####
 
 
@@ -875,7 +1110,7 @@ def _probe_fidelities() -> tuple[TrajectoryFidelityMetadata, ...]:
             runtime_fidelity="synthetic_coarse",
             control_realization="kinematic",
             promotion_status="contract_witness",
-            operations=("validate", "batch"),
+            operations=("validate", "batch", "step"),
             profile_id="contract-probe-coarse",
             claim_boundary="Synthetic contract tier only.",
         ),
@@ -890,7 +1125,7 @@ def _probe_fidelities() -> tuple[TrajectoryFidelityMetadata, ...]:
             runtime_fidelity="synthetic_medium",
             control_realization="point_mass_surrogate",
             promotion_status="contract_witness",
-            operations=("validate", "batch"),
+            operations=("validate", "batch", "step"),
             profile_id="contract-probe-medium",
             claim_boundary="Synthetic contract tier only.",
         ),
@@ -925,9 +1160,22 @@ def _probe_control_advertisement(
     shape below without deriving semantics from a label or a UI widget.
     """
 
-    available = "batch" in fidelity.operations
-    availability: TrajectoryControlAvailability = "available_in_batch" if available else "planned"
-    operations: tuple[Literal["batch", "step"], ...] = ("batch",) if available else ()
+    batch_available = "batch" in fidelity.operations
+    step_available = "step" in fidelity.operations
+    availability: TrajectoryControlAvailability = "available_in_batch" if batch_available else "planned"
+    operations: tuple[Literal["batch", "step"], ...] = ("batch",) if batch_available else ()
+    live_channel_ids = {
+        "attitude.quaternion.command",
+        "guidance.heading.command",
+        "guidance.heading_rate.command",
+        "guidance.acceleration.increment",
+        "aerodynamics.flap.detent",
+        "aerodynamics.spoiler.increment",
+        "autopilot.mode.select",
+        "safety.deadman",
+        "payload.release.command",
+        "payload.arm.command",
+    }
     speed_interval = _interval(0.0, 500.0)
     heading_interval = _interval(0.0, 360.0, maximum_inclusive=False)
     flap_interval = _interval(-10.0, 20.0)
@@ -1037,6 +1285,11 @@ def _probe_control_advertisement(
         """Build a semantic/native pair with deliberately matching metadata."""
 
         native_id = f"synthetic.{channel_id}"
+        channel_operations: tuple[Literal["batch", "step"], ...] = operations
+        channel_availability = availability
+        if step_available and channel_id in live_channel_ids:
+            channel_operations = ("batch", "step") if batch_available else ("step",)
+            channel_availability = "available"
         return TrajectoryControlChannelMetadata(
             id=channel_id,
             label=label,
@@ -1053,8 +1306,8 @@ def _probe_control_advertisement(
             sampling_semantics=sampling_semantics,
             value_space=value_space,
             semantics=semantics,
-            availability=availability,
-            operations=operations,
+            availability=channel_availability,
+            operations=channel_operations,
             native_channel_id=native_id,
             native_binding=TrajectoryControlNativeBindingMetadata(
                 id=native_id,
@@ -1352,23 +1605,89 @@ def _probe_control_advertisement(
             control="automatic",
         ),
     )
-    resolution: Literal["provider_internal", "blocked"] = "provider_internal" if available else "blocked"
+    resolution: Literal["provider_internal", "blocked"] = "provider_internal" if batch_available else "blocked"
+    authorities: list[TrajectoryControlAuthorityMetadata] = [
+        TrajectoryControlAuthorityMetadata(
+            id="synthetic_mission_authority",
+            authority="provider_defined",
+            availability=availability,
+            channel_ids=tuple(item.id for item in channels),
+            operations=operations,
+            description="Synthetic mutually exclusive batch authority over every probe command.",
+            command_owner="provider_controller",
+            selection_scope="provider",
+            switching_policy="provider_managed",
+            scheme_id="provider.program",
+            lowering_chain=("synthetic_mission_program", "synthetic_probe_commands"),
+            source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
+            provenance="synthetic contract probe",
+            claim_boundary="Debug contract coverage only.",
+        )
+    ]
+    if step_available:
+        authorities.extend(
+            (
+                TrajectoryControlAuthorityMetadata(
+                    id="debug_guidance_control",
+                    authority="kinematic",
+                    availability="available",
+                    channel_ids=(
+                        "attitude.quaternion.command",
+                        "guidance.heading.command",
+                        "guidance.heading_rate.command",
+                        "guidance.acceleration.increment",
+                    ),
+                    operations=("step",),
+                    description="Caller-owned vector, periodic, rate, and increment stress surface.",
+                    command_owner="caller",
+                    selection_scope="session",
+                    switching_policy="explicit_bumpless",
+                    scheme_id="debug.mixed",
+                    lowering_chain=("debug_guidance_hold", "synthetic_kinematic_transition"),
+                    provenance="synthetic contract probe",
+                    claim_boundary="Transport and action-schema stress only; no physical guidance claim.",
+                ),
+                TrajectoryControlAuthorityMetadata(
+                    id="debug_discrete_control",
+                    authority="native_bridge",
+                    availability="available",
+                    channel_ids=(
+                        "aerodynamics.flap.detent",
+                        "aerodynamics.spoiler.increment",
+                        "autopilot.mode.select",
+                        "safety.deadman",
+                    ),
+                    operations=("step",),
+                    description="Caller-owned detent, increment, enum, and boolean stress surface.",
+                    command_owner="caller",
+                    selection_scope="session",
+                    switching_policy="explicit_bumpless",
+                    scheme_id="debug.discrete",
+                    lowering_chain=("debug_discrete_hold", "synthetic_mode_transition"),
+                    provenance="synthetic contract probe",
+                    claim_boundary="Transport and action-schema stress only; controls are deliberately synthetic.",
+                ),
+                TrajectoryControlAuthorityMetadata(
+                    id="debug_event_control",
+                    authority="mission",
+                    availability="available",
+                    channel_ids=("payload.release.command", "payload.arm.command"),
+                    operations=("step",),
+                    description="Caller-owned once-per-episode event stress surface.",
+                    command_owner="caller",
+                    selection_scope="session",
+                    switching_policy="explicit_bumpless",
+                    scheme_id="debug.event",
+                    lowering_chain=("debug_event_gate", "synthetic_event_record"),
+                    provenance="synthetic contract probe",
+                    claim_boundary="Event repeat-policy witness only; no payload is physically modeled.",
+                ),
+            )
+        )
     return TrajectoryControlAdvertisement(
-        status="internally_generated" if available else "blocked",
+        status="available" if step_available else "internally_generated" if batch_available else "blocked",
         channels=channels,
-        authorities=(
-            TrajectoryControlAuthorityMetadata(
-                id="synthetic_mission_authority",
-                authority="provider_defined",
-                availability=availability,
-                channel_ids=tuple(item.id for item in channels),
-                operations=operations,
-                description="Synthetic mutually exclusive authority over every probe command.",
-                source_refs=("src/taoryx/trajectory/contract_probe_mission_composition.py",),
-                provenance="synthetic contract probe",
-                claim_boundary="Debug contract coverage only.",
-            ),
-        ),
+        authorities=tuple(authorities),
         intents=(
             TrajectoryControlIntentMetadata(
                 id="deployment_guidance",
@@ -1384,7 +1703,13 @@ def _probe_control_advertisement(
                 claim_boundary="Debug contract coverage only.",
             ),
         ),
-        default_authority_id="synthetic_mission_authority" if available else None,
+        default_authority_id=(
+            "debug_guidance_control"
+            if step_available
+            else "synthetic_mission_authority"
+            if batch_available
+            else None
+        ),
         claim_boundary="Synthetic full-surface control advertisement for generic composer development.",
     )
     ####
@@ -1446,7 +1771,7 @@ def _probe_operations() -> tuple[TrajectoryMissionOperationMetadata, ...]:
     operations: tuple[Literal["validate", "batch", "step"], ...] = ("validate", "batch", "step")
     for fidelity in ("coarse", "medium"):
         for operation in operations:
-            available = operation == "validate" or (operation == "batch" and fidelity in {"coarse", "medium"})
+            available = operation in {"validate", "batch", "step"} and fidelity in {"coarse", "medium"}
             common_status: Literal["registered", "adapter_required", "not_available"] = (
                 "registered" if available and operation in {"batch", "step"} else "not_available"
             )
@@ -1456,10 +1781,22 @@ def _probe_operations() -> tuple[TrajectoryMissionOperationMetadata, ...]:
                     realization_id=fidelity,
                     operation=operation,
                     status="available" if available else "blocked",
-                    execution_mode="synthetic_deterministic" if available else None,
+                    execution_mode=(
+                        "synthetic_provider_session"
+                        if available and operation == "step"
+                        else "synthetic_deterministic"
+                        if available
+                        else None
+                    ),
                     availability_scope="provider_interface",
                     common_runner_status=common_status,
-                    executor_id="contract-probe-executor" if common_status == "registered" else None,
+                    executor_id=(
+                        "contract-probe-session.v1"
+                        if common_status == "registered" and operation == "step"
+                        else "contract-probe-executor"
+                        if common_status == "registered"
+                        else None
+                    ),
                     blockers=() if available else (f"{operation} is intentionally blocked at {fidelity} fidelity.",),
                     claim_boundary="Synthetic operation-state witness only.",
                 )
@@ -1656,7 +1993,7 @@ def _probe_output_channels() -> tuple[TrajectoryOutputChannelMetadata, ...]:
                 periodicity=periodicity,
                 availability="guaranteed",
                 compatible_fidelities=_FIDELITIES,
-                operations=("batch",),
+                operations=("batch", "step"),
                 presentation=ValuePresentationMetadata(
                     group=channel_id.split(".", maxsplit=1)[0],
                     order=order * 10,

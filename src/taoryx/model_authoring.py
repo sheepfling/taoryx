@@ -648,11 +648,7 @@ def _maturity_advertisement(selection: ModelAuthoringSelection) -> dict[str, obj
 
     family_id = selection.model.family_id or selection.model.id
     record = next(
-        (
-            candidate
-            for candidate in _vehicle_maturity_records()
-            if candidate.get("composition_family_id") == family_id or candidate.get("id") == family_id
-        ),
+        (candidate for candidate in _vehicle_maturity_records() if candidate.get("composition_family_id") == family_id or candidate.get("id") == family_id),
         None,
     )
     claim_boundary = (
@@ -717,11 +713,7 @@ def _execution_advertisement(selection: ModelAuthoringSelection) -> dict[str, ob
         if existing is None or record.realization_id == realization_id:
             records_by_operation[record.operation] = record
     operation_order = ("validate", "batch", "step")
-    records = tuple(
-        records_by_operation[operation]
-        for operation in operation_order
-        if operation in records_by_operation
-    )
+    records = tuple(records_by_operation[operation] for operation in operation_order if operation in records_by_operation)
     if not records:
         return {
             "status": "not_advertised",
@@ -784,16 +776,11 @@ def _focused_endpoint_verification_advertisement(selection: ModelAuthoringSelect
     selected_realization_id = selection.realization.id if selection.realization is not None else None
     endpoints: list[dict[str, object]] = []
 
-    if (
-        selection.provider_id == "taoryx.registry.mission-composition"
-        and selection.model.model_kind == "canonical_vehicle_family"
-    ):
+    if selection.provider_id == "taoryx.registry.mission-composition" and selection.model.model_kind == "canonical_vehicle_family":
         for vehicle_endpoint in load_vehicle_endpoint_spec_catalog().endpoints:
             if vehicle_endpoint.model_id != selection.model.id:
                 continue
-            matches_selected_mission_and_fidelity = (
-                vehicle_endpoint.mission_id == selected_mission_id and vehicle_endpoint.fidelity == selection.fidelity
-            )
+            matches_selected_mission_and_fidelity = vehicle_endpoint.mission_id == selected_mission_id and vehicle_endpoint.fidelity == selection.fidelity
             endpoints.append(
                 {
                     "id": vehicle_endpoint.id,
@@ -829,10 +816,7 @@ def _focused_endpoint_verification_advertisement(selection: ModelAuthoringSelect
 
     endpoints.sort(key=lambda item: (str(item["kind"]), str(item["id"])))
     selected_endpoint_ids = [
-        str(item["id"])
-        for item in endpoints
-        if item.get("matches_selected_mission_and_fidelity") is True
-        or item.get("matches_selected_configuration") is True
+        str(item["id"]) for item in endpoints if item.get("matches_selected_mission_and_fidelity") is True or item.get("matches_selected_configuration") is True
     ]
     if not endpoints:
         status = "not_declared"
@@ -1041,10 +1025,7 @@ def _advertisement_exercise_record(
             "status": "fail",
             "sections": [],
             "findings": [f"common authoring plan failed: {error}"],
-            "claim_boundary": (
-                "An exercise failure is an advertisement integration gap. It does not identify a runtime or "
-                "qualification failure."
-            ),
+            "claim_boundary": ("An exercise failure is an advertisement integration gap. It does not identify a runtime or qualification failure."),
         }
 
     required_sections = {
@@ -1120,8 +1101,7 @@ def _advertisement_exercise_record(
         "sections": list(required_sections),
         "findings": findings,
         "claim_boundary": (
-            "This exercises portable plan/scaffold metadata only. It does not run a model, synthesize a controller, "
-            "or promote qualification evidence."
+            "This exercises portable plan/scaffold metadata only. It does not run a model, synthesize a controller, or promote qualification evidence."
         ),
     }
     ####
@@ -1185,7 +1165,11 @@ def _controller_automation_summary(provider_records: Sequence[Mapping[str, objec
                         not_applicable_fidelity_count += 1
                     if realization_status != "available" or control_status == "blocked":
                         explicitly_blocked_fidelity_count += 1
-                    if realization_status == "available" and control_status == "available":
+                    if (
+                        realization_status == "available"
+                        and control_status == "available"
+                        and automation_status in {"campaign_registered", "campaign_registration_required"}
+                    ):
                         externally_controllable_fidelity_count += 1
                         if automation_status == "campaign_registered":
                             externally_tunable_fidelity_count += 1
@@ -1426,6 +1410,13 @@ def _automation_realization_record(
             "channel_count": len(controls.channels),
             "channels": [item.id for item in controls.channels],
             "authority_ids": [item.id for item in controls.authorities],
+            "control_scheme_ids": list(
+                dict.fromkeys(
+                    item.scheme_id
+                    for item in model.control_scheme_support
+                    if item.realization_id == realization.id
+                )
+            ),
             "intent_ids": [item.id for item in controls.intents],
             "default_authority_id": controls.default_authority_id,
         },
@@ -1982,12 +1973,34 @@ def _controller_plan(
             "campaigns": [],
             "tuner_selection": _tuner_selection_advertisement(()),
             "tuning_cache": _tuning_cache_advertisement(()),
+            "control_scheme_support": [],
         }
     controls = realization.controls
+    default_authority = next(
+        (item for item in controls.authorities if item.id == controls.default_authority_id),
+        None,
+    )
+    physical_model_property = next(
+        (item for item in selection.model.presentation.properties if item.id == "physical_model"),
+        None,
+    )
+    explicitly_nonphysical = (
+        physical_model_property is not None
+        and physical_model_property.value_declared
+        and physical_model_property.value is False
+    )
     if realization.input_realization in {"uncontrolled", "source_replay"}:
         status = "not_applicable"
         pipeline = ["declare open-loop or replay semantics", "evaluate truth objectives"]
-    elif controls.status == "internally_generated":
+    elif explicitly_nonphysical:
+        status = "not_applicable"
+        pipeline = [
+            "exercise typed control transport and lowering",
+            "retain the non-physical debug claim boundary",
+        ]
+    elif controls.status == "internally_generated" or (
+        default_authority is not None and default_authority.command_owner != "caller"
+    ):
         status = "provider_managed_with_campaign" if campaigns else "provider_managed"
         pipeline = [
             "resolve mission capability and route",
@@ -2030,37 +2043,63 @@ def _controller_plan(
     campaign_screens = tuple(
         screen
         for campaign in campaigns
-        for screen in campaign.local_controller_screen_advertisements(
-            selection.mission.id if selection.mission is not None else None
-        )
+        for screen in campaign.local_controller_screen_advertisements(selection.mission.id if selection.mission is not None else None)
     )
     if len(campaign_screens) > 1:
         raise RuntimeError("one selected composition endpoint has multiple campaign local-controller-screen advertisements")
     registered_screen = campaign_screens[0] if campaign_screens else None
-    plug_in_screens = () if local_controller_screens is None else local_controller_screens.matching(
-        provider_id=selection.provider_id,
-        model_id=selection.model.id,
-        family_id=selection.model.family_id,
-        fidelity=selection.fidelity,
-        realization_id=selection.realization.id if selection.realization is not None else None,
-        mission_template_id=selection.mission.id if selection.mission is not None else None,
+    plug_in_screens = (
+        ()
+        if local_controller_screens is None
+        else local_controller_screens.matching(
+            provider_id=selection.provider_id,
+            model_id=selection.model.id,
+            family_id=selection.model.family_id,
+            fidelity=selection.fidelity,
+            realization_id=selection.realization.id if selection.realization is not None else None,
+            mission_template_id=selection.mission.id if selection.mission is not None else None,
+        )
     )
     if len(plug_in_screens) > 1:
         raise RuntimeError("one selected composition endpoint has multiple plug-in local-controller-screen advertisements")
     plug_in_screen = plug_in_screens[0].public_advertisement() if plug_in_screens else None
-    screens = tuple(
-        item
-        for item in (local_controller_screen, direct_wrench_screen, registered_screen, plug_in_screen)
-        if item is not None
-    )
+    screens = tuple(item for item in (local_controller_screen, direct_wrench_screen, registered_screen, plug_in_screen) if item is not None)
     if len(screens) > 1:
         raise RuntimeError("one selected composition endpoint has multiple local-controller-screen advertisements")
+    has_live_switchable_profiles = (
+        sum(
+            item.availability in {"available", "available_in_batch"}
+            and item.switching_policy == "explicit_bumpless"
+            for item in controls.authorities
+        )
+        > 1
+    )
+    default_channel_ids = (
+        {item.id for item in controls.channels} if default_authority is None or not has_live_switchable_profiles else set(default_authority.channel_ids)
+    )
+    default_channels = tuple(item for item in controls.channels if item.id in default_channel_ids)
+    control_scheme_support = tuple(
+        item
+        for item in selection.model.control_scheme_support
+        if item.realization_id == realization.id and selection.fidelity in item.fidelity_ids
+    )
     return {
         "status": status,
         "input_realization": realization.input_realization,
         "control_status": controls.status,
-        "channels": [item.model_dump(mode="json") for item in controls.channels],
+        # For a live-switchable multi-profile realization, ``channels`` is the
+        # immediately usable default projection. Legacy locked realizations
+        # retain their complete realization catalog here for compatibility.
+        # In both cases discovery clients can inspect every coordinate through
+        # ``available_channels`` and join it to ``authorities`` below.
+        "channels": [item.model_dump(mode="json") for item in default_channels],
+        "available_channels": [item.model_dump(mode="json") for item in controls.channels],
+        "default_authority_id": controls.default_authority_id,
+        "channel_projection": ("default_authority" if default_authority is not None and has_live_switchable_profiles else "complete_realization"),
         "authorities": [item.model_dump(mode="json") for item in controls.authorities],
+        "control_scheme_support": [
+            item.model_dump(mode="json") for item in control_scheme_support
+        ],
         "intents": [item.model_dump(mode="json") for item in controls.intents],
         "family_adapter": adapter_record,
         "tuning_adapter": {

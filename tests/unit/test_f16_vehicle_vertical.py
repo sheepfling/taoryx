@@ -127,6 +127,16 @@ def test_f16_advertisement_builds_a_complete_pseudo6dof_authoring_plan(
         "guidance.heading.command",
         "guidance.bank.command",
     }
+    assert controller["default_authority_id"] == "kinematic_guidance"
+    assert controller["channel_projection"] == "default_authority"
+    available_channels = cast(list[dict[str, Any]], controller["available_channels"])
+    assert {item["id"] for item in available_channels} > {item["id"] for item in advertised_channels}
+    assert {item["id"] for item in cast(list[dict[str, object]], controller["authorities"])} == {
+        "kinematic_guidance",
+        "reduced_pilot_command",
+        "body_rate_command",
+        "live_waypoint_guidance",
+    }
     advertised_campaigns = cast(list[dict[str, object]], controller["campaigns"])
     assert [item["id"] for item in advertised_campaigns] == ["f16-pseudo-source-trim-attitude-v1"]
     navigation = cast(dict[str, object], plan["navigation_automation"])
@@ -550,9 +560,7 @@ def test_f16_physical_surface_lqi_screen_applies_the_exact_common_tuning_candida
 
     registration = plugins.build_controller_tuning_campaign_registry().registration("f16-source-surface-local-lqi-v1")
     context = registration.application_contexts(registration.run_cached(tmp_path / "tuning-cache"))[0]
-    composition = compile_vehicle_composition(
-        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_SURFACE_SCREEN_COMPOSITION)
-    )
+    composition = compile_vehicle_composition(load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_SURFACE_SCREEN_COMPOSITION))
 
     batch = execute_vehicle_composition_batch(
         composition,
@@ -574,12 +582,8 @@ def test_f16_held_node_lqi_schedule_applies_every_exact_campaign_candidate(
 ) -> None:
     """The schedule cannot silently substitute one source-node gain for another."""
 
-    registration = plugins.build_controller_tuning_campaign_registry().registration(
-        "f16-source-surface-schedule-lqi-v1"
-    )
-    context_set = TuningApplicationContextSet(
-        registration.application_contexts(registration.run_cached(tmp_path / "schedule-tuning-cache"))
-    )
+    registration = plugins.build_controller_tuning_campaign_registry().registration("f16-source-surface-schedule-lqi-v1")
+    context_set = TuningApplicationContextSet(registration.application_contexts(registration.run_cached(tmp_path / "schedule-tuning-cache")))
     composition = compile_vehicle_composition(
         load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_SCHEDULE_INTERIOR_SCREEN_COMPOSITION)
     )
@@ -594,9 +598,7 @@ def test_f16_held_node_lqi_schedule_applies_every_exact_campaign_candidate(
 
     assert batch.passed is True
     assert [binding["node_id"] for binding in bindings] == list(context_set.node_ids)
-    assert [binding["candidate_profile_id"] for binding in bindings] == [
-        context.candidate_profile_id for context in context_set.contexts
-    ]
+    assert [binding["candidate_profile_id"] for binding in bindings] == [context.candidate_profile_id for context in context_set.contexts]
     assert all(binding["campaign_id"] == registration.id for binding in bindings)
     ####
 
@@ -607,15 +609,9 @@ def test_f16_held_node_lqr_schedule_applies_every_exact_campaign_candidate(
 ) -> None:
     """A held LQR schedule uses every node-indexed candidate, not one default gain."""
 
-    registration = plugins.build_controller_tuning_campaign_registry().registration(
-        "f16-source-surface-schedule-lqr-v1"
-    )
-    context_set = TuningApplicationContextSet(
-        registration.application_contexts(registration.run_cached(tmp_path / "schedule-tuning-cache"))
-    )
-    composition = compile_vehicle_composition(
-        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / SCHEDULE_INTERIOR_SCREEN_COMPOSITION)
-    )
+    registration = plugins.build_controller_tuning_campaign_registry().registration("f16-source-surface-schedule-lqr-v1")
+    context_set = TuningApplicationContextSet(registration.application_contexts(registration.run_cached(tmp_path / "schedule-tuning-cache")))
+    composition = compile_vehicle_composition(load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / SCHEDULE_INTERIOR_SCREEN_COMPOSITION))
 
     batch = execute_vehicle_composition_batch(
         composition,
@@ -627,9 +623,7 @@ def test_f16_held_node_lqr_schedule_applies_every_exact_campaign_candidate(
 
     assert batch.passed is True
     assert [binding["node_id"] for binding in bindings] == list(context_set.node_ids)
-    assert [binding["candidate_profile_id"] for binding in bindings] == [
-        context.candidate_profile_id for context in context_set.contexts
-    ]
+    assert [binding["candidate_profile_id"] for binding in bindings] == [context.candidate_profile_id for context in context_set.contexts]
     assert all(binding["campaign_id"] == registration.id for binding in bindings)
     applied, receipt = apply_tuning_context_to_physical_wrench_lqr_design(
         build_f16_source_physical_schedule_nodes()[0].design,
@@ -646,12 +640,8 @@ def test_f16_lqr_transition_applies_every_exact_candidate_before_interpolation(
 ) -> None:
     """The transition runner cannot interpolate one unbound default schedule."""
 
-    registration = plugins.build_controller_tuning_campaign_registry().registration(
-        "f16-source-surface-schedule-lqr-v1"
-    )
-    context_set = TuningApplicationContextSet(
-        registration.application_contexts(registration.run_cached(tmp_path / "transition-tuning-cache"))
-    )
+    registration = plugins.build_controller_tuning_campaign_registry().registration("f16-source-surface-schedule-lqr-v1")
+    context_set = TuningApplicationContextSet(registration.application_contexts(registration.run_cached(tmp_path / "transition-tuning-cache")))
 
     report = run_f16_source_physical_lqr_schedule_transition_cases(
         duration_s=0.05,
