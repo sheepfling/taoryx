@@ -1,0 +1,29 @@
+schema: taoryx.pseudo6dof-profiles/v1alpha1
+profiles:
+- id: tumbling_body.rigid_body_reuse_p6dof.v1
+  family_id: tumbling_body
+  parent_3dof_profile_id: tumbling_body.average_area_3dof.v1
+  model_kind: rigid_body_reuse
+  control_realization: uncontrolled
+  status: nominal_case_pass
+  evidence_grade: derived
+  resource_channels:
+  - mass
+  required_channels:
+  - quaternion
+  - body_rates
+  - projected_area
+  - aerodynamic_moment
+  - angular_momentum
+  unsupported_claims:
+  - prescribed_tumble_as_physical_proof
+  area_policy: average_projected_area
+  area_source: geometry-specific orientation average or steady-stage cross-section
+direct_wrench_profiles: []
+surface_allocation_profiles: []
+bindings:
+- family_id: tumbling_body
+  point_mass_profile_id: tumbling_body.average_area_3dof.v1
+  pseudo_profile_id: tumbling_body.rigid_body_reuse_p6dof.v1
+  automatic_lowering: false
+  lowering_note: uncontrolled rigid-body reuse is required to prove tumble

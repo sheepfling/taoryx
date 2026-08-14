@@ -1,0 +1,23 @@
+{
+  "asset_files": [
+    "verification/reachability_profile_catalog.yaml",
+    "x15_overlay/verification/vehicle_composition_registry.yaml",
+    "x15_overlay/verification/vehicle_execution_bindings.yaml",
+    "x15_overlay/verification/vehicle_execution_witnesses.yaml",
+    "x15_overlay/examples/vehicle_composition/x15_staged_booster_reachability_3dof_compose.yaml",
+    "x15_overlay/examples/vehicle_composition/x15_staged_booster_reachability_pseudo6dof_compose.yaml",
+    "hl20_overlay/verification/vehicle_composition_registry.yaml",
+    "hl20_overlay/verification/vehicle_execution_bindings.yaml",
+    "hl20_overlay/verification/vehicle_execution_witnesses.yaml",
+    "hl20_overlay/examples/vehicle_composition/hl20_source_booster_release_replay_3dof_compose.yaml",
+    "hl20_overlay/examples/vehicle_composition/hl20_source_booster_release_replay_pseudo6dof_compose.yaml",
+    "hl20_overlay/examples/vehicle_composition/hl20_glide_energy_capability_3dof_compose.yaml",
+    "hl20_overlay/examples/vehicle_composition/hl20_glide_energy_capability_pseudo6dof_compose.yaml"
+  ],
+  "asset_trees": [
+    "examples/showcases/hl20_california_to_hawaii"
+  ],
+  "claim_boundary": "This package fragment owns reachability profile/showcase assets and additive X-15 staged plus HL-20 booster-release/glide-energy composition, execution, and witness rows. Vehicle source data remains with its family package.",
+  "schema": "taoryx.reachability-package-data/v1",
+  "source_catalog_root": "verification/"
+}

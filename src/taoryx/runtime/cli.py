@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import re
 import shlex
 from collections.abc import Mapping
 from html import escape
@@ -37,7 +38,7 @@ from taoryx.model_authoring import (
     write_model_authoring_draft,
 )
 from taoryx.outputs import RunArtifact
-from taoryx.plugins import PluginError, discover_plugins
+from taoryx.plugins import PluginError, declared_plugin_entry_points, discover_plugins
 from taoryx.scenario import ScenarioCompileError, ScenarioCompiler
 from taoryx.simulation_runtime_bundle import build_simulation_runtime_bundle, write_composition_run_artifact
 from taoryx.simulation_runtime_catalog import SimulationRuntimeScenario, load_simulation_runtime_catalog
@@ -131,23 +132,61 @@ class _ArtifactInspectionPayload(TypedDict):
 
 _OFFICIAL_PLUGIN_DISTRIBUTIONS: dict[str, str] = {
     "taoryx.cadac": "taoryx-cadac",
+    "taoryx.a320": "taoryx-a320",
     "taoryx.daveml": "taoryx-daveml",
+    "taoryx.debug-models": "taoryx-debug-models",
+    "taoryx.f16": "taoryx-f16",
+    "taoryx.hummingbird": "taoryx-hummingbird",
+    "taoryx.nesc": "taoryx-nesc",
+    "taoryx.passive-bodies": "taoryx-passive-bodies",
     "taoryx.simple-aero": "taoryx-simple-aero",
+    "taoryx.x15": "taoryx-x15",
+    "taoryx.hl20": "taoryx-hl20",
+    "taoryx.source-table-fixed-wing": "taoryx-source-table-fixed-wing",
     "taoryx.reference-models": "taoryx-reference-models",
+    "taoryx.dual-launch": "taoryx-dual-launch",
     "taoryx.reachability": "taoryx-reachability",
 }
+
+_DIRECT_MODEL_PLUGIN_IDS: tuple[str, ...] = (
+    "taoryx.daveml",
+    "taoryx.debug-models",
+    "taoryx.a320",
+    "taoryx.f16",
+    "taoryx.hummingbird",
+    "taoryx.nesc",
+    "taoryx.passive-bodies",
+    "taoryx.simple-aero",
+    "taoryx.x15",
+    "taoryx.hl20",
+    "taoryx.source-table-fixed-wing",
+    "taoryx.dual-launch",
+)
+
+_DEVELOPER_PLUGIN_IDS: tuple[str, ...] = (*_DIRECT_MODEL_PLUGIN_IDS, "taoryx.reachability")
+
+_COMPATIBILITY_PLUGIN_IDS: tuple[str, ...] = (
+    "taoryx.daveml",
+    "taoryx.a320",
+    "taoryx.f16",
+    "taoryx.hummingbird",
+    "taoryx.nesc",
+    "taoryx.simple-aero",
+    "taoryx.x15",
+    "taoryx.hl20",
+    "taoryx.source-table-fixed-wing",
+    "taoryx.dual-launch",
+    "taoryx.reference-models",
+)
 
 _PLUGIN_INSTALL_PROFILES: dict[str, tuple[str, ...]] = {
     "core": (),
     "cadac": ("taoryx.cadac",),
-    "models": (
-        "taoryx.daveml",
-        "taoryx.simple-aero",
-        "taoryx.reference-models",
-    ),
+    "models": _DIRECT_MODEL_PLUGIN_IDS,
+    "developer": _DEVELOPER_PLUGIN_IDS,
+    "compatibility": _COMPATIBILITY_PLUGIN_IDS,
     "full": (
-        "taoryx.daveml",
-        "taoryx.simple-aero",
+        *_DIRECT_MODEL_PLUGIN_IDS,
         "taoryx.reference-models",
         "taoryx.reachability",
     ),
@@ -274,6 +313,13 @@ def main(argv: list[str] | None = None) -> int:
     plugins_list.add_argument("--no-builtin", action="store_true")
     plugins_list.add_argument("--no-external", action="store_true")
     plugins_list.add_argument("--disable", action="append", default=[], metavar="PLUGIN_ID")
+    plugins_entry_points = plugins_subparsers.add_parser(
+        "entry-points",
+        help="list declared plug-in entry points without importing plug-in targets",
+    )
+    plugins_entry_points.add_argument("--json", action="store_true")
+    plugins_entry_points.add_argument("--no-builtin", action="store_true")
+    plugins_entry_points.add_argument("--no-external", action="store_true")
     plugins_inspect = plugins_subparsers.add_parser("inspect", help="show one installed plug-in and its contributions")
     plugins_inspect.add_argument("plugin_id")
     plugins_inspect.add_argument("--json", action="store_true")
@@ -284,7 +330,12 @@ def main(argv: list[str] | None = None) -> int:
         "check",
         help="verify an official installed distribution profile without source fallbacks",
     )
-    plugins_check.add_argument("--profile", choices=tuple(_PLUGIN_INSTALL_PROFILES), default="full")
+    plugins_check.add_argument(
+        "--profile",
+        choices=tuple(_PLUGIN_INSTALL_PROFILES),
+        default="developer",
+        help="installed package profile (developer excludes the compatibility aggregate; full retains it)",
+    )
     plugins_check.add_argument("--json", action="store_true")
     model = subparsers.add_parser(
         "model",
@@ -563,10 +614,7 @@ def main(argv: list[str] | None = None) -> int:
     vehicle_verify.add_argument(
         "--results-dir",
         type=Path,
-        help=(
-            "retain the exact executed batch packet in an empty directory, including controller/tuning provenance; "
-            "requires --execute"
-        ),
+        help=("retain the exact executed batch packet in an empty directory, including controller/tuning provenance; requires --execute"),
     )
     vehicle_verify.add_argument("--output", type=Path, help="optional JSON destination for the focused report")
     vehicle_inspect = vehicle_subparsers.add_parser("inspect", help="show one vehicle's composition contract")
@@ -956,6 +1004,30 @@ def _plugins_command(arguments: argparse.Namespace) -> int:
 
     if arguments.plugins_command == "check":
         return _plugin_installation_check_command(arguments)
+    if arguments.plugins_command == "entry-points":
+        try:
+            declarations = declared_plugin_entry_points(
+                include_builtin=not arguments.no_builtin,
+                include_external=not arguments.no_external,
+            )
+        except PluginError as error:
+            print(f"error: plugin-entry-point-discovery-failed: {error}")
+            return 2
+        entry_point_payload: dict[str, object] = {
+            "schema": "taoryx.plugin-entry-point-catalog/v1",
+            "entry_points": [item.public_dict() for item in declarations],
+        }
+        if arguments.json:
+            print(json.dumps(entry_point_payload, indent=2, sort_keys=True))
+            return 0
+        raw_entry_points = entry_point_payload["entry_points"]
+        assert isinstance(raw_entry_points, list)
+        for item in raw_entry_points:
+            assert isinstance(item, Mapping)
+            distribution = item["distribution"] or "unknown-distribution"
+            version = item["version"] or "unknown-version"
+            print(f"{item['plugin_id']}\t{item['target']}\t{distribution}=={version}\t{item['origin']}")
+        return 0
     try:
         catalog = discover_plugins(
             include_builtin=not arguments.no_builtin,
@@ -963,16 +1035,25 @@ def _plugins_command(arguments: argparse.Namespace) -> int:
             disabled=tuple(arguments.disable),
             strict=False,
         )
-        payload = catalog.public_dict()
+        payload: dict[str, object] = catalog.public_dict()
         if arguments.plugins_command == "inspect":
-            plugin = catalog.plugin(arguments.plugin_id)
+            plugin_metadata = catalog.plugin(arguments.plugin_id)
             payload = {
                 "schema": "taoryx.plugin-inspection/v1",
                 "api_version": payload["api_version"],
                 "catalog_fingerprint": catalog.fingerprint,
-                "plugin": plugin.public_dict(),
-                "contributions": [item.public_dict() for item in catalog.contributions if item.plugin.id == plugin.id],
-                "diagnostics": [item.public_dict() for item in catalog.diagnostics if item.plugin_id == plugin.id],
+                "plugin": plugin_metadata.public_dict(),
+                "plugin_revision": catalog.plugin_revision(plugin_metadata.id).public_dict(),
+                "contributions": [
+                    item.public_dict()
+                    for item in catalog.contributions
+                    if item.plugin.id == plugin_metadata.id
+                ],
+                "diagnostics": [
+                    item.public_dict()
+                    for item in catalog.diagnostics
+                    if item.plugin_id == plugin_metadata.id
+                ],
             }
     except (KeyError, PluginError, TypeError, ValueError) as error:
         print(f"error: plugin-discovery-failed: {error}")
@@ -986,12 +1067,21 @@ def _plugins_command(arguments: argparse.Namespace) -> int:
     contributions = raw_contributions if isinstance(raw_contributions, list) else []
     raw_diagnostics = payload.get("diagnostics")
     diagnostics = raw_diagnostics if isinstance(raw_diagnostics, list) else []
-    for plugin in plugin_items:
-        if not isinstance(plugin, Mapping):
+    raw_revisions = payload.get("plugin_revisions") if arguments.plugins_command == "list" else [payload.get("plugin_revision")]
+    revisions = raw_revisions if isinstance(raw_revisions, list) else []
+    revision_by_plugin = {item["plugin_id"]: item for item in revisions if isinstance(item, Mapping) and isinstance(item.get("plugin_id"), str)}
+    for plugin_item in plugin_items:
+        if not isinstance(plugin_item, Mapping):
             continue
-        print(f"{plugin['id']}\t{plugin['package']}=={plugin['version']}\tAPI {plugin['api_version']}")
+        revision = revision_by_plugin.get(plugin_item["id"])
+        fingerprint = revision.get("fingerprint") if isinstance(revision, Mapping) else None
+        suffix = f"\tREV {fingerprint[:12]}" if isinstance(fingerprint, str) else ""
+        print(
+            f"{plugin_item['id']}\t{plugin_item['package']}=={plugin_item['version']}"
+            f"\tAPI {plugin_item['api_version']}{suffix}"
+        )
         for contribution in contributions:
-            if isinstance(contribution, Mapping) and contribution.get("plugin_id") == plugin["id"]:
+            if isinstance(contribution, Mapping) and contribution.get("plugin_id") == plugin_item["id"]:
                 print(f"  {contribution['kind']}\t{contribution['id']}")
     for diagnostic in diagnostics:
         if isinstance(diagnostic, Mapping) and diagnostic.get("status") not in {"loaded", "disabled"}:
@@ -1001,7 +1091,7 @@ def _plugins_command(arguments: argparse.Namespace) -> int:
 
 
 def _plugin_installation_check_command(arguments: argparse.Namespace) -> int:
-    """Verify distribution metadata and installed entry points for one suite."""
+    """Verify installed distributions, entry-point declarations, and registrations."""
 
     expected_plugin_ids = _PLUGIN_INSTALL_PROFILES[arguments.profile]
     expected_distributions = (
@@ -1024,7 +1114,16 @@ def _plugin_installation_check_command(arguments: argparse.Namespace) -> int:
             }
         )
 
+    entry_point_discovery_errors: list[str] = []
     if expected_plugin_ids:
+        try:
+            declared_entry_points = {
+                item.plugin_id: item
+                for item in declared_plugin_entry_points(include_builtin=False)
+            }
+        except PluginError as error:
+            declared_entry_points = {}
+            entry_point_discovery_errors.append(str(error))
         catalog = discover_plugins(include_builtin=False, strict=False)
         loaded_plugins = {plugin.id: plugin for plugin in catalog.plugins}
         contributions = catalog.contributions
@@ -1034,6 +1133,7 @@ def _plugin_installation_check_command(arguments: argparse.Namespace) -> int:
             if diagnostic.plugin_id in expected_plugin_ids and diagnostic.status not in {"loaded", "disabled"}
         ]
     else:
+        declared_entry_points = {}
         loaded_plugins = {}
         contributions = ()
         failed_diagnostics = []
@@ -1041,24 +1141,48 @@ def _plugin_installation_check_command(arguments: argparse.Namespace) -> int:
     plugin_records: list[dict[str, object]] = []
     for plugin_id in expected_plugin_ids:
         distribution = _OFFICIAL_PLUGIN_DISTRIBUTIONS[plugin_id]
+        declaration = declared_entry_points.get(plugin_id)
         plugin = loaded_plugins.get(plugin_id)
         loaded = plugin is not None
-        package_matches = plugin is not None and plugin.package == distribution
+        entry_point_declared = declaration is not None
+        entry_point_distribution_matches = (
+            declaration is not None
+            and declaration.distribution is not None
+            and _normalized_distribution_name(declaration.distribution) == _normalized_distribution_name(distribution)
+        )
+        entry_point_version_matches = declaration is not None and declaration.version == distribution_versions[distribution]
+        package_matches = plugin is not None and _normalized_distribution_name(plugin.package) == _normalized_distribution_name(distribution)
         version_matches = plugin is not None and plugin.version == distribution_versions[distribution]
         plugin_records.append(
             {
                 "plugin_id": plugin_id,
                 "distribution": distribution,
+                "entry_point_declared": entry_point_declared,
+                "entry_point_target": declaration.target if declaration is not None else None,
+                "entry_point_distribution": declaration.distribution if declaration is not None else None,
+                "entry_point_distribution_matches": entry_point_distribution_matches,
+                "entry_point_version": declaration.version if declaration is not None else None,
+                "entry_point_version_matches": entry_point_version_matches,
                 "loaded": loaded,
                 "package_matches": package_matches,
                 "version": plugin.version if plugin is not None else None,
                 "version_matches": version_matches,
                 "contribution_count": sum(contribution.plugin.id == plugin_id for contribution in contributions),
-                "valid": loaded and package_matches and version_matches,
+                "valid": (
+                    entry_point_declared
+                    and entry_point_distribution_matches
+                    and entry_point_version_matches
+                    and loaded
+                    and package_matches
+                    and version_matches
+                ),
             }
         )
     ready = (
-        all(bool(record["installed"]) for record in distribution_records) and all(bool(record["valid"]) for record in plugin_records) and not failed_diagnostics
+        all(bool(record["installed"]) for record in distribution_records)
+        and all(bool(record["valid"]) for record in plugin_records)
+        and not entry_point_discovery_errors
+        and not failed_diagnostics
     )
     payload = {
         "schema": "taoryx.plugin-installation-check/v1",
@@ -1066,6 +1190,7 @@ def _plugin_installation_check_command(arguments: argparse.Namespace) -> int:
         "ready": ready,
         "distributions": distribution_records,
         "plugins": plugin_records,
+        "entry_point_diagnostics": entry_point_discovery_errors,
         "diagnostics": failed_diagnostics,
     }
     if arguments.json:
@@ -1079,7 +1204,13 @@ def _plugin_installation_check_command(arguments: argparse.Namespace) -> int:
         print(f"[{marker:4}] distribution {record['distribution']}: {detail}")
     for record in plugin_records:
         marker = "OK" if record["valid"] else "FAIL"
-        if not record["loaded"]:
+        if not record["entry_point_declared"]:
+            detail = "installed entry-point declaration is missing"
+        elif not record["entry_point_distribution_matches"]:
+            detail = f"entry point belongs to {record['entry_point_distribution']!r}, expected {record['distribution']!r}"
+        elif not record["entry_point_version_matches"]:
+            detail = f"entry-point version {record['entry_point_version']!r} does not match installed distribution"
+        elif not record["loaded"]:
             detail = "entry point missing or failed to load"
         elif not record["package_matches"]:
             detail = f"advertises unexpected package metadata (expected {record['distribution']})"
@@ -1088,14 +1219,23 @@ def _plugin_installation_check_command(arguments: argparse.Namespace) -> int:
         else:
             detail = f"{record['version']}; {record['contribution_count']} contribution(s)"
         print(f"[{marker:4}] plug-in {record['plugin_id']}: {detail}")
-    for diagnostic in failed_diagnostics:
-        print(f"[FAIL] {diagnostic['plugin_id']}: {diagnostic['message']}")
+    for entry_point_diagnostic in entry_point_discovery_errors:
+        print(f"[FAIL] entry-point declaration: {entry_point_diagnostic}")
+    for failed_diagnostic in failed_diagnostics:
+        print(f"[FAIL] {failed_diagnostic['plugin_id']}: {failed_diagnostic['message']}")
     if not ready:
         print("Installation is incomplete. Install the missing distributions from the release wheelhouse")
         print("or follow docs/INSTALLATION.md from a source checkout, then run this check again.")
         return 2
     print("Installation is ready; all required entry points loaded without source fallbacks.")
     return 0
+    ####
+
+
+def _normalized_distribution_name(name: str) -> str:
+    """Compare distribution names using PEP 503 normalization."""
+
+    return re.sub(r"[-_.]+", "-", name).lower()
     ####
 
 
@@ -1523,13 +1663,18 @@ def _model_command(arguments: argparse.Namespace) -> int:
             payload: dict[str, object] = {
                 "schema": "taoryx.model-authoring-catalog/v1",
                 "plugin_catalog_fingerprint": plugins.fingerprint,
+                "plugin_revisions": [item.public_dict() for item in plugins.plugin_revisions],
+                "provider_catalog_fingerprint": providers.fingerprint,
                 "providers": [
                     {
                         "metadata": provider.metadata.model_dump(mode="json", by_alias=True),
+                        "revision": providers.provider_revision(provider.metadata.id),
                         "models": [
                             {
                                 "id": model.id,
                                 "version": model.version,
+                                "metadata_fingerprint": model.metadata_fingerprint,
+                                "revision": model.revision_public_dict(),
                                 "display_name": model.presentation.display_name,
                                 "family_id": model.family_id,
                                 "physical_family": model.physical_family,
@@ -1570,9 +1715,7 @@ def _model_command(arguments: argparse.Namespace) -> int:
         if arguments.model_command == "assess":
             family_adapters = plugins.build_family_adapter_registry() if plugins.records("family_adapter") else None
             local_controller_screens = (
-                plugins.build_local_controller_screen_advertisement_registry()
-                if plugins.records("local_controller_screen_advertisement")
-                else None
+                plugins.build_local_controller_screen_advertisement_registry() if plugins.records("local_controller_screen_advertisement") else None
             )
             payload = build_model_automation_assessment(
                 providers,
@@ -1588,9 +1731,7 @@ def _model_command(arguments: argparse.Namespace) -> int:
         if arguments.model_command == "plan":
             family_adapters = plugins.build_family_adapter_registry() if plugins.records("family_adapter") else None
             local_controller_screens = (
-                plugins.build_local_controller_screen_advertisement_registry()
-                if plugins.records("local_controller_screen_advertisement")
-                else None
+                plugins.build_local_controller_screen_advertisement_registry() if plugins.records("local_controller_screen_advertisement") else None
             )
             payload = build_model_authoring_plan(
                 providers,

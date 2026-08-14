@@ -1,0 +1,7 @@
+component,value_slug_ft2,value_kg_m2,about,source_id
+Ixx,3650.0,4948.73551141,active_empty_CG; source flag negated_crossproduct_inertia=true,JSBSIM_X15_XML
+Iyy,80000.0,108465.43586651,active_empty_CG; source flag negated_crossproduct_inertia=true,JSBSIM_X15_XML
+Izz,82000.0,111177.07176317,active_empty_CG; source flag negated_crossproduct_inertia=true,JSBSIM_X15_XML
+Ixy,0.0,0.0,active_empty_CG; source flag negated_crossproduct_inertia=true,JSBSIM_X15_XML
+Ixz,-590.0,-799.93258952,active_empty_CG; source flag negated_crossproduct_inertia=true,JSBSIM_X15_XML
+Iyz,0.0,0.0,active_empty_CG; source flag negated_crossproduct_inertia=true,JSBSIM_X15_XML

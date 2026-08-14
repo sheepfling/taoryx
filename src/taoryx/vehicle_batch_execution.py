@@ -8,13 +8,11 @@ from pathlib import Path
 from typing import Protocol, cast
 
 from .controller_runtime_contract import ControllerRuntimeDeclaration
-from .plugins import PluginCatalog, discover_plugins
+from .plugins import BATCH_FACTORY_REQUEST_CONTRACT, PluginCatalog, current_plugin_catalog, discover_plugins, plugin_catalog_scope
 from .tuning_application import TuningApplicationContext, TuningApplicationContextSet
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_artifact import VehicleExecutionArtifact, VehicleExecutionPacket
 from .vehicle_execution_bindings import VehicleExecutionBinding, resolve_vehicle_execution_binding
-
-_BATCH_FACTORY_REQUEST_CONTRACT = "taoryx.vehicle-batch-factory-request/v1alpha1"
 
 
 class NativeBatchExecution(Protocol):
@@ -63,7 +61,7 @@ class VehicleBatchExecutionRequest:
         """Return portable request identity for a plug-in-owned artifact."""
 
         return {
-            "schema": _BATCH_FACTORY_REQUEST_CONTRACT,
+            "schema": BATCH_FACTORY_REQUEST_CONTRACT,
             "composition_id": self.composition.id,
             "composition_identity_sha256": self.composition.identity_sha256,
             "family_id": self.composition.family_id,
@@ -122,13 +120,14 @@ def batch_factory_request_v1(factory: StructuredBatchFactory) -> StructuredBatch
     """Mark a plug-in factory as accepting :class:`VehicleBatchExecutionRequest`.
 
     Legacy three-argument factories remain supported while installed plug-ins
-    migrate. New vehicle families should use this marker and receive the
-    complete typed request rather than positional argument bags.
+    migrate. New vehicle families should prefer
+    :meth:`PluginRegistrar.register_execution_factory_request_v1`, which adds
+    this marker without importing the batch host during discovery.
     """
 
     if not callable(factory):
         raise TypeError("typed batch execution factories must be callable")
-    setattr(factory, "__taoryx_batch_factory_contract__", _BATCH_FACTORY_REQUEST_CONTRACT)
+    setattr(factory, "__taoryx_batch_factory_contract__", BATCH_FACTORY_REQUEST_CONTRACT)
     return factory
     ####
 
@@ -162,7 +161,9 @@ class VehicleBatchExecution:
 def _batch_factories(*, plugins: PluginCatalog | None = None) -> dict[str, RegisteredBatchFactory]:
     """Build the installed model-owned factory registry fail closed."""
 
-    catalog = plugins or discover_plugins()
+    catalog = plugins if plugins is not None else current_plugin_catalog()
+    if catalog is None:
+        catalog = discover_plugins()
     factories: dict[str, RegisteredBatchFactory] = {}
     for contribution in catalog.records("execution_factory"):
         if not callable(contribution.value):
@@ -188,7 +189,7 @@ def _invoke_batch_factory(
 ) -> NativeBatchExecution:
     """Call a new typed factory or the temporary legacy adapter explicitly."""
 
-    if getattr(factory, "__taoryx_batch_factory_contract__", None) == _BATCH_FACTORY_REQUEST_CONTRACT:
+    if getattr(factory, "__taoryx_batch_factory_contract__", None) == BATCH_FACTORY_REQUEST_CONTRACT:
         return cast(StructuredBatchFactory, factory)(request)
     return cast(BatchFactory, factory)(request.composition, request.output_dir, request.max_steps)
     ####
@@ -201,14 +202,22 @@ def execute_vehicle_composition_batch(
     max_steps: int | None = None,
     tuning_context: TuningApplicationContext | None = None,
     tuning_context_set: TuningApplicationContextSet | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleBatchExecution:
-    """Resolve and invoke one exact batch binding without family fallback."""
+    """Resolve and invoke one exact batch binding without family fallback.
 
-    binding = resolve_vehicle_execution_binding(composition, "batch")
+    ``plugins`` carries a focused host catalog through nested family runtime
+    calls.  Omitting it preserves aggregate installed-discovery behavior.
+    """
+
+    catalog = plugins if plugins is not None else current_plugin_catalog()
+    if catalog is None:
+        catalog = discover_plugins()
+    binding = resolve_vehicle_execution_binding(composition, "batch", plugins=catalog)
     if binding.factory_id is None:
         raise ValueError("runnable batch binding lacks a factory identifier")
     try:
-        factory = _batch_factories()[binding.factory_id]
+        factory = _batch_factories(plugins=catalog)[binding.factory_id]
     except KeyError as error:
         raise ValueError(f"batch execution factory is declared but not implemented: {binding.factory_id!r}") from error
     request = VehicleBatchExecutionRequest(
@@ -219,7 +228,8 @@ def execute_vehicle_composition_batch(
         tuning_context=tuning_context,
         tuning_context_set=tuning_context_set,
     )
-    execution = _invoke_batch_factory(factory, request)
+    with plugin_catalog_scope(catalog):
+        execution = _invoke_batch_factory(factory, request)
     payload = execution.as_dict()
     if not isinstance(payload, Mapping):
         raise TypeError(f"batch factory {binding.factory_id!r} returned a non-mapping artifact")
@@ -243,7 +253,7 @@ def execute_vehicle_composition_batch(
         raise TypeError(f"batch factory {binding.factory_id!r} artifact output_dir disagrees with its request")
     from .vehicle_composition import resolve_vehicle_composition_interface_contract
 
-    interface = resolve_vehicle_composition_interface_contract(composition)
+    interface = resolve_vehicle_composition_interface_contract(composition, plugins=catalog)
     packet = VehicleExecutionPacket.from_artifact(
         artifact,
         request=request.as_dict(),

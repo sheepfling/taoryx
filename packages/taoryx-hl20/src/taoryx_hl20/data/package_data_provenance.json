@@ -1,0 +1,7 @@
+{
+  "claim_boundary": "This package fragment mirrors only HL-20 catalog rows, DAVE-ML source fixture, evidence, and focused local-screen witnesses; repository-root catalogs remain canonical. The reachability plug-in may consume the source assets but owns its booster-release and glide-energy overlay catalogs, bindings, requests, and witnesses.",
+  "family_id": "hl20_mod_k",
+  "schema": "taoryx.hl20-package-data/v1",
+  "source_catalog_root": "verification/",
+  "source_family_id": "reference_hl20_mod_k"
+}

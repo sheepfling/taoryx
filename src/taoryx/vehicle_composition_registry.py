@@ -41,7 +41,6 @@ from .parameter_value_spaces import (
     validate_parameter_value_space_coverage,
     value_space_for_parameter_profile,
 )
-from .plugins.resources import packaged_resource_fallback
 from .value_space import (
     ValueSpaceSpec,
     bounded_interval,
@@ -53,6 +52,7 @@ from .value_space import (
     unit_interval,
     validate_value_space_value,
 )
+from .vehicle_catalog_resources import vehicle_catalog_resources
 from .vehicle_discovery import (
     VEHICLE_CLASS_SEGMENT_EXPECTATIONS,
     AxisResponseLimit,
@@ -83,18 +83,15 @@ from .vehicle_discovery import (
     parameter_semantic_role,
     resolve_segment_taxonomy,
 )
-from .vehicle_registry import ROOT
 
 if TYPE_CHECKING:
     from .horizontal_fidelity import HorizontalTierBinding
+    from .plugins.discovery import PluginCatalog
     from .vehicle_execution_bindings import VehicleBatchEpisodeParityAdvertisement, VehicleExecutionBinding
     from .vehicle_interface import VehicleControlAuthorityAdvertisement, VehicleInterfaceContract
 
-VEHICLE_COMPOSITION_REGISTRY = packaged_resource_fallback(
-    ROOT / "verification/vehicle_composition_registry.yaml",
-    package="taoryx_reference_models",
-    resource="data/verification/vehicle_composition_registry.yaml",
-)
+# Materialized lazily by ``__getattr__`` only for compatibility consumers.
+VEHICLE_COMPOSITION_REGISTRY: Path
 
 CompositionStatus = Literal["runnable", "development", "planned"]
 VariantBindingStatus = Literal["runnable", "planned"]
@@ -737,6 +734,41 @@ class VehicleCompositionDeclaration(BaseModel):
                 unsupported = sorted(set(supported_fidelities) - set(mission.compatible_fidelities))
                 if unsupported:
                     raise ValueError(f"mission {mission.id!r} declares {label} for incompatible fidelities: {unsupported}")
+        return self
+        ####
+
+
+class VehicleCompositionCatalogOverlay(BaseModel):
+    """Append-only composition rows supplied by an optional workflow plug-in.
+
+    A vehicle family remains owned by its base fragment. An overlay can add
+    independently named initialization, segment, mission, or variant rows
+    after that base declaration has been validated. It cannot replace vehicle
+    metadata or mutate an existing row in place.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    family_id: str = Field(min_length=1)
+    initialization_contracts: tuple[InitializationContract, ...] = ()
+    segment_contracts: tuple[SegmentContract, ...] = ()
+    mission_templates: tuple[MissionTemplateContract, ...] = ()
+    variant_parameters: tuple[VariantParameterBinding, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_append_only_rows(self) -> VehicleCompositionCatalogOverlay:
+        groups = (
+            ("initialization", self.initialization_contracts),
+            ("segment", self.segment_contracts),
+            ("mission", self.mission_templates),
+            ("variant", self.variant_parameters),
+        )
+        if not any(rows for _, rows in groups):
+            raise ValueError(f"composition overlay {self.family_id!r} must add at least one row")
+        for label, rows in groups:
+            identifiers = [item.id for item in rows]
+            if len(identifiers) != len(set(identifiers)):
+                raise ValueError(f"composition overlay {self.family_id!r} has duplicate {label} IDs")
         return self
         ####
 
@@ -2337,15 +2369,49 @@ class ResolvedVehicleCompositionCatalog:
 ####
 
 
-@lru_cache(maxsize=8)
-def load_vehicle_composition_registry(path: str | Path | None = None) -> VehicleCompositionRegistry:
-    """Load the declarative user-facing composition overlay."""
+def load_vehicle_composition_registry(
+    path: str | Path | None = None,
+    *,
+    plugins: PluginCatalog | None = None,
+) -> VehicleCompositionRegistry:
+    """Load a composition overlay from explicit plug-in-owned fragments."""
 
-    source = Path(path) if path is not None else VEHICLE_COMPOSITION_REGISTRY
-    payload = yaml.safe_load(source.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"{source} must contain a mapping")
-    registry = VehicleCompositionRegistry.model_validate(payload)
+    if path is not None:
+        return _load_vehicle_composition_registry_sources((str(Path(path)),))
+    sources = vehicle_catalog_resources("verification/vehicle_composition_registry.yaml", plugins=plugins)
+    return _load_vehicle_composition_registry_sources(tuple(str(source) for source in sources))
+    ####
+
+
+@lru_cache(maxsize=32)
+def _load_vehicle_composition_registry_sources(source_names: tuple[str, ...]) -> VehicleCompositionRegistry:
+    """Parse one cacheable, exact set of composition-registry fragments."""
+
+    if not source_names:
+        raise ValueError("vehicle composition registry has no installed fragments")
+    payloads: list[Mapping[str, object]] = []
+    for source_name in source_names:
+        source = Path(source_name)
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"{source} must contain a mapping")
+        payloads.append(payload)
+    merged = dict(payloads[0])
+    vehicles: list[object] = []
+    overlays: list[VehicleCompositionCatalogOverlay] = []
+    for payload in payloads:
+        rows = payload.get("vehicles")
+        if not isinstance(rows, list):
+            raise ValueError("vehicle composition registry vehicles must contain a list")
+        vehicles.extend(rows)
+        overlay_rows = payload.get("overlays", [])
+        if not isinstance(overlay_rows, list):
+            raise ValueError("vehicle composition registry overlays must contain a list when present")
+        overlays.extend(VehicleCompositionCatalogOverlay.model_validate(row) for row in overlay_rows)
+    merged["vehicles"] = vehicles
+    merged.pop("overlays", None)
+    registry = VehicleCompositionRegistry.model_validate(merged)
+    registry = _apply_vehicle_composition_catalog_overlays(registry, overlays)
     parameter_identifiers: list[str] = []
     for vehicle in registry.vehicles:
         for initialization_contract in vehicle.initialization_contracts:
@@ -2357,7 +2423,44 @@ def load_vehicle_composition_registry(path: str | Path | None = None) -> Vehicle
     ####
 
 
-def resolved_control_realization_for(family_id: str, tier: FidelityTier) -> ControlRealization:
+def _apply_vehicle_composition_catalog_overlays(
+    registry: VehicleCompositionRegistry,
+    overlays: Iterable[VehicleCompositionCatalogOverlay],
+) -> VehicleCompositionRegistry:
+    """Append optional plug-in rows without allowing a base declaration rewrite."""
+
+    declarations = list(registry.vehicles)
+    positions = {declaration.family_id: index for index, declaration in enumerate(declarations)}
+    for overlay in overlays:
+        position = positions.get(overlay.family_id)
+        if position is None:
+            raise ValueError(
+                f"composition overlay for family {overlay.family_id!r} has no selected base vehicle declaration"
+            )
+        base = declarations[position]
+        payload = base.model_dump(mode="python")
+        payload["initialization_contracts"] = [*base.initialization_contracts, *overlay.initialization_contracts]
+        payload["segment_contracts"] = [*base.segment_contracts, *overlay.segment_contracts]
+        payload["mission_templates"] = [*base.mission_templates, *overlay.mission_templates]
+        payload["variant_parameters"] = [*base.variant_parameters, *overlay.variant_parameters]
+        declarations[position] = VehicleCompositionDeclaration.model_validate(payload)
+    return VehicleCompositionRegistry.model_validate(
+        {
+            "schema": registry.schema_id,
+            "version": registry.version,
+            "description": registry.description,
+            "vehicles": declarations,
+        }
+    )
+    ####
+
+
+def resolved_control_realization_for(
+    family_id: str,
+    tier: FidelityTier,
+    *,
+    plugins: PluginCatalog | None = None,
+) -> ControlRealization:
     """Return the profile-specific realization when a tier has an exception.
 
     Most pseudo-6DOF profiles use a named response law.  The passive tumbling
@@ -2371,7 +2474,7 @@ def resolved_control_realization_for(family_id: str, tier: FidelityTier) -> Cont
         return control_realization_for(tier)
     from .trajectory.pseudo6dof_profiles import load_pseudo6dof_catalog
 
-    _, profile = load_pseudo6dof_catalog().for_family(family_id)
+    _, profile = load_pseudo6dof_catalog(plugins=plugins).for_family(family_id)
     return profile.control_realization
     ####
 
@@ -2380,6 +2483,7 @@ def load_resolved_vehicle_composition_catalog(
     *,
     registry: VehicleCompositionRegistry | None = None,
     manifests: UnifiedFamilyManifestCatalog | None = None,
+    plugins: PluginCatalog | None = None,
     validate_source_imports: bool = False,
 ) -> ResolvedVehicleCompositionCatalog:
     """Join declared composition to authoritative family and fidelity records.
@@ -2389,8 +2493,9 @@ def load_resolved_vehicle_composition_catalog(
     may request it explicitly with ``validate_source_imports=True``.
     """
 
-    resolved_registry = registry or load_vehicle_composition_registry()
+    resolved_registry = registry or load_vehicle_composition_registry(plugins=plugins)
     resolved_manifests = manifests or load_unified_family_manifest_catalog(
+        plugins=plugins,
         validate_source_imports=validate_source_imports,
     )
     if resolved_manifests.errors:
@@ -2637,6 +2742,19 @@ def _topology_schema_findings(value: object, path: str = "truth_objective_schema
     ####
 
 
+def __getattr__(name: str) -> object:
+    """Resolve the historical unscoped registry path only for compatibility users."""
+
+    if name != "VEHICLE_COMPOSITION_REGISTRY":
+        raise AttributeError(name)
+    from .compatibility.vehicle_catalog_resources import legacy_vehicle_catalog_resource
+
+    value = legacy_vehicle_catalog_resource("verification/vehicle_composition_registry.yaml")
+    globals()[name] = value
+    return value
+    ####
+
+
 __all__ = [
     "CompositionParameter",
     "InitializationContract",
@@ -2652,6 +2770,7 @@ __all__ = [
     "VariantStatusDerivationRelation",
     "VariantParameterBinding",
     "VEHICLE_COMPOSITION_REGISTRY",
+    "VehicleCompositionCatalogOverlay",
     "VehicleCompositionDeclaration",
     "VehicleCompositionRegistry",
     "load_resolved_vehicle_composition_catalog",

@@ -1,0 +1,11 @@
+parameter,value,units,fidelity,source_id
+specific_impulse,260.0,s,DIRECT_TRANSCRIPTION,JSBSIM_XLR99_XML
+minimum_throttle,0.4,fraction,DIRECT_TRANSCRIPTION,JSBSIM_XLR99_XML
+maximum_throttle,1.0,fraction,DIRECT_TRANSCRIPTION,JSBSIM_XLR99_XML
+maximum_fuel_flow,91.5,lbm/s,DIRECT_TRANSCRIPTION,JSBSIM_XLR99_XML
+maximum_oxidizer_flow,105.2,lbm/s,DIRECT_TRANSCRIPTION,JSBSIM_XLR99_XML
+nozzle_exit_pressure,40.0,psf,DIRECT_TRANSCRIPTION,JSBSIM_XLR99_NOZZLE_XML
+nozzle_exit_area,8.04,ft^2,DIRECT_TRANSCRIPTION,JSBSIM_XLR99_NOZZLE_XML
+engine_structural_station_x,600.0,in,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML
+engine_body_x_relative_to_empty_cg,-6.477,m,DERIVED_COORDINATE_TRANSFORMATION,JSBSIM_X15_XML
+thrust_vector_roll_pitch_yaw,"0,0,0",deg,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML

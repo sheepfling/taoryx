@@ -1018,6 +1018,21 @@ times, independently evaluated stage/cutoff/terminal objectives, and data-
 integrity envelope. It is not a substitute for a participating rocket runtime
 or a future vehicle-control episode.
 
+An optional composition-level binding can independently propagate a synthetic
+passive cylinder from the accepted stage-separation state. The binding names
+the `taoryx.passive-bodies` plug-in, its exact runtime, the requested child
+fidelity, and the ECI-to-local-tangent state transfer; it is not enabled by the
+ordinary NESC replay example and does not claim a source-exact separated stage.
+Use the explicit witness when that separate child is intended:
+
+```bash
+taoryx vehicle compose \
+  examples/vehicle_composition/nesc_staged_source_replay_with_passive_child_pseudo6dof_compose.yaml \
+  --output generated/nesc-passive-child-semantic.json
+taoryx vehicle run generated/nesc-passive-child-semantic.json \
+  --output-dir generated/nesc-passive-child-execution
+```
+
 The X-15 registry deliberately exposes two different mission contracts. The
 existing `rocket_aircraft_high_energy_v1` remains the planned local
 direct-wrench X-15 bridge. The runnable

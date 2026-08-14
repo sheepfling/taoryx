@@ -23,7 +23,7 @@ from .vehicle_registry import ROOT
 
 PARAMETER_VALUE_SPACE_CATALOG = packaged_resource_fallback(
     ROOT / "verification/parameter_value_space_catalog.yaml",
-    package="taoryx_reference_models",
+    package="taoryx",
     resource="data/verification/parameter_value_space_catalog.yaml",
 )
 

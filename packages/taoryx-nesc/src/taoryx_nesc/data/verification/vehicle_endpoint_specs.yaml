@@ -1,0 +1,38 @@
+schema: taoryx.vehicle-endpoint-specs/v1alpha1
+version: 1
+description: Focused vertical contracts that join a selected vehicle composition to
+  its runtime factory, executable witness, capability advertisement, normalized output
+  surface, controller campaign, and planning ledger record.
+endpoints:
+- id: nesc-source-history-replay-pseudo6dof
+  family_id: reference_nesc_two_stage_rocket
+  model_id: reference_nesc_two_stage_rocket
+  mission_id: staged_rocket_launch_target_state_v1
+  fidelity: pseudo_6dof
+  execution_mode: source_history_replay
+  operations:
+  - operation: batch
+    factory_id: nesc_source_replay.v1
+    witness_id: nesc-pseudo6dof-batch
+  required_core_output_ids:
+  - position.eci.x
+  - position.eci.y
+  - position.eci.z
+  - velocity.eci.x
+  - velocity.eci.y
+  - velocity.eci.z
+  required_telemetry_output_ids:
+  - mass.total
+  - diagnostics.position_error
+  - diagnostics.velocity_error
+  robustness_requirement:
+    disposition: not_applicable
+    reason: This source-history replay replays the pinned translation history with
+      a declared phase-scheduled attitude response. It exposes neither a participating
+      plant derivative nor a mass, wind, or persistent-offset input seam.
+  robustness_screens: []
+  maturity_record_id: reference_nesc_two_stage_rocket
+  claim_boundary: Exact NESC source translation-history replay with a declared pseudo-6DOF
+    response-law projection only. It does not establish source-exact attitude history,
+    a participating rocket plant, guidance, gimbal allocation, robustness, or qualification
+    beyond the pinned replay evidence.

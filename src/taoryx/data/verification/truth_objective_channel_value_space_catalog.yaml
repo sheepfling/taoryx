@@ -1,0 +1,29 @@
+schema: taoryx.truth-objective-channel-value-space-catalog/v1alpha1
+version: 1
+description: >-
+  Explicit units and mathematical topology for the declared, backend-neutral
+  truth-objective target vocabulary. A target outside this vocabulary remains
+  family-owned and cannot be promoted by the generic evaluator alone.
+channels:
+  north_m: {canonical_unit: m, profile: euclidean_scalar}
+  east_m: {canonical_unit: m, profile: euclidean_scalar}
+  altitude_m: {canonical_unit: m, profile: euclidean_scalar}
+  speed_m_s: {canonical_unit: m/s, profile: euclidean_scalar}
+  horizontal_speed_m_s: {canonical_unit: m/s, profile: euclidean_scalar}
+  vertical_speed_m_s: {canonical_unit: m/s, profile: euclidean_scalar}
+  local_roll_deg: {canonical_unit: deg, profile: euclidean_scalar}
+  local_pitch_deg: {canonical_unit: deg, profile: euclidean_scalar}
+  local_heading_deg: {canonical_unit: deg, profile: periodic_degrees}
+  heading_deg: {canonical_unit: deg, profile: periodic_degrees}
+  flight_path_angle_deg: {canonical_unit: deg, profile: euclidean_scalar}
+  kinematic_roll_command_deg: {canonical_unit: deg, profile: euclidean_scalar}
+  kinematic_roll_deg: {canonical_unit: deg, profile: euclidean_scalar}
+  kinematic_pitch_command_deg: {canonical_unit: deg, profile: euclidean_scalar}
+  kinematic_pitch_deg: {canonical_unit: deg, profile: euclidean_scalar}
+  mass_error_kg: {canonical_unit: kg, profile: euclidean_scalar}
+  velocity_error_mps: {canonical_unit: m/s, profile: euclidean_scalar}
+  position_error_m: {canonical_unit: m, profile: euclidean_scalar}
+  corridor_m: {canonical_unit: m, profile: euclidean_scalar}
+  gate_lateral_error: {canonical_unit: m, profile: euclidean_scalar}
+  gate_altitude_error: {canonical_unit: m, profile: euclidean_scalar}
+  gate_speed_error: {canonical_unit: m/s, profile: euclidean_scalar}

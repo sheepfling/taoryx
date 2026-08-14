@@ -1,0 +1,10 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: f16-local-physical-direct-wrench-screen-v1
+vehicle: f16_s119
+fidelity: rigid_body_6dof_direct_wrench
+initialization:
+  id: source_physical_control_local_point
+mission:
+  id: f16_local_physical_control_screen_v1
+segments:
+  - id: local_physical_control_screen

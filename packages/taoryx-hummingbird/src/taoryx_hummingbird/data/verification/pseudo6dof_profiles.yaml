@@ -1,0 +1,102 @@
+schema: taoryx.pseudo6dof-profiles/v1alpha1
+profiles:
+- id: hummingbird.attitude_response_p6dof.v1
+  family_id: hummingbird
+  parent_3dof_profile_id: hummingbird.point_mass_3dof.v1
+  model_kind: thrust_vector_surrogate
+  control_realization: response_law
+  status: nominal_case_pass
+  evidence_grade: derived
+  response:
+    roll:
+      time_constant_s: 0.18
+      damping_ratio: 0.8
+      maximum_rate_rad_s: 3.0
+      maximum_acceleration_rad_s2: 15.0
+    pitch:
+      time_constant_s: 0.18
+      damping_ratio: 0.8
+      maximum_rate_rad_s: 3.0
+      maximum_acceleration_rad_s2: 15.0
+    yaw:
+      time_constant_s: 0.25
+      damping_ratio: 0.8
+      maximum_rate_rad_s: 2.0
+      maximum_acceleration_rad_s2: 8.0
+  resource_channels:
+  - battery
+  - thrust
+  required_channels:
+  - roll
+  - pitch
+  - yaw
+  - position
+  - velocity
+  - thrust
+  unsupported_claims:
+  - motor_level_allocation
+  - blade_aerodynamics
+  - rotor_inflow
+direct_wrench_profiles:
+- id: hummingbird.direct_wrench_6dof.v1
+  family_id: hummingbird
+  status: nominal_case_pass
+  evidence_grade: native_rotor_debug_comparator
+  parent_3dof_profile_id: hummingbird.point_mass_3dof.v1
+  force_axes:
+  - force_x_n
+  - force_y_n
+  - force_z_n
+  moment_axes:
+  - moment_x_nm
+  - moment_y_nm
+  - moment_z_nm
+  trim_contract: native rotor hover trim preferred; direct-wrench comparator uses
+    the local debug condition
+  envelope_contract: local hover response comparator only
+  resource_channels:
+  - mass
+  required_channels:
+  - source_force
+  - source_moment
+  - requested_wrench
+  - achieved_wrench
+  - residual_wrench
+  unsupported_claims:
+  - motor_level_allocation
+  - rotor_inflow
+  - battery_draw
+  - sustained_directional_flight
+surface_allocation_profiles:
+- id: hummingbird.surface_allocated_6dof.v1
+  family_id: hummingbird
+  parent_direct_wrench_profile_id: hummingbird.direct_wrench_6dof.v1
+  status: development
+  evidence_grade: native_rotor_local
+  allocator_id: hummingbird-bounded-quad-x-v1
+  effector_channels:
+  - rotor_1_speed
+  - rotor_2_speed
+  - rotor_3_speed
+  - rotor_4_speed
+  required_channels:
+  - requested_wrench
+  - allocated_effectors
+  - achieved_effectors
+  - achieved_wrench
+  - residual_wrench
+  - saturation
+  - power
+  unsupported_claims:
+  - blade_resolved_aerodynamics
+  - battery_depletion
+  - full_translated_envelope
+bindings:
+- family_id: hummingbird
+  point_mass_profile_id: hummingbird.point_mass_3dof.v1
+  pseudo_profile_id: hummingbird.attitude_response_p6dof.v1
+  direct_wrench_profile_id: hummingbird.direct_wrench_6dof.v1
+  surface_allocation_profile_id: hummingbird.surface_allocated_6dof.v1
+  automatic_lowering: true
+  lowering_note: hover response, direct-wrench comparator, and native rotor allocation
+    path

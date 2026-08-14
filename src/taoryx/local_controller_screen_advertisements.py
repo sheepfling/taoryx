@@ -24,6 +24,7 @@ class LocalControllerScreenAdvertisement(BaseModel):
 
     id: str = Field(min_length=1)
     provider_id: str = Field(min_length=1)
+    provider_aliases: tuple[str, ...] = ()
     model_id: str = Field(min_length=1)
     family_id: str | None = None
     fidelity: str = Field(min_length=1)
@@ -34,6 +35,13 @@ class LocalControllerScreenAdvertisement(BaseModel):
     @model_validator(mode="after")
     def validate_advertisement(self) -> LocalControllerScreenAdvertisement:
         """Reject incomplete or mismatched static endpoint metadata."""
+
+        if (
+            len(self.provider_aliases) != len(set(self.provider_aliases))
+            or any(not identifier.strip() for identifier in self.provider_aliases)
+            or self.provider_id in self.provider_aliases
+        ):
+            raise ValueError("local controller-screen advertisement has invalid provider aliases")
 
         required = {
             "schema",
@@ -80,7 +88,7 @@ class LocalControllerScreenAdvertisement(BaseModel):
         """Return whether one authoring selection exactly names this screen."""
 
         return (
-            self.provider_id == provider_id
+            provider_id in (self.provider_id, *self.provider_aliases)
             and self.model_id == model_id
             and self.family_id == family_id
             and self.fidelity == fidelity
@@ -114,7 +122,7 @@ class LocalControllerScreenAdvertisementRegistry(BaseModel):
             raise ValueError("local controller-screen advertisement registry has duplicate IDs")
         keys = tuple(
             (
-                item.provider_id,
+                provider_id,
                 item.model_id,
                 item.family_id,
                 item.fidelity,
@@ -122,6 +130,7 @@ class LocalControllerScreenAdvertisementRegistry(BaseModel):
                 item.mission_template_id,
             )
             for item in self.registrations
+            for provider_id in (item.provider_id, *item.provider_aliases)
         )
         if len(keys) != len(set(keys)):
             raise ValueError("local controller-screen advertisement registry has duplicate endpoint selections")

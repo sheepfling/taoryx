@@ -1,0 +1,432 @@
+schema: taoryx.vehicle-composition-registry/v1alpha1
+version: 1
+description: 'User-facing vehicle-to-trajectory registry. This is a composition overlay:
+  it declares available initialization contracts, segment schemas, and mission templates
+  without duplicating vehicle physics or promoting a fidelity tier.'
+vehicles:
+- family_id: f16_s119
+  metadata:
+    summary: Source-grounded F-16 S-119 family for fighter energy maneuvers, DAVE-ML
+      force/moment response, and bounded surface control.
+    model_version: 1.0.0+composition-v1
+    vehicle_class: powered_fixed_wing_aircraft
+    operating_domains:
+    - atmospheric
+    propulsion:
+    - jet
+    model_basis: source_grounded_reference
+    roles:
+    - fighter_energy_maneuver
+    - high_agility_control
+    - gain_scheduling
+    tags:
+    - daveml
+    - fighter
+    - scheduled_control
+    claim_boundary: Source-grounded research family within its declared package envelope;
+      it is not flight-qualified F-16 behavior.
+  initialization_contracts:
+  - id: source_physical_control_local_point
+    status: runnable
+    description: Pinned source-trim operating point for the bounded F-16 local physical-control
+      screen.
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+  - id: source_physical_schedule_local_nodes
+    status: runnable
+    description: Four independently source-retrimmed F-16 nodes used by bounded physical
+      LQR schedule-interior and explicit schedule-transition screens.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+  - id: airborne_trim
+    status: development
+    description: Source-grounded DAVE-ML airborne trim with a declared subsonic operating
+      condition.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: altitude_m
+      canonical_unit: m
+      required: true
+      description: Initial altitude.
+    - id: speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Initial speed used by common powered-fixed-wing missions.
+    - id: mach
+      canonical_unit: dimensionless
+      required: true
+      description: Initial Mach number for source-domain energy missions.
+    - id: heading_deg
+      canonical_unit: deg
+      required: true
+      description: Initial heading.
+    - id: mass_kg
+      canonical_unit: kg
+      required: false
+      description: Initial mass.
+  segment_contracts:
+  - id: local_physical_control_screen
+    status: runnable
+    description: One-second source-trim physical-controller entry screen with direct-wrench
+      or allocated-surface evidence.
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - wrench
+  - id: local_physical_surface_lqi_screen
+    status: runnable
+    description: Five-second fixed-altitude source-trim body-velocity LQI recovery
+      through bounded allocated elevator, aileron, rudder, and throttle coordinates.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - wrench
+  - id: local_physical_surface_lqr_schedule_interior_screen
+    status: runnable
+    description: Four-node source-retrimmed F-16 physical LQR schedule-interior campaign
+      with two retained body-w recovery cases at each held node.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - wrench
+  - id: local_physical_surface_lqi_schedule_interior_screen
+    status: runnable
+    description: Four-node source-retrimmed F-16 physical LQI schedule-interior campaign
+      with two source-feasible plus/minus 0.25 m/s body-w recovery cases at each held
+      node.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - wrench
+  - id: local_physical_surface_lqr_schedule_transition_screen
+    status: runnable
+    description: Four retained time-marching F-16 physical LQR altitude-coordinate
+      transitions with explicit source endpoint derivative/effectiveness blending
+      and bounded surface/throttle allocation.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - wrench
+  - id: trim_hold
+    status: development
+    description: Stabilize at a declared source-domain operating point.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: duration_s
+      canonical_unit: s
+      required: true
+      description: Dwell duration.
+    required_control_intents:
+    - speed
+    - altitude
+    - heading
+  - id: energy_climb
+    status: development
+    description: Bounded acceleration and climb inside the declared energy envelope.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_mach
+      canonical_unit: dimensionless
+      required: true
+      description: Speed target.
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Altitude target.
+    - id: load_factor_limit
+      canonical_unit: g
+      required: true
+      description: Maximum permitted load factor.
+    required_control_intents:
+    - speed
+    - altitude
+    - load_factor
+  - id: fly_by_turn
+    status: development
+    description: Directed turn with explicit roll reversal evidence.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: turn_direction
+      canonical_unit: null
+      required: true
+      description: left or right turn.
+    - id: turn_radius_m
+      canonical_unit: m
+      required: true
+      description: Planned turn radius.
+    - id: bank_limit_deg
+      canonical_unit: deg
+      required: true
+      description: Bank limit.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: Gate location.
+    required_control_intents:
+    - bank
+    - heading
+  - id: climb_level_gate
+    status: development
+    description: Source-domain bounded climb and high-level route gate for the reusable
+      airbreather racetrack.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: High altitude.
+    - id: climb_rate_m_s
+      canonical_unit: m/s
+      required: true
+      description: Bounded climb rate.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: North-east-down high-level gate center.
+    - id: corridor_m
+      canonical_unit: m
+      required: true
+      description: Lateral gate tolerance.
+    required_control_intents:
+    - speed
+    - altitude
+    - flight_path
+  - id: descent_level_gate
+    status: development
+    description: Source-domain bounded descent and low-level route gate for the reusable
+      airbreather racetrack.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Low altitude.
+    - id: descent_rate_m_s
+      canonical_unit: m/s
+      required: true
+      description: Bounded descent rate.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: North-east-down low-level gate center.
+    required_control_intents:
+    - speed
+    - altitude
+    - flight_path
+  - id: terminal_state_gate
+    status: development
+    description: Stabilized airborne start/finish gate for the reusable airbreather
+      racetrack.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_ned_m
+      canonical_unit: m
+      required: true
+      description: Terminal gate position.
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Terminal altitude.
+    - id: target_speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Terminal speed.
+    - id: target_heading_deg
+      canonical_unit: deg
+      required: true
+      description: Terminal heading.
+    required_control_intents:
+    - speed
+    - altitude
+    - heading
+  - id: energy_recovery_gate
+    status: planned
+    description: Recover to a bounded speed, altitude, heading, and load-factor terminal
+      set.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_mach
+      canonical_unit: dimensionless
+      required: true
+      description: Terminal Mach.
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Terminal altitude.
+    required_control_intents:
+    - speed
+    - altitude
+    - heading
+  mission_templates:
+  - id: f16_local_physical_control_screen_v1
+    status: runnable
+    description: Source-trim one-second direct-wrench or physical-surface local controller
+      screen; not a completed racetrack.
+    mission_capability_adapter_id: taoryx.f16_local_physical_control_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.f16_local_physical_control_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_physical_control_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - local_physical_control_screen
+  - id: f16_local_physical_surface_lqi_screen_v1
+    status: runnable
+    description: Fixed-altitude source-trim five-second body-velocity LQI recovery
+      through bounded physical surface/throttle allocation; not a racetrack, navigation,
+      or persistent-disturbance claim.
+    mission_capability_adapter_id: taoryx.f16_local_physical_surface_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.f16_local_physical_surface_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_physical_control_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - local_physical_surface_lqi_screen
+  - id: f16_local_physical_surface_lqr_schedule_interior_screen_v1
+    status: runnable
+    description: Discrete four-node source-retrimmed F-16 physical LQR schedule-interior
+      campaign; held-node recoveries only, not continuous gain scheduling, transitions,
+      or a flight envelope.
+    mission_capability_adapter_id: taoryx.f16_local_physical_surface_lqr_schedule_interior_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.f16_local_physical_surface_lqr_schedule_interior_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_physical_schedule_local_nodes
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - local_physical_surface_lqr_schedule_interior_screen
+  - id: f16_local_physical_surface_lqi_schedule_interior_screen_v1
+    status: runnable
+    description: Discrete four-node source-retrimmed F-16 physical LQI schedule-interior
+      campaign, constrained to the source-feasible plus/minus 0.25 m/s body-w interior;
+      held-node recoveries only, not continuous gain scheduling, transitions, wind
+      or mass rejection, or a flight envelope.
+    mission_capability_adapter_id: taoryx.f16_local_physical_surface_lqi_schedule_interior_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.f16_local_physical_surface_lqi_schedule_interior_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_physical_schedule_local_nodes
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - local_physical_surface_lqi_schedule_interior_screen
+  - id: f16_local_physical_surface_lqr_schedule_transition_screen_v1
+    status: runnable
+    description: Four retained time-marching source-node F-16 physical LQR altitude-coordinate
+      transitions with explicit endpoint derivative/effectiveness blending and bounded
+      physical surface/throttle allocation; not navigation, wind or mass robustness,
+      a full envelope, or flight qualification.
+    mission_capability_adapter_id: taoryx.f16_local_physical_surface_lqr_schedule_transition_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.f16_local_physical_surface_lqr_schedule_transition_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_physical_schedule_local_nodes
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - local_physical_surface_lqr_schedule_transition_screen
+  - id: powered_fixed_wing_racetrack_v1
+    status: development
+    description: Reusable subsonic climb, left turn, descent, right turn, and start/finish
+      route.
+    mission_capability_adapter_id: taoryx.f16_racetrack.source_route.v1
+    mission_capability_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.f16_racetrack.source_route.v1
+    semantic_translator_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - airborne_trim
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - trim_hold
+    - climb_level_gate
+    - fly_by_turn
+    - descent_level_gate
+    - fly_by_turn
+    - terminal_state_gate
+    backing_templates:
+    - powered_fixed_wing_racetrack_v1
+  - id: fighter_subsonic_energy_maneuver_v1
+    status: development
+    description: Subsonic trim, acceleration/climb, right and left energy turns, recovery,
+      and airborne arrival.
+    initialization_contracts:
+    - airborne_trim
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - trim_hold
+    - energy_climb
+    - fly_by_turn
+    - fly_by_turn
+    - energy_recovery_gate

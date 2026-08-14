@@ -1,0 +1,124 @@
+schema: taoryx.vehicle-composition-overlay/v1alpha1
+version: 1
+description: Optional reachability-owned additions to the selected x15 family catalog.
+vehicles: []
+overlays:
+- family_id: x15
+  initialization_contracts:
+  - id: staged_booster_launch
+    status: runnable
+    description: Local-frame, X-15-scaled booster stack state pinned to the retained
+      rocket-to-Hawaii source staging values; it is not the synthetic California-to-Hawaii
+      vehicle.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: initial_mass_kg
+      canonical_unit: kg
+      required: true
+      description: Source-pinned stacked launch mass.
+    - id: initial_speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Magnitude of the retained source ECIC launch velocity.
+    - id: initial_altitude_m
+      canonical_unit: m
+      required: true
+      description: Local reduced-model launch altitude.
+    - id: launch_azimuth_deg
+      canonical_unit: deg
+      required: true
+      description: Declared local-frame reduced-model launch azimuth.
+    - id: launch_elevation_deg
+      canonical_unit: deg
+      required: true
+      description: Declared local-frame reduced-model launch elevation.
+    - id: glide_bank_deg
+      canonical_unit: deg
+      required: true
+      description: Declared open-loop glide-bank witness command.
+  segment_contracts:
+  - id: booster_powered
+    status: runnable
+    description: Source-pinned open-loop attached-booster burn ending at the retained
+      cutoff time.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: cutoff_time_s
+      canonical_unit: s
+      required: true
+      description: Booster cutoff time from the retained source mission.
+    permitted_transition_events:
+    - booster_cutoff
+  - id: booster_coast_release
+    status: runnable
+    description: Source-pinned coast interval followed by passive spent-booster deployment
+      at the retained release time.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: release_time_s
+      canonical_unit: s
+      required: true
+      description: Booster release time from the retained source mission.
+    permitted_transition_events:
+    - booster_release
+  - id: unpowered_glide_handoff
+    status: runnable
+    description: Open-loop reduced glide with independent high-energy and atmospheric-handoff
+      corridor evidence.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: horizon_s
+      canonical_unit: s
+      required: true
+      description: Fixed simulation horizon long enough to include the retained impact
+        witness.
+    permitted_transition_events:
+    - atmospheric_handoff
+  - id: impact_witness
+    status: runnable
+    description: Passive terminal impact witness after the open-loop atmospheric handoff;
+      it is not a guided target intercept.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: terminal_kind
+      canonical_unit: null
+      required: true
+      description: Required terminal witness kind.
+    permitted_transition_events:
+    - ground_contact
+  mission_templates:
+  - id: x15_staged_booster_reachability_v1
+    status: runnable
+    description: Source-pinned booster burn and release followed by an X-15-scaled
+      local reduced glide, open-loop atmospheric handoff witness, and passive impact
+      witness.
+    mission_capability_adapter_id: taoryx.x15_staged_reachability.capability.v1
+    mission_capability_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    semantic_translator_id: taoryx.x15_staged_reachability.capability.v1
+    semantic_translator_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    initialization_contracts:
+    - staged_booster_launch
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    segment_sequence:
+    - booster_powered
+    - booster_coast_release
+    - unpowered_glide_handoff
+    - impact_witness
+    qualification_missions:
+    - x15-scaled-staged-reachability-v1

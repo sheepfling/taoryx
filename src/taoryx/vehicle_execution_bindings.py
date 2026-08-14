@@ -12,26 +12,21 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .fidelity_contracts import FidelityTier
-from .plugins.resources import packaged_resource_fallback
+from .vehicle_catalog_resources import vehicle_catalog_resources
 from .vehicle_composition import CompiledVehicleComposition
-from .vehicle_registry import ROOT
 
-VEHICLE_EXECUTION_BINDINGS = packaged_resource_fallback(
-    ROOT / "verification/vehicle_execution_bindings.yaml",
-    package="taoryx_reference_models",
-    resource="data/verification/vehicle_execution_bindings.yaml",
-)
-VEHICLE_EXECUTION_PARITY = packaged_resource_fallback(
-    ROOT / "verification/vehicle_execution_parity.yaml",
-    package="taoryx_reference_models",
-    resource="data/verification/vehicle_execution_parity.yaml",
-)
+if TYPE_CHECKING:
+    from .plugins.discovery import PluginCatalog
+
+# Materialized lazily by ``__getattr__`` only for compatibility consumers.
+VEHICLE_EXECUTION_BINDINGS: Path
+VEHICLE_EXECUTION_PARITY: Path
 
 ExecutionOperation = Literal["batch", "episode"]
 ExecutionBindingStatus = Literal["runnable", "planned"]
@@ -240,31 +235,87 @@ class VehicleExecutionBindingError(ValueError):
     ####
 
 
-@lru_cache(maxsize=8)
 def load_vehicle_execution_binding_catalog(
     path: str | Path | None = None,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleExecutionBindingCatalog:
-    """Load the versioned execution capability declaration."""
+    """Load execution bindings from one explicit plug-in resource scope."""
 
-    source = Path(path) if path is not None else VEHICLE_EXECUTION_BINDINGS
-    payload = yaml.safe_load(source.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"{source} must contain a mapping")
-    return VehicleExecutionBindingCatalog.model_validate(payload)
+    if path is not None:
+        return _load_vehicle_execution_binding_catalog_sources((str(Path(path)),))
+    sources = vehicle_catalog_resources("verification/vehicle_execution_bindings.yaml", plugins=plugins)
+    return _load_vehicle_execution_binding_catalog_sources(tuple(str(source) for source in sources))
     ####
 
 
-@lru_cache(maxsize=8)
+@lru_cache(maxsize=32)
+def _load_vehicle_execution_binding_catalog_sources(
+    source_names: tuple[str, ...],
+) -> VehicleExecutionBindingCatalog:
+    """Parse one cacheable, exact set of execution-binding fragments."""
+
+    payloads = _catalog_payloads_from_source_names(source_names)
+    merged = _merge_list_catalog(payloads, "bindings")
+    return VehicleExecutionBindingCatalog.model_validate(merged)
+    ####
+
+
 def load_vehicle_batch_episode_parity_catalog(
     path: str | Path | None = None,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleBatchEpisodeParityCatalog:
-    """Load explicit batch/episode equivalence evidence declarations."""
+    """Load parity declarations from one explicit plug-in resource scope."""
 
-    source = Path(path) if path is not None else VEHICLE_EXECUTION_PARITY
-    payload = yaml.safe_load(source.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"{source} must contain a mapping")
-    return VehicleBatchEpisodeParityCatalog.model_validate(payload)
+    if path is not None:
+        return _load_vehicle_batch_episode_parity_catalog_sources((str(Path(path)),))
+    sources = vehicle_catalog_resources("verification/vehicle_execution_parity.yaml", plugins=plugins)
+    return _load_vehicle_batch_episode_parity_catalog_sources(tuple(str(source) for source in sources))
+    ####
+
+
+@lru_cache(maxsize=32)
+def _load_vehicle_batch_episode_parity_catalog_sources(
+    source_names: tuple[str, ...],
+) -> VehicleBatchEpisodeParityCatalog:
+    """Parse one cacheable, exact set of parity-declaration fragments."""
+
+    payloads = _catalog_payloads_from_source_names(source_names)
+    merged = _merge_list_catalog(payloads, "bindings")
+    return VehicleBatchEpisodeParityCatalog.model_validate(merged)
+    ####
+
+
+def _catalog_payloads_from_source_names(source_names: tuple[str, ...]) -> list[Mapping[str, object]]:
+    """Read a fixed resource-path set without widening its owning scope."""
+
+    if not source_names:
+        raise ValueError("vehicle execution catalog has no installed fragments")
+    payloads: list[Mapping[str, object]] = []
+    for source_name in source_names:
+        source = Path(source_name)
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"{source} must contain a mapping")
+        payloads.append(payload)
+    return payloads
+    ####
+
+
+def _merge_list_catalog(payloads: list[Mapping[str, object]], key: str) -> dict[str, object]:
+    """Join same-schema list fragments before typed validation."""
+
+    merged = dict(payloads[0])
+    rows: list[object] = []
+    for payload in payloads:
+        value = payload.get(key)
+        if not isinstance(value, list):
+            raise ValueError(f"vehicle execution catalog {key!r} must contain a list")
+        rows.extend(value)
+    merged[key] = rows
+    return merged
+    ####
     ####
 
 
@@ -272,10 +323,11 @@ def bindings_for_family(
     family_id: str,
     *,
     catalog: VehicleExecutionBindingCatalog | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> tuple[VehicleExecutionBinding, ...]:
     """Return all explicit runnable and planned bindings for one family."""
 
-    selected = catalog or load_vehicle_execution_binding_catalog()
+    selected = catalog or load_vehicle_execution_binding_catalog(plugins=plugins)
     return tuple(item for item in selected.bindings if item.family_id == family_id)
     ####
 
@@ -285,10 +337,11 @@ def resolve_vehicle_execution_binding(
     operation: ExecutionOperation,
     *,
     catalog: VehicleExecutionBindingCatalog | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleExecutionBinding:
     """Resolve an exact runnable factory binding or return its declared gap."""
 
-    selected = catalog or load_vehicle_execution_binding_catalog()
+    selected = catalog or load_vehicle_execution_binding_catalog(plugins=plugins)
     matches = tuple(
         item
         for item in selected.bindings
@@ -312,10 +365,14 @@ def execution_binding_records(
     family_id: str,
     *,
     catalog: VehicleExecutionBindingCatalog | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> list[dict[str, object]]:
     """Serialize bindings for discovery without constructing any runtime."""
 
-    return [item.model_dump(mode="json") for item in bindings_for_family(family_id, catalog=catalog)]
+    return [
+        item.model_dump(mode="json")
+        for item in bindings_for_family(family_id, catalog=catalog, plugins=plugins)
+    ]
     ####
 
 
@@ -326,6 +383,7 @@ def resolve_batch_episode_parity_advertisement(
     *,
     execution_catalog: VehicleExecutionBindingCatalog | None = None,
     parity_catalog: VehicleBatchEpisodeParityCatalog | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleBatchEpisodeParityAdvertisement:
     """Resolve typed parity status for one exact composition.
 
@@ -335,8 +393,8 @@ def resolve_batch_episode_parity_advertisement(
     through both paths; all other states are explicitly non-promotional.
     """
 
-    selected_execution = execution_catalog or load_vehicle_execution_binding_catalog()
-    selected_parity = parity_catalog or load_vehicle_batch_episode_parity_catalog()
+    selected_execution = execution_catalog or load_vehicle_execution_binding_catalog(plugins=plugins)
+    selected_parity = parity_catalog or load_vehicle_batch_episode_parity_catalog(plugins=plugins)
     matching = tuple(
         item
         for item in selected_execution.bindings
@@ -404,6 +462,7 @@ def batch_episode_parity_record(
     *,
     execution_catalog: VehicleExecutionBindingCatalog | None = None,
     parity_catalog: VehicleBatchEpisodeParityCatalog | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Serialize the typed parity advertisement for existing JSON consumers."""
 
@@ -413,6 +472,7 @@ def batch_episode_parity_record(
         fidelity,
         execution_catalog=execution_catalog,
         parity_catalog=parity_catalog,
+        plugins=plugins,
     ).as_dict()
     ####
 
@@ -422,10 +482,11 @@ def batch_episode_parity_records(
     *,
     execution_catalog: VehicleExecutionBindingCatalog | None = None,
     parity_catalog: VehicleBatchEpisodeParityCatalog | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> list[dict[str, object]]:
     """Return non-inferred parity state for every declared execution tuple."""
 
-    selected_execution = execution_catalog or load_vehicle_execution_binding_catalog()
+    selected_execution = execution_catalog or load_vehicle_execution_binding_catalog(plugins=plugins)
     keys = sorted(
         {
             (item.mission, item.fidelity)
@@ -440,6 +501,7 @@ def batch_episode_parity_records(
             fidelity,
             execution_catalog=selected_execution,
             parity_catalog=parity_catalog,
+            plugins=plugins,
         )
         for mission, fidelity in keys
     ]
@@ -503,6 +565,25 @@ def validate_execution_bindings(
                 f"{binding.family_id}/{binding.mission}/{binding.fidelity}"
             )
     return tuple(errors)
+    ####
+
+
+def __getattr__(name: str) -> object:
+    """Resolve historical aggregate path constants only on explicit access."""
+
+    relative_paths = {
+        "VEHICLE_EXECUTION_BINDINGS": "verification/vehicle_execution_bindings.yaml",
+        "VEHICLE_EXECUTION_PARITY": "verification/vehicle_execution_parity.yaml",
+    }
+    try:
+        relative_path = relative_paths[name]
+    except KeyError as error:
+        raise AttributeError(name) from error
+    from .compatibility.vehicle_catalog_resources import legacy_vehicle_catalog_resource
+
+    value = legacy_vehicle_catalog_resource(relative_path)
+    globals()[name] = value
+    return value
     ####
 
 

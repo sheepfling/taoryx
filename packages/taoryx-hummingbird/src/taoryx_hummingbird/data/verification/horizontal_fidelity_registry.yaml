@@ -1,0 +1,44 @@
+schema: taoryx.horizontal-fidelity-registry/v1alpha1
+version: 1
+description: The horizontal integration manifest for the current Alpha 3 family catalog.
+  Profile IDs are resolved against verification/pseudo6dof_profiles.yaml; this file
+  owns the physical-family overlay, adapter seam, and four-tier declaration.
+families:
+- family_id: hummingbird
+  physical_family: multirotor
+  strategy_id: multirotor_hover_translation.v1
+  mission_overlay: pad_to_pad_hover_translation
+  adapter_id: taoryx.multirotor.native_quad_x.v1
+  automatic_lowering: true
+  vehicle_registry_id: hummingbird
+  tiers:
+    point_mass_3dof:
+      profile_id: hummingbird.point_mass_3dof.v1
+      promotion_status: development
+      blockers:
+      - translated_yaw_disturbance_landing_mission
+    pseudo_6dof:
+      profile_id: hummingbird.attitude_response_p6dof.v1
+      promotion_status: development
+      blockers:
+      - rotor_response_and_yaw_authority_envelope
+    rigid_body_6dof_direct_wrench:
+      profile_id: hummingbird.direct_wrench_6dof.v1
+      promotion_status: development
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      blockers:
+      - local_direct_wrench_comparator_scope_only
+    rigid_body_6dof_surface_allocated:
+      profile_id: hummingbird.surface_allocated_6dof.v1
+      promotion_status: development
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      - effectiveness
+      - allocate
+      blockers:
+      - battery_voltage_contact_and_full_envelope

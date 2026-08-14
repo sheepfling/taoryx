@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Protocol, cast
 
-from .plugins import PluginCatalog, discover_plugins
+from .plugins import PluginCatalog, current_plugin_catalog, discover_plugins, plugin_catalog_scope
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_bindings import batch_episode_parity_record
 
@@ -43,7 +43,12 @@ def verify_serialized_declared_batch_episode_parity(
     used as a substitute.
     """
 
-    record = batch_episode_parity_record(composition.family_id, composition.mission, composition.fidelity)
+    record = batch_episode_parity_record(
+        composition.family_id,
+        composition.mission,
+        composition.fidelity,
+        plugins=plugins,
+    )
     if record.get("availability") != "registered":
         raise ValueError(
             "no declared batch/episode parity adapter is registered for "
@@ -52,7 +57,9 @@ def verify_serialized_declared_batch_episode_parity(
     adapter_id = record.get("adapter_id")
     if not isinstance(adapter_id, str):
         raise ValueError("registered batch/episode parity record lacks adapter_id")
-    selected = plugins or discover_plugins()
+    selected = plugins if plugins is not None else current_plugin_catalog()
+    if selected is None:
+        selected = discover_plugins()
     try:
         contribution = selected.contribution("batch_episode_parity_verifier", adapter_id)
     except KeyError:
@@ -62,7 +69,11 @@ def verify_serialized_declared_batch_episode_parity(
         raise TypeError(
             f"plug-in {contribution.plugin.id!r} supplied a non-callable parity verifier for {adapter_id!r}"
         )
-    report = cast(DeclaredParityReport, verifier(composition, payload))
+    # Family-owned verifiers may resolve their exact interface contract while
+    # comparing the trace. Keep the selected catalog active for that nested
+    # work so a focused parity gate cannot widen into aggregate discovery.
+    with plugin_catalog_scope(selected):
+        report = cast(DeclaredParityReport, verifier(composition, payload))
     if report.as_dict().get("adapter_id") != adapter_id:
         raise ValueError("declared batch/episode parity adapter disagrees with the verifier result")
     return report

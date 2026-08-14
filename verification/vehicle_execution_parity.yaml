@@ -49,7 +49,7 @@ bindings:
   - family_id: x15
     mission: x15_local_direct_wrench_screen_v1
     fidelity: rigid_body_6dof_direct_wrench
-    batch_factory_id: local_direct_wrench_screen.v1
+    batch_factory_id: x15_local_direct_wrench_screen.v1
     episode_factory_id: x15_local_direct_wrench_episode.v1
     adapter_id: taoryx.x15.local_direct_wrench_batch_episode_parity.v1
     evidence_scope: >-
@@ -63,9 +63,9 @@ bindings:
   - family_id: hl20_mod_k
     mission: hl20_local_direct_wrench_screen_v1
     fidelity: rigid_body_6dof_direct_wrench
-    batch_factory_id: local_direct_wrench_screen.v1
-    episode_factory_id: local_direct_wrench_episode.v1
-    adapter_id: taoryx.local_direct_wrench_batch_episode_parity.v1
+    batch_factory_id: hl20_local_direct_wrench_screen.v1
+    episode_factory_id: hl20_local_direct_wrench_episode.v1
+    adapter_id: taoryx.hl20.local_direct_wrench_batch_episode_parity.v1
     evidence_scope: >-
       One declared total-wrench action trace replayed through the source-local
       subsonic HL-20 direct-wrench batch bridge and accepted-truth episode at

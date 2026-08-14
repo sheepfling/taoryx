@@ -102,7 +102,7 @@ def test_typed_batch_factory_receives_the_complete_execution_request(tmp_path: P
 
     assert _invoke_batch_factory(typed_factory, request) is not None
     assert observed == [request]
-    assert request.as_dict()["factory_id"] == "local_direct_wrench_screen.v1"
+    assert request.as_dict()["factory_id"] == "x15_local_direct_wrench_screen.v1"
     assert request.as_dict()["max_steps"] == 12
 
 

@@ -1,0 +1,7 @@
+{
+  "claim_boundary": "This package fragment mirrors only F-16-owned catalog rows, source assets, and local-screen evidence; repository-root catalogs remain canonical.",
+  "family_id": "f16_s119",
+  "schema": "taoryx.f16-package-data/v1",
+  "source_catalog_root": "verification/",
+  "source_family_id": "reference_f16_s119"
+}

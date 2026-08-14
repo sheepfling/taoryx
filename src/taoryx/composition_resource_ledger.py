@@ -12,10 +12,13 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping
-from typing import Any, TypeGuard
+from typing import TYPE_CHECKING, Any, TypeGuard
 
 from .composition_status_trace import validate_committed_status_trace
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
+
+if TYPE_CHECKING:
+    from .plugins import PluginCatalog
 
 _SCHEMA = "taoryx.composition-resource-ledger/v1alpha1"
 
@@ -23,6 +26,8 @@ _SCHEMA = "taoryx.composition-resource-ledger/v1alpha1"
 def build_committed_resource_ledger(
     composition: CompiledVehicleComposition,
     status_trace: Mapping[str, object],
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Extract declared resource histories without creating resource values.
 
@@ -32,8 +37,8 @@ def build_committed_resource_ledger(
     permitted here.
     """
 
-    validate_committed_status_trace(composition, status_trace)
-    contract = resolve_vehicle_composition_interface_contract(composition)
+    validate_committed_status_trace(composition, status_trace, plugins=plugins)
+    contract = resolve_vehicle_composition_interface_contract(composition, plugins=plugins)
     resource_channels = tuple(contract.resource_channels)
     visible_ids = {channel.id for channel in resource_channels if channel.availability in {"available", "available_in_batch"}}
     trace_samples = _trace_samples(status_trace)
@@ -94,10 +99,11 @@ def validate_committed_resource_ledger(
     ledger: Mapping[str, object],
     *,
     status_trace: Mapping[str, object],
+    plugins: PluginCatalog | None = None,
 ) -> None:
     """Reject a ledger that is detached from its composition or status trace."""
 
-    expected = build_committed_resource_ledger(composition, status_trace)
+    expected = build_committed_resource_ledger(composition, status_trace, plugins=plugins)
     for field in (
         "schema",
         "composition_id",

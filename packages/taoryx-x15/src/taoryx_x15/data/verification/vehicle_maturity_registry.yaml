@@ -1,0 +1,25 @@
+schema_version: 1
+registry_id: taoryx_vehicle_maturity_v1
+purpose: planning ledger separating software maturity from evidence strength
+levels:
+- M0
+- M1
+- M2
+- M3
+- M4
+- M5
+- M6
+release_policy:
+  alpha2_finish_line: M4 for the four established proof families and the shared platform
+  alpha3_target: M4 for new domain pilots, with M5 only where all applicable dimensions
+    qualify
+records:
+- id: x15
+  composition_family_id: x15
+  family: rocket_plane
+  family_group: hypersonic_lifting_body_research
+  subtype: powered_hypersonic_research_aircraft_with_unpowered_glide
+  maturity: M4
+  evidence_strength: vehicle_specific_public_research_surrogate
+  status: source_release_three_surface_authority_and_local_attitude_rate_lqi_composable
+  next_gate: full_state_trim_surface_feedback_energy_managed_mission_and_terminal_contract

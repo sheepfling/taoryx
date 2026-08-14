@@ -1,0 +1,59 @@
+schema: taoryx.horizontal-fidelity-registry/v1alpha1
+version: 1
+description: The horizontal integration manifest for the current Alpha 3 family catalog.
+  Profile IDs are resolved against verification/pseudo6dof_profiles.yaml; this file
+  owns the physical-family overlay, adapter seam, and four-tier declaration.
+families:
+- family_id: a320_openap_3dof
+  physical_family: powered_fixed_wing
+  strategy_id: powered_fixed_wing.v1
+  mission_overlay: transport_racetrack
+  adapter_id: taoryx.fixed_wing.openap.v1
+  automatic_lowering: true
+  vehicle_registry_id: null
+  data_evidence:
+    point_mass_3dof:
+      status: ready
+      paths:
+      - verification/daveml_a320_openap_integration.json
+      sha256:
+        verification/daveml_a320_openap_integration.json: 0fc54c2a92fe2798e75edef807d589c843e69b6cb5a49f3c20f3cf93a09d26af
+      claim_boundary: The checked OpenAP integration artifact establishes only the
+        derived-exact point-mass data, trim, and linearization basis. It does not
+        establish rigid-body moments, aircraft-authoritative fidelity, or mission
+        qualification.
+    pseudo_6dof:
+      status: ready
+      paths:
+      - verification/daveml_a320_openap_integration.json
+      - verification/daveml_a320_matched_comparison.json
+      sha256:
+        verification/daveml_a320_openap_integration.json: 0fc54c2a92fe2798e75edef807d589c843e69b6cb5a49f3c20f3cf93a09d26af
+        verification/daveml_a320_matched_comparison.json: 18dbe48111e65adedfc42c698a8d072ecb8d1486b40dfa24691eb6422568b248
+      claim_boundary: The checked OpenAP/JSBSim comparison establishes common-channel
+        agreement for the declared surrogate-composite response route. Rotational
+        channels, physical surface allocation, aircraft authority, and mission qualification
+        remain outside this data-evidence claim.
+  tiers:
+    point_mass_3dof:
+      profile_id: a320_openap_3dof.point_mass_3dof.v1
+      promotion_status: development
+      blockers:
+      - broader_operating_point_matrix
+    pseudo_6dof:
+      profile_id: a320.attitude_response_p6dof.v1
+      promotion_status: development
+      blockers:
+      - calibrated_response_model_and_operating_points
+    rigid_body_6dof_direct_wrench:
+      profile_id: a320.direct_wrench_6dof.v1
+      promotion_status: planned
+      blockers:
+      - participating_rigid_body_plant
+      - physical_surface_effectivity
+    rigid_body_6dof_surface_allocated:
+      profile_id: a320.surface_allocated_6dof.v1
+      promotion_status: planned
+      blockers:
+      - participating_rigid_body_plant
+      - physical_surface_effectivity

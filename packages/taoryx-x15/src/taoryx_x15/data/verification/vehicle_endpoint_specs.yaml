@@ -1,0 +1,125 @@
+schema: taoryx.vehicle-endpoint-specs/v1alpha1
+version: 1
+description: Focused vertical contracts that join a selected vehicle composition to
+  its runtime factory, executable witness, capability advertisement, normalized output
+  surface, controller campaign, and planning ledger record.
+endpoints:
+- id: x15-source-release-direct-wrench-lqr
+  family_id: x15
+  model_id: x15
+  provider_ids:
+  - taoryx.registry.mission-composition
+  - taoryx.x15.mission-composition
+  mission_id: x15_local_direct_wrench_screen_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  execution_mode: local_direct_wrench_screen
+  operations:
+  - operation: batch
+    factory_id: x15_local_direct_wrench_screen.v1
+    witness_id: x15-local-direct-wrench-screen-batch
+  - operation: episode
+    factory_id: x15_local_direct_wrench_episode.v1
+    witness_id: x15-local-direct-wrench-screen-episode
+  controller_campaign_id: x15-source-release-direct-wrench-v1
+  required_tuning_operations:
+  - state_derivative
+  - trim
+  - linearize
+  required_core_output_ids:
+  - velocity.body.x
+  - velocity.body.y
+  - velocity.body.z
+  - angular_rate.body.x
+  - angular_rate.body.y
+  - angular_rate.body.z
+  required_telemetry_output_ids:
+  - mass.total
+  - control.wrench.requested.force.x
+  - control.wrench.achieved.force.x
+  - control.wrench.residual.force.x
+  - control.wrench.residual_norm
+  - control.feedback_norm
+  robustness_requirement:
+    disposition: not_applicable
+    reason: The source-release direct-wrench bridge has no declared persistent wind,
+      external-wrench, or mass-variation injection seam. It tests bounded injected
+      wrench recovery and batch/episode parity, not disturbance robustness.
+  maturity_record_id: x15
+  claim_boundary: Source-release bounded direct-wrench LQR recovery and declared batch/episode
+    bridge only. It does not establish physical X-15 surface, propulsion, or RCS allocation;
+    translation, navigation, high-energy guidance, robustness, or flight qualification.
+- id: x15-source-surface-attitude-rate-lqi
+  family_id: x15
+  model_id: x15
+  provider_ids:
+  - taoryx.registry.mission-composition
+  - taoryx.x15.mission-composition
+  mission_id: x15_source_surface_attitude_rate_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  execution_mode: closed_loop_controller
+  operations:
+  - operation: batch
+    factory_id: x15_local_physical_surface_lqi_screen.v1
+    witness_id: x15-source-surface-attitude-rate-lqi-screen-batch
+  controller_campaign_id: x15-source-surface-local-lqi-v1
+  required_tuning_operations:
+  - state_derivative
+  - trim
+  - linearize
+  required_core_output_ids:
+  - attitude.local.roll_error
+  - attitude.local.pitch_error
+  - attitude.local.yaw_error
+  - angular_rate.body.x
+  - angular_rate.body.y
+  - angular_rate.body.z
+  - source_fixture.velocity.body.u
+  - source_fixture.velocity.body.v
+  - source_fixture.velocity.body.w
+  required_telemetry_output_ids:
+  - mass.total
+  - source_fixture.mach
+  - control.moment.y.requested
+  - control.moment.y.achieved
+  - control.moment.y.residual
+  - control.allocation.residual_norm
+  - control.allocation.saturation_count
+  - actuator.surface.rudder.actual
+  robustness_screens:
+  - id: x15-local-lqi-matched-pitch-wrench-offset
+    kind: constant_offset
+    artifact_filename: robustness_report.json
+    execution_readiness: available
+    cases:
+    - id: nominal
+      parameters:
+        pitch_wrench_bias_fraction: 0.0
+      description: Retain the pinned source-release local LQI recovery as the nominal
+        reference.
+    - id: positive-pitch-offset
+      parameters:
+        pitch_wrench_bias_fraction: 0.05
+      description: Apply a constant matched positive pitch-wrench bias at five percent
+        of the declared controller scale.
+    - id: negative-pitch-offset
+      parameters:
+        pitch_wrench_bias_fraction: -0.05
+      description: Apply a constant matched negative pitch-wrench bias at five percent
+        of the declared controller scale.
+    metrics:
+    - id: final_feedback_error_fraction
+      maximum: 0.2
+      unit: ratio
+      description: Final normalized feedback error divided by initial normalized feedback
+        error.
+    - id: saturation_fraction
+      maximum: 0.0
+      unit: fraction
+      description: Fraction of committed samples with an allocation or surface saturation.
+    claim_boundary: Matched-wrench offset screen at the frozen X-15 source fixture.
+      It does not turn the local source fragment into a wind model, full-state trim,
+      propulsion/RCS, navigation, or qualification result.
+  maturity_record_id: x15
+  claim_boundary: Local frozen-translation X-15 source-surface attitude/rate LQI recovery
+    only; it does not establish full-state trim, translation, propulsion or RCS allocation,
+    wind or mass robustness, guidance, or flight qualification.

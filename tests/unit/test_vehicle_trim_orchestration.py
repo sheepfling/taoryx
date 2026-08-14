@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml
+from taoryx_hl20.resources import model_resource_root
 
 from taoryx.vehicle_trim_orchestration import orchestrate_trim_recipe
 
@@ -28,6 +29,21 @@ def test_hl20_recipe_builds_control_free_pitch_worklist() -> None:
     spec = report.work_items[0].trim_spec
     assert spec.control_names == ()
     assert spec.state_initial["alpha_deg"] == 6.457652069267908
+    ####
+
+
+def test_hl20_package_recipe_validates_its_own_evidence_root() -> None:
+    """A wheel-installed family must not need the checkout root for trim data."""
+
+    root = model_resource_root()
+    report = orchestrate_trim_recipe(
+        "reference_hl20_mod_k",
+        root / "families/reference_hl20_mod_k/qualification/trim-recipe.yaml",
+        resource_root=root,
+    )
+
+    assert report.status == "ready_for_adapter"
+    assert len(report.work_items) == 1
     ####
 
 

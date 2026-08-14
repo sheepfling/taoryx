@@ -1,0 +1,27 @@
+schema: taoryx.vehicle-execution-witnesses/v1alpha1
+version: 1
+description: One checked-in composition request for every currently runnable exact
+  family/mission/fidelity/operation endpoint. This is an onboarding and discovery
+  gate, not a mission-qualification matrix.
+witnesses:
+- id: a320-3dof-batch
+  composition: examples/vehicle_composition/a320_racetrack_capability_3dof_compose.yaml
+  operation: batch
+- id: a320-pseudo6dof-batch
+  composition: examples/vehicle_composition/a320_racetrack_capability_pseudo6dof_compose.yaml
+  operation: batch
+- id: a320-local-native-coordinate-lqi-screen-batch
+  composition: examples/vehicle_composition/a320_local_native_coordinate_lqi_screen_compose.yaml
+  operation: batch
+- id: a320-3dof-episode
+  composition: examples/vehicle_composition/a320_racetrack_capability_3dof_compose.yaml
+  operation: episode
+- id: a320-pseudo6dof-episode
+  composition: examples/vehicle_composition/a320_racetrack_capability_pseudo6dof_compose.yaml
+  operation: episode
+variant_witnesses:
+- id: a320-operating-mass-3dof
+  composition: examples/vehicle_composition/a320_racetrack_mass_variant_3dof_compose.yaml
+  variant_ids:
+  - operating_mass_kg
+graph_extension_witnesses: []

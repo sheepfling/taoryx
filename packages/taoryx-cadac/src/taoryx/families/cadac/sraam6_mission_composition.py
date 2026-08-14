@@ -507,6 +507,7 @@ def _sraam6_session_observation_schema() -> tuple[MissionCompositionSessionChann
     scalar = {"topology": "continuous", "representation": "scalar"}
     vector3 = {"topology": "product", "representation": "vector3", "components": 3}
     vector4 = {"topology": "product", "representation": "quaternion", "components": 4}
+    fin_vector4 = {"topology": "product", "representation": "vector4", "components": 4}
     opaque = {"topology": "opaque", "representation": "json"}
     return (
         MissionCompositionSessionChannel(
@@ -532,6 +533,22 @@ def _sraam6_session_observation_schema() -> tuple[MissionCompositionSessionChann
         MissionCompositionSessionChannel(
             id="target_velocity_ned_mps", direction="observation", description="Committed TARGET3 local-NED velocity.",
             quantity=cadac_output_quantity("target_velocity_ned_mps", "m/s"), unit="m/s", shape=(3,), value_space=vector3,
+        ),
+        MissionCompositionSessionChannel(
+            id="requested_control_deg", direction="observation", description="Source-controller requested roll, pitch, and yaw control.",
+            unit="deg", shape=(3,), value_space=vector3,
+        ),
+        MissionCompositionSessionChannel(
+            id="achieved_control_deg", direction="observation", description="Actuator-achieved roll, pitch, and yaw control equivalents.",
+            unit="deg", shape=(3,), value_space=vector3,
+        ),
+        MissionCompositionSessionChannel(
+            id="requested_fins_deg", direction="observation", description="Source mixer requested four physical fin angles.",
+            unit="deg", shape=(4,), value_space=fin_vector4,
+        ),
+        MissionCompositionSessionChannel(
+            id="achieved_fins_deg", direction="observation", description="Actuator-achieved four physical fin angles driving the airframe.",
+            unit="deg", shape=(4,), value_space=fin_vector4,
         ),
         MissionCompositionSessionChannel(
             id="normal_command_g", direction="observation", description="Source-owned normal acceleration command.",
@@ -586,6 +603,10 @@ def _sraam6_session_observation(
             "body_rates_rad_s": sample.body_rates_rad_s,
             "target_position_ned_m": target.position_ned_m,
             "target_velocity_ned_mps": target.velocity_ned_mps,
+            "requested_control_deg": sample.requested_control_deg,
+            "achieved_control_deg": sample.achieved_control_deg,
+            "requested_fins_deg": sample.requested_fins_deg,
+            "achieved_fins_deg": sample.achieved_fins_deg,
             "normal_command_g": sample.normal_command_g,
             "lateral_command_g": sample.lateral_command_g,
             "normal_acceleration_g": sample.normal_acceleration_g,

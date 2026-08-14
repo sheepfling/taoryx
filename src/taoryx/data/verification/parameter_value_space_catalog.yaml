@@ -1,0 +1,65 @@
+schema: taoryx.parameter-value-space-catalog/v1alpha1
+version: 1
+description: >-
+  Explicit mathematical topology for every initialization and segment
+  parameter advertised by the public vehicle-composition registry. A semantic
+  identifier maps to one value-space contract regardless of the vehicle that
+  exposes it. This catalog intentionally separates coordinate topology from
+  units: north/east coordinates are signed Euclidean values even though their
+  unit is metres, while altitude and duration are nonnegative magnitudes.
+parameters:
+  altitude_m: {value_type: scalar, profile: positive_half_line}
+  area_policy: {value_type: enum, profile: finite_set}
+  bank_command_deg: {value_type: scalar, profile: bounded_interval}
+  bank_limit_deg: {value_type: scalar, profile: bounded_interval}
+  body_shape: {value_type: enum, profile: finite_set}
+  body_rates_rad_s: {value_type: vector3, profile: euclidean_vector3, frame: body}
+  clearance_time_s: {value_type: scalar, profile: positive_half_line}
+  climb_rate_m_s: {value_type: scalar, profile: positive_half_line}
+  corridor_m: {value_type: scalar, profile: positive_half_line}
+  cutoff_condition: {value_type: enum, profile: finite_set}
+  cutoff_time_s: {value_type: scalar, profile: positive_half_line}
+  descent_rate_m_s: {value_type: scalar, profile: positive_half_line}
+  duration_s: {value_type: scalar, profile: positive_half_line}
+  dwell_s: {value_type: scalar, profile: positive_half_line}
+  east_m: {value_type: scalar, profile: euclidean_scalar, frame: NED}
+  gate_center_ned_m: {value_type: vector3, profile: euclidean_vector3, frame: NED}
+  glide_bank_deg: {value_type: scalar, profile: bounded_interval}
+  heading_deg: {value_type: scalar, profile: periodic_degrees}
+  horizon_s: {value_type: scalar, profile: positive_half_line}
+  impact_plane_altitude_m: {value_type: scalar, profile: positive_half_line}
+  initial_altitude_m: {value_type: scalar, profile: positive_half_line}
+  initial_heading_deg: {value_type: scalar, profile: periodic_degrees}
+  initial_mass_kg: {value_type: scalar, profile: positive_half_line}
+  initial_speed_m_s: {value_type: scalar, profile: positive_half_line}
+  latitude_deg: {value_type: scalar, profile: bounded_interval}
+  launch_azimuth_deg: {value_type: scalar, profile: periodic_degrees}
+  launch_elevation_deg: {value_type: scalar, profile: bounded_interval}
+  load_factor_limit: {value_type: scalar, profile: positive_half_line}
+  longitude_deg: {value_type: scalar, profile: periodic_degrees}
+  mach: {value_type: scalar, profile: positive_half_line}
+  mass_kg: {value_type: scalar, profile: positive_half_line}
+  max_dynamic_pressure_pa: {value_type: scalar, profile: positive_half_line}
+  maximum_sink_rate_m_s: {value_type: scalar, profile: positive_half_line}
+  maximum_speed_m_s: {value_type: scalar, profile: positive_half_line}
+  north_m: {value_type: scalar, profile: euclidean_scalar, frame: NED}
+  pad_east_m: {value_type: scalar, profile: euclidean_scalar, frame: NED}
+  pad_ned_m: {value_type: vector3, profile: euclidean_vector3, frame: NED}
+  pad_north_m: {value_type: scalar, profile: euclidean_scalar, frame: NED}
+  pitch_program: {value_type: scalar, profile: bounded_interval}
+  quaternion_wxyz: {value_type: vector4, profile: quaternion_so3, frame: body_to_navigation}
+  release_time_s: {value_type: scalar, profile: positive_half_line}
+  separation_delay_s: {value_type: scalar, profile: positive_half_line}
+  settle_s: {value_type: scalar, profile: positive_half_line}
+  speed_m_s: {value_type: scalar, profile: positive_half_line}
+  target_altitude_m: {value_type: scalar, profile: positive_half_line}
+  target_crossrange_m: {value_type: scalar, profile: euclidean_scalar}
+  target_energy: {value_type: scalar, profile: euclidean_scalar}
+  target_heading_deg: {value_type: scalar, profile: periodic_degrees}
+  target_mach: {value_type: scalar, profile: positive_half_line}
+  target_ned_m: {value_type: vector3, profile: euclidean_vector3, frame: NED}
+  target_speed_m_s: {value_type: scalar, profile: positive_half_line}
+  terminal_kind: {value_type: enum, profile: finite_set}
+  turn_direction: {value_type: enum, profile: finite_set}
+  turn_radius_m: {value_type: scalar, profile: positive_half_line}
+  yaw_rate_limit_deg_s: {value_type: scalar, profile: positive_half_line}

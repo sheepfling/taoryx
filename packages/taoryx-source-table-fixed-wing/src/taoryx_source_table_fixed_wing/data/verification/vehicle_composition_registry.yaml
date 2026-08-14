@@ -1,0 +1,582 @@
+schema: taoryx.vehicle-composition-registry/v1alpha1
+version: 1
+description: 'User-facing vehicle-to-trajectory registry. This is a composition overlay:
+  it declares available initialization contracts, segment schemas, and mission templates
+  without duplicating vehicle physics or promoting a fidelity tier.'
+vehicles:
+- family_id: skywalker_x8
+  metadata:
+    summary: Small flying-wing research surrogate for fixed-wing navigation, energy
+      management, and bounded elevon-control studies.
+    vehicle_class: powered_fixed_wing_aircraft
+    operating_domains:
+    - atmospheric
+    propulsion:
+    - propeller
+    model_basis: public_research_surrogate
+    roles:
+    - small_uas
+    - fixed_wing_navigation
+    - control_allocation
+    tags:
+    - flying_wing
+    - elevon
+    - electric_propulsion
+    claim_boundary: Public-research X8 surrogate; it is not a manufacturer-qualified
+      airframe or flight-control system.
+  initialization_contracts:
+  - id: source_table_trim_local_point
+    status: runnable
+    description: Pinned Skywalker X8 source-table trim used only by the local physical
+      LQR recovery screen.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+  - id: airborne_trim
+    status: runnable
+    description: Source-domain airborne trim or a declared airborne state.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: north_m
+      canonical_unit: m
+      required: false
+      description: North reference position.
+    - id: east_m
+      canonical_unit: m
+      required: false
+      description: East reference position.
+    - id: altitude_m
+      canonical_unit: m
+      required: true
+      description: Initial geometric altitude.
+    - id: speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Initial airspeed or speed target.
+    - id: heading_deg
+      canonical_unit: deg
+      required: true
+      description: Initial course or body heading.
+  segment_contracts:
+  - id: source_table_physical_lqr_screen
+    status: runnable
+    description: Recover a pinned source-table local roll/pitch perturbation through
+      bounded collective/differential elevon coordinates.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    parameters: []
+    required_control_intents:
+    - attitude_rate
+  - id: source_table_physical_lqi_screen
+    status: runnable
+    description: Recover the same pinned source-table local roll/pitch perturbation
+      through bounded offset-free LQI collective/differential elevon coordinates.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    parameters: []
+    required_control_intents:
+    - attitude_rate
+  - id: source_table_physical_lqi_long_recovery_screen
+    status: runnable
+    description: Solve the pinned source-table powered trim, then recover the local
+      roll/pitch perturbation for twenty seconds through bounded offset-free LQI collective/differential
+      elevon coordinates.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    parameters: []
+    required_control_intents:
+    - attitude_rate
+  - id: trim_hold
+    status: runnable
+    description: Establish and dwell in source-domain trimmed flight.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: duration_s
+      canonical_unit: s
+      required: true
+      description: Required trimmed dwell duration.
+    required_control_intents:
+    - speed
+    - altitude
+    - heading
+  - id: climb_level_gate
+    status: runnable
+    description: Fly a straight climb then cross an oriented level-flight gate.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Required high altitude.
+    - id: climb_rate_m_s
+      canonical_unit: m/s
+      required: true
+      description: Requested climb rate.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: North-east-down gate center.
+    - id: corridor_m
+      canonical_unit: m
+      required: true
+      description: Lateral gate tolerance.
+    required_control_intents:
+    - speed
+    - altitude
+    - flight_path
+  - id: fly_by_turn
+    status: runnable
+    description: Cross an oriented turn gate using the declared turn direction and
+      bank limit.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: turn_direction
+      canonical_unit: null
+      required: true
+      description: left or right route turn.
+    - id: turn_radius_m
+      canonical_unit: m
+      required: true
+      description: Planned turn radius.
+    - id: bank_limit_deg
+      canonical_unit: deg
+      required: true
+      description: Maximum commanded bank magnitude.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: Oriented turn-exit gate center.
+    required_control_intents:
+    - bank
+    - heading
+  - id: descent_level_gate
+    status: runnable
+    description: Fly a straight descent then cross an oriented low-level gate.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Required low altitude.
+    - id: descent_rate_m_s
+      canonical_unit: m/s
+      required: true
+      description: Requested descent rate.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: North-east-down gate center.
+    required_control_intents:
+    - speed
+    - altitude
+    - flight_path
+  - id: terminal_state_gate
+    status: development
+    description: Cross a start/finish gate with position, altitude, speed, and heading
+      tolerances.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_ned_m
+      canonical_unit: m
+      required: true
+      description: Terminal gate position.
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Terminal altitude.
+    - id: target_speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Terminal speed.
+    - id: target_heading_deg
+      canonical_unit: deg
+      required: true
+      description: Terminal heading.
+    required_control_intents:
+    - speed
+    - altitude
+    - heading
+  mission_templates:
+  - id: x8_local_physical_surface_lqr_screen_v1
+    status: runnable
+    description: Source-trim eight-second roll/pitch LQR recovery through bounded
+      source-table elevon-coordinate allocation; not a racetrack.
+    mission_capability_adapter_id: taoryx.x8_local_physical_surface_lqr_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.x8_local_physical_surface_lqr_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_table_trim_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - source_table_physical_lqr_screen
+  - id: x8_local_physical_surface_lqi_screen_v1
+    status: runnable
+    description: Source-trim eight-second roll/pitch LQI recovery through bounded
+      source-table elevon-coordinate allocation, including a matched external pitch-moment
+      offset screen; not a racetrack, wind, or mass-robustness claim.
+    mission_capability_adapter_id: taoryx.x8_local_physical_surface_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.x8_local_physical_surface_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_table_trim_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - source_table_physical_lqi_screen
+  - id: x8_local_physical_surface_lqi_long_recovery_screen_v1
+    status: runnable
+    description: Fresh source-table powered trim followed by a twenty-second local
+      roll/pitch offset-free LQI recovery through bounded source-table elevon-coordinate
+      allocation; not a racetrack, yaw, or persistent-disturbance claim.
+    mission_capability_adapter_id: taoryx.x8_local_physical_surface_lqi_long_recovery_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.x8_local_physical_surface_lqi_long_recovery_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_table_trim_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - source_table_physical_lqi_long_recovery_screen
+  - id: powered_fixed_wing_racetrack_v1
+    status: runnable
+    description: Isolated climb, level, left turn, descent, level, right turn, and
+      start/finish crossing.
+    mission_capability_adapter_id: taoryx.x8_racetrack.source_route.v1
+    mission_capability_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.x8_racetrack.source_route.v1
+    semantic_translator_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - airborne_trim
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - trim_hold
+    - climb_level_gate
+    - fly_by_turn
+    - descent_level_gate
+    - fly_by_turn
+    - terminal_state_gate
+    backing_templates:
+    - powered_fixed_wing_racetrack_v1
+    qualification_missions:
+    - x8-racetrack-altitude-turns-3dof-v1
+    - x8-racetrack-altitude-turns-pseudo-6dof-v1
+    - x8-racetrack-altitude-turns-direct-wrench-v1
+    - x8-racetrack-altitude-turns-v1
+- family_id: b747
+  metadata:
+    summary: Heavy transport research surrogate for source-table rigid-body response,
+      transport energy management, and local surface control.
+    vehicle_class: powered_fixed_wing_aircraft
+    operating_domains:
+    - atmospheric
+    propulsion:
+    - turbofan
+    model_basis: public_research_surrogate
+    roles:
+    - heavy_transport
+    - fixed_wing_navigation
+    - control_allocation
+    tags:
+    - transport
+    - four_engine
+    - conventional_surfaces
+    claim_boundary: Public-research Boeing 747-100 surrogate; it is not manufacturer
+      truth or flight qualification evidence.
+  initialization_contracts:
+  - id: airborne_trim
+    status: runnable
+    description: Source-domain airborne transport trim; this does not imply runway
+      takeoff or landing.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: altitude_m
+      canonical_unit: m
+      required: true
+      description: Initial geometric altitude.
+    - id: speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Initial speed.
+    - id: heading_deg
+      canonical_unit: deg
+      required: true
+      description: Initial heading.
+    - id: mass_kg
+      canonical_unit: kg
+      required: false
+      description: Initial modeled mass.
+  - id: condition3_source_table_trim_local_point
+    status: runnable
+    description: Pinned NASA CR-2144 condition-3 source-table trim for one local physical-control
+      screen.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    parameters: []
+  segment_contracts:
+  - id: condition3_source_table_physical_lqr_screen
+    status: runnable
+    description: Eighty-second source-table condition-3 local three-axis attitude
+      LQR recovery through bounded elevator, aileron, and rudder allocation.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    parameters: []
+    required_control_intents:
+    - attitude_rate
+  - id: condition3_source_table_physical_lqi_screen
+    status: runnable
+    description: Eighty-second source-table condition-3 local three-axis LQI recovery
+      through bounded elevator, aileron, and rudder allocation, including a matched
+      external pitch-moment offset screen.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    parameters: []
+    required_control_intents:
+    - attitude_rate
+  - id: trim_hold
+    status: runnable
+    description: Stabilize at the selected transport trim condition.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: duration_s
+      canonical_unit: s
+      required: true
+      description: Required dwell duration.
+    required_control_intents:
+    - speed
+    - altitude
+    - heading
+  - id: climb_level_gate
+    status: runnable
+    description: Managed climb to a high-level oriented route gate.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Required high altitude.
+    - id: climb_rate_m_s
+      canonical_unit: m/s
+      required: true
+      description: Requested climb rate.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: North-east-down high-level gate center.
+    - id: corridor_m
+      canonical_unit: m
+      required: true
+      description: Lateral high-level gate tolerance.
+    required_control_intents:
+    - speed
+    - altitude
+    - flight_path
+  - id: fly_by_turn
+    status: runnable
+    description: Large-radius directional transport turn through an oriented gate.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: turn_direction
+      canonical_unit: null
+      required: true
+      description: left or right route turn.
+    - id: turn_radius_m
+      canonical_unit: m
+      required: true
+      description: Planned turn radius.
+    - id: bank_limit_deg
+      canonical_unit: deg
+      required: true
+      description: Bank limit.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: North-east-down turn-exit gate center.
+    required_control_intents:
+    - bank
+    - heading
+  - id: descent_level_gate
+    status: runnable
+    description: Managed descent to a low-level oriented route gate.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Required low altitude.
+    - id: descent_rate_m_s
+      canonical_unit: m/s
+      required: true
+      description: Requested descent rate.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: North-east-down low-level gate center.
+    required_control_intents:
+    - speed
+    - altitude
+    - flight_path
+  - id: terminal_state_gate
+    status: development
+    description: Stabilized airborne arrival gate; not a contact or landing segment.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_ned_m
+      canonical_unit: m
+      required: true
+      description: Terminal gate position.
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Terminal altitude.
+    - id: target_speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Terminal speed.
+    - id: target_heading_deg
+      canonical_unit: deg
+      required: true
+      description: Terminal heading.
+    required_control_intents:
+    - speed
+    - altitude
+    - heading
+  mission_templates:
+  - id: b747_condition3_local_physical_surface_lqr_screen_v1
+    status: runnable
+    description: NASA CR-2144 condition-3 source-trim local three-axis LQR recovery
+      through bounded physical source-table surface allocation; not a racetrack.
+    mission_capability_adapter_id: taoryx.b747_condition3_local_physical_surface_lqr_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.b747_condition3_local_physical_surface_lqr_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - condition3_source_table_trim_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - condition3_source_table_physical_lqr_screen
+  - id: b747_condition3_local_physical_surface_lqi_screen_v1
+    status: runnable
+    description: NASA CR-2144 condition-3 source-trim local three-axis LQI recovery
+      through bounded physical source-table surface allocation, including a matched
+      external pitch-moment offset screen; not a racetrack, wind, or mass-robustness
+      claim.
+    mission_capability_adapter_id: taoryx.b747_condition3_local_physical_surface_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.b747_condition3_local_physical_surface_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - condition3_source_table_trim_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - condition3_source_table_physical_lqi_screen
+  - id: powered_fixed_wing_racetrack_v1
+    status: runnable
+    description: Transport-scaled reusable racetrack with isolated vertical and turning
+      demands.
+    mission_capability_adapter_id: taoryx.b747_racetrack.source_route.v1
+    mission_capability_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.b747_racetrack.source_route.v1
+    semantic_translator_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - airborne_trim
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - trim_hold
+    - climb_level_gate
+    - fly_by_turn
+    - descent_level_gate
+    - fly_by_turn
+    - terminal_state_gate
+    backing_templates:
+    - powered_fixed_wing_racetrack_v1
+    qualification_missions:
+    - b747-racetrack-altitude-turns-3dof-v1
+    - b747-racetrack-altitude-turns-pseudo-6dof-v1
+    - b747-racetrack-altitude-turns-6dof-v1

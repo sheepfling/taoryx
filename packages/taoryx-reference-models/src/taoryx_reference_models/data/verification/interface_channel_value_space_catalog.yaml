@@ -12,7 +12,9 @@ profiles:
     - control.wrench.saturated
     - guidance.override.active
     - guidance.override.enabled
+    - guidance.waypoint.captured
     - propulsion.enable
+    - propulsion.enabled
     - health.valid
     - resources.booster.attached
     - safety.deadman
@@ -22,7 +24,9 @@ profiles:
     - aerodynamics.spoiler.increment
     - aerodynamics.beta
     - attitude.pitch.command
+    - attitude.pitch
     - attitude.roll.command
+    - attitude.roll
     - body_rate.pitch.command
     - body_rate.roll.command
     - body_rate.yaw.command
@@ -68,6 +72,7 @@ profiles:
     - navigation.waypoint.east.command
     - navigation.waypoint.north.command
     - navigation.waypoint.speed.command
+    - navigation.waypoint.vertical_speed.command
     - pilot.lateral.command
     - pilot.longitudinal.command
     - initialization.pad_launch.latitude_deg
@@ -78,8 +83,14 @@ profiles:
     - segment.glide_bank_reversal.bank_command_deg
     - segment.ignition_ascent.pitch_program
     - segment.source_scheduled_bank.bank_command_deg
+    - velocity.east.command
+    - velocity.north.command
+    - velocity.vertical.command
   euclidean_scalar:
     - aerodynamics.pitch_coefficient
+    - body_rate.pitch
+    - body_rate.roll
+    - body_rate.yaw
     - control.lqi.integral_error.vertical_speed
     - flight.path_angle
     - attitude.flight_path_angle_deg
@@ -111,6 +122,7 @@ profiles:
     - velocity.down
     - velocity.east
     - velocity.north
+    - velocity.vertical
   euclidean_vector3:
     - body_rate
     - control.wrench.achieved.force
@@ -143,6 +155,7 @@ profiles:
     - control.schedule.selection
     - control.wrench.status
     - execution.status
+    - guidance.waypoint.status
     - initialization.atmospheric_release.area_policy
     - initialization.atmospheric_release.body_shape
     - phase.mode
@@ -174,6 +187,7 @@ profiles:
     - segment.terminal_state_gate.target_heading_deg
     - segment.yaw_scan.target_heading_deg
   periodic_radians:
+    - attitude.yaw
     - attitude.yaw.command
   positive_half_line:
     - aero.dynamic_pressure
@@ -186,6 +200,7 @@ profiles:
     - control.allocation.saturation_count
     - control.feedback_norm
     - control.source_effectiveness_rank
+    - guidance.waypoint.range
     - propulsion.thrust
     - resources.mass.fuel_flow
     - velocity.speed_m_s
@@ -252,6 +267,7 @@ profiles:
     - segment.waypoint_translation.maximum_speed_m_s
     - segment.yaw_scan.yaw_rate_limit_deg_s
     - velocity.speed
+    - velocity.horizontal.speed
     - control.wrench.residual_norm
   quaternion_so3:
     - attitude.quaternion.command
@@ -261,5 +277,6 @@ profiles:
     - attitude.euler
   unit_interval:
     - propulsion.command.fraction
+    - propulsion.output.thrust.fraction
     - control.throttle.realized
     - resources.battery.fraction_remaining

@@ -1,0 +1,46 @@
+{
+  "atmosphere_rows": 86,
+  "body_axes": {
+    "x": "forward",
+    "y": "right",
+    "z": "down"
+  },
+  "coherent_vehicle_specific_model": true,
+  "dataset_name": "x15_coherent_6dof_public_research_v1",
+  "flight_certified": false,
+  "force_coefficients": [
+    "CX",
+    "CY",
+    "CZ"
+  ],
+  "generated_date": "2026-07-15",
+  "grid_counts": {
+    "combined_controls_sample.csv": 2268,
+    "differential_stabilator_grid.csv": 34020,
+    "rudder_grid.csv": 26460,
+    "static_grid_zero_controls.csv": 3780,
+    "symmetric_stabilator_grid.csv": 34020
+  },
+  "mass_summary": {
+    "mass_schedule_rows": 182,
+    "propulsion_history_rows": 182,
+    "source_burn_s": 90.01092896174863,
+    "source_final_mass_lbm": 14572.850273224043,
+    "source_full_mass_lbm": 32278.0
+  },
+  "measured_dense_aero_database": false,
+  "moment_coefficients": [
+    "CMX",
+    "CMY",
+    "CMZ"
+  ],
+  "reference": {
+    "aerodynamic_reference_structural_station_in": 345.4,
+    "area_ft2": 200.0,
+    "chord_ft": 10.27,
+    "span_ft": 22.36
+  },
+  "vehicle": "North American X-15 baseline public research surrogate",
+  "version": "1.0.0",
+  "weapon_or_targeting_tuning": false
+}

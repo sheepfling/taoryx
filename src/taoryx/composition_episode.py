@@ -10,7 +10,7 @@ undeclared effector path.
 The initial witnesses are intentionally narrow:
 
 * X8/B747 language-backed racetracks reuse :class:`InteractiveSession`.
-* Hummingbird pseudo-6DOF reuses its bounded aggregate-thrust-vector model.
+* Family plug-ins register their own pseudo-6DOF episode factories.
 
 Both expose the same reset/observe/step/checkpoint/close vocabulary at
 accepted truth boundaries.  A passing episode says nothing about mission
@@ -28,10 +28,11 @@ import tempfile
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
+from typing import Any, Literal, Protocol, cast
 
 from .committed_boundary_sensor import CommittedBoundarySensor
 from .direct_wrench import DIRECT_WRENCH_NAMES, DirectWrenchProjection
+from .episode_channel_value_space import episode_channel_value_space
 from .language.grammar_contracts import GrammarProfile
 from .language_backed_execution import (
     _kinematic_attitude_from_row,
@@ -39,27 +40,16 @@ from .language_backed_execution import (
     _mission,
     _mission_tables,
 )
-from .language_backed_racetrack import materialize_powered_fixed_wing_composition
+from .language_backed_racetrack import LanguageBackedRacetrackAssets, materialize_powered_fixed_wing_composition
 from .local_direct_wrench_screen_registry import resolve_local_direct_wrench_screen_definition
-from .plugins import PluginCatalog, discover_plugins
+from .plugins import PluginCatalog, current_plugin_catalog, discover_plugins, plugin_catalog_scope
 from .runtime.interactive import InteractiveSession, InteractiveStatus
 from .scenario import ResolvedScenario, ScenarioCompiler
-from .trajectory.pseudo6dof_profiles import Pseudo6DOFProfile, load_pseudo6dof_catalog
-from .value_space import (
-    ValueSpaceSpec,
-    boolean,
-    bounded_interval,
-    euclidean,
-    finite_set,
-    periodic_circle,
-    positive_half_line,
-    product,
-    unit_interval,
-)
+from .value_space import ValueSpaceSpec
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
 from .vehicle_composition_registry import mission_graph_execution_contract
 from .vehicle_execution_bindings import VehicleExecutionBindingError, resolve_vehicle_execution_binding
-from .vehicle_execution_preflight import compile_powered_fixed_wing_racetrack_from_composition, preflight_vehicle_composition
+from .vehicle_execution_preflight import preflight_vehicle_composition
 from .vehicle_interface import (
     ObservationProfile,
     VehicleInterfaceContract,
@@ -67,18 +57,6 @@ from .vehicle_interface import (
     validate_authority_action_values,
     validate_projected_status_values,
 )
-
-if TYPE_CHECKING:
-    from .trajectory import (
-        A320GuidanceOverride,
-        A320RacetrackStepper,
-        A320RacetrackStepperState,
-        F16GuidanceOverride,
-        F16ReducedRacetrackStepper,
-        F16ReducedRacetrackStepperState,
-        HummingbirdPseudo6DOFCommand,
-        HummingbirdPseudo6DOFState,
-    )
 
 EpisodeStatus = Literal["ready", "active", "completed", "closed"]
 
@@ -140,121 +118,6 @@ class EpisodeChannel:
         }
         ####
 
-    ####
-
-
-def episode_channel_value_space(
-    name: str,
-    unit: str | None,
-    lower: float | None,
-    upper: float | None,
-) -> ValueSpaceSpec:
-    """Return a reviewed topology for a legacy native episode channel.
-
-    The semantic interface remains the authority for AI/RL-facing channels.
-    This adapter makes the older native-name episode schema equally explicit
-    instead of asking a caller to guess from a unit or identifier. It covers
-    the current source-owned episode bindings only; a new native channel must
-    extend this table or provide its own ``ValueSpaceSpec`` at construction.
-    """
-
-    normalized = name.casefold()
-    source_name = normalized.split(".", maxsplit=1)[1] if normalized.partition(".")[0].isdigit() else normalized
-    if unit == "boolean" or normalized in {
-        "guidance-override-enabled",
-        "motors_enabled",
-        "contact",
-        "wrench_saturated",
-        "physical_motor_allocation",
-        "physical_effector_allocation",
-    }:
-        return boolean()
-    if normalized in {"response_profile_id", "control_realization", "wrench_status"}:
-        return finite_set(representation="scalar declared identifier")
-    if normalized in {"yaw_rad", "attitude.yaw.command"} or normalized.endswith(".heading_rad"):
-        return periodic_circle(2.0 * math.pi)
-    if source_name in {"psi", "psigd", "yawgd", "_command_psi", "long"}:
-        return periodic_circle(360.0, representation="scalar source-degree")
-    if normalized == "attitude_rad":
-        return product(
-            bounded_interval(),
-            bounded_interval(),
-            periodic_circle(2.0 * math.pi),
-            representation="vector3 [roll, pitch, yaw]",
-        )
-    vector_channels = {
-        "position_ned_m",
-        "velocity_ned_m_s",
-        "body_rate_rad_s",
-        "force_body_n",
-        "moment_body_nm",
-        "body_velocity_m_s",
-        "requested_force_body_n",
-        "requested_moment_body_nm",
-        "achieved_force_body_n",
-        "achieved_moment_body_nm",
-        "residual_force_body_n",
-        "residual_moment_body_nm",
-    }
-    if normalized in vector_channels:
-        return euclidean(3)
-    if normalized in {"battery_fraction", "thrust_ratio"}:
-        return unit_interval()
-    if source_name in {"throttle"}:
-        return unit_interval()
-    if source_name in {
-        "collective-elevon-deg",
-        "differential-elevon-deg",
-        "gama",
-        "gamgd",
-        "_command_gamgd",
-        "pitchgd",
-        "alpha",
-        "alphat",
-        "_aero_alpha_reference_deg",
-        "lat",
-        "latgd",
-    }:
-        return bounded_interval(representation="scalar source-angle")
-    if source_name in {"_geodetic_state", "_point_mass_si_contract", "_dtprnt", "_segment"}:
-        return finite_set(representation="scalar source state code")
-    if source_name in {
-        "aggregate_thrust_n",
-        "time_s",
-        "duration_s",
-        "speed_m_s",
-        "mass_kg",
-        "alt",
-        "vel",
-        "vair",
-        "mass",
-        "mass_kg",
-        "rho",
-        "mach",
-        "dynprs",
-        "ntotal",
-        "plength",
-        "tseg",
-        "tmark",
-        "time",
-        "temp",
-        "pres",
-        "sndspd",
-        "nu",
-        "rotor_speed",
-        "_command_vel",
-        "power",
-        "wt",
-        "fuel",
-        "rcm",
-        "thrust",
-        "mdot",
-        "range",
-    }:
-        return positive_half_line()
-    if lower is not None or upper is not None:
-        return bounded_interval()
-    return euclidean()
     ####
 
 
@@ -478,10 +341,17 @@ class LanguageBackedCompositionEpisode:
         "physical control-surface, moment, or actuator evidence."
     )
 
-    def __init__(self, composition: CompiledVehicleComposition, *, seed: int | None = None) -> None:
+    def __init__(
+        self,
+        composition: CompiledVehicleComposition,
+        *,
+        seed: int | None = None,
+        assets: LanguageBackedRacetrackAssets | None = None,
+        plugins: PluginCatalog | None = None,
+    ) -> None:
         if composition.family_id not in {"skywalker_x8", "b747"}:
             raise ValueError(f"language-backed episode has no adapter for family {composition.family_id!r}")
-        preflight = preflight_vehicle_composition(composition)
+        preflight = preflight_vehicle_composition(composition, plugins=plugins)
         if preflight.status != "translation_ready":
             detail = "; ".join(preflight.diagnostics) or "no translation-ready route"
             raise ValueError(f"cannot create episode for {composition.id!r}: {preflight.status}: {detail}")
@@ -489,7 +359,14 @@ class LanguageBackedCompositionEpisode:
         self.interface_contract = _interface_contract_for_composition(composition)
         self.preflight = preflight
         self.seed = seed
-        self._scenario = _compile_language_backed_scenario(composition, seed=seed)
+        self._assets = assets
+        self._plugins = plugins
+        self._scenario = _compile_language_backed_scenario(
+            composition,
+            seed=seed,
+            assets=self._assets,
+            plugins=self._plugins,
+        )
         self._session = self._scenario.interactive_session()
         self._closed = False
         self._sensor = _sensor_for_contract(self.interface_contract, seed=seed)
@@ -554,7 +431,12 @@ class LanguageBackedCompositionEpisode:
 
         self._require_open()
         self.seed = self.seed if seed is None else seed
-        self._scenario = _compile_language_backed_scenario(self.composition, seed=self.seed)
+        self._scenario = _compile_language_backed_scenario(
+            self.composition,
+            seed=self.seed,
+            assets=self._assets,
+            plugins=self._plugins,
+        )
         self._session = self._scenario.interactive_session()
         self._sensor = _sensor_for_contract(self.interface_contract, seed=self.seed)
         self._advance_sensor()
@@ -754,303 +636,6 @@ class LanguageBackedCompositionEpisode:
     ####
 
 
-class HummingbirdPseudoCompositionEpisode:
-    """Episode wrapper around the declared Hummingbird aggregate-thrust model."""
-
-    claim_boundary = (
-        "This episode uses the named Hummingbird aggregate-thrust-vector pseudo-6DOF response law. "
-        "It exposes bounded attitude, thrust, contact, and battery behavior but does not allocate individual "
-        "rotors or establish physical motor, aerodynamic-moment, or actuator evidence."
-    )
-
-    _ACTION_SCHEMA = (
-        EpisodeChannel("roll_rad", "rad", -math.pi / 2.0, math.pi / 2.0, "commanded roll response-law angle"),
-        EpisodeChannel("pitch_rad", "rad", -math.pi / 2.0, math.pi / 2.0, "commanded pitch response-law angle"),
-        EpisodeChannel("yaw_rad", "rad", -math.pi, math.pi, "commanded yaw response-law angle"),
-        EpisodeChannel("thrust_ratio", "dimensionless", 0.0, 1.0, "aggregate thrust ratio"),
-        EpisodeChannel("motors_enabled", "boolean", description="aggregate rotor enable state"),
-    )
-    _OBSERVATION_SCHEMA = (
-        EpisodeChannel("position_ned_m", "m", description="committed NED position"),
-        EpisodeChannel("velocity_ned_m_s", "m/s", description="committed NED velocity"),
-        EpisodeChannel("attitude_rad", "rad", description="declared response-law attitude"),
-        EpisodeChannel("body_rate_rad_s", "rad/s", description="declared response-law body rate"),
-        EpisodeChannel("battery_fraction", "dimensionless", 0.0, 1.0, "bounded engineering reserve"),
-        EpisodeChannel("aggregate_thrust_n", "N", 0.0, description="achieved aggregate thrust"),
-        EpisodeChannel("contact", "boolean", description="ground-contact state"),
-        EpisodeChannel("mass_kg", "kg", 0.0, description="fixed pseudo-plant operating mass"),
-        EpisodeChannel("response_profile_id", None, description="selected named pseudo-6DOF response profile"),
-        EpisodeChannel("control_realization", None, description="declared pseudo-plant control realization"),
-        EpisodeChannel("physical_motor_allocation", "boolean", description="individual motor allocation availability"),
-    )
-
-    def __init__(self, composition: CompiledVehicleComposition, *, seed: int | None = None, integration_step_s: float = 0.02) -> None:
-        from .trajectory.hummingbird_pseudo6dof import HummingbirdPseudo6DOFModel
-
-        if composition.family_id != "hummingbird" or composition.fidelity != "pseudo_6dof":
-            raise ValueError("Hummingbird pseudo episode requires the hummingbird pseudo_6dof composition")
-        if composition.initialization.id not in {"grounded_idle", "airborne_hover"}:
-            raise ValueError("Hummingbird pseudo episode requires grounded_idle or airborne_hover initialization")
-        if not math.isfinite(integration_step_s) or integration_step_s <= 0.0:
-            raise ValueError("Hummingbird episode integration_step_s must be positive and finite")
-        self.composition = composition
-        self.interface_contract = _interface_contract_for_composition(composition)
-        self.seed = seed
-        self.integration_step_s = integration_step_s
-        self.model = HummingbirdPseudo6DOFModel(mass_kg=_hummingbird_initial_mass_kg(composition))
-        self._closed = False
-        self._status: EpisodeStatus = "ready"
-        self._state = self._initial_state()
-        self._last_action = self._initial_action()
-        self._sensor = _sensor_for_contract(self.interface_contract, seed=seed)
-        self._advance_sensor()
-        ####
-
-    @property
-    def action_schema(self) -> tuple[EpisodeChannel, ...]:
-        return self._ACTION_SCHEMA
-        ####
-
-    @property
-    def observation_schema(self) -> tuple[EpisodeChannel, ...]:
-        return self._OBSERVATION_SCHEMA
-        ####
-
-    def reset(self, *, seed: int | None = None) -> EpisodeObservation:
-        """Restore the exact declared hover or ground state.
-
-        The current pseudo plant contains no randomized subsystem.  The seed
-        is still retained as episode provenance so later declared
-        randomization can extend this boundary without changing its API.
-        """
-
-        self._require_open()
-        self.seed = self.seed if seed is None else seed
-        self._state = self._initial_state()
-        self._last_action = self._initial_action()
-        self._status = "ready"
-        self._reset_sensor()
-        return self.observe()
-        ####
-
-    def observe(self) -> EpisodeObservation:
-        """Return the current committed pseudo-plant truth state."""
-
-        self._require_open()
-        position = self._state.position_m
-        velocity = self._state.velocity_m_s
-        return EpisodeObservation(
-            self._state.time_s,
-            {
-                "position_ned_m": [position[0], position[1], -position[2]],
-                "velocity_ned_m_s": [velocity[0], velocity[1], -velocity[2]],
-                "attitude_rad": list(self._state.attitude_rad),
-                "body_rate_rad_s": list(self._state.attitude_rate_rad_s),
-                "battery_fraction": self._state.battery_fraction,
-                "mass_kg": self.model.mass_kg,
-                "aggregate_thrust_n": self._state.thrust_n,
-                "contact": self._state.contact,
-                "response_profile_id": self.model.profile_id,
-                "control_realization": "aggregate_thrust_vector_surrogate",
-                "physical_motor_allocation": False,
-            },
-            self._status,
-        )
-        ####
-
-    def status_frame(self) -> StatusFrame:
-        """Return canonical status and raw pseudo-plant truth at this boundary."""
-
-        self._require_open()
-        return _status_frame(self.interface_contract, self.observe())
-        ####
-
-    def observe_frame(self, observation_profile_id: str = "truth_debug") -> ObservationFrame:
-        """Return one selected declared observation profile without interpolation."""
-
-        self._require_open()
-        status = self.status_frame()
-        profile = self.interface_contract.observation_profile(observation_profile_id)
-        return _episode_observation_frame(status, profile, self._sensor)
-        ####
-
-    def step(self, action: Mapping[str, object], duration_s: float) -> EpisodeStep:
-        """Apply one bounded semantic action over one or more fixed substeps."""
-
-        self._require_open()
-        if not math.isfinite(duration_s) or duration_s <= 0.0:
-            raise ValueError("episode duration_s must be positive and finite")
-        requested, applied = self._resolve_action(action)
-        start = self._state.time_s
-        remaining = duration_s
-        events: list[str] = []
-        contact_before = self._state.contact
-        motors_before = bool(self._last_action["motors_enabled"])
-        while remaining > 1.0e-12:
-            upper_time = self._state.time_s + remaining
-            boundary = _next_sensor_boundary(self._sensor, self._state.time_s, upper_time)
-            step_s = min(
-                self.integration_step_s,
-                remaining,
-                remaining if boundary is None else max(0.0, boundary - self._state.time_s),
-            )
-            if step_s <= 1.0e-12:
-                self._advance_sensor()
-                continue
-            self._state, _ = self.model.step(self._state, self._command_from_action(applied), step_s)
-            remaining -= step_s
-            if not contact_before and self._state.contact:
-                events.append("contact")
-                contact_before = True
-            self._advance_sensor()
-        if motors_before and not bool(applied["motors_enabled"]):
-            events.append("motor_shutdown")
-        self._last_action = applied
-        self._status = "active"
-        return EpisodeStep(start, self._state.time_s, requested, applied, self.observe(), tuple(events))
-        ####
-
-    def step_frame(self, action: ActionFrame) -> EpisodeStep:
-        """Translate semantic pseudo-6DOF commands into the declared response law."""
-
-        self._require_open()
-        step = self.step(_native_action_for_frame(self.interface_contract, action), action.duration_s)
-        status = self.status_frame()
-        observation = _episode_observation_frame(
-            status,
-            self.interface_contract.observation_profile(self.composition.observation.profile_id),
-            self._sensor,
-        )
-        return replace(
-            step,
-            action_frame=action,
-            applied_semantic_action=_semantic_action_from_native(self.interface_contract, action, step.applied_action),
-            observation_frame=observation,
-            status_frame=status,
-        )
-        ####
-
-    def save_checkpoint(self, path: str | Path) -> Path:
-        """Persist this bounded pseudo state with an integrity fingerprint."""
-
-        self._require_open()
-        payload: dict[str, object] = {
-            "schema": "taoryx.hummingbird-pseudo-composition-episode/v1alpha1",
-            "composition_identity_sha256": self.composition.identity_sha256,
-            "seed": self.seed,
-            "integration_step_s": self.integration_step_s,
-            "status": self._status,
-            "state": _hummingbird_state_payload(self._state),
-            "last_action": dict(self._last_action),
-        }
-        if self._sensor is not None:
-            payload["declared_sensor"] = self._sensor.checkpoint_payload()
-        payload["integrity"] = _payload_digest(payload)
-        destination = Path(path)
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        temporary = destination.with_name(f".{destination.name}.tmp")
-        temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        os.replace(temporary, destination)
-        return destination
-        ####
-
-    def load_checkpoint(self, path: str | Path) -> EpisodeObservation:
-        """Restore a composition-bound pseudo state without serializing code."""
-
-        self._require_open()
-        payload = json.loads(Path(path).read_text(encoding="utf-8"))
-        if payload.get("schema") != "taoryx.hummingbird-pseudo-composition-episode/v1alpha1":
-            raise ValueError("unsupported Hummingbird composition episode checkpoint schema")
-        integrity = payload.pop("integrity", None)
-        if integrity != _payload_digest(payload):
-            raise ValueError("Hummingbird composition episode checkpoint integrity verification failed")
-        if payload.get("composition_identity_sha256") != self.composition.identity_sha256:
-            raise ValueError("Hummingbird composition episode checkpoint composition mismatch")
-        self.seed = payload.get("seed") if isinstance(payload.get("seed"), int) else None
-        self._state = _hummingbird_state_from_payload(payload["state"])
-        self._last_action = _hummingbird_action(payload["last_action"])
-        self._status = _episode_status_literal(payload.get("status"))
-        sensor_payload = payload.get("declared_sensor")
-        if self._sensor is not None:
-            if not isinstance(sensor_payload, Mapping):
-                raise ValueError("Hummingbird sensor-configured checkpoint has no declared sensor state")
-            sensor = self._sensor
-            sensor.restore_checkpoint(sensor_payload)
-        elif sensor_payload is not None:
-            raise ValueError("Hummingbird checkpoint declares a sensor unavailable in this composition")
-        return self.observe()
-        ####
-
-    def close(self) -> None:
-        self._closed = True
-        self._status = "closed"
-        ####
-
-    def _initial_state(self) -> HummingbirdPseudo6DOFState:
-        inputs = self.composition.initialization.inputs
-        altitude_m = _composition_number(inputs, "altitude_m", default=0.0)
-        north_m = _composition_number(inputs, "north_m", default=_composition_number(inputs, "pad_north_m", default=0.0))
-        east_m = _composition_number(inputs, "east_m", default=_composition_number(inputs, "pad_east_m", default=0.0))
-        heading_rad = math.radians(_composition_number(inputs, "heading_deg", default=0.0))
-        state = self.model.initial_state(altitude_m=altitude_m)
-        return replace(
-            state,
-            position_m=(north_m, east_m, altitude_m),
-            attitude_rad=(0.0, 0.0, heading_rad),
-            contact=altitude_m == 0.0,
-        )
-        ####
-
-    def _initial_action(self) -> dict[str, object]:
-        return {
-            "roll_rad": 0.0,
-            "pitch_rad": 0.0,
-            "yaw_rad": self._state.attitude_rad[2],
-            "thrust_ratio": self.model.mass_kg * self.model.gravity_m_s2 / self.model.maximum_thrust_n,
-            "motors_enabled": True,
-        }
-        ####
-
-    def _resolve_action(self, action: Mapping[str, object]) -> tuple[dict[str, object], dict[str, object]]:
-        unknown = sorted(set(action) - {channel.name for channel in self._ACTION_SCHEMA})
-        if unknown:
-            raise ValueError("unknown Hummingbird episode action(s): " + ", ".join(unknown))
-        requested = {**self._last_action, **dict(action)}
-        applied = _hummingbird_action(requested)
-        return requested, applied
-        ####
-
-    def _command_from_action(self, action: Mapping[str, object]) -> HummingbirdPseudo6DOFCommand:
-        from .trajectory.hummingbird_pseudo6dof import HummingbirdPseudo6DOFCommand
-
-        return HummingbirdPseudo6DOFCommand(
-            roll_rad=_finite_number(action["roll_rad"], "roll_rad"),
-            pitch_rad=_finite_number(action["pitch_rad"], "pitch_rad"),
-            yaw_rad=_finite_number(action["yaw_rad"], "yaw_rad"),
-            thrust_ratio=_finite_number(action["thrust_ratio"], "thrust_ratio"),
-            motors_enabled=bool(action["motors_enabled"]),
-            thrust_frame="body_euler",
-        )
-        ####
-
-    def _require_open(self) -> None:
-        if self._closed:
-            raise RuntimeError("vehicle composition episode is closed")
-        ####
-
-    def _advance_sensor(self) -> None:
-        if self._sensor is not None:
-            status = self.status_frame()
-            self._sensor.advance(status.time_s, status.values)
-        ####
-
-    def _reset_sensor(self) -> None:
-        if self._sensor is not None:
-            self._sensor = _sensor_for_contract(self.interface_contract, seed=self.seed)
-            self._advance_sensor()
-        ####
-
-    ####
 
 
 def _reduced_fixed_wing_high_order_episode_channels(maximum_speed_m_s: float) -> tuple[EpisodeChannel, ...]:
@@ -1069,14 +654,19 @@ def _reduced_fixed_wing_high_order_episode_channels(maximum_speed_m_s: float) ->
     ####
 
 
-def _f16_reduced_body_rate_episode_channels() -> tuple[EpisodeChannel, ...]:
-    """Return the F-16 pseudo-6DOF rate-reference adapter coordinates."""
+def _reduced_fixed_wing_status_values(row: Mapping[str, object]) -> dict[str, object]:
+    """Enrich declared reduced-flight telemetry with portable status vectors."""
 
-    return (
-        EpisodeChannel("body-roll-rate-command-rad-s", "rad/s", -0.5, 0.5, "held body roll-rate reference p"),
-        EpisodeChannel("body-pitch-rate-command-rad-s", "rad/s", -0.35, 0.35, "held body pitch-rate reference q"),
-        EpisodeChannel("body-yaw-rate-command-rad-s", "rad/s", -0.35, 0.35, "held body yaw-rate reference r"),
-    )
+    values = dict(row)
+    attitude_keys = ("route_bank_achieved_deg", "route_pitch_achieved_deg", "route_heading_achieved_deg")
+    rate_keys = ("p_rad_s", "q_rad_s", "r_rad_s")
+    if all(key in values for key in attitude_keys):
+        values["attitude_euler_deg"] = [values[key] for key in attitude_keys]
+    if all(key in values for key in rate_keys):
+        values["body_rate_rad_s"] = [values[key] for key in rate_keys]
+    control_path = values.get("control_path")
+    values["control_realization"] = "response_law" if control_path == "pseudo_6dof_kinematic_bridge" else "force_model"
+    return values
     ####
 
 
@@ -1091,21 +681,15 @@ class ReducedFixedWingCompositionEpisode:
     """
 
     claim_boundary = (
-        "This episode uses the declared source-owned A320 reduced-flight stepper. It accepts bounded kinematic "
-        "guidance through the point-mass or named route-lag response law; it does not establish physical surface "
+        "This episode accepts bounded reduced-model kinematic guidance. It does not establish physical surface "
         "allocation, actuator dynamics, moment balance, batch/episode parity, or mission qualification."
     )
 
-    _ACTION_SCHEMA = (
-        EpisodeChannel("speed_m_s", "m/s", 50.0, 300.0, "held reduced-model speed target"),
-        EpisodeChannel("flight_path_angle_deg", "deg", -20.0, 20.0, "held reduced-model flight-path target"),
-        EpisodeChannel("heading_deg", "deg", 0.0, 360.0, "held local-navigation heading target"),
-        EpisodeChannel("bank_angle_deg", "deg", -60.0, 60.0, "held response-law bank or lift-vector target"),
-    )
-
-    _FAMILY_ID = "a320_openap_3dof"
-    _FAMILY_LABEL = "A320"
-    _CHECKPOINT_SCHEMA = "taoryx.a320-reduced-composition-episode/v1alpha1"
+    _ACTION_SCHEMA: tuple[EpisodeChannel, ...] = ()
+    _FAMILY_ID = ""
+    _FAMILY_LABEL = "reduced fixed-wing"
+    _CHECKPOINT_SCHEMA = ""
+    _MAXIMUM_SPEED_M_S = 0.0
 
     def __init__(self, composition: CompiledVehicleComposition, *, seed: int | None = None) -> None:
         if composition.family_id != self._FAMILY_ID or composition.fidelity not in {
@@ -1116,7 +700,7 @@ class ReducedFixedWingCompositionEpisode:
         preflight = preflight_vehicle_composition(composition)
         if preflight.status != "translation_ready":
             details = "; ".join(preflight.diagnostics) or "no translation-ready route"
-            raise ValueError(f"cannot create A320 episode for {composition.id!r}: {preflight.status}: {details}")
+            raise ValueError(f"cannot create {self._FAMILY_LABEL} episode for {composition.id!r}: {preflight.status}: {details}")
         self.composition = composition
         self.interface_contract = _interface_contract_for_composition(composition)
         self._authority_action_schema_cache: dict[str, tuple[EpisodeChannel, ...]] = {}
@@ -1147,17 +731,12 @@ class ReducedFixedWingCompositionEpisode:
         if cached is not None:
             return cached
         profile = self.interface_contract.authority_profile(authority_profile_id)
-        maximum_speed_m_s = 300.0 if self._FAMILY_ID == "a320_openap_3dof" else 500.0
         candidates = {
             channel.name: channel
             for channel in (
                 *self.action_schema,
-                *_reduced_fixed_wing_high_order_episode_channels(maximum_speed_m_s),
-                *(
-                    _f16_reduced_body_rate_episode_channels()
-                    if self._FAMILY_ID == "f16_s119" and self.composition.fidelity == "pseudo_6dof"
-                    else ()
-                ),
+                *_reduced_fixed_wing_high_order_episode_channels(self._MAXIMUM_SPEED_M_S),
+                *self._additional_authority_action_schema(),
             )
         }
         semantic_channels = {channel.id: channel for channel in self.interface_contract.action_channels}
@@ -1172,6 +751,12 @@ class ReducedFixedWingCompositionEpisode:
         schema = tuple(resolved)
         self._authority_action_schema_cache[authority_profile_id] = schema
         return schema
+        ####
+
+    def _additional_authority_action_schema(self) -> tuple[EpisodeChannel, ...]:
+        """Return family-owned higher-order coordinates beyond shared guidance."""
+
+        return ()
         ####
 
     @property
@@ -1231,7 +816,7 @@ class ReducedFixedWingCompositionEpisode:
 
         self._require_open()
         if not math.isfinite(duration_s) or duration_s <= 0.0:
-            raise ValueError("A320 episode duration_s must be positive and finite")
+            raise ValueError(f"{self._FAMILY_LABEL} episode duration_s must be positive and finite")
         requested, applied = self._resolve_action(action)
         start = self._stepper.state.time_s
         rows = self._stepper.step(duration_s, self._control_override(applied, duration_s=duration_s))
@@ -1297,7 +882,7 @@ class ReducedFixedWingCompositionEpisode:
         ####
 
     def save_checkpoint(self, path: str | Path) -> Path:
-        """Persist a composition-bound A320 stepper state without serializing code."""
+        """Persist a composition-bound family stepper state without serializing code."""
 
         self._require_open()
         snapshot = self._stepper.state
@@ -1322,7 +907,7 @@ class ReducedFixedWingCompositionEpisode:
         ####
 
     def load_checkpoint(self, path: str | Path) -> EpisodeObservation:
-        """Restore an integrity-checked composition-bound A320 stepper state."""
+        """Restore an integrity-checked composition-bound family stepper state."""
 
         self._require_open()
         payload = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -1388,7 +973,7 @@ class ReducedFixedWingCompositionEpisode:
     ) -> tuple[dict[str, float], dict[str, float]]:
         unknown = sorted(set(action) - {channel.name for channel in action_schema})
         if unknown:
-            raise ValueError("unknown A320 reduced episode action(s): " + ", ".join(unknown))
+            raise ValueError(f"unknown {self._FAMILY_LABEL} reduced episode action(s): " + ", ".join(unknown))
         requested = {**held_action, **dict(action)}
         applied: dict[str, float] = {}
         for channel in action_schema:
@@ -1408,12 +993,12 @@ class ReducedFixedWingCompositionEpisode:
         ####
 
     def _build_stepper(self, composition: CompiledVehicleComposition) -> Any:
-        return _a320_stepper_for_composition(composition)
+        raise NotImplementedError("family plug-ins must provide their reduced-flight stepper")
         ####
 
     @staticmethod
     def _guidance_override(action: Mapping[str, float]) -> Any:
-        return _a320_guidance_override(action)
+        raise NotImplementedError("family plug-ins must provide their guidance lowering")
         ####
 
     def _control_override(self, action: Mapping[str, float], *, duration_s: float | None = None) -> Any:
@@ -1477,8 +1062,7 @@ class ReducedFixedWingCompositionEpisode:
             pilot_guidance: dict[str, float] = {}
             throttle = action.get("pilot-throttle-fraction")
             if throttle is not None:
-                maximum_speed_m_s = 300.0 if self._FAMILY_ID == "a320_openap_3dof" else 500.0
-                pilot_guidance["speed_m_s"] = 50.0 + throttle * (maximum_speed_m_s - 50.0)
+                pilot_guidance["speed_m_s"] = 50.0 + throttle * (self._MAXIMUM_SPEED_M_S - 50.0)
             longitudinal = action.get("pilot-longitudinal-normalized")
             if longitudinal is not None:
                 pilot_guidance["flight_path_angle_deg"] = 20.0 * longitudinal
@@ -1501,7 +1085,7 @@ class ReducedFixedWingCompositionEpisode:
             hold_duration_s = 0.0 if duration_s is None else duration_s
             throttle = action.get("pilot-throttle-fraction")
             if throttle is not None:
-                rate_guidance["speed_m_s"] = 50.0 + throttle * 450.0
+                rate_guidance["speed_m_s"] = 50.0 + throttle * (self._MAXIMUM_SPEED_M_S - 50.0)
             roll_rate = action.get("body-roll-rate-command-rad-s")
             if roll_rate is not None:
                 current_bank_deg = _finite_number(row.get("route_bank_achieved_deg"), "reduced current bank")
@@ -1546,102 +1130,20 @@ class ReducedFixedWingCompositionEpisode:
 
     @staticmethod
     def _status_values(row: Mapping[str, object]) -> dict[str, object]:
-        return _a320_status_values(row)
+        return _reduced_fixed_wing_status_values(row)
         ####
 
     @staticmethod
     def _serialize_stepper_state(snapshot: Any) -> dict[str, object]:
-        return {
-            "time_s": snapshot.time_s,
-            "north_m": snapshot.north_m,
-            "east_m": snapshot.east_m,
-            "state": dict(snapshot.state),
-            "controls": dict(snapshot.controls),
-            "terminal_hold": snapshot.terminal_hold,
-            "numerical_valid": snapshot.numerical_valid,
-            "failure": snapshot.failure,
-        }
+        raise NotImplementedError("family plug-ins must provide checkpoint serialization")
         ####
 
     @staticmethod
     def _deserialize_stepper_state(payload: Mapping[str, object]) -> Any:
-        return _a320_stepper_state(payload)
+        raise NotImplementedError("family plug-ins must provide checkpoint deserialization")
         ####
 
     ####
-
-
-class A320ReducedCompositionEpisode(ReducedFixedWingCompositionEpisode):
-    """A320/OpenAP binding of the shared reduced fixed-wing episode contract."""
-
-    pass
-    ####
-
-
-class F16ReducedCompositionEpisode(ReducedFixedWingCompositionEpisode):
-    """Accepted-truth F-16 episode using the common reduced-flight contract.
-
-    It shares the same held kinematic-guidance action and canonical status
-    projection as the A320 adapter, while retaining the F-16 source trim,
-    source-load diagnostics, and named attitude-response bridge.  Its sampled
-    source controls remain diagnostics only: they are not allocated surfaces.
-    """
-
-    claim_boundary = (
-        "This episode uses the declared source-owned F-16 reduced-flight stepper. It accepts bounded kinematic "
-        "guidance through the point-mass or named attitude/rate response law; it does not establish physical "
-        "surface allocation, actuator dynamics, moment balance, batch/episode parity, or mission qualification."
-    )
-
-    _ACTION_SCHEMA = (
-        EpisodeChannel("speed_m_s", "m/s", 50.0, 500.0, "held reduced-model speed target"),
-        EpisodeChannel("flight_path_angle_deg", "deg", -20.0, 20.0, "held reduced-model flight-path target"),
-        EpisodeChannel("heading_deg", "deg", 0.0, 360.0, "held local-navigation heading target"),
-        EpisodeChannel("bank_angle_deg", "deg", -60.0, 60.0, "held response-law bank or lift-vector target"),
-    )
-
-    _FAMILY_ID = "f16_s119"
-    _FAMILY_LABEL = "F-16"
-    _CHECKPOINT_SCHEMA = "taoryx.f16-reduced-composition-episode/v1alpha1"
-
-    def _build_stepper(self, composition: CompiledVehicleComposition) -> F16ReducedRacetrackStepper:
-        return _f16_stepper_for_composition(composition)
-        ####
-
-    @staticmethod
-    def _guidance_override(action: Mapping[str, float]) -> F16GuidanceOverride:
-        return _f16_guidance_override(action)
-        ####
-
-    @staticmethod
-    def _serialize_stepper_state(snapshot: F16ReducedRacetrackStepperState) -> dict[str, object]:
-        return {
-            "time_s": snapshot.time_s,
-            "north_m": snapshot.north_m,
-            "east_m": snapshot.east_m,
-            "altitude_m": snapshot.altitude_m,
-            "speed_m_s": snapshot.speed_m_s,
-            "heading_rad": snapshot.heading_rad,
-            "flight_path_angle_rad": snapshot.flight_path_angle_rad,
-            "roll_rad": snapshot.roll_rad,
-            "pitch_rad": snapshot.pitch_rad,
-            "yaw_rad": snapshot.yaw_rad,
-            "p_rad_s": snapshot.p_rad_s,
-            "q_rad_s": snapshot.q_rad_s,
-            "r_rad_s": snapshot.r_rad_s,
-            "controls": dict(snapshot.controls),
-            "numerical_valid": snapshot.numerical_valid,
-            "failure": snapshot.failure,
-        }
-        ####
-
-    @staticmethod
-    def _deserialize_stepper_state(payload: Mapping[str, object]) -> F16ReducedRacetrackStepperState:
-        return _f16_stepper_state(payload)
-        ####
-
-    ####
-
 
 class LocalDirectWrenchCompositionEpisode:
     """Bounded source-local direct-wrench bridge episode.
@@ -1959,36 +1461,6 @@ def _open_language_backed_episode(
     return LanguageBackedCompositionEpisode(composition, seed=seed)
     ####
 
-
-def _open_hummingbird_episode(
-    composition: CompiledVehicleComposition,
-    seed: int | None,
-    integration_step_s: float,
-) -> VehicleCompositionEpisode:
-    return HummingbirdPseudoCompositionEpisode(composition, seed=seed, integration_step_s=integration_step_s)
-    ####
-
-
-def _open_a320_reduced_episode(
-    composition: CompiledVehicleComposition,
-    seed: int | None,
-    integration_step_s: float,
-) -> VehicleCompositionEpisode:
-    del integration_step_s
-    return A320ReducedCompositionEpisode(composition, seed=seed)
-    ####
-
-
-def _open_f16_reduced_episode(
-    composition: CompiledVehicleComposition,
-    seed: int | None,
-    integration_step_s: float,
-) -> VehicleCompositionEpisode:
-    del integration_step_s
-    return F16ReducedCompositionEpisode(composition, seed=seed)
-    ####
-
-
 def _open_local_direct_wrench_episode(
     composition: CompiledVehicleComposition,
     seed: int | None,
@@ -2002,7 +1474,9 @@ def _open_local_direct_wrench_episode(
 def _episode_factories(*, plugins: PluginCatalog | None = None) -> dict[str, EpisodeFactory]:
     """Build the installed interactive factory registry."""
 
-    selected = plugins or discover_plugins()
+    selected = plugins if plugins is not None else current_plugin_catalog()
+    if selected is None:
+        selected = discover_plugins()
     factories: dict[str, EpisodeFactory] = {}
     for contribution in selected.records("episode_factory"):
         if not callable(contribution.value):
@@ -2033,19 +1507,27 @@ def open_vehicle_composition_episode(
     integration_step_s: float = 0.02,
     plugins: PluginCatalog | None = None,
 ) -> VehicleCompositionEpisode:
-    """Open one declared composition episode or fail without a substitute path."""
+    """Open one declared composition episode or fail without a substitute path.
 
+    A supplied focused catalog remains active while the family factory opens,
+    so nested generic helpers cannot rediscover unrelated installed plug-ins.
+    """
+
+    catalog = plugins if plugins is not None else current_plugin_catalog()
+    if catalog is None:
+        catalog = discover_plugins()
     try:
-        binding = resolve_vehicle_execution_binding(composition, "episode")
+        binding = resolve_vehicle_execution_binding(composition, "episode", plugins=catalog)
     except VehicleExecutionBindingError as error:
         raise ValueError(f"no composition episode adapter is registered: {error}") from error
     if binding.factory_id is None:
         raise ValueError("runnable episode binding lacks a factory identifier")
     try:
-        factory = _episode_factories(plugins=plugins)[binding.factory_id]
+        factory = _episode_factories(plugins=catalog)[binding.factory_id]
     except KeyError as error:
         raise ValueError(f"episode execution factory is declared but not implemented: {binding.factory_id!r}") from error
-    return factory(composition, seed, integration_step_s)
+    with plugin_catalog_scope(catalog):
+        return factory(composition, seed, integration_step_s)
     ####
 
 
@@ -2274,230 +1756,26 @@ def _flatten_episode_native_values(
     ####
 
 
-def _a320_stepper_for_composition(composition: CompiledVehicleComposition) -> A320RacetrackStepper:
-    """Build the exact A320 reduced plant selected by one composition."""
-
-    from taoryx_reference_models.resources import model_resource_root
-
-    from .reduced_fixed_wing_execution import _a320_operating_point_for_speed
-    from .trajectory.a320_openap import A320OpenAPModel
-    from .trajectory.a320_pseudo6dof import A320Pseudo6DOFModel
-    from .trajectory.a320_racetrack import A320RacetrackRunner, A320RacetrackStepper
-
-    route = compile_powered_fixed_wing_racetrack_from_composition(composition).route
-    inputs = composition.initialization.inputs
-    altitude_m = _composition_number(inputs, "altitude_m", default=6000.0)
-    mass_kg = _composition_number(inputs, "mass_kg", default=60000.0)
-    root = model_resource_root()
-    base_model = A320OpenAPModel.from_repository(root)
-    operating_point = _a320_operating_point_for_speed(base_model, altitude_m, mass_kg, route.speed_m_s)
-    model: A320OpenAPModel | A320Pseudo6DOFModel
-    response_profile: Pseudo6DOFProfile | None
-    mode: Literal["point_mass_3dof", "pseudo_6dof_kinematic_bridge"]
-    if composition.fidelity == "point_mass_3dof":
-        model = base_model
-        trim = model.trim_level_flight(operating_point)
-        response_profile = None
-        mode = "point_mass_3dof"
-    elif composition.fidelity == "pseudo_6dof":
-        model = A320Pseudo6DOFModel.from_repository(root)
-        trim = model.trim_pseudo6dof(operating_point)
-        _, response_profile = load_pseudo6dof_catalog(root / "verification/pseudo6dof_profiles.yaml").for_family("a320_openap_3dof")
-        mode = "pseudo_6dof_kinematic_bridge"
-    else:
-        raise ValueError(f"A320 reduced episode has no fidelity adapter for {composition.fidelity!r}")
-    return A320RacetrackStepper(
-        A320RacetrackRunner(
-            model,
-            trim,
-            route,
-            mode,
-            dt_s=0.2,
-            response_profile=response_profile,
-            operating_point=operating_point,
-        )
-    )
-    ####
-
-
-def _f16_stepper_for_composition(composition: CompiledVehicleComposition) -> F16ReducedRacetrackStepper:
-    """Build the exact source-trimmed F-16 reduction selected by one composition."""
-
-    from taoryx_reference_models.resources import model_resource_root
-
-    from .reduced_fixed_wing_execution import _f16_source_trim
-    from .trajectory.f16_reduced_racetrack import F16ReducedRacetrackRunner, F16ReducedRacetrackStepper
-    from .trajectory.f16_reductions import F16AttitudeResponsePseudo6DOFModel, F16PointMass3DOFModel
-
-    route = compile_powered_fixed_wing_racetrack_from_composition(composition).route
-    source, trim, trim_pitch_rad = _f16_source_trim()
-    observed_mach = float(source.evaluate_loads(trim.state, trim.controls, altitude_m=0.0)["mach"])
-    requested_mach = _composition_number(composition.initialization.inputs, "mach", default=observed_mach)
-    if not math.isclose(requested_mach, observed_mach, abs_tol=1.0e-9):
-        raise ValueError(f"F-16 reduced episode is pinned to its source trim Mach; requested {requested_mach:.12g}, expected {observed_mach:.12g}")
-    mode: Literal["point_mass_3dof", "pseudo_6dof_kinematic_bridge"]
-    model: F16PointMass3DOFModel | F16AttitudeResponsePseudo6DOFModel
-    if composition.fidelity == "point_mass_3dof":
-        model = F16PointMass3DOFModel(source, trim, trim_pitch_rad)
-        response_profile = None
-        mode = "point_mass_3dof"
-    elif composition.fidelity == "pseudo_6dof":
-        linearization = source.linearize_local(
-            trim.state,
-            trim.controls,
-            trim_pitch_rad=trim_pitch_rad,
-            altitude_m=0.0,
-            state_step=1.0e-5,
-            control_step=1.0e-5,
-        )
-        model = F16AttitudeResponsePseudo6DOFModel(source, trim, linearization, trim_pitch_rad)
-        root = model_resource_root()
-        _, response_profile = load_pseudo6dof_catalog(root / "verification/pseudo6dof_profiles.yaml").for_family("f16_s119")
-        mode = "pseudo_6dof_kinematic_bridge"
-    else:
-        raise ValueError(f"F-16 reduced episode has no fidelity adapter for {composition.fidelity!r}")
-    return F16ReducedRacetrackStepper(F16ReducedRacetrackRunner(model, trim, route, mode, dt_s=0.2, response_profile=response_profile))
-    ####
-
-
-def _a320_guidance_override(action: Mapping[str, float]) -> A320GuidanceOverride:
-    """Translate held public/native A320 guidance coordinates into SI/radians."""
-
-    from .trajectory.a320_racetrack import A320GuidanceOverride
-
-    return A320GuidanceOverride(
-        speed_m_s=action.get("speed_m_s"),
-        flight_path_angle_rad=(None if "flight_path_angle_deg" not in action else math.radians(action["flight_path_angle_deg"])),
-        heading_rad=None if "heading_deg" not in action else math.radians(action["heading_deg"]),
-        bank_angle_rad=None if "bank_angle_deg" not in action else math.radians(action["bank_angle_deg"]),
-    )
-    ####
-
-
-def _f16_guidance_override(action: Mapping[str, float]) -> F16GuidanceOverride:
-    """Translate held public/native F-16 guidance coordinates into SI/radians."""
-
-    from .trajectory.f16_reduced_racetrack import F16GuidanceOverride
-
-    return F16GuidanceOverride(
-        speed_m_s=action.get("speed_m_s"),
-        flight_path_angle_rad=(None if "flight_path_angle_deg" not in action else math.radians(action["flight_path_angle_deg"])),
-        heading_rad=None if "heading_deg" not in action else math.radians(action["heading_deg"]),
-        bank_angle_rad=None if "bank_angle_deg" not in action else math.radians(action["bank_angle_deg"]),
-    )
-    ####
-
-
-def _a320_status_values(row: Mapping[str, object]) -> dict[str, object]:
-    """Enrich one reduced telemetry row with only declared portable vectors."""
-
-    values = dict(row)
-    attitude_keys = ("route_bank_achieved_deg", "route_pitch_achieved_deg", "route_heading_achieved_deg")
-    rate_keys = ("p_rad_s", "q_rad_s", "r_rad_s")
-    if all(key in values for key in attitude_keys):
-        values["attitude_euler_deg"] = [values[key] for key in attitude_keys]
-    if all(key in values for key in rate_keys):
-        values["body_rate_rad_s"] = [values[key] for key in rate_keys]
-    control_path = values.get("control_path")
-    values["control_realization"] = "response_law" if control_path == "pseudo_6dof_kinematic_bridge" else "force_model"
-    return values
-    ####
-
-
-def _f16_stepper_state(payload: Mapping[str, object]) -> F16ReducedRacetrackStepperState:
-    """Decode a checkpointed F-16 stepper state with no permissive coercion."""
-
-    from .trajectory.f16_reduced_racetrack import F16ReducedRacetrackStepperState
-
-    controls = payload.get("controls")
-    if not isinstance(controls, Mapping):
-        raise ValueError("F-16 checkpoint stepper state has no control mapping")
-    scalar_controls = {str(name): _finite_number(value, f"F-16 checkpoint control {name!r}") for name, value in controls.items()}
-    numerical_valid = payload.get("numerical_valid")
-    failure = payload.get("failure")
-    if not isinstance(numerical_valid, bool):
-        raise ValueError("F-16 checkpoint has invalid numerical status")
-    if failure is not None and not isinstance(failure, str):
-        raise ValueError("F-16 checkpoint failure must be string or null")
-    scalars = [
-        _finite_number(payload.get(key), f"F-16 checkpoint {key}")
-        for key in (
-            "time_s",
-            "north_m",
-            "east_m",
-            "altitude_m",
-            "speed_m_s",
-            "heading_rad",
-            "flight_path_angle_rad",
-            "roll_rad",
-            "pitch_rad",
-            "yaw_rad",
-            "p_rad_s",
-            "q_rad_s",
-            "r_rad_s",
-        )
-    ]
-    return F16ReducedRacetrackStepperState(
-        scalars[0],
-        scalars[1],
-        scalars[2],
-        scalars[3],
-        scalars[4],
-        scalars[5],
-        scalars[6],
-        scalars[7],
-        scalars[8],
-        scalars[9],
-        scalars[10],
-        scalars[11],
-        scalars[12],
-        scalar_controls,
-        numerical_valid,
-        failure,
-    )
-    ####
-
-
-def _a320_stepper_state(payload: Mapping[str, object]) -> A320RacetrackStepperState:
-    """Decode a checkpointed A320 stepper state with no permissive coercion."""
-
-    from .trajectory.a320_racetrack import A320RacetrackStepperState
-
-    state = payload.get("state")
-    controls = payload.get("controls")
-    if not isinstance(state, Mapping) or not isinstance(controls, Mapping):
-        raise ValueError("A320 checkpoint stepper state has no scalar state/control mappings")
-    scalar_state = {str(name): _finite_number(value, f"A320 checkpoint state {name!r}") for name, value in state.items()}
-    scalar_controls = {str(name): _finite_number(value, f"A320 checkpoint control {name!r}") for name, value in controls.items()}
-    terminal_hold = payload.get("terminal_hold")
-    numerical_valid = payload.get("numerical_valid")
-    failure = payload.get("failure")
-    if not isinstance(terminal_hold, bool) or not isinstance(numerical_valid, bool):
-        raise ValueError("A320 checkpoint has invalid terminal or numerical status")
-    if failure is not None and not isinstance(failure, str):
-        raise ValueError("A320 checkpoint failure must be string or null")
-    return A320RacetrackStepperState(
-        _finite_number(payload.get("time_s"), "A320 checkpoint time_s"),
-        _finite_number(payload.get("north_m"), "A320 checkpoint north_m"),
-        _finite_number(payload.get("east_m"), "A320 checkpoint east_m"),
-        scalar_state,
-        scalar_controls,
-        terminal_hold,
-        numerical_valid,
-        failure,
-    )
-    ####
-
-
-def _compile_language_backed_scenario(composition: CompiledVehicleComposition, *, seed: int | None) -> ResolvedScenario:
+def _compile_language_backed_scenario(
+    composition: CompiledVehicleComposition,
+    *,
+    seed: int | None,
+    assets: LanguageBackedRacetrackAssets | None = None,
+    plugins: PluginCatalog | None = None,
+) -> ResolvedScenario:
     """Compile disposable materialization into an immutable parsed scenario."""
 
     with tempfile.TemporaryDirectory(prefix="taoryx-composition-episode-") as temporary:
-        materialized = materialize_powered_fixed_wing_composition(composition, Path(temporary))
+        materialized = materialize_powered_fixed_wing_composition(
+            composition,
+            Path(temporary),
+            assets=assets,
+            plugins=plugins,
+        )
         mission = _mission(materialized.mission_config, materialized.materialized_mission_id)
         return ScenarioCompiler().compile(
             materialized.problem,
-            table_paths=_mission_tables(mission),
+            table_paths=_mission_tables(mission, resource_root=materialized.asset_root),
             profile=GrammarProfile.TAORYX,
             seed=seed,
             integrator=str(mission.get("integrator", "rk4")),
@@ -2549,26 +1827,6 @@ def _next_sensor_boundary(
     ####
 
 
-def _composition_number(values: Mapping[str, Any], name: str, *, default: float) -> float:
-    value = values.get(name)
-    if value is None:
-        return default
-    return float(value.value)
-    ####
-
-
-def _hummingbird_initial_mass_kg(composition: CompiledVehicleComposition) -> float:
-    """Resolve the one declared mass-bearing Hummingbird reset contract."""
-
-    if composition.initialization.id != "grounded_idle":
-        return 0.5
-    mass_kg = _composition_number(composition.initialization.inputs, "mass_kg", default=0.5)
-    if not math.isfinite(mass_kg) or mass_kg <= 0.0:
-        raise ValueError("Hummingbird grounded_idle mass_kg must be positive and finite")
-    return mass_kg
-    ####
-
-
 def _numeric_action(action: Mapping[str, object]) -> dict[str, float]:
     """Normalize semantic booleans and numeric controls for the language runtime."""
 
@@ -2586,63 +1844,6 @@ def _numeric_action(action: Mapping[str, object]) -> dict[str, float]:
     ####
 
 
-def _hummingbird_action(action: object) -> dict[str, object]:
-    if not isinstance(action, Mapping):
-        raise ValueError("Hummingbird episode action must be a mapping")
-    result: dict[str, object] = {}
-    limits = {"roll_rad": math.pi / 2.0, "pitch_rad": math.pi / 2.0, "yaw_rad": math.pi}
-    for name, limit in limits.items():
-        raw = action.get(name)
-        if isinstance(raw, bool) or raw is None:
-            raise ValueError(f"Hummingbird episode action {name!r} must be finite numeric")
-        numeric = _finite_number(raw, f"Hummingbird episode action {name!r}")
-        result[name] = max(-limit, min(limit, numeric))
-    thrust = action.get("thrust_ratio")
-    if isinstance(thrust, bool) or thrust is None:
-        raise ValueError("Hummingbird episode action 'thrust_ratio' must be finite numeric")
-    result["thrust_ratio"] = max(0.0, min(1.0, _finite_number(thrust, "Hummingbird episode action 'thrust_ratio'")))
-    motors = action.get("motors_enabled")
-    if not isinstance(motors, bool):
-        raise ValueError("Hummingbird episode action 'motors_enabled' must be boolean")
-    result["motors_enabled"] = motors
-    return result
-    ####
-
-
-def _hummingbird_state_payload(state: HummingbirdPseudo6DOFState) -> dict[str, object]:
-    return {
-        "time_s": state.time_s,
-        "position_m": list(state.position_m),
-        "velocity_m_s": list(state.velocity_m_s),
-        "attitude_rad": list(state.attitude_rad),
-        "attitude_rate_rad_s": list(state.attitude_rate_rad_s),
-        "battery_fraction": state.battery_fraction,
-        "thrust_n": state.thrust_n,
-        "contact": state.contact,
-    }
-    ####
-
-
-def _hummingbird_state_from_payload(payload: object) -> HummingbirdPseudo6DOFState:
-    from .trajectory.hummingbird_pseudo6dof import HummingbirdPseudo6DOFState
-
-    if not isinstance(payload, Mapping):
-        raise ValueError("Hummingbird episode checkpoint state must be a mapping")
-    vectors = {
-        name: _three_vector(payload.get(name), f"Hummingbird episode checkpoint {name}")
-        for name in ("position_m", "velocity_m_s", "attitude_rad", "attitude_rate_rad_s")
-    }
-    return HummingbirdPseudo6DOFState(
-        _finite_number(payload.get("time_s"), "Hummingbird episode checkpoint time_s"),
-        vectors["position_m"],
-        vectors["velocity_m_s"],
-        vectors["attitude_rad"],
-        vectors["attitude_rate_rad_s"],
-        _finite_number(payload.get("battery_fraction"), "Hummingbird episode checkpoint battery_fraction"),
-        _finite_number(payload.get("thrust_n"), "Hummingbird episode checkpoint thrust_n"),
-        bool(payload["contact"]),
-    )
-    ####
 
 
 def _episode_status(status: InteractiveStatus, closed: bool) -> EpisodeStatus:
@@ -2658,7 +1859,7 @@ def _episode_status(status: InteractiveStatus, closed: bool) -> EpisodeStatus:
 
 def _episode_status_literal(value: object) -> EpisodeStatus:
     if value not in {"ready", "active", "completed", "closed"}:
-        raise ValueError("invalid Hummingbird episode checkpoint status")
+        raise ValueError("invalid composition episode checkpoint status")
     return value
     ####
 
@@ -2694,6 +1895,20 @@ def _native_action_for_frame(
             raise ValueError(f"action channel {identifier!r} has no episode-native binding")
         result[native] = value
     return result
+    ####
+
+
+def native_action_for_frame(
+    contract: VehicleInterfaceContract,
+    action: ActionFrame,
+) -> dict[str, object]:
+    """Validate and lower a public semantic action frame for a plug-in runtime.
+
+    Package-owned parity and episode adapters use this stable contract seam
+    instead of depending on the core episode implementation details.
+    """
+
+    return _native_action_for_frame(contract, action)
     ####
 
 
@@ -2742,6 +1957,13 @@ def _status_frame(contract: VehicleInterfaceContract, observation: EpisodeObserv
         observation.values,
         observation.status,
     )
+    ####
+
+
+def status_frame_for_observation(contract: VehicleInterfaceContract, observation: EpisodeObservation) -> StatusFrame:
+    """Project a package-owned committed observation through the public status contract."""
+
+    return _status_frame(contract, observation)
     ####
 
 
@@ -2885,19 +2107,37 @@ def _json_safe(value: object) -> object:
     ####
 
 
+def __getattr__(name: str) -> object:
+    """Resolve optional family episode classes without importing their wheels."""
+
+    if name == "A320ReducedCompositionEpisode":
+        from taoryx.a320_composition_episode import A320ReducedCompositionEpisode
+
+        return A320ReducedCompositionEpisode
+    if name == "F16ReducedCompositionEpisode":
+        from taoryx.f16_composition_episode import F16ReducedCompositionEpisode
+
+        return F16ReducedCompositionEpisode
+    raise AttributeError(name)
+    ####
+
+
 __all__ = [
+    "A320ReducedCompositionEpisode",  # noqa: F822 - optional legacy export resolved through __getattr__.
+    "ActionFrame",
     "EpisodeChannel",
     "EpisodeObservation",
     "EpisodeStep",
-    "A320ReducedCompositionEpisode",
-    "F16ReducedCompositionEpisode",
-    "HummingbirdPseudoCompositionEpisode",
+    "F16ReducedCompositionEpisode",  # noqa: F822 - optional legacy export resolved through __getattr__.
     "LanguageBackedCompositionEpisode",
     "MissionCompositionEpisode",
     "ReducedFixedWingCompositionEpisode",
+    "StatusFrame",
     "X15LocalDirectWrenchCompositionEpisode",
     "VehicleCompositionEpisode",
+    "native_action_for_frame",
     "open_vehicle_composition_episode",
     "registered_episode_factory_ids",
+    "status_frame_for_observation",
     "validate_vehicle_composition_episode_contract",
 ]

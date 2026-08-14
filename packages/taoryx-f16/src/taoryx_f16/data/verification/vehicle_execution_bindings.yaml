@@ -1,0 +1,131 @@
+schema: taoryx.vehicle-execution-bindings/v1alpha1
+version: 1
+description: Explicit source-owned execution bindings for compiled vehicle compositions.
+  An entry is a public capability declaration, not a generic family fallback. Omitted
+  vehicle/fidelity/mission combinations are unavailable until their own native binding
+  exists.
+bindings:
+- family_id: f16_s119
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  operation: batch
+  status: runnable
+  execution_mode: source_native_autonomous
+  factory_id: reduced_fixed_wing_f16_source.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the capability-derived racetrack through the declared source-reduced
+    F-16 path.
+  claim_boundary: Source-reduced trajectory evidence; no direct-wrench or physical-surface
+    promotion.
+- family_id: f16_s119
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  operation: batch
+  status: runnable
+  execution_mode: source_native_autonomous
+  factory_id: reduced_fixed_wing_f16_source.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the named source-local F-16 attitude/rate bridge.
+  claim_boundary: Named response-law evidence only; no physical F-16 actuator allocation
+    claim.
+- family_id: f16_s119
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  operation: episode
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: reduced_fixed_wing_f16_episode.v1
+  batch_action_trace: not_applicable
+  description: Step the source-owned F-16 point-mass reduced runtime through bounded
+    kinematic guidance intent.
+  claim_boundary: Accepted-truth kinematic-guidance episode only; no physical surface
+    allocation, moment balance, batch/episode parity, or mission qualification claim.
+- family_id: f16_s119
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  operation: episode
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: reduced_fixed_wing_f16_episode.v1
+  batch_action_trace: not_applicable
+  description: Step the source-owned F-16 attitude-response pseudo-6DOF runtime through
+    bounded kinematic guidance intent.
+  claim_boundary: Accepted-truth attitude-response episode only; no physical surface
+    allocation, moment balance, batch/episode parity, or mission qualification claim.
+- family_id: f16_s119
+  mission: f16_local_physical_control_screen_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: f16_local_physical_control_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the source-trim F-16 one-second bounded direct-wrench local
+    controller screen.
+  claim_boundary: Local direct-wrench controlled-entry screen only; it is not a completed
+    racetrack, scheduled flight controller, or physical-effector allocation claim.
+- family_id: f16_s119
+  mission: f16_local_physical_control_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: f16_local_physical_control_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the source-trim F-16 one-second bounded allocated-surface local
+    controller screen.
+  claim_boundary: Local source-trim physical-allocation and actuator-overlay screen
+    only; it is not a scheduled-envelope or flight qualification claim.
+- family_id: f16_s119
+  mission: f16_local_physical_surface_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: f16_local_physical_surface_lqi_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the pinned F-16 fixed-altitude source-trim body-velocity LQI
+    recovery through bounded physical surface/throttle allocation.
+  claim_boundary: Local fixed-altitude body-velocity recovery only; it does not establish
+    integrated navigation, a racetrack, wind or mass rejection, a gain schedule, or
+    flight qualification.
+- family_id: f16_s119
+  mission: f16_local_physical_surface_lqr_schedule_interior_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: f16_local_physical_surface_lqr_schedule_interior_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute two retained body-w physical LQR recovery cases at each of
+    four independently source-retrimmed F-16 nodes.
+  claim_boundary: Held-node physical schedule-interior campaign only; it does not
+    establish continuous gain interpolation, a nonlinear node transition, navigation,
+    wind or mass rejection, a full envelope, or flight qualification.
+- family_id: f16_s119
+  mission: f16_local_physical_surface_lqi_schedule_interior_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: f16_local_physical_surface_lqi_schedule_interior_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute two retained source-feasible plus/minus 0.25 m/s body-w physical
+    LQI recovery cases at each of four independently source-retrimmed F-16 nodes.
+  claim_boundary: Held-node physical LQI schedule-interior campaign only; it does
+    not establish continuous gain interpolation, a nonlinear node transition, navigation,
+    wind or mass rejection, a full envelope, or flight qualification.
+- family_id: f16_s119
+  mission: f16_local_physical_surface_lqr_schedule_transition_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: f16_local_physical_surface_lqr_schedule_transition_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute four retained time-marching F-16 source-node LQR altitude-coordinate
+    transitions through explicit endpoint derivative/effectiveness blending and bounded
+    physical surface/throttle allocation.
+  claim_boundary: Bounded local schedule-transition evidence only; it does not establish
+    navigation, wind or mass robustness, a new aerodynamic database, a full envelope,
+    or flight qualification.

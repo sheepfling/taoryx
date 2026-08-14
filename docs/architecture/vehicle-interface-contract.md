@@ -263,6 +263,15 @@ session additionally implements body-frame roll-, pitch-, and yaw-rate
 references. Its roll/yaw path is explicitly labeled as a coupled engineering
 surrogate, not a source FCS, moment, actuator, or surface interface.
 
+The Hummingbird pseudo-6DOF session implements a multirotor-specific three-mode
+surface: aggregate attitude/thrust, local velocity plus yaw, and a live local
+waypoint. All three are caller-owned, session-selected, and explicitly
+bumpless. Velocity and waypoint modes lower continuously at the episode's
+integration boundaries into the existing five-coordinate aggregate plant
+seam; they do not add a second dynamics model or rename fixed-wing controls as
+multirotor controls. The physical individual-rotor LQI screen remains a
+separate batch-only realization and is not reachable through these profiles.
+
 The four canonical fidelity tiers map to expected, not mandatory, authority:
 
 | Fidelity tier | Primary semantic control | Required status boundary | Explicit nonclaim |
@@ -295,7 +304,7 @@ The rapid-turn development queue is:
 | --- | --- | --- | --- |
 | P0 | API stressor, analytical ballistic, analytical waypoint, Simple Aero | open loop/provider program, waypoint, flight path, energy, typed debug modes | Contract and streaming behavior before physical qualification |
 | P1 | Reduced A320 and F-16, then X8/B747 where executable | waypoint/route, flight path, normalized pilot axes; body rate only for a supporting pseudo-6DOF tier | 3DOF and pseudo-6DOF only |
-| P2 | Hummingbird, then future helicopter/tiltrotor models | attitude/body rate plus family-specific collective/cyclic/pedal or nacelle profiles | No fixed-wing axis relabeling and no rotor-allocation claim |
+| P2 | Hummingbird implemented; future helicopter/tiltrotor models remain | Hummingbird attitude/thrust, velocity/yaw, and waypoint now; future family-specific collective/cyclic/pedal or nacelle profiles | No fixed-wing axis relabeling and no rotor-allocation claim |
 | P3 | Rockets, missiles, air breathers, hypersonic gliders | destination/waypoint/route, flight path, energy, attitude/rate where implemented | Source programs remain provider-owned unless an external seam exists |
 | P4 | Spacecraft and proximity operations | orbit target, relative pose/motion, attitude, body rate | No invented thruster, wheel, or RCS allocation |
 | Separate qualification track | Any rigid-body source model | direct wrench and direct effectors | Retain discovery, but do not put these paths in the rapid P0/P1 loop |
@@ -307,7 +316,7 @@ direct-wrench or effector models during each reduced-order API edit.
 
 Fidelity never causes a channel to masquerade as a different thing. For
 example, a pseudo-6DOF Hummingbird can publish
-propulsion.command.fraction and propulsion.thrust.aggregate, but rotor.1.rpm
+propulsion.command.fraction and propulsion.output.thrust.aggregate, but rotor.1.rpm
 is not applicable until the selected realization models it.
 
 ## Canonical action vocabulary
@@ -318,7 +327,7 @@ a literal throttle, elevator, or rotor command:
 | Domain | Representative IDs |
 | --- | --- |
 | Propulsion | propulsion.command.fraction, propulsion.enable, propulsion.mode |
-| Translation | motion.velocity.command, motion.acceleration.command, motion.position.command |
+| Translation | velocity.north.command, velocity.east.command, velocity.vertical.command |
 | Flight path | flight.bank.command, flight.heading.command, flight.path_angle.command, flight.altitude.command, flight.airspeed.command |
 | Body motion | attitude.command, body_rate.command, angular_acceleration.command |
 | Wrench | wrench.force.command, wrench.moment.command |
@@ -333,6 +342,24 @@ the family binding says it is.
 The schema may expose vehicle-specific semantic controls in a namespaced
 extension, such as rotorcraft.nacelle_angle.command or spacecraft.dipole.command.
 An extension must not reuse a canonical ID with altered physics.
+
+### Package-owned interface additions
+
+When a family needs a semantic control or readback that is not a shared
+family-wide primitive, its wheel may register a lazy
+`vehicle_interface_extension` contribution. The extension is additive only:
+it may supply channels and authority profiles for its declared family, while
+the host continues to construct the base contract and validates duplicate
+IDs, authority membership, availability, units, bounds, value spaces, and
+claim boundaries. A selected plug-in catalog is carried through composition,
+batch, session, witness, and parity paths, so resolving one extension never
+requires discovery of unrelated vehicle wheels.
+
+For example, the F-16 pseudo-6DOF plug-in adds bounded body-rate references
+and committed axis readbacks. Its status binding accepts the exact scalar
+episode readback or the indexed batch body-rate vector present at the
+committed boundary; it does not infer a physical flight-control system,
+effector allocation, or missing telemetry.
 
 ## Canonical status and resource vocabulary
 
@@ -657,6 +684,49 @@ law. This is in-stream guidance authority, not a second trajectory API. A
 transport-level heartbeat/deadman policy is not yet part of this contract and
 must not be inferred from held-action timing.
 
+### Hummingbird quadcopter streaming profiles
+
+The runnable Hummingbird `pseudo_6dof` composition opts into its default
+`body_motion_response` profile when neither the prepared composition nor the
+open request selects another mode. A reusable composition can instead set
+`startup_authority_profile_id` to `velocity_yaw_command` or
+`live_waypoint_guidance`. The same session can transfer among all three
+profiles because each declares `switching_policy="explicit_bumpless"`.
+
+| Profile | Semantic actions | Units and bounds |
+| --- | --- | --- |
+| `body_motion_response` | roll, pitch, yaw; aggregate thrust fraction; propulsion enable | roll/pitch `rad` in `[-pi/2, pi/2]`; yaw `rad` in `[-pi, pi]`; thrust `[0,1]`; boolean enable |
+| `velocity_yaw_command` | north, east, positive-up vertical velocity; yaw; propulsion enable | north/east `m/s` in `[-5,5]`; vertical `m/s` in `[-3,3]`; yaw and enable as above |
+| `live_waypoint_guidance` | north, east, altitude, capture radius, horizontal/vertical speed limits; yaw; propulsion enable | north/east `m` in `[-1e6,1e6]`; altitude `m` in `[0,10000]`; radius `m` in `[0.05,1000]`; horizontal speed `m/s` in `[0,5]`; vertical speed `m/s` in `[0,3]` |
+
+The velocity adapter closes a bounded translational response into roll, pitch,
+yaw, and battery-compensated aggregate thrust. The waypoint adapter first
+maps position error and its speed limits to a velocity target, then uses the
+same translational response. `lowered_action` exposes the final
+`roll_rad`/`pitch_rad`/`yaw_rad`/`thrust_ratio`/`motors_enabled` request, while
+`lowering_evidence` exposes target velocity, desired acceleration, requested
+aggregate thrust, battery availability, limiting, and waypoint capture state.
+
+Committed readback includes scalar roll/pitch/yaw, north/east/positive-up
+vertical velocity, horizontal speed, propulsion enable, achieved aggregate
+thrust and fraction, battery fraction, waypoint range/capture/status, and the
+existing contact and body-state channels. `control.controller.method` names
+the active attitude response, bounded velocity response, or waypoint/velocity
+cascade, and `lowering_evidence` publishes its gains and limits so controller
+analysis can compare the actual adapters without implying a tuned or qualified
+physical flight-control system. Every compatible action declares a
+same-unit achieved binding; capture radius deliberately reports
+`achievement_status="not_observed"` because it is a tolerance, not an achieved
+state. At or below the declared battery depletion threshold the runtime
+authority mask reports `depleted` and reason code `battery_depleted` for every
+action instead of accepting a command that the plant cannot realize.
+
+No private sensor model is introduced by these adapters. `truth_debug` exposes
+the standard canonical committed status, while `declared_sensor` continues to
+sample only the composition-selected canonical channel IDs through Taoryx's
+shared cadence, latency, error, validity, and checkpoint machinery. Adding a
+guidance output does not silently add it to a declared sensor profile.
+
 Fidelity and control abstraction are independent axes. A higher-fidelity plant
 may expose fewer externally selectable modes, while a reduced plant may expose
 several well-defined adapters:
@@ -676,7 +746,7 @@ ballistic coast, source-owned controller, terminal lifecycle, resource
 depletion, or an undeclared navigator can make it absent or temporarily
 unavailable.
 
-The provider-neutral low-fidelity witnesses use the same contract. Analytical
+The provider-neutral low-fidelity witnesses and Hummingbird use the same contract. Analytical
 ballistic flight selects a locked, zero-action `open_loop_coast` profile.
 Analytical waypoint flight can hand off among configured provider guidance,
 three-channel kinematic velocity commands, and five-channel live waypoint
@@ -686,6 +756,8 @@ and event repeat policy. Simple Aero defaults to its provider-generated
 schedule and may switch to direct throttle only; its generated bank value is
 reported but has no interactive steering claim. Each witness preserves time,
 sequence, and checkpointed active-profile state across accepted handoffs.
+Hummingbird additionally proves a physical-family-specific velocity/yaw to
+live-waypoint handoff with battery-aware availability and no rotor promotion.
 
 CADAC persistent source cases advertise a zero-action
 `source_program_control` profile instead of manufacturing external controls.
@@ -801,8 +873,9 @@ discrete. A newly added native channel must declare a `ValueSpaceSpec` or be
 added to the centrally reviewed mapping; callers may not infer topology from
 its unit or spelling. The contract maps the source-runtime X8 and B747
 altitude, speed, and mass values into SI and retains their original source-unit
-values only in the raw sidecar. Hummingbird maps bounded
-body-motion/aggregate-thrust commands and its engineering battery reserve.
+values only in the raw sidecar. Hummingbird maps bounded aggregate-attitude,
+velocity/yaw, and live-waypoint commands into its aggregate-thrust seam and
+publishes its engineering battery reserve and achieved-thrust limitation.
 
 The native debug mapping is not a generic name heuristic. For the retained
 source-table X8/B747 records it explicitly declares source-degree headings and
@@ -849,8 +922,9 @@ This is intentionally not an effector-promotion milestone:
   elevon or surface allocation;
 - Hummingbird remains aggregate thrust-vector pseudo-6DOF, not individual
   rotor allocation;
-- sensor profiles, direct-wrench episode bindings, and surface-allocated
-  runtime telemetry remain planned; and
+- direct-wrench episode bindings and surface-allocated runtime telemetry remain
+  separate from the Hummingbird pseudo-6DOF stream; declared Hummingbird sensor
+  profiles use the shared committed-boundary sensor machinery; and
 - staged NESC, the source-pinned X-15-scaled reachability witness, and
   passive-body contracts explicitly expose no invented interactive control
   path. In particular, the X-15 witness's `response_law` label describes its

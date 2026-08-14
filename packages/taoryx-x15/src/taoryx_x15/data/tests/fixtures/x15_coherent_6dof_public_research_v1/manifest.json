@@ -1,0 +1,257 @@
+{
+  "dataset_name": "x15_coherent_6dof_public_research_v1",
+  "files": [
+    {
+      "bytes": 1774,
+      "path": "DATA_DICTIONARY.md",
+      "sha256": "5f5e3bce80b71d1d18137d73efcc77a3604abedad28ee5365126c44fcf7b02a3"
+    },
+    {
+      "bytes": 2145,
+      "path": "MODEL_FIDELITY.md",
+      "sha256": "58af2b7bf76d22856f053f8a521c3ff090c9138ec96c718727966fceb8540501"
+    },
+    {
+      "bytes": 574,
+      "path": "NOTICE.md",
+      "sha256": "1b655f00e3c6a79d9748dc99e70891ec229a9692e293a1af8aeb260fea3a7be2"
+    },
+    {
+      "bytes": 2262,
+      "path": "README.md",
+      "sha256": "def280c1d99db96738b845922673e6ab4ae2a628b788d01bb70fd83a9bea0260"
+    },
+    {
+      "bytes": 6350,
+      "path": "aero/evaluator.py",
+      "sha256": "e277b57d05dda4bbe8164f060553dfa098e6c8a0870422e98557536dd1f9200f"
+    },
+    {
+      "bytes": 729126,
+      "path": "aero/grids/combined_controls_sample.csv",
+      "sha256": "9443fae4fb09e2a007c99f39446f4cb5a3e405050b53d3d937c4b7157e1dbe27"
+    },
+    {
+      "bytes": 10904389,
+      "path": "aero/grids/differential_stabilator_grid.csv",
+      "sha256": "2ed1398ae918a5f7ac6e4a74a83c12befe08791a9687823d4abce0344d152cc6"
+    },
+    {
+      "bytes": 8378959,
+      "path": "aero/grids/rudder_grid.csv",
+      "sha256": "41e097d6a9f1fd85eeed3df7a06ec66da789103f2b845ce5cfeb43b9cc4c6036"
+    },
+    {
+      "bytes": 921820,
+      "path": "aero/grids/static_grid_zero_controls.csv",
+      "sha256": "32803e8f6ec5a86d970016044b0293b01d554ffb3884aa404b1a27871a967ccc"
+    },
+    {
+      "bytes": 10632104,
+      "path": "aero/grids/symmetric_stabilator_grid.csv",
+      "sha256": "9eea786196700a6b1b3de00d7d5e8bf1c12f1b7f0195347cab343783414847c0"
+    },
+    {
+      "bytes": 1541,
+      "path": "aero/source_tables/cdmin_vs_mach.csv",
+      "sha256": "5383da7c6df33cc83b28ac76d0b809fc9c362d1f5bbcda86a53dacccd92006a8"
+    },
+    {
+      "bytes": 3411,
+      "path": "aero/source_tables/cl_mach_altitude_correction.csv",
+      "sha256": "55e28264f11a2cca27ce0acbb00c6903cc98d6955a269980513a41abe41b47a4"
+    },
+    {
+      "bytes": 579,
+      "path": "aero/source_tables/clalpha_vs_mach.csv",
+      "sha256": "7bdd15583f97bcc802a43f485572f73f7ac00a961802a04deda400b1a5d11b45"
+    },
+    {
+      "bytes": 1235,
+      "path": "aero/source_tables/clda_vs_mach_altitude.csv",
+      "sha256": "62d4722a5ead66e5e954e086e845ef622925adaed731309893e6f689465b4e51"
+    },
+    {
+      "bytes": 781,
+      "path": "aero/source_tables/clde_vs_mach.csv",
+      "sha256": "e4deccd43e64af7674ad8ce3f0e2ca4cdaf936c674385f1dfb823fd12c85359b"
+    },
+    {
+      "bytes": 4271,
+      "path": "aero/source_tables/cm_mach_altitude_correction.csv",
+      "sha256": "1b9924cf8a03eeaa85d8b28c234b255dc4a3b5321102eb004035bfbc9e602589"
+    },
+    {
+      "bytes": 517,
+      "path": "aero/source_tables/cmde_vs_mach.csv",
+      "sha256": "853b4e89313d8ede7733f98712eefc86aeed0c2a9360db34c62315e5855256cc"
+    },
+    {
+      "bytes": 2192,
+      "path": "aero/source_tables/constant_derivatives.csv",
+      "sha256": "dd1d9557dbf55bd245421a76cc5035b3ea296ce64e9d37a04aaf01f0d6186f18"
+    },
+    {
+      "bytes": 710,
+      "path": "aero/source_tables/induced_drag_factor_vs_mach.csv",
+      "sha256": "abf409abee748f1c83369d48e734a020c07003a2cb0127590d7b49480bd8c71d"
+    },
+    {
+      "bytes": 630,
+      "path": "aero/uncertainty_status.csv",
+      "sha256": "24967db69e8bea312a5eb6a24b09e53b247278d7a5da36b64800b1216aa875a1"
+    },
+    {
+      "bytes": 1224,
+      "path": "aero/validity_envelope.csv",
+      "sha256": "20cad86adecd8d8b67b56ba12a553ff809d1f624589a3404dcbd62b3b36a95d0"
+    },
+    {
+      "bytes": 790,
+      "path": "candidate_comparison.csv",
+      "sha256": "6e84fbbf3c7f2289401d54ed91c78d8914419f0aae9920de92d5a1d64860232e"
+    },
+    {
+      "bytes": 406,
+      "path": "checks/source_vs_nasa_anchor_comparison.csv",
+      "sha256": "2a8170977bd61ee7a5621ccab40d9eaf946122e96320138249951f383b312a6b"
+    },
+    {
+      "bytes": 978,
+      "path": "checks/validation_report.json",
+      "sha256": "97ded045d379419b6151b0877a49ea5a4b231221f493316f73e42b2cb4495619"
+    },
+    {
+      "bytes": 670,
+      "path": "controls/actuator_limits.csv",
+      "sha256": "956d2d83d6c94fb9917f2f85a3620e6e3a7ab1474d69d2e21fa3074785767036"
+    },
+    {
+      "bytes": 538,
+      "path": "controls/control_coordinate_mapping.csv",
+      "sha256": "8081ff1218182bef3f5b39fdb56bf903ea2894772c549832c21dfc1d053c16d2"
+    },
+    {
+      "bytes": 854,
+      "path": "controls/pitch_command_schedule.csv",
+      "sha256": "3cb142e27c4118b863b8cbcf1d619531d80f3c6f86ebdcd93430c527e983e654"
+    },
+    {
+      "bytes": 566,
+      "path": "controls/unavailable_items.csv",
+      "sha256": "99a99ef81368c87ab2082e1098d649f725eabca003a2789bccdd4cce7efb998e"
+    },
+    {
+      "bytes": 1393,
+      "path": "coverage_matrix.csv",
+      "sha256": "2ececb9a04b6f14de825fd25d2cfc099d0f4853526f2dc816e3bc66577bef66b"
+    },
+    {
+      "bytes": 569,
+      "path": "environment/model_notes.md",
+      "sha256": "5473e839cdd736f38aa0ead817772b22f5cf4a77cbc94405635f66b914da4df1"
+    },
+    {
+      "bytes": 20472,
+      "path": "environment/us_standard_atmosphere_1976.csv",
+      "sha256": "0b74d1989ca841e02f89b0176f33e946ff716f17fef6d5dad028f09b71f7ec5c"
+    },
+    {
+      "bytes": 1153,
+      "path": "geometry/conventions.md",
+      "sha256": "bef4bda110b1aaa05359515b7569e80daf2038e84c7e82f4029e91e55c5a3fb8"
+    },
+    {
+      "bytes": 1106,
+      "path": "geometry/reference_geometry.csv",
+      "sha256": "02ebc96723475d06634f181edfbf7b0b79a56c969e92f5dfa5042d2481d5298a"
+    },
+    {
+      "bytes": 923,
+      "path": "mass/burn_duration_scenarios.csv",
+      "sha256": "f339ce7219869c4fac50302108ad721712a2a5ac9f55beb3f7c0c58d569b0c7f"
+    },
+    {
+      "bytes": 658,
+      "path": "mass/jsbsim_empty_inertia.csv",
+      "sha256": "46d365d742f9091049a202e8d1a31ae02eda3e99ad4db6cda9613dcf0d90c864"
+    },
+    {
+      "bytes": 581,
+      "path": "mass/jsbsim_source_mass_model.csv",
+      "sha256": "40570eb393925cf3cbdc8b76279eb4319cdc7fbe1ee1a1b3a58475d4b1abc62e"
+    },
+    {
+      "bytes": 957,
+      "path": "mass/mass_model_notes.md",
+      "sha256": "131e1fbf06bed6e93b6d0fb4c1fc31514cbae2003d1347d8cb1527c3d339bd16"
+    },
+    {
+      "bytes": 311,
+      "path": "mass/nasa_anchor_mass_properties.csv",
+      "sha256": "96078e75fd58e18ecc56229a7362def8b6ba116b26d0cb9e89cc61094dae1d50"
+    },
+    {
+      "bytes": 66439,
+      "path": "mass/source_native_full_throttle_mass_cg_inertia_schedule.csv",
+      "sha256": "31daeda7fbbd1f92189eeae9b52140efd2fbd4bfcc2cb468323da845856f85fe"
+    },
+    {
+      "bytes": 1158,
+      "path": "metadata.json",
+      "sha256": "43d53d84803cb4a54e23944cb3b49224c1157afe2cba966157e8bf23685335b0"
+    },
+    {
+      "bytes": 710,
+      "path": "propulsion/events.csv",
+      "sha256": "31930944077625c7a96911834b9bcceda2c842c2e6b323ee9b6d6c8614f1fba9"
+    },
+    {
+      "bytes": 500,
+      "path": "propulsion/nasa_operational_envelope.csv",
+      "sha256": "93ced6022b31951f7dd3c4bb4ed1d6d2448fa950bd56cfc8e21dc6b85bc7fc6c"
+    },
+    {
+      "bytes": 25391,
+      "path": "propulsion/source_native_full_throttle_step_history.csv",
+      "sha256": "df3ee4a2616e50872042bb723a9e0456d73b9e501d711a34ce5ad227b6010c98"
+    },
+    {
+      "bytes": 2303,
+      "path": "propulsion/source_native_throttle_map.csv",
+      "sha256": "f0b7699c118f453b3da3a6d25509b6ce5b7f98767a1b2d36c4117043d60c6fac"
+    },
+    {
+      "bytes": 780,
+      "path": "propulsion/xlr99_parameters.csv",
+      "sha256": "d3928093c78ee8697093f1da01a6b106c4f2c4d0c76f5da26f71f5f541a6c19c"
+    },
+    {
+      "bytes": 226,
+      "path": "pyproject.toml",
+      "sha256": "9c7ff71bff55cda074612a35ccd76d88fa3dcfb291c4a36bad46a30dd5ee6479"
+    },
+    {
+      "bytes": 2975,
+      "path": "scripts/validate_dataset.py",
+      "sha256": "7e47de836579079848c42361c350406bafa09d20ef7b13c659809a38342c69b6"
+    },
+    {
+      "bytes": 1095,
+      "path": "shared_grid_definition.json",
+      "sha256": "97dbc912eea912b5649bdde831d38fa4ce07ebf05c2de594d80807dbabc36246"
+    },
+    {
+      "bytes": 2929,
+      "path": "sources.csv",
+      "sha256": "1a33ae691a9d9467980b4cb00f961dd27ab6f520eb15898474332d1594d4d425"
+    },
+    {
+      "bytes": 600,
+      "path": "thermal/model_requirements.csv",
+      "sha256": "6b6050c105935904d314d348db3532c8fbe2e5b29aa9b35598353a1a5a0ef773"
+    }
+  ],
+  "generated_date": "2026-07-15",
+  "version": "1.0.0"
+}

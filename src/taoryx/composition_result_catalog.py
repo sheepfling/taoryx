@@ -2040,6 +2040,8 @@ def _local_screen_composition_provenance(output_directory: Path) -> dict[str, ob
         composition = CompiledVehicleComposition.model_validate(payload)
         binding = resolve_vehicle_execution_binding(composition, "batch")
         if binding is None or binding.factory_id not in {
+            "hummingbird_local_direct_wrench_screen.v1",
+            "hl20_local_direct_wrench_screen.v1",
             "local_direct_wrench_screen.v1",
             "local_native_coordinate_lqi_screen.v1",
             "hl20_source_surface_pitch_authority_screen.v1",

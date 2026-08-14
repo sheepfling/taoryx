@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -12,11 +13,76 @@ from taoryx.mission_capability import (
     estimate_mission_capability,
     resolve_mission_capability_adapter,
 )
+from taoryx.plugins import PluginCatalog, PluginContribution, PluginMetadata, current_plugin_catalog
 from taoryx.vehicle_composition import CompositionValue, compile_vehicle_composition, load_vehicle_composition_request
 from taoryx.vehicle_execution_preflight import preflight_vehicle_composition
 from taoryx.vehicle_runtime_lowering import lower_vehicle_composition
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_explicit_capability_catalog_stays_active_for_plugin_callbacks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A family callback must not widen a focused host selection."""
+
+    metadata = PluginMetadata(
+        id="example.scoped-capability",
+        package="example-scoped-capability",
+        version="1.0.0",
+        api_version="1",
+        description="Scoped mission-capability callback fixture.",
+    )
+    catalog: PluginCatalog
+
+    class ScopeAwareAdapter:
+        id = "example.scoped-capability.adapter.v1"
+
+        def supports(self, _composition: object) -> bool:
+            assert current_plugin_catalog() is catalog
+            return True
+            ####
+
+        def estimate(self, _composition: object) -> mission_capability_module.MissionCapabilityEstimate:
+            assert current_plugin_catalog() is catalog
+            return mission_capability_module.MissionCapabilityEstimate(
+                adapter_id=self.id,
+                family_id="example_family",
+                mission_id="example_mission",
+                fidelity="point_mass_3dof",
+                feasibility="unknown",
+                diagnostics=(),
+                manifest={},
+                plan=object(),
+            )
+            ####
+
+        ####
+
+    adapter = ScopeAwareAdapter()
+    catalog = PluginCatalog(
+        plugins=(metadata,),
+        contributions=(PluginContribution("mission_capability_adapter", adapter.id, metadata, adapter),),
+        diagnostics=(),
+    )
+    composition = SimpleNamespace(
+        family_id="example_family",
+        mission="example_mission",
+        fidelity="point_mass_3dof",
+    )
+
+    def declared(*_args: object) -> str:
+        assert current_plugin_catalog() is catalog
+        return adapter.id
+        ####
+
+    monkeypatch.setattr(mission_capability_module, "declared_mission_capability_adapter", declared)
+
+    assert current_plugin_catalog() is None
+    assert resolve_mission_capability_adapter(composition, plugins=catalog) is adapter
+    assert estimate_mission_capability(composition, plugins=catalog).adapter_id == adapter.id
+    assert current_plugin_catalog() is None
+    ####
 
 
 def test_powered_fixed_wing_racetrack_uses_one_declared_capability_adapter() -> None:

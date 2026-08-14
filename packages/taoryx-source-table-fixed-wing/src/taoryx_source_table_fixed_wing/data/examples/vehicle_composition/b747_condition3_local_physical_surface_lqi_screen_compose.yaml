@@ -1,0 +1,10 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: b747-condition3-local-physical-surface-lqi-screen-v1
+vehicle: b747
+fidelity: rigid_body_6dof_surface_allocated
+initialization:
+  id: condition3_source_table_trim_local_point
+mission:
+  id: b747_condition3_local_physical_surface_lqi_screen_v1
+segments:
+  - id: condition3_source_table_physical_lqi_screen

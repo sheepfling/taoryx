@@ -19,7 +19,7 @@ from .family_adapter import (
 )
 from .family_adapter_registry import AdapterRegistrationError, FamilyAdapterRegistry
 from .fidelity_contracts import FidelityTier
-from .plugins import PluginCatalog, discover_plugins
+from .plugins import PluginCatalog, current_plugin_catalog, discover_plugins
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_composition_registry import mission_graph_execution_contract
 from .vehicle_execution_bindings import VehicleExecutionBindingError, resolve_vehicle_execution_binding
@@ -75,6 +75,7 @@ def lower_vehicle_composition(
     *,
     adapters: FamilyAdapterRegistry | None = None,
     preflight_result: VehicleExecutionPreflight | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> RuntimeLoweringResult:
     """Build only the adapter named by the composition's native handoff.
 
@@ -84,7 +85,7 @@ def lower_vehicle_composition(
     passive body with a generic direct-force implementation.
     """
 
-    registry = adapters or build_vehicle_runtime_adapter_registry()
+    registry = adapters or build_vehicle_runtime_adapter_registry(plugins=plugins)
     requested_adapter = str(composition.native_adapter_handoff["adapter_id"])
     required_intents = tuple(sorted({intent for segment in composition.segments for intent in segment.required_control_intents}))
     if (
@@ -121,7 +122,7 @@ def lower_vehicle_composition(
                 f"registry adapter {registration.adapter_id!r} does not match composed adapter {requested_adapter!r}",
             )
         adapter = registry.build(composition.family_id, composition.fidelity)
-        preflight = preflight_result or preflight_vehicle_composition(composition)
+        preflight = preflight_result or preflight_vehicle_composition(composition, plugins=plugins)
         if preflight.status == "blocked":
             failed = ", ".join(check.id for check in preflight.checks if not check.passed)
             return _blocked(
@@ -153,7 +154,9 @@ def build_vehicle_runtime_adapter_registry(
     families through the same fail-closed registry contract.
     """
 
-    catalog = plugins or discover_plugins(include_external=include_external_plugins)
+    catalog = plugins if plugins is not None else current_plugin_catalog()
+    if catalog is None:
+        catalog = discover_plugins(include_external=include_external_plugins)
     return catalog.build_family_adapter_registry()
     ####
 

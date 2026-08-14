@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
-
 from taoryx.x15_maneuvers import X15ManeuverSpec, load_x15_maneuver_catalog, settled_x15_maneuvers
+from taoryx_x15.resources import model_resource_root
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = model_resource_root()
 CATALOG_PATH = ROOT / "verification/x15_maneuver_catalog.yaml"
 
 pytestmark = pytest.mark.segment

@@ -6,15 +6,15 @@ import json
 from pathlib import Path
 
 import pytest
-
+from taoryx.a320_reduced_batch_episode_parity import verify_serialized_a320_reduced_batch_episode_parity
 from taoryx.composition_batch_episode_parity import (
     verify_composition_batch_episode_parity,
     verify_serialized_composition_batch_episode_parity,
 )
+
 from taoryx.composition_episode import open_vehicle_composition_episode
 from taoryx.composition_policy import PolicyDecision, run_composition_policy, write_composition_policy_trace
 from taoryx.language_backed_batch_episode_parity import verify_serialized_language_backed_batch_episode_parity
-from taoryx.reduced_fixed_wing_batch_episode_parity import verify_serialized_reduced_fixed_wing_batch_episode_parity
 from taoryx.runtime.cli import main
 from taoryx.vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
 
@@ -155,11 +155,9 @@ def test_language_backed_pseudo6dof_batch_and_episode_replay_the_same_trace(comp
     [
         "a320_racetrack_capability_3dof_compose.yaml",
         "a320_racetrack_capability_pseudo6dof_compose.yaml",
-        "f16_racetrack_capability_3dof_compose.yaml",
-        "f16_racetrack_capability_pseudo6dof_compose.yaml",
     ],
 )
-def test_reduced_fixed_wing_batch_and_episode_replay_the_same_kinematic_guidance_trace(composition_name: str) -> None:
+def test_a320_batch_and_episode_replay_the_same_kinematic_guidance_trace(composition_name: str) -> None:
     composition = _composition(composition_name)
     episode = open_vehicle_composition_episode(composition)
     calls = 0
@@ -176,10 +174,10 @@ def test_reduced_fixed_wing_batch_and_episode_replay_the_same_kinematic_guidance
         ####
 
     trace = run_composition_policy(episode, policy, authority_profile_id="kinematic_guidance")
-    report = verify_serialized_reduced_fixed_wing_batch_episode_parity(composition, trace.as_dict())
+    report = verify_serialized_a320_reduced_batch_episode_parity(composition, trace.as_dict())
 
     assert report.status == "pass"
-    assert report.batch_factory_id in {"reduced_fixed_wing_openap.v1", "reduced_fixed_wing_f16_source.v1"}
+    assert report.batch_factory_id == "reduced_fixed_wing_openap.v1"
     assert len(report.steps) == 2
     assert all(item.status == "pass" for item in report.steps)
     ####

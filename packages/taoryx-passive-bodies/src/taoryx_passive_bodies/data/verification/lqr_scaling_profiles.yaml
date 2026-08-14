@@ -1,0 +1,6 @@
+schema_version: 1
+id: taoryx_lqr_scaling_profiles_v1
+claim_boundary: Provisional dimensionless controller-design scales for research-surrogate
+  plants. These normalize numerical conditioning; they are not source-derived handling-quality
+  requirements or validated gains.
+profiles: {}

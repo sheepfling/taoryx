@@ -1,0 +1,20 @@
+schema: taoryx.vehicle-execution-parity-witnesses/v1alpha1
+version: 1
+description: One deterministic, short semantic action trace for every exact registered
+  batch/episode parity pair. These are kernel/status parity witnesses, not mission
+  trajectories or physical-effector qualification cases.
+witnesses:
+- id: x15-local-direct-wrench
+  composition: examples/vehicle_composition/x15_local_direct_wrench_screen_compose.yaml
+  authority_profile_id: direct_wrench
+  actions:
+  - values:
+      wrench.force.command:
+      - 1000.0
+      - 0.0
+      - 0.0
+      wrench.moment.command:
+      - 0.0
+      - 50.0
+      - 0.0
+    duration_s: 0.004

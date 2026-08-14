@@ -1,9 +1,10 @@
-"""Declared source-local direct-wrench screen definitions.
+"""Declared plug-in-owned local direct-wrench controller screens.
 
-These screens are deliberately narrow bridge evidence.  A definition binds a
-single family-owned source operating point to the common local LQR evaluator;
-it does not turn that point into a route mission, trim result, or physical
-effector-allocation claim.
+The common host knows how to validate, execute, and advertise a local
+direct-wrench screen.  It does not know which vehicle module builds the local
+source plant.  A vehicle package contributes that exact factory and static
+contract through this registry, so a focused plug-in need not import an
+aggregate compatibility package merely to run its own controller witness.
 """
 
 from __future__ import annotations
@@ -11,15 +12,19 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from copy import deepcopy
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
-from .local_direct_wrench import LocalDirectWrenchScreenConfig
-from .vehicle_composition import CompiledVehicleComposition
+if TYPE_CHECKING:
+    from .local_direct_wrench import LocalDirectWrenchScreenConfig
+    from .plugins import PluginCatalog
+    from .vehicle_composition import CompiledVehicleComposition
 
 
 @dataclass(frozen=True, slots=True)
 class LocalDirectWrenchScreenDefinition:
-    """One exact family-owned source-local screen declaration."""
+    """One exact family-owned source-local direct-wrench endpoint."""
 
+    id: str
     family_id: str
     mission_id: str
     initialization_id: str
@@ -35,6 +40,8 @@ class LocalDirectWrenchScreenDefinition:
     def __post_init__(self) -> None:
         """Reject incomplete static metadata without constructing a controller."""
 
+        if not self.id.strip():
+            raise ValueError("local direct-wrench definitions require an ID")
         required = {
             "schema",
             "id",
@@ -48,6 +55,8 @@ class LocalDirectWrenchScreenDefinition:
         missing = sorted(required - set(self.advertisement))
         if missing:
             raise ValueError(f"local direct-wrench advertisement is missing: {', '.join(missing)}")
+        if self.advertisement["id"] != self.id:
+            raise ValueError("local direct-wrench advertisement ID must match its definition")
         if self.advertisement["fidelity"] != "rigid_body_6dof_direct_wrench":
             raise ValueError("local direct-wrench advertisements require direct-wrench fidelity")
         if self.advertisement["control_realization"] != "direct_wrench":
@@ -76,231 +85,215 @@ class LocalDirectWrenchScreenDefinition:
             and composition.fidelity == "rigid_body_6dof_direct_wrench"
         )
         ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class LocalDirectWrenchScreenRegistry:
+    """Fail-closed typed lookup for plug-in-owned direct-wrench screens."""
+
+    definitions: tuple[LocalDirectWrenchScreenDefinition, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Reject duplicate public identities and endpoint selections."""
+
+        identifiers = tuple(item.id for item in self.definitions)
+        if len(identifiers) != len(set(identifiers)):
+            raise ValueError("local direct-wrench registry has duplicate IDs")
+        selections = tuple(
+            (
+                item.family_id,
+                item.mission_id,
+                "rigid_body_6dof_direct_wrench",
+                item.initialization_id,
+            )
+            for item in self.definitions
+        )
+        if len(selections) != len(set(selections)):
+            raise ValueError("local direct-wrench registry has duplicate endpoint selections")
+        ####
+
+    def resolve(
+        self,
+        composition: CompiledVehicleComposition,
+    ) -> LocalDirectWrenchScreenDefinition | None:
+        """Resolve one exact composition endpoint without a family fallback."""
+
+        return next((item for item in self.definitions if item.supports(composition)), None)
+        ####
+
+    def advertisement(
+        self,
+        *,
+        family_id: str | None,
+        mission_id: str | None,
+        fidelity: str,
+    ) -> dict[str, object] | None:
+        """Return one exact static screen record without constructing a plant."""
+
+        if family_id is None or mission_id is None or fidelity != "rigid_body_6dof_direct_wrench":
+            return None
+        definition = next(
+            (
+                item
+                for item in self.definitions
+                if item.family_id == family_id and item.mission_id == mission_id
+            ),
+            None,
+        )
+        return definition.public_advertisement() if definition is not None else None
+        ####
 
     ####
 
 
-def local_direct_wrench_screen_definitions() -> tuple[LocalDirectWrenchScreenDefinition, ...]:
-    """Return installed source-local direct-wrench screens in stable order."""
+class LocalDirectWrenchScreenCapabilityAdapter:
+    """Expose one bounded authority contract for a pinned local source screen.
 
-    from .hl20_adapter import (
-        build_hl20_local_direct_wrench_lqi_screen_config,
-        build_hl20_local_direct_wrench_screen_config,
-    )
-    from .source_table_multirotor import build_hummingbird_local_direct_wrench_screen_config
-    from .x15_adapter import (
-        build_x15_local_direct_wrench_lqi_screen_config,
-        build_x15_local_direct_wrench_screen_config,
-    )
+    This generic adapter is host-owned because its lowering semantics and
+    output contract are shared.  Its definition and configuration factory stay
+    strictly vehicle-owned through ``LocalDirectWrenchScreenDefinition``.
+    """
 
-    return (
-        LocalDirectWrenchScreenDefinition(
-            family_id="hummingbird",
-            mission_id="hummingbird_local_direct_wrench_screen_v1",
-            initialization_id="source_individual_rotor_hover_local_point",
-            segment_id="local_wrench_recovery_screen",
-            capability_adapter_id="taoryx.hummingbird.local_direct_wrench_screen.capability.v1",
-            config_factory=build_hummingbird_local_direct_wrench_screen_config,
-            advertisement=_direct_wrench_advertisement(
-                id="hummingbird-source-hover-local-direct-wrench-v1",
-                method="lqr",
-                operations=("batch",),
-                force_limit_n=0.25,
-                force_z_limit_n=0.50,
-                moment_limit_nm=0.01,
-                fixed_cadence_s=0.002,
-                screen_duration_s=2.0,
-                claim_boundary=(
-                    "The wrench is an internally generated comparator input after source-hover rotor trim. "
-                    "It bypasses allocation and is not an externally owned rotor or flight-control command."
+    def __init__(self, definition: LocalDirectWrenchScreenDefinition) -> None:
+        self.definition = definition
+        self.id = definition.capability_adapter_id
+        ####
+
+    def supports(self, composition: CompiledVehicleComposition) -> bool:
+        return self.definition.supports(composition)
+        ####
+
+    def estimate(self, composition: CompiledVehicleComposition) -> Any:
+        """Return the source-pinned local state, cadence, and wrench contract."""
+
+        from .local_direct_wrench_mission_translation import compile_local_direct_wrench_screen_mission
+        from .mission_capability import MissionCapabilityEstimate
+
+        config = self.definition.config_factory()
+        plan = compile_local_direct_wrench_screen_mission(
+            composition,
+            family_id=self.definition.family_id,
+            mission_id=self.definition.mission_id,
+            initialization_id=self.definition.initialization_id,
+            segment_id=self.definition.segment_id,
+            screen_config_id=config.id,
+        )
+        authority_span = {
+            axis: float(config.limits.upper[axis]) - float(config.limits.lower[axis])
+            for axis in config.limits.axes
+        }
+        rate_limited_axes = tuple(
+            axis for axis in config.limits.axes if config.limits.rate_limit_per_s[axis] is not None
+        )
+        manifest = plan.manifest()
+        capability: dict[str, Any] = {
+            "control_realization": "direct_wrench",
+            "participating_nonlinear_plant": True,
+            "physical_effector_allocation": False,
+            "source_physical_trim": False,
+            "navigation_guidance": False,
+            "screen_config_id": config.id,
+            "plant_id": config.plant_id,
+            "state_names": list(config.state_names),
+            "assessment_state_names": list(config.assessment_state_names or config.state_names),
+            "integration_dt_s": config.dt_s,
+            "screen_duration_s": config.duration_s,
+            "controller_method": config.controller_method,
+            "integral_output_names": list(config.lqi_result.output_names) if config.lqi_result is not None else [],
+            "controller_tuning_campaign_id": config.lqi_campaign_id,
+            "controller_screen_execution": {
+                "status": f"executed_by_this_{config.controller_method}_screen",
+                "mission_id": self.definition.mission_id,
+                "capability_adapter_id": self.id,
+                "operations": ["validate", "batch"],
+                "control_realization": "direct_wrench",
+            },
+            "persistent_disturbance_status": "not_executable_without_a_declared_source_derivative_environment",
+            "claim_boundary": self.definition.claim_boundary,
+            "direct_wrench_limits": {
+                "lower": dict(config.limits.lower),
+                "upper": dict(config.limits.upper),
+                "rate_limit_per_s": dict(config.limits.rate_limit_per_s),
+                "authority_span": authority_span,
+                "rate_limited_axes": list(rate_limited_axes),
+            },
+        }
+        manifest["capability"] = capability
+        if self.definition.paired_lqi_mission_id is not None:
+            if (
+                self.definition.paired_lqi_capability_adapter_id is None
+                or self.definition.paired_lqi_campaign_id is None
+            ):
+                raise ValueError("paired local direct-wrench LQI advertisement is incomplete")
+            capability["offset_free_tuning_candidate"] = {
+                "campaign_id": self.definition.paired_lqi_campaign_id,
+                "method": "lqi",
+                "availability": "executed_by_paired_composition_screen",
+                "controller_screen_execution": {
+                    "status": "executed_by_paired_lqi_screen",
+                    "mission_id": self.definition.paired_lqi_mission_id,
+                    "capability_adapter_id": self.definition.paired_lqi_capability_adapter_id,
+                    "operations": ["validate", "batch"],
+                    "control_realization": "direct_wrench",
+                },
+                "persistent_disturbance_status": "not_executable_without_a_declared_source_derivative_environment",
+                "claim_boundary": (
+                    "The current public batch screen executes its declared LQR controller. The paired LQI mission "
+                    "executes one integrated body-speed recovery through the same bounded generalized direct-wrench "
+                    "bridge; neither screen establishes physical effectors, a wind or mass-variation environment, "
+                    "navigation, or a vehicle qualification result."
                 ),
+            }
+        return MissionCapabilityEstimate(
+            adapter_id=self.id,
+            family_id=composition.family_id,
+            mission_id=composition.mission,
+            fidelity=composition.fidelity,
+            feasibility="likely_feasible",
+            diagnostics=(
+                f"pinned {self.definition.family_id} local source-load screen declares finite six-axis direct-wrench "
+                "bounds and cadence; executing the recovery screen remains required to establish its local result",
             ),
-            claim_boundary=(
-                "This is a local Hummingbird source-hover direct-wrench comparator. It proves only the pinned "
-                "RotorPy-derived local derivative, bounded injected wrench, and local recovery result. It does "
-                "not prove rotor allocation, motor lag, translation, landing, battery behavior, wind rejection, "
-                "gain scheduling, or family qualification."
-            ),
-        ),
-        LocalDirectWrenchScreenDefinition(
-            family_id="x15",
-            mission_id="x15_local_direct_wrench_screen_v1",
-            initialization_id="source_release_glide_local_point",
-            segment_id="local_wrench_recovery_screen",
-            capability_adapter_id="taoryx.x15_local_direct_wrench_screen.capability.v1",
-            config_factory=build_x15_local_direct_wrench_screen_config,
-            advertisement=_direct_wrench_advertisement(
-                id="x15-source-release-glide-local-direct-wrench-v1",
-                method="lqr",
-                operations=("batch", "step"),
-                force_limit_n=4.0e5,
-                moment_limit_nm=1.0e6,
-                fixed_cadence_s=0.002,
-                screen_duration_s=2.0,
-                claim_boundary=(
-                    "The batch screen internally generates bounded injected wrench. The paired step endpoint accepts "
-                    "the same direct-wrench coordinates, but neither is a physical X-15 effector allocator."
-                ),
-            ),
-            claim_boundary=(
-                "This is a local X-15 source-load direct-wrench LQR recovery screen. It proves only the declared "
-                "source-local derivative, explicit bounded wrench projection, and local error-recovery result. It "
-                "does not prove X-15 flight trim, release, propulsion scheduling, navigation, terminal handoff, "
-                "physical stabilator/rudder/RCS allocation, or vehicle-family qualification."
-            ),
-            paired_lqi_mission_id="x15_local_direct_wrench_lqi_screen_v1",
-            paired_lqi_capability_adapter_id="taoryx.x15_local_direct_wrench_lqi_screen.capability.v1",
-            paired_lqi_campaign_id="x15-source-release-direct-wrench-lqi-v1",
-        ),
-        LocalDirectWrenchScreenDefinition(
-            family_id="x15",
-            mission_id="x15_local_direct_wrench_lqi_screen_v1",
-            initialization_id="source_release_glide_local_point",
-            segment_id="local_wrench_lqi_recovery_screen",
-            capability_adapter_id="taoryx.x15_local_direct_wrench_lqi_screen.capability.v1",
-            config_factory=build_x15_local_direct_wrench_lqi_screen_config,
-            advertisement=_direct_wrench_advertisement(
-                id="x15-source-release-glide-local-direct-wrench-lqi-v1",
-                method="lqi",
-                operations=("batch",),
-                force_limit_n=4.0e5,
-                moment_limit_nm=1.0e6,
-                fixed_cadence_s=0.01,
-                screen_duration_s=3.5,
-                campaign_id="x15-source-release-direct-wrench-lqi-v1",
-                integral_output_names=("u_m_s",),
-                claim_boundary=(
-                    "The LQI screen internally generates bounded injected wrench and emits its committed batch trace. "
-                    "It has no caller-driven step endpoint and does not establish physical X-15 effector allocation."
-                ),
-            ),
-            claim_boundary=(
-                "This is a local X-15 source-load direct-wrench body-speed LQI recovery screen. It proves only the "
-                "declared source-local derivative, bounded wrench projection, and one integrated body-speed error "
-                "recovery. It does not prove X-15 flight trim, release, propulsion scheduling, navigation, terminal "
-                "handoff, physical stabilator/rudder/RCS allocation, persistent-disturbance rejection, or "
-                "vehicle-family qualification."
-            ),
-        ),
-        LocalDirectWrenchScreenDefinition(
-            family_id="hl20_mod_k",
-            mission_id="hl20_local_direct_wrench_screen_v1",
-            initialization_id="source_subsonic_local_point",
-            segment_id="local_wrench_recovery_screen",
-            capability_adapter_id="taoryx.hl20_local_direct_wrench_screen.capability.v1",
-            config_factory=build_hl20_local_direct_wrench_screen_config,
-            advertisement=_direct_wrench_advertisement(
-                id="hl20-source-mach0p5-local-direct-wrench-v1",
-                method="lqr",
-                operations=("batch", "step"),
-                force_limit_n=2.0e5,
-                moment_limit_nm=1.0e6,
-                fixed_cadence_s=0.002,
-                screen_duration_s=4.0,
-                claim_boundary=(
-                    "The batch screen internally generates bounded injected wrench. The paired step endpoint accepts "
-                    "the same direct-wrench coordinates, but neither is a physical HL-20 surface allocator."
-                ),
-            ),
-            claim_boundary=(
-                "This is a local HL-20 source-load direct-wrench LQR recovery screen at one pinned subsonic "
-                "source condition. It proves only the declared source-local derivative, explicit bounded wrench "
-                "projection, and local error-recovery result. It does not prove flight trim, release, glide guidance, "
-                "high-energy performance, physical control-surface allocation, or lifting-body-family qualification."
-            ),
-            paired_lqi_mission_id="hl20_local_direct_wrench_lqi_screen_v1",
-            paired_lqi_capability_adapter_id="taoryx.hl20_local_direct_wrench_lqi_screen.capability.v1",
-            paired_lqi_campaign_id="hl20-source-subsonic-direct-wrench-lqi-v1",
-        ),
-        LocalDirectWrenchScreenDefinition(
-            family_id="hl20_mod_k",
-            mission_id="hl20_local_direct_wrench_lqi_screen_v1",
-            initialization_id="source_subsonic_local_point",
-            segment_id="local_wrench_lqi_recovery_screen",
-            capability_adapter_id="taoryx.hl20_local_direct_wrench_lqi_screen.capability.v1",
-            config_factory=build_hl20_local_direct_wrench_lqi_screen_config,
-            advertisement=_direct_wrench_advertisement(
-                id="hl20-source-subsonic-local-direct-wrench-lqi-v1",
-                method="lqi",
-                operations=("batch",),
-                force_limit_n=2.0e5,
-                moment_limit_nm=1.0e6,
-                fixed_cadence_s=0.01,
-                screen_duration_s=4.0,
-                campaign_id="hl20-source-subsonic-direct-wrench-lqi-v1",
-                integral_output_names=("u_m_s",),
-                claim_boundary=(
-                    "The LQI screen internally generates bounded injected wrench and emits its committed batch trace. "
-                    "It has no caller-driven step endpoint and does not establish physical HL-20 surface allocation."
-                ),
-            ),
-            claim_boundary=(
-                "This is a local HL-20 source-load direct-wrench body-speed LQI recovery screen at one pinned "
-                "subsonic source condition. It proves only the declared source-local derivative, bounded wrench "
-                "projection, and one integrated body-speed error recovery. It does not prove flight trim, release, "
-                "glide guidance, high-energy performance, physical control-surface allocation, persistent-disturbance "
-                "rejection, or lifting-body-family qualification."
-            ),
-        ),
-    )
+            manifest=manifest,
+            plan=plan,
+        )
+        ####
     ####
 
 
-def _direct_wrench_advertisement(
+def _registry(*, plugins: PluginCatalog | None = None) -> LocalDirectWrenchScreenRegistry:
+    """Resolve selected plug-in contributions before inspecting screen ownership."""
+
+    if plugins is None:
+        from .plugins import current_plugin_catalog, discover_plugins
+
+        plugins = current_plugin_catalog()
+        if plugins is None:
+            plugins = discover_plugins()
+    contributed = plugins.build_local_direct_wrench_screen_registry().definitions
+    return LocalDirectWrenchScreenRegistry(definitions=contributed)
+    ####
+
+
+def local_direct_wrench_screen_definitions(
     *,
-    id: str,
-    method: str,
-    operations: tuple[str, ...],
-    force_limit_n: float,
-    moment_limit_nm: float,
-    fixed_cadence_s: float,
-    screen_duration_s: float,
-    claim_boundary: str,
-    force_z_limit_n: float | None = None,
-    campaign_id: str | None = None,
-    integral_output_names: tuple[str, ...] = (),
-) -> dict[str, object]:
-    """Build one static direct-wrench screen advertisement from declared limits."""
+    plugins: PluginCatalog | None = None,
+) -> tuple[LocalDirectWrenchScreenDefinition, ...]:
+    """Return direct-wrench endpoints visible in the selected plug-in scope."""
 
-    force_z_limit = force_limit_n if force_z_limit_n is None else force_z_limit_n
-    controls = (
-        ("force_x_n", "N", force_limit_n),
-        ("force_y_n", "N", force_limit_n),
-        ("force_z_n", "N", force_z_limit),
-        ("moment_x_nm", "N m", moment_limit_nm),
-        ("moment_y_nm", "N m", moment_limit_nm),
-        ("moment_z_nm", "N m", moment_limit_nm),
-    )
-    return {
-        "schema": "taoryx.local-controller-screen-advertisement/v1alpha1",
-        "id": id,
-        "fidelity": "rigid_body_6dof_direct_wrench",
-        "operations": list(operations),
-        "control_realization": "direct_wrench",
-        "physical_effector_allocation": False,
-        "batch_action_trace": "emits_committed_interval_trace",
-        "controller": {
-            "method": method,
-            "campaign_id": campaign_id,
-            "integral_output_names": list(integral_output_names),
-            "fixed_cadence_s": fixed_cadence_s,
-            "screen_duration_s": screen_duration_s,
-        },
-        "direct_wrench_controls": [
-            {"id": name, "unit": unit, "lower": -limit, "upper": limit}
-            for name, unit, limit in controls
-        ],
-        "claim_boundary": claim_boundary,
-    }
+    return _registry(plugins=plugins).definitions
     ####
 
 
 def resolve_local_direct_wrench_screen_definition(
     composition: CompiledVehicleComposition,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> LocalDirectWrenchScreenDefinition | None:
-    """Resolve one exact screen without a nearest-family fallback."""
+    """Resolve a screen without family or fidelity fallback."""
 
-    return next((definition for definition in local_direct_wrench_screen_definitions() if definition.supports(composition)), None)
+    return _registry(plugins=plugins).resolve(composition)
     ####
 
 
@@ -309,25 +302,22 @@ def resolve_local_direct_wrench_screen_advertisement(
     family_id: str | None,
     mission_id: str | None,
     fidelity: str,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object] | None:
     """Return selected static metadata without compiling a screen or tuning."""
 
-    if family_id is None or mission_id is None or fidelity != "rigid_body_6dof_direct_wrench":
-        return None
-    definition = next(
-        (
-            item
-            for item in local_direct_wrench_screen_definitions()
-            if item.family_id == family_id and item.mission_id == mission_id
-        ),
-        None,
+    return _registry(plugins=plugins).advertisement(
+        family_id=family_id,
+        mission_id=mission_id,
+        fidelity=fidelity,
     )
-    return definition.public_advertisement() if definition is not None else None
     ####
 
 
 __all__ = [
+    "LocalDirectWrenchScreenCapabilityAdapter",
     "LocalDirectWrenchScreenDefinition",
+    "LocalDirectWrenchScreenRegistry",
     "local_direct_wrench_screen_definitions",
     "resolve_local_direct_wrench_screen_advertisement",
     "resolve_local_direct_wrench_screen_definition",

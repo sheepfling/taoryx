@@ -1,0 +1,110 @@
+schema_version: 1
+id: taoryx_vehicle_model_registry_v1
+description: Canonical vehicle descriptions used by generated problem files and the
+  common vehicle harness. Values are SI unless the field name says otherwise.
+vehicles:
+  x15:
+    display_name: North American X-15 research surrogate
+    family_id: rocket_plane
+    mode: rigid-body-6dof
+    realization:
+      force_source: coefficient_table
+      moment_source: aerodynamic_tables
+      actuator_realization: source_aerodynamic_control_coordinates_local_surface_allocator
+      propulsion_model: time_indexed_full_thrust_and_mass_flow_history_in_staged_cases
+      resource_model: propellant_mass_flow_in_staged_cases
+      claim: source-bounded X-15 aero/propulsion response in declared cases
+      nonclaims:
+      - complete actuator transients
+      - landing dynamics
+      - universal full-envelope fidelity
+      - actual-effector LQR until a source-bounded trim passes
+      - throttle allocation from the XLR99 time history
+      - low-dynamic-pressure RCS blending
+      - resolved left/right stabilator mechanical allocation
+    trajectory_vehicle: x15
+    earth_model: wgs-84
+    earth_omega_rad_s: 7.2921151467e-05
+    earth_gm_m3_s2: 3.986004418e14
+    body_frame: x-forward-y-right-z-down
+    attitude_lqr_profile: x15-standard
+    reference_area_m2: 18.580608
+    reference_length_m: 3.130296
+    dry_mass_kg: 9000.0
+    nominal_mass_kg: 14641.0545
+    inertia_kg_m2:
+      x: 4948.7355
+      y: 129114.2666
+      z: 131825.9024
+    envelope:
+      domain_scope: recommended_research_use
+      min_mach: 0.3
+      max_mach: 6.7
+      max_alpha_deg: 10
+      max_beta_deg: 10
+      max_altitude_m: 24384
+    controls:
+    - name: throttle
+      default: 1.0
+      lower: 0.4
+      upper: 1.0
+      source_status: grammar_command_only_not_xlr99_map
+    - name: symmetric-stabilator-deg
+      default: 0.0
+      lower: -14.9
+      upper: 34.9
+    - name: differential-stabilator-deg
+      default: 0.0
+      lower: -20.05
+      upper: 20.05
+    - name: rudder-deg
+      default: 2.0
+      lower: -29.79
+      upper: 29.79
+    response_limits:
+      max_body_rate_deg_s: 3600
+      source_case: examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb
+    direct_wrench_authority:
+      frame: body_axes_x_forward_y_right_z_down
+      mode: bounded_direct_moment_injection
+      maximum_moment_nm: 250000
+      source_case: examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb
+      qualification_status: integration_baseline_only
+    actuator:
+      maximum_moment: 250000
+      maximum_body_rate_deg_s: 3600
+      source_case: examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb
+      qualification_status: direct_wrench_screen_only
+      physical_lqr_readiness: blocked_before_T1_trim
+    table_bindings:
+    - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+    - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    aero_convention:
+      force_frame: body_axes_x_forward_y_right_z_down
+      force_channels: cx_cy_cz
+      drag_note: cx and cz are body-axis force coefficients, not wind-axis drag/lift
+        coefficients.  Do not label cx or cz as CD; derive wind-axis drag only through
+        the documented body-to-wind transformation.
+      table_semantics: absolute_coefficients
+      control_table_rule: Stabilator and rudder decks are absolute control-conditioned
+        source-grid values and include their zero-control baseline; do not add them
+        to the static deck without first forming explicit deltas.
+      source_note: X-15 tables are transcodes of the named public-research source
+        grids; provenance is recorded in each table header and source differential
+        tests.
+      physical_control_note: The fixture exposes symmetric/differential stabilator
+        and rudder source coordinates, but neither the unpowered release-glide nor
+        the frozen full-thrust source condition passes the declared trim contract.
+        The XLR99 deck is time-indexed full thrust rather than a throttle map, stabilator
+        hardware sign/gearing remains unresolved, and no RCS geometry/impulse data
+        are present. Physical LQR promotion is therefore blocked before T1; direct
+        body moments remain screen-only evidence.
+      problem_comment: Aero channels are body-axis cx/cy/cz (not direct CD/CL); X-15
+        control decks are absolute source-grid values including zero-control baseline.
+    source:
+      status: public-research-surrogate
+      bundle: tests/fixtures/x15_coherent_6dof_public_research_v1
+      model_path: .
+    audit_problem_globs:
+    - examples/showcases/x15_6dof_research/*.prb
+    - examples/generated/vehicles/x15_*.prb

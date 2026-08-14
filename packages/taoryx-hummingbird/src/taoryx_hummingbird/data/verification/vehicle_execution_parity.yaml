@@ -1,0 +1,17 @@
+schema: taoryx.vehicle-execution-parity/v1alpha1
+version: 1
+description: Exact committed-boundary batch/episode parity witnesses. Absence does
+  not imply equivalence merely because both execution operations are runnable.
+bindings:
+- family_id: hummingbird
+  mission: multirotor_pad_box_yaw_recovery_land_v1
+  fidelity: pseudo_6dof
+  batch_factory_id: hummingbird_aggregate_thrust_pseudo_batch.v1
+  episode_factory_id: hummingbird_aggregate_thrust_episode.v1
+  adapter_id: taoryx.hummingbird.aggregate_thrust_batch_episode_parity.v1
+  evidence_scope: One declared semantic action trace replayed through the family-owned
+    batch and accepted-truth episode paths at every committed truth boundary.
+  claim_boundary: This is action-trace/status parity for the declared aggregate-thrust
+    pseudo-6DOF bridge. It is not a mission qualification, physical rotor allocation,
+    robustness result, or generic parity assertion for another vehicle, mission, or
+    fidelity.

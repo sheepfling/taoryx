@@ -1,0 +1,4 @@
+quantity,value,units,si_value,si_units,condition,fidelity,source_id
+minimum_reported_thrust,28000.0,lbf,124550.20522729,N,XLR99 throttleable lower bound reported by NASA,OFFICIAL_NASA_APPROXIMATE,NASA_X15_PROGRAM_PAGE
+maximum_reported_thrust,57000.0,lbf,253548.63206985,N,XLR99 maximum reported by NASA,OFFICIAL_NASA_APPROXIMATE,NASA_X15_PROGRAM_PAGE
+typical_engine_operation_duration_range,80_to_120,s,80_to_120,s,program-level operating envelope,OFFICIAL_NASA_APPROXIMATE,NASA_X15_PROGRAM_PAGE

@@ -57,6 +57,11 @@ def test_endpoint_catalog_lists_the_selected_control_endpoints() -> None:
     assert all(not item.required_tuning_operations for item in controller_free_endpoints)
     x8 = catalog.endpoint("x8-source-surface-roll-pitch-lqi")
     assert x8.required_tuning_operations == ("state_derivative", "trim", "linearize")
+    hummingbird = catalog.endpoint("hummingbird-source-hover-rotor-lqi")
+    assert hummingbird.provider_ids == (
+        "taoryx.registry.mission-composition",
+        "taoryx.hummingbird.mission-composition",
+    )
     required_robustness = [item for item in catalog.endpoints if item.robustness_requirement.disposition == "required"]
     not_applicable_robustness = [
         item for item in catalog.endpoints if item.robustness_requirement.disposition == "not_applicable"

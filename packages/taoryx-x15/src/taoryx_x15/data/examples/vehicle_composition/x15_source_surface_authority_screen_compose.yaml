@@ -1,0 +1,10 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: x15-source-surface-authority-screen-v1
+vehicle: x15
+fidelity: rigid_body_6dof_surface_allocated
+initialization:
+  id: source_release_glide_surface_authority_anchor
+mission:
+  id: x15_source_surface_authority_screen_v1
+segments:
+  - id: source_surface_three_axis_authority_allocation_screen

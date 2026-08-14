@@ -16,22 +16,22 @@ from taoryx.x15_adapter import (
     build_x15_source_surface_local_plant,
     build_x15_source_surface_physical_lqi_design,
 )
+from taoryx_x15.resources import model_resource_root
 
 from taoryx.composition_episode import ActionFrame, open_vehicle_composition_episode
 from taoryx.generic_tuning import validate_nonlinear_native_coordinate_lqi
 from taoryx.local_direct_wrench_composition_execution import execute_local_direct_wrench_composition
 from taoryx.model_authoring import build_model_authoring_plan
 from taoryx.physical_lqr import apply_tuning_context_to_physical_wrench_lqi_design
-from taoryx.plugins import PluginCatalog, discover_plugins
+from taoryx.plugins import PluginCatalog, discover_plugins, plugin_catalog_scope
 from taoryx.vehicle_batch_execution import execute_vehicle_composition_batch
 from taoryx.vehicle_composition import (
     compile_vehicle_composition,
     load_vehicle_composition_request,
 )
-from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
+from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog, load_vehicle_composition_registry
 
-ROOT = Path(__file__).resolve().parents[2]
-PROVIDER_ID = "taoryx.registry.mission-composition"
+PROVIDER_ID = "taoryx.x15.mission-composition"
 MODEL_ID = "x15"
 MISSION_ID = "x15_local_direct_wrench_screen_v1"
 FIDELITY = "rigid_body_6dof_direct_wrench"
@@ -43,20 +43,51 @@ SURFACE_AUTHORITY_FIDELITY = "rigid_body_6dof_surface_allocated"
 SURFACE_AUTHORITY_COMPOSITION = "x15_source_surface_authority_screen_compose.yaml"
 SURFACE_LQI_MISSION_ID = "x15_source_surface_attitude_rate_lqi_screen_v1"
 SURFACE_LQI_COMPOSITION = "x15_source_surface_attitude_rate_lqi_screen_compose.yaml"
+STAGED_REACHABILITY_MISSION_ID = "x15_staged_booster_reachability_v1"
 
 
 @pytest.fixture(scope="module")
 def plugins() -> PluginCatalog:
-    """Discover the installed distributions once for the focused slice."""
+    """Discover only the X-15 plug-in for this family-owned vertical slice."""
 
-    return discover_plugins(include_external=False)
+    return discover_plugins(include_external=False, selected=("taoryx.x15",))
+    ####
+
+
+@pytest.fixture(autouse=True)
+def _x15_plugin_scope(plugins: PluginCatalog):
+    """Keep implicit runtime lookups inside the selected X-15 plug-in scope."""
+
+    with plugin_catalog_scope(plugins):
+        yield
+    ####
+
+
+def _x15_catalog():
+    """Load the X-15-owned catalog fragment rather than the checkout aggregate."""
+
+    from taoryx.family_manifest import load_unified_family_manifest_catalog
+    from taoryx.horizontal_fidelity import load_horizontal_registry
+    from taoryx.trajectory.pseudo6dof_profiles import load_pseudo6dof_catalog
+
+    root = model_resource_root()
+    pseudo = load_pseudo6dof_catalog(root / "verification/pseudo6dof_profiles.yaml")
+    horizontal = load_horizontal_registry(root / "verification/horizontal_fidelity_registry.yaml")
+    manifests = load_unified_family_manifest_catalog(
+        horizontal=horizontal,
+        pseudo=pseudo,
+        root=root,
+        validate_source_imports=False,
+    )
+    registry = load_vehicle_composition_registry(root / "verification/vehicle_composition_registry.yaml")
+    return load_resolved_vehicle_composition_catalog(registry=registry, manifests=manifests)
     ####
 
 
 def _direct_wrench_composition():
     """Compile the documented X-15 local controller-screen request."""
 
-    request = load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / COMPOSITION)
+    request = load_vehicle_composition_request(model_resource_root() / "examples/vehicle_composition" / COMPOSITION)
     return compile_vehicle_composition(request)
     ####
 
@@ -64,7 +95,7 @@ def _direct_wrench_composition():
 def _direct_wrench_lqi_composition():
     """Compile the exact X-15 source-release LQI request."""
 
-    request = load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_COMPOSITION)
+    request = load_vehicle_composition_request(model_resource_root() / "examples/vehicle_composition" / LQI_COMPOSITION)
     return compile_vehicle_composition(request)
     ####
 
@@ -72,7 +103,7 @@ def _direct_wrench_lqi_composition():
 def _surface_authority_composition():
     """Compile the exact public X-15 three-surface source-authority request."""
 
-    request = load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / SURFACE_AUTHORITY_COMPOSITION)
+    request = load_vehicle_composition_request(model_resource_root() / "examples/vehicle_composition" / SURFACE_AUTHORITY_COMPOSITION)
     return compile_vehicle_composition(request)
     ####
 
@@ -80,8 +111,40 @@ def _surface_authority_composition():
 def _surface_lqi_composition():
     """Compile the exact X-15 physical source-surface LQI request."""
 
-    request = load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / SURFACE_LQI_COMPOSITION)
+    request = load_vehicle_composition_request(model_resource_root() / "examples/vehicle_composition" / SURFACE_LQI_COMPOSITION)
     return compile_vehicle_composition(request)
+    ####
+
+
+def test_x15_focused_provider_excludes_the_optional_reachability_overlay(
+    plugins: PluginCatalog,
+) -> None:
+    """Local X-15 discovery never claims an optional reachability-owned endpoint."""
+
+    provider = plugins.build_mission_composition_provider_registry().provider(PROVIDER_ID)
+    model = provider.model(MODEL_ID)
+
+    assert [item.id for item in model.mission_templates] == [
+        SURFACE_AUTHORITY_MISSION_ID,
+        SURFACE_LQI_MISSION_ID,
+        MISSION_ID,
+        LQI_MISSION_ID,
+    ]
+    assert STAGED_REACHABILITY_MISSION_ID not in {
+        mission_id
+        for realization in model.realizations
+        for mission_id in realization.mission_template_ids
+    }
+    assert set(model.capabilities.initialization_modes) == {
+        "source_release_glide_local_point",
+        "source_release_glide_surface_authority_anchor",
+    }
+    assert set(model.capabilities.segment_types) == {
+        "local_wrench_recovery_screen",
+        "local_wrench_lqi_recovery_screen",
+        "source_surface_three_axis_authority_allocation_screen",
+        "source_surface_attitude_rate_lqi_recovery_screen",
+    }
     ####
 
 
@@ -383,14 +446,14 @@ def test_x15_public_adapter_exercises_the_same_source_local_operations(
 def test_x15_catalog_advertises_the_same_runnable_endpoints_as_the_slice() -> None:
     """The public catalog names the local screen and its bounded interactive peer."""
 
-    kit = load_resolved_vehicle_composition_catalog().vehicle(MODEL_ID).authoring_kit_dict(
+    kit = _x15_catalog().vehicle(MODEL_ID).authoring_kit_dict(
         MISSION_ID,
         FIDELITY,
     )
     endpoints = cast(list[dict[str, object]], kit["execution_endpoints"])
 
     assert {(item["operation"], item["factory_id"]) for item in endpoints if item["status"] == "runnable"} == {
-        ("batch", "local_direct_wrench_screen.v1"),
+        ("batch", "x15_local_direct_wrench_screen.v1"),
         ("episode", "x15_local_direct_wrench_episode.v1"),
     }
     ####
@@ -399,14 +462,14 @@ def test_x15_catalog_advertises_the_same_runnable_endpoints_as_the_slice() -> No
 def test_x15_lqi_catalog_advertises_only_its_exercised_batch_endpoint() -> None:
     """The source-release LQI screen does not borrow the manual bridge episode."""
 
-    kit = load_resolved_vehicle_composition_catalog().vehicle(MODEL_ID).authoring_kit_dict(
+    kit = _x15_catalog().vehicle(MODEL_ID).authoring_kit_dict(
         LQI_MISSION_ID,
         FIDELITY,
     )
     endpoints = cast(list[dict[str, object]], kit["execution_endpoints"])
 
     assert {(item["operation"], item["factory_id"]) for item in endpoints if item["status"] == "runnable"} == {
-        ("batch", "local_direct_wrench_screen.v1"),
+        ("batch", "x15_local_direct_wrench_screen.v1"),
     }
     ####
 
@@ -621,7 +684,7 @@ def test_x15_source_surface_evaluator_changes_all_declared_controls_and_restores
 def test_x15_surface_authority_catalog_advertises_only_its_exercised_batch_endpoint() -> None:
     """The authority probe does not borrow the direct-wrench episode."""
 
-    kit = load_resolved_vehicle_composition_catalog().vehicle(MODEL_ID).authoring_kit_dict(
+    kit = _x15_catalog().vehicle(MODEL_ID).authoring_kit_dict(
         SURFACE_AUTHORITY_MISSION_ID,
         SURFACE_AUTHORITY_FIDELITY,
     )

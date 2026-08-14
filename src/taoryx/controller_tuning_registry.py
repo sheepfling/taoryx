@@ -55,6 +55,7 @@ class ControllerTuningCampaignRegistration:
     description: str
     adapter_factory: ControllerTuningAdapterFactory
     campaign_factory: ControllerTuningCampaignFactory
+    provider_aliases: tuple[str, ...] = ()
     local_controller_screens: tuple[Mapping[str, Any], ...] = ()
     required_extras: tuple[str, ...] = ("taoryx[scipy]",)
     claim_boundary: str = (
@@ -77,6 +78,12 @@ class ControllerTuningCampaignRegistration:
             raise ValueError("controller-tuning registrations require non-empty identity and descriptions")
         if not self.realization_ids:
             raise ValueError("controller-tuning registrations require at least one realization ID")
+        if (
+            len(self.provider_aliases) != len(set(self.provider_aliases))
+            or any(not identifier.strip() for identifier in self.provider_aliases)
+            or self.provider_id in self.provider_aliases
+        ):
+            raise ValueError("controller-tuning registration has invalid provider aliases")
         for label, values in (
             ("realization IDs", self.realization_ids),
             ("mission-template IDs", self.mission_template_ids),
@@ -160,7 +167,7 @@ class ControllerTuningCampaignRegistration:
         """Return whether this campaign applies to an advertised selection."""
 
         return (
-            self.provider_id == provider_id
+            provider_id in (self.provider_id, *self.provider_aliases)
             and self.model_id == model_id
             and self.fidelity == fidelity
             and (realization_id is None or realization_id in self.realization_ids)
@@ -304,6 +311,7 @@ class ControllerTuningCampaignRegistration:
         return {
             "id": self.id,
             "provider_id": self.provider_id,
+            "provider_aliases": list(self.provider_aliases),
             "model_id": self.model_id,
             "family_id": self.family_id,
             "fidelity": self.fidelity,

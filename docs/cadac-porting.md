@@ -139,6 +139,8 @@ Taoryx host environment service.
 | `cadac.agm6.missile` | persistent `step`; source-step holds | available `relative-state-track` | source-owned; finite-run analysis and comparison available; stability blocked | `cadac_compat` |
 | `cadac.ads6.engagement` | persistent `step`; source-step holds | one available `relative-state-track` per exact SAM/target pair | source-owned; finite-run analysis and comparison available; stability blocked | `cadac_compat` |
 | `cadac.ads6.sam` | batch-only direct-command plant | blocked; package-owned context required | direct batch controls; finite-run analysis available where requested/realized channels are selected; stability blocked | `cadac_compat` |
+| `cadac.ads6.aircraft` | batch-only source-program point-mass plant | not applicable; optional threat is a configuration seam, not a native sensor | source-owned commanded-bank/load versus achieved response; finite-run analysis and comparison available; stability blocked | `cadac_compat` |
+| `cadac.falcon6.aircraft` | batch-only direct-surface 6-DoF plant | not applicable | caller-owned aileron/elevator/rudder with requested/achieved and limit feedback; finite-run analysis and comparison available; stability blocked | `cadac_compat` |
 | All other current CADAC actors | exact advertised batch or validation boundary | not applicable unless a participating source sensor and persistent owner are added | only their advertised command/response surface; no inferred stability claim | `cadac_compat` when executable |
 
 ### AIM5 persistent-session API

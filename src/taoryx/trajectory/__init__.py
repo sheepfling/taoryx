@@ -1,4 +1,10 @@
-"""Lazy provider-neutral trajectory facade with optional model packages."""
+"""Legacy convenience facade for trajectory contracts and optional models.
+
+Existing callers may continue to import this package root. New vehicle
+plug-ins must import narrow core contracts from their defining modules instead;
+the broad facade intentionally remains a compatibility surface because it can
+resolve historical all-model lazy exports.
+"""
 
 from __future__ import annotations
 

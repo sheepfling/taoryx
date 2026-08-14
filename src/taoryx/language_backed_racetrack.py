@@ -18,10 +18,15 @@ from typing import Any
 
 import yaml
 
+from .plugins import PluginCatalog
 from .powered_fixed_wing_mission_compiler import CapabilityScaledRacetrack
 from .racetrack_template import RACETRACK_FIDELITIES, RacetrackFidelity
+from .vehicle_catalog_resources import vehicle_catalog_resources
 from .vehicle_composition import CompiledVehicleComposition
-from .vehicle_execution_preflight import compile_powered_fixed_wing_racetrack_from_composition, preflight_vehicle_composition
+from .vehicle_execution_preflight import (
+    compile_powered_fixed_wing_racetrack_from_composition,
+    preflight_vehicle_composition,
+)
 
 _ROOT = Path(__file__).resolve().parents[2]
 _MISSION_CONFIG = _ROOT / "verification" / "family_qualification_missions.yaml"
@@ -43,6 +48,35 @@ LANGUAGE_BACKED_RACETRACK_MISSIONS: dict[str, dict[RacetrackFidelity, str]] = {
 
 
 @dataclass(frozen=True, slots=True)
+class LanguageBackedRacetrackAssets:
+    """Package-owned catalogs and native inputs for one route family boundary.
+
+    Core code keeps the materialization algorithm, while the selected vehicle
+    plug-in supplies the catalog root that owns its source missions, native
+    problems, and tables.  The checkout default remains available for direct
+    source-tree tools and historical fixtures.
+    """
+
+    root: Path
+    mission_catalog: Path
+    racetrack_catalog: Path
+
+    @classmethod
+    def from_root(cls, root: str | Path) -> LanguageBackedRacetrackAssets:
+        """Resolve the conventional route catalogs below one asset root."""
+
+        asset_root = Path(root)
+        return cls(
+            root=asset_root,
+            mission_catalog=asset_root / "verification" / "family_qualification_missions.yaml",
+            racetrack_catalog=asset_root / "verification" / "racetrack_templates.yaml",
+        )
+        ####
+
+    ####
+
+
+@dataclass(frozen=True, slots=True)
 class LanguageBackedRacetrackInputs:
     """Disposable files whose route, objective windows, and horizon agree."""
 
@@ -52,6 +86,7 @@ class LanguageBackedRacetrackInputs:
     problem: Path
     mission_config: Path
     racetrack_config: Path
+    asset_root: Path
 
 
 def language_backed_racetrack_mission_id(vehicle_id: str, fidelity: RacetrackFidelity) -> str:
@@ -68,6 +103,8 @@ def materialize_language_backed_racetrack(
     proposal: CapabilityScaledRacetrack,
     source_mission_id: str,
     directory: Path,
+    *,
+    assets: LanguageBackedRacetrackAssets | None = None,
 ) -> LanguageBackedRacetrackInputs:
     """Write exact disposable inputs without modifying a baseline problem.
 
@@ -79,8 +116,10 @@ def materialize_language_backed_racetrack(
 
     if proposal.route.fidelity not in RACETRACK_FIDELITIES:
         raise ValueError(f"unsupported language-backed racetrack fidelity: {proposal.route.fidelity}")
-    mission_catalog = yaml.safe_load(_MISSION_CONFIG.read_text(encoding="utf-8"))
-    racetrack_catalog = yaml.safe_load(_RACETRACK_CONFIG.read_text(encoding="utf-8"))
+    selected_assets = assets or _assets_for_source_mission(source_mission_id)
+    _require_language_backed_assets(selected_assets)
+    mission_catalog = yaml.safe_load(selected_assets.mission_catalog.read_text(encoding="utf-8"))
+    racetrack_catalog = yaml.safe_load(selected_assets.racetrack_catalog.read_text(encoding="utf-8"))
     if not isinstance(mission_catalog, dict) or not isinstance(racetrack_catalog, dict):
         raise ValueError("candidate materialization requires mapping-based YAML catalogs")
     missions = mission_catalog.get("missions")
@@ -96,7 +135,7 @@ def materialize_language_backed_racetrack(
     mission = copy.deepcopy(source_mission)
     _retime_mission(mission, proposal)
     mission["id"] = f"{source_mission_id}-candidate"
-    source_problem = _ROOT / str(source_mission["problem"])
+    source_problem = selected_assets.root / str(source_mission["problem"])
     source_problem_text = source_problem.read_text(encoding="utf-8")
     proposal = _retain_source_owned_direct_wrench_route_settings(proposal, source_problem_text)
     step_match = re.search(r"\*integ\b[^\n]*\bdt=([-+0-9.eE]+)", source_problem_text)
@@ -120,6 +159,7 @@ def materialize_language_backed_racetrack(
         problem=problem_path,
         mission_config=mission_path,
         racetrack_config=route_path,
+        asset_root=selected_assets.root,
     )
     ####
 
@@ -127,28 +167,82 @@ def materialize_language_backed_racetrack(
 def materialize_powered_fixed_wing_composition(
     composition: CompiledVehicleComposition,
     directory: Path,
+    *,
+    assets: LanguageBackedRacetrackAssets | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> LanguageBackedRacetrackInputs:
     """Materialize one supported fixed-wing composition after route preflight."""
 
-    preflight = preflight_vehicle_composition(composition)
+    preflight = preflight_vehicle_composition(composition, plugins=plugins)
     if preflight.status != "translation_ready":
         diagnostics = "; ".join(preflight.diagnostics) or "no translation-ready geometry"
         raise ValueError(f"cannot materialize composition {composition.id!r}: {preflight.status}: {diagnostics}")
-    proposal = compile_powered_fixed_wing_racetrack_from_composition(composition)
+    proposal = compile_powered_fixed_wing_racetrack_from_composition(composition, plugins=plugins)
     return materialize_language_backed_racetrack(
         proposal,
         language_backed_racetrack_mission_id(composition.vehicle_id, proposal.route.fidelity),
         directory,
+        assets=assets,
     )
     ####
 
 
-def materialize_x8_composition(composition: CompiledVehicleComposition, directory: Path) -> LanguageBackedRacetrackInputs:
+def materialize_x8_composition(
+    composition: CompiledVehicleComposition,
+    directory: Path,
+    *,
+    assets: LanguageBackedRacetrackAssets | None = None,
+    plugins: PluginCatalog | None = None,
+) -> LanguageBackedRacetrackInputs:
     """Compatibility alias for callers still naming the original X8 slice."""
 
     if composition.family_id != "skywalker_x8":
         raise ValueError("X8 compatibility materializer requires the Skywalker X8 family")
-    return materialize_powered_fixed_wing_composition(composition, directory)
+    return materialize_powered_fixed_wing_composition(composition, directory, assets=assets, plugins=plugins)
+    ####
+
+
+def _require_language_backed_assets(assets: LanguageBackedRacetrackAssets) -> None:
+    """Fail clearly when a caller omitted the selected package resource root."""
+
+    missing = tuple(
+        path
+        for path in (assets.mission_catalog, assets.racetrack_catalog)
+        if not path.is_file()
+    )
+    if missing:
+        paths = ", ".join(str(path) for path in missing)
+        raise FileNotFoundError(
+            "language-backed racetrack assets are unavailable; provide the selected vehicle plug-in asset root: " + paths
+        )
+    ####
+
+
+def _assets_for_source_mission(source_mission_id: str) -> LanguageBackedRacetrackAssets:
+    """Resolve the owning installed catalog before falling back to a checkout.
+
+    The generic CLI and direct API remain usable from a source checkout, while
+    an installed core wheel discovers only the package fragment that actually
+    declares the requested mission.  This is resource ownership resolution,
+    not plug-in discovery or a family fallback.
+    """
+
+    for mission_catalog in vehicle_catalog_resources("verification/family_qualification_missions.yaml"):
+        payload = yaml.safe_load(mission_catalog.read_text(encoding="utf-8"))
+        missions = payload.get("missions") if isinstance(payload, dict) else None
+        if not isinstance(missions, list):
+            continue
+        if any(isinstance(mission, dict) and mission.get("id") == source_mission_id for mission in missions):
+            return LanguageBackedRacetrackAssets(
+                root=mission_catalog.parents[1],
+                mission_catalog=mission_catalog,
+                racetrack_catalog=mission_catalog.parent / "racetrack_templates.yaml",
+            )
+    return LanguageBackedRacetrackAssets(
+        root=_ROOT,
+        mission_catalog=_MISSION_CONFIG,
+        racetrack_catalog=_RACETRACK_CONFIG,
+    )
     ####
 
 

@@ -1,0 +1,22 @@
+schema: taoryx.vehicle-execution-parity-witnesses/v1alpha1
+version: 1
+description: One deterministic, short semantic action trace for every exact registered
+  batch/episode parity pair. These are kernel/status parity witnesses, not mission
+  trajectories or physical-effector qualification cases.
+witnesses:
+- id: a320-3dof-kinematic-guidance
+  composition: examples/vehicle_composition/a320_racetrack_capability_3dof_compose.yaml
+  authority_profile_id: kinematic_guidance
+  actions:
+  - values:
+      guidance.heading.command: 0.0
+      guidance.speed.command: 230.0
+    duration_s: 0.4
+- id: a320-pseudo6dof-kinematic-guidance
+  composition: examples/vehicle_composition/a320_racetrack_capability_pseudo6dof_compose.yaml
+  authority_profile_id: kinematic_guidance
+  actions:
+  - values:
+      guidance.heading.command: 0.0
+      guidance.speed.command: 230.0
+    duration_s: 0.4

@@ -1213,6 +1213,7 @@ def _build_model_metadata(
         controls=source_managed_control_advertisement(
             mission_ids=(mission_id,),
             source_refs=("missiondesignsolutions/CADAC/ADS6",),
+            operations=("batch", "step"),
             claim_boundary="Source-order package control remains internal to the persistent compatibility runtime.",
         ),
         fidelity_aliases=(fidelity_id,),

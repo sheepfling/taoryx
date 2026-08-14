@@ -1,0 +1,4111 @@
+{
+  "bounds": {
+    "altitude_max_m": -17.713807182762025,
+    "altitude_min_m": -17.713807182762025,
+    "crossrange_max_m": 0.0,
+    "crossrange_min_m": 0.0,
+    "downrange_max_m": 7226.020570791042,
+    "downrange_min_m": 7226.020570791042
+  },
+  "deployment": {
+    "accepted_event_count": 0,
+    "child_classification_counts": {},
+    "child_fidelity_policy": "native_requested_fidelity",
+    "child_models": [
+      {
+        "body_id": "hl20-synthetic-spent-booster",
+        "center_of_mass_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "center_of_pressure_m": [
+          1.5,
+          0.0,
+          0.0
+        ],
+        "dimensions_m": [
+          0.8,
+          6.0
+        ],
+        "inertia_kg_m2": [
+          5000.0,
+          5000.0,
+          500.0
+        ],
+        "initial_angular_rate_body_rad_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mass_kg": 1500.0,
+        "reference_area_m2": 2.0106192982974678,
+        "shape": "cylinder",
+        "tumbling_policy": "passive_tumble"
+      }
+    ],
+    "configured": true,
+    "enabled": false,
+    "event_id": "booster-release",
+    "kind": "passive_aero_ballistic",
+    "spawned_child_count": 0
+  },
+  "execution": {
+    "candidate_order_preserved": true,
+    "deployment_composition": "standalone",
+    "deterministic": true,
+    "horizon_s": 180.0,
+    "spawn_children": false,
+    "step_size_s": 1.0,
+    "worker_backend": "serial",
+    "workers_requested": 1
+  },
+  "feasible_count": 1,
+  "fidelity": "point_mass_3dof",
+  "horizon_s": 180.0,
+  "mission_events": [],
+  "provenance": {
+    "actuator_profile_id": "none",
+    "aerodynamic_model": "surrogate_fixed_cd_ld_v1",
+    "aerodynamics_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+    "attitude_control_gain": 500000.0,
+    "attitude_control_mode": "open_loop",
+    "attitude_rate_damping": 300000.0,
+    "child_aerodynamics": "fixed_cd_and_ld_low_fidelity_surrogate",
+    "child_mass_binding": "separate_fixed_binding_v1",
+    "child_model": "reference_hl20_mod_k",
+    "configuration_variant_id": "nominal",
+    "controller_claim": false,
+    "family_group": "hypersonic_lifting_body_research",
+    "family_id": "reference_hl20_mod_k",
+    "fidelity": "point_mass_3dof",
+    "glide_bank_schedule_deg": [],
+    "inertia_body_kg_m2": null,
+    "initial_speed_m_s": 225.0,
+    "mass_property_profile_id": "generic_slender_body_v1",
+    "mission_profile_id": "none",
+    "mission_segment_schedule": [],
+    "pseudo6dof_profile_id": null,
+    "qualification": "synthetic_booster_source_bound_glide_child",
+    "release_event_id": "hl20-release-v1",
+    "release_time_s": 25.0,
+    "rocket_parent": "generic-staged-booster-v1",
+    "rocket_parent_claim": "synthetic scenario assumption only",
+    "route_claim": false,
+    "scenario_id": "hl20-rocket-release-point_mass_3dof-v1",
+    "source_aerodynamics": false,
+    "source_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+    "source_envelope": {
+      "altitude_m": [
+        -1000.0,
+        20000.0
+      ],
+      "mach": [
+        0.3,
+        4.0
+      ]
+    },
+    "source_exact_trajectory": false,
+    "source_family_manifest": "families/reference_hl20_mod_k/family.yaml",
+    "source_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+    "wind_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "sample_count": 1,
+  "samples": [
+    {
+      "classification": "feasible",
+      "decision_vector": {
+        "azimuth_rad": 0.0,
+        "bank_rad": 0.0,
+        "elevation_rad": 1.2217304763960306,
+        "surface_commands_deg": []
+      },
+      "deployment_events": [],
+      "failure_reasons": [],
+      "feasible": true,
+      "index": 0,
+      "limiting_factor": null,
+      "mission_events": [],
+      "path_metrics": {
+        "duration_s": 76.0,
+        "initial_specific_energy_m2_s2": 25312.5,
+        "maximum_altitude_m": 4558.158783035516,
+        "maximum_specific_energy_m2_s2": 48727.3137636444,
+        "maximum_speed_m_s": 225.0,
+        "minimum_altitude_m": -17.713807182762025,
+        "minimum_mass_kg": 8664.1,
+        "phase_duration_boost_s": 15.0,
+        "phase_duration_coast_s": 10.0,
+        "phase_duration_glide_s": 51.0,
+        "terminal_impact_radius_m": 7226.020570791042,
+        "terminal_impact_speed_m_s": 216.3661400348399,
+        "terminal_specific_energy_m2_s2": 23233.440169579142
+      },
+      "query_id": "query-000000",
+      "search_coordinates": {
+        "controls.surface_commands_deg": [],
+        "glide.bank_rad": 0.0,
+        "launch.azimuth_rad": 0.0,
+        "launch.elevation_rad": 1.2217304763960306
+      },
+      "spawned_bodies": [],
+      "spawned_body_ids": [],
+      "success": true,
+      "telemetry": [
+        {
+          "air_relative_speed_m_s": 225.0,
+          "air_relative_velocity_m_s": [
+            76.95453224827548,
+            0.0,
+            211.43083967682938
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 49510.935413415005,
+          "event_id": null,
+          "mass_kg": 11664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 25312.5,
+          "termination": null,
+          "time_s": 0.0,
+          "velocity_m_s": [
+            76.95453224827548,
+            0.0,
+            211.43083967682938
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 221.98836430861917,
+          "air_relative_velocity_m_s": [
+            79.03881245342932,
+            0.0,
+            207.44083497317456
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 47021.54289721726,
+          "event_id": null,
+          "mass_kg": 11564.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            77.99379984351073,
+            0.0,
+            209.41311405836734
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 26693.0580591886,
+          "termination": null,
+          "time_s": 1.0,
+          "velocity_m_s": [
+            79.03881245342932,
+            0.0,
+            207.44083497317456
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 219.28540115662813,
+          "air_relative_velocity_m_s": [
+            81.15673250160913,
+            0.0,
+            203.71468265710644
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 44787.13679845383,
+          "event_id": null,
+          "mass_kg": 11464.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            158.08883382922699,
+            0.0,
+            414.9695841901504
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 28112.50505301,
+          "termination": null,
+          "time_s": 2.0,
+          "velocity_m_s": [
+            81.15673250160913,
+            0.0,
+            203.71468265710644
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 216.87452320259115,
+          "air_relative_velocity_m_s": [
+            83.30675043319205,
+            0.0,
+            200.2362208657892
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 42779.16776200338,
+          "event_id": null,
+          "mass_kg": 11364.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            240.31796021879165,
+            0.0,
+            616.9250110684662
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 29567.247066970194,
+          "termination": null,
+          "time_s": 3.0,
+          "velocity_m_s": [
+            83.30675043319205,
+            0.0,
+            200.2362208657892
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 214.7408528430486,
+          "air_relative_velocity_m_s": [
+            85.48744234681027,
+            0.0,
+            196.99119543969636
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 40972.994631056725,
+          "event_id": null,
+          "mass_kg": 11264.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            324.7125557992411,
+            0.0,
+            815.5198102051544
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 31054.334286628302,
+          "termination": null,
+          "time_s": 4.0,
+          "velocity_m_s": [
+            85.48744234681027,
+            0.0,
+            196.99119543969636
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 212.87096922802934,
+          "air_relative_velocity_m_s": [
+            87.69748657091716,
+            0.0,
+            193.96700850717994
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 39347.255475366765,
+          "event_id": null,
+          "mass_kg": 11164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            411.3026257654395,
+            0.0,
+            1010.9809902906452
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 32571.36149847406,
+          "termination": null,
+          "time_s": 5.0,
+          "velocity_m_s": [
+            87.69748657091716,
+            0.0,
+            193.96700850717994
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 211.25269726703982,
+          "air_relative_velocity_m_s": [
+            89.93565068314464,
+            0.0,
+            191.1525067552057
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 37883.35384881265,
+          "event_id": null,
+          "mass_kg": 11064.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            500.1168992441808,
+            0.0,
+            1203.5237006292662
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 34116.38675007578,
+          "termination": null,
+          "time_s": 6.0,
+          "velocity_m_s": [
+            89.93565068314464,
+            0.0,
+            191.1525067552057
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 209.87493148330435,
+          "air_relative_velocity_m_s": [
+            92.20078088095079,
+            0.0,
+            188.53780223091758
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 36565.03671069288,
+          "event_id": null,
+          "mass_kg": 10964.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            591.1829130503644,
+            0.0,
+            1393.3525836421322
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 35687.864546934965,
+          "termination": null,
+          "time_s": 7.0,
+          "velocity_m_s": [
+            92.20078088095079,
+            0.0,
+            188.53780223091758
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 208.7274889679315,
+          "air_relative_velocity_m_s": [
+            94.49179330356824,
+            0.0,
+            186.114119961742
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 35378.045743453586,
+          "event_id": null,
+          "mass_kg": 10864.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            684.52708581946,
+            0.0,
+            1580.6629620065007
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 37284.59076179003,
+          "termination": null,
+          "time_s": 8.0,
+          "velocity_m_s": [
+            94.49179330356824,
+            0.0,
+            186.114119961742
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 207.80098675997266,
+          "air_relative_velocity_m_s": [
+            96.8076669803695,
+            0.0,
+            183.87366780546967
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 34309.82780419796,
+          "event_id": null,
+          "mass_kg": 10764.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            780.1747842995875,
+            0.0,
+            1765.6418848731562
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 38905.657039500504,
+          "termination": null,
+          "time_s": 9.0,
+          "velocity_m_s": [
+            96.8076669803695,
+            0.0,
+            183.87366780546967
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 207.08673981220252,
+          "air_relative_velocity_m_s": [
+            99.14743813972619,
+            0.0,
+            181.8095248230302
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 33349.29329791082,
+          "event_id": null,
+          "mass_kg": 10664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            878.1503832923025,
+            0.0,
+            1948.4690534730787
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 40550.4129462652,
+          "termination": null,
+          "time_s": 10.0,
+          "velocity_m_s": [
+            99.14743813972619,
+            0.0,
+            181.8095248230302
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 206.5766763549537,
+          "air_relative_velocity_m_s": [
+            101.51019565915101,
+            0.0,
+            179.91554516244605
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 32486.61360138548,
+          "event_id": null,
+          "mass_kg": 10564.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            978.4773204895029,
+            0.0,
+            2129.317643078784
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 42218.4344714282,
+          "termination": null,
+          "time_s": 11.0,
+          "velocity_m_s": [
+            101.51019565915101,
+            0.0,
+            179.91554516244605
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 206.2632679858084,
+          "air_relative_velocity_m_s": [
+            103.89507747487325,
+            0.0,
+            178.18627499522933
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 31713.050475997603,
+          "event_id": null,
+          "mass_kg": 10464.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1081.1781472540194,
+            0.0,
+            2308.3550355610605
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 43909.497769577574,
+          "termination": null,
+          "time_s": 12.0,
+          "velocity_m_s": [
+            103.89507747487325,
+            0.0,
+            178.18627499522933
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 206.1394722248088,
+          "air_relative_velocity_m_s": [
+            106.30126779918423,
+            0.0,
+            176.61688048827278
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 31020.811814891324,
+          "event_id": null,
+          "mass_kg": 10364.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1186.2745762252264,
+            0.0,
+            2485.7434745521464
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45623.557249278165,
+          "termination": null,
+          "time_s": 13.0,
+          "velocity_m_s": [
+            106.30126779918423,
+            0.0,
+            176.61688048827278
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 206.19868560831554,
+          "air_relative_velocity_m_s": [
+            108.72799501852863,
+            0.0,
+            175.20308514934254
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 30402.92917195921,
+          "event_id": null,
+          "mass_kg": 10264.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1293.7875264920667,
+            0.0,
+            2661.640653393354
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 47360.727286898415,
+          "termination": null,
+          "time_s": 14.0,
+          "velocity_m_s": [
+            108.72799501852863,
+            0.0,
+            175.20308514934254
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 204.51743512770398,
+          "air_relative_velocity_m_s": [
+            109.18164598418352,
+            0.0,
+            172.93568009927571
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 29301.203773527555,
+          "event_id": null,
+          "mass_kg": 10164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1403.737166959345,
+            0.0,
+            2836.2002445317307
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 48727.3137636444,
+          "termination": null,
+          "time_s": 15.0,
+          "velocity_m_s": [
+            109.18164598418352,
+            0.0,
+            172.93568009927571
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 193.47532061071203,
+          "air_relative_velocity_m_s": [
+            100.40547676760998,
+            0.0,
+            165.38270744091335
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 25705.79835530752,
+          "event_id": null,
+          "mass_kg": 10164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1508.4383411709518,
+            0.0,
+            3005.396844582397
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 48189.22480863287,
+          "termination": null,
+          "time_s": 16.0,
+          "velocity_m_s": [
+            100.40547676760998,
+            0.0,
+            165.38270744091335
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 182.68888868473368,
+          "air_relative_velocity_m_s": [
+            92.68668380184079,
+            0.0,
+            157.4306472535783
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 22488.261682885834,
+          "event_id": null,
+          "mass_kg": 10164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1604.9005534574194,
+            0.0,
+            3166.832901485205
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 47743.63689778139,
+          "termination": null,
+          "time_s": 17.0,
+          "velocity_m_s": [
+            92.68668380184079,
+            0.0,
+            157.4306472535783
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 172.14463265135473,
+          "air_relative_velocity_m_s": [
+            85.92609683970488,
+            0.0,
+            149.16594930668165
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 19610.3288453783,
+          "event_id": null,
+          "mass_kg": 10164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1694.1310643935562,
+            0.0,
+            3320.1541519660786
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 47376.476989713075,
+          "termination": null,
+          "time_s": 18.0,
+          "velocity_m_s": [
+            85.92609683970488,
+            0.0,
+            149.16594930668165
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 161.83185503023654,
+          "air_relative_velocity_m_s": [
+            80.03114487728949,
+            0.0,
+            140.6576167584173
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 17038.09249119238,
+          "event_id": null,
+          "mass_kg": 10164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1777.0412340195576,
+            0.0,
+            3465.0837747100727
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 47075.638450524275,
+          "termination": null,
+          "time_s": 19.0,
+          "velocity_m_s": [
+            80.03114487728949,
+            0.0,
+            140.6576167584173
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 151.7430063702866,
+          "air_relative_velocity_m_s": [
+            74.91602100164295,
+            0.0,
+            131.9603341143627
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 14741.616585338908,
+          "event_id": null,
+          "mass_kg": 10164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1854.453233179485,
+            0.0,
+            3601.406554907905
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 46830.70358283402,
+          "termination": null,
+          "time_s": 20.0,
+          "velocity_m_s": [
+            74.91602100164295,
+            0.0,
+            131.9603341143627
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 141.87417784985823,
+          "air_relative_velocity_m_s": [
+            70.50155723557812,
+            0.0,
+            123.11706936055498
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 12694.556124210361,
+          "event_id": null,
+          "mass_kg": 10164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1927.1067644090767,
+            0.0,
+            3728.955906953405
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 46632.70661521121,
+          "termination": null,
+          "time_s": 21.0,
+          "velocity_m_s": [
+            70.50155723557812,
+            0.0,
+            123.11706936055498
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 132.22581634624538,
+          "air_relative_velocity_m_s": [
+            66.71491416041997,
+            0.0,
+            114.16123132219101
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 10873.796798439424,
+          "event_id": null,
+          "mass_kg": 10164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            1995.6655577147542,
+            0.0,
+            3847.603270389182
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 46473.93186577757,
+          "termination": null,
+          "time_s": 22.0,
+          "velocity_m_s": [
+            66.71491416041997,
+            0.0,
+            114.16123132219101
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 122.80375980998173,
+          "air_relative_velocity_m_s": [
+            63.48915963763878,
+            0.0,
+            105.11845714228355
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 9259.122316551857,
+          "event_id": null,
+          "mass_kg": 10164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2060.72349533925,
+            0.0,
+            3957.249472347582
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 46347.74224973125,
+          "termination": null,
+          "time_s": 23.0,
+          "velocity_m_s": [
+            63.48915963763878,
+            0.0,
+            105.11845714228355
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 113.62073457639488,
+          "air_relative_velocity_m_s": [
+            60.7627890026119,
+            0.0,
+            96.00809756631803
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 7832.912931401687,
+          "event_id": null,
+          "mass_kg": 10164.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2122.8102823283866,
+            0.0,
+            4057.817721040829
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 46248.43381688483,
+          "termination": null,
+          "time_s": 24.0,
+          "velocity_m_s": [
+            60.7627890026119,
+            0.0,
+            96.00809756631803
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 104.69851975119735,
+          "air_relative_velocity_m_s": [
+            58.479223913224146,
+            0.0,
+            86.84446101277189
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 6579.875992543678,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2182.3966239847614,
+            0.0,
+            4149.247959098237
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 46171.11251713665,
+          "termination": null,
+          "time_s": 25.0,
+          "velocity_m_s": [
+            58.479223913224146,
+            0.0,
+            86.84446101277189
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 95.95970959734426,
+          "air_relative_velocity_m_s": [
+            56.259854535653744,
+            0.0,
+            77.73734388074837
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 5474.062081430532,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2239.7301941884575,
+            0.0,
+            4231.543353867562
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 46101.397564208644,
+          "termination": null,
+          "time_s": 26.0,
+          "velocity_m_s": [
+            56.259854535653744,
+            0.0,
+            77.73734388074837
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 87.56481361536353,
+          "air_relative_velocity_m_s": [
+            54.4443444917284,
+            0.0,
+            68.58141101172649
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 4519.110586404488,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2295.050903720882,
+            0.0,
+            4304.706416791276
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 46048.547473972845,
+          "termination": null,
+          "time_s": 27.0,
+          "velocity_m_s": [
+            54.4443444917284,
+            0.0,
+            68.58141101172649
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 79.58277118816947,
+          "air_relative_velocity_m_s": [
+            52.9797986529238,
+            0.0,
+            59.384833119949
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 3704.781084985485,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2348.7358259098373,
+            0.0,
+            4368.692654521672
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 46008.94855545922,
+          "termination": null,
+          "time_s": 28.0,
+          "velocity_m_s": [
+            52.9797986529238,
+            0.0,
+            59.384833119949
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 72.11376028021347,
+          "air_relative_velocity_m_s": [
+            51.817205237373,
+            0.0,
+            50.153481067021225
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 3022.471643289825,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2401.1111085554085,
+            0.0,
+            4423.464503522574
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45979.5653843457,
+          "termination": null,
+          "time_s": 29.0,
+          "velocity_m_s": [
+            51.817205237373,
+            0.0,
+            50.153481067021225
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 65.30013607569545,
+          "air_relative_velocity_m_s": [
+            50.911187339034605,
+            0.0,
+            40.89203804206957
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 2465.0633778630477,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2452.4557170616804,
+            0.0,
+            4468.9895818226905
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45957.87056833365,
+          "termination": null,
+          "time_s": 30.0,
+          "velocity_m_s": [
+            50.911187339034605,
+            0.0,
+            40.89203804206957
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 59.33749223163534,
+          "air_relative_velocity_m_s": [
+            50.22000767517409,
+            0.0,
+            31.60520231615105
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 2026.7777526105524,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2503.005044662922,
+            0.0,
+            4505.240092503831
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45941.78174532238,
+          "termination": null,
+          "time_s": 31.0,
+          "velocity_m_s": [
+            50.22000767517409,
+            0.0,
+            31.60520231615105
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 54.4787277367514,
+          "air_relative_velocity_m_s": [
+            49.70598847347917,
+            0.0,
+            22.29902432146848
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 1703.0387250729148,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2552.954719204721,
+            0.0,
+            4532.193496643877
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45929.601241770215,
+          "termination": null,
+          "time_s": 32.0,
+          "velocity_m_s": [
+            49.70598847347917,
+            0.0,
+            22.29902432146848
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 51.01602512214935,
+          "air_relative_velocity_m_s": [
+            49.336542832562685,
+            0.0,
+            12.98230952467553
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 1490.3301995231225,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2602.465120394927,
+            0.0,
+            4549.83456992508
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45919.95259478767,
+          "termination": null,
+          "time_s": 33.0,
+          "velocity_m_s": [
+            49.336542832562685,
+            0.0,
+            12.98230952467553
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 49.22275138510219,
+          "air_relative_velocity_m_s": [
+            49.085910053522284,
+            0.0,
+            3.6677906343056
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 1386.0398747463962,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2651.667284616738,
+            0.0,
+            4558.158783035516
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45911.707456615026,
+          "termination": null,
+          "time_s": 34.0,
+          "velocity_m_s": [
+            49.085910053522284,
+            0.0,
+            3.6677906343056
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 49.25978454613901,
+          "air_relative_velocity_m_s": [
+            48.93728713040725,
+            0.0,
+            -5.627459626519988
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 1388.286678807433,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2700.670793874193,
+            0.0,
+            4557.1765213017925
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45903.89831939024,
+          "termination": null,
+          "time_s": 35.0,
+          "velocity_m_s": [
+            48.93728713040725,
+            0.0,
+            -5.627459626519988
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 51.09978339040262,
+          "air_relative_velocity_m_s": [
+            48.88446386309974,
+            0.0,
+            -14.882777138805874
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 1495.7411636619165,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2749.5736392637677,
+            0.0,
+            4546.9171473522465
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45895.61897435494,
+          "termination": null,
+          "time_s": 36.0,
+          "velocity_m_s": [
+            48.88446386309974,
+            0.0,
+            -14.882777138805874
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 54.534103386860394,
+          "air_relative_velocity_m_s": [
+            48.931961883610334,
+            0.0,
+            -24.07553817528663
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 1707.4588853458777,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2798.4730315847332,
+            0.0,
+            4527.431816802899
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45885.92344235454,
+          "termination": null,
+          "time_s": 37.0,
+          "velocity_m_s": [
+            48.931961883610334,
+            0.0,
+            -24.07553817528663
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 59.25595444761084,
+          "air_relative_velocity_m_s": [
+            49.0934935359528,
+            0.0,
+            -33.18278213068777
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 2022.7446981840305,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2847.4754790842308,
+            0.0,
+            4498.794588125963
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45873.73801639414,
+          "termination": null,
+          "time_s": 38.0,
+          "velocity_m_s": [
+            49.0934935359528,
+            0.0,
+            -33.18278213068777
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 64.95117943946622,
+          "air_relative_velocity_m_s": [
+            49.389519656253256,
+            0.0,
+            -42.18211775980802
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 2441.051783773058,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2896.7047891506277,
+            0.0,
+            4461.102235744197
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45857.796095449696,
+          "termination": null,
+          "time_s": 39.0,
+          "velocity_m_s": [
+            49.389519656253256,
+            0.0,
+            -42.18211775980802
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 71.34983790159957,
+          "air_relative_velocity_m_s": [
+            49.844838753514765,
+            0.0,
+            -51.051850291841994
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 2961.906270439405,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2946.3075816793935,
+            0.0,
+            4414.47356318665
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45836.59685271662,
+          "termination": null,
+          "time_s": 40.0,
+          "velocity_m_s": [
+            49.844838753514765,
+            0.0,
+            -51.051850291841994
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 78.23959219660158,
+          "air_relative_velocity_m_s": [
+            50.486676785033495,
+            0.0,
+            -59.770638730852454
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 3584.844537466374,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            2996.4566241874986,
+            0.0,
+            4359.048853018726
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45808.38332800134,
+          "termination": null,
+          "time_s": 41.0,
+          "velocity_m_s": [
+            50.486676785033495,
+            0.0,
+            -59.770638730852454
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 85.45961832585574,
+          "air_relative_velocity_m_s": [
+            51.34331592334249,
+            0.0,
+            -68.31698379171013
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 4309.352983505714,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3047.352533512657,
+            0.0,
+            4294.9897637505255
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45771.134548884555,
+          "termination": null,
+          "time_s": 42.0,
+          "velocity_m_s": [
+            51.34331592334249,
+            0.0,
+            -68.31698379171013
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 92.88903610493168,
+          "air_relative_velocity_m_s": [
+            52.44312562674845,
+            0.0,
+            -76.6687133255827
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 5134.804014370439,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3099.2243206769344,
+            0.0,
+            4222.479748921716
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45722.56754401479,
+          "termination": null,
+          "time_s": 43.0,
+          "velocity_m_s": [
+            52.44312562674845,
+            0.0,
+            -76.6687133255827
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 100.43604539336725,
+          "air_relative_velocity_m_s": [
+            53.81384591134018,
+            0.0,
+            -84.80253063729326
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 6060.384938904568,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3152.329104083119,
+            0.0,
+            4141.724962136683
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45660.14670706696,
+          "termination": null,
+          "time_s": 44.0,
+          "velocity_m_s": [
+            53.81384591134018,
+            0.0,
+            -84.80253063729326
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 108.0294627374339,
+          "air_relative_velocity_m_s": [
+            55.482010018902045,
+            0.0,
+            -92.69364262775022
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 7085.018196406225,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3206.951183347388,
+            0.0,
+            4052.955574306784
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45581.09919244493,
+          "termination": null,
+          "time_s": 45.0,
+          "velocity_m_s": [
+            55.482010018902045,
+            0.0,
+            -92.69364262775022
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 115.61260165273131,
+          "air_relative_velocity_m_s": [
+            57.47243229286533,
+            0.0,
+            -100.315468334924
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 8207.272330313148,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3263.400573259048,
+            0.0,
+            3956.4274223932057
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45482.4358122689,
+          "termination": null,
+          "time_s": 46.0,
+          "velocity_m_s": [
+            57.47243229286533,
+            0.0,
+            -100.315468334924
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 123.13898191133053,
+          "air_relative_velocity_m_s": [
+            59.807715230938264,
+            0.0,
+            -107.63942616445883
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 9425.263771089174,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3322.011038152899,
+            0.0,
+            3852.423910198237
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45360.97737202504,
+          "termination": null,
+          "time_s": 47.0,
+          "velocity_m_s": [
+            59.807715230938264,
+            0.0,
+            -107.63942616445883
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 130.56935372186533,
+          "air_relative_velocity_m_s": [
+            62.50774833971065,
+            0.0,
+            -114.63480068829443
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 10736.550038372907,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3383.13763093313,
+            0.0,
+            3741.2580823660833
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45213.38663910814,
+          "termination": null,
+          "time_s": 48.0,
+          "velocity_m_s": [
+            62.50774833971065,
+            0.0,
+            -114.63480068829443
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 137.86963795895463,
+          "air_relative_velocity_m_s": [
+            65.58918382329959,
+            0.0,
+            -121.26869355413473
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 12138.015547302943,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3447.153720212209,
+            0.0,
+            3623.274790056557
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 45036.20625537474,
+          "termination": null,
+          "time_s": 49.0,
+          "velocity_m_s": [
+            65.58918382329959,
+            0.0,
+            -121.26869355413473
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 145.0094998022545,
+          "air_relative_velocity_m_s": [
+            69.06488297178696,
+            0.0,
+            -127.50606641643928
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 13625.751871043984,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3514.4474786901264,
+            0.0,
+            3498.8528604773037
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 44825.90292064977,
+          "termination": null,
+          "time_s": 50.0,
+          "velocity_m_s": [
+            69.06488297178696,
+            0.0,
+            -127.50606641643928
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 151.96136286982411,
+          "air_relative_velocity_m_s": [
+            72.94333412946965,
+            0.0,
+            -133.30988639756208
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 15194.935098848113,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3585.4178033724056,
+            0.0,
+            3368.4071731763997
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 44578.91810745752,
+          "termination": null,
+          "time_s": 51.0,
+          "velocity_m_s": [
+            72.94333412946965,
+            0.0,
+            -133.30988639756208
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 158.6997340215241,
+          "air_relative_velocity_m_s": [
+            77.2280493617051,
+            0.0,
+            -138.64138621020973
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 16839.703839688256,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3660.469642260528,
+            0.0,
+            3232.390534589169
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 44291.72542528012,
+          "termination": null,
+          "time_s": 52.0,
+          "velocity_m_s": [
+            77.2280493617051,
+            0.0,
+            -138.64138621020973
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 165.20075164053512,
+          "air_relative_velocity_m_s": [
+            81.91695296781953,
+            0.0,
+            -143.4604515504737
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 18553.04243696224,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3740.0087122854998,
+            0.0,
+            3091.295229859735
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 43960.894537202854,
+          "termination": null,
+          "time_s": 53.0,
+          "velocity_m_s": [
+            81.91695296781953,
+            0.0,
+            -143.4604515504737
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 171.44189850001928,
+          "air_relative_velocity_m_s": [
+            87.00178104361605,
+            0.0,
+            -147.72614750452814
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 20326.67503809329,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3824.4356094260265,
+            0.0,
+            2945.654118660369
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 43583.16124340616,
+          "termination": null,
+          "time_s": 54.0,
+          "velocity_m_s": [
+            87.00178104361605,
+            0.0,
+            -147.72614750452814
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 177.40183893605044,
+          "air_relative_velocity_m_s": [
+            92.4675173709683,
+            0.0,
+            -151.39739327063083
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 22150.977235892035,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            3914.1393341983676,
+            0.0,
+            2796.041131068248
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 43155.502986936626,
+          "termination": null,
+          "time_s": 55.0,
+          "velocity_m_s": [
+            92.4675173709683,
+            0.0,
+            -151.39739327063083
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 183.0603521915526,
+          "air_relative_velocity_m_s": [
+            98.29189678610585,
+            0.0,
+            -154.43379024904098
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 24014.912969300767,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            4009.49028395076,
+            0.0,
+            2643.071012222966
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 42675.218614263984,
+          "termination": null,
+          "time_s": 56.0,
+          "velocity_m_s": [
+            98.29189678610585,
+            0.0,
+            -154.43379024904098
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 188.39834160926912,
+          "air_relative_velocity_m_s": [
+            104.44501244646631,
+            0.0,
+            -156.79660231070176
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 25906.00511343025,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            4110.832797253511,
+            0.0,
+            2487.398162385506
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 42140.01074971925,
+          "termination": null,
+          "time_s": 57.0,
+          "velocity_m_s": [
+            104.44501244646631,
+            0.0,
+            -156.79660231070176
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 193.39790424377176,
+          "air_relative_velocity_m_s": [
+            110.88906750316013,
+            0.0,
+            -158.44987874455032
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 27810.348550931692,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            4218.477374265891,
+            0.0,
+            2329.714424193337
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 41548.06864095715,
+          "termination": null,
+          "time_s": 58.0,
+          "velocity_m_s": [
+            110.88906750316013,
+            0.0,
+            -158.44987874455032
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 198.04244836765903,
+          "air_relative_velocity_m_s": [
+            117.57831388042166,
+            0.0,
+            -159.3617001054329
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 29712.674330981987,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            4332.692738755219,
+            0.0,
+            2170.7456833927267
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 40898.14883377173,
+          "termination": null,
+          "time_s": 59.0,
+          "velocity_m_s": [
+            117.57831388042166,
+            0.0,
+            -159.3617001054329
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 202.31684790102233,
+          "air_relative_velocity_m_s": [
+            124.45922037424053,
+            0.0,
+            -159.50551529160876
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 31596.472621245535,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            4453.697950157058,
+            0.0,
+            2011.2471749427923
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 40189.65058045543,
+          "termination": null,
+          "time_s": 60.0,
+          "velocity_m_s": [
+            124.45922037424053,
+            0.0,
+            -159.50551529160876
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 206.20762344832906,
+          "air_relative_velocity_m_s": [
+            131.4709083299038,
+            0.0,
+            -158.8615253329701
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 33444.18039942322,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            4581.654814619194,
+            0.0,
+            1851.9974244386112
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 39422.68252647484,
+          "termination": null,
+          "time_s": 61.0,
+          "velocity_m_s": [
+            131.4709083299038,
+            0.0,
+            -158.8615253329701
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 209.70313972569713,
+          "air_relative_velocity_m_s": [
+            138.54588509680076,
+            0.0,
+            -157.41805656772456
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 35237.437126745106,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            4716.6608785628305,
+            0.0,
+            1693.7908057763666
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 38598.117010874426,
+          "termination": null,
+          "time_s": 62.0,
+          "velocity_m_s": [
+            138.54588509680076,
+            0.0,
+            -157.41805656772456
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 212.79380898152706,
+          "air_relative_velocity_m_s": [
+            145.61109292651528,
+            0.0,
+            -155.17285444823253
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 36957.40799703376,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            4858.74331260192,
+            0.0,
+            1537.4287592009239
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 37717.628311851055,
+          "termination": null,
+          "time_s": 63.0,
+          "velocity_m_s": [
+            145.61109292651528,
+            0.0,
+            -155.17285444823253
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 215.4722897909332,
+          "air_relative_velocity_m_s": [
+            152.58927405614583,
+            0.0,
+            -152.13422070910383
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 38585.16988274818,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            5007.854003211691,
+            0.0,
+            1383.709787202095
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 36783.711418539366,
+          "termination": null,
+          "time_s": 64.0,
+          "velocity_m_s": [
+            152.58927405614583,
+            0.0,
+            -152.13422070910383
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 217.73367054390803,
+          "air_relative_velocity_m_s": [
+            159.40063206032585,
+            0.0,
+            -148.3219127010291
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 40102.15006596182,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            5163.866160214509,
+            0.0,
+            1233.4184254048469
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 35799.678445757985,
+          "termination": null,
+          "time_s": 65.0,
+          "velocity_m_s": [
+            159.40063206032585,
+            0.0,
+            -148.3219127010291
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 219.57562722010846,
+          "air_relative_velocity_m_s": [
+            165.96474647753953,
+            0.0,
+            -143.7677258488499
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 41490.602653852955,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            5326.5727168230815,
+            0.0,
+            1087.3134662766329
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 34769.63063861376,
+          "termination": null,
+          "time_s": 66.0,
+          "velocity_m_s": [
+            165.96474647753953,
+            0.0,
+            -143.7677258488499
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 220.9985457796551,
+          "air_relative_velocity_m_s": [
+            172.20267417546626,
+            0.0,
+            -138.5156895212254
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 42734.10276237984,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            5495.686744157148,
+            0.0,
+            946.1157884758906
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 33698.40501541825,
+          "termination": null,
+          "time_s": 67.0,
+          "velocity_m_s": [
+            172.20267417546626,
+            0.0,
+            -138.5156895212254
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 222.00560077661876,
+          "air_relative_velocity_m_s": [
+            178.03914937370493,
+            0.0,
+            -132.62182349249696
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 43818.034704329635,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            5670.844024564101,
+            0.0,
+            810.4962065517437
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 32591.49601207437,
+          "termination": null,
+          "time_s": 68.0,
+          "velocity_m_s": [
+            178.03914937370493,
+            0.0,
+            -132.62182349249696
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 222.60278363348772,
+          "air_relative_velocity_m_s": [
+            183.40477737652714,
+            0.0,
+            -126.15342610030005
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 44730.04812396857,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            5851.607831059739,
+            0.0,
+            681.0637970956972
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 31454.953926477192,
+          "termination": null,
+          "time_s": 69.0,
+          "velocity_m_s": [
+            183.40477737652714,
+            0.0,
+            -126.15342610030005
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 222.7988763444346,
+          "air_relative_velocity_m_s": [
+            188.23810741737026,
+            0.0,
+            -119.1878945877862
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 45460.455758136115,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            6037.475849740849,
+            0.0,
+            558.3551720099402
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 30295.26339776261,
+          "termination": null,
+          "time_s": 70.0,
+          "velocity_m_s": [
+            188.23810741737026,
+            0.0,
+            -119.1878945877862
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 222.60536907756622,
+          "air_relative_velocity_m_s": [
+            192.48746953040634,
+            0.0,
+            -111.81111043156831
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 46002.548548144165,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            6227.889066362535,
+            0.0,
+            442.82515302696186
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 29119.20645801159,
+          "termination": null,
+          "time_s": 71.0,
+          "velocity_m_s": [
+            192.48746953040634,
+            0.0,
+            -111.81111043156831
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 222.03632303860067,
+          "air_relative_velocity_m_s": [
+            196.11247000887406,
+            0.0,
+            -104.11545445091377
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 46352.80817685371,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            6422.242327162958,
+            0.0,
+            334.8392526440701
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 27933.715731192886,
+          "termination": null,
+          "time_s": 72.0,
+          "velocity_m_s": [
+            196.11247000887406,
+            0.0,
+            -104.11545445091377
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 221.108182819802,
+          "air_relative_velocity_m_s": [
+            199.08505949422647,
+            0.0,
+            -96.19754464670756
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 46511.00345039116,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            6619.896187552484,
+            0.0,
+            234.6682873020547
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 26745.72401460819,
+          "termination": null,
+          "time_s": 73.0,
+          "velocity_m_s": [
+            199.08505949422647,
+            0.0,
+            -96.19754464670756
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 219.83954505684827,
+          "air_relative_velocity_m_s": [
+            201.3901154472467,
+            0.0,
+            -88.15581076109876
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 46480.164686919146,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            6820.189589600479,
+            0.0,
+            142.48534445969125
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 25562.016688646643,
+          "termination": null,
+          "time_s": 74.0,
+          "velocity_m_s": [
+            201.3901154472467,
+            0.0,
+            -88.15581076109876
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 218.25089233984997,
+          "air_relative_velocity_m_s": [
+            203.02551390925564,
+            0.0,
+            -80.08803099729337
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 46266.43860920315,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            7022.452867269844,
+            0.0,
+            58.36520463209473
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 24389.093137575725,
+          "termination": null,
+          "time_s": 75.0,
+          "velocity_m_s": [
+            203.02551390925564,
+            0.0,
+            -80.08803099729337
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "air_relative_speed_m_s": 216.3661400348399,
+          "air_relative_velocity_m_s": [
+            204.00147365119045,
+            0.0,
+            -72.0951128837357
+          ],
+          "configuration_variant_id": "nominal",
+          "drag_force_n": 45784.100902674756,
+          "event_id": "booster-release",
+          "mass_kg": 8664.1,
+          "mass_property_profile_id": "generic_slender_body_v1",
+          "mission_bank_command_deg": 0.0,
+          "mission_profile_id": "none",
+          "mission_segment": "unprofiled",
+          "position_m": [
+            7226.020570791042,
+            0.0,
+            -17.713807182762025
+          ],
+          "projected_area_m2": 26.612075808,
+          "pseudo6dof_profile_id": null,
+          "specific_energy_j_per_kg": 23233.440169579142,
+          "termination": "ground_contact",
+          "time_s": 76.0,
+          "velocity_m_s": [
+            204.00147365119045,
+            0.0,
+            -72.0951128837357
+          ],
+          "wind_velocity_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "terminal_margins": {
+        "ground_contact_satisfied": 1.0,
+        "impact_radius_margin_m": null,
+        "impact_speed_max_margin_m_s": null,
+        "impact_speed_min_margin_m_s": null,
+        "terminal_speed_max_margin_m_s": null,
+        "terminal_speed_min_margin_m_s": 216.3661400348399
+      },
+      "terminal_position_m": [
+        7226.020570791042,
+        0.0,
+        -17.713807182762025
+      ],
+      "terminal_speed_m_s": 216.3661400348399,
+      "terminal_state": {
+        "mass_kg": 8664.1,
+        "phase": "glide",
+        "position_m": [
+          7226.020570791042,
+          0.0,
+          -17.713807182762025
+        ],
+        "speed_m_s": 216.3661400348399,
+        "time_s": 76.0,
+        "velocity_m_s": [
+          204.00147365119045,
+          0.0,
+          -72.0951128837357
+        ]
+      },
+      "terminal_velocity_m_s": [
+        204.00147365119045,
+        0.0,
+        -72.0951128837357
+      ],
+      "termination": "ground_contact",
+      "timed_out": false,
+      "trajectory": {
+        "fields": [
+          "time_s",
+          "x_m",
+          "y_m",
+          "z_m",
+          "vx_m_s",
+          "vy_m_s",
+          "vz_m_s",
+          "speed_m_s",
+          "mass_kg",
+          "phase"
+        ],
+        "rows": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            76.95453224827548,
+            0.0,
+            211.43083967682938,
+            225.0,
+            11664.1,
+            "boost"
+          ],
+          [
+            1.0,
+            77.99379984351073,
+            0.0,
+            209.41311405836734,
+            79.03881245342932,
+            0.0,
+            207.44083497317456,
+            221.98836430861917,
+            11564.1,
+            "boost"
+          ],
+          [
+            2.0,
+            158.08883382922699,
+            0.0,
+            414.9695841901504,
+            81.15673250160913,
+            0.0,
+            203.71468265710644,
+            219.28540115662813,
+            11464.1,
+            "boost"
+          ],
+          [
+            3.0,
+            240.31796021879165,
+            0.0,
+            616.9250110684662,
+            83.30675043319205,
+            0.0,
+            200.2362208657892,
+            216.87452320259115,
+            11364.1,
+            "boost"
+          ],
+          [
+            4.0,
+            324.7125557992411,
+            0.0,
+            815.5198102051544,
+            85.48744234681027,
+            0.0,
+            196.99119543969636,
+            214.7408528430486,
+            11264.1,
+            "boost"
+          ],
+          [
+            5.0,
+            411.3026257654395,
+            0.0,
+            1010.9809902906452,
+            87.69748657091716,
+            0.0,
+            193.96700850717994,
+            212.87096922802934,
+            11164.1,
+            "boost"
+          ],
+          [
+            6.0,
+            500.1168992441808,
+            0.0,
+            1203.5237006292662,
+            89.93565068314464,
+            0.0,
+            191.1525067552057,
+            211.25269726703982,
+            11064.1,
+            "boost"
+          ],
+          [
+            7.0,
+            591.1829130503644,
+            0.0,
+            1393.3525836421322,
+            92.20078088095079,
+            0.0,
+            188.53780223091758,
+            209.87493148330435,
+            10964.1,
+            "boost"
+          ],
+          [
+            8.0,
+            684.52708581946,
+            0.0,
+            1580.6629620065007,
+            94.49179330356824,
+            0.0,
+            186.114119961742,
+            208.7274889679315,
+            10864.1,
+            "boost"
+          ],
+          [
+            9.0,
+            780.1747842995875,
+            0.0,
+            1765.6418848731562,
+            96.8076669803695,
+            0.0,
+            183.87366780546967,
+            207.80098675997266,
+            10764.1,
+            "boost"
+          ],
+          [
+            10.0,
+            878.1503832923025,
+            0.0,
+            1948.4690534730787,
+            99.14743813972619,
+            0.0,
+            181.8095248230302,
+            207.08673981220252,
+            10664.1,
+            "boost"
+          ],
+          [
+            11.0,
+            978.4773204895029,
+            0.0,
+            2129.317643078784,
+            101.51019565915101,
+            0.0,
+            179.91554516244605,
+            206.5766763549537,
+            10564.1,
+            "boost"
+          ],
+          [
+            12.0,
+            1081.1781472540194,
+            0.0,
+            2308.3550355610605,
+            103.89507747487325,
+            0.0,
+            178.18627499522933,
+            206.2632679858084,
+            10464.1,
+            "boost"
+          ],
+          [
+            13.0,
+            1186.2745762252264,
+            0.0,
+            2485.7434745521464,
+            106.30126779918423,
+            0.0,
+            176.61688048827278,
+            206.1394722248088,
+            10364.1,
+            "boost"
+          ],
+          [
+            14.0,
+            1293.7875264920667,
+            0.0,
+            2661.640653393354,
+            108.72799501852863,
+            0.0,
+            175.20308514934254,
+            206.19868560831554,
+            10264.1,
+            "boost"
+          ],
+          [
+            15.0,
+            1403.737166959345,
+            0.0,
+            2836.2002445317307,
+            109.18164598418352,
+            0.0,
+            172.93568009927571,
+            204.51743512770398,
+            10164.1,
+            "coast"
+          ],
+          [
+            16.0,
+            1508.4383411709518,
+            0.0,
+            3005.396844582397,
+            100.40547676760998,
+            0.0,
+            165.38270744091335,
+            193.47532061071203,
+            10164.1,
+            "coast"
+          ],
+          [
+            17.0,
+            1604.9005534574194,
+            0.0,
+            3166.832901485205,
+            92.68668380184079,
+            0.0,
+            157.4306472535783,
+            182.68888868473368,
+            10164.1,
+            "coast"
+          ],
+          [
+            18.0,
+            1694.1310643935562,
+            0.0,
+            3320.1541519660786,
+            85.92609683970488,
+            0.0,
+            149.16594930668165,
+            172.14463265135473,
+            10164.1,
+            "coast"
+          ],
+          [
+            19.0,
+            1777.0412340195576,
+            0.0,
+            3465.0837747100727,
+            80.03114487728949,
+            0.0,
+            140.6576167584173,
+            161.83185503023654,
+            10164.1,
+            "coast"
+          ],
+          [
+            20.0,
+            1854.453233179485,
+            0.0,
+            3601.406554907905,
+            74.91602100164295,
+            0.0,
+            131.9603341143627,
+            151.7430063702866,
+            10164.1,
+            "coast"
+          ],
+          [
+            21.0,
+            1927.1067644090767,
+            0.0,
+            3728.955906953405,
+            70.50155723557812,
+            0.0,
+            123.11706936055498,
+            141.87417784985823,
+            10164.1,
+            "coast"
+          ],
+          [
+            22.0,
+            1995.6655577147542,
+            0.0,
+            3847.603270389182,
+            66.71491416041997,
+            0.0,
+            114.16123132219101,
+            132.22581634624538,
+            10164.1,
+            "coast"
+          ],
+          [
+            23.0,
+            2060.72349533925,
+            0.0,
+            3957.249472347582,
+            63.48915963763878,
+            0.0,
+            105.11845714228355,
+            122.80375980998173,
+            10164.1,
+            "coast"
+          ],
+          [
+            24.0,
+            2122.8102823283866,
+            0.0,
+            4057.817721040829,
+            60.7627890026119,
+            0.0,
+            96.00809756631803,
+            113.62073457639488,
+            10164.1,
+            "coast"
+          ],
+          [
+            25.0,
+            2182.3966239847614,
+            0.0,
+            4149.247959098237,
+            58.479223913224146,
+            0.0,
+            86.84446101277189,
+            104.69851975119735,
+            8664.1,
+            "glide"
+          ],
+          [
+            26.0,
+            2239.7301941884575,
+            0.0,
+            4231.543353867562,
+            56.259854535653744,
+            0.0,
+            77.73734388074837,
+            95.95970959734426,
+            8664.1,
+            "glide"
+          ],
+          [
+            27.0,
+            2295.050903720882,
+            0.0,
+            4304.706416791276,
+            54.4443444917284,
+            0.0,
+            68.58141101172649,
+            87.56481361536353,
+            8664.1,
+            "glide"
+          ],
+          [
+            28.0,
+            2348.7358259098373,
+            0.0,
+            4368.692654521672,
+            52.9797986529238,
+            0.0,
+            59.384833119949,
+            79.58277118816947,
+            8664.1,
+            "glide"
+          ],
+          [
+            29.0,
+            2401.1111085554085,
+            0.0,
+            4423.464503522574,
+            51.817205237373,
+            0.0,
+            50.153481067021225,
+            72.11376028021347,
+            8664.1,
+            "glide"
+          ],
+          [
+            30.0,
+            2452.4557170616804,
+            0.0,
+            4468.9895818226905,
+            50.911187339034605,
+            0.0,
+            40.89203804206957,
+            65.30013607569545,
+            8664.1,
+            "glide"
+          ],
+          [
+            31.0,
+            2503.005044662922,
+            0.0,
+            4505.240092503831,
+            50.22000767517409,
+            0.0,
+            31.60520231615105,
+            59.33749223163534,
+            8664.1,
+            "glide"
+          ],
+          [
+            32.0,
+            2552.954719204721,
+            0.0,
+            4532.193496643877,
+            49.70598847347917,
+            0.0,
+            22.29902432146848,
+            54.4787277367514,
+            8664.1,
+            "glide"
+          ],
+          [
+            33.0,
+            2602.465120394927,
+            0.0,
+            4549.83456992508,
+            49.336542832562685,
+            0.0,
+            12.98230952467553,
+            51.01602512214935,
+            8664.1,
+            "glide"
+          ],
+          [
+            34.0,
+            2651.667284616738,
+            0.0,
+            4558.158783035516,
+            49.085910053522284,
+            0.0,
+            3.6677906343056,
+            49.22275138510219,
+            8664.1,
+            "glide"
+          ],
+          [
+            35.0,
+            2700.670793874193,
+            0.0,
+            4557.1765213017925,
+            48.93728713040725,
+            0.0,
+            -5.627459626519988,
+            49.25978454613901,
+            8664.1,
+            "glide"
+          ],
+          [
+            36.0,
+            2749.5736392637677,
+            0.0,
+            4546.9171473522465,
+            48.88446386309974,
+            0.0,
+            -14.882777138805874,
+            51.09978339040262,
+            8664.1,
+            "glide"
+          ],
+          [
+            37.0,
+            2798.4730315847332,
+            0.0,
+            4527.431816802899,
+            48.931961883610334,
+            0.0,
+            -24.07553817528663,
+            54.534103386860394,
+            8664.1,
+            "glide"
+          ],
+          [
+            38.0,
+            2847.4754790842308,
+            0.0,
+            4498.794588125963,
+            49.0934935359528,
+            0.0,
+            -33.18278213068777,
+            59.25595444761084,
+            8664.1,
+            "glide"
+          ],
+          [
+            39.0,
+            2896.7047891506277,
+            0.0,
+            4461.102235744197,
+            49.389519656253256,
+            0.0,
+            -42.18211775980802,
+            64.95117943946622,
+            8664.1,
+            "glide"
+          ],
+          [
+            40.0,
+            2946.3075816793935,
+            0.0,
+            4414.47356318665,
+            49.844838753514765,
+            0.0,
+            -51.051850291841994,
+            71.34983790159957,
+            8664.1,
+            "glide"
+          ],
+          [
+            41.0,
+            2996.4566241874986,
+            0.0,
+            4359.048853018726,
+            50.486676785033495,
+            0.0,
+            -59.770638730852454,
+            78.23959219660158,
+            8664.1,
+            "glide"
+          ],
+          [
+            42.0,
+            3047.352533512657,
+            0.0,
+            4294.9897637505255,
+            51.34331592334249,
+            0.0,
+            -68.31698379171013,
+            85.45961832585574,
+            8664.1,
+            "glide"
+          ],
+          [
+            43.0,
+            3099.2243206769344,
+            0.0,
+            4222.479748921716,
+            52.44312562674845,
+            0.0,
+            -76.6687133255827,
+            92.88903610493168,
+            8664.1,
+            "glide"
+          ],
+          [
+            44.0,
+            3152.329104083119,
+            0.0,
+            4141.724962136683,
+            53.81384591134018,
+            0.0,
+            -84.80253063729326,
+            100.43604539336725,
+            8664.1,
+            "glide"
+          ],
+          [
+            45.0,
+            3206.951183347388,
+            0.0,
+            4052.955574306784,
+            55.482010018902045,
+            0.0,
+            -92.69364262775022,
+            108.0294627374339,
+            8664.1,
+            "glide"
+          ],
+          [
+            46.0,
+            3263.400573259048,
+            0.0,
+            3956.4274223932057,
+            57.47243229286533,
+            0.0,
+            -100.315468334924,
+            115.61260165273131,
+            8664.1,
+            "glide"
+          ],
+          [
+            47.0,
+            3322.011038152899,
+            0.0,
+            3852.423910198237,
+            59.807715230938264,
+            0.0,
+            -107.63942616445883,
+            123.13898191133053,
+            8664.1,
+            "glide"
+          ],
+          [
+            48.0,
+            3383.13763093313,
+            0.0,
+            3741.2580823660833,
+            62.50774833971065,
+            0.0,
+            -114.63480068829443,
+            130.56935372186533,
+            8664.1,
+            "glide"
+          ],
+          [
+            49.0,
+            3447.153720212209,
+            0.0,
+            3623.274790056557,
+            65.58918382329959,
+            0.0,
+            -121.26869355413473,
+            137.86963795895463,
+            8664.1,
+            "glide"
+          ],
+          [
+            50.0,
+            3514.4474786901264,
+            0.0,
+            3498.8528604773037,
+            69.06488297178696,
+            0.0,
+            -127.50606641643928,
+            145.0094998022545,
+            8664.1,
+            "glide"
+          ],
+          [
+            51.0,
+            3585.4178033724056,
+            0.0,
+            3368.4071731763997,
+            72.94333412946965,
+            0.0,
+            -133.30988639756208,
+            151.96136286982411,
+            8664.1,
+            "glide"
+          ],
+          [
+            52.0,
+            3660.469642260528,
+            0.0,
+            3232.390534589169,
+            77.2280493617051,
+            0.0,
+            -138.64138621020973,
+            158.6997340215241,
+            8664.1,
+            "glide"
+          ],
+          [
+            53.0,
+            3740.0087122854998,
+            0.0,
+            3091.295229859735,
+            81.91695296781953,
+            0.0,
+            -143.4604515504737,
+            165.20075164053512,
+            8664.1,
+            "glide"
+          ],
+          [
+            54.0,
+            3824.4356094260265,
+            0.0,
+            2945.654118660369,
+            87.00178104361605,
+            0.0,
+            -147.72614750452814,
+            171.44189850001928,
+            8664.1,
+            "glide"
+          ],
+          [
+            55.0,
+            3914.1393341983676,
+            0.0,
+            2796.041131068248,
+            92.4675173709683,
+            0.0,
+            -151.39739327063083,
+            177.40183893605044,
+            8664.1,
+            "glide"
+          ],
+          [
+            56.0,
+            4009.49028395076,
+            0.0,
+            2643.071012222966,
+            98.29189678610585,
+            0.0,
+            -154.43379024904098,
+            183.0603521915526,
+            8664.1,
+            "glide"
+          ],
+          [
+            57.0,
+            4110.832797253511,
+            0.0,
+            2487.398162385506,
+            104.44501244646631,
+            0.0,
+            -156.79660231070176,
+            188.39834160926912,
+            8664.1,
+            "glide"
+          ],
+          [
+            58.0,
+            4218.477374265891,
+            0.0,
+            2329.714424193337,
+            110.88906750316013,
+            0.0,
+            -158.44987874455032,
+            193.39790424377176,
+            8664.1,
+            "glide"
+          ],
+          [
+            59.0,
+            4332.692738755219,
+            0.0,
+            2170.7456833927267,
+            117.57831388042166,
+            0.0,
+            -159.3617001054329,
+            198.04244836765903,
+            8664.1,
+            "glide"
+          ],
+          [
+            60.0,
+            4453.697950157058,
+            0.0,
+            2011.2471749427923,
+            124.45922037424053,
+            0.0,
+            -159.50551529160876,
+            202.31684790102233,
+            8664.1,
+            "glide"
+          ],
+          [
+            61.0,
+            4581.654814619194,
+            0.0,
+            1851.9974244386112,
+            131.4709083299038,
+            0.0,
+            -158.8615253329701,
+            206.20762344832906,
+            8664.1,
+            "glide"
+          ],
+          [
+            62.0,
+            4716.6608785628305,
+            0.0,
+            1693.7908057763666,
+            138.54588509680076,
+            0.0,
+            -157.41805656772456,
+            209.70313972569713,
+            8664.1,
+            "glide"
+          ],
+          [
+            63.0,
+            4858.74331260192,
+            0.0,
+            1537.4287592009239,
+            145.61109292651528,
+            0.0,
+            -155.17285444823253,
+            212.79380898152706,
+            8664.1,
+            "glide"
+          ],
+          [
+            64.0,
+            5007.854003211691,
+            0.0,
+            1383.709787202095,
+            152.58927405614583,
+            0.0,
+            -152.13422070910383,
+            215.4722897909332,
+            8664.1,
+            "glide"
+          ],
+          [
+            65.0,
+            5163.866160214509,
+            0.0,
+            1233.4184254048469,
+            159.40063206032585,
+            0.0,
+            -148.3219127010291,
+            217.73367054390803,
+            8664.1,
+            "glide"
+          ],
+          [
+            66.0,
+            5326.5727168230815,
+            0.0,
+            1087.3134662766329,
+            165.96474647753953,
+            0.0,
+            -143.7677258488499,
+            219.57562722010846,
+            8664.1,
+            "glide"
+          ],
+          [
+            67.0,
+            5495.686744157148,
+            0.0,
+            946.1157884758906,
+            172.20267417546626,
+            0.0,
+            -138.5156895212254,
+            220.9985457796551,
+            8664.1,
+            "glide"
+          ],
+          [
+            68.0,
+            5670.844024564101,
+            0.0,
+            810.4962065517437,
+            178.03914937370493,
+            0.0,
+            -132.62182349249696,
+            222.00560077661876,
+            8664.1,
+            "glide"
+          ],
+          [
+            69.0,
+            5851.607831059739,
+            0.0,
+            681.0637970956972,
+            183.40477737652714,
+            0.0,
+            -126.15342610030005,
+            222.60278363348772,
+            8664.1,
+            "glide"
+          ],
+          [
+            70.0,
+            6037.475849740849,
+            0.0,
+            558.3551720099402,
+            188.23810741737026,
+            0.0,
+            -119.1878945877862,
+            222.7988763444346,
+            8664.1,
+            "glide"
+          ],
+          [
+            71.0,
+            6227.889066362535,
+            0.0,
+            442.82515302696186,
+            192.48746953040634,
+            0.0,
+            -111.81111043156831,
+            222.60536907756622,
+            8664.1,
+            "glide"
+          ],
+          [
+            72.0,
+            6422.242327162958,
+            0.0,
+            334.8392526440701,
+            196.11247000887406,
+            0.0,
+            -104.11545445091377,
+            222.03632303860067,
+            8664.1,
+            "glide"
+          ],
+          [
+            73.0,
+            6619.896187552484,
+            0.0,
+            234.6682873020547,
+            199.08505949422647,
+            0.0,
+            -96.19754464670756,
+            221.108182819802,
+            8664.1,
+            "glide"
+          ],
+          [
+            74.0,
+            6820.189589600479,
+            0.0,
+            142.48534445969125,
+            201.3901154472467,
+            0.0,
+            -88.15581076109876,
+            219.83954505684827,
+            8664.1,
+            "glide"
+          ],
+          [
+            75.0,
+            7022.452867269844,
+            0.0,
+            58.36520463209473,
+            203.02551390925564,
+            0.0,
+            -80.08803099729337,
+            218.25089233984997,
+            8664.1,
+            "glide"
+          ],
+          [
+            76.0,
+            7226.020570791042,
+            0.0,
+            -17.713807182762025,
+            204.00147365119045,
+            0.0,
+            -72.0951128837357,
+            216.3661400348399,
+            8664.1,
+            "glide"
+          ]
+        ]
+      },
+      "witness": {
+        "available": true,
+        "trajectory_included": true
+      }
+    }
+  ],
+  "schema": "trajectory.reachability-envelope/v1alpha1",
+  "search_space": {
+    "axes": [
+      {
+        "name": "launch.azimuth_rad",
+        "sampling": "explicit_grid",
+        "units": "rad",
+        "values": [
+          0.0
+        ]
+      },
+      {
+        "name": "launch.elevation_rad",
+        "sampling": "explicit_grid",
+        "units": "rad",
+        "values": [
+          1.2217304763960306
+        ]
+      },
+      {
+        "name": "glide.bank_rad",
+        "sampling": "explicit_grid",
+        "units": "rad",
+        "values": [
+          0.0
+        ]
+      }
+    ],
+    "candidate_count": 1,
+    "composition": "cartesian_product",
+    "ordering": "axis_order_then_cartesian_product"
+  },
+  "step_size_s": 1.0,
+  "study": {
+    "fidelity": "point_mass_3dof",
+    "model": {
+      "atmosphere_model": "exponential_density",
+      "attitude_model": "launch_direction_and_bank_command",
+      "deployment_composition": "standalone",
+      "effector_model": "none",
+      "force_model": [
+        "thrust",
+        "gravity",
+        "drag",
+        "lift"
+      ],
+      "integrator": "fixed_step_rk4",
+      "integrator_order": 4,
+      "phases": [
+        "boost",
+        "coast",
+        "glide"
+      ],
+      "spawn_children": false,
+      "state_fields": [
+        "time_s",
+        "x_m",
+        "y_m",
+        "z_m",
+        "vx_m_s",
+        "vy_m_s",
+        "vz_m_s",
+        "speed_m_s",
+        "mass_kg",
+        "phase"
+      ]
+    },
+    "study_id": "hl20_rocket_release_surrogate_fixed_cd_ld_v1_point_mass_3dof_v1",
+    "vehicle_id": "hl20-low-fidelity-release-v1",
+    "vehicle_parameters": {
+      "actuator_profile_id": "none",
+      "aerodynamic_model_id": "surrogate_fixed_cd_ld_v1",
+      "attitude_control_gain": 500000.0,
+      "attitude_control_mode": "open_loop",
+      "attitude_rate_damping": 300000.0,
+      "attitude_time_constant_s": 0.35,
+      "booster_burn_time_s": 15.0,
+      "booster_detached_body": {
+        "body_id": "hl20-synthetic-spent-booster",
+        "center_of_mass_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "center_of_pressure_m": [
+          1.5,
+          0.0,
+          0.0
+        ],
+        "dimensions_m": [
+          0.8,
+          6.0
+        ],
+        "inertia_kg_m2": [
+          5000.0,
+          5000.0,
+          500.0
+        ],
+        "initial_angular_rate_body_rad_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mass_kg": 1500.0,
+        "reference_area_m2": 2.0106192982974678,
+        "shape": "cylinder",
+        "tumbling_policy": "passive_tumble"
+      },
+      "booster_dry_mass_kg": 1500.0,
+      "booster_propellant_mass_kg": 1500.0,
+      "booster_release_time_s": 25.0,
+      "booster_separation_impulse_frame": "body",
+      "booster_separation_impulse_n_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "booster_thrust_n": 120000.0,
+      "burn_time_s": 0.0,
+      "configuration_variant_id": "nominal",
+      "density_scale_height_m": 8500.0,
+      "drag_coefficient": 0.06,
+      "dry_mass_kg": 8664.1,
+      "glide_bank_schedule_deg": [],
+      "gravity_m_s2": 9.80665,
+      "inertia_body_kg_m2": null,
+      "initial_altitude_m": 0.0,
+      "initial_speed_m_s": 225.0,
+      "lift_to_drag": 3.2,
+      "mass_property_profile_id": "generic_slender_body_v1",
+      "max_attitude_rate_rad_s": 1.5707963267948966,
+      "mission_profile_id": "none",
+      "mission_segment_schedule": [],
+      "propellant_mass_kg": 0.0,
+      "pseudo6dof_profile_id": null,
+      "reference_area_m2": 26.612075808,
+      "sea_level_density_kg_m3": 1.225,
+      "thrust_n": 0.0,
+      "vehicle_id": "hl20-low-fidelity-release-v1",
+      "wind_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "vehicle_type": "staged_rocket_glide"
+  },
+  "success_spec": {
+    "max_impact_radius_m": null,
+    "max_impact_speed_m_s": null,
+    "max_speed_m_s": null,
+    "min_impact_speed_m_s": null,
+    "min_speed_m_s": 0.0,
+    "require_ground_contact": true,
+    "target_frame": "local_ecic",
+    "target_id": "local_target",
+    "target_position_m": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "summary": {
+    "candidate_count": 1,
+    "child_classification_counts": {},
+    "classification_counts": {
+      "feasible": 1
+    },
+    "evaluated_bounds": {
+      "altitude_max_m": -17.713807182762025,
+      "altitude_min_m": -17.713807182762025,
+      "crossrange_max_m": 0.0,
+      "crossrange_min_m": 0.0,
+      "downrange_max_m": 7226.020570791042,
+      "downrange_min_m": 7226.020570791042
+    },
+    "failure_reason_counts": {},
+    "feasible_bounds": {
+      "altitude_max_m": -17.713807182762025,
+      "altitude_min_m": -17.713807182762025,
+      "crossrange_max_m": 0.0,
+      "crossrange_min_m": 0.0,
+      "downrange_max_m": 7226.020570791042,
+      "downrange_min_m": 7226.020570791042
+    },
+    "feasible_count": 1,
+    "successful_query_ids": [
+      "query-000000"
+    ],
+    "timed_out_count": 0,
+    "timed_out_query_ids": [],
+    "unsuccessful_count": 0,
+    "unsuccessful_query_ids": []
+  },
+  "vehicle_id": "hl20-low-fidelity-release-v1",
+  "workers": 1
+}

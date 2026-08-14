@@ -1,0 +1,308 @@
+{
+  "artifacts": [
+    "point_mass_3dof.json",
+    "pseudo_6dof.json",
+    "rigid_body_6dof.json",
+    "rigid_body_6dof_surface_allocated.json"
+  ],
+  "claim_boundary": "four fidelity synthetic booster comparison with source-bound HL-20 geometry and fixed mass",
+  "family_group": "hypersonic_lifting_body_research",
+  "fidelity_profiles": [
+    "point_mass_3dof",
+    "pseudo_6dof",
+    "rigid_body_6dof",
+    "rigid_body_6dof_surface_allocated"
+  ],
+  "plot_manifest": "plots/plot-manifest.json",
+  "plots": [
+    "flown-trajectories.png",
+    "search-coverage.png",
+    "terminal-capability.png",
+    "deployment-timeline.png",
+    "projected-area.png",
+    "trajectory_parent.png",
+    "trajectory_children.png",
+    "event_timeline.png",
+    "capability_footprint.png",
+    "exploration_coverage.png",
+    "projected_area.png",
+    "fidelity_comparison.png",
+    "fidelity-progression.png"
+  ],
+  "provenance": {
+    "actuator_profile_id": "none",
+    "aerodynamic_model": "surrogate_fixed_cd_ld_v1",
+    "aerodynamics_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+    "attitude_control_gain": 500000.0,
+    "attitude_control_mode": "open_loop",
+    "attitude_rate_damping": 300000.0,
+    "child_aerodynamics": "fixed_cd_and_ld_low_fidelity_surrogate",
+    "child_mass_binding": "separate_fixed_binding_v1",
+    "child_model": "reference_hl20_mod_k",
+    "configuration_variant_id": "nominal",
+    "controller_claim": false,
+    "family_group": "hypersonic_lifting_body_research",
+    "family_id": "reference_hl20_mod_k",
+    "fidelity": "point_mass_3dof",
+    "glide_bank_schedule_deg": [],
+    "inertia_body_kg_m2": null,
+    "initial_speed_m_s": 250.0,
+    "mass_property_profile_id": "generic_slender_body_v1",
+    "mission_profile_id": "none",
+    "mission_segment_schedule": [],
+    "pseudo6dof_profile_id": null,
+    "qualification": "synthetic_booster_source_bound_glide_child",
+    "release_event_id": "hl20-release-v1",
+    "release_time_s": 25.0,
+    "rocket_parent": "generic-staged-booster-v1",
+    "rocket_parent_claim": "synthetic scenario assumption only",
+    "route_claim": false,
+    "scenario_id": "hl20-rocket-release-point_mass_3dof-v1",
+    "source_aerodynamics": false,
+    "source_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+    "source_envelope": {
+      "altitude_m": [
+        -1000.0,
+        20000.0
+      ],
+      "mach": [
+        0.3,
+        4.0
+      ]
+    },
+    "source_exact_trajectory": false,
+    "source_family_manifest": "families/reference_hl20_mod_k/family.yaml",
+    "source_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+    "wind_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "provenance_by_fidelity": {
+    "point_mass_3dof": {
+      "actuator_profile_id": "none",
+      "aerodynamic_model": "surrogate_fixed_cd_ld_v1",
+      "aerodynamics_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+      "attitude_control_gain": 500000.0,
+      "attitude_control_mode": "open_loop",
+      "attitude_rate_damping": 300000.0,
+      "child_aerodynamics": "fixed_cd_and_ld_low_fidelity_surrogate",
+      "child_mass_binding": "separate_fixed_binding_v1",
+      "child_model": "reference_hl20_mod_k",
+      "configuration_variant_id": "nominal",
+      "controller_claim": false,
+      "family_group": "hypersonic_lifting_body_research",
+      "family_id": "reference_hl20_mod_k",
+      "fidelity": "point_mass_3dof",
+      "glide_bank_schedule_deg": [],
+      "inertia_body_kg_m2": null,
+      "initial_speed_m_s": 250.0,
+      "mass_property_profile_id": "generic_slender_body_v1",
+      "mission_profile_id": "none",
+      "mission_segment_schedule": [],
+      "pseudo6dof_profile_id": null,
+      "qualification": "synthetic_booster_source_bound_glide_child",
+      "release_event_id": "hl20-release-v1",
+      "release_time_s": 25.0,
+      "rocket_parent": "generic-staged-booster-v1",
+      "rocket_parent_claim": "synthetic scenario assumption only",
+      "route_claim": false,
+      "scenario_id": "hl20-rocket-release-point_mass_3dof-v1",
+      "source_aerodynamics": false,
+      "source_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+      "source_envelope": {
+        "altitude_m": [
+          -1000.0,
+          20000.0
+        ],
+        "mach": [
+          0.3,
+          4.0
+        ]
+      },
+      "source_exact_trajectory": false,
+      "source_family_manifest": "families/reference_hl20_mod_k/family.yaml",
+      "source_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+      "wind_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "pseudo_6dof": {
+      "actuator_profile_id": "none",
+      "aerodynamic_model": "surrogate_fixed_cd_ld_v1",
+      "aerodynamics_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+      "attitude_control_gain": 500000.0,
+      "attitude_control_mode": "open_loop",
+      "attitude_rate_damping": 300000.0,
+      "child_aerodynamics": "fixed_cd_and_ld_low_fidelity_surrogate",
+      "child_mass_binding": "separate_fixed_binding_v1",
+      "child_model": "reference_hl20_mod_k",
+      "configuration_variant_id": "nominal",
+      "controller_claim": false,
+      "family_group": "hypersonic_lifting_body_research",
+      "family_id": "reference_hl20_mod_k",
+      "fidelity": "pseudo_6dof",
+      "glide_bank_schedule_deg": [],
+      "inertia_body_kg_m2": null,
+      "initial_speed_m_s": 250.0,
+      "mass_property_profile_id": "generic_slender_body_v1",
+      "mission_profile_id": "none",
+      "mission_segment_schedule": [],
+      "pseudo6dof_profile_id": null,
+      "qualification": "synthetic_booster_source_bound_glide_child",
+      "release_event_id": "hl20-release-v1",
+      "release_time_s": 25.0,
+      "rocket_parent": "generic-staged-booster-v1",
+      "rocket_parent_claim": "synthetic scenario assumption only",
+      "route_claim": false,
+      "scenario_id": "hl20-rocket-release-pseudo_6dof-v1",
+      "source_aerodynamics": false,
+      "source_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+      "source_envelope": {
+        "altitude_m": [
+          -1000.0,
+          20000.0
+        ],
+        "mach": [
+          0.3,
+          4.0
+        ]
+      },
+      "source_exact_trajectory": false,
+      "source_family_manifest": "families/reference_hl20_mod_k/family.yaml",
+      "source_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+      "wind_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "rigid_body_6dof": {
+      "actuator_profile_id": "none",
+      "aerodynamic_model": "surrogate_fixed_cd_ld_v1",
+      "aerodynamics_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+      "attitude_control_gain": 500000.0,
+      "attitude_control_mode": "open_loop",
+      "attitude_rate_damping": 300000.0,
+      "child_aerodynamics": "fixed_cd_and_ld_low_fidelity_surrogate",
+      "child_mass_binding": "separate_fixed_binding_v1",
+      "child_model": "reference_hl20_mod_k",
+      "configuration_variant_id": "nominal",
+      "controller_claim": false,
+      "family_group": "hypersonic_lifting_body_research",
+      "family_id": "reference_hl20_mod_k",
+      "fidelity": "rigid_body_6dof",
+      "glide_bank_schedule_deg": [],
+      "inertia_body_kg_m2": null,
+      "initial_speed_m_s": 250.0,
+      "mass_property_profile_id": "generic_slender_body_v1",
+      "mission_profile_id": "none",
+      "mission_segment_schedule": [],
+      "pseudo6dof_profile_id": null,
+      "qualification": "synthetic_booster_source_bound_glide_child",
+      "release_event_id": "hl20-release-v1",
+      "release_time_s": 25.0,
+      "rocket_parent": "generic-staged-booster-v1",
+      "rocket_parent_claim": "synthetic scenario assumption only",
+      "route_claim": false,
+      "scenario_id": "hl20-rocket-release-rigid_body_6dof-v1",
+      "source_aerodynamics": false,
+      "source_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+      "source_envelope": {
+        "altitude_m": [
+          -1000.0,
+          20000.0
+        ],
+        "mach": [
+          0.3,
+          4.0
+        ]
+      },
+      "source_exact_trajectory": false,
+      "source_family_manifest": "families/reference_hl20_mod_k/family.yaml",
+      "source_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+      "wind_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "rigid_body_6dof_surface_allocated": {
+      "actuator_profile_id": "none",
+      "aerodynamic_model": "surrogate_fixed_cd_ld_v1",
+      "aerodynamics_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+      "attitude_control_gain": 500000.0,
+      "attitude_control_mode": "open_loop",
+      "attitude_rate_damping": 300000.0,
+      "child_aerodynamics": "fixed_cd_and_ld_low_fidelity_surrogate",
+      "child_mass_binding": "separate_fixed_binding_v1",
+      "child_model": "reference_hl20_mod_k",
+      "configuration_variant_id": "nominal",
+      "controller_claim": false,
+      "family_group": "hypersonic_lifting_body_research",
+      "family_id": "reference_hl20_mod_k",
+      "fidelity": "rigid_body_6dof_surface_allocated",
+      "glide_bank_schedule_deg": [],
+      "inertia_body_kg_m2": null,
+      "initial_speed_m_s": 250.0,
+      "mass_property_profile_id": "generic_slender_body_v1",
+      "mission_profile_id": "none",
+      "mission_segment_schedule": [],
+      "pseudo6dof_profile_id": null,
+      "qualification": "synthetic_booster_source_bound_glide_child",
+      "release_event_id": "hl20-release-v1",
+      "release_time_s": 25.0,
+      "rocket_parent": "generic-staged-booster-v1",
+      "rocket_parent_claim": "synthetic scenario assumption only",
+      "route_claim": false,
+      "scenario_id": "hl20-rocket-release-rigid_body_6dof_surface_allocated-v1",
+      "source_aerodynamics": false,
+      "source_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+      "source_envelope": {
+        "altitude_m": [
+          -1000.0,
+          20000.0
+        ],
+        "mach": [
+          0.3,
+          4.0
+        ]
+      },
+      "source_exact_trajectory": false,
+      "source_family_manifest": "families/reference_hl20_mod_k/family.yaml",
+      "source_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+      "wind_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "schema": "taoryx.hl20-rocket-release-fidelity-bundle/v1alpha1",
+  "showcase": {
+    "composites": [
+      "composites/hl20-ca-hi-flight-composite.png",
+      "composites/hl20-ca-hi-envelope-comparison.png",
+      "composites/hl20-ca-hi-spent-booster-composite.png"
+    ],
+    "data_artifacts": [
+      "composites/candidate-summary.csv",
+      "composites/parent-telemetry-all-tiers.csv",
+      "composites/spent-booster-telemetry.csv",
+      "composites/surface-allocation.csv"
+    ],
+    "manifest": "composites/showcase-manifest.json",
+    "summary": "composites/showcase-summary.json"
+  },
+  "surface_allocation_claim": "logical overlay only; not source-declared actuator dynamics or controller qualification",
+  "tier_contracts": {
+    "point_mass_3dof": "translation and resource baseline",
+    "pseudo_6dof": "synthesized attitude response bridge",
+    "rigid_body_6dof": "native rigid-body diagnostic with direct loads",
+    "rigid_body_6dof_surface_allocated": "bounded synthetic logical seven-surface overlay"
+  },
+  "vehicle_id": "reference_hl20_mod_k"
+}

@@ -1,0 +1,81 @@
+schema: taoryx.vehicle-endpoint-specs/v1alpha1
+version: 1
+description: Focused vertical contracts that join a selected vehicle composition to
+  its runtime factory, executable witness, capability advertisement, normalized output
+  surface, controller campaign, and planning ledger record.
+endpoints:
+- id: hl20-source-surface-attitude-rate-lqi
+  family_id: hl20_mod_k
+  model_id: hl20_mod_k
+  mission_id: hl20_source_surface_attitude_rate_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  execution_mode: closed_loop_controller
+  operations:
+  - operation: batch
+    factory_id: hl20_local_physical_surface_lqi_screen.v1
+    witness_id: hl20-source-surface-attitude-rate-lqi-screen-batch
+  controller_campaign_id: hl20-source-surface-local-lqi-v1
+  required_tuning_operations:
+  - state_derivative
+  - trim
+  - linearize
+  required_core_output_ids:
+  - attitude.local.roll_error
+  - attitude.local.pitch_error
+  - attitude.local.yaw_error
+  - angular_rate.body.x
+  - angular_rate.body.y
+  - angular_rate.body.z
+  - source_fixture.velocity.body.x
+  - source_fixture.velocity.body.y
+  - source_fixture.velocity.body.z
+  required_telemetry_output_ids:
+  - mass.total
+  - aerodynamics.pitch_coefficient
+  - control.pitch_moment.requested
+  - control.pitch_moment.achieved
+  - control.pitch_moment.residual
+  - control.allocation.residual_norm
+  - control.allocation.saturation_count
+  - actuator.surface.rudder.actual
+  robustness_screens:
+  - id: hl20-local-lqi-matched-pitch-wrench-offset
+    kind: constant_offset
+    artifact_filename: robustness_report.json
+    execution_readiness: available
+    cases:
+    - id: nominal
+      parameters:
+        pitch_wrench_bias_fraction: 0.0
+      description: Retain the pinned Mach-1 source-pitch-trim local LQI recovery as
+        the nominal reference.
+    - id: positive-pitch-offset
+      parameters:
+        pitch_wrench_bias_fraction: 0.05
+      description: Apply a constant matched positive pitch-wrench bias at five percent
+        of the declared controller scale.
+    - id: negative-pitch-offset
+      parameters:
+        pitch_wrench_bias_fraction: -0.05
+      description: Apply a constant matched negative pitch-wrench bias at five percent
+        of the declared controller scale.
+    metrics:
+    - id: final_feedback_error_fraction
+      maximum: 0.2
+      unit: ratio
+      description: Final normalized feedback error divided by initial normalized feedback
+        error.
+    - id: saturation_fraction
+      maximum: 0.0
+      unit: fraction
+      description: Fraction of committed samples with an allocation or surface saturation.
+    claim_boundary: Executed matched-wrench offset screen at the frozen HL-20 source
+      fixture. It replays nominal and plus/minus five-percent pitch-moment cases through
+      the declared source full-inertia external-dynamics seam. It does not establish
+      an atmospheric-wind model, mass variation, full glide trim, guidance, navigation,
+      or flight qualification.
+  maturity_record_id: reference_hl20_mod_k
+  claim_boundary: Local frozen-translation HL-20 source-surface attitude/rate LQI
+    recovery plus one matched constant external pitch-moment screen only; it does
+    not establish full-state trim, glide guidance, navigation, wind or mass robustness,
+    or flight qualification.

@@ -348,7 +348,7 @@ bindings:
     operation: batch
     status: runnable
     execution_mode: local_direct_wrench_screen
-    factory_id: local_direct_wrench_screen.v1
+    factory_id: x15_local_direct_wrench_screen.v1
     batch_action_trace: emits_committed_interval_trace
     description: Execute the source-local X-15 direct-wrench LQR recovery screen through the public composition path.
     claim_boundary: Local direct-wrench recovery screen only; it is neither an X-15 flight mission nor physical effector allocation.
@@ -368,7 +368,7 @@ bindings:
     operation: batch
     status: runnable
     execution_mode: local_direct_wrench_screen
-    factory_id: local_direct_wrench_screen.v1
+    factory_id: x15_local_direct_wrench_screen.v1
     batch_action_trace: emits_committed_interval_trace
     description: Execute the source-release X-15 body-speed LQI screen through the bounded generalized direct-wrench composition bridge.
     claim_boundary: Local source-load direct-wrench LQI screen only; it proves neither physical X-15 effector allocation, persistent-disturbance rejection, navigation, nor a flight mission.
@@ -398,7 +398,7 @@ bindings:
     operation: batch
     status: runnable
     execution_mode: local_direct_wrench_screen
-    factory_id: local_direct_wrench_screen.v1
+    factory_id: hl20_local_direct_wrench_screen.v1
     batch_action_trace: emits_committed_interval_trace
     description: Execute the source-local subsonic HL-20 direct-wrench LQR recovery screen through the public composition path.
     claim_boundary: Local direct-wrench recovery screen only; it is neither a high-energy HL-20 glide mission nor physical control-surface allocation.
@@ -408,7 +408,7 @@ bindings:
     operation: episode
     status: runnable
     execution_mode: local_direct_wrench_screen
-    factory_id: local_direct_wrench_episode.v1
+    factory_id: hl20_local_direct_wrench_episode.v1
     batch_action_trace: not_applicable
     description: Step the source-local HL-20 direct-wrench bridge through its declared bounded total-wrench command.
     claim_boundary: Local direct-wrench bridge episode only; it exposes requested-versus-achieved injected wrench, not physical control-surface allocation or a high-energy glide mission.
@@ -418,7 +418,7 @@ bindings:
     operation: batch
     status: runnable
     execution_mode: local_direct_wrench_screen
-    factory_id: local_direct_wrench_screen.v1
+    factory_id: hl20_local_direct_wrench_screen.v1
     batch_action_trace: emits_committed_interval_trace
     description: Execute the pinned subsonic HL-20 body-speed LQI screen through the bounded generalized direct-wrench composition bridge.
     claim_boundary: Local source-load direct-wrench LQI screen only; it proves neither physical HL-20 surface allocation, persistent-disturbance rejection, navigation, nor a high-energy glide mission.
@@ -579,7 +579,7 @@ bindings:
     operation: batch
     status: runnable
     execution_mode: local_direct_wrench_screen
-    factory_id: local_direct_wrench_screen.v1
+    factory_id: hummingbird_local_direct_wrench_screen.v1
     batch_action_trace: emits_committed_interval_trace
     description: Execute the pinned source-hover Hummingbird direct-wrench bridge through common local LQR recovery.
     claim_boundary: Direct wrench is injected after the source hover plant and bypasses allocation; no rotor, motor-lag, translation, landing, battery, wind, gain-schedule, or qualification claim is made.

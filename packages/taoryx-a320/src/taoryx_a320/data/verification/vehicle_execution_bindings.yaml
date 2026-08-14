@@ -1,0 +1,67 @@
+schema: taoryx.vehicle-execution-bindings/v1alpha1
+version: 1
+description: Explicit source-owned execution bindings for compiled vehicle compositions.
+  An entry is a public capability declaration, not a generic family fallback. Omitted
+  vehicle/fidelity/mission combinations are unavailable until their own native binding
+  exists.
+bindings:
+- family_id: a320_openap_3dof
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  operation: batch
+  status: runnable
+  execution_mode: native_autonomous
+  factory_id: reduced_fixed_wing_openap.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the capability-derived racetrack through the declared OpenAP
+    reduced model.
+  claim_boundary: Reduced OpenAP trajectory evidence; no physical control-surface
+    or moment claim.
+- family_id: a320_openap_3dof
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  operation: batch
+  status: runnable
+  execution_mode: native_autonomous
+  factory_id: reduced_fixed_wing_openap.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the named A320 response-law racetrack through the declared
+    OpenAP reduced model.
+  claim_boundary: Named pseudo response only; policy diagnostics are not physical
+    surface allocation.
+- family_id: a320_openap_3dof
+  mission: a320_local_native_coordinate_lqi_screen_v1
+  fidelity: pseudo_6dof
+  operation: batch
+  status: runnable
+  execution_mode: local_native_coordinate_lqi_screen
+  factory_id: local_native_coordinate_lqi_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the pinned A320 pseudo-6DOF named-control cruise-attitude LQI
+    recovery through the common nonlinear validator.
+  claim_boundary: Local named-coordinate response screen only; no route guidance,
+    physical surface allocation, actuator dynamics, or A320 qualification claim.
+- family_id: a320_openap_3dof
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  operation: episode
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: reduced_fixed_wing_a320_episode.v1
+  batch_action_trace: not_applicable
+  description: Step the source-owned A320 point-mass reduced runtime through bounded
+    kinematic guidance intent.
+  claim_boundary: Accepted-truth kinematic-guidance episode only; no physical surface
+    allocation, moment balance, batch/episode parity, or mission qualification claim.
+- family_id: a320_openap_3dof
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  operation: episode
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: reduced_fixed_wing_a320_episode.v1
+  batch_action_trace: not_applicable
+  description: Step the source-owned A320 route-lag pseudo-6DOF reduced runtime through
+    bounded kinematic guidance intent.
+  claim_boundary: Accepted-truth route-lag pseudo-6DOF episode only; no physical surface
+    allocation, moment balance, batch/episode parity, or mission qualification claim.

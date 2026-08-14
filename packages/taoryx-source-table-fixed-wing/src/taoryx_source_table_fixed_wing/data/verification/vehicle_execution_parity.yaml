@@ -1,0 +1,53 @@
+schema: taoryx.vehicle-execution-parity/v1alpha1
+version: 1
+description: Exact committed-boundary batch/episode parity witnesses. Absence does
+  not imply equivalence merely because both execution operations are runnable.
+bindings:
+- family_id: skywalker_x8
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  batch_factory_id: language_backed_powered_fixed_wing.v1
+  episode_factory_id: language_backed_interactive.v1
+  adapter_id: taoryx.language_backed.action_trace_batch_episode_parity.v1
+  evidence_scope: One declared semantic native-control-bridge action trace replayed
+    through a fresh source-materialized language-runtime batch session and the accepted-truth
+    episode session at every committed boundary.
+  claim_boundary: This is X8 language-runtime kernel/status parity only. Both paths
+    use the same declared source runtime, so it is not independent-plant validation,
+    physical-effector evidence, robustness, or family qualification.
+- family_id: skywalker_x8
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  batch_factory_id: language_backed_powered_fixed_wing.v1
+  episode_factory_id: language_backed_interactive.v1
+  adapter_id: taoryx.language_backed.action_trace_batch_episode_parity.v1
+  evidence_scope: One declared semantic native-control-bridge action trace replayed
+    through a fresh source-materialized route-lag pseudo-6DOF language-runtime batch
+    session and the accepted-truth episode session at every committed boundary.
+  claim_boundary: This is X8 route-lag pseudo-6DOF language-runtime kernel/status
+    parity only. It does not establish rigid-body moments, physical elevon behavior,
+    robustness, or family qualification.
+- family_id: b747
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  batch_factory_id: language_backed_powered_fixed_wing.v1
+  episode_factory_id: language_backed_interactive.v1
+  adapter_id: taoryx.language_backed.action_trace_batch_episode_parity.v1
+  evidence_scope: One declared semantic native-control-bridge action trace replayed
+    through a fresh source-materialized language-runtime batch session and the accepted-truth
+    episode session at every committed boundary.
+  claim_boundary: This is B747 language-runtime kernel/status parity only. Both paths
+    use the same declared source runtime, so it is not independent-plant validation,
+    physical-effector evidence, robustness, or transport-family qualification.
+- family_id: b747
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  batch_factory_id: language_backed_powered_fixed_wing.v1
+  episode_factory_id: language_backed_interactive.v1
+  adapter_id: taoryx.language_backed.action_trace_batch_episode_parity.v1
+  evidence_scope: One declared semantic native-control-bridge action trace replayed
+    through a fresh source-materialized transport route-lag pseudo-6DOF language-runtime
+    batch session and the accepted-truth episode session at every committed boundary.
+  claim_boundary: This is B747 route-lag pseudo-6DOF language-runtime kernel/status
+    parity only. It does not establish rigid-body moments, physical surface behavior,
+    robustness, or transport-family qualification.

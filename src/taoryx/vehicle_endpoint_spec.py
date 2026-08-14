@@ -27,10 +27,10 @@ from .composition_result_catalog import index_composition_results
 from .family_adapter import AdapterOperation
 from .fidelity_contracts import FidelityTier
 from .plugins import discover_plugins
-from .plugins.resources import packaged_resource_fallback
 from .trajectory.native_output_contract import NativeOutputBinding, extract_native_channel, native_output_bindings
 from .tuning_application import RuntimeTuningBindingReceipt, TuningApplicationContextSet
 from .vehicle_batch_execution import VehicleBatchExecution, execute_vehicle_composition_batch
+from .vehicle_catalog_resources import vehicle_catalog_resources
 from .vehicle_composition import CompiledVehicleComposition, compile_vehicle_composition, load_vehicle_composition_request
 from .vehicle_composition_registry import ResolvedVehicleCompositionCatalog, load_resolved_vehicle_composition_catalog
 from .vehicle_execution_bindings import (
@@ -45,17 +45,11 @@ from .vehicle_execution_witnesses import load_vehicle_execution_witness_catalog
 from .vehicle_interface import resolve_vehicle_interface_contract, validate_vehicle_interface_contract
 from .vehicle_registry import ROOT
 
-VEHICLE_ENDPOINT_SPECS = packaged_resource_fallback(
-    ROOT / "verification/vehicle_endpoint_specs.yaml",
-    package="taoryx_reference_models",
-    resource="data/verification/vehicle_endpoint_specs.yaml",
-)
-VEHICLE_MATURITY_REGISTRY = packaged_resource_fallback(
-    ROOT / "verification/vehicle_maturity_registry.yaml",
-    package="taoryx_reference_models",
-    resource="data/verification/vehicle_maturity_registry.yaml",
-)
 _CONTROLLER_TUNING_PROVENANCE_FILENAME = "controller_tuning_provenance.json"
+
+# Materialized lazily by ``__getattr__`` only for compatibility consumers.
+VEHICLE_ENDPOINT_SPECS: Path
+VEHICLE_MATURITY_REGISTRY: Path
 
 
 class VehicleEndpointOperationSpec(BaseModel):
@@ -176,6 +170,7 @@ class VehicleEndpointSpec(BaseModel):
     id: str = Field(min_length=1)
     family_id: str = Field(min_length=1)
     model_id: str = Field(min_length=1)
+    provider_ids: tuple[str, ...] = Field(default=("taoryx.registry.mission-composition",), min_length=1)
     mission_id: str = Field(min_length=1)
     fidelity: FidelityTier
     execution_mode: ExecutionMode
@@ -200,6 +195,8 @@ class VehicleEndpointSpec(BaseModel):
         operations = tuple(item.operation for item in self.operations)
         if len(operations) != len(set(operations)):
             raise ValueError(f"endpoint {self.id!r} has duplicate operations")
+        if len(self.provider_ids) != len(set(self.provider_ids)) or any(not identifier.strip() for identifier in self.provider_ids):
+            raise ValueError(f"endpoint {self.id!r} needs unique nonblank provider IDs")
         if "batch" not in operations:
             raise ValueError(f"endpoint {self.id!r} needs one batch operation for typed evidence artifacts")
         required_outputs = (*self.required_core_output_ids, *self.required_telemetry_output_ids)
@@ -263,11 +260,62 @@ class VehicleEndpointSpecCatalog(BaseModel):
 def load_vehicle_endpoint_spec_catalog(path: str | Path | None = None) -> VehicleEndpointSpecCatalog:
     """Load the explicit plug-in authoring contracts for focused endpoints."""
 
-    source = Path(path) if path is not None else VEHICLE_ENDPOINT_SPECS
-    payload = yaml.safe_load(source.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"{source} must contain a mapping")
-    return VehicleEndpointSpecCatalog.model_validate(payload)
+    if path is not None:
+        source = Path(path)
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"{source} must contain a mapping")
+        return VehicleEndpointSpecCatalog.model_validate(payload)
+    payloads = _catalog_payloads("verification/vehicle_endpoint_specs.yaml")
+    return VehicleEndpointSpecCatalog.model_validate(_merge_list_catalog(payloads, "endpoints"))
+    ####
+
+
+def _catalog_payloads(relative_path: str) -> list[Mapping[str, object]]:
+    """Read every installed non-overlapping vehicle endpoint fragment."""
+
+    payloads: list[Mapping[str, object]] = []
+    for source in vehicle_catalog_resources(relative_path):
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"{source} must contain a mapping")
+        payloads.append(payload)
+    return payloads
+    ####
+
+
+def _merge_list_catalog(payloads: list[Mapping[str, object]], key: str) -> dict[str, object]:
+    """Join same-schema plug-in fragments before typed validation."""
+
+    if not payloads:
+        raise ValueError("vehicle endpoint catalog has no installed fragments")
+    merged = dict(payloads[0])
+    rows: list[object] = []
+    for payload in payloads:
+        value = payload.get(key)
+        if not isinstance(value, list):
+            raise ValueError(f"vehicle endpoint catalog {key!r} must contain a list")
+        rows.extend(value)
+    merged[key] = rows
+    return merged
+    ####
+
+
+def _maturity_records() -> tuple[Mapping[str, object], ...]:
+    """Return the merged family-ledger records owned by installed packages."""
+
+    records: list[Mapping[str, object]] = []
+    for payload in _catalog_payloads("verification/vehicle_maturity_registry.yaml"):
+        if payload.get("registry_id") != "taoryx_vehicle_maturity_v1":
+            raise ValueError("invalid vehicle maturity registry")
+        fragment_records = payload.get("records")
+        if not isinstance(fragment_records, list):
+            raise ValueError("vehicle maturity registry must contain records")
+        records.extend(item for item in fragment_records if isinstance(item, Mapping))
+    identifiers = [item.get("id") for item in records]
+    if len(identifiers) != len(set(identifiers)):
+        raise ValueError("vehicle maturity registry has duplicate record IDs across plug-in fragments")
+    return tuple(records)
     ####
 
 
@@ -2183,12 +2231,10 @@ def _elapsed_s(started: float) -> float:
 def _verify_maturity_record(endpoint: VehicleEndpointSpec, errors: list[str]) -> dict[str, object]:
     """Keep the planning ledger visible without letting it imply runtime readiness."""
 
-    payload = yaml.safe_load(VEHICLE_MATURITY_REGISTRY.read_text(encoding="utf-8"))
-    records = payload.get("records") if isinstance(payload, Mapping) else None
     record = next(
-        (item for item in records if isinstance(item, Mapping) and item.get("id") == endpoint.maturity_record_id),
+        (item for item in _maturity_records() if item.get("id") == endpoint.maturity_record_id),
         None,
-    ) if isinstance(records, list) else None
+    )
     if not isinstance(record, Mapping):
         errors.append(f"endpoint {endpoint.id}: maturity record {endpoint.maturity_record_id!r} is missing")
         return {"status": "fail", "record_id": endpoint.maturity_record_id}
@@ -2204,6 +2250,25 @@ def _verify_maturity_record(endpoint: VehicleEndpointSpec, errors: list[str]) ->
             "Family maturity is a planning ledger. It is not substituted for the endpoint's executable or controller evidence."
         ),
     }
+    ####
+
+
+def __getattr__(name: str) -> object:
+    """Resolve historical aggregate path constants only on explicit access."""
+
+    relative_paths = {
+        "VEHICLE_ENDPOINT_SPECS": "verification/vehicle_endpoint_specs.yaml",
+        "VEHICLE_MATURITY_REGISTRY": "verification/vehicle_maturity_registry.yaml",
+    }
+    try:
+        relative_path = relative_paths[name]
+    except KeyError as error:
+        raise AttributeError(name) from error
+    from .compatibility.vehicle_catalog_resources import legacy_vehicle_catalog_resource
+
+    value = legacy_vehicle_catalog_resource(relative_path)
+    globals()[name] = value
+    return value
     ####
 
 

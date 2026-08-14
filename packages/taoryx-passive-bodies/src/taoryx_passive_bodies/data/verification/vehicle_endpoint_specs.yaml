@@ -1,0 +1,39 @@
+schema: taoryx.vehicle-endpoint-specs/v1alpha1
+version: 1
+description: Focused vertical contracts that join a selected vehicle composition to
+  its runtime factory, executable witness, capability advertisement, normalized output
+  surface, controller campaign, and planning ledger record.
+endpoints:
+- id: tumbling-body-passive-release-pseudo6dof
+  family_id: tumbling_body
+  model_id: tumbling_body
+  mission_id: tumbling_body_release_damping_impact_v1
+  fidelity: pseudo_6dof
+  execution_mode: passive_uncontrolled
+  operations:
+  - operation: batch
+    factory_id: passive_tumbling_direct_release.v1
+    witness_id: tumbling-pseudo6dof-batch
+  required_core_output_ids:
+  - position.local.x
+  - position.local.y
+  - position.local.z
+  - velocity.local.x
+  - velocity.local.y
+  - velocity.local.z
+  required_telemetry_output_ids:
+  - mass.total
+  - aerodynamics.drag_force
+  - aerodynamics.projected_area
+  - angular_rate.norm
+  robustness_requirement:
+    disposition: not_applicable
+    reason: This passive release has no controller and no declared mass, wind, or
+      persistent-offset input seam. Its pseudo-6DOF packet reports native rigid-body
+      passive-tumble reuse, not a controlled robustness screen.
+  robustness_screens: []
+  maturity_record_id: tumbling_body
+  claim_boundary: Passive pseudo-6DOF tumbling-body release with native rigid-body
+    passive-tumble reuse and instantaneous projected area only. It does not establish
+    a control path, moment-command authority, a mass/wind/disturbance screen, a shape
+    envelope, or qualification.

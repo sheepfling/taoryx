@@ -116,11 +116,27 @@ details remain additive extensions of the typed record.
 
 ## First use
 
-Install at least the model profile and verify real entry points:
+Install the model profile, or an owning family package when working only on
+that family, and verify real entry points:
 
 ```bash
+python -m pip install taoryx-f16
+taoryx plugins list --no-builtin
+taoryx model list --provider taoryx.f16.mission-composition
+
+python -m pip install taoryx-hummingbird
+taoryx plugins list --no-builtin
+taoryx model list --provider taoryx.hummingbird.mission-composition
+
+# Shared source-table fixed wing has one focused provider per family:
+python -m pip install taoryx-source-table-fixed-wing
+taoryx plugins list --no-builtin
+taoryx model list --provider taoryx.x8.mission-composition
+taoryx model list --provider taoryx.b747.mission-composition
+
+# Compatibility aggregate and its dependency closure:
 python -m pip install taoryx-reference-models
-taoryx plugins check --profile models
+taoryx plugins check --profile compatibility
 ```
 
 From a source checkout, contributors and agents should use:
@@ -135,9 +151,18 @@ Then inventory the exact installed catalog:
 
 ```bash
 taoryx model list
-taoryx model list --provider taoryx.registry.mission-composition
+taoryx model list --provider taoryx.hummingbird.mission-composition
 taoryx model assess --output build/model-assessment.json
 ```
+
+The direct developer profile intentionally does not install the historic
+aggregate provider. Any later example that names
+`taoryx.registry.mission-composition` is a compatibility-consumer example and
+requires the `compatibility` or `full` profile. For new work, substitute the
+focused provider owned by the model family, such as
+`taoryx.a320.mission-composition`, `taoryx.f16.mission-composition`,
+`taoryx.hummingbird.mission-composition`, `taoryx.x15.mission-composition`,
+`taoryx.x8.mission-composition`, or `taoryx.b747.mission-composition`.
 
 The inventory includes advertised fidelities, realizations, input/control
 status, mission templates, and registered tuning campaign IDs. It does not
@@ -195,7 +220,13 @@ developer needs a single trustworthy answer to “what can I actually run and
 tune?” The catalog at `verification/vehicle_endpoint_specs.yaml` is the join
 point between the existing composition, execution-binding, witness, generic
 capability-advertisement, normalized-output, controller-campaign, and maturity
-registries. Its packaged mirror travels with `taoryx-reference-models`.
+registries. Package-owned fragments travel with the vehicle package that owns
+each family: F-16 rows and witnesses live in `taoryx-f16`, Hummingbird rows and
+witnesses live in `taoryx-hummingbird`, while the reference-model package
+carries the complementary compatibility fragment.
+The core host merges non-overlapping fragments by stable identity at discovery
+time; a family package never needs to import the aggregate merely to advertise
+or run its own endpoint.
 
 ```bash
 taoryx vehicle endpoint-specs
@@ -674,15 +705,23 @@ plug-in supplies `LocalNativeCoordinateLqiScreenConfig`: its existing plant,
 retained campaign candidate, pinned perturbation, named-coordinate bounds,
 and an exact committed-status mapper. The host then owns the nonlinear LQI
 run, acceptance gates, preflight, result artifacts, and registration shape.
+The plug-in registers the executable definition with
+`register_local_native_coordinate_lqi_screen_definition(...)` and registers
+the identical static UI/agent record with
+`register_local_controller_screen_advertisement(...)`. Discovery rejects a
+missing, differently owned, endpoint-mismatched, or metadata-mismatched pair;
+the runtime and authoring view are therefore two projections of one package
+endpoint rather than separate control descriptions.
+
 The A320 `a320_local_native_coordinate_lqi_screen_v1` is the first shipped
 example. It is batch-only and intentionally emits no external action trace:
 the aileron/elevator/rudder coordinates are internally generated native model
 commands, not advertised physical effectors or route-guidance overrides. For
-this kind of endpoint, `taoryx model plan ... --mission <screen-id>` also
-publishes `controller_automation.local_controller_screen`: the exact cadence,
-campaign ID, named-coordinate units and bounds, integral outputs, operation
-scope, and physical-allocation boundary. This static record is available
-without running a tuning campaign or executing the screen.
+this kind of endpoint, `taoryx model plan ... --mission <screen-id>` publishes
+`controller_automation.local_controller_screen`: the exact cadence, campaign
+ID, named-coordinate units and bounds, integral outputs, operation scope, and
+physical-allocation boundary. This static record is available without running
+a tuning campaign or executing the screen.
 
 The focused endpoint contract separately records whether that fidelity owns a
 mass, wind, or persistent-offset seam. A physical screen must declare its
@@ -712,7 +751,10 @@ not eligible for common retuning. In that case a plug-in registers a
 `LocalControllerScreenAdvertisement` through
 `register_local_controller_screen_advertisement(...)`. The record is selected
 only by its exact provider, model, family, fidelity, realization, and mission
-template; it cannot leak to a neighboring tier. The F-16 direct-wrench local
+template; it cannot leak to a neighboring tier. Its owning provider is
+canonical, while explicit compatibility-provider aliases may expose the same
+record to an aggregate host; alias-expanded endpoint identities are checked for
+collisions. The F-16 direct-wrench local
 screen is the shipped example. Its plan advertises the retained LQR profile,
 fixed 0.2 s cadence, four native wrench components, and their normalization
 scales. It also explicitly says that hard wrench limits and caller override
@@ -919,10 +961,11 @@ The first provider-neutral streaming acceptance ladder is deliberately small:
 | `reference_constant_velocity_waypoint_3dof` | `configured_waypoint_guidance` | `kinematic_velocity_command`, `live_waypoint_guidance` | Shared analytical transition with explicit speed/angle or waypoint units |
 | `contract_probe_vehicle` | `debug_guidance_control` | `debug_discrete_control`, `debug_event_control` | Non-physical API stress surface; tuning is not applicable |
 | `simple_aero` | `generated_mission_commands` | `direct_throttle_command` | Existing point-mass kernel; bank is non-steering schedule telemetry |
+| `hummingbird` (`pseudo_6dof`) | `body_motion_response` | `velocity_yaw_command`, `live_waypoint_guidance` | Aggregate thrust-vector plant with battery-aware readback; no individual-rotor claim |
 
 These fixtures test open, observe, step, authority handoff, typed schemas,
 lowering evidence, and checkpoint restoration before the same pattern is
-promoted further into the F-16. A zero-action provider/open-loop profile is a
+promoted into source-owned vehicle families. A zero-action provider/open-loop profile is a
 first-class profile, not a missing schema: it accepts `{}` and reports its
 owner while rejecting invented caller coordinates.
 
@@ -932,22 +975,39 @@ references during transfer. CADAC source-managed sessions instead advertise an
 empty `source_program_control` action schema with `provider_managed` switching;
 their retained source controller cannot be replaced through this API.
 
+For Hummingbird, set `startup_authority_profile_id="velocity_yaw_command"`
+for north/east/positive-up velocity plus yaw control, or
+`"live_waypoint_guidance"` for in-stream waypoint retargeting. Inspect each
+inactive profile's `action_schema` before opening to obtain exact multirotor
+units, bounds, topology, and normalization; do not reuse the fixed-wing
+waypoint speed envelope. The session's `control_feedback` and
+`lowering_evidence` report achieved state, held values, waypoint progress,
+aggregate-thrust limiting, and battery availability.
+
 ### Focused workflow endpoints
 
-`Simple Aero` and `dual_launch_glider` are registered model workflows, but
-they are not physical entries in the Vehicle Composition registry. Their
-checked-in endpoint catalog keeps that boundary visible while still proving
-the useful batch vertical path: authored draft → installed-provider validation
-→ advertised common batch registration → normalized result surface. Simple
-Aero additionally exposes the persistent session described above; the focused
-endpoint witness remains a batch witness and does not silently broaden the
-dual-launch contract.
+`Simple Aero`, `dual_launch_glider`, and the debug-model fixtures are
+registered model workflows, but they are not physical entries in the Vehicle
+Composition registry. Their checked-in endpoint catalog keeps that boundary
+visible while still proving the useful batch vertical path: authored draft →
+installed-provider validation → advertised common batch registration →
+normalized result surface. Each record is contributed by its owning plug-in; a
+selected host sees only those fragments, and an installed wheel resolves the
+corresponding package data. Simple Aero additionally exposes the persistent
+session described above. The debug plug-in owns ballistic, waypoint, and
+contract-probe witnesses; the waypoint and probe retain their selectable
+session controls and feedback, while the endpoint witnesses remain batch
+proofs. None of these records silently broadens a workflow into a physical
+vehicle, controller, robustness, or qualification claim.
 
 ```bash
 taoryx model endpoint-specs
 taoryx model verify simple-aero-fixed-ld-batch
 taoryx model verify simple-aero-fixed-ld-batch --execute
 taoryx model verify dual-launch-attached-booster-batch --execute
+taoryx model verify reference-ballistic-3dof-batch --execute
+taoryx model verify reference-waypoint-3dof-batch --execute
+taoryx model verify debug-contract-probe-batch --execute
 ```
 
 The non-executing check catches stale model/schema identity, unfilled values,
@@ -1421,6 +1481,10 @@ Use this progression instead of beginning with manual segment code or gains:
 Data-only contributions can complete steps 1–3 and immediately gain generic
 discovery, planning, scaffolding, and validation. Steps 4–6 are what turn that
 data into an automatically tunable and executable controlled model.
+
+For the tier-specific version of this checklist—3DOF force model, pseudo-6DOF
+response law, rigid-body direct wrench, or actuator-resolved rigid body—see
+[Fidelity tiers and vehicle plug-in requirements](fidelity-data-requirements.md).
 
 ### Replay and release witnesses
 

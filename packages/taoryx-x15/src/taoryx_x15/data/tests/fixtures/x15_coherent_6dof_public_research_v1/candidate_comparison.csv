@@ -1,0 +1,5 @@
+candidate,coherent_executable_6dof,dense_measured_coefficient_book_publicly_downloadable,propulsion_and_tanks,selection,reason
+North American X-15 public JSBSim model,yes,no,yes_simplified,SELECTED,strongest public end-to-end executable research surrogate found
+NASA Space Shuttle RFDS,documented,not found,entry/landing model focus,NOT_PACKAGED,"NASA reports describe >46,000 aero points, but the coefficient book was not located as machine-readable data"
+AFRL Road Runner Generic Hypersonic Vehicle,described,not found,described,NOT_PACKAGED,public sources describe HEAT-TK/RJPA lookup tables but do not release the table files
+JSBSim Space Shuttle model,partial,no,no,REJECTED,"beta educational model, explicit guesses, empty propulsion section, and highly simplified aerodynamics"

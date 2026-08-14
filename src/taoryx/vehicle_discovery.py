@@ -105,6 +105,7 @@ class VehicleMetadata(BaseModel):
     operating_domains: tuple[OperatingDomain, ...] = Field(min_length=1)
     propulsion: tuple[PropulsionKind, ...] = Field(min_length=1)
     model_basis: ModelBasis
+    model_version: str = Field(default="composition-registry-v1", min_length=1)
     roles: tuple[str, ...] = Field(min_length=1)
     tags: tuple[str, ...] = ()
     claim_boundary: str = Field(min_length=1)

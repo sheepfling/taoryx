@@ -1,0 +1,71 @@
+{
+  "artifacts": [
+    "telemetry_parent.csv",
+    "telemetry_hl20-synthetic-spent-booster.csv"
+  ],
+  "deployment_event_count": 3,
+  "dpi": 80,
+  "execution": {
+    "candidate_order_preserved": true,
+    "deployment_composition": "enabled",
+    "deterministic": true,
+    "horizon_s": 180.0,
+    "spawn_children": true,
+    "step_size_s": 1.0,
+    "worker_backend": "serial",
+    "workers_requested": 1
+  },
+  "fidelity": "point_mass_3dof",
+  "omitted": [],
+  "plots": [
+    "flown-trajectories.png",
+    "search-coverage.png",
+    "terminal-capability.png",
+    "deployment-timeline.png",
+    "projected-area.png",
+    "trajectory_parent.png",
+    "trajectory_children.png",
+    "event_timeline.png",
+    "capability_footprint.png",
+    "exploration_coverage.png",
+    "projected_area.png",
+    "fidelity_comparison.png",
+    "fidelity-progression.png"
+  ],
+  "schema": "trajectory.reachability-plot-bundle/v1alpha1",
+  "search_space": {
+    "axes": [
+      {
+        "name": "launch.azimuth_rad",
+        "sampling": "explicit_grid",
+        "units": "rad",
+        "values": [
+          0.0
+        ]
+      },
+      {
+        "name": "launch.elevation_rad",
+        "sampling": "explicit_grid",
+        "units": "rad",
+        "values": [
+          1.0471975511965976,
+          1.2217304763960306,
+          1.3962634015954636
+        ]
+      },
+      {
+        "name": "glide.bank_rad",
+        "sampling": "explicit_grid",
+        "units": "rad",
+        "values": [
+          0.0
+        ]
+      }
+    ],
+    "candidate_count": 3,
+    "composition": "cartesian_product",
+    "ordering": "axis_order_then_cartesian_product"
+  },
+  "source_configuration_hash": "83d9f8da14fdd3e207bf18d29265e4c2fa5a80d7e125c248435050d4a47c49d3",
+  "source_schema": "trajectory.reachability-envelope/v1alpha1"
+}

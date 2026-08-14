@@ -54,7 +54,7 @@ Ghame6OutputDataType = Literal["float64", "int64", "boolean", "string", "json"]
 GHAME6_MODEL_ID = "cadac.ghame6.hypersonic_vehicle"
 GHAME6_SATELLITE_MODEL_ID = "cadac.ghame6.satellite"
 GHAME6_RADAR_MODEL_ID = "cadac.ghame6.ground_site"
-GHAME6_MODEL_VERSION = "0.7.0"
+GHAME6_MODEL_VERSION = "0.8.0"
 GHAME6_FIDELITY_ID = "rigid_body_6dof_surface_allocated"
 GHAME6_REALIZATION_ID = "cadac-source-atmospheric-surfaces-to-aggregate-rcs"
 GHAME6_MISSION_ID = "atmospheric_to_exo_intercept"
@@ -651,7 +651,10 @@ def _build_model_metadata(
                 "actuator.aileron.deflection": CadacControlOutputEvidence("requested_control_deg", ("achieved_control_deg",), 0, (0,)),
                 "actuator.elevator.deflection": CadacControlOutputEvidence("requested_control_deg", ("achieved_control_deg",), 1, (1,)),
                 "actuator.rudder.deflection": CadacControlOutputEvidence("requested_control_deg", ("achieved_control_deg",), 2, (2,)),
-                "rcs.thrust_vector.direction": CadacControlOutputEvidence("requested_thrust_vector_unit_body", ("rcs_force_body_n",)),
+                "rcs.thrust_vector.direction": CadacControlOutputEvidence(
+                    "requested_thrust_vector_unit_body",
+                    ("rcs_force_body_n", "rcs_moment_body_nm"),
+                ),
                 "rcs.roll.attitude_command": CadacControlOutputEvidence("requested_rcs_attitude_deg", ("rcs_moment_body_nm",), 0, (0,)),
                 "rcs.pitch.attitude_command": CadacControlOutputEvidence("requested_rcs_attitude_deg", ("rcs_moment_body_nm",), 1, (1,)),
                 "rcs.yaw.attitude_command": CadacControlOutputEvidence("requested_rcs_attitude_deg", ("rcs_moment_body_nm",), 2, (2,)),
@@ -729,7 +732,7 @@ def _build_model_metadata(
             category="aerospace",
             subcategory="hypersonic_space_interceptor",
             sort_key="cadac-ghame6",
-            badges=("T4→T3", "multi-actor", "source-events", "no-TVC"),
+            badges=("T4→T3", "multi-actor", "native-sensor", "source-events", "no-TVC"),
             default_fidelity_id=GHAME6_FIDELITY_ID,
             default_mission_template_id=GHAME6_MISSION_ID,
             default_output_channel_ids=("position_inertial_m", "velocity_inertial_mps", "source_phase", "runtime_fidelity"),
@@ -751,9 +754,18 @@ def _build_model_metadata(
         ),
         family_id=GHAME6_MODEL_ID,
         physical_family="hypersonic_atmospheric_to_exo_interceptor",
-        model_kind="vehicle_plugin",
+        model_kind="mission_composition",
         status="development",
-        tags=("cadac", "hypersonic", "rigid_body_6dof", "physical_surfaces", "aggregate_rcs", "satellite", "radar"),
+        tags=(
+            "cadac",
+            "hypersonic",
+            "rigid_body_6dof",
+            "physical_surfaces",
+            "aggregate_rcs",
+            "satellite",
+            "radar",
+            "native_relative_state",
+        ),
         operations=("discover", "validate", "batch"),
         common_runner_operations=("batch",),
         capabilities=TrajectoryModelCapabilities(
@@ -1042,18 +1054,32 @@ def _project_run_result(
             )
             for event in run.events
         )
-        events.extend(
-            TrajectoryEvent(
-                id=f"ghame6-radar-track-{track.update_sequence}",
-                time_s=track.time_s,
-                category="custom",
-                kind="radar_track_update",
-                object_id="ghame6-radar-1",
-                detail="RADAR0 measured SAT3 and refreshed its source track file.",
-                data=track.model_dump(mode="json"),
+        for track in run.radar_tracks:
+            source_track = track.model_dump(mode="json")
+            native_packet = source_track.pop("native_relative_state_packet")
+            events.append(
+                TrajectoryEvent(
+                    id=f"ghame6-radar-track-{track.update_sequence}",
+                    time_s=track.time_s,
+                    category="custom",
+                    kind="radar_track_update",
+                    object_id="ghame6-radar-1",
+                    detail="RADAR0 measured SAT3 and refreshed its source track file.",
+                    data=source_track,
+                )
             )
-            for track in run.radar_tracks
-        )
+            events.append(
+                TrajectoryEvent(
+                    id=f"ghame6-native-relative-state-{track.update_sequence}",
+                    time_s=track.time_s,
+                    category="custom",
+                    kind="native_relative_state_track",
+                    object_id="ghame6-radar-1",
+                    detail="Standard raw relative-state packet projected from the committed RADAR0/SAT3 geometry.",
+                    data=native_packet,
+                )
+            )
+        ####
     ####
     diagnostics = (
         MissionCompositionDiagnostic(
@@ -1085,6 +1111,19 @@ def _project_run_result(
             provider_id=CADAC_PROVIDER_ID,
             model_id=GHAME6_MODEL_ID,
             object_id="ghame6-hyper-1",
+        ),
+        MissionCompositionDiagnostic(
+            severity="info",
+            code="cadac-ghame6-native-radar-track",
+            message=(
+                "Every RADAR0 update also emits a Taoryx relative-state-track packet from committed RADAR0/SAT3 geometry. "
+                "The source-shaped noisy RADAR0 track remains a separate event, and this batch-only package does not claim SensorBus delivery."
+            ),
+            phase="execution",
+            recoverability="degraded",
+            provider_id=CADAC_PROVIDER_ID,
+            model_id=GHAME6_MODEL_ID,
+            object_id="ghame6-radar-1",
         ),
     )
     return MissionCompositionTrajectoryResult(

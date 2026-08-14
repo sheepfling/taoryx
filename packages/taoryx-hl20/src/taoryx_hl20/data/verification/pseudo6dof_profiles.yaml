@@ -1,0 +1,98 @@
+schema: taoryx.pseudo6dof-profiles/v1alpha1
+profiles:
+- id: hl20.attitude_response_p6dof.v1
+  family_id: hl20_mod_k
+  parent_3dof_profile_id: hl20_mod_k.point_mass_3dof.v1
+  model_kind: source_derived_reduced_model
+  control_realization: response_law
+  status: nominal_case_pass
+  evidence_grade: source_derived
+  response:
+    roll:
+      time_constant_s: 1.0
+      damping_ratio: 0.75
+      maximum_rate_rad_s: 0.7
+      maximum_acceleration_rad_s2: 1.8
+    pitch:
+      time_constant_s: 1.1
+      damping_ratio: 0.75
+      maximum_rate_rad_s: 0.45
+      maximum_acceleration_rad_s2: 1.2
+    yaw:
+      time_constant_s: 1.4
+      damping_ratio: 0.8
+      maximum_rate_rad_s: 0.25
+      maximum_acceleration_rad_s2: 0.6
+  resource_channels:
+  - mass
+  required_channels:
+  - bank
+  - pitch
+  - heading
+  - alpha
+  - energy
+  - crossrange
+  unsupported_claims:
+  - thermal_model
+  - physical_surface_allocation_without_source_data
+direct_wrench_profiles:
+- id: hl20.direct_wrench_6dof.v1
+  family_id: hl20_mod_k
+  parent_3dof_profile_id: hl20_mod_k.point_mass_3dof.v1
+  status: nominal_case_pass
+  evidence_grade: daveml_source_loads
+  force_axes:
+  - force_x_n
+  - force_y_n
+  - force_z_n
+  moment_axes:
+  - moment_x_nm
+  - moment_y_nm
+  - moment_z_nm
+  trim_contract: source-load operating point with explicit balance bias; source trim
+    pending
+  envelope_contract: single Mach/alpha/altitude source-domain witness
+  resource_channels:
+  - mass
+  required_channels:
+  - source_force
+  - source_moment
+  - requested_wrench
+  - achieved_wrench
+  - residual_wrench
+  unsupported_claims:
+  - physical_surface_allocation
+  - source_exact_trim
+  - thermal_model
+  - family_wide_glide
+surface_allocation_profiles:
+- id: hl20.surface_allocated_6dof.v1
+  family_id: hl20_mod_k
+  parent_direct_wrench_profile_id: hl20.direct_wrench_6dof.v1
+  status: development
+  evidence_grade: logical_surface_overlay
+  allocator_id: hl20-logical-surface-v1
+  effector_channels:
+  - left_wing_flap
+  - right_wing_flap
+  - body_flap
+  - rudder
+  required_channels:
+  - requested_wrench
+  - allocated_effectors
+  - achieved_wrench
+  - residual_wrench
+  - saturation
+  unsupported_claims:
+  - source_servo_dynamics
+  - thermal_model
+  - full_arrival_qualification
+bindings:
+- family_id: hl20_mod_k
+  point_mass_profile_id: hl20_mod_k.point_mass_3dof.v1
+  pseudo_profile_id: hl20.attitude_response_p6dof.v1
+  direct_wrench_profile_id: hl20.direct_wrench_6dof.v1
+  surface_allocation_profile_id: hl20.surface_allocated_6dof.v1
+  automatic_lowering: true
+  lowering_note: source-derived glide response, direct-wrench bridge, and logical
+    surface overlay

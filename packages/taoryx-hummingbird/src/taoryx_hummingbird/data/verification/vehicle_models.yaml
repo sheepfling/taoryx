@@ -1,0 +1,115 @@
+schema_version: 1
+id: taoryx_vehicle_model_registry_v1
+description: Canonical vehicle descriptions used by generated problem files and the
+  common vehicle harness. Values are SI unless the field name says otherwise.
+vehicles:
+  hummingbird:
+    display_name: AscTec Hummingbird research surrogate
+    family_id: multirotor_direct_wrench
+    mode: rigid-body-6dof
+    realization:
+      force_source: dimensional_wrench_table
+      moment_source: dimensional_wrench_table_plus_rotor_reaction_torque
+      actuator_realization: rotor_allocator
+      propulsion_model: rotor_thrust_model
+      resource_model: fixed_mass
+      claim: source-wrench plant with bounded quad-X rotor command allocation
+      nonclaims:
+      - blade-resolved aerodynamics
+      - dynamic inflow
+      - drivetrain transients
+      - battery depletion
+    trajectory_vehicle: hummingbird
+    earth_model: wgs-84
+    earth_omega_rad_s: 0.0
+    body_frame: source-z-up-adapted-to-taoryx
+    aero_load_mode: direct-wrench
+    aero_wrench_frame: source-z-up
+    rotor_geometry:
+      arrangement: quad-x
+      rotor_count: 4
+      positions_file: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/quadcopter_hummingbird/geometry_mass/rotor_positions.csv
+      position_reference: center_of_mass
+      axis_frame: source-z-up
+      spin_direction_field: yaw_torque_direction
+      source_id: ROTORPY_HUMMINGBIRD
+    rotor_allocator:
+      model: bounded_quad_x
+      matrix_file: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/quadcopter_hummingbird/controls/control_allocation_matrix.csv
+      input_units: individual_rotor_thrust_N
+      source_id: ROTORPY_HUMMINGBIRD_AND_MULTIROTOR_DYNAMICS
+    allocation:
+      model: quad_x
+      wrench_frame: source-z-up
+      matrix_file: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/quadcopter_hummingbird/controls/control_allocation_matrix.csv
+    reference_area_m2: 1.0
+    reference_length_m: 0.34
+    dry_mass_kg: 0.5
+    nominal_mass_kg: 0.5
+    inertia_kg_m2:
+      x: 0.00365
+      y: 0.00368
+      z: 0.00703
+    envelope:
+      max_speed_m_s: 10
+    attitude_lqr_profile: hummingbird-standard
+    controls:
+    - name: rotor-speed
+      default: 468.7244338633868
+      lower: 0
+      upper: 1500
+    - name: rotor-1-speed
+      default: 468.7244338633868
+      lower: 0
+      upper: 1500
+    - name: rotor-2-speed
+      default: 468.7244338633868
+      lower: 0
+      upper: 1500
+    - name: rotor-3-speed
+      default: 468.7244338633868
+      lower: 0
+      upper: 1500
+    - name: rotor-4-speed
+      default: 468.7244338633868
+      lower: 0
+      upper: 1500
+    actuator:
+      maximum_moment: 1
+      maximum_body_rate_deg_s: 720
+      dynamics:
+        model: first_order_motor_lag
+        time_constant_s: 0.005
+        speed_limits_rad_s:
+        - 0
+        - 1500
+        source: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/quadcopter_hummingbird/VALIDITY.md
+    table_bindings:
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_reaction_torque.tbl
+    aero_convention:
+      force_frame: source_body_wrench_frame_z_up
+      force_channels: cx_cy_cz
+      drag_note: These channels are adapter names for source body-wrench components,
+        not aerodynamic force coefficients and not direct CD/CL values.  No wind-axis
+        drag coefficient is represented by the Hummingbird tables.
+      table_semantics: absolute_source_wrench_channels
+      control_table_rule: Use the rotor-speed-conditioned source wrench channels as
+        provided; do not apply fixed-wing static/control baseline subtraction.
+      source_note: Hummingbird tables transcode common_speed_wrench_grid.csv and preserve
+        source body-wrench components through the source-z-up runtime adapter.
+      problem_comment: Aero channel names cx/cy/cz are source body-wrench adapters,
+        not CD/CL; no fixed-wing baseline subtraction is intended.
+    source:
+      status: public-research-surrogate
+      bundle: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
+      model_path: quadcopter_hummingbird
+    audit_problem_globs:
+    - examples/mission_families/slower_hummingbird/*.prb
+    - examples/generated/vehicles/hummingbird_*.prb

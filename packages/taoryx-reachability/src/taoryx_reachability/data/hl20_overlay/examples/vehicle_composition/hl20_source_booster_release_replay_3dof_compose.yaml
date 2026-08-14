@@ -1,0 +1,30 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: hl20-source-booster-release-replay-3dof-v1
+vehicle: hl20_mod_k
+fidelity: point_mass_3dof
+initialization:
+  id: source_booster_launch
+  inputs:
+    initial_speed_m_s: {value: 350.0, unit: m/s}
+    initial_mass_kg: {value: 11664.1, unit: kg}
+    launch_azimuth_deg: {value: 0.0, unit: deg}
+    launch_elevation_deg: {value: 60.0, unit: deg}
+mission:
+  id: hl20_source_booster_release_replay_v1
+segments:
+  - id: source_booster_release
+    inputs:
+      release_time_s: {value: 25.0, unit: s}
+  - id: source_scheduled_bank
+    instance_id: right-bank-source-schedule
+    inputs:
+      bank_command_deg: {value: 30.0, unit: deg}
+      duration_s: {value: 10.0, unit: s}
+  - id: source_scheduled_bank
+    instance_id: left-bank-source-schedule
+    inputs:
+      bank_command_deg: {value: -30.0, unit: deg}
+      duration_s: {value: 10.0, unit: s}
+  - id: source_ground_contact
+    inputs:
+      horizon_s: {value: 120.0, unit: s}

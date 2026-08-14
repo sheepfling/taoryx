@@ -51,6 +51,10 @@ _RELATIVE_STATE_MODELS: dict[str, tuple[str, ...]] = {
     "cadac.agm6.missile": ("source acquisition and sensor gimbal state", "source lock, blind-range, and filter state"),
     "cadac.ads6.sam": ("source RF/IR gimbal state", "source acquisition, lock, and filtering state"),
     "cadac.ads6.engagement": ("source RADAR0 noise sequence", "source track-manager and launch scheduling state"),
+    "cadac.ghame6.hypersonic_vehicle": (
+        "source RADAR0 polar/noise measurement and update-cadence state",
+        "source RADAR0 track-file behavior",
+    ),
 }
 
 _PERSISTENT_SENSOR_BLOCKERS: dict[str, tuple[str, ...]] = {
@@ -71,9 +75,13 @@ def build_cadac_sensor_integration_contract(
     specialised_state = _RELATIVE_STATE_MODELS.get(model_id)
     if specialised_state is not None:
         bus_status: CadacSensorReadiness = "available" if persistent_session else "blocked"
-        blockers = () if persistent_session else _PERSISTENT_SENSOR_BLOCKERS.get(
-            model_id,
-            ("the CADAC batch runtime has no persistent session that can bind native sensor clocks, delivery, or SensorBus checkpoint state",),
+        blockers = (
+            ()
+            if persistent_session
+            else _PERSISTENT_SENSOR_BLOCKERS.get(
+                model_id,
+                ("the CADAC batch runtime has no persistent session that can bind native sensor clocks, delivery, or SensorBus checkpoint state",),
+            )
         )
         return CadacSensorIntegrationContract(
             model_id=model_id,
@@ -84,7 +92,7 @@ def build_cadac_sensor_integration_contract(
             source_specialised_state=specialised_state,
             blockers=blockers,
             claim_boundary=(
-                "The source module consumes the Taoryx typed raw relative-state observation. "
+                "The source module is explicitly connected to a Taoryx typed raw relative-state observation at its committed boundary. "
                 + (
                     "A persistent session also publishes the native SensorBus packet at committed source boundaries. "
                     if persistent_session

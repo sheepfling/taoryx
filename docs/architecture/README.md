@@ -29,11 +29,20 @@ request, and standard result envelope is defined in
 Installable Python package discovery, typed registry aggregation, collision
 rules, and the current extraction state are defined in
 [Installable model and provider plug-ins](plugins.md).
+The concise core/direct-package/compatibility topology, repository ownership
+rules, package profiles, and focused verification model are defined in
+[Repository and package architecture](repository-architecture.md).
+The developer-facing procedure for contributing a new vehicle package and its
+controls—including typed coordinate fields, validated fidelity lowering,
+caller/provider controller ownership, and common LQR/LQI campaign inputs—is
+[Authoring a vehicle plug-in](vehicle-plugin-authoring.md).
 Package selection, source and wheel installation, contributor bootstrap, and
 installed-entry-point verification are covered by the
 [installation guide](../INSTALLATION.md).
 The shortest consumer-facing route through that contract is the
-[Mission Composition front door](../MISSION_COMPOSITION.md).
+[Mission Composition and interactive-control front door](../MISSION_COMPOSITION.md),
+which explains the catalogue, configuration, batch, and persistent-session
+paths for UI, AI, and library clients.
 The generated
 [Mission Composition family/realization coverage matrix](mission-composition-coverage-matrix.md)
 is the current inventory, exact batch/session availability, telemetry,
@@ -47,9 +56,9 @@ contract is described in
 The explicit force, moment, actuator, propulsion, resource, and claim-boundary
 inventory is described in
 [`vehicle-realizations.md`](vehicle-realizations.md).
-The tiered data intake contract and machine-readable readiness checklist is
-described in
-[`fidelity-data-requirements.md`](fidelity-data-requirements.md).
+The four fidelity tiers—what a vehicle plug-in must provide at each tier, and
+their machine-readable readiness checklist—are described in
+[Fidelity tiers and vehicle plug-in requirements](fidelity-data-requirements.md).
 The reusable trim, true-derivative linearization, and dimension-matched LQR
 tuning pipeline is described in
 [`generic-controller-tuning.md`](generic-controller-tuning.md).

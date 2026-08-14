@@ -1,0 +1,23 @@
+requirement,coverage,detail
+reference geometry,YES,"source-native Sref, span, chord, AERORP and axes"
+CX/CY/CZ shared grid,YES_WITH_CAVEAT,generated from one compositional X-15 model
+CMX/CMY/CMZ shared grid,YES_WITH_CAVEAT,generated from one compositional X-15 model
+Mach-alpha-beta static grid,YES,four altitude slices included
+symmetric pitch control,YES,Mach-scheduled lift and pitch effects
+differential roll control,YES,Mach/altitude roll schedule plus cross-coupling
+rudder control,YES,linear side/roll/yaw increments
+full nonlinear control-interaction test database,NO,generated superposition only
+pitch/roll/yaw damping derivatives,YES,"Cmq, Clp, Cnr plus Clr/Cnp"
+control-rate derivatives,NO,not in source
+actuator position limits,YES,source clips
+actuator rate limits,NO,not in source
+actuator delay/dynamics,PARTIAL,pitch first-order lag only
+mass versus time,YES_DERIVED,source-native full-throttle schedule
+CG versus mass,YES_DERIVED,point-tank model
+inertia versus mass,YES_DERIVED,parallel-axis point-tank model
+stage separation,NOT_APPLICABLE_BASELINE,carrier release metadata only
+thrust and mass flow,YES_WITH_CAVEAT,simplified source map and NASA anchors
+thrust-vector control,NO,source orientation fixed at zero
+standard atmosphere,YES,USSA1976 reconstruction
+measured winds,NO,zero-wind placeholder
+certified thermal model,NO,requirements file only

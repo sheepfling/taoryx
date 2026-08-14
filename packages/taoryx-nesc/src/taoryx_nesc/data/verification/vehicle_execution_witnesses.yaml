@@ -1,0 +1,14 @@
+schema: taoryx.vehicle-execution-witnesses/v1alpha1
+version: 1
+description: One checked-in composition request for every currently runnable exact
+  family/mission/fidelity/operation endpoint. This is an onboarding and discovery
+  gate, not a mission-qualification matrix.
+witnesses:
+- id: nesc-3dof-batch
+  composition: examples/vehicle_composition/nesc_staged_source_replay_3dof_compose.yaml
+  operation: batch
+- id: nesc-pseudo6dof-batch
+  composition: examples/vehicle_composition/nesc_staged_source_replay_pseudo6dof_compose.yaml
+  operation: batch
+variant_witnesses: []
+graph_extension_witnesses: []

@@ -1,0 +1,218 @@
+schema_version: 1
+families:
+- family_id: dual_launch_glider
+  version: 1.0.0
+  display_name: Dual-launch glider composition proof family
+  fidelities:
+  - point_mass_3dof
+  - pseudo_6dof
+  - rigid_body_6dof
+  provenance: synthetic successor-side Alpha 2 T6 fixture; native launch composition
+    only
+  parameters:
+  - id: vehicle.id
+    kind: string
+    canonical_unit: null
+    default: t6-glider
+  - id: vehicle.mass.initial
+    kind: number
+    canonical_unit: kg
+    default: 1000.0
+    minimum: 1.0
+  - id: vehicle.mass.glider
+    kind: number
+    canonical_unit: kg
+    default: 900.0
+    minimum: 1.0
+  - id: vehicle.booster.thrust
+    kind: number
+    canonical_unit: N
+    default: 15000.0
+    minimum: 0.0
+  - id: vehicle.booster.mass_flow
+    kind: number
+    canonical_unit: kg/s
+    default: 50.0
+    minimum: 0.0
+  - id: vehicle.geometry.reference_area
+    kind: number
+    canonical_unit: m^2
+    default: 1.0
+    minimum: 0.0001
+  - id: vehicle.geometry.reference_length
+    kind: number
+    canonical_unit: m
+    default: 1.0
+    minimum: 0.0001
+  - id: vehicle.aero.drag_coefficient
+    kind: number
+    canonical_unit: dimensionless
+    default: 0.02
+    minimum: 0.0
+  - id: vehicle.aero.lift_to_drag
+    kind: number
+    canonical_unit: dimensionless
+    default: 4.0
+    minimum: 0.0
+  - id: mission.initial_altitude
+    kind: number
+    canonical_unit: m
+    default: 3000.0
+    minimum: 0.0
+  - id: mission.initial_speed
+    kind: number
+    canonical_unit: m/s
+    default: 120.0
+    minimum: 0.0
+  - id: mission.release_altitude
+    kind: number
+    canonical_unit: m
+    default: 3200.0
+    minimum: 0.0
+  - id: mission.release_speed
+    kind: number
+    canonical_unit: m/s
+    default: 155.0
+    minimum: 0.0
+  - id: mission.initial_flight_path_angle
+    kind: number
+    canonical_unit: deg
+    default: 5.0
+    minimum: -89.0
+    maximum: 89.0
+  - id: mission.initial_heading
+    kind: number
+    canonical_unit: deg
+    default: 90.0
+    minimum: -360.0
+    maximum: 360.0
+  - id: mission.target_range
+    kind: number
+    canonical_unit: m
+    default: 2000.0
+    minimum: 0.0
+  - id: mission.target_bearing
+    kind: number
+    canonical_unit: deg
+    default: 90.0
+    minimum: -360.0
+    maximum: 360.0
+  - id: mission.target_altitude
+    kind: number
+    canonical_unit: m
+    default: 3200.0
+    minimum: 0.0
+  - id: mission.target_speed
+    kind: number
+    canonical_unit: m/s
+    default: 120.0
+    minimum: 0.0
+  - id: mission.boost_duration
+    kind: number
+    canonical_unit: s
+    default: 2.0
+    minimum: 0.0001
+  - id: mission.glide_duration
+    kind: number
+    canonical_unit: s
+    default: 12.0
+    minimum: 0.0001
+  - id: mission.terminal_duration
+    kind: number
+    canonical_unit: s
+    default: 4.0
+    minimum: 0.0001
+  - id: runtime.time_step
+    kind: number
+    canonical_unit: s
+    default: 0.05
+    minimum: 0.0001
+  - id: runtime.output_interval
+    kind: number
+    canonical_unit: s
+    default: 0.1
+    minimum: 0.0001
+  variants:
+    baseline: {}
+  loadouts:
+    baseline: {}
+  missions:
+    waypoint_release: {}
+  segment_plans:
+    dual_launch: {}
+  segment_graphs:
+    dual_launch:
+      schema_version: 1
+      launch_forms:
+      - air_release
+      - attached_booster
+      post_release_guidance: terminal_pronav
+      segments:
+      - id: attached_booster
+        kind: powered_ascent
+        duration_parameter: mission.boost_duration
+        cutoff: separation
+      - id: release_glide
+        kind: ballistic_coast
+        duration_parameter: mission.glide_duration
+        cutoff: time
+      - id: terminal_guidance
+        kind: terminal_pronav
+        duration_parameter: mission.terminal_duration
+        cutoff: waypoint_capture
+      events:
+      - id: separation
+        kind: separation
+        source: mission.boost_duration
+        continuity: continuous
+        impulse: none
+      - id: waypoint_capture
+        kind: waypoint_capture
+        source: mission.target_range
+        tolerance_m: 100.0
+  controls:
+  - id: command.bank
+    unit: deg
+    default: 0.0
+    minimum: -25.0
+    maximum: 25.0
+    authority_modes:
+    - autopilot
+    - commanded
+    - overlay
+    - direct
+    - mixed
+    default_authority: autopilot
+    cadence_s: 0.1
+    hold_behavior: hold
+    failsafe_value: 0.0
+    rate_limit_per_s: 45.0
+  - id: command.throttle
+    unit: dimensionless
+    default: 0.0
+    minimum: 0.0
+    maximum: 1.0
+    authority_modes:
+    - autopilot
+    - commanded
+    - overlay
+    - direct
+    - mixed
+    default_authority: autopilot
+    cadence_s: 0.1
+    hold_behavior: failsafe
+    failsafe_value: 0.0
+    rate_limit_per_s: 1.0
+  observations:
+  - id: state.position.altitude
+    unit: m
+    source: alt
+  - id: state.position.downrange
+    unit: m
+    source: range
+  - id: state.velocity
+    unit: m/s
+    source: vel
+  - id: event.separation
+    unit: s
+    source: separation

@@ -1,0 +1,7 @@
+{
+  "claim_boundary": "This package fragment mirrors only the synthetic Dual Launch family metadata, maturity row, workflow endpoint, and authored witness; repository-root catalogs remain canonical.",
+  "endpoint_id": "dual-launch-attached-booster-batch",
+  "family_id": "dual_launch_glider",
+  "schema": "taoryx.dual-launch-package-data/v1",
+  "source_catalog_root": "verification/"
+}

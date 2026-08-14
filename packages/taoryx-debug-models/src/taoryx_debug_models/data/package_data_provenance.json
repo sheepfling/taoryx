@@ -1,0 +1,10 @@
+{
+  "claim_boundary": "This package fragment mirrors only the analytical ballistic, waypoint, and contract-probe endpoint records and authored witnesses; repository-root catalogs remain canonical.",
+  "endpoint_ids": [
+    "reference-ballistic-3dof-batch",
+    "reference-waypoint-3dof-batch",
+    "debug-contract-probe-batch"
+  ],
+  "schema": "taoryx.debug-models-package-data/v1",
+  "source_catalog_root": "verification/"
+}

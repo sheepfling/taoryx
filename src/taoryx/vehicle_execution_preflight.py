@@ -19,8 +19,9 @@ import hashlib
 import json
 import math
 from collections.abc import Iterator, Mapping
+from contextlib import nullcontext
 from dataclasses import dataclass
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -37,7 +38,7 @@ from .mission_capability import (
 from .mission_capability import (
     compile_powered_fixed_wing_racetrack_from_composition as _compile_powered_fixed_wing_racetrack_from_composition,
 )
-from .plugins import PluginCatalog, discover_plugins
+from .plugins import DeferredSemanticPreflightHandler, PluginCatalog, current_plugin_catalog, discover_plugins, plugin_catalog_scope
 from .powered_fixed_wing_mission_compiler import CapabilityScaledRacetrack
 from .vehicle_composition import CompiledSegment, CompiledVehicleComposition
 from .vehicle_composition_registry import (
@@ -300,6 +301,7 @@ def _preflight_vehicle_composition_unchecked(
     composition: CompiledVehicleComposition,
     *,
     handler_registry: SemanticPreflightHandlerRegistry | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleExecutionPreflight:
     """Dispatch only to the mission template's explicitly declared translator.
 
@@ -332,7 +334,7 @@ def _preflight_vehicle_composition_unchecked(
         composition.mission,
         composition.fidelity,
     )
-    capability_adapter = resolve_mission_capability_adapter(composition)
+    capability_adapter = resolve_mission_capability_adapter(composition, plugins=plugins)
     if capability_adapter is None:
         diagnostic = (
             "mission template declares semantic translation but no tier-compatible capability adapter is installed"
@@ -341,7 +343,7 @@ def _preflight_vehicle_composition_unchecked(
         )
         return _not_applicable(composition, diagnostic)
     if declared_translator_id is None:
-        estimate = estimate_mission_capability(composition)
+        estimate = estimate_mission_capability(composition, plugins=plugins)
         return _blocked(
             composition,
             (),
@@ -350,7 +352,7 @@ def _preflight_vehicle_composition_unchecked(
             None if estimate is None else estimate.manifest,
             None if estimate is None else _capability_estimate_evidence(composition, estimate),
         )
-    registry = handler_registry or semantic_preflight_handler_registry()
+    registry = handler_registry or semantic_preflight_handler_registry(plugins=plugins)
     handler = registry.resolve(declared_translator_id)
     if handler is None:
         return _blocked(
@@ -375,6 +377,7 @@ def preflight_vehicle_composition(
     composition: CompiledVehicleComposition,
     *,
     handler_registry: SemanticPreflightHandlerRegistry | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleExecutionPreflight:
     """Run semantic preflight and enforce the registry-declared translator.
 
@@ -384,39 +387,47 @@ def preflight_vehicle_composition(
     selected mission template; a mismatch is a fail-closed integration error.
     """
 
-    result = _preflight_vehicle_composition_unchecked(composition, handler_registry=handler_registry)
-    if result.status != "translation_ready":
+    scope = plugin_catalog_scope(plugins) if plugins is not None else nullcontext()
+    with scope:
+        result = _preflight_vehicle_composition_unchecked(
+            composition,
+            handler_registry=handler_registry,
+            plugins=plugins,
+        )
+        if result.status != "translation_ready":
+            return result
+        declared_translator_id = mission_semantic_translator_id(
+            composition.family_id,
+            composition.mission,
+            composition.fidelity,
+        )
+        if declared_translator_id is None:
+            return _blocked(
+                composition,
+                result.checks,
+                "semantic preflight reached translation_ready without a registry-declared semantic_translator_id",
+                result.derived_mission,
+            )
+        if result.translator_id != declared_translator_id:
+            return _blocked(
+                composition,
+                result.checks,
+                "semantic preflight translator does not match the selected mission template: "
+                f"declared {declared_translator_id!r}, observed {result.translator_id!r}",
+                result.derived_mission,
+            )
         return result
-    declared_translator_id = mission_semantic_translator_id(
-        composition.family_id,
-        composition.mission,
-        composition.fidelity,
-    )
-    if declared_translator_id is None:
-        return _blocked(
-            composition,
-            result.checks,
-            "semantic preflight reached translation_ready without a registry-declared semantic_translator_id",
-            result.derived_mission,
-        )
-    if result.translator_id != declared_translator_id:
-        return _blocked(
-            composition,
-            result.checks,
-            "semantic preflight translator does not match the selected mission template: "
-            f"declared {declared_translator_id!r}, observed {result.translator_id!r}",
-            result.derived_mission,
-        )
-    return result
     ####
 
 
 def _capability_estimate_and_manifest(
     composition: CompiledVehicleComposition,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> tuple[MissionCapabilityEstimate, dict[str, object]]:
     """Return the exact declared estimate and its family-owned capability map."""
 
-    estimate = estimate_mission_capability(composition)
+    estimate = estimate_mission_capability(composition, plugins=plugins)
     if estimate is None:
         raise ValueError("declared semantic translator has no tier-compatible capability adapter")
     if (
@@ -604,85 +615,6 @@ def _capability_number(capability: dict[str, object], key: str) -> float:
     ####
 
 
-def _preflight_hummingbird_hover_yaw(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
-    """Preflight the declared aggregate-thrust Hummingbird mission translator."""
-
-    from .hummingbird_mission_translation import compile_hummingbird_pseudo_mission
-
-    plan = compile_hummingbird_pseudo_mission(composition)
-    estimate, capability = _capability_estimate_and_manifest(composition)
-    thrust_margin_n = _capability_number(capability, "thrust_margin_n")
-    capability_ok = estimate.feasibility != "certainly_infeasible"
-    return VehicleExecutionPreflight(
-        composition.id,
-        composition.identity_sha256,
-        composition.vehicle_id,
-        composition.family_id,
-        composition.fidelity,
-        "translation_ready" if capability_ok else "blocked",
-        "taoryx.hummingbird.hover_yaw_contact.pseudo6dof.v1",
-        (
-            ExecutionPreflightCheck(
-                "hummingbird.semantic_plan",
-                "declared_hover_yaw_translation_contact_segments",
-                [segment.instance_id for segment in plan.segments],
-                None,
-                True,
-            ),
-            ExecutionPreflightCheck(
-                "hummingbird.aggregate_hover_thrust_margin",
-                0.0,
-                thrust_margin_n,
-                "N",
-                capability_ok,
-            ),
-        ),
-        (
-            "composition lowers exactly through the declared Hummingbird pseudo-6DOF mission translator",
-            *estimate.diagnostics,
-        ),
-        estimate.manifest,
-        _capability_estimate_evidence(composition, estimate),
-    )
-    ####
-
-
-def _preflight_nesc_source_replay(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
-    """Preflight the source-pinned NESC replay chronology."""
-
-    from .nesc_mission_translation import compile_nesc_source_replay_mission
-
-    plan = compile_nesc_source_replay_mission(composition)
-    estimate, capability = _capability_estimate_and_manifest(composition)
-    event_order_valid = bool(capability["stage_event_order_valid"])
-    return VehicleExecutionPreflight(
-        composition.id,
-        composition.identity_sha256,
-        composition.vehicle_id,
-        composition.family_id,
-        composition.fidelity,
-        "translation_ready" if event_order_valid else "blocked",
-        estimate.adapter_id,
-        (
-            ExecutionPreflightCheck(
-                "nesc.semantic_source_replay_plan",
-                "pinned_launch_staging_orbit_replay",
-                [segment.instance_id for segment in plan.segments],
-                None,
-                True,
-            ),
-            ExecutionPreflightCheck("nesc.source_stage_event_order", True, event_order_valid, None, event_order_valid),
-        ),
-        (
-            "composition exactly matches the pinned NESC source-replay launch, staging, and terminal witness",
-            *estimate.diagnostics,
-        ),
-        estimate.manifest,
-        _capability_estimate_evidence(composition, estimate),
-    )
-    ####
-
-
 def _preflight_local_direct_wrench(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
     """Preflight one source-local direct-wrench screen without effector claims."""
 
@@ -815,8 +747,26 @@ def _preflight_local_native_coordinate_lqi(composition: CompiledVehicleCompositi
     ####
 
 
-def _preflight_powered_fixed_wing_racetrack(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
-    """Compare a composed fixed-wing racetrack to its selected capability profile."""
+def preflight_local_native_coordinate_lqi(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
+    """Preflight a plug-in-owned named-coordinate local LQI screen.
+
+    The common host owns the semantic and status checks; the selected plug-in
+    owns the exact screen definition, control plant, and runtime evidence.
+    """
+
+    return _preflight_local_native_coordinate_lqi(composition)
+    ####
+
+
+def preflight_powered_fixed_wing_racetrack(composition: CompiledVehicleComposition) -> VehicleExecutionPreflight:
+    """Preflight a family-owned powered fixed-wing racetrack translator.
+
+    This is the stable geometric preflight seam for an external vehicle
+    plug-in that owns its mission translator while sharing the standard
+    capability-scaled racetrack representation.  It establishes route
+    translation only; dynamics and control qualification stay package-owned
+    follow-on gates.
+    """
 
     compiled = compile_powered_fixed_wing_racetrack_from_composition(composition)
     estimate, _capability = _capability_estimate_and_manifest(composition)
@@ -909,15 +859,28 @@ def semantic_preflight_handler_registry(
 ) -> SemanticPreflightHandlerRegistry:
     """Return the immutable registry of installed source-owned translators."""
 
-    catalog = plugins or discover_plugins()
+    catalog = plugins if plugins is not None else current_plugin_catalog()
+    if catalog is None:
+        catalog = discover_plugins()
     handlers: list[SemanticPreflightHandler] = []
     for contribution in catalog.records("semantic_preflight_handler"):
-        if not isinstance(contribution.value, SemanticPreflightHandler):
+        value = contribution.value
+        if isinstance(value, SemanticPreflightHandler):
+            handlers.append(value)
+            continue
+        if isinstance(value, DeferredSemanticPreflightHandler):
+            handlers.append(
+                SemanticPreflightHandler(
+                    value.translator_id,
+                    cast(TranslationPreflightHandler, value.handler),
+                )
+            )
+            continue
+        else:
             raise TypeError(
                 f"plug-in {contribution.plugin.id!r} supplied an invalid semantic preflight handler "
                 f"for {contribution.id!r}"
             )
-        handlers.append(contribution.value)
     return SemanticPreflightHandlerRegistry(tuple(handlers))
     ####
 
@@ -1027,14 +990,20 @@ def build_semantic_preflight_handler_report(
 
 def compile_powered_fixed_wing_racetrack_from_composition(
     composition: CompiledVehicleComposition,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> CapabilityScaledRacetrack:
     """Compatibility projection of the registered fixed-wing capability planner."""
 
-    return _compile_powered_fixed_wing_racetrack_from_composition(composition)
+    return _compile_powered_fixed_wing_racetrack_from_composition(composition, plugins=plugins)
     ####
 
 
-def compile_x8_racetrack_from_composition(composition: CompiledVehicleComposition) -> CapabilityScaledRacetrack:
+def compile_x8_racetrack_from_composition(
+    composition: CompiledVehicleComposition,
+    *,
+    plugins: PluginCatalog | None = None,
+) -> CapabilityScaledRacetrack:
     """Compatibility alias for the original X8-only public helper.
 
     New callers must use :func:`compile_powered_fixed_wing_racetrack_from_composition`
@@ -1043,7 +1012,7 @@ def compile_x8_racetrack_from_composition(composition: CompiledVehicleCompositio
 
     if composition.family_id != "skywalker_x8":
         raise ValueError("X8 compatibility helper requires the Skywalker X8 family")
-    return compile_powered_fixed_wing_racetrack_from_composition(composition)
+    return compile_powered_fixed_wing_racetrack_from_composition(composition, plugins=plugins)
     ####
 
 
@@ -1170,6 +1139,8 @@ __all__ = [
     "compile_powered_fixed_wing_racetrack_from_composition",
     "_preflight_local_native_coordinate_lqi",
     "compile_x8_racetrack_from_composition",
+    "preflight_local_native_coordinate_lqi",
+    "preflight_powered_fixed_wing_racetrack",
     "preflight_vehicle_composition",
     "semantic_preflight_handler_registry",
     "validate_public_capability_advertisement",

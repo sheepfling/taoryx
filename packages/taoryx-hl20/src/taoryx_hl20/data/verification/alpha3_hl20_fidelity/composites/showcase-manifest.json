@@ -1,0 +1,80 @@
+{
+  "composites": [
+    {
+      "bytes": 563168,
+      "path": "hl20-ca-hi-flight-composite.png",
+      "sha256": "bf3caab7c92fce76eece983cfee27c7078c2d8d197ce814c256f2a52f23918cb"
+    },
+    {
+      "bytes": 162214,
+      "path": "hl20-ca-hi-envelope-comparison.png",
+      "sha256": "bcdf14a0a365bfdc7f0beb42d99a3d5a1371c2b92f41c2dd4856573e73d6ed12"
+    },
+    {
+      "bytes": 481528,
+      "path": "hl20-ca-hi-spent-booster-composite.png",
+      "sha256": "ed3744917372de4d918759f089de2c09e3bc5f113b2018ae4dd8370c2e2a15bb"
+    }
+  ],
+  "data_artifacts": [
+    {
+      "bytes": 5030,
+      "path": "candidate-summary.csv",
+      "sha256": "c994a9e7fef19475fe1ebb8e815fbd2d2de4de6af678fd080bac800e9ad5b7c8"
+    },
+    {
+      "bytes": 882025,
+      "path": "parent-telemetry-all-tiers.csv",
+      "sha256": "b5141e450e5291a023f22796423526bad1f087143f62dd5fff324b503626dc04"
+    },
+    {
+      "bytes": 473989,
+      "path": "spent-booster-telemetry.csv",
+      "sha256": "c8bb57221e30105443246547995880b61807ba49aa92705e602a393ca945aa1d"
+    },
+    {
+      "bytes": 332438,
+      "path": "surface-allocation.csv",
+      "sha256": "2148d51d4503258eae6b590ec82916d0917d228b6f7981b2bded9f2d70bf72b0"
+    }
+  ],
+  "input_configuration_hashes": {
+    "point_mass_3dof": "64743ff925201e530d1c967a2bc6388c02b861fd204c56dffc5dbcd0b51c331d",
+    "pseudo_6dof": "ccff84b39f7a48021142909eabb49cc7c622c01a2e35b57cd96930d3a79a8647",
+    "rigid_body_6dof": "7f2e09edabcf2ab183ec000f28e2cb1cb279f001e23a41dc878328dd08894a62",
+    "rigid_body_6dof_surface_allocated": "1a2c5add82e67f4ab637c718efc1e7e05b6b2f61e7149222016a41359b3deb85"
+  },
+  "rendering": {
+    "deterministic_layout": true,
+    "dpi": 80,
+    "renderer": "matplotlib"
+  },
+  "schema": "taoryx.hl20-ca-hi-showcase-composite-manifest/v1alpha1",
+  "source_artifacts": [
+    {
+      "bytes": 562012,
+      "path": "../point_mass_3dof.json",
+      "sha256": "fd9c840de8421c087f3e0895fd6b5e48f48400f580073698e15fc6a2866498ff"
+    },
+    {
+      "bytes": 1042089,
+      "path": "../pseudo_6dof.json",
+      "sha256": "e467482ae4bef5b2ec4a09099877e435586225d400e35380da8d3cc3e1133161"
+    },
+    {
+      "bytes": 1916150,
+      "path": "../rigid_body_6dof.json",
+      "sha256": "da9fadf1d7943dfb7d3aa38e25f1c5b1531af8dcb1b71554fe984a09fd8afe8e"
+    },
+    {
+      "bytes": 2154279,
+      "path": "../rigid_body_6dof_surface_allocated.json",
+      "sha256": "2a2443baee1902f62d43a58e5c596fbba8e6c0a5ef77fd3674691a9b98d1bcda"
+    }
+  ],
+  "summary": {
+    "bytes": 15418,
+    "path": "showcase-summary.json",
+    "sha256": "3cdc5c6cc2d9dca4f58e0f23fd3fb74a281f9de7f83e9dc81c0f2a151bc75bb1"
+  }
+}

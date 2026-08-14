@@ -1,0 +1,41 @@
+schema: taoryx.model-authoring-draft/v1
+draft_id: reference-waypoint-3dof-batch-draft
+configuration_id: reference-waypoint-3dof-batch
+provider_id: taoryx.reference.mission-composition
+model_id: reference_constant_velocity_waypoint_3dof
+model_version: 1.0.0
+schema_fingerprint: 6cc38193ad6c728acb1dde582a12f2ab64acd0329fc1b8272ffb019d9f2ff951
+fidelity: point_mass_3dof
+realization_id: analytical_point_mass
+mission_template_id: reference_constant_velocity_waypoint_3dof_repeatable_sequence_v1
+selection_sources:
+  fidelity: caller
+  mission: caller
+  realization: caller
+values:
+  initialization:
+    selected: initial_state
+    values:
+      altitude_m: 1000.0
+      speed_m_s: 100.0
+      heading_deg: 90.0
+  segments:
+    template: null
+    items:
+      - selected: waypoint_leg
+        instance_id: outbound
+        values:
+          duration_s: 5.0
+          waypoint_north_m: 0.0
+          waypoint_east_m: 500.0
+          waypoint_altitude_m: 1000.0
+      - selected: waypoint_leg
+        instance_id: return
+        values:
+          duration_s: 5.0
+          waypoint_north_m: 0.0
+          waypoint_east_m: 0.0
+          waypoint_altitude_m: 1000.0
+claim_boundary: >-
+  This checked-in endpoint witness is editable input in canonical advertised units.
+  It remains an analytical waypoint workflow proof until the exact provider validates and runs it.

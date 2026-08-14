@@ -1,0 +1,45 @@
+schema: taoryx.horizontal-fidelity-registry/v1alpha1
+version: 1
+description: The horizontal integration manifest for the current Alpha 3 family catalog.
+  Profile IDs are resolved against verification/pseudo6dof_profiles.yaml; this file
+  owns the physical-family overlay, adapter seam, and four-tier declaration.
+families:
+- family_id: reference_nesc_two_stage_rocket
+  physical_family: mass_depleting_rocket
+  strategy_id: staged_rocket_replay.v1
+  mission_overlay: staged_launch_target_state
+  adapter_id: taoryx.rocket.variable_mass_nesc.v1
+  automatic_lowering: true
+  source_manifest: families/reference_nesc_two_stage_rocket/family.yaml
+  source_family_id: reference_nesc_two_stage_rocket
+  tiers:
+    point_mass_3dof:
+      profile_id: nesc_rocket.performance_3dof.v1
+      promotion_status: development
+      blockers:
+      - source_replay_not_participating_plant
+    pseudo_6dof:
+      profile_id: nesc_rocket.attitude_response_p6dof.v1
+      promotion_status: development
+      blockers:
+      - source_replay_not_participating_attitude
+    rigid_body_6dof_direct_wrench:
+      profile_id: nesc_rocket.direct_wrench_6dof.v1
+      promotion_status: planned
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      blockers:
+      - time_aligned_attitude_gimbal_effectivity
+    rigid_body_6dof_surface_allocated:
+      profile_id: nesc_rocket.surface_allocated_6dof.v1
+      promotion_status: planned
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      - effectiveness
+      - allocate
+      blockers:
+      - time_aligned_attitude_gimbal_effectivity

@@ -1,0 +1,6 @@
+item,status,effect
+hard_actuator_rate_limits,not supplied by source model,must be supplied before actuator-authority claims
+pure_transport_delays,not supplied by source model,must be supplied before phase-margin claims
+control_rate_aerodynamic_derivatives,not supplied,no delta-dot aerodynamic increments
+body_flap,not present on baseline X-15 aerodynamic model,do not map Shuttle/HGV body-flap coefficients into this deck
+reaction_control_thruster geometry and impulse,RCS tank exists but thruster model is absent,thin-air attitude control is not represented

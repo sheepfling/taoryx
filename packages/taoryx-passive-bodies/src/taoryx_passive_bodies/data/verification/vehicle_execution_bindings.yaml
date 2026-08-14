@@ -1,0 +1,31 @@
+schema: taoryx.vehicle-execution-bindings/v1alpha1
+version: 1
+description: Explicit source-owned execution bindings for compiled vehicle compositions.
+  An entry is a public capability declaration, not a generic family fallback. Omitted
+  vehicle/fidelity/mission combinations are unavailable until their own native binding
+  exists.
+bindings:
+- family_id: tumbling_body
+  mission: tumbling_body_release_damping_impact_v1
+  fidelity: point_mass_3dof
+  operation: batch
+  status: runnable
+  execution_mode: passive_uncontrolled
+  factory_id: passive_tumbling_direct_release.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the declared direct passive-cylinder release with orientation-averaged
+    projected area.
+  claim_boundary: The passive 3DOF reduction cannot establish moment-driven rotational
+    behavior or expose a control path.
+- family_id: tumbling_body
+  mission: tumbling_body_release_damping_impact_v1
+  fidelity: pseudo_6dof
+  operation: batch
+  status: runnable
+  execution_mode: passive_uncontrolled
+  factory_id: passive_tumbling_direct_release.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the declared direct passive-cylinder release using native rigid-body
+    passive-tumble reuse.
+  claim_boundary: Passive pseudo-6DOF has no control or allocation path; it reuses
+    real rigid-body evidence explicitly.

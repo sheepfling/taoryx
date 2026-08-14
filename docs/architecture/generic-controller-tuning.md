@@ -92,21 +92,21 @@ registrations and can be discovered and executed without importing a
 vehicle-specific runner:
 
 ```text
-taoryx model plan taoryx.registry.mission-composition a320_openap_3dof \
+taoryx model plan taoryx.a320.mission-composition a320_openap_3dof \
   --fidelity pseudo_6dof
-taoryx model tune taoryx.registry.mission-composition a320_openap_3dof
+taoryx model tune taoryx.a320.mission-composition a320_openap_3dof
 
-taoryx model plan taoryx.registry.mission-composition hummingbird \
+taoryx model plan taoryx.hummingbird.mission-composition hummingbird \
   --fidelity pseudo_6dof
-taoryx model tune taoryx.registry.mission-composition hummingbird
+taoryx model tune taoryx.hummingbird.mission-composition hummingbird
 
-taoryx model plan taoryx.registry.mission-composition f16_s119 \
+taoryx model plan taoryx.f16.mission-composition f16_s119 \
   --fidelity pseudo_6dof
-taoryx model tune taoryx.registry.mission-composition f16_s119 \
+taoryx model tune taoryx.f16.mission-composition f16_s119 \
   --fidelity pseudo_6dof \
   --campaign f16-pseudo-source-trim-attitude-v1
 
-taoryx model tune taoryx.registry.mission-composition x15 \
+taoryx model tune taoryx.x15.mission-composition x15 \
   --campaign x15-source-release-direct-wrench-v1
 ```
 

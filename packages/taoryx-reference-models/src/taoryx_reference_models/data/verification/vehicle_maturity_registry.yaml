@@ -1,141 +1,76 @@
 schema_version: 1
 registry_id: taoryx_vehicle_maturity_v1
 purpose: planning ledger separating software maturity from evidence strength
-levels: [M0, M1, M2, M3, M4, M5, M6]
+levels:
+- M0
+- M1
+- M2
+- M3
+- M4
+- M5
+- M6
 release_policy:
   alpha2_finish_line: M4 for the four established proof families and the shared platform
-  alpha3_target: M4 for new domain pilots, with M5 only where all applicable dimensions qualify
+  alpha3_target: M4 for new domain pilots, with M5 only where all applicable dimensions
+    qualify
 records:
-  - id: simple_aero
-    family: configurable_point_mass
-    maturity: M5
-    evidence_strength: synthetic
-    status: mature_proof_family
-    next_gate: maintain_as_contract_reference
-  - id: dual_launch_glider
-    family: composable_glider
-    maturity: M4
-    evidence_strength: synthetic
-    status: composable_proof_fixture
-    next_gate: longer_family-appropriate_missions
-  - id: b747
-    composition_family_id: b747
-    family: powered_fixed_wing
-    maturity: M4
-    evidence_strength: public_research_surrogate
-    status: condition3_physical_lqi_and_matched_pitch_offset_screen_composable
-    next_gate: extended_controller_mission_and_local_mode_correlation
-  - id: a320_openap_3dof
-    composition_family_id: a320_openap_3dof
-    family: powered_fixed_wing
-    maturity: M4
-    evidence_strength: public_research_surrogate
-    status: openap_point_mass_and_pseudo6dof_native_coordinate_lqi_endpoint_composable
-    next_gate: expanded_operating_point_schedule_and_source_grounded_surface_path
-  - id: skywalker_x8
-    composition_family_id: skywalker_x8
-    family: powered_fixed_wing
-    maturity: M4
-    evidence_strength: public_research_surrogate
-    status: source_powered_trim_extended_physical_lqi_recovery_and_matched_pitch_offset_screen_composable
-    next_gate: nonlinear_lateral_yaw_recovery_and_surface_route
-  - id: hummingbird
-    composition_family_id: hummingbird
-    family: multirotor_direct_wrench
-    maturity: M4
-    evidence_strength: public_research_surrogate
-    status: local_source_anchored_composable_horizontal_and_vertical_rotor_lqi_with_fixed_lqi_mass_variation_screen
-    next_gate: declared_disturbance_contact_landing_and_full_route_mission
-  - id: x15
-    composition_family_id: x15
-    family: rocket_plane
-    family_group: hypersonic_lifting_body_research
-    subtype: powered_hypersonic_research_aircraft_with_unpowered_glide
-    maturity: M4
-    evidence_strength: vehicle_specific_public_research_surrogate
-    status: source_release_three_surface_authority_and_local_attitude_rate_lqi_composable
-    next_gate: full_state_trim_surface_feedback_energy_managed_mission_and_terminal_contract
-  - id: reference_f16_s119
-    composition_family_id: f16_s119
-    family: powered_fixed_wing
-    maturity: M4
-    evidence_strength: source_grounded_reference
-    status: nominal_multi_fidelity_racetrack_with_candidate_bound_held_node_surface_lqr_lqi_schedule_interiors_and_bounded_physical_lqr_transition_screen
-    next_gate: expanded_transition_envelope_wind_mass_robustness_and_r1_review
-  - id: reference_hl20_mod_k
-    composition_family_id: hl20_mod_k
-    family: unpowered_lifting_body
-    family_group: hypersonic_lifting_body_research
-    subtype: unpowered_hypersonic_lifting_body_entry_glider
-    maturity: M4
-    evidence_strength: source_grounded_reference
-    status: scalar_pitch_trim_source_surface_authority_and_local_attitude_rate_lqi_composable
-    next_gate: full_state_trim_surface_feedback_glide_guidance_and_arrival_showcase
-  - id: reference_nesc_two_stage_rocket
-    composition_family_id: reference_nesc_two_stage_rocket
-    family: mass_depleting_rocket
-    maturity: M4
-    evidence_strength: source_grounded_reference
-    status: source_history_replay_and_phase_scheduled_pseudo6dof_composable
-    next_gate: participating_plant_time_aligned_attitude_and_gimbal_effectivity
-  - id: tumbling_body
-    composition_family_id: tumbling_body
-    family: passive_ballistic_tumbling_body
-    maturity: M4
-    evidence_strength: engineering_surrogate
-    status: passive_uncontrolled_3dof_and_pseudo6dof_composable
-    next_gate: passive_rotation_envelope_and_shape_coverage
-  - id: c172p_hybrid
-    family: light_propeller_aircraft
-    maturity: M0
-    evidence_strength: public_surrogate_candidate
-    status: intake_record_only
-    next_gate: catalog_ingestion_and_convention_firewall
-  - id: learjet24_local
-    family: small_business_jet
-    maturity: M0
-    evidence_strength: public_local_derivative_candidate
-    status: intake_record_only
-    next_gate: catalog_ingestion_and_local_trim
-  - id: r44_class
-    family: single_main_rotor_helicopter
-    maturity: M0
-    evidence_strength: public_and_identified_candidate
-    status: intake_record_only
-    next_gate: source_hover_deck_ingestion
-  - id: uh1h_scheduled
-    family: conventional_helicopter
-    maturity: M0
-    evidence_strength: NASA_scheduled_derivative_candidate
-    status: intake_record_only
-    next_gate: source_point_reproduction
-  - id: uh60a_scheduled
-    family: conventional_helicopter
-    maturity: M0
-    evidence_strength: NASA_scheduled_derivative_candidate
-    status: intake_record_only
-    next_gate: source_point_reproduction
-  - id: xv15_class
-    family: tiltrotor
-    maturity: M0
-    evidence_strength: public_research_candidate
-    status: intake_record_only
-    next_gate: 3dof_conversion_force_model
-  - id: v22_class_scaled
-    family: tiltrotor_scaled_surrogate
-    maturity: M0
-    evidence_strength: public_fact_plus_engineering_estimate
-    status: intake_record_only
-    next_gate: inherit_qualified_transition_architecture
-  - id: spacecraft_reference
-    family: spacecraft
-    maturity: M0
-    evidence_strength: synthetic_reference_candidate
-    status: planned
-    next_gate: epoch_frame_and_force_contract
-  - id: public_autonomous_surrogate_roster
-    family: public_flight_dynamics_surrogate
-    maturity: M0
-    evidence_strength: public_data_and_estimate
-    status: partial_parameter_pack
-    next_gate: energy_backend_and_mode_contract
+- id: simple_aero
+  family: configurable_point_mass
+  maturity: M5
+  evidence_strength: synthetic
+  status: mature_proof_family
+  next_gate: maintain_as_contract_reference
+- id: c172p_hybrid
+  family: light_propeller_aircraft
+  maturity: M0
+  evidence_strength: public_surrogate_candidate
+  status: intake_record_only
+  next_gate: catalog_ingestion_and_convention_firewall
+- id: learjet24_local
+  family: small_business_jet
+  maturity: M0
+  evidence_strength: public_local_derivative_candidate
+  status: intake_record_only
+  next_gate: catalog_ingestion_and_local_trim
+- id: r44_class
+  family: single_main_rotor_helicopter
+  maturity: M0
+  evidence_strength: public_and_identified_candidate
+  status: intake_record_only
+  next_gate: source_hover_deck_ingestion
+- id: uh1h_scheduled
+  family: conventional_helicopter
+  maturity: M0
+  evidence_strength: NASA_scheduled_derivative_candidate
+  status: intake_record_only
+  next_gate: source_point_reproduction
+- id: uh60a_scheduled
+  family: conventional_helicopter
+  maturity: M0
+  evidence_strength: NASA_scheduled_derivative_candidate
+  status: intake_record_only
+  next_gate: source_point_reproduction
+- id: xv15_class
+  family: tiltrotor
+  maturity: M0
+  evidence_strength: public_research_candidate
+  status: intake_record_only
+  next_gate: 3dof_conversion_force_model
+- id: v22_class_scaled
+  family: tiltrotor_scaled_surrogate
+  maturity: M0
+  evidence_strength: public_fact_plus_engineering_estimate
+  status: intake_record_only
+  next_gate: inherit_qualified_transition_architecture
+- id: spacecraft_reference
+  family: spacecraft
+  maturity: M0
+  evidence_strength: synthetic_reference_candidate
+  status: planned
+  next_gate: epoch_frame_and_force_contract
+- id: public_autonomous_surrogate_roster
+  family: public_flight_dynamics_surrogate
+  maturity: M0
+  evidence_strength: public_data_and_estimate
+  status: partial_parameter_pack
+  next_gate: energy_backend_and_mode_contract

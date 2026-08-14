@@ -8,8 +8,8 @@ from typing import Any, cast
 import pytest
 import taoryx.mission_composition_maturity as mission_composition_maturity
 import yaml
+from taoryx.a320_reduced_execution import execute_a320_reduced_composition
 from taoryx.mission_composition_maturity import build_mission_composition_maturity_report
-from taoryx.reduced_fixed_wing_execution import execute_reduced_fixed_wing_composition
 
 import taoryx.runtime.cli as runtime_cli
 import taoryx.vehicle_execution_preflight as execution_preflight
@@ -444,7 +444,7 @@ def test_executable_mission_templates_declare_their_semantic_translator() -> Non
         ),
         ("b747", "powered_fixed_wing_racetrack_v1"): ("taoryx.b747_racetrack.source_route.v1", CANONICAL_FIDELITY_TIERS),
         ("a320_openap_3dof", "powered_fixed_wing_racetrack_v1"): (
-            "taoryx.powered_fixed_wing_racetrack.capability_scaled.v1",
+            "taoryx.a320_openap_racetrack.capability_scaled.v1",
             ("point_mass_3dof", "pseudo_6dof"),
         ),
         ("a320_openap_3dof", "a320_local_native_coordinate_lqi_screen_v1"): (
@@ -471,7 +471,7 @@ def test_executable_mission_templates_declare_their_semantic_translator() -> Non
             "taoryx.f16_local_physical_surface_lqr_schedule_transition_screen.capability.v1",
             ("rigid_body_6dof_surface_allocated",),
         ),
-        ("f16_s119", "powered_fixed_wing_racetrack_v1"): ("taoryx.powered_fixed_wing_racetrack.capability_scaled.v1", CANONICAL_FIDELITY_TIERS),
+        ("f16_s119", "powered_fixed_wing_racetrack_v1"): ("taoryx.f16_racetrack.source_route.v1", CANONICAL_FIDELITY_TIERS),
         ("hummingbird", "hummingbird_local_individual_rotor_lqi_screen_v1"): (
             "taoryx.hummingbird.local_individual_rotor_lqi_screen.capability.v1",
             ("rigid_body_6dof_surface_allocated",),
@@ -568,7 +568,7 @@ def test_preflight_fails_closed_when_handler_reports_a_different_translator() ->
     def wrong_handler(candidate: object) -> object:
         assert candidate is composition
         return replace(
-            execution_preflight._preflight_powered_fixed_wing_racetrack(composition),
+            execution_preflight.preflight_powered_fixed_wing_racetrack(composition),
             translator_id="taoryx.synthetic.mismatched_translator.v1",
         )
         ####
@@ -2156,18 +2156,16 @@ def test_vehicle_run_executes_a320_runtime_bound_mass_variant(tmp_path: Path, ca
     (
         ("a320_racetrack_capability_3dof_compose.yaml", "a320_openap_3dof"),
         ("a320_racetrack_capability_pseudo6dof_compose.yaml", "a320_openap_3dof"),
-        ("f16_racetrack_capability_3dof_compose.yaml", "f16_s119"),
-        ("f16_racetrack_capability_pseudo6dof_compose.yaml", "f16_s119"),
     ),
 )
-def test_reduced_airbreather_compositions_execute_the_common_racetrack(
+def test_reduced_a320_compositions_execute_the_common_racetrack(
     tmp_path: Path,
     request_name: str,
     expected_family: str,
 ) -> None:
     composition = compile_vehicle_composition(load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / request_name))
 
-    result = execute_reduced_fixed_wing_composition(composition, tmp_path / request_name.removesuffix(".yaml"))
+    result = execute_a320_reduced_composition(composition, tmp_path / request_name.removesuffix(".yaml"))
 
     assert result.composition.family_id == expected_family
     assert result.mission_pass is True

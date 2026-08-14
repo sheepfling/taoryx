@@ -1,0 +1,37 @@
+schema_version: 1
+description: Capability-backed first-mission inputs for the reusable powered-fixed-wing
+  racetrack compiler. These are planning inputs, not controller or physical effector
+  qualification claims.
+baselines:
+  f16-subsonic: f16-s119-point-mass
+profiles:
+  f16-subsonic:
+    realization_bindings:
+      point_mass_3dof: f16-s119-point-mass
+      pseudo_6dof_kinematic_bridge: f16-s119-pseudo-6dof
+      rigid_body_6dof_direct_wrench: f16-s119-direct-wrench
+      rigid_body_6dof_surface_allocated: f16-s119-surfaces
+    capability:
+      vehicle_id: reference_f16_s119
+      operating_point_id: f16-s119-subsonic-reference
+      minimum_speed_m_s: 120.0
+      nominal_speed_m_s: 152.4
+      maximum_speed_m_s: 220.0
+      maximum_bank_deg: 35.0
+      maximum_climb_rate_m_s: 6.0
+      maximum_descent_rate_m_s: 6.0
+      provenance: source-grounded F-16 S-119 local subsonic reference envelope
+      evidence_class: local_source_bound_planning_bound
+    intent:
+      id: powered-fixed-wing-racetrack
+      low_altitude_m: 0.0
+      high_altitude_m: 300.0
+      requested_speed_m_s: 152.4
+      requested_bank_deg: 20.0
+      minimum_straight_length_m: 18000.0
+      level_dwell_s: 60.0
+      turn_radius_margin: 1.1
+      simulation_margin_s: 90.0
+      gate_corridor_m: 500.0
+      gate_altitude_tolerance_m: 35.0
+      gate_speed_tolerance_mps: 12.0

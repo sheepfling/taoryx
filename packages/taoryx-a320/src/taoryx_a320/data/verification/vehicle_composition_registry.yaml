@@ -1,0 +1,265 @@
+schema: taoryx.vehicle-composition-registry/v1alpha1
+version: 1
+description: 'User-facing vehicle-to-trajectory registry. This is a composition overlay:
+  it declares available initialization contracts, segment schemas, and mission templates
+  without duplicating vehicle physics or promoting a fidelity tier.'
+vehicles:
+- family_id: a320_openap_3dof
+  metadata:
+    summary: Source-derived A320 transport composite for OpenAP point-mass performance
+      and a named surrogate attitude-response tier.
+    model_version: 1.0.0+composition-v1
+    vehicle_class: powered_fixed_wing_aircraft
+    operating_domains:
+    - atmospheric
+    propulsion:
+    - scheduled_thrust_model
+    model_basis: source_derived_composite
+    roles:
+    - transport_performance
+    - reduced_order_navigation
+    - surrogate_attitude_response
+    tags:
+    - openap
+    - jsbsim_comparison
+    - reduced_order
+    claim_boundary: Derived transport composite; it does not claim Airbus-authoritative
+      aerodynamics, moments, or physical control surfaces.
+  variant_parameters:
+  - id: operating_mass_kg
+    canonical_unit: kg
+    target_initialization_id: airborne_trim
+    target_parameter_id: mass_kg
+    status: runnable
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    runtime_adapter_id: taoryx.fixed_wing.openap.v1
+    runtime_input_path: A320OpenAPOperatingPoint.mass_kg
+    hard_lower: 42600.0
+    hard_upper: 78000.0
+    value_space_profile: positive_half_line
+    transform: log
+    requires_retrim: true
+    requires_requalification: true
+    coupling_group: operating_mass
+    derived_status_channels:
+    - resources.mass.total
+    status_derivation_relation: equal_to_target
+    resource_derivation: runtime_adapter_owned
+    derivation_claim_boundary: The OpenAP runtime owns the resulting operating-point,
+      trim, and mass-status calculations. Fuel loading, inertia, and detailed energy/resource
+      derivation are not represented by this modifier.
+    derivation: Adapter-owned OpenAP operating mass, trim, and total-mass status update.
+    invalidations:
+    - retrim:mass_kg
+    - requalification:mass_kg
+    provenance: Pinned OpenAP A320 clean-performance and drag table mass-axis domain.
+    description: Initial operating mass forwarded to the OpenAP operating point, trim
+      solve, and emitted mass telemetry for the selected composition.
+  initialization_contracts:
+  - id: pseudo6dof_cruise_attitude_local_point
+    status: runnable
+    description: Pinned A320 surrogate-composite cruise attitude point used only by
+      the local named-coordinate LQI recovery screen.
+    compatible_fidelities:
+    - pseudo_6dof
+  - id: airborne_trim
+    status: runnable
+    description: OpenAP airborne operating state with declared mass, speed, altitude,
+      and course.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: altitude_m
+      canonical_unit: m
+      required: true
+      description: Initial altitude.
+    - id: speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Initial speed.
+    - id: heading_deg
+      canonical_unit: deg
+      required: true
+      description: Initial course.
+    - id: mass_kg
+      canonical_unit: kg
+      required: false
+      description: Initial mass.
+  segment_contracts:
+  - id: native_coordinate_attitude_lqi_screen
+    status: runnable
+    description: Recover the pinned pseudo-6DOF cruise attitude perturbation through
+      bounded named aileron, elevator, and rudder response coordinates with a common-host
+      LQI candidate.
+    compatible_fidelities:
+    - pseudo_6dof
+    parameters: []
+    required_control_intents:
+    - attitude_rate
+  - id: trim_hold
+    status: runnable
+    description: Capture the selected OpenAP operating point.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: duration_s
+      canonical_unit: s
+      required: true
+      description: Dwell duration.
+    required_control_intents:
+    - speed
+    - altitude
+    - heading
+  - id: climb_level_gate
+    status: runnable
+    description: Controlled climb and high-level gate crossing.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Target altitude.
+    - id: climb_rate_m_s
+      canonical_unit: m/s
+      required: true
+      description: Requested climb rate.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: North-east-down high-level gate center.
+    - id: corridor_m
+      canonical_unit: m
+      required: true
+      description: Lateral gate tolerance.
+    required_control_intents:
+    - speed
+    - altitude
+    - flight_path
+  - id: fly_by_turn
+    status: runnable
+    description: Bank-limited turn through an oriented route gate.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: turn_direction
+      canonical_unit: null
+      required: true
+      description: left or right turn.
+    - id: turn_radius_m
+      canonical_unit: m
+      required: true
+      description: Turn radius.
+    - id: bank_limit_deg
+      canonical_unit: deg
+      required: true
+      description: Bank limit.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: North-east-down turn-exit gate center.
+    required_control_intents:
+    - bank
+    - heading
+  - id: descent_level_gate
+    status: runnable
+    description: Controlled descent and low-level gate crossing.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Target altitude.
+    - id: descent_rate_m_s
+      canonical_unit: m/s
+      required: true
+      description: Requested descent rate.
+    - id: gate_center_ned_m
+      canonical_unit: m
+      required: true
+      description: North-east-down low-level gate center.
+    required_control_intents:
+    - speed
+    - altitude
+    - flight_path
+  - id: terminal_state_gate
+    status: development
+    description: Stabilized airborne start/finish gate; not a runway arrival or contact
+      segment.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: target_ned_m
+      canonical_unit: m
+      required: true
+      description: Terminal gate position.
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Terminal altitude.
+    - id: target_speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Terminal speed.
+    - id: target_heading_deg
+      canonical_unit: deg
+      required: true
+      description: Terminal heading.
+    required_control_intents:
+    - speed
+    - altitude
+    - heading
+  mission_templates:
+  - id: a320_local_native_coordinate_lqi_screen_v1
+    status: runnable
+    description: Pinned local A320 pseudo-6DOF named-coordinate LQI attitude recovery;
+      not a route mission or physical surface allocation.
+    mission_capability_adapter_id: taoryx.a320.local_native_coordinate_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - pseudo_6dof
+    semantic_translator_id: taoryx.a320.local_native_coordinate_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - pseudo_6dof
+    initialization_contracts:
+    - pseudo6dof_cruise_attitude_local_point
+    compatible_fidelities:
+    - pseudo_6dof
+    segment_sequence:
+    - native_coordinate_attitude_lqi_screen
+    backing_templates:
+    - a320_local_native_coordinate_lqi_screen_v1
+  - id: powered_fixed_wing_racetrack_v1
+    status: runnable
+    description: Transport-scale reusable racetrack at the supported performance and
+      pseudo-response levels.
+    mission_capability_adapter_id: taoryx.a320_openap_racetrack.capability_scaled.v1
+    mission_capability_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    semantic_translator_id: taoryx.a320_openap_racetrack.capability_scaled.v1
+    semantic_translator_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    initialization_contracts:
+    - airborne_trim
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    segment_sequence:
+    - trim_hold
+    - climb_level_gate
+    - fly_by_turn
+    - descent_level_gate
+    - fly_by_turn
+    - terminal_state_gate
+    backing_templates:
+    - powered_fixed_wing_racetrack_v1

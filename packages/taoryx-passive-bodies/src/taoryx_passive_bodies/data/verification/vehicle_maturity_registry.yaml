@@ -1,0 +1,23 @@
+schema_version: 1
+registry_id: taoryx_vehicle_maturity_v1
+purpose: planning ledger separating software maturity from evidence strength
+levels:
+- M0
+- M1
+- M2
+- M3
+- M4
+- M5
+- M6
+release_policy:
+  alpha2_finish_line: M4 for the four established proof families and the shared platform
+  alpha3_target: M4 for new domain pilots, with M5 only where all applicable dimensions
+    qualify
+records:
+- id: tumbling_body
+  composition_family_id: tumbling_body
+  family: passive_ballistic_tumbling_body
+  maturity: M4
+  evidence_strength: engineering_surrogate
+  status: passive_uncontrolled_3dof_and_pseudo6dof_composable
+  next_gate: passive_rotation_envelope_and_shape_coverage

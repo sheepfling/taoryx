@@ -20,7 +20,8 @@ import json
 import math
 from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal, cast
+from functools import lru_cache
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -32,6 +33,7 @@ from .control_schemes import (
 )
 from .fidelity_contracts import FidelityTier
 from .interface_channel_value_spaces import interface_channel_value_space_profile, value_space_for_interface_channel_profile
+from .plugins import DeferredVehicleInterfaceExtension, PluginCatalog, current_plugin_catalog, discover_plugins
 from .value_space import (
     ValueSpaceSpec,
     default_value_space_for_value_type,
@@ -445,6 +447,41 @@ class AuthorityProfile:
 
 
 @dataclass(frozen=True, slots=True)
+class InterfaceContractAugmentation:
+    """Family-owned additions to one otherwise generic interface contract.
+
+    An augmentation is additive only.  Core keeps the generic contract,
+    validates every public ID and authority reference, and rejects collisions;
+    a vehicle plug-in may supply source-specific reduced controls or readbacks
+    without teaching the core about a vehicle name.
+    """
+
+    action_channels: tuple[InterfaceChannel, ...] = ()
+    authority_profiles: tuple[AuthorityProfile, ...] = ()
+    status_channels: tuple[InterfaceChannel, ...] = ()
+    resource_channels: tuple[InterfaceChannel, ...] = ()
+    diagnostic_channels: tuple[InterfaceChannel, ...] = ()
+
+
+class VehicleInterfaceExtension(Protocol):
+    """Package-owned additive interface contract for one vehicle family."""
+
+    id: str
+    family_id: str
+
+    def augment(
+        self,
+        fidelity: FidelityTier,
+        *,
+        episode_runnable: bool,
+        batch_runnable: bool,
+    ) -> InterfaceContractAugmentation | None:
+        """Return additive semantic interface fields, if this tier is owned."""
+
+        ...
+
+
+@dataclass(frozen=True, slots=True)
 class ObservationProfile:
     """A declared view of committed truth for one external consumer."""
 
@@ -732,28 +769,31 @@ def resolve_vehicle_interface_contract(
     fidelity: FidelityTier,
     *,
     catalog: ResolvedVehicleCompositionCatalog | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleInterfaceContract:
     """Resolve one versioned interface without instantiating a simulation."""
 
     if catalog is None:
         from .vehicle_composition_registry import load_resolved_vehicle_composition_catalog
 
-        catalog = load_resolved_vehicle_composition_catalog()
-    return interface_contract_for_composition(catalog.vehicle(identifier), fidelity)
+        catalog = load_resolved_vehicle_composition_catalog(plugins=plugins)
+    return interface_contract_for_composition(catalog.vehicle(identifier), fidelity, plugins=plugins)
     ####
 
 
 def interface_contract_for_composition(
     composition: ResolvedVehicleComposition,
     fidelity: FidelityTier,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleInterfaceContract:
     """Project one registered family/fidelity into explicit semantic channels."""
 
     family = composition.family
     tier = family.family.tiers[fidelity]
     vehicle_id = family.family.vehicle_registry_id or family.family_id
-    episode_runnable = _has_runnable_episode(family.family_id, fidelity)
-    batch_runnable = _has_runnable_batch(family.family_id, fidelity)
+    episode_runnable = _has_runnable_episode(family.family_id, fidelity, plugins=plugins)
+    batch_runnable = _has_runnable_batch(family.family_id, fidelity, plugins=plugins)
     action_channels, authority_profiles = _action_contract(
         family.family_id,
         fidelity,
@@ -765,10 +805,33 @@ def interface_contract_for_composition(
         fidelity,
         episode_runnable,
         batch_runnable,
+        plugins=plugins,
     )
+    augmentation = _interface_contract_augmentation(
+        family.family_id,
+        fidelity,
+        episode_runnable=episode_runnable,
+        batch_runnable=batch_runnable,
+        plugins=plugins,
+    )
+    if (
+        augmentation.authority_profiles
+        and len(authority_profiles) == 1
+        and authority_profiles[0].id == "no_external_action"
+    ):
+        # A family-owned augmentation supplies the public semantic authority
+        # in place of core's conservative empty fallback.  The extension is
+        # still additive for every real generic contract, while core remains
+        # unaware of the owning vehicle family.
+        authority_profiles = ()
+    action_channels = (*action_channels, *augmentation.action_channels)
+    authority_profiles = (*authority_profiles, *augmentation.authority_profiles)
+    status = (*status, *augmentation.status_channels)
+    resources = (*resources, *augmentation.resource_channels)
+    diagnostics = (*diagnostics, *augmentation.diagnostic_channels)
     execution_records = tuple(
         item
-        for item in bindings_for_family(family.family_id)
+        for item in bindings_for_family(family.family_id, plugins=plugins)
         if item.fidelity == fidelity
     )
     return VehicleInterfaceContract(
@@ -776,7 +839,11 @@ def interface_contract_for_composition(
         family_id=family.family_id,
         physical_family=family.family.physical_family,
         fidelity=fidelity,
-        control_realization=resolved_control_realization_for(family.family_id, fidelity),
+        control_realization=resolved_control_realization_for(
+            family.family_id,
+            fidelity,
+            plugins=plugins,
+        ),
         evidence_status=tier.promotion_status,
         parameter_channels=_parameter_channels(composition),
         action_channels=action_channels,
@@ -795,6 +862,83 @@ def interface_contract_for_composition(
         execution_records=execution_records,
         claim_boundary=_contract_claim_boundary(family.family_id, fidelity, tier.promotion_status),
     )
+    ####
+
+
+def _interface_contract_augmentation(
+    family_id: str,
+    fidelity: FidelityTier,
+    *,
+    episode_runnable: bool,
+    batch_runnable: bool,
+    plugins: PluginCatalog | None,
+) -> InterfaceContractAugmentation:
+    """Resolve package-owned additive contract fields for one exact family.
+
+    The selected catalog is an explicit execution boundary.  An ambient catalog
+    is honored while a focused provider or batch/session host is active;
+    otherwise legacy direct inspection retains aggregate discovery behavior.
+    Deferred entries are resolved only after their declared family matches.
+    """
+
+    catalog = plugins if plugins is not None else current_plugin_catalog()
+    if catalog is None:
+        catalog = _aggregate_interface_extension_catalog()
+    result = InterfaceContractAugmentation()
+    for contribution in catalog.records("vehicle_interface_extension"):
+        candidate = contribution.value
+        declared_family_id = getattr(candidate, "family_id", None)
+        if declared_family_id != family_id:
+            continue
+        extension = (
+            candidate.resolve_extension()
+            if isinstance(candidate, DeferredVehicleInterfaceExtension)
+            else candidate
+        )
+        if getattr(extension, "family_id", None) != family_id:
+            raise TypeError(
+                f"plug-in {contribution.plugin.id!r} supplied an interface extension for another family"
+            )
+        augment = getattr(extension, "augment", None)
+        if not callable(augment):
+            raise TypeError(
+                f"plug-in {contribution.plugin.id!r} supplied an invalid vehicle interface extension "
+                f"for {contribution.id!r}"
+            )
+        augmentation = augment(
+            fidelity,
+            episode_runnable=episode_runnable,
+            batch_runnable=batch_runnable,
+        )
+        if augmentation is None:
+            continue
+        if not isinstance(augmentation, InterfaceContractAugmentation):
+            raise TypeError(
+                f"plug-in {contribution.plugin.id!r} interface extension {contribution.id!r} "
+                "returned an invalid augmentation"
+            )
+        result = InterfaceContractAugmentation(
+            action_channels=(*result.action_channels, *augmentation.action_channels),
+            authority_profiles=(*result.authority_profiles, *augmentation.authority_profiles),
+            status_channels=(*result.status_channels, *augmentation.status_channels),
+            resource_channels=(*result.resource_channels, *augmentation.resource_channels),
+            diagnostic_channels=(*result.diagnostic_channels, *augmentation.diagnostic_channels),
+        )
+    return result
+    ####
+
+
+@lru_cache(maxsize=1)
+def _aggregate_interface_extension_catalog() -> PluginCatalog:
+    """Cache legacy aggregate extension discovery for one host process.
+
+    Focused hosts pass or scope a catalog and never use this path.  The cache
+    prevents a catalogue inspection from repeating plug-in/Pydantic discovery
+    for every family/fidelity contract while preserving the legacy aggregate
+    behavior for callers that do not select a plug-in set.
+    """
+
+    return discover_plugins()
     ####
 
 
@@ -859,40 +1003,8 @@ def _action_contract(
     episode_runnable: bool,
     batch_runnable: bool,
 ) -> tuple[tuple[InterfaceChannel, ...], tuple[AuthorityProfile, ...]]:
-    if family_id == "hummingbird" and fidelity == "pseudo_6dof":
-        available: InterfaceAvailability = "available" if episode_runnable else "unavailable_at_runtime"
-        hummingbird_channels: tuple[InterfaceChannel, ...] = (
-            _action("attitude.roll.command", "rad", -1.5707963267948966, 1.5707963267948966, "Commanded roll angle accepted by the named aggregate-thrust response law.", "roll_rad", available),
-            _action("attitude.pitch.command", "rad", -1.5707963267948966, 1.5707963267948966, "Commanded pitch angle accepted by the named aggregate-thrust response law.", "pitch_rad", available),
-            _action("attitude.yaw.command", "rad", -3.141592653589793, 3.141592653589793, "Commanded yaw angle accepted by the named aggregate-thrust response law.", "yaw_rad", available),
-            _action("propulsion.command.fraction", "dimensionless", 0.0, 1.0, "Aggregate thrust fraction, not an individual rotor command.", "thrust_ratio", available),
-            InterfaceChannel(
-                "propulsion.enable",
-                "action",
-                "boolean",
-                None,
-                "Aggregate motor-enable state for the response-law plant.",
-                availability=available,
-                provenance="engineering_surrogate",
-                sampling="held_action",
-                binding={"native_action": "motors_enabled"},
-                claim_boundary="This is aggregate enable state only; it does not establish individual motor allocation.",
-            ),
-        )
-        return hummingbird_channels, (
-            AuthorityProfile(
-                "body_motion_response",
-                "body_motion",
-                available,
-                tuple(item.id for item in hummingbird_channels),
-                "Bounded roll, pitch, yaw, and aggregate-thrust response command.",
-                "Pseudo-6DOF body-motion response only; no individual rotor, motor, or moment-balance claim.",
-                scheme_id="body_motion.attitude",
-            ),
-        )
-
     if family_id in {"a320_openap_3dof", "f16_s119"} and fidelity in {"point_mass_3dof", "pseudo_6dof"}:
-        available = "available" if episode_runnable else "unavailable_at_runtime"
+        available: InterfaceAvailability = "available" if episode_runnable else "unavailable_at_runtime"
         maximum_speed_m_s = 300.0 if family_id == "a320_openap_3dof" else 500.0
         guidance_channels: tuple[InterfaceChannel, ...] = (
             _action(
@@ -938,11 +1050,6 @@ def _action_contract(
         pilot_channels, waypoint_channels = _reduced_fixed_wing_high_order_controls(
             family_id,
             available,
-        )
-        body_rate_channels = (
-            _f16_reduced_body_rate_controls(available)
-            if family_id == "f16_s119" and fidelity == "pseudo_6dof"
-            else ()
         )
         profiles = [
             AuthorityProfile(
@@ -990,27 +1097,7 @@ def _action_contract(
                 scheme_id="mission.waypoint",
             ),
         ]
-        if body_rate_channels:
-            profiles.insert(
-                2,
-                AuthorityProfile(
-                    "body_rate_command",
-                    "body_motion",
-                    available,
-                    ("propulsion.command.fraction", *(item.id for item in body_rate_channels)),
-                    "Body-frame roll-, pitch-, and yaw-rate references plus normalized propulsion for the F-16 pseudo-6DOF response.",
-                    "This is a bounded engineering-surrogate rate-reference adapter. Roll/yaw response remains coupled by "
-                    "the named pseudo-6DOF law; it is not a source flight-control computer, moment balance, or surface authority.",
-                    switching_policy="explicit_bumpless",
-                    lowering_chain=(
-                        "external_body_rate_reference",
-                        "pseudo_6dof_rate_reference_adapter",
-                        "reduced_fixed_wing_response_law",
-                    ),
-                    scheme_id="body_motion.body_rate",
-                ),
-            )
-        return (*guidance_channels, *pilot_channels, *body_rate_channels, *waypoint_channels), tuple(profiles)
+        return (*guidance_channels, *pilot_channels, *waypoint_channels), tuple(profiles)
 
     fixed_wing_controls = _fixed_wing_bridge_controls(family_id)
     if fixed_wing_controls and fidelity in {"point_mass_3dof", "pseudo_6dof"}:
@@ -1320,46 +1407,6 @@ def _reduced_fixed_wing_high_order_controls(
     ####
 
 
-def _f16_reduced_body_rate_controls(
-    availability: InterfaceAvailability,
-) -> tuple[InterfaceChannel, ...]:
-    """Expose the pseudo-6DOF F-16 rate-reference adapter without effector claims."""
-
-    specs = (
-        ("body_rate.roll.command", -0.5, 0.5, "body-roll-rate-command-rad-s", "Body-frame roll-rate reference p."),
-        ("body_rate.pitch.command", -0.35, 0.35, "body-pitch-rate-command-rad-s", "Body-frame pitch-rate reference q."),
-        ("body_rate.yaw.command", -0.35, 0.35, "body-yaw-rate-command-rad-s", "Body-frame yaw-rate reference r."),
-    )
-    return tuple(
-        InterfaceChannel(
-            identifier,
-            "action",
-            "scalar",
-            "rad/s",
-            description,
-            frame="body",
-            lower=lower,
-            upper=upper,
-            availability=availability,
-            provenance="engineering_surrogate",
-            sampling="held_action",
-            binding={
-                "native_action": native,
-                "control_role": "body_rate_command",
-                "action_adapter": "f16_pseudo_6dof_body_rate_v1",
-                "state_authority": "pseudo_6dof_rate_reference_adapter",
-                "frame": "body",
-            },
-            claim_boundary=(
-                "The pseudo-6DOF adapter converts this held rate reference into bounded attitude/kinematic references. "
-                "It does not expose source FCS, moment, actuator, or surface authority."
-            ),
-        )
-        for identifier, lower, upper, native, description in specs
-    )
-    ####
-
-
 def _language_backed_guidance_controls(
     family_id: str,
     availability: InterfaceAvailability,
@@ -1484,6 +1531,7 @@ def _action(
     native: str,
     availability: InterfaceAvailability,
     *,
+    frame: str | None = None,
     binding: Mapping[str, object] | None = None,
     claim_boundary: str | None = None,
 ) -> InterfaceChannel:
@@ -1493,6 +1541,7 @@ def _action(
         "scalar",
         unit,
         description,
+        frame=frame,
         lower=lower,
         upper=upper,
         availability=availability,
@@ -1776,6 +1825,8 @@ def _status_contract(
     fidelity: FidelityTier,
     episode_runnable: bool,
     batch_runnable: bool,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> tuple[tuple[InterfaceChannel, ...], tuple[InterfaceChannel, ...], tuple[InterfaceChannel, ...]]:
     runtime_availability: InterfaceAvailability = (
         "available"
@@ -1829,56 +1880,7 @@ def _status_contract(
     ]
     resources: list[InterfaceChannel] = []
     diagnostics: list[InterfaceChannel] = []
-    if family_id == "hummingbird" and fidelity == "pseudo_6dof":
-        status.extend(
-            (
-                _status("position.north", "m", "Committed NED north position.", "position_ned_m[0]", runtime_availability),
-                _status("position.east", "m", "Committed NED east position.", "position_ned_m[1]", runtime_availability),
-                _status("position.altitude", "m", "Committed altitude above the NED origin.", "position_ned_m[2] (sign-inverted)", runtime_availability),
-                _status("velocity.north", "m/s", "Committed NED north velocity.", "velocity_ned_m_s[0]", runtime_availability),
-                _status("velocity.east", "m/s", "Committed NED east velocity.", "velocity_ned_m_s[1]", runtime_availability),
-                _status("velocity.down", "m/s", "Committed NED down velocity.", "velocity_ned_m_s[2]", runtime_availability),
-                _status("attitude.euler", "rad", "Declared pseudo-6DOF Euler attitude response.", "attitude_rad", runtime_availability, value_type="vector3"),
-                _status("body_rate", "rad/s", "Declared pseudo-6DOF body-rate response.", "body_rate_rad_s", runtime_availability, value_type="vector3"),
-                _status("contact.state", None, "Declared ground-contact state.", "contact", runtime_availability, value_type="boolean"),
-            )
-        )
-        resources.extend(
-            (
-            InterfaceChannel(
-                "resources.mass.total",
-                "resource",
-                "scalar",
-                "kg",
-                "Modeled total mass retained by the aggregate-thrust pseudo-6DOF plant.",
-                availability=runtime_availability,
-                provenance="engineering_surrogate",
-                sampling="truth_boundary",
-                binding={"episode_value": "mass_kg"},
-                claim_boundary=(
-                    "This is the configured aggregate model mass. It does not establish a payload distribution, "
-                    "inertia update, fuel mass flow, or a complete mass-property ledger."
-                ),
-            ),
-            InterfaceChannel(
-                "resources.battery.fraction_remaining",
-                "resource",
-                "scalar",
-                "dimensionless",
-                "Declared bounded engineering battery reserve.",
-                lower=0.0,
-                upper=1.0,
-                availability=runtime_availability,
-                provenance="engineering_surrogate",
-                sampling="truth_boundary",
-                binding={"episode_value": "battery_fraction"},
-                claim_boundary="This is the pseudo-plant reserve model; it is not a cell-voltage or motor-current claim.",
-            ),
-            )
-        )
-        status.append(_status("propulsion.output.thrust.aggregate", "N", "Achieved aggregate thrust in the pseudo response law.", "aggregate_thrust_n", runtime_availability))
-        diagnostics.extend((_diagnostic("control.realization", "control_realization", runtime_availability), _diagnostic("control.physical_motor_allocation", "physical_motor_allocation", runtime_availability)))
-    elif family_id == "hummingbird" and fidelity == "rigid_body_6dof_surface_allocated":
+    if family_id == "hummingbird" and fidelity == "rigid_body_6dof_surface_allocated":
         status.extend(
             (
                 _status(
@@ -2667,7 +2669,7 @@ def _status_contract(
         diagnostics.append(
             _diagnostic(
                 "control.realization",
-                resolved_control_realization_for(family_id, fidelity),
+                resolved_control_realization_for(family_id, fidelity, plugins=plugins),
                 runtime_availability,
             )
         )
@@ -2830,7 +2832,7 @@ def _status_contract(
         diagnostics.append(
             _diagnostic(
                 "control.realization",
-                resolved_control_realization_for(family_id, fidelity),
+                resolved_control_realization_for(family_id, fidelity, plugins=plugins),
                 runtime_availability,
             )
         )
@@ -3259,7 +3261,7 @@ def _status_contract(
             (
                 _diagnostic(
                     "control.realization",
-                    resolved_control_realization_for(family_id, fidelity),
+                    resolved_control_realization_for(family_id, fidelity, plugins=plugins),
                     runtime_availability,
                     binding={"batch_telemetry": "control_realization"},
                 ),
@@ -3480,133 +3482,6 @@ def _status_contract(
                 ),
             )
         )
-    elif family_id == "tumbling_body" and fidelity in {"point_mass_3dof", "pseudo_6dof"}:
-        status.extend(
-            (
-                _status(
-                    "position.local",
-                    "m",
-                    "Committed local-frame passive-body position.",
-                    "position_m",
-                    runtime_availability,
-                    value_type="vector3",
-                    binding={"batch_telemetry": "position_m", "frame": "local_reduced"},
-                    provenance="engineering_surrogate",
-                ),
-                _status(
-                    "position.altitude",
-                    "m",
-                    "Committed passive-body altitude above the impact plane.",
-                    "position_m[2]",
-                    runtime_availability,
-                    binding={"batch_telemetry": "position_m[2]", "frame": "local_reduced"},
-                    provenance="engineering_surrogate",
-                ),
-                _status(
-                    "velocity.local",
-                    "m/s",
-                    "Committed local-frame passive-body velocity.",
-                    "velocity_m_s",
-                    runtime_availability,
-                    value_type="vector3",
-                    binding={"batch_telemetry": "velocity_m_s", "frame": "local_reduced"},
-                    provenance="engineering_surrogate",
-                ),
-                _status(
-                    "velocity.speed",
-                    "m/s",
-                    "Magnitude of the committed passive-body velocity.",
-                    "velocity_m_s",
-                    runtime_availability,
-                    binding={"derived_from": "batch_telemetry.velocity_m_s", "transform": "norm"},
-                    provenance="engineering_surrogate",
-                ),
-                _status(
-                    "aerodynamics.drag_force",
-                    "N",
-                    "Committed aerodynamic drag-force magnitude from the passive-body truth model.",
-                    "drag_force_n",
-                    runtime_availability,
-                    binding={"batch_telemetry": "drag_force_n", "frame": "local_reduced"},
-                    provenance="engineering_surrogate",
-                ),
-                _status(
-                    "aerodynamics.projected_area",
-                    "m^2",
-                    "Committed projected area used by the selected passive-body aerodynamic representation.",
-                    "projected_area_m2",
-                    runtime_availability,
-                    binding={"batch_telemetry": "projected_area_m2", "frame": "body"},
-                    provenance="engineering_surrogate",
-                ),
-                _status(
-                    "angular_rate.norm",
-                    "rad/s",
-                    "Committed angular-rate magnitude; zero in the orientation-averaged 3DOF reduction.",
-                    "angular_rate_norm_rad_s",
-                    runtime_availability,
-                    binding={"batch_telemetry": "angular_rate_norm_rad_s", "frame": "body"},
-                    provenance="engineering_surrogate",
-                ),
-                _status(
-                    "phase.mode",
-                    None,
-                    "Passive direct-release phase, always ballistic after the declared release.",
-                    "ballistic",
-                    runtime_availability,
-                    value_type="enum",
-                    binding={"constant": "ballistic"},
-                    provenance="derived",
-                ),
-            )
-        )
-        if fidelity == "pseudo_6dof":
-            status.extend(
-                (
-                    _status(
-                        "attitude.quaternion",
-                        "dimensionless",
-                        "Native rigid-body attitude reused by the passive pseudo-6DOF profile.",
-                        "attitude_quaternion",
-                        runtime_availability,
-                        value_type="vector4",
-                        binding={"batch_telemetry": "attitude_quaternion"},
-                        provenance="engineering_surrogate",
-                    ),
-                    _status(
-                        "body_rate",
-                        "rad/s",
-                        "Native rigid-body angular rate reused by the passive pseudo-6DOF profile.",
-                        "attitude_rate_rad_s",
-                        runtime_availability,
-                        value_type="vector3",
-                        binding={"batch_telemetry": "attitude_rate_rad_s"},
-                        provenance="engineering_surrogate",
-                    ),
-                )
-            )
-        resources.append(
-            InterfaceChannel(
-                "resources.mass.total",
-                "resource",
-                "scalar",
-                "kg",
-                "Passive-body mass at the committed truth state.",
-                availability=runtime_availability,
-                provenance="engineering_surrogate",
-                sampling="truth_boundary",
-                binding={"batch_telemetry": "mass_kg"},
-                claim_boundary="The witness has no propulsion resource; this is fixed detached-body mass, not fuel or propellant.",
-            )
-        )
-        diagnostics.append(
-            _diagnostic(
-                "control.realization",
-                "uncontrolled",
-                runtime_availability,
-                binding={"batch_report": "runtime.control_realization"},
-            )
-        )
     diagnostics.append(
         _diagnostic(
             "control.controller.method",
@@ -3615,8 +3490,8 @@ def _status_contract(
             binding={"batch_telemetry": "controller_method", "episode_value": "controller_method"},
             value_type="enum",
             description=(
-                "Executed reusable controller family for this committed sample: lqr, lqi, or not_applicable "
-                "when this execution mode has no such controller."
+                "Executed named controller or response-law family for this committed sample, or not_applicable "
+                "when this execution mode has no controller."
             ),
         )
     )
@@ -4060,28 +3935,37 @@ def _bound_status_value(
     raw_values: Mapping[str, object],
     contract: VehicleInterfaceContract,
 ) -> object:
-    """Read one declared native status binding without guessing data."""
+    """Read one declared native status binding without guessing data.
+
+    A channel may name both an episode value and batch telemetry. Those are
+    alternative representations of the same committed truth, so retain their
+    declared precedence but use the next declared source when the earlier one
+    is absent from this execution route's sample.
+    """
 
     binding = channel.binding
     constant = binding.get("constant")
     if constant is not None:
         return constant
-    native = (
-        binding.get("episode_value")
-        or binding.get("runtime_state")
-        or binding.get("batch_telemetry")
-        or binding.get("batch_report")
-    )
-    if native is None:
+    value: object = _STATUS_MISSING
+    has_native_binding = False
+    for source_kind in ("episode_value", "runtime_state", "batch_telemetry", "batch_report"):
+        native = binding.get(source_kind)
+        if native is None:
+            continue
+        has_native_binding = True
+        if not isinstance(native, str):
+            continue
+        candidate = _nested_status_value(raw_values, native)
+        if candidate is not _STATUS_MISSING:
+            value = candidate
+            break
+    if not has_native_binding:
         derived_from = binding.get("derived_from")
         transform = binding.get("transform")
         if not isinstance(derived_from, str) or not isinstance(transform, str):
             return contract.control_realization if channel.id == "control.realization" else _STATUS_MISSING
         value = _derived_status_value(derived_from, transform, raw_values)
-    elif not isinstance(native, str):
-        return _STATUS_MISSING
-    else:
-        value = _nested_status_value(raw_values, native)
     if value is _STATUS_MISSING:
         if channel.id == "control.realization":
             return contract.control_realization
@@ -4165,17 +4049,20 @@ def _nested_status_value(values: Mapping[str, object], binding: str) -> object:
     source = binding.replace(" (sign-inverted)", "")
     sign = -1.0 if "(sign-inverted)" in binding else 1.0
     index: int | None = None
-    if "[" in source and source.endswith("]"):
-        source, index_text = source[:-1].rsplit("[", 1)
-        try:
-            index = int(index_text)
-        except ValueError:
-            return _STATUS_MISSING
-    current: object = values
-    for token in source.split("."):
-        if not isinstance(current, Mapping) or token not in current:
-            return _STATUS_MISSING
-        current = current[token]
+    if source in values:
+        current: object = values[source]
+    else:
+        if "[" in source and source.endswith("]"):
+            source, index_text = source[:-1].rsplit("[", 1)
+            try:
+                index = int(index_text)
+            except ValueError:
+                return _STATUS_MISSING
+        current = values
+        for token in source.split("."):
+            if not isinstance(current, Mapping) or token not in current:
+                return _STATUS_MISSING
+            current = current[token]
     if index is not None:
         if not isinstance(current, list | tuple) or index < 0 or index >= len(current):
             return _STATUS_MISSING
@@ -4219,12 +4106,19 @@ def validate_vehicle_interface_contract(contract: VehicleInterfaceContract) -> t
 
 def build_vehicle_interface_catalog_report(
     catalog: ResolvedVehicleCompositionCatalog | None = None,
+    *,
+    family_ids: Iterable[str] | None = None,
+    fidelity_ids: Iterable[str] | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
-    """Validate every advertised interface as one fail-closed catalog gate.
+    """Validate selected advertised interfaces as a fail-closed contract gate.
 
     This report is intentionally declarative: it does not open episodes or
     integrate a plant.  It proves that the registry, execution-binding catalog,
-    and semantic interface agree about every currently advertised fidelity.
+    and semantic interface agree about every selected fidelity.  ``family_ids``
+    and ``fidelity_ids`` supply the plug-in development boundary; omitting
+    them retains the complete catalog gate used at integration and release
+    time.
     A profile declared as available must have a matching runnable episode
     binding; planned and unavailable channels remain visible without becoming
     errors merely because their promotion work is unfinished.
@@ -4233,12 +4127,33 @@ def build_vehicle_interface_catalog_report(
     if catalog is None:
         from .vehicle_composition_registry import load_resolved_vehicle_composition_catalog
 
-        catalog = load_resolved_vehicle_composition_catalog()
+        catalog = load_resolved_vehicle_composition_catalog(plugins=plugins)
+    family_filter = None if family_ids is None else frozenset(str(item).strip() for item in family_ids if str(item).strip())
+    if family_filter == frozenset():
+        raise ValueError("family_ids must contain at least one non-empty vehicle family ID")
+    fidelity_filter = None if fidelity_ids is None else frozenset(str(item).strip() for item in fidelity_ids if str(item).strip())
+    if fidelity_filter == frozenset():
+        raise ValueError("fidelity_ids must contain at least one non-empty fidelity ID")
+    known_families = {item.family.family_id for item in catalog.vehicles}
+    unknown_families = () if family_filter is None else tuple(sorted(family_filter - known_families))
+    selected_vehicles = tuple(
+        composition
+        for composition in catalog.vehicles
+        if family_filter is None or composition.family.family_id in family_filter
+    )
+    selected_fidelities = {
+        fidelity
+        for composition in selected_vehicles
+        for fidelity in composition.family.family.tiers
+    }
+    unknown_fidelities = () if fidelity_filter is None else tuple(sorted(fidelity_filter - selected_fidelities))
     records: list[dict[str, object]] = []
-    error_count = 0
-    for composition in catalog.vehicles:
+    error_count = len(unknown_families) + len(unknown_fidelities)
+    for composition in selected_vehicles:
         for fidelity in composition.family.family.tiers:
-            contract = interface_contract_for_composition(composition, fidelity)
+            if fidelity_filter is not None and fidelity not in fidelity_filter:
+                continue
+            contract = interface_contract_for_composition(composition, fidelity, plugins=plugins)
             findings = list(validate_vehicle_interface_contract(contract))
             episode_runnable = any(
                 item.operation == "episode" and item.status == "runnable"
@@ -4288,9 +4203,15 @@ def build_vehicle_interface_catalog_report(
     return {
         "schema": "taoryx.vehicle-interface-catalog-report/v1alpha1",
         "status": "pass" if error_count == 0 else "fail",
-        "family_count": len(catalog.vehicles),
+        "family_count": len(selected_vehicles),
         "interface_count": len(records),
         "error_count": error_count,
+        "family_filter": None if family_filter is None else sorted(family_filter),
+        "fidelity_filter": None if fidelity_filter is None else sorted(fidelity_filter),
+        "errors": [
+            *(f"unknown requested vehicle family: {item}" for item in unknown_families),
+            *(f"requested fidelity is unavailable for the selected vehicle family: {item}" for item in unknown_fidelities),
+        ],
         "interfaces": records,
         "claim_boundary": (
             "This is a registry/interface conformance report. It does not execute, qualify, "
@@ -4300,15 +4221,31 @@ def build_vehicle_interface_catalog_report(
     ####
 
 
-def _has_runnable_episode(family_id: str, fidelity: FidelityTier) -> bool:
-    return any(item.operation == "episode" and item.fidelity == fidelity and item.status == "runnable" for item in bindings_for_family(family_id))
+def _has_runnable_episode(
+    family_id: str,
+    fidelity: FidelityTier,
+    *,
+    plugins: PluginCatalog | None = None,
+) -> bool:
+    return any(
+        item.operation == "episode" and item.fidelity == fidelity and item.status == "runnable"
+        for item in bindings_for_family(family_id, plugins=plugins)
+    )
     ####
 
 
-def _has_runnable_batch(family_id: str, fidelity: FidelityTier) -> bool:
+def _has_runnable_batch(
+    family_id: str,
+    fidelity: FidelityTier,
+    *,
+    plugins: PluginCatalog | None = None,
+) -> bool:
     """Return whether an exact family/fidelity batch binding exists."""
 
-    return any(item.operation == "batch" and item.fidelity == fidelity and item.status == "runnable" for item in bindings_for_family(family_id))
+    return any(
+        item.operation == "batch" and item.fidelity == fidelity and item.status == "runnable"
+        for item in bindings_for_family(family_id, plugins=plugins)
+    )
     ####
 
 
@@ -4352,11 +4289,13 @@ __all__ = [
     "InterfaceAvailability",
     "InterfaceChannel",
     "InterfaceChannelKind",
+    "InterfaceContractAugmentation",
     "InterfaceValueType",
     "ObservationProfile",
     "ParameterScope",
     "SCHEMA_ID",
     "VehicleInterfaceContract",
+    "VehicleInterfaceExtension",
     "VehicleControlAuthorityAdvertisement",
     "bind_declared_sensor_profile",
     "interface_contract_for_composition",

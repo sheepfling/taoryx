@@ -234,6 +234,7 @@ python -m pytest
 For everyday implementation work, use the smaller development tiers first:
 
 ```bash
+python -m tools.dev quality
 python -m tools.dev test-quick
 python -m tools.dev test-changed
 ```
@@ -248,10 +249,12 @@ selected numerical relationships.
 ## Build the parser wheel
 
 ```bash
-python -m build --wheel
+python -m build
 ```
 
-The current wheel is also distributed under `dist/`.
+This makes an sdist first, then builds the wheel from that fresh source tree.
+It avoids carrying stale files from a previous local `build/` directory into a
+release artifact. The current wheel is also distributed under `dist/`.
 
 ## Create the Codex handoff bundle
 

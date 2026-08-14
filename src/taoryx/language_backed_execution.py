@@ -29,8 +29,9 @@ from .composition_resource_ledger import build_committed_resource_ledger
 from .composition_sensor_trace import BatchTruthSample, build_declared_sensor_trace
 from .composition_status_trace import build_committed_status_trace, status_trace_summary
 from .language.grammar_contracts import GrammarProfile
-from .language_backed_racetrack import materialize_powered_fixed_wing_composition
+from .language_backed_racetrack import LanguageBackedRacetrackAssets, materialize_powered_fixed_wing_composition
 from .mission_objectives import TruthObjectiveSpec, evaluate_truth_objectives
+from .plugins import PluginCatalog
 from .racetrack_template import load_racetrack_template_catalog
 from .runtime.runner import RunReport, run_files
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
@@ -139,10 +140,12 @@ def execute_powered_fixed_wing_composition(
     output_dir: str | Path,
     *,
     max_steps: int | None = None,
+    assets: LanguageBackedRacetrackAssets | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> LanguageBackedCompositionExecution:
     """Execute one X8/B747 composition without a family or route fallback."""
 
-    preflight = preflight_vehicle_composition(composition)
+    preflight = preflight_vehicle_composition(composition, plugins=plugins)
     if preflight.status != "translation_ready":
         diagnostics = "; ".join(preflight.diagnostics) or "no translation-ready geometry"
         raise ValueError(f"cannot execute composition {composition.id!r}: {preflight.status}: {diagnostics}")
@@ -152,9 +155,14 @@ def execute_powered_fixed_wing_composition(
     destination.mkdir(parents=True, exist_ok=True)
 
     with tempfile.TemporaryDirectory(prefix="taoryx-language-backed-composition-") as temporary:
-        materialized = materialize_powered_fixed_wing_composition(composition, Path(temporary))
+        materialized = materialize_powered_fixed_wing_composition(
+            composition,
+            Path(temporary),
+            assets=assets,
+            plugins=plugins,
+        )
         mission = _mission(materialized.mission_config, materialized.materialized_mission_id)
-        tables = _mission_tables(mission)
+        tables = _mission_tables(mission, resource_root=materialized.asset_root)
         _copy_inputs(destination / "inputs", (materialized.problem, materialized.mission_config, materialized.racetrack_config, *tables))
         runtime = run_files(
             materialized.problem,
@@ -390,10 +398,11 @@ def _mission(path: Path, mission_id: str) -> dict[str, Any]:
     ####
 
 
-def _mission_tables(mission: dict[str, Any]) -> tuple[Path, ...]:
+def _mission_tables(mission: dict[str, Any], *, resource_root: Path | None = None) -> tuple[Path, ...]:
     """Resolve the immutable table inputs declared by one mission contract."""
 
-    return tuple(_ROOT / str(item) for item in mission.get("tables", ()))
+    root = _ROOT if resource_root is None else resource_root
+    return tuple(root / str(item) for item in mission.get("tables", ()))
     ####
 
 

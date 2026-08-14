@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
+from typing import TYPE_CHECKING
 
 from .composition_sensor_trace import BatchTruthSample
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
@@ -20,10 +21,15 @@ from .vehicle_interface import (
     validate_projected_status_values,
 )
 
+if TYPE_CHECKING:
+    from .plugins import PluginCatalog
+
 
 def build_committed_status_trace(
     composition: CompiledVehicleComposition,
     samples: Sequence[BatchTruthSample],
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Project all declared batch-visible semantic channels without gaps.
 
@@ -36,7 +42,7 @@ def build_committed_status_trace(
 
     if not samples:
         raise ValueError("committed status trace requires at least one batch truth sample")
-    contract = resolve_vehicle_composition_interface_contract(composition)
+    contract = resolve_vehicle_composition_interface_contract(composition, plugins=plugins)
     expected = _batch_visible_channel_ids(contract)
     trace_samples: list[dict[str, object]] = []
     previous_time: float | None = None
@@ -84,6 +90,8 @@ def build_committed_status_trace(
 def validate_committed_status_trace(
     composition: CompiledVehicleComposition,
     trace: Mapping[str, object],
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> None:
     """Reject a portable trace that disagrees with its exact interface.
 
@@ -93,7 +101,7 @@ def validate_committed_status_trace(
     channels, and has one complete mapping at each time-ordered committed row.
     """
 
-    contract = resolve_vehicle_composition_interface_contract(composition)
+    contract = resolve_vehicle_composition_interface_contract(composition, plugins=plugins)
     expected = _batch_visible_channel_ids(contract)
     if trace.get("schema") != "taoryx.composition-status-trace/v1alpha1":
         raise ValueError("committed status trace has an unknown schema")

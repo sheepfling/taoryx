@@ -30,6 +30,8 @@ def package_check(
     name: str,
     import_name: str | None = None,
     distribution_name: str | None = None,
+    *,
+    required: bool = True,
 ) -> Check:
     import_name = import_name or name
     distribution_name = distribution_name or name
@@ -45,7 +47,7 @@ def package_check(
         detail = "missing import"
     else:
         detail = f"distribution {distribution_name!r} is not installed"
-    return Check(f"Python package: {name}", present, detail)
+    return Check(f"Python package: {name}", present, detail, required=required)
 
 
 def command_check(name: str, *, required: bool = False) -> Check:
@@ -73,13 +75,32 @@ def run_check(*, documentation: bool = False) -> list[Check]:
         ),
     ]
     checks.extend(
-        package_check(name, import_name, distribution_name)
+        package_check(
+            name,
+            import_name,
+            distribution_name,
+            required=distribution_name != "taoryx-reference-models",
+        )
         for name, import_name, distribution_name in (
             ("Taoryx core", "taoryx", "taoryx"),
             ("Taoryx DAVE-ML plug-in", "taoryx_daveml", "taoryx-daveml"),
+            ("Taoryx debug-model plug-in", "taoryx_debug_models", "taoryx-debug-models"),
+            ("Taoryx A320 plug-in", "taoryx_a320", "taoryx-a320"),
+            ("Taoryx F-16 plug-in", "taoryx_f16", "taoryx-f16"),
+            ("Taoryx Hummingbird plug-in", "taoryx_hummingbird", "taoryx-hummingbird"),
+            ("Taoryx NESC plug-in", "taoryx_nesc", "taoryx-nesc"),
+            ("Taoryx passive-bodies plug-in", "taoryx_passive_bodies", "taoryx-passive-bodies"),
             ("Taoryx Simple Aero plug-in", "taoryx_simple_aero", "taoryx-simple-aero"),
+            ("Taoryx Dual Launch plug-in", "taoryx_dual_launch", "taoryx-dual-launch"),
+            ("Taoryx X-15 plug-in", "taoryx_x15", "taoryx-x15"),
+            ("Taoryx HL-20 plug-in", "taoryx_hl20", "taoryx-hl20"),
             (
-                "Taoryx reference-model plug-in",
+                "Taoryx source-table fixed-wing plug-in",
+                "taoryx_source_table_fixed_wing",
+                "taoryx-source-table-fixed-wing",
+            ),
+            (
+                "Taoryx reference-model compatibility aggregate",
                 "taoryx_reference_models",
                 "taoryx-reference-models",
             ),

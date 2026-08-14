@@ -19,6 +19,7 @@ from typing import Annotated, Any, Literal, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError, model_validator
 
+from ..deployment import DeploymentBinding, validate_deployment_bindings
 from .configuration_contract import (
     ConfigurableTrajectoryProvider,
     ConfigurationChoiceSchema,
@@ -210,7 +211,16 @@ class MissionCompositionRunRequest(BaseModel):
     provider_version: str = Field(min_length=1)
     operation: Literal["batch"] = "batch"
     prepared_configuration: PreparedTrajectoryConfiguration
+    deployment_bindings: tuple[DeploymentBinding, ...] = ()
     output: MissionCompositionOutputSelection = Field(default_factory=MissionCompositionOutputSelection)
+
+    @model_validator(mode="after")
+    def validate_selected_deployment_bindings(self) -> MissionCompositionRunRequest:
+        """Keep child selection explicit at the common request boundary."""
+
+        validate_deployment_bindings(self.deployment_bindings)
+        return self
+        ####
 
     @property
     def model_id(self) -> str:
@@ -882,7 +892,14 @@ def audit_provider_advertisement(
                 )
             if "step" in realization.operations:
                 step_actions = tuple(item for item in active_channels if item.channel_kind == "action" and "step" in item.operations)
-                if not step_actions:
+                source_program_owns_step = (
+                    realization.controls.status == "internally_generated"
+                    and any(
+                        authority.command_owner == "source_program" and "step" in authority.operations
+                        for authority in active_authorities
+                    )
+                )
+                if not step_actions and not source_program_owns_step:
                     model_diagnostics.append(
                         _audit_diagnostic(
                             "interactive-control-schema-missing",
@@ -1084,11 +1101,13 @@ def audit_provider_advertisement(
                             model_id=model.id,
                         )
                     )
-                if deployment.status == "available" and (deployment.common_runner_status != "registered" or deployment.executor_id is None):
+                if deployment.status == "available" and (
+                    deployment.common_runner_status not in {"registered", "adapter_required"} or deployment.executor_id is None
+                ):
                     model_diagnostics.append(
                         _audit_diagnostic(
                             "available-deployment-not-registered",
-                            f"Available deployment {deployment.id!r} has no registered common executor.",
+                            f"Available deployment {deployment.id!r} has no registered executor or explicit adapter binding.",
                             metadata.id,
                             model_id=model.id,
                         )

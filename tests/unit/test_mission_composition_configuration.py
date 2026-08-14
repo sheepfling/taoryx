@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import pytest
-from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.trajectory.simple_aero_mission_composition import build_simple_aero_prepared_configuration
 
 from taoryx.fidelity_contracts import CANONICAL_FIDELITY_TIERS
 from taoryx.language import parse_problem_text
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.trajectory.configuration_contract import (
+    ConfigurableTrajectoryProviderRegistry,
     ConfigurationChoiceSchema,
     ConfigurationChoiceValue,
     ConfigurationContractError,
@@ -25,6 +25,7 @@ from taoryx.trajectory.configuration_contract import (
     validate_configuration_instance,
 )
 from taoryx.trajectory.mission_composition import ExampleMissionCompositionProvider
+from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
 
 
@@ -151,6 +152,34 @@ def test_registry_provider_advertises_every_canonical_vehicle_family_and_registr
     assert all(provider.model(item).model_kind == "canonical_vehicle_family" for item in canonical)
     assert provider.model("simple_aero").model_kind == "trajectory_workflow"
     assert all(item.configuration_schema_fingerprint == provider.get_model_schema(item.id).fingerprint for item in provider.list_models())
+    ####
+
+
+def test_model_and_provider_catalog_revisions_are_serialized_and_change_with_metadata() -> None:
+    """Discovery clients receive both release versions and derived refresh tokens."""
+
+    provider = RegistryMissionCompositionProvider()
+    model = provider.model("tumbling_body")
+
+    revision = model.revision_public_dict()
+    assert revision["model_id"] == model.id
+    assert revision["version"] == model.version
+    assert revision["metadata_fingerprint"] == model.metadata_fingerprint
+    assert len(model.metadata_fingerprint) == 64
+    assert model.model_dump(mode="json")["metadata_fingerprint"] == model.metadata_fingerprint
+
+    corrected = model.model_copy(update={"description": model.description + " Corrected metadata wording."})
+    assert corrected.version == model.version
+    assert corrected.metadata_fingerprint != model.metadata_fingerprint
+
+    registry = ConfigurableTrajectoryProviderRegistry((provider,))
+    publication = registry.public_dict()
+    assert publication["fingerprint"] == registry.fingerprint
+    provider_publication = publication["providers"][0]
+    assert provider_publication["revision"] == registry.provider_revision(provider.metadata.id)
+    advertised_model = next(item for item in provider_publication["models"] if item["id"] == model.id)
+    assert advertised_model["metadata_fingerprint"] == model.metadata_fingerprint
+    assert advertised_model["revision"] == revision
     ####
 
 

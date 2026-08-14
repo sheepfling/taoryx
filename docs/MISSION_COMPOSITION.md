@@ -17,6 +17,71 @@ Mission Composition   discovers, configures, and assembles the mission
 The short explanation is: Authoring defines the model. Runtime executes the
 model. Composition lets users choose and assemble a mission.
 
+## For UI, AI, and library consumers: start here
+
+Mission Composition is the public integration boundary for a generic client.
+Use it when a caller needs to discover available models, render configuration
+and control forms, run a batch mission, or keep one model alive for live
+control. The client consumes the provider's typed publication; it must not
+import a vehicle-specific dynamics class, guess a control from its spelling,
+or infer availability from a fidelity label.
+
+```text
+discover models and capabilities (no plant execution)
+    -> choose model / realization / fidelity / operation
+    -> render and validate typed configuration
+    -> batch: run once and receive a trajectory
+       or
+       session: open one persistent model, inspect, step, switch an allowed
+                authority profile, reset, or close
+```
+
+| Client need | Contract surface | Treat this as authoritative |
+| --- | --- | --- |
+| Model picker, catalogue, or capability search | `list_models()` / `taoryx model list` | Model identity, presentation metadata, exact available operations, blockers, and claim boundary |
+| Configuration form or generated mission input | `get_model_schema()` / `taoryx model plan` or `scaffold` | Typed inputs, defaults, units, bounds, choices, compatible fidelity, and validation rules |
+| Control-mode picker | `control_scheme_support` and the realization's authority profiles | UI order, consumer roles, ownership, streaming preference, switching policy, and which action channels belong to one mode |
+| Live action form or agent policy | Open-session descriptor | The selected action schema, units, bounds, topology, action ordering, and normalization projection |
+| Live status display and command acknowledgement | Step result and committed observation | Current authority, runtime action mask, requested/applied/achieved feedback, lowered action, limiting, diagnostics, and lifecycle |
+
+The normal consumer sequence is:
+
+1. Discover with `list_models()` or `taoryx model list`. This is safe to use
+   for a catalogue: discovery must not construct or run a plant.
+2. Select an exact realization, fidelity, mission, and supported operation;
+   then obtain the configuration schema. A discoverable model can still state
+   that a combination is blocked or batch-only.
+3. Submit canonical values and validate them into a prepared, fingerprinted
+   configuration. Display units and editor hints help render a client but do
+   not change what the provider accepts.
+4. For batch work, submit a run request. For interactive work, open a session
+   and build controls from the descriptor's *selected* action schema.
+5. On every live step, use the returned sequence number, respect
+   `control_authority.available_action_ids`, and display
+   `control_feedback`, `lowered_action`, and `lowering_evidence` rather than
+   assuming that a request was physically achieved.
+
+An authority profile is one coherent command surface, not an additive menu of
+all controls advertised by a model. A UI or policy must select one profile and
+send only its action channels. It may inspect inactive profiles before a
+handoff, but may transfer only when both profiles explicitly allow a bumpless
+transition. This is what lets a waypoint mode, a pilot-like mode, and a
+low-level expert seam coexist without presenting a misleading mixed control
+vector.
+
+The client-facing metadata is transport-neutral. Taoryx currently defines the
+Python/domain session protocol, not a REST, WebSocket, gamepad, authentication,
+or heartbeat/deadman protocol. A front end may map keyboard, controller, or
+network input into the selected action schema, but it owns transport timing,
+authentication, reconnect, and safety policy. In particular, a held action for
+`duration_s` is simulation semantics, not a transport-level deadman policy.
+
+For the complete schema reference, see the
+[Mission Composition Provider API](architecture/mission-composition-provider-api.md).
+For the authority, lowering, status, and claim-boundary rules that every
+consumer must preserve, see the
+[Vehicle Interface Contract](architecture/vehicle-interface-contract.md).
+
 ## Start with discovery and configuration
 
 The canonical Python surface is
@@ -45,11 +110,14 @@ advertisement: semantic actions/effectors, exact native bindings, authority
 profiles, mission intents, and explicit available/internal/uncontrolled/
 blocked/unsupported status.
 
-The repository-backed implementation is
+The repository-backed compatibility implementation is
 `RegistryMissionCompositionProvider`. It projects, rather than copies, the
 canonical vehicle-composition, fidelity, value-space, and execution-binding
-authorities. It advertises all nine resolved vehicle families, the
-`simple_aero` trajectory workflow, and the dual-launch glider family. A model
+authorities selected by the aggregate catalog. It advertises all nine resolved
+vehicle families, the `simple_aero` trajectory workflow, and the dual-launch
+glider family. New plug-ins should instead use a focused package-owned provider
+and the catalog-scoped host documented in
+[Vehicle plug-in authoring](architecture/vehicle-plugin-authoring.md). A model
 or realization may remain discoverable with explicit blockers; discovery is
 never a promise that every mission or fidelity is executable:
 
@@ -180,6 +248,13 @@ configuration follows the shape of an engineering mission form:
 - burnout-speed and apogee checkpoints;
 - an ordered list of independently configured segment occurrences; and
 - integration step, output interval, and environment preset.
+
+Focused hosts select `taoryx.simple-aero.mission-composition` from the
+`taoryx.simple-aero` plug-in. That provider has its own package version and
+endpoint witness; it does not require the legacy aggregate provider to author,
+run, or inspect Simple Aero. In a source checkout, a selected plug-in scope
+sees only its endpoint record; an installed wheel reads that same record and
+witness from Simple Aero package data.
 
 The segment list is open for composition experiments and publishes reviewed
 templates for `ballistic`, `cbcr`, `crossrange`, `marv`, `phugoid`,
@@ -371,6 +446,16 @@ batch boundary for all three fixtures:
 taoryx model run <provider-id> <prepared.json> --output <response.json>
 ```
 
+The independently installable `taoryx-debug-models` package also owns focused
+batch witnesses for `reference-ballistic-3dof-batch`,
+`reference-waypoint-3dof-batch`, and `debug-contract-probe-batch`. Discover
+them with `taoryx model endpoint-specs` and run an exact proof with
+`taoryx model verify <endpoint-id> --execute`. Those checks validate the
+authored configuration, provider/model versions, declared runner, output
+surface, and normalized result. They remain nonphysical API fixtures; the
+waypoint and probe's selectable session modes expose their own runtime masks
+and requested/applied/achieved readback separately.
+
 The command revalidates the prepared configuration, dispatches only a
 provider-owned common batch runner, and writes a discriminated trajectory or
 failure response. The contract probe is particularly useful with
@@ -476,9 +561,54 @@ parent graph.
 Model advertisements expose deployment capability separately from returned
 lineage. The X-15 and HL-20 publications advertise independently propagated
 spent-booster children. The NESC two-stage publication advertises its staging
-event lineage but explicitly does not advertise an independent spent-stage
+event lineage. By default, that source replay returns no detached stage; a
+composition may instead select its separately installed passive-body child
+runtime for the accepted stage-separation event. That child is explicitly a
+synthetic local-atmosphere cylinder, not a source-exact NESC spent-stage
 trajectory. An empty `deployments` list means the model publishes no child
 emission capability; consumers must not infer one from a segment name.
+
+### Selected cross-plug-in deployments
+
+An independently propagated child is always composition-selected. The binding
+names the parent deployment/event, child plug-in and runtime, model/family,
+requested fidelity, transfer policy, and the claim boundary. This makes the
+same selection visible to a UI, a training client, and an execution host;
+the returned receipt repeats the realized fidelity, accepted state, telemetry,
+status, termination, and provenance.
+
+```yaml
+deployment_bindings:
+  - id: nesc-synthetic-passive-cylinder-pseudo6dof
+    deployment_id: stage_separation_lineage
+    release_event_id: stage_separation
+    child_object_id: nesc-synthetic-cylinder-1
+    child:
+      plugin_id: taoryx.passive-bodies
+      runtime_id: taoryx.passive-bodies.local-atmosphere-release.v1
+      model_id: nesc-synthetic-cylinder
+      family_id: tumbling_body
+      fidelity: pseudo_6dof
+    state_transfer: source_replay_kinematic_projection
+    claim_boundary: Explicit synthetic child; no source-exact stage or impulse claim.
+```
+
+The host resolves that runtime only from the catalog selected for the parent
+execution. It rejects an absent, differently owned, or incompatible runtime;
+it never silently imports an installed aggregate or substitutes a model. The
+NESC handoff projects the accepted ECI replay state into the child's declared
+event-local tangent frame. Its provenance records both the original replay
+state and the projection, while the parent source-replay truth remains
+unchanged.
+
+A direct vehicle-composition request carries this binding with its parent
+composition. The portable common runner instead accepts the same typed values
+on `MissionCompositionRunRequest.deployment_bindings`, deliberately outside the
+prepared parent configuration. This lets callers reuse a parent configuration
+without implicitly spawning a child, while still returning the selected child,
+event, relationship, accepted state, and realized-fidelity readback through the
+standard multi-object result. A binding that the selected model does not
+advertise is rejected rather than ignored.
 
 Simulation Runtime artifacts can be converted with
 `trajectory_result_from_run_artifact()`. Runtime telemetry now preserves model
@@ -515,6 +645,55 @@ vocabulary as batch execution.
 The session observation reserves `spawned_entity_ids` for models that emit
 children while stepping. No current native episode advertises that capability,
 so it remains false rather than synthesizing child histories.
+
+### Selecting a live control mode
+
+Callers normally choose an `authority_profile_id` in the open-session request,
+or set `startup_authority_profile_id` in the reusable configuration before it
+is validated. The returned descriptor then projects only that profile's
+semantic action schema. This lets a generic UI render an exact input surface,
+and lets an AI/RL adapter obtain a matching normalization-ready action-space
+projection, without learning a provider's private plant coordinates.
+
+Each completed step returns four complementary views of control:
+
+| Field | Consumer meaning |
+| --- | --- |
+| `requested_action` | The new semantic values submitted by the client |
+| `applied_action` / `control_feedback` | Which values were accepted, held, limited, withheld, or unavailable, plus any same-unit achieved readback |
+| `lowered_action` | The request delivered to the registered model adapter or plant seam |
+| `lowering_evidence` | The adapter's documented targets, limits, gains, mode, and resource reasoning |
+
+`observation.control_authority` is the live source of truth for the active
+profile, command owner, phase, availability reason codes, and action mask. A
+static authority profile says what a model can support in principle; it does
+not promise that a resource-limited, terminal, or otherwise unavailable model
+will accept every channel now.
+
+#### Hummingbird pseudo-6DOF example
+
+The current multirotor example demonstrates the intended progression from
+direct user input to higher-level guidance without exposing invented physical
+controls:
+
+| Profile | Suitable client input | Low-level boundary |
+| --- | --- | --- |
+| `body_motion_response` | Roll, pitch, yaw, aggregate thrust fraction, and propulsion enable | Five-coordinate aggregate response-law seam |
+| `velocity_yaw_command` | North/east/positive-up velocity, yaw, and propulsion enable | Bounded velocity response lowers to the same aggregate seam |
+| `live_waypoint_guidance` | Local waypoint, capture radius, speed limits, yaw, and propulsion enable | Waypoint/velocity cascade lowers to the same aggregate seam |
+
+All three profiles are caller-owned and declare explicit bumpless transfer.
+They publish requested, applied, and achieved values, waypoint progress, and
+battery-aware availability. They do **not** expose individual rotor commands:
+the Hummingbird individual-rotor LQI screen is a separate batch-only physical
+realization. A generic front end should therefore render the profile selected
+by the session descriptor, not promote rotor inputs because the family is a
+quadcopter.
+
+See [the Hummingbird profile reference](architecture/vehicle-interface-contract.md#hummingbird-quadcopter-streaming-profiles)
+for exact channel units and bounds, and
+[select a streaming control profile](architecture/model-authoring-automation.md#select-a-streaming-control-profile)
+for a Python session example.
 
 ## Run the checked-in example
 

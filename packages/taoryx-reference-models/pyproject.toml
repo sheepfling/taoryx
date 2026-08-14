@@ -5,15 +5,20 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "taoryx-reference-models"
 version = "0.1.0a0"
-description = "Source-backed and analytical reference vehicle models for Taoryx"
+description = "Compatibility aggregate Mission Composition provider for Taoryx"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-  "numpy>=2.0",
-  "scipy>=1.13",
   "taoryx>=0.1.0a0,<0.2",
-  "taoryx-daveml>=0.1.0a0,<0.2",
+  "taoryx-a320>=0.1.0a0,<0.2",
+  "taoryx-f16>=0.1.0a0,<0.2",
+  "taoryx-hummingbird>=0.1.0a0,<0.2",
+  "taoryx-nesc>=0.1.0a0,<0.2",
+  "taoryx-dual-launch>=0.1.0a0,<0.2",
   "taoryx-simple-aero>=0.1.0a0,<0.2",
+  "taoryx-x15>=0.1.0a0,<0.2",
+  "taoryx-hl20>=0.1.0a0,<0.2",
+  "taoryx-source-table-fixed-wing>=0.1.0a0,<0.2",
 ]
 
 [project.entry-points."taoryx.plugins"]

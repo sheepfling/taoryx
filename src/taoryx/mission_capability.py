@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
-from .plugins import PluginCatalog, discover_plugins
+from .plugins import PluginCatalog, current_plugin_catalog, discover_plugins, plugin_catalog_scope
 from .vehicle_composition import CompiledVehicleComposition
 
 if TYPE_CHECKING:
@@ -77,7 +77,9 @@ def mission_capability_adapters(
 ) -> tuple[MissionCapabilityAdapter, ...]:
     """Return installed family-owned planners in deterministic plugin order."""
 
-    selected = plugins or discover_plugins()
+    selected = plugins if plugins is not None else current_plugin_catalog()
+    if selected is None:
+        selected = discover_plugins()
     adapters: list[MissionCapabilityAdapter] = []
     for contribution in selected.records("mission_capability_adapter"):
         value = contribution.value
@@ -102,38 +104,46 @@ def resolve_mission_capability_adapter(
 ) -> MissionCapabilityAdapter | None:
     """Resolve one exact installed planner without a nearest-family fallback."""
 
-    matches = tuple(adapter for adapter in mission_capability_adapters(plugins=plugins) if adapter.supports(composition))
-    if len(matches) > 1:
-        raise ValueError(
-            "multiple mission capability adapters claim "
-            f"{composition.family_id!r}/{composition.mission!r}/{composition.fidelity!r}"
-        )
-    declared = declared_mission_capability_adapter(
-        composition.family_id,
-        composition.mission,
-        composition.fidelity,
-    )
-    if not matches:
-        if declared is not None:
+    selected = plugins if plugins is not None else current_plugin_catalog()
+    if selected is None:
+        selected = discover_plugins()
+    # Capability adapters are package-owned callbacks.  Keep the selected host
+    # catalog active while they inspect a composition or resolve a nested
+    # family registry, otherwise a focused caller can accidentally rediscover
+    # unrelated editable plug-ins.
+    with plugin_catalog_scope(selected):
+        matches = tuple(adapter for adapter in mission_capability_adapters(plugins=selected) if adapter.supports(composition))
+        if len(matches) > 1:
             raise ValueError(
-                "mission template declares capability adapter "
-                f"{declared!r}, but no installed adapter supports "
+                "multiple mission capability adapters claim "
                 f"{composition.family_id!r}/{composition.mission!r}/{composition.fidelity!r}"
             )
-        return None
-    adapter = matches[0]
-    if declared is None:
-        raise ValueError(
-            "installed capability adapter "
-            f"{adapter.id!r} has no mission-template declaration for "
-            f"{composition.family_id!r}/{composition.mission!r}/{composition.fidelity!r}"
+        declared = declared_mission_capability_adapter(
+            composition.family_id,
+            composition.mission,
+            composition.fidelity,
         )
-    if adapter.id != declared:
-        raise ValueError(
-            "mission-template capability adapter does not match installed adapter: "
-            f"declared {declared!r}, observed {adapter.id!r}"
-        )
-    return adapter
+        if not matches:
+            if declared is not None:
+                raise ValueError(
+                    "mission template declares capability adapter "
+                    f"{declared!r}, but no installed adapter supports "
+                    f"{composition.family_id!r}/{composition.mission!r}/{composition.fidelity!r}"
+                )
+            return None
+        adapter = matches[0]
+        if declared is None:
+            raise ValueError(
+                "installed capability adapter "
+                f"{adapter.id!r} has no mission-template declaration for "
+                f"{composition.family_id!r}/{composition.mission!r}/{composition.fidelity!r}"
+            )
+        if adapter.id != declared:
+            raise ValueError(
+                "mission-template capability adapter does not match installed adapter: "
+                f"declared {declared!r}, observed {adapter.id!r}"
+            )
+        return adapter
     ####
 
 
@@ -164,8 +174,12 @@ def estimate_mission_capability(
 ) -> MissionCapabilityEstimate | None:
     """Return the exact installed estimate or ``None`` when no family owns it."""
 
-    adapter = resolve_mission_capability_adapter(composition, plugins=plugins)
-    return None if adapter is None else adapter.estimate(composition)
+    selected = plugins if plugins is not None else current_plugin_catalog()
+    if selected is None:
+        selected = discover_plugins()
+    with plugin_catalog_scope(selected):
+        adapter = resolve_mission_capability_adapter(composition, plugins=selected)
+        return None if adapter is None else adapter.estimate(composition)
     ####
 
 

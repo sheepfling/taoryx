@@ -80,11 +80,14 @@ California–Hawaii variants, external time stepping, and the diagnostic ladder.
 | Assess all advertised model/control readiness | [Model-to-mission automation](architecture/model-authoring-automation.md) | `taoryx model assess --output build/model-assessment.json` |
 | Generate initialization, modes, and segments | [Model-to-mission automation](architecture/model-authoring-automation.md) | `taoryx model scaffold` → edit plain YAML → `taoryx model compile` |
 | Run automatic controller candidate tuning | [Generic controller tuning](architecture/generic-controller-tuning.md) | plug-in campaign registration → `taoryx model tune` |
+| Publish caller, provider, or common-tuned control for a new vehicle | [Vehicle plug-in authoring](architecture/vehicle-plugin-authoring.md) | authority profile → native lowering/readback; optional campaign registration |
 | Verify one mature vehicle endpoint vertically | [Model-to-mission automation](architecture/model-authoring-automation.md) | `taoryx vehicle endpoint-specs` → `taoryx vehicle verify <endpoint-id>` |
 | Validate an LQI candidate through native model controls | [Model-to-mission automation](architecture/model-authoring-automation.md) | `LocalNativeCoordinateLqiScreenConfig` → exact batch Composition screen for response-law/guidance coordinates; use physical wrench validation when allocation is declared |
 | Add an airbreathing vehicle mission | [Mission-composition automation](plan/mission-composition-automation.md) | `compile_powered_fixed_wing_racetrack(...)` |
-| Add a vehicle or topology | [Generic family integration playbook](plan/generic-family-integration-playbook.md) | `taoryx vehicle intake existing-family ...` or `taoryx vehicle intake new-topology ...` |
-| Solidify one runnable vehicle | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py test-vehicle <family>` |
+| Add a vehicle or topology | [Vehicle plug-in authoring](architecture/vehicle-plugin-authoring.md) and [generic family integration playbook](plan/generic-family-integration-playbook.md) | `taoryx vehicle intake existing-family ...` or `taoryx vehicle intake new-topology ...` |
+| Define or assess one vehicle fidelity tier | [Fidelity tiers and vehicle plug-in requirements](architecture/fidelity-data-requirements.md) | `python3 tools/validate_fidelity_readiness.py --vehicle <id> --tier all` |
+| Iterate on one runnable vehicle | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py test-vehicle <family>` |
+| Verify one physical vehicle plug-in | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py check-vehicle <family>` |
 | Validate catalogue declarations | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py vehicle-catalogue` |
 | Expose a parameter, control, status, or objective value | [Public value-space contract](architecture/public-value-spaces.md) | `taoryx vehicle topology-report` |
 | Demonstrate the three layers | [Authoring → Runtime → Composition showcase guide](AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md) | `taoryx vehicle maturity-report` → `catalog` → `mission inspect`/`mission create`/`mission validate` → `preflight` → `run` |
@@ -145,6 +148,10 @@ python -m pytest tests/unit/test_vehicle_endpoint_spec.py -m slow
 # reference_nesc_two_stage_rocket, tumbling_body, all Simple Aero fixed-L/D
 # batch/session templates, and both source-generated point-mass dual-launch forms.
 python tools/dev.py test-vehicle skywalker_x8
+
+# Stronger family-scoped host-contract gate. This validates only the selected
+# vehicle's interfaces, endpoint witnesses, parity replay, and vertical tests.
+python tools/dev.py check-vehicle hummingbird
 
 # Simple Aero is a non-physical fixed-L/D workflow with a common batch runner
 # and a persistent point-mass session. Its default provider-owned generated
@@ -1011,7 +1018,11 @@ artifact = session.to_run_artifact()
 For a Vehicle Composition model, prefer the common Mission Composition
 session contract and select one advertised authority profile at open. Reduced
 A320/F-16 sessions can expose kinematic, normalized pilot, live-waypoint, and
-(for F-16 pseudo-6DOF) body-rate profiles through the same step route. Use
+(for F-16 pseudo-6DOF) body-rate profiles through the same step route.
+Hummingbird's pseudo-6DOF session exposes aggregate attitude/thrust,
+north/east/positive-up velocity plus yaw, and live local-waypoint control; its
+lowered action remains the five-coordinate aggregate response-law seam and
+never individual rotor commands. Use
 `MissionCompositionSessionManager.switch_authority` only for profiles that
 advertise `explicit_bumpless`; inspect each observation's `control_authority`
 and each step's lowering evidence. See

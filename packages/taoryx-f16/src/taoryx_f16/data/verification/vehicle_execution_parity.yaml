@@ -1,0 +1,29 @@
+schema: taoryx.vehicle-execution-parity/v1alpha1
+version: 1
+description: Exact committed-boundary batch/episode parity witnesses. Absence does
+  not imply equivalence merely because both execution operations are runnable.
+bindings:
+- family_id: f16_s119
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  batch_factory_id: reduced_fixed_wing_f16_source.v1
+  episode_factory_id: reduced_fixed_wing_f16_episode.v1
+  adapter_id: taoryx.reduced_fixed_wing.f16_action_trace_batch_episode_parity.v1
+  evidence_scope: One declared semantic kinematic-guidance action trace replayed through
+    a fresh source-owned F-16 reduced batch stepper and the accepted-truth episode
+    state at every committed boundary.
+  claim_boundary: This is F-16 point-mass reduced kernel/status parity only. It is
+    not physical control-surface, moment, actuator, robustness, mission, or fighter-family
+    qualification evidence.
+- family_id: f16_s119
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  batch_factory_id: reduced_fixed_wing_f16_source.v1
+  episode_factory_id: reduced_fixed_wing_f16_episode.v1
+  adapter_id: taoryx.reduced_fixed_wing.f16_action_trace_batch_episode_parity.v1
+  evidence_scope: One declared semantic kinematic-guidance action trace replayed through
+    a fresh source-owned F-16 attitude-response batch stepper and the accepted-truth
+    episode state at every committed boundary.
+  claim_boundary: This is F-16 attitude-response pseudo-6DOF reduced kernel/status
+    parity only. It is not physical control-surface, moment, actuator, robustness,
+    mission, or fighter-family qualification evidence.

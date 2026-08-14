@@ -23,19 +23,15 @@ from .model_authoring import (
     load_model_authoring_draft,
     run_prepared_mission_composition,
 )
-from .plugins import discover_plugins
-from .plugins.resources import packaged_resource_fallback
+from .plugins import MissionWorkflowEndpointCatalogFragment, discover_plugins
+from .plugins.resources import packaged_resource
 from .trajectory.execution_contract import MissionCompositionOutputSelection, RunnableMissionCompositionProvider
 from .vehicle_registry import ROOT
 
 if TYPE_CHECKING:
     from .plugins import PluginCatalog
 
-MISSION_WORKFLOW_ENDPOINT_SPECS = packaged_resource_fallback(
-    ROOT / "verification/mission_workflow_endpoint_specs.yaml",
-    package="taoryx_reference_models",
-    resource="data/verification/mission_workflow_endpoint_specs.yaml",
-)
+MISSION_WORKFLOW_ENDPOINT_SPECS = ROOT / "verification/mission_workflow_endpoint_specs.yaml"
 
 
 class MissionWorkflowEndpointEventSpec(BaseModel):
@@ -55,7 +51,10 @@ class MissionWorkflowEndpointSpec(BaseModel):
     id: str = Field(min_length=1)
     provider_id: str = Field(min_length=1)
     model_id: str = Field(min_length=1)
-    model_kind: Literal["trajectory_workflow", "composition_proof_family"]
+    # Model-kind vocabulary belongs to the provider. The verifier checks this
+    # value for exact equality with the advertised model without requiring the
+    # core host to enumerate every future plug-in taxonomy.
+    model_kind: str = Field(min_length=1)
     fidelity: str = Field(min_length=1)
     realization_id: str = Field(min_length=1)
     mission_template_id: str = Field(min_length=1)
@@ -123,21 +122,42 @@ class MissionWorkflowEndpointCatalog(BaseModel):
     ####
 
 
-def load_mission_workflow_endpoint_catalog(path: str | Path | None = None) -> MissionWorkflowEndpointCatalog:
-    """Load the checked-in workflow endpoint catalog."""
+def load_mission_workflow_endpoint_catalog(
+    path: str | Path | None = None,
+    *,
+    plugins: PluginCatalog | None = None,
+) -> MissionWorkflowEndpointCatalog:
+    """Load canonical workflow endpoints or merge installed plug-in fragments."""
 
-    source = Path(path) if path is not None else MISSION_WORKFLOW_ENDPOINT_SPECS
-    payload = yaml.safe_load(source.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"{source} must contain a mapping")
-    return MissionWorkflowEndpointCatalog.model_validate(payload)
+    if path is not None:
+        return _load_catalog(Path(path))
+    canonical = MISSION_WORKFLOW_ENDPOINT_SPECS
+    if plugins is not None:
+        fragments = _workflow_endpoint_fragments(plugins)
+        if not fragments:
+            raise FileNotFoundError(
+                "the selected plug-in catalog contributes no workflow endpoint catalog fragments"
+            )
+        if canonical.is_file():
+            return _select_canonical_catalog_fragments(_load_catalog(canonical), fragments)
+        return _merge_catalog_fragments(fragments)
+    if canonical.is_file():
+        return _load_catalog(canonical)
+
+    installed_plugins = discover_plugins()
+    fragments = _workflow_endpoint_fragments(installed_plugins)
+    if not fragments:
+        raise FileNotFoundError(
+            "mission workflow endpoint catalog is unavailable: install a plug-in that contributes a workflow endpoint catalog fragment"
+        )
+    return _merge_catalog_fragments(fragments)
     ####
 
 
-def mission_workflow_endpoint_list() -> dict[str, object]:
+def mission_workflow_endpoint_list(*, plugins: PluginCatalog | None = None) -> dict[str, object]:
     """Return the discoverable workflow endpoint inventory without execution."""
 
-    catalog = load_mission_workflow_endpoint_catalog()
+    catalog = load_mission_workflow_endpoint_catalog(plugins=plugins)
     return {
         "schema": "taoryx.mission-workflow-endpoint-list/v1alpha1",
         "endpoints": [
@@ -170,12 +190,12 @@ def verify_mission_workflow_endpoint(
 ) -> dict[str, object]:
     """Verify one exact authored workflow through the public provider contract."""
 
-    endpoint = (catalog or load_mission_workflow_endpoint_catalog()).endpoint(identifier)
     installed_plugins = plugins or discover_plugins()
+    endpoint = (catalog or load_mission_workflow_endpoint_catalog(plugins=installed_plugins)).endpoint(identifier)
     providers = installed_plugins.build_mission_composition_provider_registry()
     errors: list[str] = []
     records: dict[str, object] = {}
-    draft_path = _workflow_draft_path(endpoint.draft)
+    draft_path = _workflow_draft_path(endpoint.draft, installed_plugins)
 
     try:
         draft = load_model_authoring_draft(draft_path)
@@ -345,14 +365,116 @@ def verify_mission_workflow_endpoint(
     ####
 
 
-def _workflow_draft_path(relative_path: str) -> Path:
-    """Resolve a checked-in witness from source or the reference-model package."""
+def _workflow_draft_path(relative_path: str, plugins: PluginCatalog) -> Path:
+    """Resolve an authored witness from source or the selected owning package."""
 
-    return packaged_resource_fallback(
-        ROOT / relative_path,
-        package="taoryx_reference_models",
-        resource=f"data/{relative_path}",
+    canonical = ROOT / relative_path
+    if canonical.is_file():
+        return canonical
+    for fragment in _workflow_endpoint_fragments(plugins):
+        candidate = packaged_resource(
+            package=fragment.resource_package,
+            resource=f"data/{relative_path}",
+        )
+        if candidate is not None:
+            return candidate
+    return canonical
+    ####
+
+
+def _load_catalog(path: Path) -> MissionWorkflowEndpointCatalog:
+    """Load one complete or package-fragment workflow catalog."""
+
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, Mapping):
+        raise ValueError(f"{path} must contain a mapping")
+    return MissionWorkflowEndpointCatalog.model_validate(payload)
+    ####
+
+
+def _workflow_endpoint_fragments(plugins: PluginCatalog) -> tuple[MissionWorkflowEndpointCatalogFragment, ...]:
+    """Resolve only the resource fragments contributed by the selected catalog."""
+
+    fragments: list[MissionWorkflowEndpointCatalogFragment] = []
+    for contribution in plugins.records("mission_workflow_endpoint_catalog"):
+        fragment = contribution.value
+        if not isinstance(fragment, MissionWorkflowEndpointCatalogFragment):
+            raise TypeError(
+                f"workflow endpoint fragment {contribution.id!r} from {contribution.plugin.id!r} has an invalid contract"
+            )
+        if contribution.id != fragment.id:
+            raise ValueError(
+                f"workflow endpoint fragment registration {contribution.id!r} disagrees with payload {fragment.id!r}"
+            )
+        fragments.append(fragment)
+    return tuple(fragments)
+    ####
+
+
+def _merge_catalog_fragments(
+    fragments: tuple[MissionWorkflowEndpointCatalogFragment, ...],
+) -> MissionWorkflowEndpointCatalog:
+    """Merge disjoint package-owned workflow endpoint fragments by stable ID."""
+
+    declared_endpoint_ids = _declared_fragment_endpoint_ids(fragments)
+    catalogs: list[MissionWorkflowEndpointCatalog] = []
+    for fragment in fragments:
+        path = packaged_resource(package=fragment.resource_package, resource=fragment.resource)
+        if path is None:
+            raise FileNotFoundError(
+                f"workflow endpoint fragment {fragment.id!r} from {fragment.resource_package!r} is not packaged at {fragment.resource!r}"
+            )
+        catalog = _load_catalog(path)
+        endpoint_ids = tuple(item.id for item in catalog.endpoints)
+        if endpoint_ids != fragment.endpoint_ids:
+            raise ValueError(
+                f"workflow endpoint fragment {fragment.id!r} declares {fragment.endpoint_ids!r}, "
+                f"but packaged data contains {endpoint_ids!r}"
+            )
+        catalogs.append(catalog)
+    first = catalogs[0]
+    endpoints = tuple(item for catalog in catalogs for item in catalog.endpoints)
+    if tuple(item.id for item in endpoints) != declared_endpoint_ids:
+        raise ValueError("workflow package fragment endpoint declarations drifted during catalog merge")
+    return MissionWorkflowEndpointCatalog(
+        schema=first.schema_id,
+        version=first.version,
+        description="Installed package-owned Mission Composition workflow endpoint fragments.",
+        endpoints=endpoints,
     )
+    ####
+
+
+def _select_canonical_catalog_fragments(
+    catalog: MissionWorkflowEndpointCatalog,
+    fragments: tuple[MissionWorkflowEndpointCatalogFragment, ...],
+) -> MissionWorkflowEndpointCatalog:
+    """Keep a source-tree catalog inside the caller's selected plug-in scope."""
+
+    declared_endpoint_ids = _declared_fragment_endpoint_ids(fragments)
+    declared_set = set(declared_endpoint_ids)
+    endpoints = tuple(item for item in catalog.endpoints if item.id in declared_set)
+    resolved_ids = tuple(item.id for item in endpoints)
+    if set(resolved_ids) != declared_set:
+        missing = sorted(declared_set - set(resolved_ids))
+        raise ValueError(
+            "canonical workflow endpoint catalog is missing selected plug-in endpoint IDs: "
+            f"{missing!r}"
+        )
+    return catalog.model_copy(update={"endpoints": endpoints})
+    ####
+
+
+def _declared_fragment_endpoint_ids(
+    fragments: tuple[MissionWorkflowEndpointCatalogFragment, ...],
+) -> tuple[str, ...]:
+    """Flatten unique endpoint ownership declarations in plug-in order."""
+
+    endpoint_ids = tuple(endpoint_id for fragment in fragments for endpoint_id in fragment.endpoint_ids)
+    duplicates = sorted({endpoint_id for endpoint_id in endpoint_ids if endpoint_ids.count(endpoint_id) > 1})
+    if duplicates:
+        raise ValueError(f"workflow package fragments have duplicate endpoint IDs: {duplicates!r}")
+    return endpoint_ids
     ####
 
 

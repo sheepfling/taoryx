@@ -1,0 +1,46 @@
+schema: taoryx.horizontal-fidelity-registry/v1alpha1
+version: 1
+description: The horizontal integration manifest for the current Alpha 3 family catalog.
+  Profile IDs are resolved against verification/pseudo6dof_profiles.yaml; this file
+  owns the physical-family overlay, adapter seam, and four-tier declaration.
+families:
+- family_id: x15
+  physical_family: powered_fixed_wing
+  strategy_id: rocket_aircraft_high_energy.v1
+  mission_overlay: rocket_aircraft_high_energy
+  adapter_id: taoryx.high_energy.fixed_wing.v1
+  automatic_lowering: true
+  vehicle_registry_id: x15
+  tiers:
+    point_mass_3dof:
+      profile_id: x15.point_mass_3dof.v1
+      promotion_status: development
+      blockers:
+      - release_burn_coast_terminal_handoff
+    pseudo_6dof:
+      profile_id: x15.attitude_response_p6dof.v1
+      promotion_status: development
+      blockers:
+      - powered_coast_atmospheric_schedule
+    rigid_body_6dof_direct_wrench:
+      profile_id: x15.direct_wrench_6dof.v1
+      promotion_status: development
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      blockers:
+      - full_source_physical_effector_trim
+      - powered_coast_atmospheric_schedule
+    rigid_body_6dof_surface_allocated:
+      profile_id: x15.surface_allocated_6dof.v1
+      promotion_status: development
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      - effectiveness
+      - allocate
+      blockers:
+      - source_trim_acceptance
+      - stabilator_rudder_rcs_propulsion_effectivity

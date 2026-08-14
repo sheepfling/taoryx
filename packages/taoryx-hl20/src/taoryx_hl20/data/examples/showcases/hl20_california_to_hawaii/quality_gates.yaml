@@ -1,0 +1,41 @@
+schema_version: 1
+schema: taoryx.hl20-qualification-gates/v1alpha1
+id: hl20-ca-hi-g0-g6-v1
+scenario_id: hl20-rocket-release
+vehicle_id: reference_hl20_mod_k
+artifact_schema: trajectory.reachability-envelope/v1alpha1
+expected_fidelities:
+  - point_mass_3dof
+  - pseudo_6dof
+  - rigid_body_6dof
+  - rigid_body_6dof_surface_allocated
+search_space:
+  candidate_count: 3
+  axes:
+    launch.azimuth_rad: [0.0]
+    launch.elevation_rad: [1.0471975511965976, 1.2217304763960306, 1.3962634015954636]
+    glide.bank_rad: [0.0]
+events:
+  burn_time_s: 15.0
+  release_time_s: 25.0
+  tolerance_s: 1.0e-8
+terminal:
+  parent_termination: ground_contact
+  child_termination: ground_contact
+  timeout_is_not_success: true
+limits:
+  quaternion_norm_error: 1.0e-10
+  max_translation_residual_normalized: 1.0e-10
+  max_rotation_residual_normalized: 1.0e-10
+  max_momentum_residual_kg_m_s: 1.0e-8
+  max_surface_residual_deg: 1.0e-8
+  max_native_body_rate_rad_s: 50.0
+  max_pseudo_attitude_rate_rad_s: 50.0
+required_surface_channels:
+  - left_wing_flap_deg
+  - right_wing_flap_deg
+  - upper_left_body_flap_deg
+  - upper_right_body_flap_deg
+  - lower_left_body_flap_deg
+  - lower_right_body_flap_deg
+  - rudder_deg

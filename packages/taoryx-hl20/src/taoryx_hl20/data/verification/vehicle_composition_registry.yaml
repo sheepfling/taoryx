@@ -1,0 +1,145 @@
+schema: taoryx.vehicle-composition-registry/v1alpha1
+version: 1
+description: 'User-facing vehicle-to-trajectory registry. This is a composition overlay:
+  it declares available initialization contracts, segment schemas, and mission templates
+  without duplicating vehicle physics or promoting a fidelity tier.'
+vehicles:
+- family_id: hl20_mod_k
+  metadata:
+    summary: Source-grounded unpowered lifting-body family for booster release, glide-energy
+      management, and seven-surface control studies.
+    vehicle_class: lifting_body
+    operating_domains:
+    - atmospheric
+    - near_space
+    propulsion:
+    - unpowered
+    model_basis: source_grounded_reference
+    roles:
+    - lifting_body_glide
+    - crossrange_management
+    - terminal_energy_handoff
+    tags:
+    - daveml
+    - lifting_body
+    - seven_surfaces
+    claim_boundary: Source-grounded HL-20 Mod K research model; local control and
+      replay witnesses do not constitute a qualified end-to-end glide mission.
+  initialization_contracts:
+  - id: source_subsonic_local_point
+    status: runnable
+    description: Pinned Mach-0.5, alpha-5-degree source-aerodynamic HL-20 operating
+      point used only by the local direct-wrench recovery screen.
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+  - id: source_mach1_pitch_trim_anchor
+    status: runnable
+    description: Pinned Mach-1, alpha-6.457652069-degree DAVE-ML scalar pitch-coefficient
+      trim anchor used only by the frozen source-surface pitch-authority screen; it
+      is not a full-state equilibrium.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+  segment_contracts:
+  - id: local_wrench_recovery_screen
+    status: runnable
+    description: Bounded local six-axis direct-wrench LQR recovery at the pinned source-load
+      operating point; it is not a navigation segment.
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    required_control_intents:
+    - wrench
+  - id: local_wrench_lqi_recovery_screen
+    status: runnable
+    description: Bounded local six-axis direct-wrench body-speed LQI recovery at the
+      pinned source-load operating point; it is not a physical-effector or navigation
+      segment.
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    required_control_intents:
+    - wrench
+  - id: source_surface_pitch_authority_allocation_screen
+    status: runnable
+    description: Frozen Mach-1 DAVE-ML source-fixture pitch-authority request allocated
+      through all seven bounded named source surfaces with declared local lag; it
+      does not propagate state or execute feedback control.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - attitude_rate
+  - id: source_surface_attitude_rate_lqi_recovery_screen
+    status: runnable
+    description: Frozen-translation Mach-1 source-fragment local three-axis attitude/rate
+      LQI recovery through bounded seven-surface DAVE-ML allocation.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - attitude_rate
+    - wrench
+  mission_templates:
+  - id: hl20_source_surface_pitch_authority_screen_v1
+    status: runnable
+    description: Nonlinear DAVE-ML seven-surface pitch-authority allocation screen
+      at the verified scalar pitch-coefficient trim anchor; it is neither a full 6-DOF
+      trim nor a glide guidance mission.
+    mission_capability_adapter_id: taoryx.hl20_source_surface_pitch_authority_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.hl20_source_surface_pitch_authority_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_mach1_pitch_trim_anchor
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - source_surface_pitch_authority_allocation_screen
+  - id: hl20_source_surface_attitude_rate_lqi_screen_v1
+    status: runnable
+    description: Nonlinear HL-20 source-surface local attitude-error/body-rate LQI
+      recovery at the frozen Mach-1 scalar pitch-trim fragment; it is not a full-state
+      trim or glide mission.
+    mission_capability_adapter_id: taoryx.hl20_source_surface_attitude_rate_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.hl20_source_surface_attitude_rate_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_mach1_pitch_trim_anchor
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - source_surface_attitude_rate_lqi_recovery_screen
+  - id: hl20_local_direct_wrench_screen_v1
+    status: runnable
+    description: Local source-load direct-wrench recovery screen at a bounded subsonic
+      source condition; it is not the high-energy glide mission.
+    mission_capability_adapter_id: taoryx.hl20_local_direct_wrench_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_direct_wrench
+    semantic_translator_id: taoryx.hl20_local_direct_wrench_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_direct_wrench
+    initialization_contracts:
+    - source_subsonic_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    segment_sequence:
+    - local_wrench_recovery_screen
+  - id: hl20_local_direct_wrench_lqi_screen_v1
+    status: runnable
+    description: Local subsonic source-load direct-wrench body-speed LQI recovery
+      screen with source-derived candidate gain, bounded wrench projection, and integral-error
+      telemetry.
+    mission_capability_adapter_id: taoryx.hl20_local_direct_wrench_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_direct_wrench
+    semantic_translator_id: taoryx.hl20_local_direct_wrench_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_direct_wrench
+    initialization_contracts:
+    - source_subsonic_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    segment_sequence:
+    - local_wrench_lqi_recovery_screen

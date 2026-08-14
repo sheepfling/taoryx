@@ -1,0 +1,160 @@
+schema: taoryx.pseudo6dof-profiles/v1alpha1
+profiles:
+- id: nesc_rocket.attitude_response_p6dof.v1
+  family_id: reference_nesc_two_stage_rocket
+  parent_3dof_profile_id: nesc_rocket.performance_3dof.v1
+  model_kind: thrust_vector_surrogate
+  control_realization: response_law
+  status: nominal_case_pass
+  evidence_grade: mixed
+  response:
+    roll:
+      time_constant_s: 0.8
+      damping_ratio: 0.7
+      maximum_rate_rad_s: 0.8
+      maximum_acceleration_rad_s2: 2.0
+    pitch:
+      time_constant_s: 0.9
+      damping_ratio: 0.75
+      maximum_rate_rad_s: 0.55
+      maximum_acceleration_rad_s2: 1.4
+    yaw:
+      time_constant_s: 1.0
+      damping_ratio: 0.75
+      maximum_rate_rad_s: 0.45
+      maximum_acceleration_rad_s2: 1.0
+  phase_response:
+    stage1_burn:
+      roll:
+        time_constant_s: 0.55
+        damping_ratio: 0.7
+        maximum_rate_rad_s: 1.2
+        maximum_acceleration_rad_s2: 3.0
+      pitch:
+        time_constant_s: 0.65
+        damping_ratio: 0.75
+        maximum_rate_rad_s: 0.9
+        maximum_acceleration_rad_s2: 2.5
+      yaw:
+        time_constant_s: 0.75
+        damping_ratio: 0.75
+        maximum_rate_rad_s: 0.7
+        maximum_acceleration_rad_s2: 2.0
+    stage2_burn:
+      roll:
+        time_constant_s: 0.7
+        damping_ratio: 0.7
+        maximum_rate_rad_s: 0.95
+        maximum_acceleration_rad_s2: 2.4
+      pitch:
+        time_constant_s: 0.8
+        damping_ratio: 0.75
+        maximum_rate_rad_s: 0.7
+        maximum_acceleration_rad_s2: 1.9
+      yaw:
+        time_constant_s: 0.9
+        damping_ratio: 0.75
+        maximum_rate_rad_s: 0.55
+        maximum_acceleration_rad_s2: 1.5
+    stack_coast:
+      roll:
+        time_constant_s: 0.95
+        damping_ratio: 0.7
+        maximum_rate_rad_s: 0.65
+        maximum_acceleration_rad_s2: 1.6
+      pitch:
+        time_constant_s: 1.05
+        damping_ratio: 0.75
+        maximum_rate_rad_s: 0.5
+        maximum_acceleration_rad_s2: 1.2
+      yaw:
+        time_constant_s: 1.2
+        damping_ratio: 0.75
+        maximum_rate_rad_s: 0.38
+        maximum_acceleration_rad_s2: 0.9
+    orbit_coast:
+      roll:
+        time_constant_s: 1.1
+        damping_ratio: 0.7
+        maximum_rate_rad_s: 0.5
+        maximum_acceleration_rad_s2: 1.2
+      pitch:
+        time_constant_s: 1.2
+        damping_ratio: 0.75
+        maximum_rate_rad_s: 0.4
+        maximum_acceleration_rad_s2: 0.9
+      yaw:
+        time_constant_s: 1.35
+        damping_ratio: 0.75
+        maximum_rate_rad_s: 0.3
+        maximum_acceleration_rad_s2: 0.7
+  resource_channels:
+  - propellant
+  - mass
+  required_channels:
+  - bank
+  - pitch
+  - yaw
+  - body_rates
+  - stage
+  - deployment_state
+  unsupported_claims:
+  - source_exact_gimbal_effectivity
+  - plume_interaction
+direct_wrench_profiles:
+- id: nesc_rocket.direct_wrench_6dof.v1
+  family_id: reference_nesc_two_stage_rocket
+  parent_3dof_profile_id: nesc_rocket.performance_3dof.v1
+  status: nominal_case_pass
+  evidence_grade: translation_derived_engineering
+  force_axes:
+  - force_x_n
+  - force_y_n
+  - force_z_n
+  moment_axes:
+  - moment_x_nm
+  - moment_y_nm
+  - moment_z_nm
+  trim_contract: source attitude trim unavailable; declared engineering initial condition
+  envelope_contract: translation-history extension with declared engineering inertia
+  resource_channels:
+  - mass
+  required_channels:
+  - source_force
+  - requested_wrench
+  - achieved_wrench
+  - residual_wrench
+  - stage
+  unsupported_claims:
+  - source_attitude_data
+  - physical_gimbal_allocation
+  - plume_interaction
+  - source_exact_moments
+surface_allocation_profiles:
+- id: nesc_rocket.surface_allocated_6dof.v1
+  family_id: reference_nesc_two_stage_rocket
+  parent_direct_wrench_profile_id: nesc_rocket.direct_wrench_6dof.v1
+  status: not_applicable
+  evidence_grade: unavailable
+  allocator_id: nesc-source-gimbal-contract-pending-v1
+  effector_channels:
+  - thrust_vector_gimbal_x
+  - thrust_vector_gimbal_y
+  required_channels:
+  - requested_wrench
+  - achieved_wrench
+  - residual_wrench
+  - stage
+  unsupported_claims:
+  - source_gimbal_effectivity
+  - plume_interaction
+  - active_guidance
+bindings:
+- family_id: reference_nesc_two_stage_rocket
+  point_mass_profile_id: nesc_rocket.performance_3dof.v1
+  pseudo_profile_id: nesc_rocket.attitude_response_p6dof.v1
+  direct_wrench_profile_id: nesc_rocket.direct_wrench_6dof.v1
+  surface_allocation_profile_id: nesc_rocket.surface_allocated_6dof.v1
+  automatic_lowering: true
+  lowering_note: staged response and translation-derived direct-wrench bridge; source
+    gimbal remains not applicable

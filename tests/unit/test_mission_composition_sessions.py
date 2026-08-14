@@ -64,22 +64,24 @@ def test_every_native_episode_tuple_uses_common_stateful_session(witness: object
     realization_id = configuration.realization_id or configuration.fidelity
     model = PROVIDER.model(configuration.model_id)
     realization = next(item for item in model.realizations if item.id == realization_id)
-    advertised_actions = {
-        item.native_channel_id: item
+    advertised_controls = tuple(
+        item
         for item in realization.controls.channels
         if item.channel_kind == "action" and "step" in item.operations and item.native_channel_id is not None
-    }
+    )
     default_authority = next(
         item for item in realization.controls.authorities if item.id == realization.controls.default_authority_id
     )
     default_semantic_ids = set(default_authority.channel_ids)
+    semantic_projection = descriptor.action_schema_projection == "selected_semantic_profile"
+    advertised_actions = {
+        item.id if semantic_projection else item.native_channel_id: item
+        for item in advertised_controls
+    }
     default_profile_actions = {
-        item.native_channel_id: item
-        for item in realization.controls.channels
+        item.id if semantic_projection else item.native_channel_id: item
+        for item in advertised_controls
         if item.id in default_semantic_ids
-        and item.channel_kind == "action"
-        and "step" in item.operations
-        and item.native_channel_id is not None
     }
     runtime_actions = {item.id: item for item in descriptor.action_schema}
     assert set(default_profile_actions) <= set(runtime_actions)

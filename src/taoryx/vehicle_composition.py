@@ -20,7 +20,9 @@ from typing import TYPE_CHECKING, Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from .deployment import DeploymentBinding, validate_deployment_bindings
 from .fidelity_contracts import FidelityTier, runtime_fidelity_for
+from .plugins import PluginCatalog
 from .value_space import validate_value_space_value
 from .vehicle_composition_registry import (
     CompositionParameter,
@@ -206,6 +208,13 @@ class VehicleCompositionRequest(BaseModel):
     mission_graph: MissionGraphSelection | None = None
     variant: VariantSelection = Field(default_factory=VariantSelection)
     observation: ObservationSelection = Field(default_factory=ObservationSelection)
+    deployment_bindings: tuple[DeploymentBinding, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_selected_deployment_bindings(self) -> VehicleCompositionRequest:
+        validate_deployment_bindings(self.deployment_bindings)
+        return self
+        ####
 ####
 
 
@@ -391,8 +400,15 @@ class CompiledVehicleComposition(BaseModel):
     segments: tuple[CompiledSegment, ...]
     mission_graph: CompiledMissionGraph | None = None
     observation: CompiledObservation = Field(default_factory=lambda: CompiledObservation(profile_id="truth_debug"))
+    deployment_bindings: tuple[DeploymentBinding, ...] = ()
     native_adapter_handoff: dict[str, Any]
     identity_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def validate_selected_deployment_bindings(self) -> CompiledVehicleComposition:
+        validate_deployment_bindings(self.deployment_bindings)
+        return self
+        ####
 
     def canonical_payload(self) -> dict[str, Any]:
         """Return a reproducible payload excluding its self-referential digest."""
@@ -441,6 +457,7 @@ def compile_vehicle_composition(
     request: VehicleCompositionRequest,
     *,
     catalog: ResolvedVehicleCompositionCatalog | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> CompiledVehicleComposition:
     """Resolve a selected initialization and exact mission segment sequence.
 
@@ -450,7 +467,7 @@ def compile_vehicle_composition(
     general unit-conversion service is shared by both trajectory contracts.
     """
 
-    resolved_catalog = catalog or load_resolved_vehicle_composition_catalog()
+    resolved_catalog = catalog or load_resolved_vehicle_composition_catalog(plugins=plugins)
     vehicle = _vehicle(resolved_catalog, request.vehicle)
     tier_binding = vehicle.family.family.tiers[request.fidelity]
     if tier_binding.profile_id is None:
@@ -527,7 +544,12 @@ def compile_vehicle_composition(
     compiled_graph = _compile_mission_graph(request.mission_graph, tuple(compiled_segments))
     statuses = [mission.status, initialization.status, *(segment.status for segment in compiled_segments)]
     status = _aggregate_status(statuses)
-    compiled_observation = _resolve_observation(request.observation, vehicle.family.family_id, request.fidelity)
+    compiled_observation = _resolve_observation(
+        request.observation,
+        vehicle.family.family_id,
+        request.fidelity,
+        plugins=plugins,
+    )
     adapter_handoff = {
         "adapter_id": vehicle.family.family.adapter_id,
         "profile_id": tier_binding.profile_id,
@@ -547,7 +569,11 @@ def compile_vehicle_composition(
         physical_family=vehicle.family.family.physical_family,
         fidelity=request.fidelity,
         runtime_fidelity=runtime_fidelity_for(request.fidelity),
-        control_realization=resolved_control_realization_for(vehicle.family.family_id, request.fidelity),
+        control_realization=resolved_control_realization_for(
+            vehicle.family.family_id,
+            request.fidelity,
+            plugins=plugins,
+        ),
         composition_status=status,
         variant=resolved_variant,
         initialization=compiled_initialization,
@@ -557,6 +583,7 @@ def compile_vehicle_composition(
         segments=tuple(compiled_segments),
         mission_graph=compiled_graph,
         observation=compiled_observation,
+        deployment_bindings=request.deployment_bindings,
         native_adapter_handoff=adapter_handoff,
         identity_sha256="0" * 64,
     )
@@ -771,6 +798,7 @@ def resolve_vehicle_composition_interface_contract(
     composition: CompiledVehicleComposition,
     *,
     catalog: ResolvedVehicleCompositionCatalog | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleInterfaceContract:
     """Resolve the exact caller-facing interface selected by one composition.
 
@@ -787,20 +815,25 @@ def resolve_vehicle_composition_interface_contract(
     )
     from .vehicle_interface import bind_declared_sensor_profile, resolve_vehicle_interface_contract
 
-    contract = resolve_vehicle_interface_contract(composition.family_id, composition.fidelity, catalog=catalog)
+    contract = resolve_vehicle_interface_contract(
+        composition.family_id,
+        composition.fidelity,
+        catalog=catalog,
+        plugins=plugins,
+    )
     try:
-        resolve_vehicle_execution_binding(composition, "episode")
+        resolve_vehicle_execution_binding(composition, "episode", plugins=plugins)
         episode_runnable = True
     except VehicleExecutionBindingError:
         episode_runnable = False
     try:
-        resolve_vehicle_execution_binding(composition, "batch")
+        resolve_vehicle_execution_binding(composition, "batch", plugins=plugins)
         batch_runnable = True
     except VehicleExecutionBindingError:
         batch_runnable = False
     exact_records = tuple(
         item
-        for item in bindings_for_family(composition.family_id)
+        for item in bindings_for_family(composition.family_id, plugins=plugins)
         if item.mission == composition.mission and item.fidelity == composition.fidelity
     )
     contract = _gate_interface_to_composition_execution(
@@ -1209,12 +1242,14 @@ def _resolve_observation(
     selection: ObservationSelection,
     family_id: str,
     fidelity: FidelityTier,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> CompiledObservation:
     """Bind a declared sensor selection to portable available channels only."""
 
     from .vehicle_interface import bind_declared_sensor_profile, resolve_vehicle_interface_contract
 
-    contract = resolve_vehicle_interface_contract(family_id, fidelity)
+    contract = resolve_vehicle_interface_contract(family_id, fidelity, plugins=plugins)
     sensor = selection.declared_sensor
     if sensor is None:
         contract.observation_profile(selection.profile_id)
@@ -1260,6 +1295,7 @@ def _aggregate_status(statuses: list[str]) -> str:
 __all__ = [
     "CompiledVehicleComposition",
     "CompiledDeclaredSensor",
+    "DeploymentBinding",
     "CompiledMissionGraph",
     "CompiledMissionGraphNode",
     "CompiledMissionTransition",

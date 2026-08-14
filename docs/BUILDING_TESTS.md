@@ -12,6 +12,28 @@ python -m tools.dev test-views
 
 Use `pytest --markers` to inspect the registered marker descriptions directly.
 
+## Static quality and CI
+
+The `Core Quality` workflow runs on every push and pull request. It uses the
+same portable task as local development, then runs the routing/quality contract
+tests with an isolated deterministic pytest temporary root.
+
+```bash
+python -m tools.dev quality    # non-mutating Ruff fix preview, then Pyright
+python -m tools.dev ruff-fix   # apply Ruff's safe fixes to that same surface
+```
+
+`quality` follows each declared `taoryx.plugins` entry point for Ruff, checks
+the shared discovery/developer-route API with Pyright, and validates every
+plug-in's structural developer route. A new plug-in registration is therefore
+covered automatically without forcing its complete model implementation through
+a catalogue-wide type scan. CI invokes Ruff with `--fix --diff`: it reports the
+exact safe patch needed but never rewrites a contributor's branch. Run
+`ruff-fix` locally to apply that patch. The broader legacy `python -m tools.dev
+lint` and Mypy gates remain available for release work; the inherited parser
+and model corpus has tracked type debt outside this actionable entry-point
+surface.
+
 ## Choose the smallest useful tier
 
 The repository has four development tiers. Start vehicle work with one
@@ -25,10 +47,19 @@ python -m tools.dev test-vehicle f16_s119  # one runnable F-16 Composition path
 python -m tools.dev test-f16               # convenience alias for the same slice
 python -m tools.dev test-vehicle a320_openap_3dof
 python -m tools.dev test-vehicle hummingbird
+python -m tools.dev check-vehicle hummingbird  # scoped interface + witnesses + parity + vertical test
+python -m tools.dev plugin-wheel-smoke  # isolated installed-wheel boundaries for every split plug-in
+python tools/verify_plugin_wheels.py --plugin cross-plugin-deployment  # selected NESC + passive child handoff
 python -m tools.dev test-vehicle x15
 python -m tools.dev check-vehicle-maturity
 python -m tools.dev test-vehicle simple_aero  # runnable fixed-L/D batch and persistent-session workflow
 python -m tools.dev test-vehicle dual_launch_glider  # source-generated point-mass batch forms
+python -m tools.dev test-debug-models  # isolated ballistic, waypoint, and contract-probe provider workflow
+python -m tools.dev check-daveml  # selected DAVE-ML format handler and installed-wheel boundary
+python -m tools.dev test-reachability  # exact reachability overlay data and deferred-registration boundary
+python -m tools.dev check-reachability  # plus the direct-dependency installed-wheel boundary
+python -m tools.dev test-cadac-discovery  # CADAC entry point without an actor sweep
+python -m tools.dev test-vehicle cadac_aim5  # one selected source-bound CADAC actor
 python -m tools.dev test-vehicle-catalogue  # campaign declarations must have vertical coverage
 python -m tools.dev test-control-api-pilot  # four reduced-order control/API fixtures only
 python -m tools.dev test-quick      # curated smoke/contracts; stop on first failure
@@ -81,9 +112,10 @@ vehicles or historical evidence into every edit.
 The available physical-family slices are `f16_s119`, `a320_openap_3dof`,
 `hummingbird`, `x15`, `hl20_mod_k`, `reference_nesc_two_stage_rocket`,
 `tumbling_body`, `skywalker_x8`, and `b747`. `simple_aero` is the focused
-fixed-L/D workflow slice: it proves the provider-generated batch path and its
-persistent generated-command/direct-throttle session boundary, not a physical
-vehicle or actuator claim. `dual_launch_glider` proves the source-generated point-mass batch path
+package-owned fixed-L/D workflow slice: it proves its provider advertisement,
+generated batch path, persistent generated-command/direct-throttle session,
+and workflow endpoint data boundary, not a physical vehicle or actuator claim.
+`dual_launch_glider` proves the source-generated point-mass batch path
 for both launch forms and reports attached-booster separation as an event; it
 does not claim an independently propagated released-glider history. Add the
 next slice only after its documented composition has a real runnable endpoint;
@@ -93,6 +125,58 @@ model's data, controls, segment contract, execution, and tuning footing before
 broadening the matrix. A narrow local controller screen—such as X-15's
 direct-wrench route—must preserve that boundary rather than being labeled a
 full flight mission.
+
+`test-debug-models` is a separate non-vehicle plug-in gate for the analytical
+ballistic and waypoint fixtures plus the synthetic contract probe. It proves
+their package version, model/control advertisements, selected plug-in scope,
+streamed action/readback paths, package-owned endpoint data, and concrete batch
+results. It does not scan or execute physical vehicle families.
+
+`check-daveml` is the corresponding shared-format gate. It selects only the
+`daveml` model-format contribution, verifies its package revision, invokes the
+lazy handler, and proves that the imported DAVE-ML implementation comes from an
+installed core-plus-DAVE-ML wheel. It does not construct a consumer vehicle or
+replay F-16, HL-20, or NESC source data.
+
+`check-reachability` is the optional-overlay gate. It verifies the exact
+reachability package data, direct X-15/HL-20 dependency declarations, deferred
+capability/preflight/execution registration, and an installed-wheel boundary.
+The X-15, HL-20, and DAVE-ML wheels are present only as installation and
+discovery dependencies; their controller, trim, and study gates are not rerun.
+
+`check-vehicle <family>` is the stronger plug-in-owned gate for a physical
+vehicle family. It scopes the semantic-interface catalog report, endpoint
+witness validation, registered batch/episode parity replay, and the executable
+vertical pytest slice to that one family. It does not execute DAVEML, CADAC,
+debug-provider, parser, or unrelated vehicle suites. Use it before handing a
+vehicle change to catalogue integration; use `test-vehicle` while iterating on
+the vehicle's plant or controller implementation.
+
+`plugin-wheel-smoke` is the packaging boundary check for the currently split
+plug-ins. It builds fresh source-distribution-derived wheels, installs core
+plus the selected plug-ins into a temporary target, removes all editable source
+roots from that child process, and then exercises each declared boundary:
+providers, model-format lazy imports, packaged model data, and concrete
+adapters where applicable. A selected package's dependency wheels are installed
+and discovered, but their own vertical assertions are skipped unless explicitly
+selected. Use it when changing package ownership, entry
+points, package data, or deferred registration; it is not a catalogue-wide
+mission regression run.
+
+The validation layers are deliberately separate:
+
+1. `test-vehicle <family>` — one vehicle's executable pytest slice.
+2. `check-vehicle <family>` — one physical vehicle plug-in's full host-contract
+   boundary.
+3. `vehicle-catalogue` — cross-plug-in metadata reconciliation without broad
+   mission execution.
+4. `check` — repository integration/release validation, including unrelated
+   packages and documentation.
+
+Exact per-vehicle channels, authorities, units, lowering chains, and readbacks
+belong in that vehicle's vertical tests. Catalogue tests check structural
+invariants and uniqueness; they must not pin a global sum that changes whenever
+an independent plug-in adds a legitimate channel.
 
 For a catalogue-wide metadata change, run `python -m tools.dev
 vehicle-catalogue`. It checks registered controller-campaign coverage, family
@@ -179,6 +263,20 @@ family when the change is limited to one dynamics tier or one segment:
 | Grammar-only change | `python -m tools.dev test-grammar` | parser slice |
 | Plot/visualization change | `python -m tools.dev test-plots` | fast visualization slice |
 | Full vehicle family | `python -m tools.dev test-x15` | intentionally expensive |
+
+The common controller-campaign catalog test validates registrations and their
+portable advertisements without constructing every numerical plant.  The
+cross-catalog runner proof intentionally executes every campaign and is marked
+`slow`; opt into it only when changing the shared tuning runner or campaign
+registration contract:
+
+```bash
+python -m pytest tests/unit/test_model_authoring.py::test_registered_reference_campaigns_execute_through_the_common_runner -m slow -o addopts=''
+```
+
+Likewise, the all-provider `model assess` matrix and its CLI proof are marked
+`slow`. They are catalogue-release checks, not prerequisites for a focused
+vehicle plug-in edit.
 
 The `segment`, `dof3`, and `dof6` markers are additive views. `slow` is a cost
 label, not a reason to select every slow test. `-o addopts=''` is required for

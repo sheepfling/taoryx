@@ -17,7 +17,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -30,8 +30,11 @@ from ..fidelity_contracts import (
 )
 from ..fidelity_lowering import LoweringCandidate, select_canonical_lowering
 from ..fidelity_lowering import LoweringStatus as SharedLoweringStatus
-from ..plugins.resources import packaged_resource_fallback
+from ..vehicle_catalog_resources import vehicle_catalog_resources
 from ..vehicle_registry import ROOT
+
+if TYPE_CHECKING:
+    from ..plugins.discovery import PluginCatalog
 
 Pseudo6DOFModelKind = Literal[
     "attitude_response_surrogate",
@@ -430,23 +433,43 @@ class Pseudo6DOFCatalog(BaseModel):
     ####
 
 
-@lru_cache(maxsize=8)
-def load_pseudo6dof_catalog(path: str | Path | None = None) -> Pseudo6DOFCatalog:
+def load_pseudo6dof_catalog(
+    path: str | Path | None = None,
+    *,
+    plugins: PluginCatalog | None = None,
+) -> Pseudo6DOFCatalog:
     """Load and validate the canonical pseudo-6DOF catalog."""
 
-    catalog_path = (
-        Path(path)
-        if path is not None
-        else packaged_resource_fallback(
-            ROOT / "verification/pseudo6dof_profiles.yaml",
-            package="taoryx_reference_models",
-            resource="data/verification/pseudo6dof_profiles.yaml",
-        )
-    )
-    payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise ValueError(f"{catalog_path} must contain a mapping")
-    return Pseudo6DOFCatalog.model_validate(payload)
+    if path is not None:
+        return _load_pseudo6dof_catalog_sources((str(Path(path)),))
+    sources = vehicle_catalog_resources("verification/pseudo6dof_profiles.yaml", plugins=plugins)
+    return _load_pseudo6dof_catalog_sources(tuple(str(source) for source in sources))
+    ####
+
+
+@lru_cache(maxsize=32)
+def _load_pseudo6dof_catalog_sources(source_names: tuple[str, ...]) -> Pseudo6DOFCatalog:
+    """Parse one cacheable set of exact package-owned pseudo-profile paths."""
+
+    if not source_names:
+        raise ValueError("pseudo6dof catalog has no installed fragments")
+    payloads: list[dict[str, object]] = []
+    for source_name in source_names:
+        source = Path(source_name)
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError(f"{source} must contain a mapping")
+        payloads.append(payload)
+    merged = dict(payloads[0])
+    for key in ("profiles", "direct_wrench_profiles", "surface_allocation_profiles", "bindings"):
+        rows: list[object] = []
+        for payload in payloads:
+            value = payload.get(key)
+            if not isinstance(value, list):
+                raise ValueError(f"pseudo6dof catalog {key!r} must contain a list")
+            rows.extend(value)
+        merged[key] = rows
+    return Pseudo6DOFCatalog.model_validate(merged)
     ####
 
 

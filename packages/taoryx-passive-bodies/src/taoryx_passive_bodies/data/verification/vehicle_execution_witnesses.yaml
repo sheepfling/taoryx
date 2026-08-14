@@ -1,0 +1,14 @@
+schema: taoryx.vehicle-execution-witnesses/v1alpha1
+version: 1
+description: One checked-in composition request for every currently runnable exact
+  family/mission/fidelity/operation endpoint. This is an onboarding and discovery
+  gate, not a mission-qualification matrix.
+witnesses:
+- id: tumbling-3dof-batch
+  composition: examples/vehicle_composition/tumbling_body_direct_release_3dof_compose.yaml
+  operation: batch
+- id: tumbling-pseudo6dof-batch
+  composition: examples/vehicle_composition/tumbling_body_direct_release_pseudo6dof_compose.yaml
+  operation: batch
+variant_witnesses: []
+graph_extension_witnesses: []

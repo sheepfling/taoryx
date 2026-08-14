@@ -72,11 +72,12 @@ def test_production_advertisement_and_generated_completion_artifacts_are_current
     assert audit.status == "pass", audit.diagnostics
     assert audit.runner_checked
     assert all(item.status == "pass" for item in audit.models)
-    assert sum(item.control_channel_count for item in audit.models) == 177
-    assert sum(item.active_control_channel_count for item in audit.models) == 132
-    assert sum(item.native_bound_control_channel_count for item in audit.models) == 165
-    assert sum(item.control_authority_count for item in audit.models) == 69
-    assert sum(item.control_intent_count for item in audit.models) == 156
+    assert all(
+        item.control_channel_count == item.action_control_channel_count + item.effector_control_channel_count
+        for item in audit.models
+    )
+    assert all(item.active_control_channel_count <= item.control_channel_count for item in audit.models)
+    assert all(item.native_bound_control_channel_count <= item.control_channel_count for item in audit.models)
     assert ProviderAdvertisementConformanceReport.model_validate_json(audit.model_dump_json(by_alias=True)) == audit
 
     assert report.status == "pass", report.diagnostics

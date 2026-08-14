@@ -1306,6 +1306,7 @@ def _build_model_metadata(
         controls=source_managed_control_advertisement(
             mission_ids=(AGM6_MISSION_ID,),
             source_refs=("missiondesignsolutions/CADAC/AGM6",),
+            operations=("batch", "step"),
             claim_boundary="AGM6 source guidance and control remain internal to the persistent source runtime.",
         ),
         fidelity_aliases=(AGM6_FIDELITY_ID,),

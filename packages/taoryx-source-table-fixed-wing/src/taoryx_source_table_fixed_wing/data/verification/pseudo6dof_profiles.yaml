@@ -1,0 +1,188 @@
+schema: taoryx.pseudo6dof-profiles/v1alpha1
+profiles:
+- id: skywalker_x8.attitude_response_p6dof.v1
+  family_id: skywalker_x8
+  parent_3dof_profile_id: skywalker_x8.point_mass_3dof.v1
+  model_kind: attitude_response_surrogate
+  control_realization: response_law
+  status: nominal_case_pass
+  evidence_grade: derived
+  response:
+    roll:
+      time_constant_s: 0.8
+      damping_ratio: 0.75
+      maximum_rate_rad_s: 0.8
+      maximum_acceleration_rad_s2: 1.8
+    pitch:
+      time_constant_s: 1.0
+      damping_ratio: 0.75
+      maximum_rate_rad_s: 0.5
+      maximum_acceleration_rad_s2: 1.2
+    yaw:
+      time_constant_s: 1.2
+      damping_ratio: 0.75
+      maximum_rate_rad_s: 0.35
+      maximum_acceleration_rad_s2: 0.8
+  resource_channels:
+  - fuel
+  required_channels:
+  - bank
+  - pitch
+  - heading
+  - speed
+  - altitude
+  unsupported_claims:
+  - physical_elevon_allocation
+  - physical_moment_closure
+- id: b747.attitude_response_p6dof.v1
+  family_id: b747
+  parent_3dof_profile_id: b747.point_mass_3dof.v1
+  model_kind: attitude_response_surrogate
+  control_realization: response_law
+  status: nominal_case_pass
+  evidence_grade: estimated
+  response:
+    roll:
+      time_constant_s: 2.4
+      damping_ratio: 0.8
+      maximum_rate_rad_s: 0.18
+      maximum_acceleration_rad_s2: 0.12
+    pitch:
+      time_constant_s: 3.0
+      damping_ratio: 0.8
+      maximum_rate_rad_s: 0.12
+      maximum_acceleration_rad_s2: 0.08
+    yaw:
+      time_constant_s: 3.5
+      damping_ratio: 0.8
+      maximum_rate_rad_s: 0.08
+      maximum_acceleration_rad_s2: 0.05
+  resource_channels:
+  - fuel
+  - mass
+  required_channels:
+  - bank
+  - pitch
+  - heading
+  - speed
+  - altitude
+  unsupported_claims:
+  - physical_surface_allocation
+  - physical_moment_closure
+direct_wrench_profiles:
+- id: skywalker_x8.direct_wrench_6dof.v1
+  family_id: skywalker_x8
+  parent_3dof_profile_id: skywalker_x8.point_mass_3dof.v1
+  status: nominal_case_pass
+  evidence_grade: source_table_local
+  force_axes:
+  - force_x_n
+  - force_y_n
+  - force_z_n
+  moment_axes:
+  - moment_x_nm
+  - moment_y_nm
+  - moment_z_nm
+  trim_contract: source-trim local rigid-body witness; no surface trim claim
+  envelope_contract: local source-table operating point and declared wrench limits
+  resource_channels:
+  - mass
+  required_channels:
+  - source_force
+  - source_moment
+  - requested_wrench
+  - achieved_wrench
+  - residual_wrench
+  unsupported_claims:
+  - physical_elevon_allocation
+  - servo_dynamics
+  - family_wide_schedule
+- id: b747.direct_wrench_6dof.v1
+  family_id: b747
+  parent_3dof_profile_id: b747.point_mass_3dof.v1
+  status: nominal_case_pass
+  evidence_grade: source_table_transport
+  force_axes:
+  - force_x_n
+  - force_y_n
+  - force_z_n
+  moment_axes:
+  - moment_x_nm
+  - moment_y_nm
+  - moment_z_nm
+  trim_contract: declared transport operating condition with source-table/local balance
+    contract
+  envelope_contract: nominal transport racetrack, table domain, and terminal gates
+  resource_channels:
+  - mass
+  required_channels:
+  - source_force
+  - source_moment
+  - requested_wrench
+  - achieved_wrench
+  - residual_wrench
+  unsupported_claims:
+  - physical_elevator_aileron_rudder_allocation
+  - fuel_burn
+  - full_envelope_schedule
+surface_allocation_profiles:
+- id: skywalker_x8.surface_allocated_6dof.v1
+  family_id: skywalker_x8
+  parent_direct_wrench_profile_id: skywalker_x8.direct_wrench_6dof.v1
+  status: development
+  evidence_grade: source_table_local
+  allocator_id: x8-bounded-collective-differential-elevon-v1
+  effector_channels:
+  - left_elevon_deg
+  - right_elevon_deg
+  - throttle
+  required_channels:
+  - requested_wrench
+  - allocated_effectors
+  - achieved_effectors
+  - achieved_wrench
+  - residual_wrench
+  - saturation
+  unsupported_claims:
+  - servo_hardware_fidelity
+  - independent_yaw_authority
+  - family_wide_schedule
+- id: b747.surface_allocated_6dof.v1
+  family_id: b747
+  parent_direct_wrench_profile_id: b747.direct_wrench_6dof.v1
+  status: development
+  evidence_grade: source_table_local
+  allocator_id: b747-bounded-surface-v1
+  effector_channels:
+  - elevator_deg
+  - aileron_deg
+  - rudder_deg
+  - throttle
+  required_channels:
+  - requested_wrench
+  - allocated_effectors
+  - achieved_effectors
+  - achieved_wrench
+  - residual_wrench
+  - saturation
+  unsupported_claims:
+  - servo_hardware_fidelity
+  - fuel_flow
+  - full_envelope_schedule
+bindings:
+- family_id: skywalker_x8
+  point_mass_profile_id: skywalker_x8.point_mass_3dof.v1
+  pseudo_profile_id: skywalker_x8.attitude_response_p6dof.v1
+  direct_wrench_profile_id: skywalker_x8.direct_wrench_6dof.v1
+  surface_allocation_profile_id: skywalker_x8.surface_allocated_6dof.v1
+  automatic_lowering: true
+  lowering_note: shared fixed-wing response, direct-wrench bridge, and declared surface
+    path
+- family_id: b747
+  point_mass_profile_id: b747.point_mass_3dof.v1
+  pseudo_profile_id: b747.attitude_response_p6dof.v1
+  direct_wrench_profile_id: b747.direct_wrench_6dof.v1
+  surface_allocation_profile_id: b747.surface_allocated_6dof.v1
+  automatic_lowering: true
+  lowering_note: transport-scaled response, direct-wrench bridge, and declared surface
+    path

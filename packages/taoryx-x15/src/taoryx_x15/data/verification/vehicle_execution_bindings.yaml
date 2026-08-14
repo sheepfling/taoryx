@@ -1,0 +1,88 @@
+schema: taoryx.vehicle-execution-bindings/v1alpha1
+version: 1
+description: Explicit source-owned execution bindings for compiled vehicle compositions.
+  An entry is a public capability declaration, not a generic family fallback. Omitted
+  vehicle/fidelity/mission combinations are unavailable until their own native binding
+  exists.
+bindings:
+- family_id: x15
+  mission: x15_local_direct_wrench_screen_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: batch
+  status: runnable
+  execution_mode: local_direct_wrench_screen
+  factory_id: x15_local_direct_wrench_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the source-local X-15 direct-wrench LQR recovery screen through
+    the public composition path.
+  claim_boundary: Local direct-wrench recovery screen only; it is neither an X-15
+    flight mission nor physical effector allocation.
+- family_id: x15
+  mission: x15_local_direct_wrench_screen_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: episode
+  status: runnable
+  execution_mode: local_direct_wrench_screen
+  factory_id: x15_local_direct_wrench_episode.v1
+  batch_action_trace: not_applicable
+  description: Step the source-local X-15 direct-wrench bridge through its declared
+    bounded total-wrench command.
+  claim_boundary: Local direct-wrench bridge episode only; it exposes requested-versus-achieved
+    injected wrench, not physical effector allocation or an X-15 flight mission.
+- family_id: x15
+  mission: x15_local_direct_wrench_lqi_screen_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: batch
+  status: runnable
+  execution_mode: local_direct_wrench_screen
+  factory_id: x15_local_direct_wrench_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the source-release X-15 body-speed LQI screen through the bounded
+    generalized direct-wrench composition bridge.
+  claim_boundary: Local source-load direct-wrench LQI screen only; it proves neither
+    physical X-15 effector allocation, persistent-disturbance rejection, navigation,
+    nor a flight mission.
+- family_id: x15
+  mission: x15_source_surface_authority_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: source_surface_authority_screen
+  factory_id: x15_source_surface_authority_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the frozen X-15 source-table three-surface, three-axis moment-authority
+    allocation screen through the public composition path.
+  claim_boundary: Source-fixture surface-authority allocation only; it proves actual
+    bounded symmetric stabilator, differential stabilator, and rudder inputs with
+    nonlinear source-table load response, not full vehicle trim, feedback control,
+    propulsion/RCS allocation, navigation, high-energy guidance, or flight qualification.
+- family_id: x15
+  mission: x15_source_surface_attitude_rate_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: x15_local_physical_surface_lqi_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the frozen-translation X-15 source-surface attitude-error/body-rate
+    LQI recovery through the public composition path.
+  claim_boundary: Local source-surface LQI recovery only; it proves a moment-balanced
+    fixed fixture, bounded symmetric stabilator/differential stabilator/rudder allocation,
+    and nonlinear attitude/rate recovery. It does not establish full-state trim, translation,
+    propulsion/RCS allocation, persistent-disturbance rejection, navigation, high-energy
+    guidance, or flight qualification.
+- family_id: x15
+  mission: rocket_aircraft_high_energy_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: batch
+  status: planned
+  execution_mode: planned
+  batch_action_trace: planned
+  description: Execute release, burn/coast, and atmospheric handoff through the bounded
+    X-15 source direct-wrench bridge.
+  claim_boundary: The current local direct-wrench bridge is not yet an end-to-end
+    X-15 mission executor.
+  blockers:
+  - release_to_powered_coast_phase_translator
+  - source_bounded_high_energy_terminal_objectives
+  - phase_scheduled_direct_wrench_controller

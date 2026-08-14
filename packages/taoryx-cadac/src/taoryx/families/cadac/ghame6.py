@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import TypeAlias
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 from pydantic import Field, model_validator
+
+from taoryx.sensor_api import MeasurementPacket, packet_to_record
+from taoryx.sensor_plugins.relative_state import RelativeStateTrackerConfig, relative_state_track_from_geometry
 
 from .bundle import CadacSourceArtifact, CadacSourceBundle, load_cadac_source_bundle
 from .deck import CadacDeck
@@ -47,6 +50,10 @@ from .source_environment import CADAC_SOURCE_EARTH_RADIUS_M, atmosphere76
 
 FloatVector: TypeAlias = NDArray[np.float64]
 FloatMatrix: TypeAlias = NDArray[np.float64]
+
+_GHAME6_RADAR_SENSOR_ID = "ghame6-radar0-native-relative-state"
+_GHAME6_RADAR_TARGET_ID = "ghame6-satellite-1"
+_GHAME6_RADAR_SENSOR_FRAME_ID = "cadac.ghame6.radar0.eci"
 
 _GHAME6_MODULES = (
     "kinematics",
@@ -724,13 +731,20 @@ class Ghame6PhaseEvent(CadacModel):
 
 
 class Ghame6RadarTrack(CadacModel):
-    """One RADAR0-owned measured SAT3 track update."""
+    """One RADAR0 source track plus its native raw geometry projection.
+
+    ``native_relative_state_packet`` is deliberately separate from the
+    source-shaped polar/noise track fields.  It is the standard Taoryx raw
+    measurement of the committed RADAR0/SAT3 geometry, not a replacement for
+    CADAC's own radar corruption or track-file semantics.
+    """
 
     time_s: float = Field(ge=0.0)
     measured_position_inertial_m: tuple[float, float, float]
     measured_velocity_inertial_mps: tuple[float, float, float]
     true_range_m: float = Field(ge=0.0)
     update_sequence: int = Field(ge=1)
+    native_relative_state_packet: dict[str, Any]
 
 
 ####
@@ -1865,7 +1879,7 @@ def _runtime_radar(
     if not config.enabled or sim_time_s + 0.5 * dt_s < runtime.next_track_time_s:
         return None
     ####
-    site_position, _ = _ground0_inertial_state(config, sim_time_s)
+    site_position, site_velocity = _ground0_inertial_state(config, sim_time_s)
     line = site_position - satellite.position_inertial_m
     true_range = float(np.linalg.norm(line))
     azimuth = math.atan2(float(line[1]), float(line[0]))
@@ -1884,16 +1898,97 @@ def _runtime_radar(
     measured_position = site_position - measured_relative
     measured_velocity = satellite.velocity_inertial_mps + rng.normal(0.0, config.velocity_sigma_mps, size=3)
     runtime.update_count += 1
+    native_packet = _native_radar_relative_state_packet(
+        sim_time_s=sim_time_s,
+        site_position_inertial_m=site_position,
+        site_velocity_inertial_mps=site_velocity,
+        satellite=satellite,
+        update_sequence=runtime.update_count,
+    )
     track = Ghame6RadarTrack(
         time_s=max(0.0, sim_time_s),
         measured_position_inertial_m=_tuple3(measured_position),
         measured_velocity_inertial_mps=_tuple3(np.asarray(measured_velocity, dtype=np.float64)),
         true_range_m=true_range,
         update_sequence=runtime.update_count,
+        native_relative_state_packet=native_packet,
     )
     runtime.latest_track = track
     runtime.next_track_time_s = sim_time_s + (config.track_step_s if config.track_step_s > 0.0 else dt_s)
     return track
+
+
+####
+
+
+def _native_radar_relative_state_packet(
+    *,
+    sim_time_s: float,
+    site_position_inertial_m: FloatVector,
+    site_velocity_inertial_mps: FloatVector,
+    satellite: _Ghame6SatelliteRuntime,
+    update_sequence: int,
+) -> dict[str, Any]:
+    """Project one committed RADAR0/SAT3 boundary through the native sensor API.
+
+    GHAME6's source RADAR0 track is a separately preserved noisy polar
+    reconstruction.  This zero-noise raw packet gives standard consumers the
+    corresponding committed geometry without claiming a persistent
+    ``SensorBus`` or rewriting the source radar's scheduling/filter state.
+    RADAR0 has no modeled gimbal/body attitude in this source package, so its
+    sensor frame is explicitly aligned with the published inertial frame.
+    """
+
+    sample_time_s = max(0.0, sim_time_s)
+    payload_or_reason = relative_state_track_from_geometry(
+        target_id=_GHAME6_RADAR_TARGET_ID,
+        host_position_world_m=site_position_inertial_m,
+        host_velocity_world_mps=site_velocity_inertial_mps,
+        orientation_world_from_body=np.eye(3, dtype=np.float64),
+        target_position_world_m=satellite.position_inertial_m,
+        target_velocity_world_mps=satellite.velocity_inertial_mps,
+        host_body_rate_rad_s=None,
+        config=RelativeStateTrackerConfig(target_id=_GHAME6_RADAR_TARGET_ID),
+    )
+    if isinstance(payload_or_reason, str):
+        packet = MeasurementPacket(
+            sampled_at_s=sample_time_s,
+            available_at_s=sample_time_s,
+            interval_start_s=None,
+            payload=None,
+            valid=False,
+            sensor_id=_GHAME6_RADAR_SENSOR_ID,
+            port="track",
+            sequence=update_sequence - 1,
+            schema_id="taoryx.tracking.relative-state/v1",
+            invalid_reason=payload_or_reason,
+        )
+    else:
+        packet = MeasurementPacket(
+            sampled_at_s=sample_time_s,
+            available_at_s=sample_time_s,
+            interval_start_s=None,
+            payload=replace(payload_or_reason, frame_id=_GHAME6_RADAR_SENSOR_FRAME_ID),
+            sensor_id=_GHAME6_RADAR_SENSOR_ID,
+            port="track",
+            sequence=update_sequence - 1,
+            schema_id="taoryx.tracking.relative-state/v1",
+        )
+    ####
+    return packet_to_record(
+        packet,
+        provenance={
+            "provider": "relative-state-track",
+            "execution": "source-ordered-batch-boundary",
+            "source_actor": "RADAR0",
+            "target_actor": "SAT3",
+            "source_update_sequence": update_sequence,
+            "claim_boundary": (
+                "Raw committed RADAR0/SAT3 geometry only. The accompanying radar_track_update retains CADAC's "
+                "source polar convention, deterministic noise sequence, cadence, and track-file behavior; no persistent SensorBus is claimed."
+            ),
+        },
+    )
 
 
 ####

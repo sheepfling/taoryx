@@ -6,6 +6,7 @@ import pytest
 from taoryx.families.cadac.ghame6_mission_composition import (
     GHAME6_FIDELITY_ID,
     GHAME6_MODEL_ID,
+    GHAME6_MODEL_VERSION,
     GHAME6_RADAR_MODEL_ID,
     GHAME6_SATELLITE_MODEL_ID,
     CadacGhame6MissionCompositionProvider,
@@ -34,6 +35,7 @@ def test_ghame6_provider_advertises_t4_envelope_with_phase_reported_t3_rcs(tmp_p
     model = provider.list_models()[0]
 
     assert model.id == GHAME6_MODEL_ID
+    assert model.model_kind == "mission_composition"
     assert model.common_runner_operations == ("batch",)
     assert model.fidelities[0].id == GHAME6_FIDELITY_ID
     assert model.fidelities[0].dynamics_fidelity == "rigid_body_6dof"
@@ -83,7 +85,7 @@ def test_ghame6_common_runner_returns_three_root_actors_and_phase_evidence(tmp_p
         MissionCompositionRunRequest(
             request_id="ghame6-phase-smoke",
             provider_id="cadac",
-            provider_version="0.7.0",
+            provider_version=GHAME6_MODEL_VERSION,
             prepared_configuration=prepared,
             output=MissionCompositionOutputSelection(mode="all"),
         )
@@ -112,6 +114,9 @@ def test_ghame6_common_runner_returns_three_root_actors_and_phase_evidence(tmp_p
     }
     assert tuple(event.kind for event in result.events if event.kind.startswith("source_event_")) == tuple(f"source_event_{index}" for index in range(5))
     assert any(event.kind == "radar_track_update" and event.object_id == "ghame6-radar-1" for event in result.events)
+    native_track = next(event for event in result.events if event.kind == "native_relative_state_track")
+    assert native_track.data["schema_id"] == "taoryx.tracking.relative-state/v1"
+    assert native_track.data["payload"]["target_id"] == "ghame6-satellite-1"
     assert result.relationships == ()
 
 
@@ -129,7 +134,7 @@ def test_ghame6_core_selection_retains_truth_for_all_three_source_actors(tmp_pat
         MissionCompositionRunRequest(
             request_id="ghame6-core",
             provider_id="cadac",
-            provider_version="0.7.0",
+            provider_version=GHAME6_MODEL_VERSION,
             prepared_configuration=prepared,
             output=MissionCompositionOutputSelection(mode="core"),
         )

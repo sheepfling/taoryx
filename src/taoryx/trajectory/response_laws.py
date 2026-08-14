@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from .pseudo6dof_profiles import AxisResponseProfile
+if TYPE_CHECKING:
+    from .pseudo6dof_profiles import AxisResponseProfile
 
 
 def _clamp(value: float, lower: float, upper: float) -> float:

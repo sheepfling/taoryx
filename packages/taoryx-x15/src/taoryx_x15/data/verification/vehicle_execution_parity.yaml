@@ -1,0 +1,16 @@
+schema: taoryx.vehicle-execution-parity/v1alpha1
+version: 1
+description: Exact committed-boundary batch/episode parity witnesses. Absence does
+  not imply equivalence merely because both execution operations are runnable.
+bindings:
+- family_id: x15
+  mission: x15_local_direct_wrench_screen_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  batch_factory_id: x15_local_direct_wrench_screen.v1
+  episode_factory_id: x15_local_direct_wrench_episode.v1
+  adapter_id: taoryx.x15.local_direct_wrench_batch_episode_parity.v1
+  evidence_scope: One declared total-wrench action trace replayed through the source-local
+    X-15 direct-wrench batch bridge and accepted-truth episode at each committed boundary.
+  claim_boundary: This is X-15 source-local direct-wrench bridge/status parity only.
+    It does not establish an X-15 flight mission, physical control-surface, rudder,
+    RCS, propulsion, actuator, robustness, or qualification result.

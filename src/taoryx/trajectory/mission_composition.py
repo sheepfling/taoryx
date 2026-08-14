@@ -111,14 +111,6 @@ from .configuration_contract import (
     render_configuration_schema,
     validate_configuration_instance,
 )
-from .contract_probe_mission_composition import (
-    CONTRACT_PROBE_MODEL_ID,
-    CONTRACT_PROBE_PROVIDER_ID,
-    ContractProbeMissionCompositionProvider,
-    build_contract_probe_configuration,
-    contract_probe_configuration_schema,
-    contract_probe_model_metadata,
-)
 from .execution_contract import (
     MissionCompositionDiagnostic,
     MissionCompositionExecutionError,
@@ -149,6 +141,14 @@ from .rl_control import RLActionSpaceSpec, RLControlChannelSpec, build_rl_action
 from .runtime_mission_composition import RuntimeArtifactProjection, trajectory_result_from_run_artifact
 
 if TYPE_CHECKING:
+    from .contract_probe_mission_composition import (
+        CONTRACT_PROBE_MODEL_ID,
+        CONTRACT_PROBE_PROVIDER_ID,
+        ContractProbeMissionCompositionProvider,
+        build_contract_probe_configuration,
+        contract_probe_configuration_schema,
+        contract_probe_model_metadata,
+    )
     from .native_mission_composition import (
         build_registry_mission_composition_runner,
         compile_prepared_vehicle_composition,
@@ -208,6 +208,17 @@ if TYPE_CHECKING:
 def __getattr__(name: str) -> object:
     """Load native adapters lazily to avoid runtime/family import cycles."""
 
+    if name in {
+        "CONTRACT_PROBE_MODEL_ID",
+        "CONTRACT_PROBE_PROVIDER_ID",
+        "ContractProbeMissionCompositionProvider",
+        "build_contract_probe_configuration",
+        "contract_probe_configuration_schema",
+        "contract_probe_model_metadata",
+    }:
+        from . import contract_probe_mission_composition
+
+        return getattr(contract_probe_mission_composition, name)
     if name in {
         "ReferenceBallisticLaunch",
         "ReferenceMissionCompositionProvider",

@@ -76,7 +76,9 @@ def test_sraam6_common_runner_returns_missile_and_target_root_objects(tmp_path: 
         output=MissionCompositionOutputSelection(mode="all"),
     )
 
-    result = registry.run(request).result
+    response = registry.run(request)
+    assert response.kind == "trajectory", response.model_dump(mode="json")
+    result = response.result
 
     assert result.primary_model_id == SRAAM6_MODEL_ID
     assert [item.model_id for item in result.objects] == [SRAAM6_MODEL_ID, SRAAM6_TARGET_MODEL_ID]
@@ -162,6 +164,10 @@ def test_sraam6_persistent_session_owns_target_seeker_and_native_sensor_bus(tmp_
     assert step.observation.lifecycle == "active"
     assert isinstance(step.observation.values["normal_acceleration_g"], float)
     assert step.observation.values["source_seeker_state"]["seeker_mode"] >= 2
+    assert len(step.observation.values["requested_control_deg"]) == 3
+    assert len(step.observation.values["achieved_control_deg"]) == 3
+    assert len(step.observation.values["requested_fins_deg"]) == 4
+    assert len(step.observation.values["achieved_fins_deg"]) == 4
     track = step.observation.values["native_relative_state_track"]
     assert track["sensor_id"] == "sraam6-native-relative-state"
     assert track["sequence"] == 2

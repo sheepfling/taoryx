@@ -12,6 +12,7 @@ from taoryx.interface_channel_value_spaces import (
     load_interface_channel_value_space_catalog,
     validate_interface_channel_value_space_coverage,
 )
+from taoryx.plugins import discover_plugins
 from taoryx.runtime.cli import main
 from taoryx.vehicle_composition import (
     compile_vehicle_composition,
@@ -24,6 +25,7 @@ from taoryx.vehicle_interface import (
     bind_declared_sensor_profile,
     build_vehicle_interface_catalog_report,
     interface_contract_for_composition,
+    project_committed_status_values,
     resolve_vehicle_interface_contract,
     validate_authority_action_values,
     validate_interface_channel_value,
@@ -125,20 +127,96 @@ def test_interface_binding_validates_common_source_and_transform_contracts() -> 
     ####
 
 
+def test_status_projection_uses_declared_episode_or_batch_binding_present_in_truth_sample() -> None:
+    """A dual-route binding must not require the other route's raw alias."""
+
+    plugins = discover_plugins(include_external=False, selected=("taoryx.f16",))
+    contract = resolve_vehicle_interface_contract("f16_s119", "pseudo_6dof", plugins=plugins)
+
+    episode_values = project_committed_status_values(
+        contract,
+        time_s=0.0,
+        execution_status="active",
+        raw_values={
+            "body_rate.roll": 0.1,
+            "body_rate.pitch": -0.2,
+            "body_rate.yaw": 0.3,
+        },
+    )
+    assert {
+        key: episode_values[key]
+        for key in ("body_rate.roll", "body_rate.pitch", "body_rate.yaw")
+    } == {
+        "body_rate.roll": 0.1,
+        "body_rate.pitch": -0.2,
+        "body_rate.yaw": 0.3,
+    }
+
+    batch_values = project_committed_status_values(
+        contract,
+        time_s=0.0,
+        execution_status="active",
+        raw_values={"body_rate_rad_s": [0.4, -0.5, 0.6]},
+    )
+    assert {
+        key: batch_values[key]
+        for key in ("body_rate.roll", "body_rate.pitch", "body_rate.yaw")
+    } == {
+        "body_rate.roll": 0.4,
+        "body_rate.pitch": -0.5,
+        "body_rate.yaw": 0.6,
+    }
+    ####
+
+
 def test_hummingbird_pseudo_interface_exposes_response_controls_and_battery_status() -> None:
     contract = resolve_vehicle_interface_contract("hummingbird", "pseudo_6dof")
 
     assert contract.authority_profile("body_motion_response").availability == "available"
+    assert {
+        profile.id: (profile.scheme_id, profile.switching_policy)
+        for profile in contract.authority_profiles
+    } == {
+        "body_motion_response": ("body_motion.attitude", "explicit_bumpless"),
+        "velocity_yaw_command": ("kinematic.velocity", "explicit_bumpless"),
+        "live_waypoint_guidance": ("mission.waypoint", "explicit_bumpless"),
+    }
     assert {channel.id for channel in contract.action_channels} == {
         "attitude.roll.command",
         "attitude.pitch.command",
         "attitude.yaw.command",
         "propulsion.command.fraction",
         "propulsion.enable",
+        "velocity.north.command",
+        "velocity.east.command",
+        "velocity.vertical.command",
+        "navigation.waypoint.north.command",
+        "navigation.waypoint.east.command",
+        "navigation.waypoint.altitude.command",
+        "navigation.waypoint.capture_radius.command",
+        "navigation.waypoint.speed.command",
+        "navigation.waypoint.vertical_speed.command",
     }
     assert "resources.battery.fraction_remaining" in {channel.id for channel in contract.resource_channels}
     assert "resources.mass.total" in {channel.id for channel in contract.resource_channels}
     assert "propulsion.output.thrust.aggregate" in {channel.id for channel in contract.status_channels}
+    assert {
+        "velocity.vertical",
+        "velocity.horizontal.speed",
+        "attitude.roll",
+        "attitude.pitch",
+        "attitude.yaw",
+        "propulsion.enabled",
+        "propulsion.output.thrust.fraction",
+        "guidance.waypoint.range",
+        "guidance.waypoint.captured",
+        "guidance.waypoint.status",
+    } <= {channel.id for channel in contract.status_channels}
+    actions = {channel.id: channel for channel in contract.action_channels}
+    assert actions["velocity.vertical.command"].canonical_unit == "m/s"
+    assert actions["navigation.waypoint.vertical_speed.command"].canonical_unit == "m/s"
+    assert actions["navigation.waypoint.speed.command"].binding["feedback_channel_id"] == "velocity.horizontal.speed"
+    assert actions["propulsion.command.fraction"].binding["feedback_channel_id"] == "propulsion.output.thrust.fraction"
     assert validate_vehicle_interface_contract(contract) == ()
     ####
 
@@ -581,4 +659,36 @@ def test_catalog_interface_report_matches_all_declared_episode_profiles(
     payload = cast(dict[str, Any], json.loads(capsys.readouterr().out))
     assert payload["schema"] == "taoryx.vehicle-interface-catalog-report/v1alpha1"
     assert payload["status"] == "pass"
+    ####
+
+
+def test_interface_report_can_validate_only_one_vehicle_plugin() -> None:
+    report = build_vehicle_interface_catalog_report(family_ids=("hummingbird",))
+
+    assert report["status"] == "pass"
+    assert report["family_filter"] == ["hummingbird"]
+    assert report["family_count"] == 1
+    assert report["interface_count"] == 4
+    interfaces = cast(list[dict[str, object]], report["interfaces"])
+    assert {item["family_id"] for item in interfaces} == {"hummingbird"}
+    ####
+
+
+def test_interface_report_can_validate_only_reduced_fidelities_for_one_plugin() -> None:
+    """A quick family gate need not reconstruct its physical controller tiers."""
+
+    report = build_vehicle_interface_catalog_report(
+        family_ids=("f16_s119",),
+        fidelity_ids=("point_mass_3dof", "pseudo_6dof"),
+    )
+
+    assert report["status"] == "pass"
+    assert report["family_filter"] == ["f16_s119"]
+    assert report["fidelity_filter"] == ["point_mass_3dof", "pseudo_6dof"]
+    assert report["interface_count"] == 2
+    interfaces = cast(list[dict[str, object]], report["interfaces"])
+    assert {(item["family_id"], item["fidelity"]) for item in interfaces} == {
+        ("f16_s119", "point_mass_3dof"),
+        ("f16_s119", "pseudo_6dof"),
+    }
     ####

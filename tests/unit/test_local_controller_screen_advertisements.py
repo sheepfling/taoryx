@@ -10,12 +10,18 @@ from taoryx.local_controller_screen_advertisements import (
 )
 
 
-def _registration(identifier: str = "example-local-screen") -> LocalControllerScreenAdvertisement:
+def _registration(
+    identifier: str = "example-local-screen",
+    *,
+    provider_id: str = "example.provider",
+    provider_aliases: tuple[str, ...] = (),
+) -> LocalControllerScreenAdvertisement:
     """Build one complete minimal opaque-controller advertisement."""
 
     return LocalControllerScreenAdvertisement(
         id=identifier,
-        provider_id="example.provider",
+        provider_id=provider_id,
+        provider_aliases=provider_aliases,
         model_id="example-model",
         family_id="example-family",
         fidelity="rigid_body_6dof_direct_wrench",
@@ -69,5 +75,30 @@ def test_local_controller_screen_registry_rejects_duplicate_endpoint_ownership()
     with pytest.raises(ValueError, match="duplicate endpoint selections"):
         LocalControllerScreenAdvertisementRegistry(
             registrations=(_registration("first-screen"), _registration("second-screen")),
+        )
+    ####
+
+
+def test_local_controller_screen_aliases_are_exact_and_collision_safe() -> None:
+    """An aggregate alias can expose a screen without creating ambiguity."""
+
+    registration = _registration(provider_aliases=("example.aggregate",))
+    registry = LocalControllerScreenAdvertisementRegistry(registrations=(registration,))
+
+    assert [item.id for item in registry.matching(
+        provider_id="example.aggregate",
+        model_id="example-model",
+        family_id="example-family",
+        fidelity="rigid_body_6dof_direct_wrench",
+        realization_id="rigid_body_6dof_direct_wrench",
+        mission_template_id="example_local_screen_v1",
+    )] == ["example-local-screen"]
+
+    with pytest.raises(ValueError, match="duplicate endpoint selections"):
+        LocalControllerScreenAdvertisementRegistry(
+            registrations=(
+                registration,
+                _registration("aggregate-screen", provider_id="example.aggregate"),
+            ),
         )
     ####

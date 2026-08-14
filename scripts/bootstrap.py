@@ -11,19 +11,45 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 VENV = ROOT / ".venv"
 
+_DIRECT_MODEL_PROJECTS: tuple[str, ...] = (
+    "packages/taoryx-daveml",
+    "packages/taoryx-debug-models",
+    "packages/taoryx-a320",
+    "packages/taoryx-f16",
+    "packages/taoryx-hummingbird",
+    "packages/taoryx-nesc",
+    "packages/taoryx-passive-bodies",
+    "packages/taoryx-simple-aero",
+    "packages/taoryx-dual-launch",
+    "packages/taoryx-x15",
+    "packages/taoryx-hl20",
+    "packages/taoryx-source-table-fixed-wing",
+)
+
+_COMPATIBILITY_PROJECTS: tuple[str, ...] = (
+    "packages/taoryx-daveml",
+    "packages/taoryx-a320",
+    "packages/taoryx-f16",
+    "packages/taoryx-hummingbird",
+    "packages/taoryx-nesc",
+    "packages/taoryx-simple-aero",
+    "packages/taoryx-dual-launch",
+    "packages/taoryx-x15",
+    "packages/taoryx-hl20",
+    "packages/taoryx-source-table-fixed-wing",
+    "packages/taoryx-reference-models",
+)
+
 PROFILE_PROJECTS: dict[str, tuple[str, ...]] = {
     "core": (),
     "cadac": (
         "packages/taoryx-cadac",
     ),
-    "models": (
-        "packages/taoryx-daveml",
-        "packages/taoryx-simple-aero",
-        "packages/taoryx-reference-models",
-    ),
+    "models": _DIRECT_MODEL_PROJECTS,
+    "developer": (*_DIRECT_MODEL_PROJECTS, "packages/taoryx-reachability"),
+    "compatibility": _COMPATIBILITY_PROJECTS,
     "full": (
-        "packages/taoryx-daveml",
-        "packages/taoryx-simple-aero",
+        *_DIRECT_MODEL_PROJECTS,
         "packages/taoryx-reference-models",
         "packages/taoryx-reachability",
     ),
@@ -74,8 +100,8 @@ def main() -> int:
     parser.add_argument(
         "--profile",
         choices=tuple(PROFILE_PROJECTS),
-        default="full",
-        help="distribution set to install (default: all official model and reachability plug-ins)",
+        default="developer",
+        help="distribution set to install (default: direct model and overlay plug-ins, without the compatibility aggregate)",
     )
     parser.add_argument(
         "--with-sensors",

@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from taoryx_reference_models.resources import model_resource_root
+from taoryx_x15.resources import model_resource_root
 
 from .contracts import Vector3
 from .reachability_envelope import (

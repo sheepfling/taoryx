@@ -1,0 +1,47 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: nesc-staged-source-replay-with-passive-child-pseudo6dof-v1
+vehicle: reference_nesc_two_stage_rocket
+fidelity: pseudo_6dof
+initialization:
+  id: pad_launch
+  inputs:
+    latitude_deg: {value: 0.0, unit: deg}
+    longitude_deg: {value: 0.0, unit: deg}
+    initial_mass_kg: {value: 314000.0, unit: kg}
+    initial_heading_deg: {value: 90.0, unit: deg}
+mission:
+  id: staged_rocket_launch_target_state_v1
+segments:
+  - id: ignition_ascent
+    instance_id: stage1-ascent
+    inputs:
+      pitch_program: {value: 0.0, unit: deg}
+  - id: stage_separation
+    instance_id: source-staging
+    inputs:
+      separation_delay_s: {value: 97.6, unit: s}
+  - id: ignition_ascent
+    instance_id: stage2-ascent
+    inputs:
+      pitch_program: {value: 0.0, unit: deg}
+  - id: coast_terminal_state
+    instance_id: orbit-coast-terminal
+    inputs:
+      terminal_kind: {value: orbit}
+deployment_bindings:
+  - id: nesc-synthetic-passive-cylinder-pseudo6dof
+    deployment_id: stage_separation_lineage
+    release_event_id: stage_separation
+    child_object_id: nesc-synthetic-cylinder-1
+    child:
+      plugin_id: taoryx.passive-bodies
+      runtime_id: taoryx.passive-bodies.local-atmosphere-release.v1
+      model_id: nesc-synthetic-cylinder
+      family_id: tumbling_body
+      fidelity: pseudo_6dof
+    state_transfer: source_replay_kinematic_projection
+    claim_boundary: >-
+      This explicitly selects a synthetic passive cylinder after the accepted
+      NESC source-replay stage-separation event. The ECI state is projected to
+      an event-local tangent state for the child runtime; no separation impulse,
+      source-exact detached-stage aerodynamics, or parent replay promotion is claimed.

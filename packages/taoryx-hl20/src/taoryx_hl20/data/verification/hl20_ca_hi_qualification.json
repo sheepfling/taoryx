@@ -1,0 +1,131 @@
+{
+  "artifact_dir": "artifacts/showcases/hl20_california_to_hawaii/low_fidelity",
+  "contract_path": "examples/showcases/hl20_california_to_hawaii/quality_gates.yaml",
+  "fidelities": [
+    "point_mass_3dof",
+    "pseudo_6dof",
+    "rigid_body_6dof",
+    "rigid_body_6dof_surface_allocated"
+  ],
+  "gates": [
+    {
+      "evidence": {
+        "artifact_sha256": {
+          "point_mass_3dof": "af83a991affbc1728c7aded2f7c478c1fd950b62f4a9526feb9e09de1aca3813",
+          "pseudo_6dof": "d094c74f2ddbc34afa0fbd15412de367b0012b6ac7254cfee3827e4d2fa99f23",
+          "rigid_body_6dof": "4fed033aa244e708a65aa0e288fd6024c60afef16bc2f293259cca4ad308a746",
+          "rigid_body_6dof_surface_allocated": "0739c89c538488056ada5405026d5f6734db924404535c1fe6b39f0335469c78"
+        },
+        "provenance_scenario_ids": [
+          "hl20-rocket-release-point_mass_3dof-v1",
+          "hl20-rocket-release-pseudo_6dof-v1",
+          "hl20-rocket-release-rigid_body_6dof-v1",
+          "hl20-rocket-release-rigid_body_6dof_surface_allocated-v1"
+        ]
+      },
+      "id": "HL20-G0",
+      "message": "source, assumption, artifact, and common-search-space bindings are valid",
+      "name": "source and artifact contract",
+      "number": 0,
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "phase_trajectory_counts": {
+          "boost": 12,
+          "coast": 12,
+          "glide": 12
+        },
+        "release_times_s": [
+          25.0,
+          25.0,
+          25.0,
+          25.0,
+          25.0,
+          25.0,
+          25.000000000000007,
+          25.000000000000007,
+          25.000000000000007,
+          25.000000000000007,
+          25.000000000000007,
+          25.000000000000007
+        ]
+      },
+      "id": "HL20-G1",
+      "message": "boost, coast, and glide are ordered with exact burnout and release boundaries",
+      "name": "phase and event ordering",
+      "number": 1,
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "candidate_count": 3,
+        "maximum_altitude_m": 5357.575593850259,
+        "maximum_speed_m_s": 250.0
+      },
+      "id": "HL20-G2",
+      "message": "3DOF translation and resource baseline is finite, bounded, and terminally classified",
+      "name": "3DOF translation baseline",
+      "number": 2,
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "candidate_count": 3,
+        "maximum_attitude_rate_rad_s": 1.131810764412816
+      },
+      "id": "HL20-G3",
+      "message": "pseudo-6DOF carries aligned reduced attitude and rate channels without claiming native rotation",
+      "name": "pseudo-6DOF bridge",
+      "number": 3,
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "maximum_body_rate_rad_s": 0.0,
+        "maximum_rotation_residual_normalized": 0.0,
+        "maximum_translation_residual_normalized": 1.2468492807575207e-15
+      },
+      "id": "HL20-G4",
+      "message": "native rigid-body state, equation residuals, and passive-tumble rotation are present",
+      "name": "native rigid-body 6DOF",
+      "number": 4,
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "dynamics_overlay_only": true,
+        "maximum_surface_residual_deg": 0.0,
+        "telemetry_rows": 599
+      },
+      "id": "HL20-G5",
+      "message": "logical seven-surface telemetry is bounded and proven as a non-dynamics overlay",
+      "name": "logical surface telemetry overlay",
+      "number": 5,
+      "status": "pass"
+    },
+    {
+      "evidence": {
+        "child_termination_counts": {
+          "ground_contact": 12
+        },
+        "deployed_children": 12,
+        "maximum_momentum_residual_kg_m_s": 0.0,
+        "parent_termination_counts": {
+          "ground_contact": 12
+        },
+        "timed_out_query_ids": []
+      },
+      "id": "HL20-G6",
+      "message": "cylinder deployment lineage, impulse closure, child telemetry, and terminal semantics are qualified",
+      "name": "deployment lineage and terminal semantics",
+      "number": 6,
+      "status": "pass"
+    }
+  ],
+  "qualified_through": "HL20-G6",
+  "scenario_id": "hl20-rocket-release",
+  "schema": "taoryx.hl20-qualification-report/v1alpha1",
+  "vehicle_id": "reference_hl20_mod_k",
+  "verdict": "qualified_through_hl20_g6"
+}

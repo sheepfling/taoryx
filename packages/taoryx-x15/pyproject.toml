@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taoryx-x15"
+version = "0.1.0a0"
+description = "Source-backed X-15 vehicle plug-in for Taoryx"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "numpy>=2.0",
+  "scipy>=1.13",
+  "taoryx>=0.1.0a0,<0.2",
+]
+
+[project.entry-points."taoryx.plugins"]
+"taoryx.x15" = "taoryx_x15.plugin:PLUGIN"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[tool.setuptools.package-data]
+taoryx_x15 = ["data/**/*", "data/**/**/*", "data/**/**/**/*", "data/**/**/**/**/*"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["**/__pycache__/*", "**/*.pyc"]

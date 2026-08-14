@@ -13,7 +13,8 @@ dependencies = [
   "pydantic>=2.8",
   "PyYAML>=6.0",
   "taoryx>=0.1.0a0,<0.2",
-  "taoryx-reference-models>=0.1.0a0,<0.2",
+  "taoryx-x15>=0.1.0a0,<0.2",
+  "taoryx-hl20>=0.1.0a0,<0.2",
 ]
 
 [project.entry-points."taoryx.plugins"]

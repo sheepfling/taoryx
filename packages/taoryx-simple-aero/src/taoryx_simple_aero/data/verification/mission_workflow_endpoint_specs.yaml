@@ -1,0 +1,36 @@
+schema: taoryx.mission-workflow-endpoint-specs/v1alpha1
+version: 1
+description: Focused provider-owned vertical proofs for registered nonphysical workflows
+  that intentionally do not claim membership in the physical vehicle-composition registry.
+endpoints:
+- id: simple-aero-fixed-ld-batch
+  provider_id: taoryx.simple-aero.mission-composition
+  model_id: simple_aero
+  model_kind: trajectory_workflow
+  fidelity: point_mass_3dof
+  realization_id: fixed_ld_point_mass
+  mission_template_id: fixed_ld_baseline
+  draft: verification/workflow_endpoint_witnesses/simple_aero_fixed_ld_baseline.yaml
+  batch_executor_id: taoryx.simple-aero.common-batch.v1
+  blocked_operations: []
+  required_core_output_ids:
+  - position.geodetic.altitude
+  - position.geodetic.latitude
+  - position.geodetic.longitude
+  - velocity.speed
+  required_telemetry_output_ids:
+  - mass.total
+  - propulsion.mass_flow
+  - propulsion.thrust
+  - propulsion.throttle_command
+  - aerodynamics.dynamic_pressure
+  - aerodynamics.angle_of_attack
+  expected_primary_object_count: 1
+  maximum_samples_per_object: 3
+  robustness_disposition: not_applicable
+  robustness_reason: The fixed-L/D workflow does not expose an accepted persistent
+    disturbance, mass-variation, or controller-tuning injection seam at this boundary.
+  maturity_record_id: simple_aero
+  claim_boundary: This is a source-shaped, fixed-L/D point-mass workflow proof. It
+    is not a physical vehicle, navigation, robustness, controller-tuning, or qualification
+    claim.

@@ -7,11 +7,12 @@ from typing import Any
 
 import yaml
 
+from taoryx.builtin_plugins import source_plugin_entry_points
+
 ROOT = Path(__file__).resolve().parents[1]
 MATURITY_REGISTRY = ROOT / "verification/vehicle_maturity_registry.yaml"
 COMPOSITION_REGISTRY = ROOT / "verification/vehicle_composition_registry.yaml"
 EXECUTION_WITNESSES = ROOT / "verification/vehicle_execution_witnesses.yaml"
-PACKAGED_MIRROR = ROOT / "packages/taoryx-reference-models/src/taoryx_reference_models/data/verification/vehicle_maturity_registry.yaml"
 
 
 def _load_mapping(path: Path) -> dict[str, Any]:
@@ -30,11 +31,13 @@ def _composition_family_ids(registry: dict[str, Any]) -> set[str]:
     records = registry.get("vehicles")
     if not isinstance(records, list):
         raise ValueError("vehicle composition registry must contain a vehicles list")
-    identifiers = {
-        record.get("family_id")
-        for record in records
-        if isinstance(record, dict) and isinstance(record.get("family_id"), str)
-    }
+    identifiers: set[str] = set()
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        family_id = record.get("family_id")
+        if isinstance(family_id, str):
+            identifiers.add(family_id)
     if not identifiers:
         raise ValueError("vehicle composition registry contains no family identifiers")
     return identifiers
@@ -63,6 +66,79 @@ def _batch_witness_families(witnesses: dict[str, Any]) -> set[str]:
 ####
 
 
+def _packaged_fragment_paths() -> tuple[Path, ...]:
+    """Find maturity fragments from their owning package entry-point declarations.
+
+    The checkout ledger is deliberately reconstructed from every declared
+    sibling plug-in package that carries this resource.  A static package list
+    would drift whenever a family is split, merged, or newly added.
+    """
+
+    fragments: list[Path] = []
+    for declaration in source_plugin_entry_points():
+        module_name = declaration.value.partition(":")[0]
+        package_name = module_name.split(".", maxsplit=1)[0]
+        source = (
+            declaration.project.parent
+            / "src"
+            / package_name
+            / "data"
+            / "verification"
+            / "vehicle_maturity_registry.yaml"
+        )
+        if source.is_file():
+            fragments.append(source)
+    if not fragments:
+        raise ValueError("no declared plug-in package owns a vehicle maturity registry fragment")
+    return tuple(fragments)
+####
+
+
+def _validate_packaged_fragments(canonical: dict[str, Any]) -> None:
+    """Prove that the package-owned maturity rows reconstruct the source ledger.
+
+    The checkout-level registry is still the canonical editing surface.  A
+    split family owns a non-overlapping fragment in its own wheel, so bytewise
+    equality with the reference-model package would incorrectly require that
+    package to keep a second family copy. Compare records by stable ID
+    instead, preserving the source ledger's headers and exact record content.
+    """
+
+    canonical_records = canonical.get("records")
+    if not isinstance(canonical_records, list):
+        raise ValueError("vehicle maturity registry must contain records")
+    fragments: list[dict[str, Any]] = []
+    for source in _packaged_fragment_paths():
+        fragment = _load_mapping(source)
+        if fragment.get("registry_id") != canonical.get("registry_id"):
+            raise ValueError(f"vehicle maturity registry packaged fragment has an incompatible header: {source}")
+        if fragment.get("levels") != canonical.get("levels"):
+            raise ValueError(f"vehicle maturity registry packaged fragment has incompatible levels: {source}")
+        fragments.append(fragment)
+
+    packaged_records = [
+        record
+        for fragment in fragments
+        for record in fragment.get("records", [])
+        if isinstance(record, dict)
+    ]
+    canonical_by_id = {
+        record.get("id"): record
+        for record in canonical_records
+        if isinstance(record, dict) and isinstance(record.get("id"), str)
+    }
+    packaged_by_id = {
+        record.get("id"): record
+        for record in packaged_records
+        if isinstance(record.get("id"), str)
+    }
+    if len(packaged_by_id) != len(packaged_records):
+        raise ValueError("vehicle maturity registry packaged fragments contain duplicate or invalid record IDs")
+    if packaged_by_id != canonical_by_id:
+        raise ValueError("vehicle maturity registry packaged fragments do not reconstruct the canonical ledger")
+####
+
+
 def validate() -> None:
     """Check maturity metadata against concrete public Composition witnesses.
 
@@ -74,10 +150,7 @@ def validate() -> None:
     """
 
     maturity = _load_mapping(MATURITY_REGISTRY)
-    if not PACKAGED_MIRROR.is_file():
-        raise ValueError("vehicle maturity registry packaged mirror is missing")
-    if PACKAGED_MIRROR.read_text(encoding="utf-8") != MATURITY_REGISTRY.read_text(encoding="utf-8"):
-        raise ValueError("vehicle maturity registry packaged mirror is stale")
+    _validate_packaged_fragments(maturity)
     if maturity.get("registry_id") != "taoryx_vehicle_maturity_v1":
         raise ValueError("invalid vehicle maturity registry header")
     levels = maturity.get("levels")
@@ -98,7 +171,13 @@ def validate() -> None:
         maturity_level = record.get("maturity")
         status = record.get("status")
         next_gate = record.get("next_gate")
-        if not all(isinstance(value, str) and value for value in (identifier, maturity_level, status, next_gate)):
+        if not isinstance(identifier, str) or not identifier:
+            raise ValueError("vehicle maturity records require id, maturity, status, and next_gate")
+        if not isinstance(maturity_level, str) or not maturity_level:
+            raise ValueError("vehicle maturity records require id, maturity, status, and next_gate")
+        if not isinstance(status, str) or not status:
+            raise ValueError("vehicle maturity records require id, maturity, status, and next_gate")
+        if not isinstance(next_gate, str) or not next_gate:
             raise ValueError("vehicle maturity records require id, maturity, status, and next_gate")
         if identifier in identifiers:
             raise ValueError(f"duplicate vehicle maturity record: {identifier}")

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taoryx-hl20"
+version = "0.1.0a0"
+description = "Source-backed HL-20 vehicle plug-in for Taoryx"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "numpy>=2.0",
+  "scipy>=1.13",
+  "taoryx>=0.1.0a0,<0.2",
+  "taoryx-daveml>=0.1.0a0,<0.2",
+]
+
+[project.entry-points."taoryx.plugins"]
+"taoryx.hl20" = "taoryx_hl20.plugin:PLUGIN"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[tool.setuptools.package-data]
+taoryx_hl20 = ["data/**/*", "data/**/**/*", "data/**/**/**/*", "data/**/**/**/**/*"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["**/__pycache__/*", "**/*.pyc"]

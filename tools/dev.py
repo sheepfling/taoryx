@@ -8,6 +8,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tomllib
 import zipfile
 from collections.abc import Iterable
 from pathlib import Path
@@ -17,14 +18,93 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 TOOLS = ROOT / "tools"
 VENV_PYTHON = ROOT / ".venv" / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
-SOURCE_ROOTS = (
-    ROOT / "src",
-    ROOT / "packages" / "taoryx-daveml" / "src",
-    ROOT / "packages" / "taoryx-cadac" / "src",
-    ROOT / "packages" / "taoryx-simple-aero" / "src",
-    ROOT / "packages" / "taoryx-reference-models" / "src",
-    ROOT / "packages" / "taoryx-reachability" / "src",
+
+
+def _declared_source_roots() -> tuple[Path, ...]:
+    """Return core plus sibling source roots declared through plug-in entry points.
+
+    The developer runner must not carry a second hand-maintained package list:
+    a newly declared plug-in becomes available to repository integration work
+    through the same ``pyproject.toml`` declaration that produces its wheel.
+    Focused vehicle commands still pass an explicit selected plug-in catalog to
+    their host APIs; this helper only supplies import roots for repository-wide
+    integration tasks.
+    """
+
+    roots = [ROOT / "src"]
+    for project in sorted((ROOT / "packages").glob("*/pyproject.toml")):
+        try:
+            document = tomllib.loads(project.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, tomllib.TOMLDecodeError) as error:
+            raise RuntimeError(f"could not read plug-in declaration {project}: {error}") from error
+        metadata = document.get("project")
+        entry_points = metadata.get("entry-points") if isinstance(metadata, dict) else None
+        group = entry_points.get("taoryx.plugins") if isinstance(entry_points, dict) else None
+        if not isinstance(group, dict) or not group:
+            continue
+        source_root = project.parent / "src"
+        if not source_root.is_dir():
+            raise RuntimeError(f"plug-in declaration {project} has no source root {source_root}")
+        roots.append(source_root)
+    return tuple(roots)
+    ####
+
+
+SOURCE_ROOTS = _declared_source_roots()
+
+
+def _declared_plugin_entry_point_paths() -> tuple[str, ...]:
+    """Resolve every declared plug-in entry point to its source module.
+
+    Ruff intentionally follows the same metadata that package discovery uses.
+    That makes a new plug-in's public registration module part of its safe-fix
+    gate automatically, without another manually maintained package list.
+    """
+
+    paths: set[str] = set()
+    for project in sorted((ROOT / "packages").glob("*/pyproject.toml")):
+        try:
+            document = tomllib.loads(project.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, tomllib.TOMLDecodeError) as error:
+            raise RuntimeError(f"could not read plug-in declaration {project}: {error}") from error
+        metadata = document.get("project")
+        entry_points = metadata.get("entry-points") if isinstance(metadata, dict) else None
+        group = entry_points.get("taoryx.plugins") if isinstance(entry_points, dict) else None
+        if not isinstance(group, dict):
+            continue
+        source_root = project.parent / "src"
+        for plugin_id, declaration in group.items():
+            if not isinstance(plugin_id, str) or not isinstance(declaration, str):
+                raise RuntimeError(f"plug-in declaration {project} has an invalid taoryx.plugins entry point")
+            module_name, separator, _attribute = declaration.partition(":")
+            if not separator or not module_name:
+                raise RuntimeError(f"plug-in declaration {project} has an invalid entry point {declaration!r}")
+            module_path = source_root.joinpath(*module_name.split(".")).with_suffix(".py")
+            package_init = source_root.joinpath(*module_name.split("."), "__init__.py")
+            source = module_path if module_path.is_file() else package_init
+            if not source.is_file():
+                raise RuntimeError(f"plug-in declaration {project} entry point {declaration!r} has no source module")
+            paths.add(source.relative_to(ROOT).as_posix())
+    return tuple(sorted(paths))
+    ####
+
+
+# This is intentionally the shared plug-in developer surface rather than the
+# whole historical/model corpus. The latter already has an independent Mypy
+# gate and known typing debt; this CI route makes shared API regressions
+# actionable without hiding them in a catalogue-wide report.
+PYRIGHT_QUALITY_PATHS = (
+    "src/taoryx/plugins",
+    "src/taoryx/builtin_plugins",
+    "src/taoryx/compatibility/vehicle_catalog_resources.py",
+    "src/taoryx/vehicle_catalog_resources.py",
+    "src/taoryx/trajectory/catalog_mission_composition.py",
+    "tools/dev.py",
+    "tools/validate_plugin_developer_route.py",
+    "tools/verify_plugin_wheels.py",
 )
+PLUGIN_ENTRY_POINT_PATHS = _declared_plugin_entry_point_paths()
+RUFF_QUALITY_PATHS = (*PYRIGHT_QUALITY_PATHS, *PLUGIN_ENTRY_POINT_PATHS)
 QUICK_TEST_PATHS = (
     "tests/parser/test_lexical.py",
     "tests/parser/test_expressions.py",
@@ -37,6 +117,7 @@ QUICK_TEST_PATHS = (
     "tests/unit/test_mission_composition_completion.py",
     "tests/unit/test_model_authoring.py",
     "tests/unit/test_tooling_entrypoints.py",
+    "tests/unit/test_vehicle_catalog_resource_quarantine.py",
 )
 CONTROL_API_PILOT_TEST_PATHS = (
     "tests/unit/test_control_scheme_advertisement.py",
@@ -45,30 +126,193 @@ CONTROL_API_PILOT_TEST_PATHS = (
     "tests/unit/test_simple_aero_vehicle_vertical.py",
     "tests/unit/test_mission_composition_sessions.py",
 )
+DEBUG_MODEL_VERTICAL_TEST_PATHS = ("tests/families/debug_models/test_debug_models_vertical.py",)
+DAVEML_PLUGIN_VERTICAL_TEST_PATHS = ("tests/families/daveml/test_daveml_plugin_vertical.py",)
+CADAC_PLUGIN_BOUNDARY_TEST_PATHS = ("tests/families/cadac/test_taoryx_plugin.py",)
+REACHABILITY_PLUGIN_VERTICAL_TEST_PATHS = ("tests/families/reachability/test_reachability_plugin_vertical.py",)
+SOURCE_TABLE_FIXED_WING_PLUGIN_BOUNDARY_TEST_PATHS = (
+    "tests/families/source_table_fixed_wing/test_source_table_fixed_wing_plugin_boundary.py",
+)
 VEHICLE_VERTICAL_TEST_PATHS: dict[str, tuple[str, ...]] = {
     # A vertical slice is deliberately one family rather than every test with
     # that family marker.  It proves the public Composition path from the
     # plug-in advertisement through execution and controller automation.
-    "f16_s119": ("tests/unit/test_f16_vehicle_vertical.py",),
-    "a320_openap_3dof": ("tests/unit/test_a320_vehicle_vertical.py",),
-    "hummingbird": ("tests/unit/test_hummingbird_vehicle_vertical.py",),
-    "x15": ("tests/unit/test_x15_vehicle_vertical.py",),
-    "hl20_mod_k": ("tests/unit/test_hl20_vehicle_vertical.py",),
-    "reference_nesc_two_stage_rocket": ("tests/unit/test_nesc_vehicle_vertical.py",),
-    "tumbling_body": ("tests/unit/test_tumbling_body_vehicle_vertical.py",),
-    "skywalker_x8": ("tests/unit/test_x8_vehicle_vertical.py",),
-    "b747": ("tests/unit/test_b747_vehicle_vertical.py",),
-    "simple_aero": (
-        "tests/unit/test_simple_aero_vehicle_vertical.py",
-        "tests/unit/test_mission_workflow_endpoint.py::test_workflow_endpoints_compile_and_preflight_through_the_installed_provider[simple-aero-fixed-ld-batch]",
-        "tests/unit/test_mission_workflow_endpoint.py::test_workflow_endpoints_emit_their_declared_normalized_result_surface[simple-aero-fixed-ld-batch]",
+    "f16_s119": ("tests/families/f16/test_f16_vehicle_vertical.py",),
+    "a320_openap_3dof": ("tests/families/a320/test_a320_vehicle_vertical.py",),
+    "hummingbird": ("tests/families/hummingbird/test_hummingbird_vehicle_vertical.py",),
+    "x15": ("tests/families/x15/test_x15_plugin_vertical.py",),
+    "hl20_mod_k": ("tests/families/hl20/test_hl20_plugin_vertical.py",),
+    "reference_nesc_two_stage_rocket": ("tests/families/nesc/test_nesc_vehicle_vertical.py",),
+    "tumbling_body": ("tests/families/passive_bodies/test_tumbling_body_vehicle_vertical.py",),
+    "skywalker_x8": (
+        *SOURCE_TABLE_FIXED_WING_PLUGIN_BOUNDARY_TEST_PATHS,
+        "tests/families/source_table_fixed_wing/test_x8_vehicle_vertical.py",
     ),
+    "b747": (
+        *SOURCE_TABLE_FIXED_WING_PLUGIN_BOUNDARY_TEST_PATHS,
+        "tests/families/source_table_fixed_wing/test_b747_vehicle_vertical.py",
+    ),
+    "cadac_aim5": ("tests/families/cadac/test_aim5_vehicle_vertical.py",),
+    "cadac_cruise5": ("tests/families/cadac/test_cruise5_vehicle_vertical.py",),
+    "cadac_magsix": ("tests/families/cadac/test_magsix_vehicle_vertical.py",),
+    "cadac_ghame3": ("tests/families/cadac/test_ghame3_vehicle_vertical.py",),
+    "cadac_ghame6": ("tests/families/cadac/test_ghame6_package_vertical.py",),
+    "cadac_rocket6g": ("tests/families/cadac/test_rocket6g_vehicle_vertical.py",),
+    "cadac_ads6_srbm": ("tests/families/cadac/test_ads6_srbm_vehicle_vertical.py",),
+    "cadac_agm6": ("tests/families/cadac/test_agm6_vehicle_vertical.py",),
+    "cadac_ads6_engagement": ("tests/families/cadac/test_ads6_engagement_vehicle_vertical.py",),
+    "cadac_sraam6": ("tests/families/cadac/test_sraam6_vehicle_vertical.py",),
+    "cadac_ads6_sam": ("tests/families/cadac/test_ads6_sam_vehicle_vertical.py",),
+    "cadac_ads6_aircraft": ("tests/families/cadac/test_ads6_aircraft_vehicle_vertical.py",),
+    "cadac_falcon6": ("tests/families/cadac/test_falcon6_vehicle_vertical.py",),
+    "simple_aero": ("tests/families/simple_aero/test_simple_aero_workflow_vertical.py",),
     "dual_launch_glider": (
-        "tests/unit/test_dual_launch_vehicle_vertical.py",
+        "tests/families/dual_launch/test_dual_launch_workflow_vertical.py",
         "tests/unit/test_mission_workflow_endpoint.py::test_workflow_endpoints_compile_and_preflight_through_the_installed_provider[dual-launch-attached-booster-batch]",
-        "tests/unit/test_mission_workflow_endpoint.py::test_workflow_endpoints_emit_their_declared_normalized_result_surface[dual-launch-attached-booster-batch]",
+        "tests/unit/test_mission_workflow_endpoint.py::test_workflow_endpoints_emit_their_declared_normalized_result_surface[dual-launch-attached-booster-batch-1]",
     ),
 }
+VEHICLE_INTERFACE_VERTICAL_FAMILIES = frozenset(
+    {
+        "a320_openap_3dof",
+        "b747",
+        "f16_s119",
+        "hl20_mod_k",
+        "hummingbird",
+        "reference_nesc_two_stage_rocket",
+        "skywalker_x8",
+        "tumbling_body",
+        "x15",
+    }
+)
+FOCUSED_VEHICLE_PLUGIN_IDS: dict[str, tuple[str, ...]] = {
+    # Roll out narrow executable catalog scopes one family at a time.  A
+    # family is absent until its focused gate proves every selected endpoint
+    # can run without aggregate plug-in discovery.
+    "a320_openap_3dof": ("taoryx.a320",),
+    "f16_s119": ("taoryx.f16",),
+    "hummingbird": ("taoryx.hummingbird",),
+    "reference_nesc_two_stage_rocket": ("taoryx.nesc",),
+    "tumbling_body": ("taoryx.passive-bodies",),
+    "skywalker_x8": ("taoryx.source-table-fixed-wing",),
+    "b747": ("taoryx.source-table-fixed-wing",),
+    "x15": ("taoryx.x15",),
+    "hl20_mod_k": ("taoryx.hl20",),
+    "dual_launch_glider": ("taoryx.dual-launch",),
+}
+FOCUSED_VEHICLE_ASSET_CHECKS: dict[str, str] = {
+    # A package-data extractor is part of a vehicle's vertical boundary. The
+    # selected family check rejects stale source/evidence assets before using
+    # them, without inspecting another package's data tree.
+    "a320_openap_3dof": "extract_a320_plugin_assets.py",
+    "f16_s119": "extract_f16_plugin_assets.py",
+    "hummingbird": "extract_hummingbird_plugin_assets.py",
+    "skywalker_x8": "extract_source_table_fixed_wing_plugin_assets.py",
+    "b747": "extract_source_table_fixed_wing_plugin_assets.py",
+    "x15": "extract_x15_plugin_assets.py",
+    "hl20_mod_k": "extract_hl20_plugin_assets.py",
+    "reference_nesc_two_stage_rocket": "extract_nesc_plugin_assets.py",
+    "tumbling_body": "extract_passive_bodies_plugin_assets.py",
+}
+WORKFLOW_VEHICLE_ASSET_CHECKS: dict[str, str] = {
+    # Nonphysical workflow packages use the same exact-data guard, while their
+    # focused commands intentionally avoid physical-vehicle interface gates.
+    "simple_aero": "extract_simple_aero_plugin_assets.py",
+    "dual_launch_glider": "extract_dual_launch_plugin_assets.py",
+}
+FOCUSED_VEHICLE_INTERFACE_FIDELITIES: dict[str, tuple[str, ...]] = {
+    # The reduced OpenAP and surrogate pseudo-6DOF products are the public
+    # streaming surface. The native-coordinate LQI screen remains separate.
+    "a320_openap_3dof": ("point_mass_3dof", "pseudo_6dof"),
+    # The F-16 quick gate intentionally covers the reduced tiers first.  The
+    # source-local direct-wrench and surface controller campaigns retain their
+    # own evidence suite and are not re-executed for a reduced API change.
+    "f16_s119": ("point_mass_3dof", "pseudo_6dof"),
+    # The aggregate-thrust pseudo runtime is the narrow public contract.  The
+    # physical rotor/direct-wrench screens retain their own evidence suites.
+    "hummingbird": ("pseudo_6dof",),
+    # Source-replay products are batch-only at both lower tiers. The optional
+    # passive-body child is a separate explicit two-package deployment proof.
+    "reference_nesc_two_stage_rocket": ("point_mass_3dof", "pseudo_6dof"),
+    # Direct-release bodies have batch-only low-fidelity products and no
+    # caller action or batch/episode parity claim.
+    "tumbling_body": ("point_mass_3dof", "pseudo_6dof"),
+    # X8's guidance-first tiers are the normal streaming contract. Its
+    # direct-wrench and source-surface screens remain separate evidence.
+    "skywalker_x8": ("point_mass_3dof", "pseudo_6dof"),
+    # B747's normal package gate likewise stays at the lower guidance tiers.
+    # Source direct-wrench and local-controller screens have their own lane.
+    "b747": ("point_mass_3dof", "pseudo_6dof"),
+    # X-15 currently has no reduced route product in its focused plug-in.
+    # Its local direct-wrench bridge is the one selected public endpoint;
+    # source-surface screens and reachability remain separate evidence lanes.
+    "x15": ("rigid_body_6dof_direct_wrench",),
+    # HL-20's reduced source-release replay is reachability-owned. Its local
+    # package gate owns one direct-wrench batch/episode contract; seven-surface
+    # controller screens remain their own physical-evidence lane.
+    "hl20_mod_k": ("rigid_body_6dof_direct_wrench",),
+}
+FOCUSED_VEHICLE_WITNESS_IDS: dict[str, tuple[str, ...]] = {
+    "a320_openap_3dof": (
+        "a320-3dof-batch",
+        "a320-pseudo6dof-batch",
+        "a320-3dof-episode",
+        "a320-pseudo6dof-episode",
+    ),
+    "f16_s119": (
+        "f16-3dof-batch",
+        "f16-pseudo6dof-batch",
+        "f16-3dof-episode",
+        "f16-pseudo6dof-episode",
+    ),
+    "hummingbird": (
+        "hummingbird-pseudo6dof-batch",
+        "hummingbird-pseudo6dof-episode",
+    ),
+    "reference_nesc_two_stage_rocket": (
+        "nesc-3dof-batch",
+        "nesc-pseudo6dof-batch",
+    ),
+    "tumbling_body": (
+        "tumbling-3dof-batch",
+        "tumbling-pseudo6dof-batch",
+    ),
+    "skywalker_x8": (
+        "x8-3dof-batch",
+        "x8-pseudo6dof-batch",
+        "x8-3dof-episode",
+        "x8-pseudo6dof-episode",
+    ),
+    "b747": (
+        "b747-3dof-batch",
+        "b747-pseudo6dof-batch",
+        "b747-3dof-episode",
+        "b747-pseudo6dof-episode",
+    ),
+    "x15": (
+        "x15-local-direct-wrench-screen-batch",
+        "x15-local-direct-wrench-screen-episode",
+    ),
+    "hl20_mod_k": (
+        "hl20-local-direct-wrench-screen-batch",
+        "hl20-local-direct-wrench-screen-episode",
+    ),
+}
+FOCUSED_VEHICLE_PARITY_FAMILIES = frozenset(
+    {
+        # A focused gate runs trace replay only when the selected reduced
+        # family has a real batch/episode parity declaration. Batch-only
+        # models retain an explicit no-parity boundary instead of importing a
+        # legacy aggregate witness host merely to prove absence.
+        "a320_openap_3dof",
+        "f16_s119",
+        "hummingbird",
+        "skywalker_x8",
+        "b747",
+        "x15",
+        "hl20_mod_k",
+    }
+)
 
 
 def project_python() -> str:
@@ -86,6 +330,16 @@ def run(command: list[str]) -> None:
     environment = os.environ.copy()
     existing_pythonpath = environment.get("PYTHONPATH")
     environment["PYTHONPATH"] = os.pathsep.join(path for path in (*(str(item) for item in SOURCE_ROOTS), existing_pythonpath) if path)
+    subprocess.run(command, cwd=ROOT, check=True, env=environment)
+    ####
+
+
+def run_installed(command: list[str]) -> None:
+    """Run an installation check without the developer source-tree overlay."""
+
+    print("+", " ".join(command))
+    environment = os.environ.copy()
+    environment.pop("PYTHONPATH", None)
     subprocess.run(command, cwd=ROOT, check=True, env=environment)
     ####
 
@@ -132,9 +386,9 @@ def doctor() -> None:
 
 
 def installation_check() -> None:
-    """Require all official editable distributions and installed entry points."""
+    """Require the direct developer distributions and installed entry points."""
 
-    run(
+    run_installed(
         [
             project_python(),
             "-m",
@@ -142,9 +396,74 @@ def installation_check() -> None:
             "plugins",
             "check",
             "--profile",
-            "full",
+            "developer",
         ]
     )
+    ####
+
+
+def check_developer_plugins() -> None:
+    """Prove direct package ownership before broader repository integration."""
+
+    run(tool_script("validate_plugin_developer_route.py"))
+    installation_check()
+    ####
+
+
+def plugin_wheel_smoke() -> None:
+    """Build and exercise the independently installable vehicle plug-in wheels."""
+
+    run(tool_script("verify_plugin_wheels.py", "--python", project_python()))
+    ####
+
+
+def check_plugin_install(plugin: str) -> None:
+    """Prove one plug-in's static ownership and fresh installed-wheel boundary.
+
+    This is intentionally narrower than ``plugin-wheel-smoke``: it validates
+    the direct developer-route rules, then builds and installs only the named
+    plug-in plus its declared direct wheel dependencies in a temporary target.
+    It is the normal package-isolation gate after a focused vehicle/workflow
+    test, not a reason to rerun unrelated family suites.
+    """
+
+    run(tool_script("validate_plugin_developer_route.py"))
+    run(tool_script("verify_plugin_wheels.py", "--plugin", plugin, "--python", project_python()))
+    ####
+
+
+def test_cadac_plugin_boundary() -> None:
+    """Run CADAC entry-point laziness without constructing an unrelated vehicle."""
+
+    test_slice(CADAC_PLUGIN_BOUNDARY_TEST_PATHS, "not slow and not artifact")
+    ####
+
+
+def test_cadac() -> None:
+    """Run selected source-bound CADAC actor vertical slices."""
+
+    test_cadac_plugin_boundary()
+    test_vehicle_vertical("cadac_aim5")
+    test_vehicle_vertical("cadac_cruise5")
+    test_vehicle_vertical("cadac_magsix")
+    test_vehicle_vertical("cadac_ghame3")
+    test_vehicle_vertical("cadac_ghame6")
+    test_vehicle_vertical("cadac_rocket6g")
+    test_vehicle_vertical("cadac_ads6_srbm")
+    test_vehicle_vertical("cadac_agm6")
+    test_vehicle_vertical("cadac_ads6_engagement")
+    test_vehicle_vertical("cadac_sraam6")
+    test_vehicle_vertical("cadac_ads6_sam")
+    test_vehicle_vertical("cadac_ads6_aircraft")
+    test_vehicle_vertical("cadac_falcon6")
+    ####
+
+
+def check_cadac() -> None:
+    """Run focused CADAC vertical slices and the installed-wheel gate."""
+
+    test_cadac()
+    run(tool_script("verify_plugin_wheels.py", "--plugin", "cadac", "--python", project_python()))
     ####
 
 
@@ -155,7 +474,43 @@ def docs_doctor() -> None:
 
 
 def lint() -> None:
-    run([project_python(), "-m", "ruff", "check", "src", "packages", "tests", "tools", "scripts"])
+    # Some packaged research fixtures intentionally contain their own
+    # ``pyproject.toml`` files.  Keep lint inspection read-only so Ruff never
+    # writes a cache into an asset tree that packaging/ownership checks guard.
+    run([project_python(), "-m", "ruff", "check", "--no-cache", "src", "packages", "tests", "tools", "scripts"])
+
+
+####
+
+
+def ruff_fix() -> None:
+    """Apply Ruff's safe fixes to the entry-point quality surface locally."""
+
+    run([project_python(), "-m", "ruff", "check", "--no-cache", "--fix", *RUFF_QUALITY_PATHS])
+    ####
+
+
+def _ruff_fix_preview() -> None:
+    """Require the same Ruff fixes without mutating a CI checkout."""
+
+    run([project_python(), "-m", "ruff", "check", "--no-cache", "--fix", "--diff", *RUFF_QUALITY_PATHS])
+    ####
+
+
+def pyright() -> None:
+    """Type-check the shared plug-in developer surface with Pyright."""
+
+    run([project_python(), "-m", "pyright", *PYRIGHT_QUALITY_PATHS])
+    ####
+
+
+def quality() -> None:
+    """Run the non-mutating Ruff preview, Pyright, and plug-in route gate."""
+
+    _ruff_fix_preview()
+    pyright()
+    run(tool_script("validate_plugin_developer_route.py"))
+    ####
 
 
 ####
@@ -359,6 +714,45 @@ def test_simple_aero_segments() -> None:
     ####
 
 
+def test_debug_models() -> None:
+    """Run the standalone analytical/debug-model plug-in vertical proof only."""
+
+    run(tool_script("extract_debug_models_plugin_assets.py", "--check"))
+    test_slice(DEBUG_MODEL_VERTICAL_TEST_PATHS, "not slow and not artifact")
+    ####
+
+
+def test_daveml_plugin() -> None:
+    """Run the DAVE-ML plug-in discovery and lazy-import boundary only."""
+
+    test_slice(DAVEML_PLUGIN_VERTICAL_TEST_PATHS, "not slow and not artifact")
+    ####
+
+
+def check_daveml_plugin() -> None:
+    """Prove the focused DAVE-ML source and installed-wheel boundaries."""
+
+    test_daveml_plugin()
+    run(tool_script("verify_plugin_wheels.py", "--plugin", "daveml", "--python", project_python()))
+    ####
+
+
+def test_reachability_plugin() -> None:
+    """Run the optional reachability package boundary without an overlay study."""
+
+    run(tool_script("extract_reachability_plugin_assets.py", "--check"))
+    test_slice(REACHABILITY_PLUGIN_VERTICAL_TEST_PATHS, "not slow and not artifact")
+    ####
+
+
+def check_reachability_plugin() -> None:
+    """Prove focused reachability source and installed-wheel boundaries."""
+
+    test_reachability_plugin()
+    run(tool_script("verify_plugin_wheels.py", "--plugin", "reachability", "--python", project_python()))
+    ####
+
+
 def test_vehicle_family(family: str) -> None:
     """Run only one vehicle family, including its opt-in slow tests."""
 
@@ -374,6 +768,8 @@ def test_vehicle_vertical(family: str) -> None:
     except KeyError as error:
         available = ", ".join(sorted(VEHICLE_VERTICAL_TEST_PATHS))
         raise SystemExit(f"no focused vehicle slice is defined for {family!r}; available: {available}") from error
+    if asset_check := WORKFLOW_VEHICLE_ASSET_CHECKS.get(family):
+        run(tool_script(asset_check, "--check"))
     marker_expression = "not slow and not artifact"
     if family != "simple_aero":
         marker_expression += " and not simple_aero"
@@ -394,6 +790,69 @@ def test_vehicle_vertical(family: str) -> None:
             f".pytest-vehicle-{family}",
         ]
     )
+    ####
+
+
+def check_vehicle_vertical(family: str) -> None:
+    """Validate one vehicle plug-in from interface declaration through execution.
+
+    This is the plug-in development gate.  It deliberately scopes the static
+    semantic-interface report, endpoint witnesses, batch/episode parity replay,
+    and executable pytest slice to ``family``.  Catalog-wide reconciliation
+    remains a separate integration/release responsibility.
+    """
+
+    if family not in VEHICLE_INTERFACE_VERTICAL_FAMILIES:
+        available = ", ".join(sorted(VEHICLE_INTERFACE_VERTICAL_FAMILIES))
+        raise SystemExit(f"no focused physical-vehicle plug-in check is defined for {family!r}; available: {available}")
+    if asset_check := FOCUSED_VEHICLE_ASSET_CHECKS.get(family):
+        run(tool_script(asset_check, "--check"))
+    interface_fidelity_arguments = tuple(argument for fidelity in FOCUSED_VEHICLE_INTERFACE_FIDELITIES.get(family, ()) for argument in ("--fidelity", fidelity))
+    plugin_arguments = tuple(argument for plugin_id in FOCUSED_VEHICLE_PLUGIN_IDS.get(family, ()) for argument in ("--plugin", plugin_id))
+    run(
+        tool_script(
+            "validate_vehicle_interface_catalog.py",
+            "--check",
+            "--family",
+            family,
+            *interface_fidelity_arguments,
+            *plugin_arguments,
+        )
+    )
+    witness_ids = FOCUSED_VEHICLE_WITNESS_IDS.get(family)
+    if witness_ids is None:
+        run(
+            tool_script(
+                "validate_vehicle_execution_witnesses.py",
+                "--family",
+                family,
+                "--execute-parity",
+                "--summary",
+                *plugin_arguments,
+            )
+        )
+    else:
+        witness_arguments = tuple(argument for witness_id in witness_ids for argument in ("--witness", witness_id))
+        run(
+            tool_script(
+                "validate_vehicle_execution_witnesses.py",
+                *witness_arguments,
+                "--summary",
+                *plugin_arguments,
+            )
+        )
+        if family in FOCUSED_VEHICLE_PARITY_FAMILIES:
+            run(
+                tool_script(
+                    "validate_vehicle_execution_witnesses.py",
+                    "--family",
+                    family,
+                    "--parity-only",
+                    "--summary",
+                    *plugin_arguments,
+                )
+            )
+    test_vehicle_vertical(family)
     ####
 
 
@@ -435,6 +894,17 @@ def test_views() -> None:
     print("  test-changed tests associated with current Git changes")
     print("  test-parallel default fast suite with pytest-xdist when installed")
     print(f"  test-vehicle <family> runnable one-family Composition vertical slice ({', '.join(sorted(VEHICLE_VERTICAL_TEST_PATHS))})")
+    print("  test-debug-models standalone analytical ballistic/waypoint/contract-probe plug-in slice")
+    print("  test-daveml  DAVE-ML discovery and lazy model-format import slice")
+    print("  check-daveml DAVE-ML focused slice plus isolated wheel smoke")
+    print("  test-reachability optional overlay discovery, package data, and lazy implementation slice")
+    print("  check-reachability focused overlay slice plus isolated wheel smoke")
+    print("  check-developer-plugins metadata and installed-profile compliance for the direct plug-in route")
+    print("  check-plugin <plugin> direct-route metadata plus one fresh installed-wheel boundary")
+    print("  test-cadac-discovery CADAC entry-point and deferred-provider slice")
+    print("  check-vehicle <family> scoped interface + witnesses + parity + vertical slice")
+    print("  test-cadac  CADAC AIM5, CRUISE5, MAGSIX, GHAME3, GHAME6, ROCKET6G, ADS6 SRBM/SAM/AIRCRAFT3, AGM6, FALCON6, engagement, and SRAAM6 vertical slices")
+    print("  check-cadac CADAC vertical slices plus isolated wheel smoke")
     print("  test-vehicle-catalogue controller-campaign to vertical-slice catalogue contract")
     print("  test-f16     F-16 S.119 vertical-slice convenience alias")
     print("  test-a320    A320 pseudo-6DOF vertical-slice convenience alias")
@@ -1567,7 +2037,10 @@ def handoff() -> None:
     # The repository bootstrap may be intentionally offline.  Dependencies
     # are provisioned by `bootstrap`; avoid making the release handoff reach
     # out to PyPI for an isolated build environment.
-    run([project_python(), "-m", "build", "--wheel", "--no-isolation", "--outdir", "dist"])
+    # Build the wheel from a freshly generated sdist.  A direct ``--wheel``
+    # build may reuse stale files under this checkout's build/ directory after
+    # a model module has moved into its own plug-in package.
+    run([project_python(), "-m", "build", "--no-isolation", "--outdir", "dist"])
     run(
         tool_script(
             "build_handoff_bundle.py",
@@ -1583,6 +2056,7 @@ def handoff() -> None:
 
 
 def check() -> None:
+    check_developer_plugins()
     check_vehicle_models()
     check_supported_reference_families()
     check_vehicle_maturity_registry()
@@ -1622,10 +2096,14 @@ TASKS: dict[str, Callable[[], None]] = {
     "bootstrap": bootstrap,
     "doctor": doctor,
     "install-check": installation_check,
+    "check-developer-plugins": check_developer_plugins,
     "docs-doctor": docs_doctor,
     "source-pdf": source_pdf,
     "lint": lint,
+    "ruff-fix": ruff_fix,
     "typecheck": typecheck,
+    "pyright": pyright,
+    "quality": quality,
     "grammar": grammar,
     "legacy-audit": legacy_audit,
     "legacy-close-check": legacy_close_check,
@@ -1644,12 +2122,17 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-slow": lambda: test_category("slow"),
     "test-simple_aero": lambda: test_category("simple_aero"),
     "test-simple_aero-segments": test_simple_aero_segments,
+    "test-debug-models": test_debug_models,
+    "test-daveml": test_daveml_plugin,
+    "test-reachability": test_reachability_plugin,
     "test-b747": lambda: test_vehicle_family("b747"),
     "test-x8": lambda: test_vehicle_family("x8"),
     "test-hummingbird": lambda: test_vehicle_family("hummingbird"),
     "test-x15": lambda: test_vehicle_family("x15"),
     "test-f16": lambda: test_vehicle_vertical("f16_s119"),
     "test-a320": lambda: test_vehicle_vertical("a320_openap_3dof"),
+    "test-cadac-discovery": test_cadac_plugin_boundary,
+    "test-cadac": test_cadac,
     "test-hummingbird-vertical": lambda: test_vehicle_vertical("hummingbird"),
     "test-x15-vertical": lambda: test_vehicle_vertical("x15"),
     "test-vehicle-catalogue": test_vehicle_catalogue,
@@ -1777,6 +2260,10 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-operating-points": daveml_operating_points,
     "daveml-alpha3-completion": daveml_alpha3_completion,
     "daveml-alpha3-qualification": daveml_alpha3_qualification,
+    "plugin-wheel-smoke": plugin_wheel_smoke,
+    "check-daveml": check_daveml_plugin,
+    "check-reachability": check_reachability_plugin,
+    "check-cadac": check_cadac,
     "handoff": handoff,
     "check": check,
     "all": check,
@@ -1785,13 +2272,21 @@ TASKS: dict[str, Callable[[], None]] = {
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("task", choices=sorted((*TASKS, "test-vehicle")))
+    parser.add_argument("task", choices=sorted((*TASKS, "check-plugin", "check-vehicle", "test-vehicle")))
     parser.add_argument("vehicle", nargs="?")
     args = parser.parse_args()
-    if args.task == "test-vehicle":
+    if args.task in {"check-vehicle", "test-vehicle"}:
         if args.vehicle is None:
-            parser.error("test-vehicle requires a vehicle family, for example: f16_s119")
-        test_vehicle_vertical(args.vehicle)
+            parser.error(f"{args.task} requires a vehicle family, for example: f16_s119")
+        if args.task == "check-vehicle":
+            check_vehicle_vertical(args.vehicle)
+        else:
+            test_vehicle_vertical(args.vehicle)
+        return 0
+    if args.task == "check-plugin":
+        if args.vehicle is None:
+            parser.error("check-plugin requires a wheel selector, for example: f16")
+        check_plugin_install(args.vehicle)
         return 0
     if args.vehicle is not None:
         parser.error(f"{args.task} does not accept a vehicle family")

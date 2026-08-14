@@ -1,0 +1,10 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: x8-local-physical-surface-lqi-long-recovery-screen-v1
+vehicle: skywalker_x8
+fidelity: rigid_body_6dof_surface_allocated
+initialization:
+  id: source_table_trim_local_point
+mission:
+  id: x8_local_physical_surface_lqi_long_recovery_screen_v1
+segments:
+  - id: source_table_physical_lqi_long_recovery_screen

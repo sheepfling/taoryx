@@ -47,8 +47,10 @@ python -m tools.dev install-check
 python -m tools.dev doctor
 ```
 
-Bootstrap installs the core plus all four official model/provider plug-ins for
-contributors. Core-only, model-suite, full-suite, wheelhouse, optional sensor,
+Bootstrap installs the core plus the thirteen direct model/overlay plug-ins used
+for development. The compatibility aggregate is an explicit opt-in profile for
+existing catalogue consumers, rather than a dependency of new vehicle work.
+Core-only, model-suite, compatibility, full-suite, wheelhouse, optional sensor,
 and Windows instructions are in [Installing Taoryx and its model packages](docs/INSTALLATION.md).
 If you already have a working environment, the portable runner will use `.venv`
 automatically when it exists.
@@ -64,6 +66,7 @@ python -m tools.dev equation-audit
 Run the main validation gates:
 
 ```bash
+python -m tools.dev quality
 python -m tools.dev check
 python -m pytest
 ```
@@ -97,7 +100,7 @@ taoryx plugins list
 taoryx plugins list --json
 taoryx model list
 taoryx model assess --output build/model-assessment.json
-taoryx model plan taoryx.registry.mission-composition hummingbird --fidelity pseudo_6dof
+taoryx model plan taoryx.hummingbird.mission-composition hummingbird --fidelity pseudo_6dof
 ```
 
 `taoryx model assess` is the compact all-model readiness matrix: it shows
@@ -113,12 +116,17 @@ Model plug-ins can generate common LQR/LQI campaigns from the compact
 under `build/controller-cache` unless `--no-cache` is selected.
 
 The core wheel contains the language and simulation host. Optional wheels own
-DAVE-ML, Simple Aero, reference vehicles, and the reachability workbench. The
-reachability commands become available when `taoryx-reachability` is installed;
-without it the core CLI fails closed with an installation hint.
+DAVE-ML, development-only debug providers, Simple Aero, the standalone A320,
+F-16, Hummingbird, and X-15 families, the remaining reference vehicles, and the reachability
+workbench. The reachability commands become available when
+`taoryx-reachability` is installed; without it the core CLI fails closed with
+an installation hint.
 
 The plug-in contract and extraction status are documented in
 [Installable model and provider plug-ins](docs/architecture/plugins.md).
+The repository-level core/direct-package/compatibility topology and focused
+verification model are documented in
+[Repository and package architecture](docs/architecture/repository-architecture.md).
 
 Rebuild the reconstructed manual when you need the published PDF or want to
 refresh the page-normalized source build:
@@ -147,7 +155,7 @@ python tools/aero_drag_analysis.py --all --output-dir build/aero-drag
 
 - [Installation and package selection](docs/INSTALLATION.md)
 - [Agent workflows](docs/AGENT_WORKFLOWS.md)
-- [Mission Composition front door](docs/MISSION_COMPOSITION.md)
+- [Mission Composition and interactive-control front door](docs/MISSION_COMPOSITION.md) — the consumer API for model discovery, typed configuration, batch execution, and persistent live-control sessions
 - [Model-to-mission authoring and automation](docs/architecture/model-authoring-automation.md)
 - [Simulation Runtime onboarding: find, set up, step, and diagnose](docs/SIMULATION_RUNTIME_ONBOARDING.md)
 - [Authoring → Runtime → Composition showcase guide](docs/AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md)
@@ -159,6 +167,7 @@ python tools/aero_drag_analysis.py --all --output-dir build/aero-drag
 - [Equation registry](docs/equations/registry.md)
 - [Equation implementation bindings](docs/equations/implementation-bindings.md)
 - [Runtime architecture](docs/architecture/README.md)
+- [Repository and package architecture](docs/architecture/repository-architecture.md)
 - [Table explorer / table plotter boundary](docs/architecture/table-explorer.md)
 - [Simple Aero corpus description](docs/grammar/e2e-suite-v23.md)
 - [Tumbling analysis workspace](analysis/tumbling/README.md)

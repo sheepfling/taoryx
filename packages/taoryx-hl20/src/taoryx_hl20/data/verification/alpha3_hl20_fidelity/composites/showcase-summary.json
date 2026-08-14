@@ -1,0 +1,526 @@
+{
+  "claim_boundary": {
+    "actuator_profiles": [
+      "none"
+    ],
+    "arrival_or_landing_claim": false,
+    "controller_claim": false,
+    "source_aerodynamics": false,
+    "source_bound_hl20_geometry_and_fixed_mass": true,
+    "source_exact_route": false,
+    "spent_stage": "Synthetic passive aero-ballistic cylinder. Native tumble is only represented in native rigid tiers.",
+    "surface_controls": "Requested and achieved source surface channels are recorded when the source model is selected; this is not a closed-loop authority claim.",
+    "synthetic_booster": true
+  },
+  "composites": [
+    "hl20-ca-hi-flight-composite.png",
+    "hl20-ca-hi-envelope-comparison.png",
+    "hl20-ca-hi-spent-booster-composite.png"
+  ],
+  "cross_fidelity": {
+    "candidate_deltas": [
+      {
+        "fidelity": "pseudo_6dof",
+        "query_id": "query-000000",
+        "terminal_altitude_delta_m_vs_3dof": -5.496070723554049,
+        "terminal_downrange_delta_m_vs_3dof": -905.0193935839288,
+        "terminal_speed_delta_m_s_vs_3dof": 14.115920337255176,
+        "termination_changed": false
+      },
+      {
+        "fidelity": "pseudo_6dof",
+        "query_id": "query-000001",
+        "terminal_altitude_delta_m_vs_3dof": -1.115646241421544,
+        "terminal_downrange_delta_m_vs_3dof": -84.48501824516825,
+        "terminal_speed_delta_m_s_vs_3dof": 1.2974491232493506,
+        "termination_changed": false
+      },
+      {
+        "fidelity": "pseudo_6dof",
+        "query_id": "query-000002",
+        "terminal_altitude_delta_m_vs_3dof": 72.04001172215455,
+        "terminal_downrange_delta_m_vs_3dof": 49.55741778900392,
+        "terminal_speed_delta_m_s_vs_3dof": -0.02813992597114634,
+        "termination_changed": false
+      },
+      {
+        "fidelity": "rigid_body_6dof",
+        "query_id": "query-000000",
+        "terminal_altitude_delta_m_vs_3dof": -1.3361625068320322,
+        "terminal_downrange_delta_m_vs_3dof": 3600.906868722368,
+        "terminal_speed_delta_m_s_vs_3dof": -20.412853978659427,
+        "termination_changed": false
+      },
+      {
+        "fidelity": "rigid_body_6dof",
+        "query_id": "query-000001",
+        "terminal_altitude_delta_m_vs_3dof": -5.423715375952696,
+        "terminal_downrange_delta_m_vs_3dof": 6322.932792688662,
+        "terminal_speed_delta_m_s_vs_3dof": -66.19411234375664,
+        "termination_changed": false
+      },
+      {
+        "fidelity": "rigid_body_6dof",
+        "query_id": "query-000002",
+        "terminal_altitude_delta_m_vs_3dof": 62.405149818508065,
+        "terminal_downrange_delta_m_vs_3dof": 3574.8572087467437,
+        "terminal_speed_delta_m_s_vs_3dof": -29.696004497110636,
+        "termination_changed": false
+      },
+      {
+        "fidelity": "rigid_body_6dof_surface_allocated",
+        "query_id": "query-000000",
+        "terminal_altitude_delta_m_vs_3dof": -1.3361625068320322,
+        "terminal_downrange_delta_m_vs_3dof": 3600.906868722368,
+        "terminal_speed_delta_m_s_vs_3dof": -20.412853978659427,
+        "termination_changed": false
+      },
+      {
+        "fidelity": "rigid_body_6dof_surface_allocated",
+        "query_id": "query-000001",
+        "terminal_altitude_delta_m_vs_3dof": -5.423715375952696,
+        "terminal_downrange_delta_m_vs_3dof": 6322.932792688662,
+        "terminal_speed_delta_m_s_vs_3dof": -66.19411234375664,
+        "termination_changed": false
+      },
+      {
+        "fidelity": "rigid_body_6dof_surface_allocated",
+        "query_id": "query-000002",
+        "terminal_altitude_delta_m_vs_3dof": 62.405149818508065,
+        "terminal_downrange_delta_m_vs_3dof": 3574.8572087467437,
+        "terminal_speed_delta_m_s_vs_3dof": -29.696004497110636,
+        "termination_changed": false
+      }
+    ],
+    "comparison_note": "Differences expose model-form changes. They are not an accuracy ranking without independently qualified source dynamics.",
+    "reference_fidelity": "point_mass_3dof"
+  },
+  "data_artifacts": [
+    "candidate-summary.csv",
+    "parent-telemetry-all-tiers.csv",
+    "spent-booster-telemetry.csv",
+    "surface-allocation.csv"
+  ],
+  "execution": {
+    "all_tiers_share_search_space": true,
+    "candidate_count_per_tier": 3,
+    "horizon_s": 180.0,
+    "step_size_s": 1.0
+  },
+  "phase_schedule": {
+    "boost_start_s": 0.0,
+    "burnout_time_s": 15.0,
+    "horizon_s": 180.0,
+    "release_time_s": 25.0
+  },
+  "scene": {
+    "id": "hl20_california_to_hawaii_comparison",
+    "route_contract": "synthetic California-to-Hawaii comparison geometry",
+    "runtime_boundary": "local synthetic booster-release witness; not a route, arrival, controller, or source-trajectory claim"
+  },
+  "schema": "taoryx.hl20-ca-hi-showcase-summary/v1alpha1",
+  "search_space": {
+    "axes": [
+      {
+        "name": "launch.azimuth_rad",
+        "sampling": "explicit_grid",
+        "units": "rad",
+        "values": [
+          0.0
+        ]
+      },
+      {
+        "name": "launch.elevation_rad",
+        "sampling": "explicit_grid",
+        "units": "rad",
+        "values": [
+          1.0471975511965976,
+          1.2217304763960306,
+          1.3962634015954636
+        ]
+      },
+      {
+        "name": "glide.bank_rad",
+        "sampling": "explicit_grid",
+        "units": "rad",
+        "values": [
+          0.0
+        ]
+      }
+    ],
+    "candidate_count": 3,
+    "composition": "cartesian_product",
+    "ordering": "axis_order_then_cartesian_product"
+  },
+  "tiers": [
+    {
+      "actuator_profile_id": "none",
+      "aerodynamic_model_id": "surrogate_fixed_cd_ld_v1",
+      "candidates": {
+        "child_classification_counts": {
+          "impact": 3
+        },
+        "classification_counts": {
+          "feasible": 3
+        },
+        "count": 3,
+        "spawned_child_count": 3,
+        "termination_counts": {
+          "ground_contact": 3
+        },
+        "timed_out_query_ids": []
+      },
+      "contract": "Translation, mass, and phase baseline. Rotation and effectors are unavailable.",
+      "fidelity": "point_mass_3dof",
+      "label": "Tier 0 | 3DOF translation",
+      "mass_schedule": {
+        "burnout_mass_kg": 10164.1,
+        "initial_mass_kg": 11664.1,
+        "release_mass_kg": 8664.1
+      },
+      "mission_profile_id": "none",
+      "mission_segment_schedule": [],
+      "phase_objectives": [
+        {
+          "detail": "boost phase retained for every candidate",
+          "id": "boost",
+          "status": "achieved"
+        },
+        {
+          "detail": "coast phase begins at scheduled booster burnout",
+          "id": "burnout",
+          "status": "achieved"
+        },
+        {
+          "detail": "accepted booster-release events: 3/3",
+          "id": "release",
+          "status": "achieved"
+        },
+        {
+          "detail": "unpowered HL-20 glide phase after release",
+          "id": "glide",
+          "status": "achieved"
+        },
+        {
+          "detail": "cylinder propagated as a center-of-mass passive aero-ballistic reduction; rotation unavailable",
+          "id": "spent_cylinder",
+          "status": "achieved"
+        },
+        {
+          "detail": "3 ground_contact",
+          "id": "terminal",
+          "status": "impact_observed"
+        }
+      ],
+      "state_fields": [
+        "time_s",
+        "x_m",
+        "y_m",
+        "z_m",
+        "vx_m_s",
+        "vy_m_s",
+        "vz_m_s",
+        "speed_m_s",
+        "mass_kg",
+        "phase"
+      ],
+      "terminal_criteria": {
+        "max_impact_radius_m": null,
+        "max_impact_speed_m_s": null,
+        "max_speed_m_s": null,
+        "min_impact_speed_m_s": null,
+        "min_speed_m_s": 0.0,
+        "require_ground_contact": true,
+        "target_frame": "local_ecic",
+        "target_id": "local_target",
+        "target_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "actuator_profile_id": "none",
+      "aerodynamic_model_id": "surrogate_fixed_cd_ld_v1",
+      "candidates": {
+        "child_classification_counts": {
+          "impact": 3
+        },
+        "classification_counts": {
+          "feasible": 3
+        },
+        "count": 3,
+        "spawned_child_count": 3,
+        "termination_counts": {
+          "ground_contact": 3
+        },
+        "timed_out_query_ids": []
+      },
+      "contract": "Translation plus filtered attitude/rate response. Not native rigid-body rotation.",
+      "fidelity": "pseudo_6dof",
+      "label": "Tier 1 | pseudo-6DOF bridge",
+      "mass_schedule": {
+        "burnout_mass_kg": 10164.1,
+        "initial_mass_kg": 11664.1,
+        "release_mass_kg": 8664.1
+      },
+      "mission_profile_id": "none",
+      "mission_segment_schedule": [],
+      "phase_objectives": [
+        {
+          "detail": "boost phase retained for every candidate",
+          "id": "boost",
+          "status": "achieved"
+        },
+        {
+          "detail": "coast phase begins at scheduled booster burnout",
+          "id": "burnout",
+          "status": "achieved"
+        },
+        {
+          "detail": "accepted booster-release events: 3/3",
+          "id": "release",
+          "status": "achieved"
+        },
+        {
+          "detail": "unpowered HL-20 glide phase after release",
+          "id": "glide",
+          "status": "achieved"
+        },
+        {
+          "detail": "pseudo-6DOF reduced tumble; peak body-rate magnitude 1.147 rad/s",
+          "id": "spent_cylinder",
+          "status": "achieved"
+        },
+        {
+          "detail": "3 ground_contact",
+          "id": "terminal",
+          "status": "impact_observed"
+        }
+      ],
+      "state_fields": [
+        "time_s",
+        "x_m",
+        "y_m",
+        "z_m",
+        "vx_m_s",
+        "vy_m_s",
+        "vz_m_s",
+        "speed_m_s",
+        "mass_kg",
+        "phase",
+        "roll_rad",
+        "pitch_rad",
+        "yaw_rad",
+        "roll_rate_rad_s",
+        "pitch_rate_rad_s",
+        "yaw_rate_rad_s"
+      ],
+      "terminal_criteria": {
+        "max_impact_radius_m": null,
+        "max_impact_speed_m_s": null,
+        "max_speed_m_s": null,
+        "min_impact_speed_m_s": null,
+        "min_speed_m_s": 0.0,
+        "require_ground_contact": true,
+        "target_frame": "local_ecic",
+        "target_id": "local_target",
+        "target_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "actuator_profile_id": "none",
+      "aerodynamic_model_id": "surrogate_fixed_cd_ld_v1",
+      "candidates": {
+        "child_classification_counts": {
+          "impact": 3
+        },
+        "classification_counts": {
+          "feasible": 3
+        },
+        "count": 3,
+        "spawned_child_count": 3,
+        "termination_counts": {
+          "ground_contact": 3
+        },
+        "timed_out_query_ids": []
+      },
+      "contract": "Native rigid state with reduced direct-load observables. Open-loop only.",
+      "fidelity": "rigid_body_6dof",
+      "label": "Tier 2 | native rigid 6DOF",
+      "mass_schedule": {
+        "burnout_mass_kg": 10164.1,
+        "initial_mass_kg": 11664.1,
+        "release_mass_kg": 8664.1
+      },
+      "mission_profile_id": "none",
+      "mission_segment_schedule": [],
+      "phase_objectives": [
+        {
+          "detail": "boost phase retained for every candidate",
+          "id": "boost",
+          "status": "achieved"
+        },
+        {
+          "detail": "coast phase begins at scheduled booster burnout",
+          "id": "burnout",
+          "status": "achieved"
+        },
+        {
+          "detail": "accepted booster-release events: 3/3",
+          "id": "release",
+          "status": "achieved"
+        },
+        {
+          "detail": "unpowered HL-20 glide phase after release",
+          "id": "glide",
+          "status": "achieved"
+        },
+        {
+          "detail": "native rigid-body passive tumble; peak body-rate magnitude 1.85 rad/s",
+          "id": "spent_cylinder",
+          "status": "achieved"
+        },
+        {
+          "detail": "3 ground_contact",
+          "id": "terminal",
+          "status": "impact_observed"
+        }
+      ],
+      "state_fields": [
+        "time_s",
+        "x_m",
+        "y_m",
+        "z_m",
+        "vx_m_s",
+        "vy_m_s",
+        "vz_m_s",
+        "speed_m_s",
+        "mass_kg",
+        "phase",
+        "qw",
+        "qx",
+        "qy",
+        "qz",
+        "wx_rad_s",
+        "wy_rad_s",
+        "wz_rad_s"
+      ],
+      "terminal_criteria": {
+        "max_impact_radius_m": null,
+        "max_impact_speed_m_s": null,
+        "max_speed_m_s": null,
+        "min_impact_speed_m_s": null,
+        "min_speed_m_s": 0.0,
+        "require_ground_contact": true,
+        "target_frame": "local_ecic",
+        "target_id": "local_target",
+        "target_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "actuator_profile_id": "none",
+      "aerodynamic_model_id": "surrogate_fixed_cd_ld_v1",
+      "candidates": {
+        "child_classification_counts": {
+          "impact": 3
+        },
+        "classification_counts": {
+          "feasible": 3
+        },
+        "count": 3,
+        "spawned_child_count": 3,
+        "termination_counts": {
+          "ground_contact": 3
+        },
+        "timed_out_query_ids": []
+      },
+      "contract": "Native rigid state plus bounded logical seven-surface telemetry overlay.",
+      "fidelity": "rigid_body_6dof_surface_allocated",
+      "label": "Tier 3 | rigid 6DOF + logical surfaces",
+      "mass_schedule": {
+        "burnout_mass_kg": 10164.1,
+        "initial_mass_kg": 11664.1,
+        "release_mass_kg": 8664.1
+      },
+      "mission_profile_id": "none",
+      "mission_segment_schedule": [],
+      "phase_objectives": [
+        {
+          "detail": "boost phase retained for every candidate",
+          "id": "boost",
+          "status": "achieved"
+        },
+        {
+          "detail": "coast phase begins at scheduled booster burnout",
+          "id": "burnout",
+          "status": "achieved"
+        },
+        {
+          "detail": "accepted booster-release events: 3/3",
+          "id": "release",
+          "status": "achieved"
+        },
+        {
+          "detail": "unpowered HL-20 glide phase after release",
+          "id": "glide",
+          "status": "achieved"
+        },
+        {
+          "detail": "native rigid-body passive tumble; peak body-rate magnitude 1.85 rad/s",
+          "id": "spent_cylinder",
+          "status": "achieved"
+        },
+        {
+          "detail": "3 ground_contact",
+          "id": "terminal",
+          "status": "impact_observed"
+        }
+      ],
+      "state_fields": [
+        "time_s",
+        "x_m",
+        "y_m",
+        "z_m",
+        "vx_m_s",
+        "vy_m_s",
+        "vz_m_s",
+        "speed_m_s",
+        "mass_kg",
+        "phase",
+        "qw",
+        "qx",
+        "qy",
+        "qz",
+        "wx_rad_s",
+        "wy_rad_s",
+        "wz_rad_s"
+      ],
+      "terminal_criteria": {
+        "max_impact_radius_m": null,
+        "max_impact_speed_m_s": null,
+        "max_speed_m_s": null,
+        "min_impact_speed_m_s": null,
+        "min_speed_m_s": 0.0,
+        "require_ground_contact": true,
+        "target_frame": "local_ecic",
+        "target_id": "local_target",
+        "target_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ],
+  "title": "HL-20 CA-HI four-tier boost, glide, and passive-cylinder witness"
+}

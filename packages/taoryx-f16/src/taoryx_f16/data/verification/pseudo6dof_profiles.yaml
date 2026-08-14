@@ -1,0 +1,98 @@
+schema: taoryx.pseudo6dof-profiles/v1alpha1
+profiles:
+- id: f16_s119.attitude_response_p6dof.v1
+  family_id: f16_s119
+  parent_3dof_profile_id: f16_s119.point_mass_3dof.v1
+  model_kind: source_derived_reduced_model
+  control_realization: response_law
+  status: nominal_case_pass
+  evidence_grade: source_derived
+  response:
+    roll:
+      time_constant_s: 0.45
+      damping_ratio: 0.7
+      maximum_rate_rad_s: 1.4
+      maximum_acceleration_rad_s2: 5.0
+    pitch:
+      time_constant_s: 0.7
+      damping_ratio: 0.75
+      maximum_rate_rad_s: 0.7
+      maximum_acceleration_rad_s2: 2.5
+    yaw:
+      time_constant_s: 0.9
+      damping_ratio: 0.8
+      maximum_rate_rad_s: 0.45
+      maximum_acceleration_rad_s2: 1.2
+  resource_channels:
+  - fuel
+  - mass
+  required_channels:
+  - bank
+  - pitch
+  - heading
+  - alpha
+  - beta
+  - load_factor
+  unsupported_claims:
+  - physical_surface_allocation_outside_declared_plant
+  - supersonic_fidelity
+direct_wrench_profiles:
+- id: f16_s119.direct_wrench_6dof.v1
+  family_id: f16_s119
+  parent_3dof_profile_id: f16_s119.point_mass_3dof.v1
+  status: nominal_case_pass
+  evidence_grade: source_plant_local
+  force_axes:
+  - force_x_n
+  - force_y_n
+  - force_z_n
+  moment_axes:
+  - moment_x_nm
+  - moment_y_nm
+  - moment_z_nm
+  trim_contract: source-plant local trim contract
+  envelope_contract: local subsonic alpha/beta and rate domain
+  resource_channels:
+  - mass
+  required_channels:
+  - source_force
+  - source_moment
+  - requested_wrench
+  - achieved_wrench
+  - residual_wrench
+  unsupported_claims:
+  - physical_surface_allocation
+  - supersonic_fidelity
+  - family_wide_schedule
+surface_allocation_profiles:
+- id: f16_s119.surface_allocated_6dof.v1
+  family_id: f16_s119
+  parent_direct_wrench_profile_id: f16_s119.direct_wrench_6dof.v1
+  status: development
+  evidence_grade: source_plant_local
+  allocator_id: f16-bounded-elevator-aileron-rudder-throttle-v1
+  effector_channels:
+  - elevator_deg
+  - aileron_deg
+  - rudder_deg
+  - throttle
+  required_channels:
+  - requested_wrench
+  - allocated_effectors
+  - achieved_effectors
+  - achieved_wrench
+  - residual_wrench
+  - saturation
+  unsupported_claims:
+  - full_envelope_schedule
+  - servo_certification
+  - operational_flight
+bindings:
+- family_id: f16_s119
+  point_mass_profile_id: f16_s119.point_mass_3dof.v1
+  pseudo_profile_id: f16_s119.attitude_response_p6dof.v1
+  direct_wrench_profile_id: f16_s119.direct_wrench_6dof.v1
+  surface_allocation_profile_id: f16_s119.surface_allocated_6dof.v1
+  automatic_lowering: true
+  lowering_note: source-derived subsonic response, direct-wrench bridge, and declared
+    surface path

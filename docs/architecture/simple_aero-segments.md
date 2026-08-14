@@ -24,12 +24,14 @@ the phase contract, while the source `.prb` remains responsible for native
 syntax such as `*prop`, `*aero`, `*fly`, and `*when`.
 
 The same material is published as the `simple_aero` workflow model through
-`RegistryMissionCompositionProvider`. Its portable schema advertises launch
-and aimpoint geometry, initial mass and speed, burnout/apogee checkpoints,
-fixed-L/D inputs, and ordered per-occurrence segment parameters. Reviewed
-mission recipes include ballistic, phugoid, skip, slalom, and weave. This is a
-workflow advertisement—not a physical vehicle entry—and only its synthetic
-point-mass realization is declared.
+the package-owned `taoryx.simple-aero.mission-composition` provider. Its
+portable schema advertises launch and aimpoint geometry, initial mass and
+speed, burnout/apogee checkpoints, fixed-L/D inputs, and ordered
+per-occurrence segment parameters. Reviewed mission recipes include ballistic,
+phugoid, skip, slalom, and weave. This is a workflow advertisement—not a
+physical vehicle entry—and only its synthetic point-mass realization is
+declared. The compatibility aggregate may project this provider for legacy
+consumers, but it is not the authoring or direct developer path.
 
 ## Start with parameters, not problem-file boilerplate
 

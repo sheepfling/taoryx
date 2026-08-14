@@ -26,6 +26,8 @@ from .composition_episode import (
     _sensor_for_contract,
     _status_frame,
 )
+from .language_backed_racetrack import LanguageBackedRacetrackAssets
+from .plugins import PluginCatalog
 from .runtime.interactive import InteractiveSession, InteractiveStatus
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
 from .vehicle_execution_bindings import batch_episode_parity_record, resolve_vehicle_execution_binding
@@ -101,6 +103,9 @@ class LanguageBackedBatchEpisodeParityReport:
 def verify_serialized_language_backed_batch_episode_parity(
     composition: CompiledVehicleComposition,
     payload: Mapping[str, object],
+    *,
+    assets: LanguageBackedRacetrackAssets | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> LanguageBackedBatchEpisodeParityReport:
     """Replay one registered public trace through a fresh language-runtime session."""
 
@@ -118,7 +123,12 @@ def verify_serialized_language_backed_batch_episode_parity(
     if episode_binding.factory_id != "language_backed_interactive.v1":
         raise ValueError("language-backed fixed-wing parity does not recognize the selected episode factory")
 
-    session = _compile_language_backed_scenario(composition, seed=None).interactive_session()
+    session = _compile_language_backed_scenario(
+        composition,
+        seed=None,
+        assets=assets,
+        plugins=plugins,
+    ).interactive_session()
     sensor = _sensor_for_contract(contract, seed=None)
     if sensor is not None:
         initial = _status(session, contract)

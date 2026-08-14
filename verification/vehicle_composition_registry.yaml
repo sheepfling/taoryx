@@ -258,6 +258,7 @@ vehicles:
   - family_id: a320_openap_3dof
     metadata:
       summary: Source-derived A320 transport composite for OpenAP point-mass performance and a named surrogate attitude-response tier.
+      model_version: "1.0.0+composition-v1"
       vehicle_class: powered_fixed_wing_aircraft
       operating_domains: [atmospheric]
       propulsion: [scheduled_thrust_model]
@@ -371,9 +372,9 @@ vehicles:
       - id: powered_fixed_wing_racetrack_v1
         status: runnable
         description: Transport-scale reusable racetrack at the supported performance and pseudo-response levels.
-        mission_capability_adapter_id: taoryx.powered_fixed_wing_racetrack.capability_scaled.v1
+        mission_capability_adapter_id: taoryx.a320_openap_racetrack.capability_scaled.v1
         mission_capability_fidelities: [point_mass_3dof, pseudo_6dof]
-        semantic_translator_id: taoryx.powered_fixed_wing_racetrack.capability_scaled.v1
+        semantic_translator_id: taoryx.a320_openap_racetrack.capability_scaled.v1
         semantic_translator_fidelities: [point_mass_3dof, pseudo_6dof]
         initialization_contracts: [airborne_trim]
         compatible_fidelities: [point_mass_3dof, pseudo_6dof]
@@ -383,6 +384,7 @@ vehicles:
   - family_id: f16_s119
     metadata:
       summary: Source-grounded F-16 S-119 family for fighter energy maneuvers, DAVE-ML force/moment response, and bounded surface control.
+      model_version: "1.0.0+composition-v1"
       vehicle_class: powered_fixed_wing_aircraft
       operating_domains: [atmospheric]
       propulsion: [jet]
@@ -542,9 +544,9 @@ vehicles:
       - id: powered_fixed_wing_racetrack_v1
         status: development
         description: Reusable subsonic climb, left turn, descent, right turn, and start/finish route.
-        mission_capability_adapter_id: taoryx.powered_fixed_wing_racetrack.capability_scaled.v1
+        mission_capability_adapter_id: taoryx.f16_racetrack.source_route.v1
         mission_capability_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
-        semantic_translator_id: taoryx.powered_fixed_wing_racetrack.capability_scaled.v1
+        semantic_translator_id: taoryx.f16_racetrack.source_route.v1
         semantic_translator_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
         initialization_contracts: [airborne_trim]
         compatible_fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof_direct_wrench, rigid_body_6dof_surface_allocated]
@@ -724,6 +726,7 @@ vehicles:
   - family_id: hummingbird
     metadata:
       summary: Quad-X multirotor research surrogate for hover, translation, rotor allocation, and bounded landing composition.
+      model_version: "1.0.0+composition-v1"
       vehicle_class: multirotor
       operating_domains: [atmospheric]
       propulsion: [electric_rotor]
@@ -1090,6 +1093,7 @@ vehicles:
   - family_id: tumbling_body
     metadata:
       summary: Passive geometry-driven atmospheric body family for release, tumbling drag, descent, and impact analysis.
+      model_version: "1.0.0+composition-v1"
       vehicle_class: passive_atmospheric_body
       operating_domains: [atmospheric]
       propulsion: [none]

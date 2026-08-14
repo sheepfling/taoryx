@@ -1,0 +1,90 @@
+id: slower_airbreathing_and_multirotor_6dof_bundle_v1_tables
+title: Slower airbreathing and multirotor public research table catalog
+kind: vehicle-specific-public-6dof-research-surrogate
+source_fixture: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
+provenance:
+  source_status: mixed-public-research
+  source_bundle_sha256: 17ee0ca897e3ee44d4dd68deb6eb6c4922fef9ef87de46fb032124596b39b911
+  notes:
+  - source-csv-preserved
+  - generated-si-and-radian-axes-where-applicable
+  - not-flight-qualified
+tables:
+- path: hummingbird_common_speed_wrench.tbl
+  vehicle: hummingbird
+  family: aerodynamic-wrench
+  status: source-csv-only
+- path: hummingbird_cx.tbl
+  vehicle: hummingbird
+  family: aerodynamic-wrench
+  axes:
+  - velocity_x
+  - velocity_y
+  - velocity_z
+  - rotor_speed
+  quantities:
+  - output
+- path: hummingbird_cy.tbl
+  vehicle: hummingbird
+  family: aerodynamic-wrench
+  axes:
+  - velocity_x
+  - velocity_y
+  - velocity_z
+  - rotor_speed
+  quantities:
+  - output
+- path: hummingbird_cz.tbl
+  vehicle: hummingbird
+  family: aerodynamic-wrench
+  axes:
+  - velocity_x
+  - velocity_y
+  - velocity_z
+  - rotor_speed
+  quantities:
+  - output
+- path: hummingbird_cmx.tbl
+  vehicle: hummingbird
+  family: aerodynamic-wrench
+  axes:
+  - velocity_x
+  - velocity_y
+  - velocity_z
+  - rotor_speed
+  quantities:
+  - output
+- path: hummingbird_cmy.tbl
+  vehicle: hummingbird
+  family: aerodynamic-wrench
+  axes:
+  - velocity_x
+  - velocity_y
+  - velocity_z
+  - rotor_speed
+  quantities:
+  - output
+- path: hummingbird_cmz.tbl
+  vehicle: hummingbird
+  family: aerodynamic-wrench
+  axes:
+  - velocity_x
+  - velocity_y
+  - velocity_z
+  - rotor_speed
+  quantities:
+  - output
+- path: hummingbird_rotor_static.tbl
+  vehicle: hummingbird
+  family: propulsion
+  axes:
+  - rotor_speed
+  quantities:
+  - thrust
+- path: hummingbird_rotor_reaction_torque.tbl
+  vehicle: hummingbird
+  family: propulsion
+  axes:
+  - rotor_speed
+  quantities:
+  - output

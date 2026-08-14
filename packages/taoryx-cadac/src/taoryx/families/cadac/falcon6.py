@@ -378,6 +378,8 @@ class Falcon6PlantSample(CadacModel):
     requested_surfaces_deg: tuple[float, float, float]
     achieved_surfaces_deg: tuple[float, float, float]
     aero_surfaces_deg: tuple[float, float, float]
+    surface_position_limited: tuple[bool, bool, bool]
+    surface_rate_limited: tuple[bool, bool, bool]
     throttle: float = Field(ge=0.0, le=1.0)
     thrust_n: float
     force_body_n: tuple[float, float, float]
@@ -431,6 +433,8 @@ class _Falcon6RuntimeState:
     density_kg_m3: float = 0.0
     temperature_k: float = 0.0
     speed_of_sound_mps: float = 0.0
+    surface_position_limited: tuple[bool, bool, bool] = (False, False, False)
+    surface_rate_limited: tuple[bool, bool, bool] = (False, False, False)
 
 
 ####
@@ -918,6 +922,8 @@ def run_falcon6_physical_plant(
                 )
                 runtime.actuator_state = actuator.state
                 runtime.achieved_surfaces = actuator.achieved
+                runtime.surface_position_limited = actuator.position_limited
+                runtime.surface_rate_limited = actuator.rate_limited
             elif module == "euler":
                 derivative = falcon6_rotational_derivative(
                     definition,
@@ -1128,6 +1134,8 @@ def _runtime_sample(
         requested_surfaces_deg=command.surfaces.vector(),
         achieved_surfaces_deg=runtime.achieved_surfaces.vector(),
         aero_surfaces_deg=aero_surfaces.vector(),
+        surface_position_limited=runtime.surface_position_limited,
+        surface_rate_limited=runtime.surface_rate_limited,
         throttle=propulsion.throttle,
         thrust_n=propulsion.thrust_n,
         force_body_n=wrench.force_n,

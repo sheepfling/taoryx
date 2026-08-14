@@ -1,0 +1,5 @@
+parameter,source_value,source_units,si_value,si_units,note,source_id
+reference_area,5500.0,ft^2,510.96672,m^2,Common to all configurations,NASA_CR_2144
+reference_span,195.68,ft,59.643264,m,Roll and yaw moment reference length,NASA_CR_2144
+reference_chord,27.31,ft,8.324088,m,Pitch moment reference length,NASA_CR_2144
+aerodynamic_moment_reference,0.25,fraction_cbar,0.25,fraction_cbar,CG at 25 percent mean aerodynamic chord,NASA_CR_2144

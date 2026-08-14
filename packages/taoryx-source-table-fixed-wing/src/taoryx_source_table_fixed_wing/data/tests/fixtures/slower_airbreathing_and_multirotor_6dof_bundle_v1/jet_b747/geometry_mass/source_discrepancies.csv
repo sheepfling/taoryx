@@ -1,0 +1,5 @@
+configuration,quantity,implementation_value,flight_condition_table_value,units,relative_difference,action
+power_approach_and_landing,Ixx,13700000.0,14200000.0,slug*ft^2,-0.035211267606,preserved_both_no_silent_reconciliation
+power_approach_and_landing,Iyy,30500000.0,32300000.0,slug*ft^2,-0.05572755418,preserved_both_no_silent_reconciliation
+power_approach_and_landing,Izz,43100000.0,45400000.0,slug*ft^2,-0.050660792952,preserved_both_no_silent_reconciliation
+power_approach_and_landing,Ixz,825000.0,870000.0,slug*ft^2,-0.051724137931,preserved_both_no_silent_reconciliation

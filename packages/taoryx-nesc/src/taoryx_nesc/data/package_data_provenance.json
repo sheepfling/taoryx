@@ -1,0 +1,6 @@
+{
+  "claim_boundary": "This package fragment mirrors only NESC-owned catalog rows and source replay evidence; repository-root catalogs remain canonical.",
+  "family_id": "reference_nesc_two_stage_rocket",
+  "schema": "taoryx.nesc-package-data/v1",
+  "source_catalog_root": "verification/"
+}

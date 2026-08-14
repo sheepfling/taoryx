@@ -1,0 +1,34 @@
+schema: taoryx.vehicle-execution-witnesses/v1alpha1
+version: 1
+description: One checked-in composition request for every currently runnable exact
+  family/mission/fidelity/operation endpoint. This is an onboarding and discovery
+  gate, not a mission-qualification matrix.
+witnesses:
+- id: hummingbird-pseudo6dof-batch
+  composition: examples/vehicle_composition/hummingbird_hover_yaw_episode_pseudo6dof_compose.yaml
+  operation: batch
+- id: hummingbird-pseudo6dof-episode
+  composition: examples/vehicle_composition/hummingbird_hover_yaw_episode_pseudo6dof_compose.yaml
+  operation: episode
+- id: hummingbird-local-physical-lqi-screen-batch
+  composition: examples/vehicle_composition/hummingbird_local_individual_rotor_lqi_screen_compose.yaml
+  operation: batch
+- id: hummingbird-local-horizontal-translation-lqi-screen-batch
+  composition: examples/vehicle_composition/hummingbird_local_horizontal_translation_lqi_screen_compose.yaml
+  operation: batch
+- id: hummingbird-local-vertical-translation-lqi-screen-batch
+  composition: examples/vehicle_composition/hummingbird_local_vertical_translation_lqi_screen_compose.yaml
+  operation: batch
+- id: hummingbird-local-direct-wrench-screen-batch
+  composition: examples/vehicle_composition/hummingbird_local_direct_wrench_screen_compose.yaml
+  operation: batch
+variant_witnesses:
+- id: hummingbird-grounded-mass-pseudo6dof
+  composition: examples/vehicle_composition/hummingbird_grounded_mass_variant_pseudo6dof_compose.yaml
+  variant_ids:
+  - grounded_operating_mass_kg
+graph_extension_witnesses:
+- id: hummingbird-timeout-recovery-graph-pseudo6dof
+  composition: examples/vehicle_composition/hummingbird_timeout_recovery_graph_pseudo6dof_compose.yaml
+  required_transition_kind: timeout
+  expected_observed_outcome: success

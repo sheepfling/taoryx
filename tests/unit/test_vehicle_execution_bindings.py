@@ -8,6 +8,7 @@ from typing import Any, Literal, cast
 
 import pytest
 from taoryx.hl20_source_release_composition_execution import execute_hl20_source_booster_release_composition
+from taoryx.hummingbird_composition_episode import HummingbirdPseudoCompositionEpisode
 from taoryx.hummingbird_composition_execution import execute_hummingbird_pseudo_composition
 from taoryx.nesc_composition_execution import execute_nesc_source_replay_composition
 from taoryx.passive_tumbling_composition_execution import execute_passive_tumbling_composition
@@ -15,7 +16,6 @@ from taoryx.x15_staged_composition_execution import execute_x15_staged_reachabil
 
 from taoryx.composition_control_trace import validate_committed_control_trace
 from taoryx.composition_episode import (
-    HummingbirdPseudoCompositionEpisode,
     open_vehicle_composition_episode,
     registered_episode_factory_ids,
 )
@@ -224,7 +224,7 @@ def test_batch_episode_parity_registry_is_explicit_and_never_inferred() -> None:
     assert x15["availability"] == "registered"
     assert x15["adapter_id"] == "taoryx.x15.local_direct_wrench_batch_episode_parity.v1"
     assert hl20["availability"] == "registered"
-    assert hl20["adapter_id"] == "taoryx.local_direct_wrench_batch_episode_parity.v1"
+    assert hl20["adapter_id"] == "taoryx.hl20.local_direct_wrench_batch_episode_parity.v1"
     assert batch_episode_parity_records("hummingbird", parity_catalog=parity_catalog) == [
         hummingbird_direct,
         hummingbird_horizontal,
@@ -270,7 +270,7 @@ def test_batch_episode_parity_has_a_typed_contract_before_json_serialization() -
         ("nesc_staged_source_replay_pseudo6dof_compose.yaml", "batch", "nesc_source_replay.v1"),
         ("hl20_source_booster_release_replay_3dof_compose.yaml", "batch", "hl20_source_booster_release_replay.v1"),
         ("x15_staged_booster_reachability_3dof_compose.yaml", "batch", "x15_staged_reachability.v1"),
-        ("x15_local_direct_wrench_screen_compose.yaml", "batch", "local_direct_wrench_screen.v1"),
+        ("x15_local_direct_wrench_screen_compose.yaml", "batch", "x15_local_direct_wrench_screen.v1"),
         ("tumbling_body_direct_release_pseudo6dof_compose.yaml", "batch", "passive_tumbling_direct_release.v1"),
         ("hummingbird_hover_yaw_episode_pseudo6dof_compose.yaml", "episode", "hummingbird_aggregate_thrust_episode.v1"),
         ("hummingbird_local_individual_rotor_lqi_screen_compose.yaml", "batch", "hummingbird_local_individual_rotor_lqi_screen.v1"),
@@ -787,7 +787,7 @@ def test_x15_local_direct_wrench_screen_runs_through_composition_without_becomin
     assert lowering.status == "adapter_bound"
     assert lowering.translator_status == "translation_ready"
     assert lowering.execution_binding is not None
-    assert lowering.execution_binding["factory_id"] == "local_direct_wrench_screen.v1"
+    assert lowering.execution_binding["factory_id"] == "x15_local_direct_wrench_screen.v1"
     assert result.screen.observed_statuses == ("feasible",)
     assert result.screen.equilibrium_pass is True
     assert "not prove X-15 flight trim" in result.claim_boundary

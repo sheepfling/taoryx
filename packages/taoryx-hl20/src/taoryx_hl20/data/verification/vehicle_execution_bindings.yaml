@@ -1,0 +1,73 @@
+schema: taoryx.vehicle-execution-bindings/v1alpha1
+version: 1
+description: Explicit source-owned execution bindings for compiled vehicle compositions.
+  An entry is a public capability declaration, not a generic family fallback. Omitted
+  vehicle/fidelity/mission combinations are unavailable until their own native binding
+  exists.
+bindings:
+- family_id: hl20_mod_k
+  mission: hl20_local_direct_wrench_screen_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: batch
+  status: runnable
+  execution_mode: local_direct_wrench_screen
+  factory_id: hl20_local_direct_wrench_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the source-local subsonic HL-20 direct-wrench LQR recovery
+    screen through the public composition path.
+  claim_boundary: Local direct-wrench recovery screen only; it is neither a high-energy
+    HL-20 glide mission nor physical control-surface allocation.
+- family_id: hl20_mod_k
+  mission: hl20_local_direct_wrench_screen_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: episode
+  status: runnable
+  execution_mode: local_direct_wrench_screen
+  factory_id: hl20_local_direct_wrench_episode.v1
+  batch_action_trace: not_applicable
+  description: Step the source-local HL-20 direct-wrench bridge through its declared
+    bounded total-wrench command.
+  claim_boundary: Local direct-wrench bridge episode only; it exposes requested-versus-achieved
+    injected wrench, not physical control-surface allocation or a high-energy glide
+    mission.
+- family_id: hl20_mod_k
+  mission: hl20_local_direct_wrench_lqi_screen_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: batch
+  status: runnable
+  execution_mode: local_direct_wrench_screen
+  factory_id: hl20_local_direct_wrench_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the pinned subsonic HL-20 body-speed LQI screen through the
+    bounded generalized direct-wrench composition bridge.
+  claim_boundary: Local source-load direct-wrench LQI screen only; it proves neither
+    physical HL-20 surface allocation, persistent-disturbance rejection, navigation,
+    nor a high-energy glide mission.
+- family_id: hl20_mod_k
+  mission: hl20_source_surface_pitch_authority_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: source_surface_authority_screen
+  factory_id: hl20_source_surface_pitch_authority_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the frozen Mach-1 DAVE-ML seven-surface pitch-authority allocation
+    screen through the public composition path.
+  claim_boundary: Source-fixture pitch-authority allocation only; it proves actual
+    bounded named DAVE-ML surface inputs and nonlinear source-load response, not full-state
+    trim, feedback control, navigation, glide guidance, or flight qualification.
+- family_id: hl20_mod_k
+  mission: hl20_source_surface_attitude_rate_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: hl20_local_physical_surface_lqi_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the frozen-translation HL-20 source-surface local attitude/rate
+    LQI recovery through the public composition path.
+  claim_boundary: Local source-surface LQI recovery only; it proves a moment-balanced
+    Mach-1 scalar-pitch-fragment fixture, bounded seven-surface allocation with the
+    declared lag/rate realization, and nonlinear local attitude/rate recovery. It
+    does not establish full-state trim, translation, glide guidance, navigation, robustness,
+    or flight qualification.

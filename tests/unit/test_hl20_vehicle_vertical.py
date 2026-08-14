@@ -13,19 +13,20 @@ from taoryx.hl20_adapter import (
     build_hl20_source_direct_wrench_tuning_plant,
     build_hl20_source_surface_physical_lqi_design,
 )
+from taoryx_hl20.resources import model_resource_root
 
 from taoryx.composition_episode import ActionFrame, open_vehicle_composition_episode
 from taoryx.generic_tuning import validate_nonlinear_native_coordinate_lqi
 from taoryx.local_direct_wrench_composition_execution import execute_local_direct_wrench_composition
 from taoryx.model_authoring import build_model_authoring_plan
 from taoryx.physical_lqr import apply_tuning_context_to_physical_wrench_lqi_design
-from taoryx.plugins import PluginCatalog, discover_plugins
+from taoryx.plugins import PluginCatalog, discover_plugins, plugin_catalog_scope
 from taoryx.vehicle_batch_execution import execute_vehicle_composition_batch
 from taoryx.vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
-from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
+from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog, load_vehicle_composition_registry
+from taoryx.vehicle_trim_adapters import solve_vehicle_trim_evidence
 
-ROOT = Path(__file__).resolve().parents[2]
-PROVIDER_ID = "taoryx.registry.mission-composition"
+PROVIDER_ID = "taoryx.hl20.mission-composition"
 MODEL_ID = "hl20_mod_k"
 MISSION_ID = "hl20_local_direct_wrench_screen_v1"
 FIDELITY = "rigid_body_6dof_direct_wrench"
@@ -50,16 +51,46 @@ HL20_SOURCE_SURFACES = {
 
 @pytest.fixture(scope="module")
 def plugins() -> PluginCatalog:
-    """Discover the installed distributions once for the focused slice."""
+    """Discover only the HL-20 plug-in for the family-owned vertical slice."""
 
-    return discover_plugins(include_external=False)
+    return discover_plugins(include_external=False, selected=("taoryx.hl20",))
+    ####
+
+
+@pytest.fixture(autouse=True)
+def _hl20_plugin_scope(plugins: PluginCatalog):
+    """Keep implicit runtime lookups inside the selected HL-20 plug-in scope."""
+
+    with plugin_catalog_scope(plugins):
+        yield
+    ####
+
+
+def _hl20_catalog():
+    """Load the HL-20-owned catalog fragment rather than the checkout aggregate."""
+
+    from taoryx.family_manifest import load_unified_family_manifest_catalog
+    from taoryx.horizontal_fidelity import load_horizontal_registry
+    from taoryx.trajectory.pseudo6dof_profiles import load_pseudo6dof_catalog
+
+    root = model_resource_root()
+    pseudo = load_pseudo6dof_catalog(root / "verification/pseudo6dof_profiles.yaml")
+    horizontal = load_horizontal_registry(root / "verification/horizontal_fidelity_registry.yaml")
+    manifests = load_unified_family_manifest_catalog(
+        horizontal=horizontal,
+        pseudo=pseudo,
+        root=root,
+        validate_source_imports=False,
+    )
+    registry = load_vehicle_composition_registry(root / "verification/vehicle_composition_registry.yaml")
+    return load_resolved_vehicle_composition_catalog(registry=registry, manifests=manifests)
     ####
 
 
 def _direct_wrench_composition():
     """Compile the documented HL-20 local controller-screen request."""
 
-    request = load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / COMPOSITION)
+    request = load_vehicle_composition_request(model_resource_root() / "examples/vehicle_composition" / COMPOSITION)
     return compile_vehicle_composition(request)
     ####
 
@@ -67,7 +98,7 @@ def _direct_wrench_composition():
 def _direct_wrench_lqi_composition():
     """Compile the exact HL-20 subsonic LQI request."""
 
-    request = load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / LQI_COMPOSITION)
+    request = load_vehicle_composition_request(model_resource_root() / "examples/vehicle_composition" / LQI_COMPOSITION)
     return compile_vehicle_composition(request)
     ####
 
@@ -75,7 +106,7 @@ def _direct_wrench_lqi_composition():
 def _surface_authority_composition():
     """Compile the exact public seven-surface source-authority request."""
 
-    request = load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / SURFACE_AUTHORITY_COMPOSITION)
+    request = load_vehicle_composition_request(model_resource_root() / "examples/vehicle_composition" / SURFACE_AUTHORITY_COMPOSITION)
     return compile_vehicle_composition(request)
     ####
 
@@ -83,8 +114,56 @@ def _surface_authority_composition():
 def _surface_lqi_composition():
     """Compile the exact public HL-20 physical source-surface LQI request."""
 
-    request = load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / SURFACE_LQI_COMPOSITION)
+    request = load_vehicle_composition_request(model_resource_root() / "examples/vehicle_composition" / SURFACE_LQI_COMPOSITION)
     return compile_vehicle_composition(request)
+    ####
+
+
+def test_hl20_focused_provider_excludes_optional_reachability_overlays(
+    plugins: PluginCatalog,
+) -> None:
+    """Local HL-20 discovery never claims reachability-owned missions or inputs."""
+
+    provider = plugins.build_mission_composition_provider_registry().provider(PROVIDER_ID)
+    model = provider.model(MODEL_ID)
+
+    assert [item.id for item in model.mission_templates] == [
+        SURFACE_AUTHORITY_MISSION_ID,
+        SURFACE_LQI_MISSION_ID,
+        MISSION_ID,
+        LQI_MISSION_ID,
+    ]
+    advertised_missions = {
+        mission_id
+        for realization in model.realizations
+        for mission_id in realization.mission_template_ids
+    }
+    assert "hl20_source_booster_release_replay_v1" not in advertised_missions
+    assert "lifting_body_glide_energy_management_v1" not in advertised_missions
+    assert set(model.capabilities.initialization_modes) == {
+        "source_subsonic_local_point",
+        "source_mach1_pitch_trim_anchor",
+    }
+    assert set(model.capabilities.segment_types) == {
+        "local_wrench_recovery_screen",
+        "local_wrench_lqi_recovery_screen",
+        "source_surface_pitch_authority_allocation_screen",
+        "source_surface_attitude_rate_lqi_recovery_screen",
+    }
+    ####
+
+
+def test_hl20_trim_evidence_uses_the_family_owned_source_binding(
+    plugins: PluginCatalog,
+) -> None:
+    """The shared trim API resolves HL-20's recipe and DAVE-ML binding locally."""
+
+    report = solve_vehicle_trim_evidence("reference_hl20_mod_k", plugins=plugins)
+
+    assert report.status == "verified"
+    assert report.adapter == "taoryx.adapters.reference_hl20_mod_k.daveml_pitch_channel"
+    assert [point.point_id for point in report.points] == ["hl20-mach1-pitch-trim"]
+    assert report.points[0].max_residual < 1.0e-10
     ####
 
 
@@ -504,15 +583,15 @@ def test_hl20_source_surface_lqi_screen_applies_the_exact_common_tuning_candidat
 def test_hl20_catalog_advertises_the_same_runnable_endpoints_as_the_slice() -> None:
     """The public catalog names the local screen and its bounded interactive peer."""
 
-    kit = load_resolved_vehicle_composition_catalog().vehicle(MODEL_ID).authoring_kit_dict(
+    kit = _hl20_catalog().vehicle(MODEL_ID).authoring_kit_dict(
         MISSION_ID,
         FIDELITY,
     )
     endpoints = cast(list[dict[str, object]], kit["execution_endpoints"])
 
     assert {(item["operation"], item["factory_id"]) for item in endpoints if item["status"] == "runnable"} == {
-        ("batch", "local_direct_wrench_screen.v1"),
-        ("episode", "local_direct_wrench_episode.v1"),
+        ("batch", "hl20_local_direct_wrench_screen.v1"),
+        ("episode", "hl20_local_direct_wrench_episode.v1"),
     }
     ####
 
@@ -520,14 +599,14 @@ def test_hl20_catalog_advertises_the_same_runnable_endpoints_as_the_slice() -> N
 def test_hl20_lqi_catalog_advertises_only_its_exercised_batch_endpoint() -> None:
     """The batch LQI screen does not borrow the manual direct-wrench episode."""
 
-    kit = load_resolved_vehicle_composition_catalog().vehicle(MODEL_ID).authoring_kit_dict(
+    kit = _hl20_catalog().vehicle(MODEL_ID).authoring_kit_dict(
         LQI_MISSION_ID,
         FIDELITY,
     )
     endpoints = cast(list[dict[str, object]], kit["execution_endpoints"])
 
     assert {(item["operation"], item["factory_id"]) for item in endpoints if item["status"] == "runnable"} == {
-        ("batch", "local_direct_wrench_screen.v1"),
+        ("batch", "hl20_local_direct_wrench_screen.v1"),
     }
     ####
 
@@ -535,7 +614,7 @@ def test_hl20_lqi_catalog_advertises_only_its_exercised_batch_endpoint() -> None
 def test_hl20_surface_authority_catalog_advertises_only_its_exercised_batch_endpoint() -> None:
     """The authority probe does not borrow a direct-wrench or controller episode."""
 
-    kit = load_resolved_vehicle_composition_catalog().vehicle(MODEL_ID).authoring_kit_dict(
+    kit = _hl20_catalog().vehicle(MODEL_ID).authoring_kit_dict(
         SURFACE_AUTHORITY_MISSION_ID,
         SURFACE_AUTHORITY_FIDELITY,
     )

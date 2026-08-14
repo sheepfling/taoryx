@@ -1,0 +1,39 @@
+schema: taoryx.model-authoring-draft/v1
+draft_id: debug-contract-probe-batch-draft
+configuration_id: debug-contract-probe-batch
+provider_id: taoryx.debug.mission-composition-contract-probe
+model_id: contract_probe_vehicle
+model_version: 1.0.0
+schema_fingerprint: acb60a40f079c5fc46c124d96417784e440dc53498b78b93b33082e2f06244e4
+fidelity: medium
+realization_id: medium
+mission_template_id: deployment_walkthrough
+selection_sources:
+  fidelity: caller
+  mission: caller
+  realization: caller
+values:
+  initialization:
+    launch_altitude_m: 1000.0
+    integration_order: 4
+    emit_diagnostics: true
+    callsign: PROBE-01
+    coordinate_mode: local_ned
+    initial_position_m: [0.0, 0.0, -1000.0]
+    initial_attitude_quaternion: [1.0, 0.0, 0.0, 0.0]
+    heading_deg: 45.0
+    success_probability: 0.95
+  motion_mode:
+    selected: constant_acceleration
+    values:
+      initial_speed_m_s: 100.0
+      acceleration_m_s2: 2.0
+  segments:
+    template: deployment_walkthrough
+    items:
+      - duration_s: 1.0
+      - duration_s: 1.0
+  payload: null
+claim_boundary: >-
+  This checked-in endpoint witness is editable input in canonical advertised units.
+  It remains a synthetic contract/API proof until the exact provider validates and runs it.

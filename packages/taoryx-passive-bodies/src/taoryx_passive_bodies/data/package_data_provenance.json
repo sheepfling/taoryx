@@ -1,0 +1,6 @@
+{
+  "claim_boundary": "This package fragment mirrors only passive-body-owned catalog rows; repository-root catalogs remain canonical.",
+  "family_id": "tumbling_body",
+  "schema": "taoryx.passive-bodies-package-data/v1",
+  "source_catalog_root": "verification/"
+}

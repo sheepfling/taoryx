@@ -1,0 +1,36 @@
+schema_version: 1
+id: taoryx_lqr_scaling_profiles_v1
+claim_boundary: Provisional dimensionless controller-design scales for research-surrogate
+  plants. These normalize numerical conditioning; they are not source-derived handling-quality
+  requirements or validated gains.
+profiles:
+  x15-gentle:
+    vehicle: x15
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.13089969389925
+    state_rate_scale_rad_s: 0.5
+    control_moment_scale_nm: 449446.9515522355
+    normalized_weights:
+      q_angle: 0.25
+      q_rate: 1.0
+      r_moment: 2.0
+  x15-standard:
+    vehicle: x15
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.13089969389925
+    state_rate_scale_rad_s: 0.5
+    control_moment_scale_nm: 449446.9515522355
+    normalized_weights:
+      q_angle: 1.0
+      q_rate: 1.0
+      r_moment: 1.0
+  x15-aggressive:
+    vehicle: x15
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.13089969389925
+    state_rate_scale_rad_s: 0.5
+    control_moment_scale_nm: 449446.9515522355
+    normalized_weights:
+      q_angle: 4.0
+      q_rate: 1.0
+      r_moment: 0.25

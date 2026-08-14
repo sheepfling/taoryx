@@ -1,0 +1,5 @@
+engine_id,side,body_y_ft,body_y_m,body_x,body_z,source_id,fidelity
+1,left_outer,-71.7,-21.85416,not_supplied,not_supplied,TENSORAEROSPACE_B747,IMPLEMENTATION_GEOMETRY
+2,left_inner,-35.8,-10.91184,not_supplied,not_supplied,TENSORAEROSPACE_B747,IMPLEMENTATION_GEOMETRY
+3,right_inner,35.8,10.91184,not_supplied,not_supplied,TENSORAEROSPACE_B747,IMPLEMENTATION_GEOMETRY
+4,right_outer,71.7,21.85416,not_supplied,not_supplied,TENSORAEROSPACE_B747,IMPLEMENTATION_GEOMETRY

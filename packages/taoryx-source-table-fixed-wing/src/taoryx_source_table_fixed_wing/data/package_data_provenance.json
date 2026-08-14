@@ -1,0 +1,9 @@
+{
+  "claim_boundary": "This exact package fragment mirrors only Skywalker X8 and B747 source-table catalog rows, local programs, source grids, witnesses, and table provenance. Repository-root catalogs remain canonical; local controller screens remain development evidence rather than route-level qualification.",
+  "family_ids": [
+    "b747",
+    "skywalker_x8"
+  ],
+  "schema": "taoryx.source-table-fixed-wing-package-data/v1",
+  "source_catalog_root": "verification/"
+}

@@ -273,7 +273,7 @@ def _build_configuration_schema(plugin: Rocket6gVehiclePlugin) -> TrajectoryConf
                         _parameter(
                             "thrust_vector_unit_body",
                             "Desired thrust-vector direction",
-                            "Body-axis unit direction consumed by source RCS vector-direction mode.",
+                            "Body-axis direction used by source RCS vector moment modes and, when its force mode is nonzero, aggregate RCS force modes.",
                             default=(1.0, 0.0, 0.0),
                             value_type="vector3",
                             frame=_BODY_FRAME_ID,
@@ -457,6 +457,13 @@ def _build_output_schema() -> TrajectoryOutputSchema:
         ),
         _output("propulsion_mode", "Propulsion mode", "Source mprop value.", data_type="int64", interpolation="step"),
         _output("rcs_moment_mode", "RCS moment mode", "Source mrcs_moment value.", data_type="int64", interpolation="step"),
+        _output(
+            "rcs_force_mode",
+            "RCS force mode",
+            "Source mrcs_force value; zero means the requested thrust-vector direction produces no aggregate RCS force in that sample.",
+            data_type="int64",
+            interpolation="step",
+        ),
         _output("tvc_mode", "TVC mode", "Source mtvc value.", data_type="int64", interpolation="step"),
         _output("mass_kg", "Mass", "Source stage gross mass after fuel expenditure.", unit="kg"),
         _output("remaining_fuel_kg", "Remaining fuel", "Current source stage fuel remaining.", unit="kg"),
@@ -567,7 +574,10 @@ def _build_model_metadata(
             output_evidence={
                 "tvc.pitch.deflection": CadacControlOutputEvidence("requested_tvc_control_deg", ("achieved_nozzle_deg",), 0, (0,)),
                 "tvc.yaw.deflection": CadacControlOutputEvidence("requested_tvc_control_deg", ("achieved_nozzle_deg",), 1, (1,)),
-                "rcs.thrust_vector.direction": CadacControlOutputEvidence("requested_thrust_vector_unit_body", ("rcs_force_body_n",)),
+                "rcs.thrust_vector.direction": CadacControlOutputEvidence(
+                    "requested_thrust_vector_unit_body",
+                    ("rcs_force_body_n", "rcs_moment_body_nm"),
+                ),
                 "rcs.roll.attitude_command": CadacControlOutputEvidence("requested_rcs_attitude_deg", ("rcs_moment_body_nm",), 0, (0,)),
                 "rcs.pitch.attitude_command": CadacControlOutputEvidence("requested_rcs_attitude_deg", ("rcs_moment_body_nm",), 1, (1,)),
                 "rcs.yaw.attitude_command": CadacControlOutputEvidence("requested_rcs_attitude_deg", ("rcs_moment_body_nm",), 2, (2,)),

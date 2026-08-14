@@ -1,0 +1,97 @@
+schema_version: 1
+description: Capability-backed first-mission inputs for the reusable powered-fixed-wing
+  racetrack compiler. These are planning inputs, not controller or physical effector
+  qualification claims.
+baselines:
+  b747-cruise: b747-transport-scaled-rigid
+  x8-cruise: x8-reference
+profiles:
+  b747-cruise:
+    realization_bindings:
+      point_mass_3dof: b747-transport-scaled
+      pseudo_6dof_kinematic_bridge: b747-transport-scaled-kinematic
+      rigid_body_6dof_direct_wrench: b747-transport-scaled-rigid
+    capability:
+      vehicle_id: b747
+      operating_point_id: nasa-cr2144-condition-3-cruise
+      minimum_speed_m_s: 130.0
+      nominal_speed_m_s: 153.0
+      maximum_speed_m_s: 180.0
+      maximum_bank_deg: 20.0
+      maximum_climb_rate_m_s: 1.5
+      maximum_descent_rate_m_s: 1.2
+      provenance: NASA CR-2144 local condition-three transport proof envelope
+      evidence_class: local_source_bound_planning_bound
+    intent:
+      id: powered-fixed-wing-racetrack
+      low_altitude_m: 500.0
+      high_altitude_m: 650.0
+      requested_speed_m_s: 153.0
+      requested_bank_deg: 18.0
+      minimum_straight_length_m: 30000.0
+      level_dwell_s: 60.0
+      turn_radius_margin: 1.1
+      simulation_margin_s: 60.0
+      gate_corridor_m: 500.0
+      gate_altitude_tolerance_m: 35.0
+      gate_speed_tolerance_mps: 12.0
+    fidelity_intent_overrides:
+      point_mass_3dof:
+        low_altitude_m: 100.0
+        high_altitude_m: 250.0
+      pseudo_6dof_kinematic_bridge:
+        low_altitude_m: 100.0
+        high_altitude_m: 250.0
+    source_direct_wrench_route:
+      source_problem: examples/mission_families/slower_b747/SV01_racetrack_altitude_turns_6dof.prb
+      control_owner: source_autonomous_local_bank_pitch_pd
+      simulation_margin_s: 10.0
+      altitude_capture_gain_per_s: 1.0
+      altitude_capture_max_mps: 10.0
+      position_capture_gain_per_m: 0.01
+      position_capture_max_correction_mps: 50.0
+      claim_boundary: These are pinned source-route controller settings for the autonomous
+        direct-wrench batch lane. They are neither generic composition inputs nor
+        externally callable wrench commands.
+  x8-cruise:
+    realization_bindings:
+      point_mass_3dof: x8-point-mass
+      pseudo_6dof_kinematic_bridge: x8-kinematic-bridge
+      rigid_body_6dof_direct_wrench: x8-direct-wrench
+      rigid_body_6dof_surface_allocated: x8-reference
+    capability:
+      vehicle_id: skywalker_x8
+      operating_point_id: x8-cruise-17p9mps
+      minimum_speed_m_s: 15.0
+      nominal_speed_m_s: 17.9
+      maximum_speed_m_s: 22.0
+      maximum_bank_deg: 12.0
+      maximum_climb_rate_m_s: 0.5
+      maximum_descent_rate_m_s: 0.3
+      provenance: source-table cruise binding plus current local racetrack envelope
+      evidence_class: engineering_planning_bound
+    intent:
+      id: powered-fixed-wing-racetrack
+      low_altitude_m: 178.0
+      high_altitude_m: 188.0
+      requested_speed_m_s: 17.9
+      requested_bank_deg: 10.0
+      minimum_straight_length_m: 1000.0
+      level_dwell_s: 20.0
+      turn_radius_margin: 1.1
+      simulation_margin_s: 20.0
+      gate_corridor_m: 100.0
+      gate_altitude_tolerance_m: 10.0
+      gate_speed_tolerance_mps: 4.0
+    source_direct_wrench_route:
+      source_problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_direct_wrench_6dof.prb
+      control_owner: source_autonomous_direct_moment
+      simulation_margin_s: 4.0
+      altitude_capture_gain_per_s: 0.1
+      altitude_capture_max_mps: 2.0
+      position_capture_gain_per_m: 0.01
+      position_capture_max_correction_mps: 2.0
+      right_turn_bank_sign: -1.0
+      claim_boundary: These are pinned source-route controller settings for the autonomous
+        direct-wrench batch lane. They are neither generic composition inputs nor
+        externally callable wrench commands.

@@ -78,7 +78,10 @@ def test_committed_control_trace_preserves_held_actions_without_inventing_effect
     assert trace["sampling"] == "held_action_interval_to_committed_truth_boundary"
     assert trace["authority_profile_id"] == "body_motion_response"
     assert trace["command_owner"] == "caller"
-    assert trace["lowering_chain"] == []
+    assert trace["lowering_chain"] == [
+        "held_attitude_and_aggregate_thrust",
+        "hummingbird_pseudo_6dof_response_law",
+    ]
     assert trace["achieved_effector_channels"] == []
     sample = trace["samples"][0]
     assert sample["requested_actions"]["propulsion.enable"] is True

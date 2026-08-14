@@ -5,11 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from taoryx.hummingbird_composition_episode import HummingbirdPseudoCompositionEpisode
 
 from taoryx.composition_episode import (
     ActionFrame,
     EpisodeChannel,
-    HummingbirdPseudoCompositionEpisode,
     ReducedFixedWingCompositionEpisode,
     open_vehicle_composition_episode,
     validate_vehicle_composition_episode_contract,
@@ -251,8 +251,8 @@ def test_hummingbird_episode_maps_semantic_controls_and_status_without_motor_pro
     assert action_spaces["thrust_ratio"] is not None
     assert action_spaces["thrust_ratio"].topology == "unit_interval"
     observation_spaces = {channel.name: channel.value_space for channel in episode.observation_schema}
-    assert observation_spaces["aggregate_thrust_n"] is not None
-    assert observation_spaces["aggregate_thrust_n"].topology == "positive_half_line"
+    assert observation_spaces["propulsion.output.thrust.aggregate"] is not None
+    assert observation_spaces["propulsion.output.thrust.aggregate"].topology == "positive_half_line"
     frame = ActionFrame(
         contract.id,
         contract.fingerprint,
@@ -291,6 +291,10 @@ def test_hummingbird_episode_maps_semantic_controls_and_status_without_motor_pro
     assert result.observation_frame.valid["resources.battery.fraction_remaining"] is True
     assert result.observation_frame.observation_profile_id == "declared_sensor"
     assert result.observation_frame.source_time_s == pytest.approx(0.08)
+    assert set(result.observation_frame.values) == set(
+        contract.observation_profile("declared_sensor").channel_ids
+    )
+    assert "guidance.waypoint.status" not in result.observation_frame.values
     ####
 
 

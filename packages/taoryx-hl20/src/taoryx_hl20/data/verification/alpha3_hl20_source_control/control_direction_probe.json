@@ -1,0 +1,701 @@
+{
+  "claims": [
+    "all seven declared surface channels are probed; six or more produce reproducible nonzero source coefficient responses at every probe point",
+    "the source response matrix rank is recorded rather than inferred from channel count",
+    "all probes remain inside the declared Mach and alpha envelope"
+  ],
+  "coefficient_names": [
+    "cl",
+    "cd",
+    "cy",
+    "cr",
+    "cm",
+    "cn"
+  ],
+  "family_id": "hl20_mod_k",
+  "next_gate": "Use these source directions in a bounded trim/linearization/physical allocator adapter; retain the Mach-3 rudder authority boundary, then validate bank, alpha, and energy response around a source-supported operating point.",
+  "nonclaims": [
+    "closed-loop trim or trajectory qualification",
+    "physical surface allocation residual or actuator dynamics",
+    "source-exact arrival, landing, or family-envelope performance",
+    "the existing logical reduced allocator is not promoted by this probe"
+  ],
+  "operating_points": [
+    {
+      "alpha_deg": 5.0,
+      "baseline_coefficients": {
+        "cd": 0.0611390775,
+        "cl": 0.14916700833333332,
+        "cm": 0.004554197500000003,
+        "cn": 0.0,
+        "cr": 0.0,
+        "cy": 0.0
+      },
+      "mach": 0.5,
+      "nonzero_surface_count": 7,
+      "response_matrix_rank": 6,
+      "response_matrix_shape": [
+        6,
+        7
+      ],
+      "responses": {
+        "left_wing_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.003570900000000002,
+            "cl": 0.021783299999999978,
+            "cm": -0.007569590833333332,
+            "cn": -0.030661716111111115,
+            "cr": 0.026539608333333332,
+            "cy": 0.03464766666666666
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "lower_left_body_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0011402111111111085,
+            "cl": 0.014388327777777765,
+            "cm": -0.002547725833333333,
+            "cn": -0.0015153708333333332,
+            "cr": 0.004838917561111111,
+            "cy": 0.0032412138888888884
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "lower_right_body_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0011402111111111085,
+            "cl": 0.014388327777777765,
+            "cm": -0.002547725833333333,
+            "cn": 0.0015153708333333332,
+            "cr": -0.004838917561111111,
+            "cy": -0.0032412138888888884
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "right_wing_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.003570900000000002,
+            "cl": 0.021783299999999978,
+            "cm": -0.007569590833333332,
+            "cn": 0.030661716111111115,
+            "cr": -0.026539608333333332,
+            "cy": -0.03464766666666666
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "rudder": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": -0.002955185555555552,
+            "cl": 0.01689325,
+            "cm": -0.0019765308333333335,
+            "cn": -0.015712524444444445,
+            "cr": 0.0015085138888888889,
+            "cy": 0.021846847222222222
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "upper_left_body_flap": {
+          "command_deg": -10.0,
+          "delta_coefficients": {
+            "cd": 0.0006849744444444444,
+            "cl": -0.024117786111111122,
+            "cm": 0.00789670888888889,
+            "cn": -0.000722650277777778,
+            "cr": -0.0031220611111111114,
+            "cy": 0.0018375583333333327
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "upper_right_body_flap": {
+          "command_deg": -10.0,
+          "delta_coefficients": {
+            "cd": 0.0006849744444444444,
+            "cl": -0.024117786111111122,
+            "cm": 0.00789670888888889,
+            "cn": 0.000722650277777778,
+            "cr": 0.0031220611111111114,
+            "cy": -0.0018375583333333327
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        }
+      }
+    },
+    {
+      "alpha_deg": 5.0,
+      "baseline_coefficients": {
+        "cd": 0.12083715666666667,
+        "cl": 0.17524959583333333,
+        "cm": 0.007435285000000005,
+        "cn": 0.0,
+        "cr": 0.0,
+        "cy": 0.0
+      },
+      "mach": 1.0,
+      "nonzero_surface_count": 7,
+      "response_matrix_rank": 6,
+      "response_matrix_shape": [
+        6,
+        7
+      ],
+      "responses": {
+        "left_wing_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0036304277777777783,
+            "cl": 0.020372728333333312,
+            "cm": -0.007088300833333332,
+            "cn": -0.02891950611111111,
+            "cr": 0.024773905833333335,
+            "cy": 0.03243312583333334
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "lower_left_body_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0019046655555555597,
+            "cl": 0.018925438888888868,
+            "cm": -0.003488240833333333,
+            "cn": -0.0020364641666666666,
+            "cr": 0.00636056045,
+            "cy": 0.004188513888888889
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "lower_right_body_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0019046655555555597,
+            "cl": 0.018925438888888868,
+            "cm": -0.003488240833333333,
+            "cn": 0.0020364641666666666,
+            "cr": -0.00636056045,
+            "cy": -0.004188513888888889
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "right_wing_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0036304277777777783,
+            "cl": 0.020372728333333312,
+            "cm": -0.007088300833333332,
+            "cn": 0.02891950611111111,
+            "cr": -0.024773905833333335,
+            "cy": -0.03243312583333334
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "rudder": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": -0.008021511111111115,
+            "cl": 0.009229661111111093,
+            "cm": -0.0018173444444444433,
+            "cn": -0.018014475,
+            "cr": 0.0008009672222222225,
+            "cy": 0.024668408333333336
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "upper_left_body_flap": {
+          "command_deg": -10.0,
+          "delta_coefficients": {
+            "cd": 0.000692285361111114,
+            "cl": -0.020786813888888894,
+            "cm": 0.006806630555555557,
+            "cn": -0.0006395021111111112,
+            "cr": -0.0028079625000000013,
+            "cy": 0.0015495933333333337
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "upper_right_body_flap": {
+          "command_deg": -10.0,
+          "delta_coefficients": {
+            "cd": 0.000692285361111114,
+            "cl": -0.020786813888888894,
+            "cm": 0.006806630555555557,
+            "cn": 0.0006395021111111112,
+            "cr": 0.0028079625000000013,
+            "cy": -0.0015495933333333337
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        }
+      }
+    },
+    {
+      "alpha_deg": 5.0,
+      "baseline_coefficients": {
+        "cd": 0.1437231525,
+        "cl": 0.1460456625,
+        "cm": -0.0175061025,
+        "cn": 0.0,
+        "cr": 0.0,
+        "cy": 0.0
+      },
+      "mach": 2.0,
+      "nonzero_surface_count": 7,
+      "response_matrix_rank": 6,
+      "response_matrix_shape": [
+        6,
+        7
+      ],
+      "responses": {
+        "left_wing_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0037575416666666417,
+            "cl": 0.004647278333333338,
+            "cm": -0.0012637900000000007,
+            "cn": -0.006529621666666666,
+            "cr": 0.0031926408333333334,
+            "cy": 0.004829863333333333
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "lower_left_body_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.004190033333333315,
+            "cl": 0.007991499999999985,
+            "cm": -0.002715248333333333,
+            "cn": -0.0008715133333333332,
+            "cr": 0.0015806546666666667,
+            "cy": 0.00016967166666666662
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "lower_right_body_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.004190033333333315,
+            "cl": 0.007991499999999985,
+            "cm": -0.002715248333333333,
+            "cn": 0.0008715133333333332,
+            "cr": -0.0015806546666666667,
+            "cy": -0.00016967166666666662
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "right_wing_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0037575416666666417,
+            "cl": 0.004647278333333338,
+            "cm": -0.0012637900000000007,
+            "cn": 0.006529621666666666,
+            "cr": -0.0031926408333333334,
+            "cy": -0.004829863333333333
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "rudder": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": -0.0014819883333333506,
+            "cl": -0.0025610333333333513,
+            "cm": 0.0010438099999999992,
+            "cn": -0.012053300000000001,
+            "cr": 0.001951958333333333,
+            "cy": 0.012882756666666665
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "upper_left_body_flap": {
+          "command_deg": -10.0,
+          "delta_coefficients": {
+            "cd": 0.0012233749999999988,
+            "cl": -0.0001935583333333435,
+            "cm": 0.0009162408333333316,
+            "cn": -0.00013292333333333323,
+            "cr": -0.0014302625000000002,
+            "cy": -0.0005339716666666666
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "upper_right_body_flap": {
+          "command_deg": -10.0,
+          "delta_coefficients": {
+            "cd": 0.0012233749999999988,
+            "cl": -0.0001935583333333435,
+            "cm": 0.0009162408333333316,
+            "cn": 0.00013292333333333323,
+            "cr": 0.0014302625000000002,
+            "cy": 0.0005339716666666666
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        }
+      }
+    },
+    {
+      "alpha_deg": 5.0,
+      "baseline_coefficients": {
+        "cd": 0.1189734275,
+        "cl": 0.08686358139124999,
+        "cm": -0.003895092500000001,
+        "cn": 0.0,
+        "cr": 0.0,
+        "cy": 0.0
+      },
+      "mach": 3.0,
+      "nonzero_surface_count": 6,
+      "response_matrix_rank": 6,
+      "response_matrix_shape": [
+        6,
+        7
+      ],
+      "responses": {
+        "left_wing_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0012216909166666706,
+            "cl": 0.0019361125000000035,
+            "cm": -0.00073391725,
+            "cn": -0.004209716416666667,
+            "cr": 0.0020581440833333333,
+            "cy": 0.0029232340833333335
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "lower_left_body_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0018224391666666617,
+            "cl": 0.0037132625000000086,
+            "cm": -0.0016222419166666666,
+            "cn": -0.00071355025,
+            "cr": 0.0010858323333333333,
+            "cy": -2.6985833333333315e-06
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "lower_right_body_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0018224391666666617,
+            "cl": 0.0037132625000000086,
+            "cm": -0.0016222419166666666,
+            "cn": 0.00071355025,
+            "cr": -0.0010858323333333333,
+            "cy": 2.6985833333333315e-06
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "right_wing_flap": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0012216909166666706,
+            "cl": 0.0019361125000000035,
+            "cm": -0.00073391725,
+            "cn": 0.004209716416666667,
+            "cr": -0.0020581440833333333,
+            "cy": -0.0029232340833333335
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "rudder": {
+          "command_deg": 10.0,
+          "delta_coefficients": {
+            "cd": 0.0,
+            "cl": 0.0,
+            "cm": 0.0,
+            "cn": 0.0,
+            "cr": 0.0,
+            "cy": 0.0
+          },
+          "nonzero_channels": []
+        },
+        "upper_left_body_flap": {
+          "command_deg": -10.0,
+          "delta_coefficients": {
+            "cd": 0.00016365416666666577,
+            "cl": -0.0013265841666666583,
+            "cm": 0.000579025916666667,
+            "cn": -0.0007114224999999999,
+            "cr": -0.00044804375000000006,
+            "cy": 0.00047900305833333337
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        },
+        "upper_right_body_flap": {
+          "command_deg": -10.0,
+          "delta_coefficients": {
+            "cd": 0.00016365416666666577,
+            "cl": -0.0013265841666666583,
+            "cm": 0.000579025916666667,
+            "cn": 0.0007114224999999999,
+            "cr": 0.00044804375000000006,
+            "cy": -0.00047900305833333337
+          },
+          "nonzero_channels": [
+            "cl",
+            "cd",
+            "cy",
+            "cr",
+            "cm",
+            "cn"
+          ]
+        }
+      }
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hl20_source_control_probe.py",
+  "schema": "taoryx.hl20-source-control-direction/v1alpha1",
+  "source_provenance": {
+    "aerodynamic_model": "hl20_mod_k_daveml_source_v1",
+    "atmosphere_model": "exponential_density",
+    "source_coefficient_channels": [
+      "CL",
+      "CD",
+      "CY",
+      "CR",
+      "CM",
+      "CN"
+    ],
+    "source_control_envelope_deg": {
+      "left_wing_flap": [
+        -30.0,
+        30.0
+      ],
+      "lower_left_body_flap": [
+        0.0,
+        60.0
+      ],
+      "lower_right_body_flap": [
+        0.0,
+        60.0
+      ],
+      "right_wing_flap": [
+        -30.0,
+        30.0
+      ],
+      "rudder": [
+        -30.0,
+        30.0
+      ],
+      "upper_left_body_flap": [
+        -60.0,
+        0.0
+      ],
+      "upper_right_body_flap": [
+        -60.0,
+        0.0
+      ]
+    },
+    "source_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+    "source_force_frame": "body_axes_frd",
+    "source_numerical_boundary_tolerance_rad": 0.01,
+    "source_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+    "source_sidecar": "families/reference_hl20_mod_k/plant/daveml-import.json",
+    "source_validity_envelope": {
+      "alpha_max_rad": 0.2617993877991494,
+      "alpha_min_rad": 0.0,
+      "altitude_max_m": 20000.0,
+      "altitude_min_m": -1000.0,
+      "beta_max_rad": 0.17453292519943295,
+      "beta_min_rad": -0.17453292519943295,
+      "dynamic_pressure_min_pa": 0.0,
+      "mach_max": 4.0,
+      "mach_min": 0.3
+    },
+    "speed_of_sound_model": "constant_340.294_m_s_assumption"
+  },
+  "status": "open_loop_source_direction_pass_with_boundary",
+  "surface_names": [
+    "upper_left_body_flap",
+    "lower_left_body_flap",
+    "upper_right_body_flap",
+    "lower_right_body_flap",
+    "left_wing_flap",
+    "right_wing_flap",
+    "rudder"
+  ]
+}

@@ -13,14 +13,13 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .family_adapter import ADAPTER_OPERATIONS, AdapterOperation
 from .fidelity_contracts import CANONICAL_FIDELITY_TIERS, FidelityTier
-from .plugins.resources import packaged_resource_fallback
 from .trajectory.pseudo6dof_profiles import (
     AutomaticLoweringReport,
     Pseudo6DOFCatalog,
@@ -28,13 +27,14 @@ from .trajectory.pseudo6dof_profiles import (
     load_pseudo6dof_catalog,
     load_qualified_fidelity_evidence,
 )
+from .vehicle_catalog_resources import vehicle_catalog_resources
 from .vehicle_registry import ROOT
 
-HORIZONTAL_REGISTRY = packaged_resource_fallback(
-    ROOT / "verification/horizontal_fidelity_registry.yaml",
-    package="taoryx_reference_models",
-    resource="data/verification/horizontal_fidelity_registry.yaml",
-)
+if TYPE_CHECKING:
+    from .plugins.discovery import PluginCatalog
+
+# Materialized lazily by ``__getattr__`` only for compatibility consumers.
+HORIZONTAL_REGISTRY: Path
 
 PromotionStatus = Literal["qualified", "development", "planned", "not_applicable"]
 DataEvidenceStatus = Literal["ready", "source_declared"]
@@ -230,14 +230,34 @@ class HorizontalConformanceReport:
     ####
 
 
-def load_horizontal_registry(path: str | Path | None = None) -> HorizontalFidelityRegistry:
-    """Load and validate the canonical horizontal registry."""
+def load_horizontal_registry(
+    path: str | Path | None = None,
+    *,
+    plugins: PluginCatalog | None = None,
+) -> HorizontalFidelityRegistry:
+    """Load horizontal records from one explicit selected catalog when given."""
 
-    registry_path = Path(path) if path is not None else HORIZONTAL_REGISTRY
-    payload = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"{registry_path} must contain a mapping")
-    return HorizontalFidelityRegistry.model_validate(payload)
+    if path is not None:
+        registry_path = Path(path)
+        payload = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"{registry_path} must contain a mapping")
+        return HorizontalFidelityRegistry.model_validate(payload)
+    payloads: list[Mapping[str, object]] = []
+    for source in vehicle_catalog_resources("verification/horizontal_fidelity_registry.yaml", plugins=plugins):
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"{source} must contain a mapping")
+        payloads.append(payload)
+    merged = dict(payloads[0])
+    families: list[object] = []
+    for payload in payloads:
+        rows = payload.get("families")
+        if not isinstance(rows, list):
+            raise ValueError("horizontal registry families must contain a list")
+        families.extend(rows)
+    merged["families"] = families
+    return HorizontalFidelityRegistry.model_validate(merged)
     ####
 
 
@@ -335,13 +355,26 @@ def validate_horizontal_fidelity(
         results.append(HorizontalFamilyConformance(family.family_id, family.physical_family, family.adapter_id, actual, promotion, lowering))
     status = "pass" if not findings else "fail"
     return HorizontalConformanceReport(
-        str(HORIZONTAL_REGISTRY.relative_to(ROOT)),
+        "verification/horizontal_fidelity_registry.yaml",
         str((ROOT / "verification/pseudo6dof_profiles.yaml").relative_to(ROOT)),
         status,
         len(results),
         tuple(results),
         tuple(findings),
     )
+    ####
+
+
+def __getattr__(name: str) -> object:
+    """Resolve the historical aggregate registry path only for compatibility users."""
+
+    if name != "HORIZONTAL_REGISTRY":
+        raise AttributeError(name)
+    from .compatibility.vehicle_catalog_resources import legacy_vehicle_catalog_resource
+
+    value = legacy_vehicle_catalog_resource("verification/horizontal_fidelity_registry.yaml")
+    globals()[name] = value
+    return value
     ####
 
 

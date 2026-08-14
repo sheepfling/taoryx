@@ -14,6 +14,7 @@ import shlex
 import tempfile
 from collections.abc import Iterable, Mapping
 from contextlib import AbstractContextManager, nullcontext, redirect_stdout
+from functools import lru_cache
 from io import StringIO
 from pathlib import Path
 from typing import Literal
@@ -21,6 +22,8 @@ from typing import Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from .plugins import PluginCatalog, plugin_catalog_scope
+from .vehicle_catalog_resources import vehicle_catalog_resource, vehicle_catalog_resources
 from .vehicle_composition import CompiledVehicleComposition, compile_vehicle_composition, load_vehicle_composition_request
 from .vehicle_composition_registry import (
     ResolvedVehicleCompositionCatalog,
@@ -34,10 +37,10 @@ from .vehicle_execution_bindings import (
     resolve_vehicle_execution_binding,
 )
 from .vehicle_execution_preflight import preflight_vehicle_composition, validate_public_capability_advertisement
-from .vehicle_registry import ROOT
 from .vehicle_runtime_lowering import lower_vehicle_composition
 
-VEHICLE_EXECUTION_WITNESSES = ROOT / "verification/vehicle_execution_witnesses.yaml"
+# Materialized lazily by ``__getattr__`` only for compatibility consumers.
+VEHICLE_EXECUTION_WITNESSES: Path
 
 # These executions deliberately have no common control screen.  A release
 # packet must preserve that boundary as explicit ``not_applicable`` evidence;
@@ -143,14 +146,43 @@ class VehicleExecutionWitnessCatalog(BaseModel):
 
 def load_vehicle_execution_witness_catalog(
     path: str | Path | None = None,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> VehicleExecutionWitnessCatalog:
-    """Load the checked-in composition witness catalog."""
+    """Load checked-in witnesses from one explicit plug-in data scope."""
 
-    source = Path(path) if path is not None else VEHICLE_EXECUTION_WITNESSES
-    payload = yaml.safe_load(source.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"{source} must contain a mapping")
-    return VehicleExecutionWitnessCatalog.model_validate(payload)
+    if path is not None:
+        return _load_vehicle_execution_witness_catalog_sources((str(Path(path)),))
+    sources = vehicle_catalog_resources("verification/vehicle_execution_witnesses.yaml", plugins=plugins)
+    return _load_vehicle_execution_witness_catalog_sources(tuple(str(source) for source in sources))
+    ####
+
+
+@lru_cache(maxsize=32)
+def _load_vehicle_execution_witness_catalog_sources(
+    source_names: tuple[str, ...],
+) -> VehicleExecutionWitnessCatalog:
+    """Parse one cacheable, exact set of execution-witness fragments."""
+
+    payloads: list[Mapping[str, object]] = []
+    for source_name in source_names:
+        source = Path(source_name)
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"{source} must contain a mapping")
+        payloads.append(payload)
+    if not payloads:
+        raise ValueError("vehicle execution witness catalog has no installed fragments")
+    merged = dict(payloads[0])
+    for key in ("witnesses", "variant_witnesses", "graph_extension_witnesses"):
+        rows: list[object] = []
+        for payload in payloads:
+            value = payload.get(key, [])
+            if not isinstance(value, list):
+                raise ValueError(f"vehicle execution witness catalog {key!r} must contain a list")
+            rows.extend(value)
+        merged[key] = rows
+    return VehicleExecutionWitnessCatalog.model_validate(merged)
     ####
 
 
@@ -161,6 +193,7 @@ def validate_vehicle_execution_witnesses(
     family_ids: Iterable[str] | None = None,
     witness_ids: Iterable[str] | None = None,
     retained_results_directory: str | Path | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Validate every runnable execution binding has an exact composition witness.
 
@@ -173,15 +206,17 @@ def validate_vehicle_execution_witnesses(
     generated batch packet in a caller-selected empty directory and writes one
     aggregate, hash-bound release catalog; it does not change evidence scope.
     Interactive witnesses are opened once because their endpoint contract
-    includes a concrete accepted-truth episode.
+    includes a concrete accepted-truth episode. A focused ``plugins`` catalog
+    is carried through every executable path so a family gate never needs to
+    rediscover unrelated model packages.
     """
 
-    witness_catalog = catalog or load_vehicle_execution_witness_catalog()
+    witness_catalog = catalog or load_vehicle_execution_witness_catalog(plugins=plugins)
     family_filter = _normalized_family_filter(family_ids)
     witness_filter = _normalized_witness_filter(witness_ids)
     batch_output_root = _prepare_retained_results_directory(retained_results_directory, execute_batch=execute_batch)
-    binding_catalog = load_vehicle_execution_binding_catalog()
-    composition_catalog = load_resolved_vehicle_composition_catalog()
+    binding_catalog = load_vehicle_execution_binding_catalog(plugins=plugins)
+    composition_catalog = load_resolved_vehicle_composition_catalog(plugins=plugins)
     known_families = {item.family_id for item in binding_catalog.bindings}
     known_witnesses = {item.id for item in witness_catalog.witnesses}
     requested_unknown_families = () if family_filter is None else tuple(sorted(family_filter - known_families))
@@ -200,7 +235,7 @@ def validate_vehicle_execution_witnesses(
     for witness in witness_catalog.witnesses:
         if witness_filter is not None and witness.id not in witness_filter:
             continue
-        source = ROOT / witness.composition
+        source = vehicle_catalog_resource(witness.composition, plugins=plugins)
         if not source.is_file():
             errors.append(f"{witness.id}: composition request is missing: {witness.composition}")
             continue
@@ -208,6 +243,7 @@ def validate_vehicle_execution_witnesses(
             composition = compile_vehicle_composition(
                 load_vehicle_composition_request(source),
                 catalog=composition_catalog,
+                plugins=plugins,
             )
         except (TypeError, ValueError) as error:
             errors.append(f"{witness.id}: composition does not compile: {error}")
@@ -224,11 +260,11 @@ def validate_vehicle_execution_witnesses(
             errors.append(f"{witness.id}: no runnable execution binding for {_format_key(key)}")
             continue
         try:
-            resolved = resolve_vehicle_execution_binding(composition, witness.operation)
+            resolved = resolve_vehicle_execution_binding(composition, witness.operation, plugins=plugins)
         except ValueError as error:
             errors.append(f"{witness.id}: endpoint resolution failed: {error}")
             continue
-        preflight = preflight_vehicle_composition(composition)
+        preflight = preflight_vehicle_composition(composition, plugins=plugins)
         if preflight.status != "translation_ready":
             errors.append(f"{witness.id}: expected translation_ready preflight, got {preflight.status}")
         capability_preflight = _validate_concrete_capability_preflight(
@@ -237,7 +273,7 @@ def validate_vehicle_execution_witnesses(
             context=witness.id,
             errors=errors,
         )
-        lowering = lower_vehicle_composition(composition, preflight_result=preflight)
+        lowering = lower_vehicle_composition(composition, preflight_result=preflight, plugins=plugins)
         if lowering.status not in {"adapter_bound", "factory_bound"}:
             errors.append(f"{witness.id}: expected a runtime binding after preflight, got {lowering.status}")
         episode_opened = False
@@ -250,7 +286,7 @@ def validate_vehicle_execution_witnesses(
                     validate_vehicle_composition_episode_contract,
                 )
 
-                episode = open_vehicle_composition_episode(composition)
+                episode = open_vehicle_composition_episode(composition, plugins=plugins)
                 episode_contract = validate_vehicle_composition_episode_contract(episode)
                 if episode_contract["status"] != "pass":
                     raw_findings = episode_contract.get("findings", [])
@@ -267,6 +303,7 @@ def validate_vehicle_execution_witnesses(
                 composition,
                 binding=resolved,
                 output_root=batch_output_root,
+                plugins=plugins,
             )
             if batch_execution["status"] != "pass":
                 errors.append(f"{witness.id}: public batch execution failed: {batch_execution['detail']}")
@@ -306,6 +343,7 @@ def validate_vehicle_execution_witnesses(
             execute_batch=execute_batch,
             family_ids=family_filter,
             batch_output_root=batch_output_root,
+            plugins=plugins,
         )
     )
     variant_errors = variant_report["errors"]
@@ -324,6 +362,7 @@ def validate_vehicle_execution_witnesses(
             execute_batch=execute_batch,
             family_ids=family_filter,
             batch_output_root=batch_output_root,
+            plugins=plugins,
         )
     )
     graph_extension_errors = graph_extension_report["errors"]
@@ -368,6 +407,7 @@ def validate_vehicle_variant_witnesses(
     execute_batch: bool = False,
     family_ids: Iterable[str] | None = None,
     batch_output_root: Path | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Validate every runnable variant has one exact composed witness.
 
@@ -378,9 +418,9 @@ def validate_vehicle_variant_witnesses(
     establishes retrim validity or qualification.
     """
 
-    witness_catalog = catalog or load_vehicle_execution_witness_catalog()
+    witness_catalog = catalog or load_vehicle_execution_witness_catalog(plugins=plugins)
     family_filter = _normalized_family_filter(family_ids)
-    resolved_catalog = composition_catalog or load_resolved_vehicle_composition_catalog()
+    resolved_catalog = composition_catalog or load_resolved_vehicle_composition_catalog(plugins=plugins)
     runnable_variants = {
         (vehicle.family.family_id, variant.id)
         for vehicle in resolved_catalog.vehicles
@@ -391,7 +431,7 @@ def validate_vehicle_variant_witnesses(
     records: list[dict[str, object]] = []
     errors: list[str] = []
     for witness in witness_catalog.variant_witnesses:
-        source = ROOT / witness.composition
+        source = vehicle_catalog_resource(witness.composition, plugins=plugins)
         if not source.is_file():
             errors.append(f"{witness.id}: variant composition request is missing: {witness.composition}")
             continue
@@ -399,6 +439,7 @@ def validate_vehicle_variant_witnesses(
             composition = compile_vehicle_composition(
                 load_vehicle_composition_request(source),
                 catalog=resolved_catalog,
+                plugins=plugins,
             )
         except (TypeError, ValueError) as error:
             errors.append(f"{witness.id}: variant composition does not compile: {error}")
@@ -416,21 +457,21 @@ def validate_vehicle_variant_witnesses(
             witnessed_variants[variant_key] = witness.id
             if variant_key not in runnable_variants:
                 errors.append(f"{witness.id}: composition selects an undeclared runnable variant {variant_key!r}")
-        preflight = preflight_vehicle_composition(composition)
+        preflight = preflight_vehicle_composition(composition, plugins=plugins)
         capability_preflight = _validate_concrete_capability_preflight(
             preflight,
             composition,
             context=witness.id,
             errors=errors,
         )
-        lowering = lower_vehicle_composition(composition, preflight_result=preflight)
+        lowering = lower_vehicle_composition(composition, preflight_result=preflight, plugins=plugins)
         if preflight.status != "translation_ready":
             errors.append(f"{witness.id}: variant composition expected translation_ready preflight, got {preflight.status}")
         if lowering.status not in {"adapter_bound", "factory_bound"}:
             errors.append(f"{witness.id}: variant composition expected a runtime binding, got {lowering.status}")
         batch_binding: VehicleExecutionBinding | None = None
         try:
-            batch_binding = resolve_vehicle_execution_binding(composition, "batch")
+            batch_binding = resolve_vehicle_execution_binding(composition, "batch", plugins=plugins)
         except ValueError as error:
             errors.append(f"{witness.id}: runnable variant has no public batch endpoint: {error}")
         batch_execution: dict[str, object] | None = None
@@ -441,6 +482,7 @@ def validate_vehicle_variant_witnesses(
                     composition,
                     binding=batch_binding,
                     output_root=batch_output_root,
+                    plugins=plugins,
                 )
                 if batch_execution["status"] != "pass":
                     errors.append(f"{witness.id}: variant batch execution failed: {batch_execution['detail']}")
@@ -489,6 +531,7 @@ def validate_vehicle_graph_extension_witnesses(
     execute_batch: bool = False,
     family_ids: Iterable[str] | None = None,
     batch_output_root: Path | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Validate declared non-success graph extensions without generic branches.
 
@@ -501,13 +544,13 @@ def validate_vehicle_graph_extension_witnesses(
     timeout-as-success assertion.
     """
 
-    witness_catalog = catalog or load_vehicle_execution_witness_catalog()
+    witness_catalog = catalog or load_vehicle_execution_witness_catalog(plugins=plugins)
     family_filter = _normalized_family_filter(family_ids)
-    resolved_catalog = composition_catalog or load_resolved_vehicle_composition_catalog()
+    resolved_catalog = composition_catalog or load_resolved_vehicle_composition_catalog(plugins=plugins)
     records: list[dict[str, object]] = []
     errors: list[str] = []
     for witness in witness_catalog.graph_extension_witnesses:
-        source = ROOT / witness.composition
+        source = vehicle_catalog_resource(witness.composition, plugins=plugins)
         if not source.is_file():
             errors.append(f"{witness.id}: graph-extension composition request is missing: {witness.composition}")
             continue
@@ -515,6 +558,7 @@ def validate_vehicle_graph_extension_witnesses(
             composition = compile_vehicle_composition(
                 load_vehicle_composition_request(source),
                 catalog=resolved_catalog,
+                plugins=plugins,
             )
         except (TypeError, ValueError) as error:
             errors.append(f"{witness.id}: graph-extension composition does not compile: {error}")
@@ -546,21 +590,21 @@ def validate_vehicle_graph_extension_witnesses(
             errors.append(
                 f"{witness.id}: compiled graph has no declared {witness.required_transition_kind!r} transition"
             )
-        preflight = preflight_vehicle_composition(composition)
+        preflight = preflight_vehicle_composition(composition, plugins=plugins)
         capability_preflight = _validate_concrete_capability_preflight(
             preflight,
             composition,
             context=witness.id,
             errors=errors,
         )
-        lowering = lower_vehicle_composition(composition, preflight_result=preflight)
+        lowering = lower_vehicle_composition(composition, preflight_result=preflight, plugins=plugins)
         if preflight.status != "translation_ready":
             errors.append(f"{witness.id}: graph-extension composition expected translation_ready preflight, got {preflight.status}")
         if lowering.status not in {"adapter_bound", "factory_bound"}:
             errors.append(f"{witness.id}: graph-extension composition expected a runtime binding, got {lowering.status}")
         batch_binding: VehicleExecutionBinding | None = None
         try:
-            batch_binding = resolve_vehicle_execution_binding(composition, "batch")
+            batch_binding = resolve_vehicle_execution_binding(composition, "batch", plugins=plugins)
         except ValueError as error:
             errors.append(f"{witness.id}: graph-extension composition has no public batch endpoint: {error}")
         batch_execution: dict[str, object] | None = None
@@ -570,6 +614,7 @@ def validate_vehicle_graph_extension_witnesses(
                 composition,
                 binding=batch_binding,
                 output_root=batch_output_root,
+                plugins=plugins,
             )
             if batch_execution.get("status") != "pass":
                 errors.append(f"{witness.id}: graph-extension batch execution failed: {batch_execution.get('detail')}")
@@ -824,12 +869,19 @@ def _run_batch_witness(
     *,
     binding: VehicleExecutionBinding,
     output_root: Path | None,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Run one witness with temporary or explicitly retained artifacts."""
 
     if output_root is None:
-        return _execute_batch_witness(witness_id, composition, binding=binding)
-    return _execute_batch_witness(witness_id, composition, binding=binding, output_root=output_root)
+        return _execute_batch_witness(witness_id, composition, binding=binding, plugins=plugins)
+    return _execute_batch_witness(
+        witness_id,
+        composition,
+        binding=binding,
+        output_root=output_root,
+        plugins=plugins,
+    )
     ####
 
 
@@ -894,6 +946,7 @@ def _execute_batch_witness(
     *,
     binding: VehicleExecutionBinding,
     output_root: Path | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Run one exact batch witness through the public CLI without log leakage.
 
@@ -928,7 +981,8 @@ def _execute_batch_witness(
         bounded_translation_smoke = binding.factory_id == "language_backed_powered_fixed_wing.v1"
         if bounded_translation_smoke:
             arguments.extend(("--max-steps", "8"))
-        with redirect_stdout(stdout):
+        execution_scope = plugin_catalog_scope(plugins) if plugins is not None else nullcontext()
+        with execution_scope, redirect_stdout(stdout):
             exit_code = main(arguments)
         execution_path = output_dir / "execution.json"
         interface_path = output_dir / "vehicle_interface.json"
@@ -1379,6 +1433,8 @@ def _validate_batch_result_catalog(
     expected_kind = (
         "local_controller_screen"
         if binding.factory_id in {
+            "hummingbird_local_direct_wrench_screen.v1",
+            "hl20_local_direct_wrench_screen.v1",
             "local_direct_wrench_screen.v1",
             "local_native_coordinate_lqi_screen.v1",
         }
@@ -1481,6 +1537,19 @@ def _validate_batch_result_catalog(
         **({"semantic_action_trace_evidence": dict(action_trace_execution)} if isinstance(action_trace_execution, Mapping) else {}),
         "claim_boundary": "The batch packet is consumable by the normalized result catalog; this is not qualification.",
     }
+    ####
+
+
+def __getattr__(name: str) -> object:
+    """Resolve the historical witness path only for compatibility users."""
+
+    if name != "VEHICLE_EXECUTION_WITNESSES":
+        raise AttributeError(name)
+    from .compatibility.vehicle_catalog_resources import legacy_vehicle_catalog_resource
+
+    value = legacy_vehicle_catalog_resource("verification/vehicle_execution_witnesses.yaml")
+    globals()[name] = value
+    return value
     ####
 
 

@@ -1,57 +1,69 @@
 # CADAC ADS6 AIRCRAFT3 plug-in
 
-`cadac.ads6.aircraft` exposes the ADS6 `AIRCRAFT3` target as a Taoryx Mission Composition batch vehicle.
+`cadac.ads6.aircraft` is the exact runnable ADS6 `AIRCRAFT3` target actor. It
+is independent of the ADS6 package composition: `cadac.ads6.engagement` owns
+SAM/target/RADAR0 scheduling when that full source context is required.
 
-## Fidelity
+## Fidelity and result composition
 
-```text
-point_mass_3dof / force_model
-```
-
-Only local-NED position and velocity are core truth. The source bank and normal-load variables are response states used to realize specific force; they are not rigid-body attitude or angular-rate state.
-
-## Source modules
+The actor is a `point_mass_3dof` force-model realization. Each batch returns
+one independent root:
 
 ```text
-environment → kinematics → guidance → control → forces → newton
+ads6-aircraft-1  cadac.ads6.aircraft
 ```
 
-The executable path supports source steady flight, strict-window horizontal g-turns, and cross-product escape guidance against explicitly supplied missile truth.
+Core truth is only local-NED position and velocity. Bank, load factor, and
+specific force are source response telemetry; the plug-in never fabricates a
+quaternion, body rates, moments, physical effectors, or a pseudo-6DoF claim.
 
-## Configuration
+## Source-program configuration
 
-The typed schema exposes:
+The source program owns control, so the realization advertises no caller action
+channels. At composition/startup a caller can select and parameterize the
+source behavior through the typed configuration schema:
 
-- initial NED position, speed, heading, flight path, and launch delay;
-- source guidance option, gain, g-turn command, and maneuver window;
-- bank/load response constants and source limits;
-- longitudinal acceleration;
-- optional external threat truth for standalone escape mode;
-- end time and output cadence.
+| Source behavior | Configuration | Required seam |
+| --- | --- | --- |
+| steady flight | `guidance_option=0` | none |
+| horizontal g-turn | `guidance_option=1`, `turn_load_g`, maneuver window, bank/load response parameters | none |
+| threat escape | `guidance_option=2`, guidance gain, maneuver window | an enabled constant-velocity `threat_track` configuration |
 
-## Output
+The optional threat track is an explicit batch configuration seam, not a
+native Taoryx sensor or hidden package dependency. Escape validation fails
+closed if it is selected without a nonzero threat velocity.
 
-Core:
+## Control feedback and analysis
 
-```text
-position_ned_m
-velocity_ned_mps
-```
+The standard output distinguishes source commands from plant response:
 
-Telemetry includes atmosphere, phase, commanded acceleration, bank command/state/output, normal-load command/achievement, and specific force. Quaternion and body-rate outputs are intentionally absent.
+- `commanded_acceleration_ned_mps2` and
+  `commanded_acceleration_velocity_mps2`;
+- `commanded_bank_deg`, `bank_state_deg`, and achieved `bank_deg`;
+- `commanded_load_factor_g`, achieved `normal_load_factor_g`, and limiter
+  state; and
+- `specific_force_body_mps2` plus source atmosphere/gravity diagnostics.
 
-## Exact dispatch
+This makes finite-run source-controller analysis and like-for-like trace
+comparison available. Local linear stability and frequency margins remain
+blocked until a declared operating point and a complete closed-loop state model
+are published.
 
-```python
-registry.register(
-    "cadac",
-    "cadac.ads6.aircraft",
-    provider.execute_batch,
-)
-```
+## Batch, sensor, and environment boundary
 
-No neighboring CADAC model or alternate fidelity is substituted when the exact executor is absent.
+AIRCRAFT3 is intentionally batch-only. It has no persistent Mission
+Composition session and `open_session` rejects it rather than replaying a batch
+from initial conditions. Its sensor integration is `not_applicable`; the
+standalone threat configuration does not create a `SensorBus` stream.
+
+The executable profile is `cadac_compat`: source atmosphere and gravity remain
+inside the compatibility runtime for source-parity work. They are not a second
+Taoryx environment service. A future native session would need to inject the
+shared host environment before that retained source path could be removed.
 
 ## Evidence boundary
 
-The shipped straight-level and 1.5-g-turn source cases run to `50 s` at their original `0.001 s` step in the Python compatibility runtime. Their input bytes are checked against the pinned upstream Git blob IDs. Compiled-CADAC numerical parity and package-level radar/SAM orchestration remain open gates.
+The plug-in does not claim package-level radar/SAM communication, source packet
+scheduling, persistent streaming control, rigid-body attitude, physical
+effector allocation, or compiled-CADAC numerical parity. Exact dispatch cannot
+fall back to a different CADAC actor or fidelity tier.

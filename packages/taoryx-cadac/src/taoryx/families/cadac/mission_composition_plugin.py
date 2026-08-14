@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -32,7 +32,11 @@ from taoryx.trajectory.configuration_contract import (
     TrajectoryRealizationMetadata,
     validate_configuration_instance,
 )
-from taoryx.trajectory.execution_contract import MissionCompositionRunnerRegistry
+from taoryx.trajectory.execution_contract import (
+    MissionCompositionRunnerRegistry,
+    MissionCompositionRunRequest,
+    MissionCompositionTrajectoryResult,
+)
 from taoryx.trajectory.mission_composition import (
     MissionCompositionClosedSession,
     MissionCompositionCloseSessionRequest,
@@ -50,7 +54,6 @@ from .ads6_aircraft_mission_composition import (
     ADS6_AIRCRAFT_PHASE_ID,
     CadacAds6AircraftMissionCompositionProvider,
     build_default_ads6_aircraft_configuration,
-    register_ads6_aircraft_mission_composition,
 )
 from .ads6_aircraft_plugin import Ads6AircraftVehiclePlugin
 from .ads6_engagement_mission_composition import (
@@ -59,7 +62,6 @@ from .ads6_engagement_mission_composition import (
     ADS6_ENGAGEMENT_PHASE_ID,
     CadacAds6EngagementMissionCompositionProvider,
     build_default_ads6_engagement_configuration,
-    register_ads6_engagement_mission_composition,
 )
 from .ads6_engagement_plugin import Ads6EngagementPlugin
 from .ads6_sam_mission_composition import (
@@ -67,7 +69,6 @@ from .ads6_sam_mission_composition import (
     ADS6_SAM_MODEL_ID,
     CadacAds6SamMissionCompositionProvider,
     build_default_ads6_sam_configuration,
-    register_ads6_sam_mission_composition,
 )
 from .ads6_sam_plugin import Ads6SamVehiclePlugin
 from .ads6_srbm_mission_composition import (
@@ -75,7 +76,6 @@ from .ads6_srbm_mission_composition import (
     ADS6_SRBM_PHASE_ID,
     CadacAds6SrbmMissionCompositionProvider,
     build_default_ads6_srbm_configuration,
-    register_ads6_srbm_mission_composition,
 )
 from .ads6_srbm_plugin import Ads6SrbmVehiclePlugin
 from .agm6_mission_composition import (
@@ -83,7 +83,6 @@ from .agm6_mission_composition import (
     AGM6_PHASE_ID,
     CadacAgm6MissionCompositionProvider,
     build_default_agm6_configuration,
-    register_agm6_mission_composition,
 )
 from .agm6_plugin import Agm6VehiclePlugin
 from .aim5_mission_composition import (
@@ -91,7 +90,6 @@ from .aim5_mission_composition import (
     CADAC_PROVIDER_ID,
     CadacAim5MissionCompositionProvider,
     build_default_aim5_configuration,
-    register_aim5_mission_composition,
 )
 from .aim5_plugin import Aim5VehiclePlugin
 from .control_metadata import blocked_control_advertisement
@@ -99,28 +97,24 @@ from .cruise5_mission_composition import (
     CRUISE5_MODEL_ID,
     CadacCruise5MissionCompositionProvider,
     build_default_cruise5_configuration,
-    register_cruise5_mission_composition,
 )
 from .cruise5_plugin import Cruise5VehiclePlugin
 from .falcon6_mission_composition import (
     FALCON6_MODEL_ID,
     CadacFalcon6MissionCompositionProvider,
     build_default_falcon6_configuration,
-    register_falcon6_mission_composition,
 )
 from .falcon6_plugin import Falcon6VehiclePlugin
 from .ghame3_mission_composition import (
     GHAME3_MODEL_ID,
     CadacGhame3MissionCompositionProvider,
     build_default_ghame3_configuration,
-    register_ghame3_mission_composition,
 )
 from .ghame3_plugin import Ghame3VehiclePlugin
 from .ghame6_mission_composition import (
     GHAME6_MODEL_ID,
     CadacGhame6MissionCompositionProvider,
     build_default_ghame6_configuration,
-    register_ghame6_mission_composition,
 )
 from .ghame6_plugin import Ghame6VehiclePlugin
 from .integration_contract import CadacModelIntegrationContract, build_cadac_model_integration_contract
@@ -128,7 +122,6 @@ from .magsix_mission_composition import (
     MAGSIX_MODEL_ID,
     CadacMagsixMissionCompositionProvider,
     build_default_magsix_configuration,
-    register_magsix_mission_composition,
 )
 from .magsix_plugin import MagsixVehiclePlugin
 from .manifest import (
@@ -142,7 +135,6 @@ from .rocket6g_mission_composition import (
     ROCKET6G_MODEL_ID,
     CadacRocket6gMissionCompositionProvider,
     build_default_rocket6g_configuration,
-    register_rocket6g_mission_composition,
 )
 from .rocket6g_plugin import Rocket6gVehiclePlugin
 from .sensor_integration import CadacSensorIntegrationContract
@@ -151,16 +143,26 @@ from .sraam6_mission_composition import (
     SRAAM6_MODEL_ID,
     CadacSraam6MissionCompositionProvider,
     build_default_sraam6_configuration,
-    register_sraam6_mission_composition,
 )
 from .sraam6_plugin import Sraam6VehiclePlugin
 
 CADAC_CATALOG_PROVIDER_VERSION = ADS6_ENGAGEMENT_MODEL_VERSION
 _PLANNED_REALIZATION_PREFIX = "cadac-source-phase"
+_CADAC_PACKAGE_MODEL_IDS = frozenset((ADS6_ENGAGEMENT_MODEL_ID,))
+_CADAC_SELECTABLE_MODEL_IDS = (
+    frozenset(descriptor.model_id for descriptor in CADAC_PLUGIN_CATALOG.plugins if descriptor.trajectory_capable) | _CADAC_PACKAGE_MODEL_IDS
+)
 
 
 class CadacMissionCompositionProvider:
-    """Provider-wide discovery surface for every trajectory-capable CADAC actor plug-in."""
+    """Discovery surface for all or a selected set of CADAC actor/package models.
+
+    A source-bound host may select one exact model to avoid constructing
+    unrelated configuration and output schemas. The default remains the full
+    metadata catalog used by ordinary CADAC discovery.  Package models that
+    own multiple source actors, such as ADS6 engagement, are selectable even
+    though they do not correspond to a single actor manifest descriptor.
+    """
 
     def __init__(
         self,
@@ -178,26 +180,89 @@ class CadacMissionCompositionProvider:
         magsix_plugin: MagsixVehiclePlugin | None = None,
         rocket6g_plugin: Rocket6gVehiclePlugin | None = None,
         sraam6_plugin: Sraam6VehiclePlugin | None = None,
+        selected_model_ids: tuple[str, ...] | None = None,
     ) -> None:
-        self._ads6_aircraft = CadacAds6AircraftMissionCompositionProvider(ads6_aircraft_plugin) if ads6_aircraft_plugin is not None else None
-        self._ads6_engagement = CadacAds6EngagementMissionCompositionProvider(ads6_engagement_plugin) if ads6_engagement_plugin is not None else None
-        self._ads6_sam = CadacAds6SamMissionCompositionProvider(ads6_sam_plugin) if ads6_sam_plugin is not None else None
-        self._ads6_srbm = CadacAds6SrbmMissionCompositionProvider(ads6_srbm_plugin) if ads6_srbm_plugin is not None else None
-        self._agm6 = CadacAgm6MissionCompositionProvider(agm6_plugin) if agm6_plugin is not None else None
-        self._aim5 = CadacAim5MissionCompositionProvider(aim5_plugin) if aim5_plugin is not None else None
-        self._cruise5 = CadacCruise5MissionCompositionProvider(cruise5_plugin) if cruise5_plugin is not None else None
-        self._falcon6 = CadacFalcon6MissionCompositionProvider(falcon6_plugin) if falcon6_plugin is not None else None
-        self._ghame3 = CadacGhame3MissionCompositionProvider(ghame3_plugin) if ghame3_plugin is not None else None
-        self._ghame6 = CadacGhame6MissionCompositionProvider(ghame6_plugin) if ghame6_plugin is not None else None
-        self._magsix = CadacMagsixMissionCompositionProvider(magsix_plugin) if magsix_plugin is not None else None
-        self._rocket6g = CadacRocket6gMissionCompositionProvider(rocket6g_plugin) if rocket6g_plugin is not None else None
-        self._sraam6 = CadacSraam6MissionCompositionProvider(sraam6_plugin) if sraam6_plugin is not None else None
+        selected = _resolve_selected_model_ids(selected_model_ids)
+        bound_model_ids = frozenset(
+            model_id
+            for model_id, plugin in (
+                (ADS6_AIRCRAFT_MODEL_ID, ads6_aircraft_plugin),
+                (ADS6_ENGAGEMENT_MODEL_ID, ads6_engagement_plugin),
+                (ADS6_SAM_MODEL_ID, ads6_sam_plugin),
+                (ADS6_SRBM_MODEL_ID, ads6_srbm_plugin),
+                (AGM6_MODEL_ID, agm6_plugin),
+                (AIM5_MODEL_ID, aim5_plugin),
+                (CRUISE5_MODEL_ID, cruise5_plugin),
+                (FALCON6_MODEL_ID, falcon6_plugin),
+                (GHAME3_MODEL_ID, ghame3_plugin),
+                (GHAME6_MODEL_ID, ghame6_plugin),
+                (MAGSIX_MODEL_ID, magsix_plugin),
+                (ROCKET6G_MODEL_ID, rocket6g_plugin),
+                (SRAAM6_MODEL_ID, sraam6_plugin),
+            )
+            if plugin is not None
+        )
+        if selected is not None:
+            unselected_bindings = tuple(sorted(bound_model_ids - selected))
+            if unselected_bindings:
+                raise ValueError("CADAC selected model scope omits explicit source bindings: " + ", ".join(unselected_bindings))
+        ####
+
+        def is_selected(model_id: str) -> bool:
+            return selected is None or model_id in selected
+            ####
+
+        self._ads6_aircraft = (
+            CadacAds6AircraftMissionCompositionProvider(ads6_aircraft_plugin)
+            if ads6_aircraft_plugin is not None and is_selected(ADS6_AIRCRAFT_MODEL_ID)
+            else None
+        )
+        self._ads6_engagement = (
+            CadacAds6EngagementMissionCompositionProvider(ads6_engagement_plugin)
+            if ads6_engagement_plugin is not None and is_selected(ADS6_ENGAGEMENT_MODEL_ID)
+            else None
+        )
+        self._ads6_sam = CadacAds6SamMissionCompositionProvider(ads6_sam_plugin) if ads6_sam_plugin is not None and is_selected(ADS6_SAM_MODEL_ID) else None
+        self._ads6_srbm = (
+            CadacAds6SrbmMissionCompositionProvider(ads6_srbm_plugin) if ads6_srbm_plugin is not None and is_selected(ADS6_SRBM_MODEL_ID) else None
+        )
+        self._agm6 = CadacAgm6MissionCompositionProvider(agm6_plugin) if agm6_plugin is not None and is_selected(AGM6_MODEL_ID) else None
+        self._aim5 = CadacAim5MissionCompositionProvider(aim5_plugin) if aim5_plugin is not None and is_selected(AIM5_MODEL_ID) else None
+        self._cruise5 = CadacCruise5MissionCompositionProvider(cruise5_plugin) if cruise5_plugin is not None and is_selected(CRUISE5_MODEL_ID) else None
+        self._falcon6 = CadacFalcon6MissionCompositionProvider(falcon6_plugin) if falcon6_plugin is not None and is_selected(FALCON6_MODEL_ID) else None
+        self._ghame3 = CadacGhame3MissionCompositionProvider(ghame3_plugin) if ghame3_plugin is not None and is_selected(GHAME3_MODEL_ID) else None
+        self._ghame6 = CadacGhame6MissionCompositionProvider(ghame6_plugin) if ghame6_plugin is not None and is_selected(GHAME6_MODEL_ID) else None
+        self._magsix = CadacMagsixMissionCompositionProvider(magsix_plugin) if magsix_plugin is not None and is_selected(MAGSIX_MODEL_ID) else None
+        self._rocket6g = CadacRocket6gMissionCompositionProvider(rocket6g_plugin) if rocket6g_plugin is not None and is_selected(ROCKET6G_MODEL_ID) else None
+        self._sraam6 = CadacSraam6MissionCompositionProvider(sraam6_plugin) if sraam6_plugin is not None and is_selected(SRAAM6_MODEL_ID) else None
+        self._batch_executors: dict[
+            str,
+            Callable[[MissionCompositionRunRequest], MissionCompositionTrajectoryResult],
+        ] = {
+            model_id: executor
+            for model_id, executor in (
+                (ADS6_AIRCRAFT_MODEL_ID, self._ads6_aircraft.execute_batch if self._ads6_aircraft is not None else None),
+                (ADS6_ENGAGEMENT_MODEL_ID, self._ads6_engagement.execute_batch if self._ads6_engagement is not None else None),
+                (ADS6_SAM_MODEL_ID, self._ads6_sam.execute_batch if self._ads6_sam is not None else None),
+                (ADS6_SRBM_MODEL_ID, self._ads6_srbm.execute_batch if self._ads6_srbm is not None else None),
+                (AGM6_MODEL_ID, self._agm6.execute_batch if self._agm6 is not None else None),
+                (AIM5_MODEL_ID, self._aim5.execute_batch if self._aim5 is not None else None),
+                (CRUISE5_MODEL_ID, self._cruise5.execute_batch if self._cruise5 is not None else None),
+                (FALCON6_MODEL_ID, self._falcon6.execute_batch if self._falcon6 is not None else None),
+                (GHAME3_MODEL_ID, self._ghame3.execute_batch if self._ghame3 is not None else None),
+                (GHAME6_MODEL_ID, self._ghame6.execute_batch if self._ghame6 is not None else None),
+                (MAGSIX_MODEL_ID, self._magsix.execute_batch if self._magsix is not None else None),
+                (ROCKET6G_MODEL_ID, self._rocket6g.execute_batch if self._rocket6g is not None else None),
+                (SRAAM6_MODEL_ID, self._sraam6.execute_batch if self._sraam6 is not None else None),
+            )
+            if executor is not None
+        }
         self._schemas: dict[str, TrajectoryConfigurationSchema] = {}
         self._output_schemas: dict[str, TrajectoryOutputSchema] = {}
         self._models: dict[str, TrajectoryModelMetadata] = {}
         self._integration_contracts: dict[str, CadacModelIntegrationContract] = {}
         for descriptor in CADAC_PLUGIN_CATALOG.plugins:
-            if not descriptor.trajectory_capable:
+            if not descriptor.trajectory_capable or not is_selected(descriptor.model_id):
                 continue
             ####
             if descriptor.model_id == ADS6_AIRCRAFT_MODEL_ID and self._ads6_aircraft is not None:
@@ -260,7 +325,7 @@ class CadacMissionCompositionProvider:
             self._models[descriptor.model_id] = model
             self._integration_contracts[descriptor.model_id] = build_cadac_model_integration_contract(model)
         ####
-        if self._ads6_engagement is not None:
+        if self._ads6_engagement is not None and is_selected(ADS6_ENGAGEMENT_MODEL_ID):
             engagement_model = self._ads6_engagement.list_models()[0]
             engagement_schema = self._ads6_engagement.get_model_schema(ADS6_ENGAGEMENT_MODEL_ID)
             engagement_output = self._ads6_engagement.get_model_output_schema(ADS6_ENGAGEMENT_MODEL_ID)
@@ -433,6 +498,29 @@ class CadacMissionCompositionProvider:
 
     ####
 
+    def execute_batch(self, request: MissionCompositionRunRequest) -> MissionCompositionTrajectoryResult:
+        """Dispatch one bound actor through the catalog's exact provider revision.
+
+        Each actor bridge has its own implementation revision, while callers of
+        this catalog selected the catalog provider revision.  The wrapper
+        preserves the selected provider identity in the common result instead
+        of leaking an inner bridge version through the catalog boundary.
+        """
+
+        if request.provider_id != self.metadata.id or request.provider_version != self.metadata.version:
+            raise ValueError("CADAC batch request names another catalog provider version")
+        ####
+        try:
+            executor = self._batch_executors[request.model_id]
+        except KeyError as error:
+            raise ValueError(f"CADAC model {request.model_id!r} has no installed exact batch binding") from error
+        ####
+        result = executor(request)
+        return result.model_copy(update={"provider_version": self.metadata.version})
+        ####
+
+    ####
+
     def open_session(self, request: MissionCompositionOpenSessionRequest) -> MissionCompositionSessionDescriptor:
         """Open an exact installed persistent CADAC model session.
 
@@ -472,7 +560,9 @@ class CadacMissionCompositionProvider:
     ) -> MissionCompositionSessionObservation:
         """Inspect a currently open installed CADAC session."""
 
-        return self._require_session_owner(request.session_id if isinstance(request, MissionCompositionInspectSessionRequest) else request).inspect_session(request)
+        return self._require_session_owner(request.session_id if isinstance(request, MissionCompositionInspectSessionRequest) else request).inspect_session(
+            request
+        )
         ####
 
     def step_session(self, request: MissionCompositionSessionStepRequest) -> MissionCompositionSessionStepResult:
@@ -511,7 +601,13 @@ class CadacMissionCompositionProvider:
     def _require_session_owner(
         self,
         session_id: str,
-    ) -> CadacAim5MissionCompositionProvider | CadacAds6SrbmMissionCompositionProvider | CadacAds6EngagementMissionCompositionProvider | CadacAgm6MissionCompositionProvider | CadacSraam6MissionCompositionProvider:
+    ) -> (
+        CadacAim5MissionCompositionProvider
+        | CadacAds6SrbmMissionCompositionProvider
+        | CadacAds6EngagementMissionCompositionProvider
+        | CadacAgm6MissionCompositionProvider
+        | CadacSraam6MissionCompositionProvider
+    ):
         for provider in (self._aim5, self._ads6_srbm, self._ads6_engagement, self._agm6, self._sraam6):
             if provider is not None and provider.has_session(session_id):
                 return provider
@@ -610,52 +706,40 @@ class CadacMissionCompositionProvider:
     ####
 
     def register_runnable_models(self, registry: MissionCompositionRunnerRegistry) -> None:
-        """Register only exact installed executors; planned models remain discovery-only."""
+        """Register only exact bound actors through this catalog wrapper.
 
-        if self._ads6_engagement is not None:
-            register_ads6_engagement_mission_composition(self._ads6_engagement, registry)
-        ####
-        if self._ads6_aircraft is not None:
-            register_ads6_aircraft_mission_composition(self._ads6_aircraft, registry)
-        ####
-        if self._ads6_sam is not None:
-            register_ads6_sam_mission_composition(self._ads6_sam, registry)
-        ####
-        if self._ads6_srbm is not None:
-            register_ads6_srbm_mission_composition(self._ads6_srbm, registry)
-        ####
-        if self._agm6 is not None:
-            register_agm6_mission_composition(self._agm6, registry)
-        ####
-        if self._aim5 is not None:
-            register_aim5_mission_composition(self._aim5, registry)
-        ####
-        if self._cruise5 is not None:
-            register_cruise5_mission_composition(self._cruise5, registry)
-        ####
-        if self._falcon6 is not None:
-            register_falcon6_mission_composition(self._falcon6, registry)
-        ####
-        if self._ghame3 is not None:
-            register_ghame3_mission_composition(self._ghame3, registry)
-        ####
-        if self._ghame6 is not None:
-            register_ghame6_mission_composition(self._ghame6, registry)
-        ####
-        if self._magsix is not None:
-            register_magsix_mission_composition(self._magsix, registry)
-        ####
-        if self._rocket6g is not None:
-            register_rocket6g_mission_composition(self._rocket6g, registry)
-        ####
-        if self._sraam6 is not None:
-            register_sraam6_mission_composition(self._sraam6, registry)
+        The registry receives one catalog-level executor so its result retains
+        the version that callers selected.  It never substitutes an unbound
+        actor or routes through an inner provider's independent revision.
+        """
+
+        for model_id in sorted(self._batch_executors):
+            registry.register(self.metadata.id, model_id, self.execute_batch)
         ####
 
     ####
 
 
 ####
+
+
+def _resolve_selected_model_ids(selected_model_ids: tuple[str, ...] | None) -> frozenset[str] | None:
+    """Validate an optional exact CADAC provider-model scope before building schemas."""
+
+    if selected_model_ids is None:
+        return None
+    if not selected_model_ids:
+        raise ValueError("CADAC selected model scope must contain at least one model ID")
+    if len(selected_model_ids) != len(set(selected_model_ids)):
+        raise ValueError("CADAC selected model scope contains duplicate model IDs")
+    if any(not model_id.strip() for model_id in selected_model_ids):
+        raise ValueError("CADAC selected model scope contains an empty model ID")
+    selected = frozenset(selected_model_ids)
+    unknown = tuple(sorted(selected - _CADAC_SELECTABLE_MODEL_IDS))
+    if unknown:
+        raise ValueError("CADAC selected model scope contains unknown model IDs: " + ", ".join(unknown))
+    return selected
+    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -718,8 +802,44 @@ class CadacSourceCaseBindings:
 
     ####
 
-    def build_provider(self) -> CadacMissionCompositionProvider:
-        """Build a catalog provider with exactly the explicitly bound source cases."""
+    def build_provider(
+        self,
+        *,
+        selected_model_ids: tuple[str, ...] | None = None,
+    ) -> CadacMissionCompositionProvider:
+        """Build a full or selected provider with exactly the bound source cases.
+
+        A selected scope must include every explicitly bound source case. This
+        prevents a source case from being parsed or registered as a hidden
+        fallback outside the caller's requested model boundary.
+        """
+
+        selected = _resolve_selected_model_ids(selected_model_ids)
+        bound_model_ids = frozenset(
+            model_id
+            for model_id, source_case_path in (
+                (ADS6_AIRCRAFT_MODEL_ID, self.ads6_aircraft_case_path),
+                (ADS6_ENGAGEMENT_MODEL_ID, self.ads6_engagement_case_path),
+                (ADS6_SAM_MODEL_ID, self.ads6_sam_case_path),
+                (ADS6_SRBM_MODEL_ID, self.ads6_srbm_case_path),
+                (AGM6_MODEL_ID, self.agm6_case_path),
+                (AIM5_MODEL_ID, self.aim5_case_path),
+                (CRUISE5_MODEL_ID, self.cruise5_case_path),
+                (FALCON6_MODEL_ID, self.falcon6_case_path),
+                (GHAME3_MODEL_ID, self.ghame3_case_path),
+                (GHAME6_MODEL_ID, self.ghame6_case_path),
+                (MAGSIX_MODEL_ID, self.magsix_case_path),
+                (ROCKET6G_MODEL_ID, self.rocket6g_case_path),
+                (SRAAM6_MODEL_ID, self.sraam6_case_path),
+            )
+            if source_case_path is not None
+        )
+        if selected is not None:
+            unselected_bindings = tuple(sorted(bound_model_ids - selected))
+            if unselected_bindings:
+                raise ValueError("CADAC selected model scope omits explicit source bindings: " + ", ".join(unselected_bindings))
+            ####
+        ####
 
         return CadacMissionCompositionProvider(
             ads6_aircraft_plugin=(Ads6AircraftVehiclePlugin(self.ads6_aircraft_case_path) if self.ads6_aircraft_case_path is not None else None),
@@ -742,6 +862,7 @@ class CadacSourceCaseBindings:
             magsix_plugin=(MagsixVehiclePlugin(self.magsix_case_path) if self.magsix_case_path is not None else None),
             rocket6g_plugin=(Rocket6gVehiclePlugin(self.rocket6g_case_path) if self.rocket6g_case_path is not None else None),
             sraam6_plugin=(Sraam6VehiclePlugin(self.sraam6_case_path) if self.sraam6_case_path is not None else None),
+            selected_model_ids=selected_model_ids,
         )
 
     ####

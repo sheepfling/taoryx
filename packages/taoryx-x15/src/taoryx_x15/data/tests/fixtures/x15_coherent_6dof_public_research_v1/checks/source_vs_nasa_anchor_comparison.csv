@@ -1,0 +1,4 @@
+comparison,jsbsim_source_lbm,nasa_anchor_lbm,relative_difference_vs_nasa,interpretation
+full_mass,32278.0,31275.0,0.032070343725,not identical configurations or bookkeeping
+empty_or_burnout_mass,14560.0,12295.0,0.184221228142,burnout mass is not necessarily identical to empty mass
+maximum_vacuum_thrust,51463.6,57000.0,-0.097129824561,column unit is lbf for this row; simplified source model is lower

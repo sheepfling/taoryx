@@ -12,9 +12,13 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
 from .vehicle_interface import AuthorityProfile, InterfaceChannel, VehicleInterfaceContract, validate_interface_channel_value
+
+if TYPE_CHECKING:
+    from .plugins import PluginCatalog
 
 _SCHEMA = "taoryx.composition-semantic-action-trace/v1alpha1"
 
@@ -32,6 +36,8 @@ class BatchControlSample:
 def build_committed_control_trace(
     composition: CompiledVehicleComposition,
     samples: Sequence[BatchControlSample],
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Build a complete semantic command trace without synthesizing channels.
 
@@ -44,7 +50,7 @@ def build_committed_control_trace(
 
     if not samples:
         raise ValueError("committed control trace requires at least one sample")
-    contract = resolve_vehicle_composition_interface_contract(composition)
+    contract = resolve_vehicle_composition_interface_contract(composition, plugins=plugins)
     actions, authority_profile = _batch_action_channels(
         contract,
         requested_action_ids=set(samples[0].requested_actions),
@@ -95,6 +101,8 @@ def build_committed_control_trace(
 def build_uncontrolled_committed_control_trace(
     composition: CompiledVehicleComposition,
     committed_truth_times_s: Sequence[float],
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Record an action-free source replay without manufacturing controls.
 
@@ -106,7 +114,7 @@ def build_uncontrolled_committed_control_trace(
     use :func:`build_committed_control_trace` with its actual held values.
     """
 
-    contract = resolve_vehicle_composition_interface_contract(composition)
+    contract = resolve_vehicle_composition_interface_contract(composition, plugins=plugins)
     actions = _batch_visible_channels(contract.action_channels)
     effectors = _batch_visible_channels(contract.effector_channels)
     if actions or effectors:
@@ -128,17 +136,19 @@ def build_uncontrolled_committed_control_trace(
             )
         )
         previous_time = committed
-    return build_committed_control_trace(composition, samples)
+    return build_committed_control_trace(composition, samples, plugins=plugins)
     ####
 
 
 def validate_committed_control_trace(
     composition: CompiledVehicleComposition,
     trace: Mapping[str, object],
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> None:
     """Reject a command artifact that disagrees with the exact composition interface."""
 
-    contract = resolve_vehicle_composition_interface_contract(composition)
+    contract = resolve_vehicle_composition_interface_contract(composition, plugins=plugins)
     raw_action_ids = trace.get("requested_action_channels")
     requested_action_ids = (
         set(raw_action_ids)
@@ -199,6 +209,7 @@ def validate_committed_control_trace_against_status(
     trace: Mapping[str, object],
     *,
     status_trace: Mapping[str, object],
+    plugins: PluginCatalog | None = None,
 ) -> None:
     """Bind held action intervals to actual committed truth boundaries.
 
@@ -210,10 +221,10 @@ def validate_committed_control_trace_against_status(
     retain additional truth samples while one command remains held.
     """
 
-    validate_committed_control_trace(composition, trace)
+    validate_committed_control_trace(composition, trace, plugins=plugins)
     from .composition_status_trace import validate_committed_status_trace
 
-    validate_committed_status_trace(composition, status_trace)
+    validate_committed_status_trace(composition, status_trace, plugins=plugins)
     raw_status_samples = status_trace.get("samples")
     raw_control_samples = trace.get("samples")
     if not isinstance(raw_status_samples, list) or not isinstance(raw_control_samples, list):

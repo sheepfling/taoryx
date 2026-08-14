@@ -23,8 +23,9 @@ from .vehicle_execution_bindings import batch_episode_parity_record, resolve_veh
 from .vehicle_interface import VehicleInterfaceContract, project_committed_status_values, validate_projected_status_values
 
 _X15_ADAPTER_ID = "taoryx.x15.local_direct_wrench_batch_episode_parity.v1"
+_HL20_ADAPTER_ID = "taoryx.hl20.local_direct_wrench_batch_episode_parity.v1"
 _GENERIC_ADAPTER_ID = "taoryx.local_direct_wrench_batch_episode_parity.v1"
-_SUPPORTED_ADAPTER_IDS = {_X15_ADAPTER_ID, _GENERIC_ADAPTER_ID}
+_SUPPORTED_ADAPTER_IDS = {_HL20_ADAPTER_ID, _X15_ADAPTER_ID, _GENERIC_ADAPTER_ID}
 _TOLERANCE = 1.0e-12
 
 
@@ -107,7 +108,12 @@ def verify_serialized_local_direct_wrench_batch_episode_parity(
 
     batch_binding = resolve_vehicle_execution_binding(composition, "batch")
     episode_binding = resolve_vehicle_execution_binding(composition, "episode")
-    if batch_binding.factory_id != "local_direct_wrench_screen.v1" or episode_binding.factory_id not in {
+    if batch_binding.factory_id not in {
+        "hl20_local_direct_wrench_screen.v1",
+        "local_direct_wrench_screen.v1",
+        "x15_local_direct_wrench_screen.v1",
+    } or episode_binding.factory_id not in {
+        "hl20_local_direct_wrench_episode.v1",
         "x15_local_direct_wrench_episode.v1",
         "local_direct_wrench_episode.v1",
     }:

@@ -274,7 +274,8 @@ prepared run.
 
 - stable deployment ID, trigger segments, and trigger event kinds;
 - status (`available`, `declared`, `blocked`, or `not_available`);
-- child role, model identity/scope/kind, and child cardinality;
+- child role, model identity/scope/kind, and child cardinality; external
+  children also declare their owning plug-in and runtime ID;
 - compatible fidelities and exact batch/step operations;
 - native/provider availability scope and common-runner registration status;
 - accepted-boundary state-initialization and fidelity policy;
@@ -292,7 +293,7 @@ The registry currently exposes:
 | --- | --- |
 | X-15 | Available, independently propagated passive spent booster |
 | HL-20 | Available, independently propagated synthetic passive spent booster |
-| NESC two-stage rocket | Declared cutoff/separation/ignition lineage; no independent spent-stage trajectory |
+| NESC two-stage rocket | Source-replay lineage by default; an explicit composition binding may select the independently installed synthetic passive-cylinder child at stage separation, not a source-exact spent stage |
 | Dual-launch glider | Source-generated point-mass batch path for both launch forms; declared event-only separation with no independently propagated child |
 | Other models and `simple_aero` | No advertised child emission |
 
@@ -304,8 +305,17 @@ data:
 - request, provider, and provider-version IDs;
 - the batch operation (interactive state changes use the session contract);
 - the validated `PreparedTrajectoryConfiguration`; and
+- optional typed `deployment_bindings` selecting advertised independently
+  propagated children; and
 - output mode, selected telemetry channels/groups, cadence,
   event/segment/child inclusion, and sample or object limits.
+
+Child selection deliberately stays outside the prepared parent configuration:
+the same parent can be reused with no child or with an explicitly selected
+one. The native bridge validates every supplied binding against the selected
+model's advertised deployment/event and external child owner/runtime/model
+before execution. It rejects an unadvertised or unavailable child rather than
+silently dropping, substituting, or rediscovering one.
 
 `MissionCompositionRunnerRegistry` registers executors by
 `(provider_id, model_id)`. It refuses missing executors, validates result
@@ -364,7 +374,9 @@ semantic channels. A prepared composition may instead set
 `startup_authority_profile_id`; an explicit open request must agree with that
 selection. Omitting both retains the legacy `native_union` schema for older
 canonical episodes, while low-fidelity fixtures that explicitly opt into
-default selection open their advertised default profile. Action
+default selection open their advertised default profile. Hummingbird's
+pseudo-6DOF episode also opts in: it defaults to aggregate attitude/thrust
+while allowing startup selection of velocity/yaw or live waypoint guidance. Action
 and observation channels carry type, shape, quantity, unit, frame, bounds,
 sampling semantics, and explicit value space. Selected-profile steps separate
 requested and applied semantic values from lowered adapter values and lowering
@@ -423,6 +435,14 @@ and waypoint coordinates to committed position/velocity/attitude truth, and
 Simple Aero binds direct throttle to its committed realized throttle. A
 capture radius has no achieved coordinate and therefore remains explicitly
 `not_observed`.
+
+The Hummingbird pseudo-6DOF session binds velocity, attitude, position,
+propulsion enable, and achieved aggregate-thrust fraction to committed
+readback. Its live waypoint publishes range, capture, and adapter status;
+its battery reserve can mask the entire active profile as `depleted` with a
+stable `battery_depleted` reason. Those values come from the existing plant
+and standard committed-boundary sensor/status path, not a session-local
+atmosphere, gravity, or sensor substitute.
 
 `MissionCompositionDiagnostic` is the common feedback vocabulary. It includes:
 
@@ -555,10 +575,15 @@ qualification.
 
 ## Repository implementations
 
-`RegistryMissionCompositionProvider` projects all nine canonical physical
-vehicle families, the `simple_aero` workflow, and the dual-launch glider
-family from existing authorities. It does not maintain a second model catalog.
-The Simple Aero schema publishes
+`RegistryMissionCompositionProvider` retains the legacy projection of all nine
+canonical physical vehicle families, the `simple_aero` workflow, and the
+dual-launch glider family from existing authorities. It does not maintain a
+second model catalog. New Simple Aero work should instead select the
+package-owned `taoryx.simple-aero.mission-composition` provider, which exposes
+only `simple_aero`, retains the selected plug-in catalog through batch/session
+execution, and owns its endpoint catalog and witness. The legacy registry may
+continue to delegate its compatibility lowering to the package, but it is not a
+dependency of the focused API. The Simple Aero schema publishes
 launch and endpoint choices, mass/boost/aero inputs, checkpoints, open segment
 composition, named maneuver templates, and an explicit point-mass-only fidelity
 boundary. Every fixed-L/D template has a common batch binding and a registered

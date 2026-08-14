@@ -1,0 +1,137 @@
+schema: taoryx.vehicle-composition-registry/v1alpha1
+version: 1
+description: 'User-facing vehicle-to-trajectory registry. This is a composition overlay:
+  it declares available initialization contracts, segment schemas, and mission templates
+  without duplicating vehicle physics or promoting a fidelity tier.'
+vehicles:
+- family_id: reference_nesc_two_stage_rocket
+  metadata:
+    summary: Source-grounded NASA/NESC two-stage launch vehicle for variable-mass
+      ascent, staging, and terminal-state replay.
+    vehicle_class: staged_launch_vehicle
+    operating_domains:
+    - atmospheric
+    - near_space
+    - space
+    propulsion:
+    - staged_rocket
+    model_basis: source_grounded_reference
+    roles:
+    - launch
+    - staging
+    - variable_mass_trajectory
+    tags:
+    - nesc
+    - two_stage
+    - scenario_17
+    claim_boundary: Scenario-bounded reference replay; it is not an independently
+      qualified launch vehicle or general guidance system.
+  initialization_contracts:
+  - id: pad_launch
+    status: development
+    description: Staged launch state with mass, guidance, and environment declared
+      before ignition.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: latitude_deg
+      canonical_unit: deg
+      required: true
+      description: Launch latitude.
+    - id: longitude_deg
+      canonical_unit: deg
+      required: true
+      description: Launch longitude.
+    - id: initial_mass_kg
+      canonical_unit: kg
+      required: true
+      description: Initial total mass.
+    - id: initial_heading_deg
+      canonical_unit: deg
+      required: true
+      description: Initial azimuth.
+  segment_contracts:
+  - id: ignition_ascent
+    status: development
+    description: Ignition, release, and first-stage ascent under a declared pitch
+      program.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: pitch_program
+      canonical_unit: deg
+      required: true
+      description: Pitch program or target law.
+    - id: max_dynamic_pressure_pa
+      canonical_unit: Pa
+      required: false
+      description: Optional dynamic-pressure constraint.
+    required_control_intents:
+    - flight_path
+    - throttle
+  - id: stage_separation
+    status: development
+    description: Ordered cutoff, separation, and upper-stage ignition event chain.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: separation_delay_s
+      canonical_unit: s
+      required: true
+      description: Staging delay.
+    required_control_intents:
+    - attitude_rate
+    permitted_transition_events:
+    - stage_cutoff
+    - stage_separation
+    - upper_stage_ignition
+  - id: coast_terminal_state
+    status: development
+    description: Post-cutoff coast to an apogee, impact, re-entry, or orbital target-state
+      contract.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: terminal_kind
+      canonical_unit: null
+      required: true
+      description: apogee, impact, reentry, or orbit target.
+    required_control_intents:
+    - attitude_rate
+  mission_templates:
+  - id: staged_rocket_launch_target_state_v1
+    status: development
+    description: Ignition, ascent, staging, upper-stage guidance, cutoff, and target-state/coast
+      lifecycle.
+    mission_capability_adapter_id: taoryx.nesc_staged_source_replay.capability.v1
+    mission_capability_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    semantic_translator_id: taoryx.nesc_staged_source_replay.capability.v1
+    semantic_translator_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    initialization_contracts:
+    - pad_launch
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - ignition_ascent
+    - stage_separation
+    - ignition_ascent
+    - coast_terminal_state

@@ -1,0 +1,196 @@
+schema: taoryx.vehicle-execution-bindings/v1alpha1
+version: 1
+description: Explicit source-owned execution bindings for compiled vehicle compositions.
+  An entry is a public capability declaration, not a generic family fallback. Omitted
+  vehicle/fidelity/mission combinations are unavailable until their own native binding
+  exists.
+bindings:
+- family_id: skywalker_x8
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  operation: batch
+  status: runnable
+  execution_mode: source_native_autonomous
+  factory_id: language_backed_powered_fixed_wing.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Materialize the exact source-table route and execute it through the
+    language runtime.
+  claim_boundary: Point-mass source-table trajectory evidence; no attitude or physical-effector
+    claim.
+- family_id: skywalker_x8
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  operation: batch
+  status: runnable
+  execution_mode: source_native_autonomous
+  factory_id: language_backed_powered_fixed_wing.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Materialize the named route-lag pseudo-6DOF source-table route and
+    execute it through the language runtime.
+  claim_boundary: Named attitude-response bridge; no rigid-body moment or elevon-allocation
+    claim.
+- family_id: skywalker_x8
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  operation: episode
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: language_backed_interactive.v1
+  batch_action_trace: not_applicable
+  description: Project the language-backed source runtime into an accepted-truth interactive
+    episode.
+  claim_boundary: External controls remain the declared runtime controls and do not
+    promote the point-mass evidence tier.
+- family_id: skywalker_x8
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  operation: episode
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: language_backed_interactive.v1
+  batch_action_trace: not_applicable
+  description: Project the named pseudo-6DOF language runtime into an accepted-truth
+    interactive episode.
+  claim_boundary: External controls do not establish physical elevon allocation or
+    moment balance.
+- family_id: skywalker_x8
+  mission: x8_local_physical_surface_lqr_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: x8_local_physical_surface_lqr_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the pinned X8 source-table roll/pitch LQR recovery through
+    bounded collective/differential elevon-coordinate allocation.
+  claim_boundary: Local source-trim source-coordinate allocation screen only; it is
+    not a physical racetrack, gain schedule, individual-servo validation, or flight
+    qualification claim.
+- family_id: skywalker_x8
+  mission: x8_local_physical_surface_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: x8_local_physical_surface_lqi_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the pinned X8 source-table roll/pitch LQI recovery through
+    bounded collective/differential elevon-coordinate allocation, including a three-case
+    matched external pitch-moment offset screen.
+  claim_boundary: Local source-trim source-coordinate allocation screen plus one fixed
+    matched external pitch-moment witness only; it does not establish wind or mass
+    robustness, a physical racetrack, gain schedule, individual-servo validation,
+    or flight qualification.
+- family_id: skywalker_x8
+  mission: x8_local_physical_surface_lqi_long_recovery_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: x8_local_physical_surface_lqi_long_recovery_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Solve the pinned X8 source-table powered trim, then execute twenty
+    seconds of roll/pitch offset-free LQI recovery through bounded collective/differential
+    elevon-coordinate allocation.
+  claim_boundary: Pinned source-trim local source-coordinate recovery only; it does
+    not establish persistent-disturbance rejection, nonlinear yaw recovery, a physical
+    racetrack, gain schedule, individual-servo validation, or flight qualification.
+- family_id: skywalker_x8
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: batch
+  status: runnable
+  execution_mode: source_native_autonomous
+  factory_id: language_backed_powered_fixed_wing.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Materialize and execute the source-owned X8 direct-moment racetrack.
+  claim_boundary: Bounded source-autonomous direct-wrench evidence only; no external
+    wrench authority, physical elevon allocation, source-validated controller, or
+    flight-qualification claim.
+- family_id: b747
+  mission: b747_condition3_local_physical_surface_lqr_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: b747_condition3_local_physical_surface_lqr_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the pinned B747 NASA CR-2144 condition-3 local LQR recovery
+    through bounded elevator, aileron, and rudder source-table allocation.
+  claim_boundary: Local condition-3 surface-allocation screen only; it is not a physical
+    racetrack, gain schedule, servo/engine-dynamics model, or transport flight qualification
+    claim.
+- family_id: b747
+  mission: b747_condition3_local_physical_surface_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: b747_condition3_local_physical_surface_lqi_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the pinned B747 NASA CR-2144 condition-3 local LQI recovery
+    through bounded elevator, aileron, and rudder source-table allocation, including
+    a three-case matched external pitch-moment offset screen.
+  claim_boundary: Local condition-3 surface-allocation screen plus one fixed matched
+    external pitch-moment witness only; it does not establish wind or mass robustness,
+    a physical racetrack, gain schedule, servo/engine-dynamics model, or transport
+    flight qualification.
+- family_id: b747
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  operation: batch
+  status: runnable
+  execution_mode: source_native_autonomous
+  factory_id: language_backed_powered_fixed_wing.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Materialize and execute the transport-scaled source-table point-mass
+    racetrack.
+  claim_boundary: Transport trajectory evidence only; no physical control-surface
+    claim.
+- family_id: b747
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  operation: batch
+  status: runnable
+  execution_mode: source_native_autonomous
+  factory_id: language_backed_powered_fixed_wing.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Materialize and execute the transport-scaled named route-lag racetrack.
+  claim_boundary: Named route-lag pseudo response; no B747 surface-allocation or moment
+    claim.
+- family_id: b747
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: batch
+  status: runnable
+  execution_mode: source_native_autonomous
+  factory_id: language_backed_powered_fixed_wing.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Materialize and execute the source-owned transport direct-wrench racetrack.
+  claim_boundary: Bounded source-autonomous direct-wrench transport evidence only;
+    no external wrench authority, B747 surface allocation, source flight-control-law,
+    or flight-qualification claim.
+- family_id: b747
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: point_mass_3dof
+  operation: episode
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: language_backed_interactive.v1
+  batch_action_trace: not_applicable
+  description: Project the source-table transport runtime into an accepted-truth interactive
+    episode.
+  claim_boundary: Interactive control does not promote trajectory evidence to physical
+    transport control evidence.
+- family_id: b747
+  mission: powered_fixed_wing_racetrack_v1
+  fidelity: pseudo_6dof
+  operation: episode
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: language_backed_interactive.v1
+  batch_action_trace: not_applicable
+  description: Project the named transport route-lag runtime into an accepted-truth
+    interactive episode.
+  claim_boundary: The episode remains a named response-law bridge and does not establish
+    physical effector behavior.

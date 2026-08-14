@@ -1,0 +1,20 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: tumbling-body-direct-release-pseudo6dof-v1
+vehicle: tumbling_body
+fidelity: pseudo_6dof
+initialization:
+  id: atmospheric_release
+  inputs:
+    altitude_m: {value: 1000.0, unit: m}
+    speed_m_s: {value: 250.0, unit: m/s}
+    quaternion_wxyz: {value: [1.0, 0.0, 0.0, 0.0], unit: dimensionless}
+    body_rates_rad_s: {value: [0.25, 0.4, 0.6], unit: rad/s}
+    area_policy: {value: native_rigid_body_reuse_instantaneous_projected_area}
+mission: {id: tumbling_body_release_damping_impact_v1}
+segments:
+  - id: passive_coast
+    inputs:
+      duration_s: {value: 120.0, unit: s}
+  - id: atmospheric_descent
+    inputs:
+      impact_plane_altitude_m: {value: 0.0, unit: m}

@@ -1,0 +1,77 @@
+{
+  "comparison_artifact": "verification/alpha3_hl20_development/pseudo_6dof_evidence.json",
+  "comparison_fidelity": "pseudo_6dof",
+  "comparison_status": "pass",
+  "control_realization": {
+    "comparison": "response_law",
+    "reference": "none"
+  },
+  "family_id": "hl20_mod_k",
+  "interpretation": "The report measures semantic agreement, event-time deltas, and available objective margins. It does not rank fidelities or imply that absent physical effectors exist.",
+  "mission_result": {
+    "agreement": true,
+    "comparison_pass": true,
+    "reference_pass": true
+  },
+  "mission_semantics": {
+    "common_objective_ids": [
+      "boost",
+      "booster_cutoff",
+      "glide_energy_segment",
+      "release",
+      "terminal_impact_witness"
+    ],
+    "objective_sequence_preserved": true,
+    "unmatched_objective_ids": []
+  },
+  "objective_deltas": [
+    {
+      "id": "boost",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "sample_id_pair": [
+        "query-000002",
+        "query-000002"
+      ]
+    },
+    {
+      "id": "booster_cutoff",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "sample_id_pair": [
+        "query-000002",
+        "query-000002"
+      ]
+    },
+    {
+      "id": "glide_energy_segment",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "sample_id_pair": [
+        "query-000002",
+        "query-000002"
+      ]
+    },
+    {
+      "id": "release",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "sample_id_pair": [
+        "query-000002",
+        "query-000002"
+      ]
+    },
+    {
+      "id": "terminal_impact_witness",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "sample_id_pair": [
+        "query-000002",
+        "query-000002"
+      ]
+    }
+  ],
+  "reference_artifact": "verification/alpha3_hl20_development/point_mass_3dof_evidence.json",
+  "reference_fidelity": "point_mass_3dof",
+  "schema": "taoryx.alpha3-cross-fidelity-comparison/v1alpha1"
+}

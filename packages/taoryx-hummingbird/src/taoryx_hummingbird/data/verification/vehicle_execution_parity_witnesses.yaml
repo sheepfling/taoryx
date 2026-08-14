@@ -1,0 +1,16 @@
+schema: taoryx.vehicle-execution-parity-witnesses/v1alpha1
+version: 1
+description: One deterministic, short semantic action trace for every exact registered
+  batch/episode parity pair. These are kernel/status parity witnesses, not mission
+  trajectories or physical-effector qualification cases.
+witnesses:
+- id: hummingbird-pseudo6dof-body-motion
+  composition: examples/vehicle_composition/hummingbird_hover_yaw_episode_pseudo6dof_compose.yaml
+  authority_profile_id: body_motion_response
+  seed: 7
+  integration_step_s: 0.02
+  actions:
+  - values:
+      attitude.yaw.command: 0.25
+      propulsion.command.fraction: 0.75
+    duration_s: 0.06

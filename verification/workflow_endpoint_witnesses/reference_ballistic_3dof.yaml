@@ -1,0 +1,34 @@
+schema: taoryx.model-authoring-draft/v1
+draft_id: reference-ballistic-3dof-batch-draft
+configuration_id: reference-ballistic-3dof-batch
+provider_id: taoryx.reference.mission-composition
+model_id: reference_ballistic_3dof
+model_version: 1.0.0
+schema_fingerprint: 013341d70e144dc573a2aba16bcc4edc764c7d0a0bc2be9768c27292f3e37746
+fidelity: point_mass_3dof
+realization_id: analytical_point_mass
+mission_template_id: reference_ballistic_3dof_repeatable_sequence_v1
+selection_sources:
+  fidelity: caller
+  mission: caller
+  realization: caller
+values:
+  initialization:
+    selected: launch_state
+    values:
+      altitude_m: 1000.0
+      speed_m_s: 150.0
+      heading_deg: 0.0
+      flight_path_angle_deg: 20.0
+  segments:
+    template: null
+    items:
+      - selected: ballistic_coast
+        values:
+          duration_s: 2.0
+      - selected: ballistic_coast
+        values:
+          duration_s: 2.0
+claim_boundary: >-
+  This checked-in endpoint witness is editable input in canonical advertised units.
+  It remains an analytical ballistic workflow proof until the exact provider validates and runs it.

@@ -1,0 +1,40 @@
+name: Core Quality
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Ruff, Pyright, and focused infrastructure tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+      - name: Install the development toolchain
+        run: python -m pip install -e ".[dev]"
+      - name: Verify Ruff auto-fixes and Pyright
+        run: python -m tools.dev quality
+      # Keep the CI smoke route narrow and deterministic. Family-specific
+      # plug-in changes use their own vertical gates; the DAVE-ML workflow
+      # retains its broader marker-selected test lanes.
+      - name: Exercise the quality and plug-in-routing contracts
+        run: >-
+          python -m pytest
+          tests/unit/test_tooling_entrypoints.py
+          tests/unit/test_vehicle_catalog_resource_quarantine.py
+          -q -x --strict-markers
+          --basetemp build/ci-quality-pytest

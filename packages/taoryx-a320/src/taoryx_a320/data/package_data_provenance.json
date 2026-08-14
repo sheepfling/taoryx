@@ -1,0 +1,11 @@
+{
+  "claim_boundary": "This package fragment mirrors only A320/OpenAP catalog rows, source assets, evidence, and focused witnesses; repository-root catalogs remain canonical and unrelated exploded corpus members are excluded.",
+  "family_id": "a320_openap_3dof",
+  "schema": "taoryx.a320-package-data/v1",
+  "source_archive": {
+    "path": "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip",
+    "sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+    "storage_boundary": "archive_and_attribution_notice_only"
+  },
+  "source_catalog_root": "verification/"
+}

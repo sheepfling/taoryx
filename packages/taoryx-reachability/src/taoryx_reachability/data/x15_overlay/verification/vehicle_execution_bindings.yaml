@@ -1,0 +1,33 @@
+schema: taoryx.vehicle-execution-bindings/v1alpha1
+version: 1
+description: Explicit source-owned execution bindings for compiled vehicle compositions.
+  An entry is a public capability declaration, not a generic family fallback. Omitted
+  vehicle/fidelity/mission combinations are unavailable until their own native binding
+  exists.
+bindings:
+- family_id: x15
+  mission: x15_staged_booster_reachability_v1
+  fidelity: point_mass_3dof
+  operation: batch
+  status: runnable
+  execution_mode: open_loop_witness
+  factory_id: x15_staged_reachability.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the source-pinned X-15-scaled booster, coast, release, glide,
+    open-loop handoff, and passive-impact witness through the reduced reachability
+    model.
+  claim_boundary: Local-frame X-15-scaled reduced witness only; it preserves declared
+    staging anchors but is not the synthetic California-to-Hawaii vehicle, a native
+    X-15 rigid-body mission, or a controlled terminal handoff.
+- family_id: x15
+  mission: x15_staged_booster_reachability_v1
+  fidelity: pseudo_6dof
+  operation: batch
+  status: runnable
+  execution_mode: open_loop_witness
+  factory_id: x15_staged_reachability.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the source-pinned X-15-scaled staged witness with the declared
+    named attitude-response bridge.
+  claim_boundary: Local-frame X-15-scaled response-law witness only; it does not establish
+    source-derived moments, physical effectors, or a controlled terminal handoff.

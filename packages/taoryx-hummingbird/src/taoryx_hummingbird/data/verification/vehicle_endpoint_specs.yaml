@@ -1,0 +1,194 @@
+schema: taoryx.vehicle-endpoint-specs/v1alpha1
+version: 1
+description: Focused vertical contracts that join a selected vehicle composition to
+  its runtime factory, executable witness, capability advertisement, normalized output
+  surface, controller campaign, and planning ledger record.
+endpoints:
+- id: hummingbird-source-hover-rotor-lqi
+  family_id: hummingbird
+  model_id: hummingbird
+  provider_ids:
+  - taoryx.registry.mission-composition
+  - taoryx.hummingbird.mission-composition
+  mission_id: hummingbird_local_individual_rotor_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  execution_mode: closed_loop_controller
+  operations:
+  - operation: batch
+    factory_id: hummingbird_local_individual_rotor_lqi_screen.v1
+    witness_id: hummingbird-local-physical-lqi-screen-batch
+  controller_campaign_id: hummingbird-source-rotor-local-lqi-v1
+  required_tuning_operations:
+  - state_derivative
+  - trim
+  - linearize
+  required_core_output_ids:
+  - attitude.local.roll_error
+  - attitude.local.pitch_error
+  - attitude.local.yaw_error
+  - angular_rate.body.x
+  - angular_rate.body.y
+  - angular_rate.body.z
+  required_telemetry_output_ids:
+  - mass.total
+  - diagnostics.allocation_residual_norm
+  - diagnostics.saturation_count
+  - actuator.rotor.1.speed.actual
+  - actuator.rotor.4.speed.actual
+  robustness_screens:
+  - id: hummingbird-hover-fixed-lqi-mass-variation
+    kind: mass_variation
+    artifact_filename: robustness_report.json
+    execution_readiness: available
+    cases:
+    - id: mass-0.85x
+      parameters:
+        mass_factor: 0.85
+      description: Independently re-trim the source hover plant at 85 percent of nominal
+        mass.
+    - id: mass-1.00x
+      parameters:
+        mass_factor: 1.0
+      description: Retain the nominal source-hover mass as the reference case.
+    - id: mass-1.15x
+      parameters:
+        mass_factor: 1.15
+      description: Independently re-trim the source hover plant at 115 percent of
+        nominal mass.
+    metrics:
+    - id: final_attitude_rate_error_fraction
+      maximum: 1.0
+      unit: ratio
+      description: Final attitude/rate error norm divided by the case initial norm;
+        below one proves bounded recovery.
+    - id: saturation_fraction
+      maximum: 0.0
+      unit: fraction
+      description: Fraction of committed control samples with an allocation or actuator
+        saturation.
+    claim_boundary: Discrete source-mass screen under one fixed nominal LQI design
+      and independent case re-trims. It does not establish a gain schedule, an in-flight
+      mass transition, wind rejection, or qualification.
+  maturity_record_id: hummingbird
+  claim_boundary: Local source-hover attitude/rate LQI and physical four-rotor allocation
+    screen only; it does not establish translation, wind rejection, battery, landing,
+    gain scheduling, or vehicle qualification.
+- id: hummingbird-source-vertical-translation-rotor-lqi
+  family_id: hummingbird
+  model_id: hummingbird
+  provider_ids:
+  - taoryx.registry.mission-composition
+  - taoryx.hummingbird.mission-composition
+  mission_id: hummingbird_local_vertical_translation_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  execution_mode: closed_loop_controller
+  operations:
+  - operation: batch
+    factory_id: hummingbird_local_vertical_translation_lqi_screen.v1
+    witness_id: hummingbird-local-vertical-translation-lqi-screen-batch
+  controller_campaign_id: hummingbird-source-rotor-vertical-lqi-v1
+  required_tuning_operations:
+  - state_derivative
+  - trim
+  - linearize
+  required_core_output_ids:
+  - position.local.z
+  - velocity.local.z
+  - attitude.local.roll_error
+  - attitude.local.pitch_error
+  - attitude.local.yaw_error
+  required_telemetry_output_ids:
+  - mass.total
+  - control.wrench.requested.force.z
+  - control.wrench.achieved.force.z
+  - control.wrench.residual.force.z
+  - diagnostics.allocation_residual_norm
+  - diagnostics.saturation_count
+  - control.lqi.integral_error.vertical_speed
+  - actuator.rotor.1.speed.actual
+  - actuator.rotor.4.speed.actual
+  robustness_screens:
+  - id: hummingbird-vertical-fixed-lqi-mass-variation
+    kind: mass_variation
+    artifact_filename: robustness_report.json
+    execution_readiness: available
+    cases:
+    - id: mass-0.85x
+      parameters:
+        mass_factor: 0.85
+      description: Independently re-trim the source-local vertical plant at 85 percent
+        of nominal mass.
+    - id: mass-1x
+      parameters:
+        mass_factor: 1.0
+      description: Retain the nominal source-local vertical mass as the fixed-design
+        reference case.
+    - id: mass-1.15x
+      parameters:
+        mass_factor: 1.15
+      description: Independently re-trim the source-local vertical plant at 115 percent
+        of nominal mass.
+    metrics:
+    - id: minimum_phase_capture_dwell_s
+      minimum: 0.8
+      unit: s
+      description: Weakest declared climb, hover, descent, or return capture dwell
+        in one mass case.
+    - id: saturation_fraction
+      maximum: 0.0
+      unit: fraction
+      description: Fraction of committed source-rotor samples with allocation or actuator
+        saturation.
+    claim_boundary: Discrete source-mass vertical capture screen under one fixed nominal-mass
+      LQI design and independently re-trimmed local plants. It does not establish
+      a gain schedule, mass transition, wind rejection, contact, landing, battery
+      behavior, or qualification.
+  maturity_record_id: hummingbird
+  claim_boundary: Bounded source-local climb, hover, descent, and return capture through
+    collective-force and four-rotor LQI allocation only. It does not establish wind
+    rejection, contact, landing, battery behavior, gain scheduling, full-route navigation,
+    or vehicle qualification.
+- id: hummingbird-source-horizontal-translation-rotor-lqi
+  family_id: hummingbird
+  model_id: hummingbird
+  provider_ids:
+  - taoryx.registry.mission-composition
+  - taoryx.hummingbird.mission-composition
+  mission_id: hummingbird_local_horizontal_translation_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  execution_mode: closed_loop_controller
+  operations:
+  - operation: batch
+    factory_id: hummingbird_local_horizontal_translation_lqi_screen.v1
+    witness_id: hummingbird-local-horizontal-translation-lqi-screen-batch
+  controller_campaign_id: hummingbird-source-rotor-local-lqi-v1
+  required_tuning_operations:
+  - state_derivative
+  - trim
+  - linearize
+  required_core_output_ids:
+  - position.local.x
+  - position.local.y
+  - velocity.local.x
+  - velocity.local.y
+  - attitude.local.yaw_error
+  required_telemetry_output_ids:
+  - mass.total
+  - control.wrench.requested.moment.z
+  - control.wrench.achieved.moment.z
+  - control.wrench.residual.moment.z
+  - diagnostics.allocation_residual_norm
+  - diagnostics.saturation_count
+  - control.lqi.integral_error.yaw
+  - actuator.rotor.1.speed.actual
+  - actuator.rotor.4.speed.actual
+  robustness_requirement:
+    disposition: not_applicable
+    reason: The bounded horizontal source-local screen has no declared persistent
+      wind, external-wrench, or mass-variation injection seam. Its changing position/yaw
+      references are tracking objectives, not robustness cases.
+  maturity_record_id: hummingbird
+  claim_boundary: Bounded source-local forward, yaw, lateral, rearward, and return
+    tracking through attitude LQI and four-rotor allocation only. It does not establish
+    altitude/collective control, wind rejection, contact, landing, battery behavior,
+    gain scheduling, a general route, or vehicle qualification.

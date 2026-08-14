@@ -1,0 +1,1079 @@
+schema_version: 1
+id: taoryx_family_qualification_missions_v1
+claim_boundary: independent truth-evaluated family qualification; integration baselines
+  remain nonqualified
+missions:
+- id: x8-fixed-wing-flyby-route-v1
+  family: skywalker_x8
+  fidelity_tier: rigid_body_6dof_direct_wrench
+  display_name: Skywalker X8 left-hand fly-by waypoint sequence — nominal case
+  evidence_level: nominal_case_pass_overall_qualification_pending
+  claim: The source-bounded X8 rigid-body surrogate crosses four declared, oriented
+    route gates inside the local aerodynamic envelope under independent truth evaluation.
+  nonclaims:
+  - closed-route terminal capture
+  - physical actuator authority or source-validated bank response
+  - flight-test or manufacturer fidelity
+  - wind robustness
+  - full landing or recovery dynamics
+  problem: examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb
+  tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+  max_steps: 7000
+  envelope:
+  - channel: speed_m_s
+    minimum: 2.0
+    maximum: 27.0
+  - channel: aero_alpha_deg
+    minimum: 0.0
+    maximum: 12.0
+  - channel: aero_sideslip_deg
+    minimum: -5.0
+    maximum: 5.0
+  terminal:
+    required: true
+    dwell_s: 2.0
+    window_start_s: 115.0
+    window_end_s: 120.0
+    target:
+      north_m: 0.0
+      east_m: 0.0
+      altitude_m: 178.0
+      speed_m_s: 17.9
+    tolerance:
+      north_m: 100.0
+      east_m: 100.0
+      altitude_m: 40.0
+      speed_m_s: 5.0
+  objectives:
+  - id: east-turn-gate
+    objective_type: fly_by_gate
+    target:
+      north_m: 0.0
+      east_m: 615.0
+      altitude_m: 178.0
+    tolerance:
+      corridor_m: 150.0
+    gate_normal:
+    - 0.0
+    - 1.0
+    - 0.0
+    crossing_direction: 1
+    window_start_s: 0.0
+    window_end_s: 40.0
+  - id: north-turn-gate
+    objective_type: fly_by_gate
+    target:
+      north_m: 615.0
+      east_m: 700.0
+      altitude_m: 210.0
+    tolerance:
+      corridor_m: 150.0
+    gate_normal:
+    - 1.0
+    - 0.0
+    - 0.0
+    crossing_direction: 1
+    window_start_s: 40.0
+    window_end_s: 80.0
+  - id: west-turn-gate
+    objective_type: fly_by_gate
+    target:
+      north_m: 615.0
+      east_m: 200.0
+      altitude_m: 178.0
+    tolerance:
+      corridor_m: 150.0
+    gate_normal:
+    - 0.0
+    - -1.0
+    - 0.0
+    crossing_direction: 1
+    window_start_s: 80.0
+    window_end_s: 110.0
+  - id: south-turn-gate
+    objective_type: fly_by_gate
+    target:
+      north_m: 400.0
+      east_m: 25.0
+      altitude_m: 178.0
+    tolerance:
+      corridor_m: 150.0
+    gate_normal:
+    - -1.0
+    - 0.0
+    - 0.0
+    crossing_direction: 1
+    window_start_s: 100.0
+    window_end_s: 120.0
+- id: x8-figure-eight-altitude-bank-pitch-v2
+  family: skywalker_x8
+  fidelity_tier: rigid_body_6dof_direct_wrench
+  display_name: Skywalker X8 figure-eight altitude, bank, and pitch reversal — nominal
+    airborne pass; terminal pending
+  evidence_level: nominal_case_pass_overall_qualification_pending
+  claim: The source-bounded X8 rigid-body surrogate executes a figure-eight reference
+    with explicit high/low altitude gates and truth-observable bank and pitch reversals
+    inside the local aerodynamic envelope. An explicit return-to-terminal recovery
+    is exercised, but stable terminal closure remains qualification-pending.
+  nonclaims:
+  - physical actuator authority or source-validated bank and pitch response
+  - flight-test or manufacturer fidelity
+  - wind robustness
+  - full landing or recovery dynamics
+  - stable return-to-terminal closure
+  realization:
+    force_source: source_table
+    moment_source: direct_moment
+    actuator_realization: direct_moment_injection
+    propulsion_model: source_table_thrust
+    resource_model: fixed_mass_zero_propellant
+    note: The nominal airborne witness uses the declared attitude LQR to produce a
+      bounded canonical body moment. Elevon channels are diagnostic only; they do
+      not close the attitude loop.
+  problem: examples/mission_families/slower_x8/SV03_figure_eight_altitude_reversal_6dof.prb
+  tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+  max_steps: 21000
+  envelope:
+  - channel: speed_m_s
+    minimum: 2.0
+    maximum: 27.0
+  - channel: aero_alpha_deg
+    minimum: 0.0
+    maximum: 12.0
+  - channel: aero_sideslip_deg
+    minimum: -5.0
+    maximum: 5.0
+  truth_events:
+  - id: bank-positive-response
+    channel: local_roll_deg
+    predicate: at_least
+    threshold: 1.0
+    window_start_s: 0.0
+    window_end_s: 90.0
+  - id: bank-negative-response
+    channel: local_roll_deg
+    predicate: at_most
+    threshold: -1.0
+    window_start_s: 90.0
+    window_end_s: 180.0
+  - id: pitch-positive-response
+    channel: local_pitch_deg
+    predicate: at_least
+    threshold: 9.0
+    window_start_s: 20.0
+    window_end_s: 90.0
+  - id: pitch-negative-response
+    channel: local_pitch_deg
+    predicate: at_most
+    threshold: -0.5
+    window_start_s: 90.0
+    window_end_s: 180.0
+  terminal:
+    required: true
+    dwell_s: 2.0
+    window_start_s: 350.0
+    window_end_s: 360.0
+    target:
+      north_m: 0.0
+      east_m: 0.0
+      altitude_m: 178.0
+      speed_m_s: 20.0
+    tolerance:
+      north_m: 100.0
+      east_m: 100.0
+      altitude_m: 8.0
+      speed_m_s: 4.0
+  objectives:
+  - id: bank-positive-response
+    objective_type: event
+    event_id: bank-positive-response
+  - id: altitude-high-gate
+    objective_type: fly_by_gate
+    target:
+      north_m: 116.295
+      east_m: 559.924
+      altitude_m: 220.0
+      speed_m_s: 20.0
+    tolerance:
+      corridor_m: 120.0
+      altitude_m: 15.0
+      speed_m_s: 3.0
+    gate_normal:
+    - -0.3431
+    - 0.9393
+    - 0.0
+    crossing_direction: 1
+    window_start_s: 20.0
+    window_end_s: 60.0
+  - id: bank-negative-response
+    objective_type: event
+    event_id: bank-negative-response
+  - id: pitch-positive-response
+    objective_type: event
+    event_id: pitch-positive-response
+  - id: altitude-low-gate
+    objective_type: fly_by_gate
+    target:
+      north_m: 111.138
+      east_m: -582.126
+      altitude_m: 170.0
+      speed_m_s: 20.0
+    tolerance:
+      corridor_m: 120.0
+      altitude_m: 20.0
+      speed_m_s: 4.0
+    gate_normal:
+    - -0.5358
+    - -0.8443
+    - 0.0
+    crossing_direction: 1
+    window_start_s: 110.0
+    window_end_s: 150.0
+  - id: pitch-negative-response
+    objective_type: event
+    event_id: pitch-negative-response
+- id: x8-racetrack-altitude-turns-v1
+  family: skywalker_x8
+  fidelity_tier: rigid_body_6dof_surface_allocated
+  display_name: Skywalker X8 racetrack climb, level, return-turn, descent, and start/finish
+    gate
+  evidence_level: nominal_case_pass_overall_qualification_pending
+  claim: The source-bounded X8 rigid-body surrogate follows a reusable, source-domain
+    racetrack reference with isolated outbound climb, high-altitude level flight,
+    a left lobe, inbound descent, low-altitude recovery, a return lobe, and an oriented
+    start/finish crossing through bounded physical elevon allocation.
+  nonclaims:
+  - source-validated controller or actuator fidelity
+  - flight-test or manufacturer fidelity
+  - wind robustness
+  - takeoff, landing, or runway operations
+  realization:
+    force_source: source_table
+    moment_source: local_surface_inversion
+    actuator_realization: bounded_elevon_allocation_bank_pitch_pd
+    propulsion_model: source_table_thrust
+    resource_model: fixed_mass_zero_propellant
+    note: This is a local surface-allocation realization using a declared bank/pitch
+      response law and finite-difference source-table derivatives. It commands only
+      the roll/pitch subspace available to the two X8 elevon channels; yaw residual
+      is reported rather than injected. A source-linearized diagnostic finds the differential-elevon
+      coupled roll/yaw/sideslip subproblem controllable, but it does not establish
+      an independent yaw wrench axis or nonlinear yaw/sideslip recovery. It is bounded
+      by the declared elevon limits and aerodynamic table domain; it is not a manufacturer
+      flight-control law or a claim of source-validated actuator dynamics. The current
+      full-route witness is intentionally fail-closed when yaw/sideslip reaches the
+      declared source beta boundary; the short source-domain allocation witness remains
+      the active physical-effector evidence until coupled nonlinear recovery and route
+      use are independently exercised.
+  problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_6dof.prb
+  racetrack_binding: x8-reference
+  timing_estimate:
+    straight_length_m: 700.0
+    turn_radius_m: 250.0
+    speed_m_s: 17.9
+    altitude_delta_m: 10.0
+    climb_rate_m_s: 0.5
+    descent_rate_m_s: 0.3
+  tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+  max_steps: 14000
+  envelope:
+  - channel: speed_m_s
+    minimum: 2.0
+    maximum: 27.0
+  - channel: aero_alpha_deg
+    minimum: 0.0
+    maximum: 12.0
+  - channel: aero_sideslip_deg
+    minimum: -5.0
+    maximum: 5.0
+  truth_events:
+  - id: left-turn-bank
+    channel: route_bank_achieved_deg
+    predicate: at_most
+    threshold: -5.0
+    window_start_s: 39.0
+    window_end_s: 85.0
+  - id: return-turn-bank
+    channel: route_bank_achieved_deg
+    predicate: at_most
+    threshold: -5.0
+    window_start_s: 122.0
+    window_end_s: 171.0
+  terminal:
+    required: true
+    objective_type: fly_by_gate
+    racetrack_gate_id: terminal-start-finish-gate
+    dwell_s: 0.0
+    window_start_s: 165.0
+    window_end_s: 180.0
+    tolerance:
+      corridor_m: 120.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+  objectives:
+  - id: high-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: high-altitude-level-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 25.0
+    window_end_s: 50.0
+  - id: left-turn-bank
+    objective_type: event
+    event_id: left-turn-bank
+  - id: left-turn-exit-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: left-turn-exit-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 70.0
+    window_end_s: 100.0
+  - id: low-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: low-altitude-level-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 100.0
+    window_end_s: 140.0
+  - id: return-turn-bank
+    objective_type: event
+    event_id: return-turn-bank
+- id: x8-racetrack-altitude-turns-direct-moment-baseline-v1
+  family: skywalker_x8
+  fidelity_tier: rigid_body_6dof_direct_wrench
+  display_name: Skywalker X8 racetrack direct-moment baseline
+  evidence_level: integration_baseline_direct_moment
+  claim: The source-bounded X8 rigid-body surrogate executes the reusable racetrack
+    reference through the existing attitude/LQR direct-moment baseline, providing
+    a control-realization comparison for the physical elevon-allocation candidate.
+  nonclaims:
+  - physical elevon allocation
+  - source-validated controller or actuator fidelity
+  - flight-test or manufacturer fidelity
+  - wind robustness
+  - takeoff, landing, or runway operations
+  realization:
+    force_source: source_table
+    moment_source: direct_moment
+    actuator_realization: direct_moment_injection
+    propulsion_model: source_table_thrust
+    resource_model: fixed_mass_zero_propellant
+    note: This is retained as a diagnostic baseline. It cannot certify the physical
+      elevon candidate or substitute for surface qualification.
+  problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_direct_moment_6dof.prb
+  timing_estimate:
+    straight_length_m: 1400.0
+    turn_radius_m: 250.0
+    speed_m_s: 17.9
+    altitude_delta_m: 23.0
+    climb_rate_m_s: 1.5
+    descent_rate_m_s: 0.5
+  tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+  max_steps: 14000
+  envelope:
+  - channel: speed_m_s
+    minimum: 2.0
+    maximum: 27.0
+  - channel: aero_alpha_deg
+    minimum: 0.0
+    maximum: 12.0
+  - channel: aero_sideslip_deg
+    minimum: -5.0
+    maximum: 5.0
+  truth_events:
+  - id: left-turn-bank
+    channel: route_bank_achieved_deg
+    predicate: at_most
+    threshold: -8.0
+    window_start_s: 80.0
+    window_end_s: 125.0
+  - id: right-turn-bank
+    channel: route_bank_achieved_deg
+    predicate: at_most
+    threshold: -8.0
+    window_start_s: 205.0
+    window_end_s: 240.0
+  terminal:
+    required: true
+    objective_type: fly_by_gate
+    dwell_s: 0.0
+    window_start_s: 220.0
+    window_end_s: 270.0
+    target:
+      north_m: 0.0
+      east_m: 0.0
+      altitude_m: 178.0
+      speed_m_s: 17.9
+    tolerance:
+      corridor_m: 120.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    gate_normal:
+    - 0.0
+    - 1.0
+    - 0.0
+    crossing_direction: 1
+  objectives:
+  - id: high-altitude-level-gate
+    objective_type: fly_by_gate
+    target:
+      north_m: 0.0
+      east_m: 1000.0
+      altitude_m: 218.0
+      speed_m_s: 17.9
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    gate_normal:
+    - 0.0
+    - 1.0
+    - 0.0
+    crossing_direction: 1
+    window_start_s: 45.0
+    window_end_s: 75.0
+  - id: left-turn-bank
+    objective_type: event
+    event_id: left-turn-bank
+  - id: left-turn-exit-gate
+    objective_type: fly_by_gate
+    target:
+      north_m: 500.0
+      east_m: 1400.0
+      altitude_m: 218.0
+      speed_m_s: 17.9
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    gate_normal:
+    - 0.0
+    - -1.0
+    - 0.0
+    crossing_direction: 1
+    window_start_s: 105.0
+    window_end_s: 135.0
+  - id: low-altitude-level-gate
+    objective_type: fly_by_gate
+    target:
+      north_m: 500.0
+      east_m: 500.0
+      altitude_m: 195.0
+      speed_m_s: 17.9
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    gate_normal:
+    - 0.0
+    - -1.0
+    - 0.0
+    crossing_direction: 1
+    window_start_s: 135.0
+    window_end_s: 175.0
+  - id: right-turn-bank
+    objective_type: event
+    event_id: right-turn-bank
+- id: b747-racetrack-altitude-turns-3dof-v1
+  family: b747
+  fidelity_tier: point_mass_3dof
+  display_name: B747 transport-scaled racetrack climb, level, turn, descent, and start/finish
+    gate
+  evidence_level: nominal_case_pass_overall_qualification_pending
+  claim: The B747 public-research point-mass reduction resolves the same powered fixed-wing
+    racetrack mission contract as the X8 at transport scale, with longer legs, larger
+    turns, slower vertical changes, and independent truth-based altitude, speed, route,
+    and terminal gates.
+  nonclaims:
+  - rigid-body attitude or bank dynamics
+  - physical elevator, aileron, or rudder allocation
+  - source-validated transport flight-control law
+  - fuel depletion or certified JT9D performance
+  - takeoff, landing, wind robustness, or manufacturer fidelity
+  realization:
+    force_source: source_table
+    moment_source: not_applicable_point_mass_3dof
+    actuator_realization: kinematic_route_command_no_surface_claim
+    propulsion_model: source_table_thrust
+    resource_model: fixed_mass_zero_propellant
+    note: This is the first scaled realization of the shared powered-fixed-wing template.
+      The point-mass adapter commands speed, heading, and flight-path angle from the
+      racetrack tangent and bounded position/ altitude corrections; it does not create
+      attitude or surface telemetry.
+  problem: examples/mission_families/slower_b747/SV01_racetrack_altitude_turns_3dof.prb
+  racetrack_binding: b747-transport-scaled
+  tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+  max_steps: 12000
+  envelope:
+  - channel: speed_m_s
+    minimum: 100.0
+    maximum: 220.0
+  - channel: altitude_m
+    minimum: 50.0
+    maximum: 350.0
+  terminal:
+    required: true
+    objective_type: fly_by_gate
+    racetrack_gate_id: terminal-start-finish-gate
+    dwell_s: 0.0
+    window_start_s: 550.0
+    window_end_s: 570.5
+    tolerance:
+      corridor_m: 2000.0
+      altitude_m: 35.0
+      speed_m_s: 8.0
+    crossing_direction: 1
+  objectives:
+  - id: high-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: high-altitude-level-gate
+    tolerance:
+      corridor_m: 2000.0
+      altitude_m: 35.0
+      speed_m_s: 8.0
+    crossing_direction: 1
+    window_start_s: 145.0
+    window_end_s: 175.0
+  - id: left-turn-exit-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: left-turn-exit-gate
+    tolerance:
+      corridor_m: 2000.0
+      altitude_m: 35.0
+      speed_m_s: 8.0
+    crossing_direction: 1
+    window_start_s: 265.0
+    window_end_s: 295.0
+  - id: low-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: low-altitude-level-gate
+    tolerance:
+      corridor_m: 2000.0
+      altitude_m: 35.0
+      speed_m_s: 8.0
+    crossing_direction: 1
+    window_start_s: 420.0
+    window_end_s: 455.0
+- id: x8-racetrack-altitude-turns-3dof-v1
+  family: skywalker_x8
+  fidelity_tier: point_mass_3dof
+  display_name: Skywalker X8 racetrack point-mass 3DOF
+  evidence_level: nominal_case_pass_overall_qualification_pending
+  claim: The source-table X8 point-mass reduction completes the shared powered fixed-wing
+    racetrack geometry with independent truth-based altitude, speed, route, and terminal
+    gates.
+  nonclaims:
+  - attitude or body-rate dynamics
+  - physical elevon, moment, or actuator authority
+  - flight-test or manufacturer fidelity
+  - wind robustness, takeoff, or landing
+  realization:
+    force_source: source_table
+    moment_source: not_applicable_point_mass_3dof
+    actuator_realization: kinematic_route_command_no_surface_claim
+    propulsion_model: source_table_thrust
+    resource_model: fixed_mass_zero_propellant
+    note: The point-mass adapter integrates translational motion and resolves speed,
+      heading, and flight-path commands from the shared racetrack. No attitude, moment,
+      or individual surface signal is used to pass the mission.
+  problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_3dof.prb
+  racetrack_binding: x8-point-mass
+  tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+  max_steps: 5000
+  envelope:
+  - channel: speed_m_s
+    minimum: 2.0
+    maximum: 27.0
+  - channel: altitude_m
+    minimum: 150.0
+    maximum: 215.0
+  terminal:
+    required: true
+    objective_type: fly_by_gate
+    racetrack_gate_id: terminal-start-finish-gate
+    dwell_s: 0.0
+    window_start_s: 165.0
+    window_end_s: 180.0
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+  objectives:
+  - id: high-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: high-altitude-level-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 25.0
+    window_end_s: 50.0
+  - id: left-turn-exit-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: left-turn-exit-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 70.0
+    window_end_s: 100.0
+  - id: low-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: low-altitude-level-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 100.0
+    window_end_s: 140.0
+- id: x8-racetrack-altitude-turns-pseudo-6dof-v1
+  family: skywalker_x8
+  fidelity_tier: pseudo_6dof
+  display_name: Skywalker X8 racetrack kinematic pseudo-6DOF
+  evidence_level: nominal_case_pass_overall_qualification_pending
+  claim: The source-table X8 kinematic 3-plus-3 bridge completes the shared translational
+    racetrack while exposing the declared bounded route-lag attitude response sidecar.
+  nonclaims:
+  - physical moment balance or elevon allocation
+  - route bank authority from aerodynamic surfaces
+  - flight-test or manufacturer fidelity
+  - wind robustness, takeoff, or landing
+  realization:
+    force_source: source_table
+    moment_source: not_applicable_kinematic_bridge
+    actuator_realization: route_lag_kinematic_response_no_surface_claim
+    response_profile_id: skywalker_x8.attitude_response_p6dof.v1
+    response_law: first-order-rate-limited-v1
+    propulsion_model: source_table_thrust
+    resource_model: fixed_mass_zero_propellant
+    note: Translation is the same force-integrated point-mass realization used by
+      the 3DOF packet. The declared route-lag sidecar derives bank, flight-path-plus-alpha
+      pitch, and tangent heading targets, then publishes quaternion and body-rate
+      response. These are not moment-derived signals.
+  problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_pseudo_6dof.prb
+  racetrack_binding: x8-kinematic-bridge
+  tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+  max_steps: 5000
+  envelope:
+  - channel: speed_m_s
+    minimum: 2.0
+    maximum: 27.0
+  - channel: altitude_m
+    minimum: 150.0
+    maximum: 215.0
+  terminal:
+    required: true
+    objective_type: fly_by_gate
+    racetrack_gate_id: terminal-start-finish-gate
+    dwell_s: 0.0
+    window_start_s: 165.0
+    window_end_s: 180.0
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+  objectives:
+  - id: climb-pitch-response
+    objective_type: dwell
+    racetrack_phase: outbound-climb
+    target:
+      kinematic_pitch_command_deg: 9.4
+      kinematic_pitch_deg: 9.4
+    tolerance:
+      kinematic_pitch_command_deg: 0.75
+      kinematic_pitch_deg: 0.75
+    dwell_s: 1.0
+  - id: high-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: high-altitude-level-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 25.0
+    window_end_s: 50.0
+  - id: left-turn-bank-response
+    objective_type: dwell
+    racetrack_phase: left-turn
+    target:
+      kinematic_roll_command_deg: -10.0
+      kinematic_roll_deg: -10.0
+    tolerance:
+      kinematic_roll_command_deg: 1.0
+      kinematic_roll_deg: 2.0
+    dwell_s: 1.0
+  - id: left-turn-exit-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: left-turn-exit-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 70.0
+    window_end_s: 100.0
+  - id: descent-pitch-response
+    objective_type: dwell
+    racetrack_phase: inbound-descent
+    target:
+      kinematic_pitch_command_deg: 6.85
+      kinematic_pitch_deg: 6.85
+    tolerance:
+      kinematic_pitch_command_deg: 0.75
+      kinematic_pitch_deg: 0.75
+    dwell_s: 1.0
+  - id: low-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: low-altitude-level-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 100.0
+    window_end_s: 140.0
+  - id: right-turn-bank-response
+    objective_type: dwell
+    racetrack_phase: right-turn
+    target:
+      kinematic_roll_command_deg: 10.0
+      kinematic_roll_deg: 10.0
+    tolerance:
+      kinematic_roll_command_deg: 1.0
+      kinematic_roll_deg: 2.0
+    dwell_s: 1.0
+- id: x8-racetrack-altitude-turns-direct-wrench-v1
+  family: skywalker_x8
+  fidelity_tier: rigid_body_6dof_direct_wrench
+  display_name: Skywalker X8 racetrack induced-wrench rigid-body 6DOF
+  evidence_level: integration_baseline_direct_wrench
+  claim: The source-bounded X8 rigid-body model completes the shared racetrack using
+    integrated aerodynamic loads and a bounded direct body-moment controller.
+  nonclaims:
+  - physical elevon allocation
+  - source-validated controller or actuator fidelity
+  - flight-test or manufacturer fidelity
+  - wind robustness, takeoff, landing, or runway operations
+  realization:
+    force_source: source_table
+    moment_source: direct_moment
+    actuator_realization: direct_moment_injection
+    propulsion_model: source_table_thrust
+    resource_model: fixed_mass_zero_propellant
+    note: 'This is the third tier in the ladder: rigid-body translation and rotation
+      are integrated, but the attitude controller supplies a body moment directly.
+      No physical elevon qualification is claimed.'
+  problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_direct_wrench_6dof.prb
+  racetrack_binding: x8-direct-wrench
+  tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+  max_steps: 14000
+  envelope:
+  - channel: speed_m_s
+    minimum: 2.0
+    maximum: 27.0
+  - channel: aero_alpha_deg
+    minimum: 0.0
+    maximum: 12.0
+  - channel: aero_sideslip_deg
+    minimum: -5.0
+    maximum: 5.0
+  terminal:
+    required: true
+    objective_type: fly_by_gate
+    racetrack_gate_id: terminal-start-finish-gate
+    dwell_s: 0.0
+    window_start_s: 165.0
+    window_end_s: 180.0
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+  objectives:
+  - id: high-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: high-altitude-level-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 25.0
+    window_end_s: 50.0
+  - id: left-turn-exit-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: left-turn-exit-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 70.0
+    window_end_s: 100.0
+  - id: low-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: low-altitude-level-gate
+    tolerance:
+      corridor_m: 220.0
+      altitude_m: 15.0
+      speed_m_s: 4.0
+    crossing_direction: 1
+    window_start_s: 100.0
+    window_end_s: 140.0
+- id: b747-racetrack-altitude-turns-pseudo-6dof-v1
+  family: b747
+  fidelity_tier: pseudo_6dof
+  display_name: B747 transport-scaled racetrack kinematic pseudo-6DOF
+  evidence_level: nominal_case_pass_overall_qualification_pending
+  claim: The B747 public-research kinematic bridge completes the transport-scale powered
+    fixed-wing racetrack with truth-evaluated altitude, speed, route, and terminal
+    gates while exposing a named attitude-response sidecar.
+  nonclaims:
+  - physical transport moments or surface allocation
+  - source-validated flight-control law
+  - fuel depletion or certified JT9D performance
+  - takeoff, landing, wind robustness, or manufacturer fidelity
+  realization:
+    force_source: source_table
+    moment_source: not_applicable_kinematic_bridge
+    actuator_realization: route_lag_kinematic_response_no_surface_claim
+    response_profile_id: b747.attitude_response_p6dof.v1
+    response_law: first-order-rate-limited-v1
+    propulsion_model: source_table_thrust
+    resource_model: fixed_mass_zero_propellant
+    note: The route-lag sidecar derives bank, flight-path-plus-alpha pitch, and tangent
+      heading targets from the same racetrack used by the point-mass translation.
+      It is a named pseudo-6DOF realization, not a physical B747 surface or moment
+      qualification.
+  problem: examples/mission_families/slower_b747/SV01_racetrack_altitude_turns_pseudo_6dof.prb
+  racetrack_binding: b747-transport-scaled-kinematic
+  tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+  max_steps: 12000
+  envelope:
+  - channel: speed_m_s
+    minimum: 100.0
+    maximum: 220.0
+  - channel: altitude_m
+    minimum: 50.0
+    maximum: 350.0
+  terminal:
+    required: true
+    objective_type: fly_by_gate
+    racetrack_gate_id: terminal-start-finish-gate
+    dwell_s: 0.0
+    window_start_s: 550.0
+    window_end_s: 570.5
+    tolerance:
+      corridor_m: 2000.0
+      altitude_m: 35.0
+      speed_m_s: 8.0
+    crossing_direction: 1
+  objectives:
+  - id: climb-pitch-response
+    objective_type: dwell
+    racetrack_phase: outbound-climb
+    target:
+      kinematic_pitch_command_deg: 3.66
+      kinematic_pitch_deg: 3.66
+    tolerance:
+      kinematic_pitch_command_deg: 0.5
+      kinematic_pitch_deg: 0.75
+    dwell_s: 2.0
+  - id: high-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: high-altitude-level-gate
+    tolerance:
+      corridor_m: 2000.0
+      altitude_m: 35.0
+      speed_m_s: 8.0
+    crossing_direction: 1
+    window_start_s: 145.0
+    window_end_s: 175.0
+  - id: left-turn-bank-response
+    objective_type: dwell
+    racetrack_phase: left-turn
+    target:
+      kinematic_roll_command_deg: -18.0
+      kinematic_roll_deg: -18.0
+    tolerance:
+      kinematic_roll_command_deg: 1.0
+      kinematic_roll_deg: 2.0
+    dwell_s: 2.0
+  - id: left-turn-exit-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: left-turn-exit-gate
+    tolerance:
+      corridor_m: 2000.0
+      altitude_m: 35.0
+      speed_m_s: 8.0
+    crossing_direction: 1
+    window_start_s: 265.0
+    window_end_s: 295.0
+  - id: descent-pitch-response
+    objective_type: dwell
+    racetrack_phase: inbound-descent
+    target:
+      kinematic_pitch_command_deg: 2.65
+      kinematic_pitch_deg: 2.65
+    tolerance:
+      kinematic_pitch_command_deg: 0.5
+      kinematic_pitch_deg: 0.75
+    dwell_s: 2.0
+  - id: low-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: low-altitude-level-gate
+    tolerance:
+      corridor_m: 2000.0
+      altitude_m: 35.0
+      speed_m_s: 8.0
+    crossing_direction: 1
+    window_start_s: 420.0
+    window_end_s: 455.0
+  - id: right-turn-bank-response
+    objective_type: dwell
+    racetrack_phase: right-turn
+    target:
+      kinematic_roll_command_deg: 18.0
+      kinematic_roll_deg: 18.0
+    tolerance:
+      kinematic_roll_command_deg: 1.0
+      kinematic_roll_deg: 2.0
+    dwell_s: 2.0
+- id: b747-racetrack-altitude-turns-6dof-v1
+  family: b747
+  fidelity_tier: rigid_body_6dof_direct_wrench
+  display_name: B747 transport-scaled racetrack rigid-body 6DOF
+  evidence_level: bounded_direct_wrench_nominal_case
+  claim: The B747 public-research rigid-body realization integrates translation, attitude,
+    body rates, source-table aerodynamic loads, propulsion, and a direct-moment attitude
+    controller through the shared transport-scale racetrack.
+  nonclaims:
+  - physical elevator, aileron, or rudder allocation
+  - source-validated transport flight-control law
+  - fuel depletion or certified JT9D performance
+  - takeoff, landing, wind robustness, or manufacturer fidelity
+  realization:
+    force_source: source_table
+    moment_source: direct_moment
+    actuator_realization: direct_total_wrench_local_bank_pitch_pd_with_beta_force
+    propulsion_model: source_table_thrust
+    resource_model: fixed_mass_zero_propellant
+    note: This packet uses an explicit local-bank/local-pitch PD law to request a
+      bounded total body wrench. Source moments and side force are cancelled before
+      integration, and a logged beta-proportional plus lateral-velocity damping force
+      is applied directly. The supplied direct-wrench table includes an explicitly
+      estimated numerical beta extension to +/-0.12 radians for intermediate integrator
+      stages; the accepted trajectory remains bounded by the source +/-5 degree beta
+      envelope. This is not an elevon-allocation claim or a source-validated transport
+      controller.
+  problem: examples/mission_families/slower_b747/SV01_racetrack_altitude_turns_6dof.prb
+  racetrack_binding: b747-transport-scaled-rigid
+  tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis_direct_wrench.tbl
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+  integrator: euler
+  max_steps: 70000
+  envelope:
+  - channel: speed_m_s
+    minimum: 20.0
+    maximum: 240.0
+  - channel: altitude_m
+    minimum: 400.0
+    maximum: 800.0
+  - channel: aero_alpha_deg
+    minimum: -2.0
+    maximum: 8.0
+  - channel: aero_sideslip_deg
+    minimum: -5.0
+    maximum: 5.0
+  terminal:
+    required: true
+    objective_type: fly_by_gate
+    racetrack_gate_id: terminal-start-finish-gate
+    dwell_s: 0.0
+    window_start_s: 645.0
+    window_end_s: 675.0
+    tolerance:
+      corridor_m: 3000.0
+      altitude_m: 220.0
+      speed_m_s: 12.0
+    crossing_direction: 1
+  objectives:
+  - id: high-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: high-altitude-level-gate
+    tolerance:
+      corridor_m: 3000.0
+      altitude_m: 220.0
+      speed_m_s: 12.0
+    crossing_direction: 1
+    window_start_s: 145.0
+    window_end_s: 180.0
+  - id: left-turn-exit-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: left-turn-exit-gate
+    tolerance:
+      corridor_m: 3000.0
+      altitude_m: 220.0
+      speed_m_s: 12.0
+    crossing_direction: 1
+    window_start_s: 315.0
+    window_end_s: 340.0
+  - id: low-altitude-level-gate
+    objective_type: fly_by_gate
+    racetrack_gate_id: low-altitude-level-gate
+    tolerance:
+      corridor_m: 3000.0
+      altitude_m: 220.0
+      speed_m_s: 12.0
+    crossing_direction: 1
+    window_start_s: 465.0
+    window_end_s: 500.0

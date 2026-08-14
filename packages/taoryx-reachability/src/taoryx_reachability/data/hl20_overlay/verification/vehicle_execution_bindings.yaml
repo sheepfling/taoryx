@@ -1,0 +1,63 @@
+schema: taoryx.vehicle-execution-bindings/v1alpha1
+version: 1
+description: Explicit source-owned execution bindings for compiled vehicle compositions.
+  An entry is a public capability declaration, not a generic family fallback. Omitted
+  vehicle/fidelity/mission combinations are unavailable until their own native binding
+  exists.
+bindings:
+- family_id: hl20_mod_k
+  mission: hl20_source_booster_release_replay_v1
+  fidelity: point_mass_3dof
+  operation: batch
+  status: runnable
+  execution_mode: source_scheduled_replay
+  factory_id: hl20_source_booster_release_replay.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the exact source-aerodynamic HL-20 synthetic-booster release
+    and fixed bank-schedule witness through the point-mass tier.
+  claim_boundary: Source-scheduled aerodynamic release witness only; it does not establish
+    generic high-altitude glide guidance, trim, or physical effector allocation.
+- family_id: hl20_mod_k
+  mission: hl20_source_booster_release_replay_v1
+  fidelity: pseudo_6dof
+  operation: batch
+  status: runnable
+  execution_mode: source_scheduled_replay
+  factory_id: hl20_source_booster_release_replay.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the exact source-aerodynamic HL-20 synthetic-booster release
+    and fixed bank-schedule witness with its named attitude-response tier.
+  claim_boundary: Source-scheduled response-law witness only; it does not establish
+    a user-driven guidance controller, source-derived moments, or physical effector
+    allocation.
+- family_id: hl20_mod_k
+  mission: lifting_body_glide_energy_management_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: batch
+  status: planned
+  execution_mode: planned
+  batch_action_trace: planned
+  description: Execute a release-to-energy-handoff mission through the local HL-20
+    source direct-wrench bridge.
+  claim_boundary: The current local source load bridge does not provide a complete
+    release, gravity, navigation, or glide mission plant.
+  blockers:
+  - declared_direct_wrench_authority_deficit_at_mach2_source_point
+  - release_trim_and_gravity_state_binding
+  - energy_glide_segment_translator
+  - source_bounded_handoff_evaluator
+- family_id: hl20_mod_k
+  mission: lifting_body_glide_energy_management_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: planned
+  execution_mode: planned
+  batch_action_trace: planned
+  description: Execute the HL-20 release-to-energy-handoff mission through source-surface
+    allocation.
+  claim_boundary: Current source-surface evidence is local allocation/effectivity
+    only, not full lifting-body mission control.
+  blockers:
+  - release_trim_and_gravity_state_binding
+  - nonlinear_surface_control_mission_loop
+  - source_bounded_handoff_evaluator

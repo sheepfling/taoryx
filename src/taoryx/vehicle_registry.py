@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -10,17 +11,29 @@ import yaml
 
 from taoryx.language.table_parser import parse_table_file
 
+from .vehicle_catalog_resources import vehicle_catalog_resource, vehicle_catalog_resources
+
 ROOT = Path(__file__).resolve().parents[2]
-REGISTRY = ROOT / "verification/vehicle_models.yaml"
-LQR_PROFILES = ROOT / "verification/lqr_scaling_profiles.yaml"
 STANDARD_GRAVITY_M_S2 = 9.80665
 
 
 def load_vehicle_registry() -> dict[str, dict[str, Any]]:
     """Load vehicle definitions from the repository source of truth."""
 
-    payload = yaml.safe_load(REGISTRY.read_text(encoding="utf-8"))
-    return {str(key): value for key, value in payload["vehicles"].items()}
+    vehicles: dict[str, dict[str, Any]] = {}
+    for source in vehicle_catalog_resources("verification/vehicle_models.yaml"):
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        records = payload.get("vehicles") if isinstance(payload, dict) else None
+        if not isinstance(records, dict):
+            raise ValueError(f"{source} must contain a vehicles mapping")
+        for key, value in records.items():
+            identifier = str(key)
+            if identifier in vehicles:
+                raise ValueError(f"vehicle registry has duplicate installed definition {identifier!r}")
+            if not isinstance(value, dict):
+                raise ValueError(f"vehicle registry definition {identifier!r} must be a mapping")
+            vehicles[identifier] = value
+    return vehicles
 ####
 
 
@@ -68,7 +81,7 @@ def vehicle_status_line(vehicle_id: str) -> str:
 def lqr_profile_attributes(profile_id: str) -> dict[str, str]:
     """Resolve one named controller profile into runtime LQR attributes."""
 
-    payload = yaml.safe_load(LQR_PROFILES.read_text(encoding="utf-8"))
+    payload = _load_lqr_scaling_profiles()
     try:
         profile = payload["profiles"][profile_id]
     except KeyError as error:
@@ -104,12 +117,54 @@ def lqr_profile_attributes(profile_id: str) -> dict[str, str]:
 ####
 
 
+@lru_cache(maxsize=1)
+def _load_lqr_scaling_profiles() -> dict[str, Any]:
+    """Merge model-owned controller-scale fragments without hidden fallback."""
+
+    merged: dict[str, Any] | None = None
+    profiles: dict[str, Any] = {}
+    for source in vehicle_catalog_resources("verification/lqr_scaling_profiles.yaml"):
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict) or not isinstance(payload.get("profiles"), dict):
+            raise ValueError(f"{source} must contain LQR scaling profiles")
+        if merged is None:
+            merged = dict(payload)
+        for identifier, profile in payload["profiles"].items():
+            if identifier in profiles:
+                raise ValueError(f"LQR scaling profile {identifier!r} is owned by more than one plug-in fragment")
+            profiles[str(identifier)] = profile
+    if merged is None:
+        raise ValueError("no LQR scaling-profile fragment is installed")
+    merged["profiles"] = profiles
+    return merged
+    ####
+
+
+def __getattr__(name: str) -> object:
+    """Resolve historical aggregate path constants only on explicit access."""
+
+    relative_paths = {
+        "REGISTRY": "verification/vehicle_models.yaml",
+        "LQR_PROFILES": "verification/lqr_scaling_profiles.yaml",
+    }
+    try:
+        relative_path = relative_paths[name]
+    except KeyError as error:
+        raise AttributeError(name) from error
+    from .compatibility.vehicle_catalog_resources import legacy_vehicle_catalog_resource
+
+    value = legacy_vehicle_catalog_resource(relative_path)
+    globals()[name] = value
+    return value
+    ####
+
+
 def _table_axis_limits(vehicle_id: str) -> dict[str, tuple[float, float]]:
     """Collect source table axis limits for a vehicle, preserving axis names."""
 
     limits: dict[str, tuple[float, float]] = {}
     for relative_path in vehicle_definition(vehicle_id).get("table_bindings", ()):
-        path = ROOT / str(relative_path)
+        path = vehicle_catalog_resource(str(relative_path))
         if not path.is_file():
             raise FileNotFoundError(
                 f"vehicle {vehicle_id!r} table binding is missing: {relative_path}; "

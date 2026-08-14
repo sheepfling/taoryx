@@ -1,10 +1,17 @@
 """Public SDK and discovery surface for installable Taoryx plug-ins."""
 
 from .contracts import (
+    BATCH_FACTORY_REQUEST_CONTRACT,
     CONTRIBUTION_KINDS,
     PLUGIN_API_VERSION,
     PLUGIN_ENTRY_POINT_GROUP,
     ContributionKind,
+    DeferredFamilyAdapterRegistration,
+    DeferredMissionCompositionProvider,
+    DeferredSemanticPreflightHandler,
+    DeferredTrimEvidenceBinding,
+    DeferredVehicleInterfaceExtension,
+    MissionWorkflowEndpointCatalogFragment,
     PluginCollisionError,
     PluginCompatibilityError,
     PluginContribution,
@@ -14,13 +21,31 @@ from .contracts import (
     PluginLoadError,
     PluginMetadata,
     PluginRegistrar,
+    PluginRevisionMetadata,
     TaoryxPlugin,
+    VehicleCatalogFragment,
+    VehicleCatalogOverlayFragment,
 )
-from .discovery import PluginCatalog, PluginEntryPoint, discover_plugins
+from .discovery import (
+    PluginCatalog,
+    PluginEntryPoint,
+    PluginEntryPointDeclaration,
+    current_plugin_catalog,
+    declared_plugin_entry_points,
+    discover_plugins,
+    plugin_catalog_scope,
+)
 
 __all__ = [
+    "BATCH_FACTORY_REQUEST_CONTRACT",
     "CONTRIBUTION_KINDS",
     "ContributionKind",
+    "DeferredFamilyAdapterRegistration",
+    "DeferredMissionCompositionProvider",
+    "DeferredSemanticPreflightHandler",
+    "DeferredTrimEvidenceBinding",
+    "DeferredVehicleInterfaceExtension",
+    "MissionWorkflowEndpointCatalogFragment",
     "PLUGIN_API_VERSION",
     "PLUGIN_ENTRY_POINT_GROUP",
     "PluginCatalog",
@@ -30,11 +55,18 @@ __all__ = [
     "PluginDefinition",
     "PluginDiagnostic",
     "PluginEntryPoint",
+    "PluginEntryPointDeclaration",
     "PluginError",
     "PluginLoadError",
     "PluginMetadata",
+    "PluginRevisionMetadata",
     "PluginRegistrar",
     "TaoryxPlugin",
+    "VehicleCatalogFragment",
+    "VehicleCatalogOverlayFragment",
+    "current_plugin_catalog",
+    "declared_plugin_entry_points",
     "discover_plugins",
+    "plugin_catalog_scope",
 ]
 ####

@@ -1,0 +1,47 @@
+schema: taoryx.vehicle-endpoint-specs/v1alpha1
+version: 1
+description: Focused vertical contracts that join a selected vehicle composition to
+  its runtime factory, executable witness, capability advertisement, normalized output
+  surface, controller campaign, and planning ledger record.
+endpoints:
+- id: a320-pseudo6dof-native-coordinate-lqi
+  family_id: a320_openap_3dof
+  model_id: a320_openap_3dof
+  mission_id: a320_local_native_coordinate_lqi_screen_v1
+  fidelity: pseudo_6dof
+  execution_mode: local_native_coordinate_lqi_screen
+  operations:
+  - operation: batch
+    factory_id: local_native_coordinate_lqi_screen.v1
+    witness_id: a320-local-native-coordinate-lqi-screen-batch
+  controller_campaign_id: a320-pseudo-cruise-attitude-v1
+  required_tuning_operations:
+  - state_derivative
+  - trim
+  - linearize
+  required_core_output_ids:
+  - attitude.local.roll_error
+  - angular_rate.body.x
+  - angular_rate.body.y
+  - angular_rate.body.z
+  required_telemetry_output_ids:
+  - mass.total
+  - aerodynamics.angle_of_attack
+  - aerodynamics.sideslip
+  - control.native.aileron.applied
+  - control.native.elevator.applied
+  - control.native.rudder.applied
+  - control.lqi.integral_error.roll
+  - diagnostics.feedback_error_norm
+  - diagnostics.saturation_count
+  robustness_requirement:
+    disposition: not_applicable
+    reason: This pinned pseudo-6DOF response-law LQI screen exposes no mass, wind,
+      or persistent-offset input seam. Its nominal convergence sidecar is deliberately
+      not a robustness result, and physical allocation is outside the selected fidelity.
+  robustness_screens: []
+  maturity_record_id: a320_openap_3dof
+  claim_boundary: One nominal OpenAP/JSBSim-surrogate pseudo-6DOF local LQI recovery
+    through named aileron, elevator, and rudder response coordinates. It does not
+    establish a mass, wind, or disturbance screen, physical effector allocation, actuator
+    dynamics, route tracking, gain scheduling, or Airbus qualification.

@@ -937,7 +937,9 @@ Exit:
 **Progress:** `taoryx.mission_capability` now defines the fail-closed
 `MissionCapabilityAdapter` seam. The existing capability-scaled racetrack is
 registered as `taoryx.powered_fixed_wing_racetrack.capability_scaled.v1` for
-X8, B747, A320, and F-16 only. It remains the same source-provenanced turn,
+X8, B747, and F-16, while A320 owns
+`taoryx.a320_openap_racetrack.capability_scaled.v1`. The planners retain the
+same source-provenanced turn,
 climb/descent, dwell, and horizon derivation used by execution preflight, but
 is now independently discoverable through each family authoring worklist. The
 Hummingbird pseudo-6DOF route uses its separate

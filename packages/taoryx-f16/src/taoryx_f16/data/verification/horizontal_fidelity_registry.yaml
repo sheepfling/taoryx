@@ -1,0 +1,45 @@
+schema: taoryx.horizontal-fidelity-registry/v1alpha1
+version: 1
+description: The horizontal integration manifest for the current Alpha 3 family catalog.
+  Profile IDs are resolved against verification/pseudo6dof_profiles.yaml; this file
+  owns the physical-family overlay, adapter seam, and four-tier declaration.
+families:
+- family_id: f16_s119
+  physical_family: powered_fixed_wing
+  strategy_id: powered_fixed_wing.v1
+  mission_overlay: fighter_energy_maneuver
+  adapter_id: taoryx.fixed_wing.daveml.v1
+  automatic_lowering: true
+  source_manifest: families/reference_f16_s119/family.yaml
+  source_family_id: reference_f16_s119
+  tiers:
+    point_mass_3dof:
+      profile_id: f16_s119.point_mass_3dof.v1
+      promotion_status: development
+      blockers:
+      - multi_regime_energy_mission
+    pseudo_6dof:
+      profile_id: f16_s119.attitude_response_p6dof.v1
+      promotion_status: development
+      blockers:
+      - high_rate_alpha_beta_load_factor_envelope
+    rigid_body_6dof_direct_wrench:
+      profile_id: f16_s119.direct_wrench_6dof.v1
+      promotion_status: development
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      blockers:
+      - nonlinear_energy_maneuver_mission
+    rigid_body_6dof_surface_allocated:
+      profile_id: f16_s119.surface_allocated_6dof.v1
+      promotion_status: development
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      - effectiveness
+      - allocate
+      blockers:
+      - scheduled_surface_qualification

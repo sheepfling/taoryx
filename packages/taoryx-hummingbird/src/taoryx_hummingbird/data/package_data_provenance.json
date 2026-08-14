@@ -1,0 +1,6 @@
+{
+  "claim_boundary": "This package fragment mirrors only Hummingbird catalog rows, source tables, focused witnesses, and local controller-screen evidence; repository-root catalogs remain canonical. The reduced streaming interface does not promote the physical rotor screens into a flight-qualified controller.",
+  "family_id": "hummingbird",
+  "schema": "taoryx.hummingbird-package-data/v1",
+  "source_catalog_root": "verification/"
+}

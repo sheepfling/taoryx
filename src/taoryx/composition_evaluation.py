@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from .composition_control_trace import validate_committed_control_trace
 from .trajectory.evaluation import (
@@ -25,6 +25,9 @@ from .trajectory.evaluation import (
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
 from .vehicle_execution_preflight import VehicleExecutionPreflight
 
+if TYPE_CHECKING:
+    from .plugins import PluginCatalog
+
 
 def build_composition_trajectory_evaluation(
     composition: CompiledVehicleComposition,
@@ -36,6 +39,7 @@ def build_composition_trajectory_evaluation(
     claim_boundary: str,
     status_trace: Mapping[str, object] | None = None,
     control_trace: Mapping[str, object] | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> TrajectoryEvaluation:
     """Project an existing independent truth report into the neutral envelope.
 
@@ -53,7 +57,12 @@ def build_composition_trajectory_evaluation(
     envelope_pass = _optional_bool(envelope.get("pass"))
     hard_gates_pass = _optional_bool(runtime.get("hard_gates_passed"))
     metrics = tuple(_objective_metrics(truth_evaluation))
-    requested_controls, achieved_controls, resources = _declared_evidence_channels(composition, status_trace, control_trace)
+    requested_controls, achieved_controls, resources = _declared_evidence_channels(
+        composition,
+        status_trace,
+        control_trace,
+        plugins=plugins,
+    )
     return TrajectoryEvaluation(
         scenario_id=composition.id,
         scenario_contract_sha256=composition.identity_sha256,
@@ -127,6 +136,8 @@ def _declared_evidence_channels(
     composition: CompiledVehicleComposition,
     status_trace: Mapping[str, object] | None,
     control_trace: Mapping[str, object] | None,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> tuple[tuple[EvidenceChannel, ...], tuple[EvidenceChannel, ...], tuple[EvidenceChannel, ...]]:
     """Project only run evidence that the composed interface can substantiate.
 
@@ -138,8 +149,12 @@ def _declared_evidence_channels(
     boolean value.
     """
 
-    contract = resolve_vehicle_composition_interface_contract(composition)
-    control_time_s, requested_values, achieved_values = _final_control_sample(composition, control_trace)
+    contract = resolve_vehicle_composition_interface_contract(composition, plugins=plugins)
+    control_time_s, requested_values, achieved_values = _final_control_sample(
+        composition,
+        control_trace,
+        plugins=plugins,
+    )
     requested = tuple(
         _control_evidence_channel(
             channel.id,
@@ -202,12 +217,14 @@ def _declared_evidence_channels(
 def _final_control_sample(
     composition: CompiledVehicleComposition,
     control_trace: Mapping[str, object] | None,
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> tuple[float | None, Mapping[str, object], Mapping[str, object]]:
     """Return the final held command/effector sample after identity validation."""
 
     if control_trace is None:
         return None, {}, {}
-    validate_committed_control_trace(composition, control_trace)
+    validate_committed_control_trace(composition, control_trace, plugins=plugins)
     samples = control_trace.get("samples")
     if not isinstance(samples, Sequence) or isinstance(samples, str | bytes) or not samples:
         raise ValueError("validated committed control trace has no samples")

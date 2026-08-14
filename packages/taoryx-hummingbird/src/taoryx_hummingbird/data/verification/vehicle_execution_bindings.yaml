@@ -1,0 +1,85 @@
+schema: taoryx.vehicle-execution-bindings/v1alpha1
+version: 1
+description: Explicit source-owned execution bindings for compiled vehicle compositions.
+  An entry is a public capability declaration, not a generic family fallback. Omitted
+  vehicle/fidelity/mission combinations are unavailable until their own native binding
+  exists.
+bindings:
+- family_id: hummingbird
+  mission: hummingbird_local_individual_rotor_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: hummingbird_local_individual_rotor_lqi_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the source-hover one-second Hummingbird LQI screen through
+    bounded four-rotor allocation and motor lag.
+  claim_boundary: Local source-hover attitude/rate LQI and physical rotor-allocation
+    screen only; it is not position, wind, battery, landing, gain-schedule, or qualification
+    evidence.
+- family_id: hummingbird
+  mission: hummingbird_local_horizontal_translation_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: hummingbird_local_horizontal_translation_lqi_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the bounded source-local horizontal forward, yaw, lateral,
+    rearward, and return LQI screen through allocated four-rotor control and motor
+    lag.
+  claim_boundary: Bounded source-local horizontal position/yaw targets through attitude
+    LQI and physical rotor allocation only; no altitude, wind, battery, contact, landing,
+    gain-schedule, or qualification claim.
+- family_id: hummingbird
+  mission: hummingbird_local_vertical_translation_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  operation: batch
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: hummingbird_local_vertical_translation_lqi_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the bounded source-local climb, hover, descent, and return-to-hover
+    LQI screen through collective body-z force, attitude moments, four allocated rotors,
+    and motor lag.
+  claim_boundary: Bounded source-local down-position/vertical-speed LQI through physical
+    collective force and rotor allocation only; no wind, battery, contact, landing,
+    gain-schedule, or qualification claim.
+- family_id: hummingbird
+  mission: hummingbird_local_direct_wrench_screen_v1
+  fidelity: rigid_body_6dof_direct_wrench
+  operation: batch
+  status: runnable
+  execution_mode: local_direct_wrench_screen
+  factory_id: hummingbird_local_direct_wrench_screen.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Execute the pinned source-hover Hummingbird direct-wrench bridge through
+    common local LQR recovery.
+  claim_boundary: Direct wrench is injected after the source hover plant and bypasses
+    allocation; no rotor, motor-lag, translation, landing, battery, wind, gain-schedule,
+    or qualification claim is made.
+- family_id: hummingbird
+  mission: multirotor_pad_box_yaw_recovery_land_v1
+  fidelity: pseudo_6dof
+  operation: episode
+  status: runnable
+  execution_mode: closed_loop_controller
+  factory_id: hummingbird_aggregate_thrust_episode.v1
+  batch_action_trace: not_applicable
+  description: Project the bounded aggregate-thrust Hummingbird response model into
+    an accepted-truth episode.
+  claim_boundary: Aggregate thrust-vector response only; no individual motor allocation,
+    rotor inflow, or moment-balance claim.
+- family_id: hummingbird
+  mission: multirotor_pad_box_yaw_recovery_land_v1
+  fidelity: pseudo_6dof
+  operation: batch
+  status: runnable
+  execution_mode: source_native_autonomous
+  factory_id: hummingbird_aggregate_thrust_pseudo_batch.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Translate the declared hover/yaw/translation/contact composition into
+    a source-owned pseudo-6DOF nominal run.
+  claim_boundary: Aggregate thrust-vector response only; no individual motor allocation,
+    rotor inflow, or moment-balance claim.

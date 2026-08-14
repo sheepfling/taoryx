@@ -27,6 +27,7 @@ from .composition_episode import (
     VehicleCompositionEpisode,
     open_vehicle_composition_episode,
 )
+from .plugins import PluginCatalog
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_bindings import batch_episode_parity_record
 from .vehicle_interface import VehicleInterfaceContract, project_authority_action_values
@@ -198,6 +199,7 @@ def replay_composition_policy_trace(
     trace: CompositionPolicyTrace,
     *,
     seed: int | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> CompositionPolicyReplayReport:
     """Replay a previously emitted semantic trace through a fresh episode.
 
@@ -207,7 +209,12 @@ def replay_composition_policy_trace(
     episode state transitions without defining a second physics or policy API.
     """
 
-    return replay_serialized_composition_policy_trace(composition, trace.as_dict(), seed=seed)
+    return replay_serialized_composition_policy_trace(
+        composition,
+        trace.as_dict(),
+        seed=seed,
+        plugins=plugins,
+    )
     ####
 
 
@@ -226,12 +233,18 @@ def replay_composition_policy_trace_file(
     path: str | Path,
     *,
     seed: int | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> CompositionPolicyReplayReport:
     """Load and independently replay a persisted semantic action trace."""
 
     source = Path(path)
     payload = _mapping(json.loads(source.read_text(encoding="utf-8")), "policy trace")
-    return replay_serialized_composition_policy_trace(composition, payload, seed=seed)
+    return replay_serialized_composition_policy_trace(
+        composition,
+        payload,
+        seed=seed,
+        plugins=plugins,
+    )
     ####
 
 
@@ -240,6 +253,7 @@ def replay_serialized_composition_policy_trace(
     payload: Mapping[str, object],
     *,
     seed: int | None = None,
+    plugins: PluginCatalog | None = None,
 ) -> CompositionPolicyReplayReport:
     """Replay one serialized semantic trace without trusting its producer.
 
@@ -259,6 +273,7 @@ def replay_serialized_composition_policy_trace(
         composition,
         seed=seed,
         integration_step_s=_serialized_integration_step(payload),
+        plugins=plugins,
     )
     try:
         contract = episode.interface_contract
@@ -286,7 +301,7 @@ def replay_serialized_composition_policy_trace(
         )
         final_status = episode.status_frame()
         _require_equal_payload("final status", final_status.as_dict(), _mapping(payload.get("final_status"), "final_status"))
-        batch_episode_parity = _batch_episode_parity_report(composition, payload)
+        batch_episode_parity = _batch_episode_parity_report(composition, payload, plugins=plugins)
         replay_status = "fail" if batch_episode_parity.get("status") == "fail" else "pass"
         return CompositionPolicyReplayReport(
             composition.id,
@@ -306,15 +321,22 @@ def replay_serialized_composition_policy_trace(
 def _batch_episode_parity_report(
     composition: CompiledVehicleComposition,
     payload: Mapping[str, object],
+    *,
+    plugins: PluginCatalog | None = None,
 ) -> dict[str, object]:
     """Attach exact parity evidence only for a registered composition pair."""
 
     from .batch_episode_parity_dispatch import verify_serialized_declared_batch_episode_parity
 
-    disposition = batch_episode_parity_record(composition.family_id, composition.mission, composition.fidelity)
+    disposition = batch_episode_parity_record(
+        composition.family_id,
+        composition.mission,
+        composition.fidelity,
+        plugins=plugins,
+    )
     if disposition.get("availability") != "registered":
         return disposition
-    report = verify_serialized_declared_batch_episode_parity(composition, payload)
+    report = verify_serialized_declared_batch_episode_parity(composition, payload, plugins=plugins)
     result = dict(disposition)
     result["status"] = report.status
     result["report"] = report.as_dict()

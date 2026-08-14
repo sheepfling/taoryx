@@ -1,0 +1,34 @@
+schema: taoryx.vehicle-execution-parity-witnesses/v1alpha1
+version: 1
+description: One deterministic, short semantic action trace for every exact registered
+  batch/episode parity pair. These are kernel/status parity witnesses, not mission
+  trajectories or physical-effector qualification cases.
+witnesses:
+- id: x8-3dof-native-bridge
+  composition: examples/vehicle_composition/x8_racetrack_capability_3dof_compose.yaml
+  authority_profile_id: native_control_bridge
+  actions:
+  - values:
+      propulsion.command.fraction: 0.6
+    duration_s: 0.1
+- id: x8-pseudo6dof-native-bridge
+  composition: examples/vehicle_composition/x8_racetrack_capability_compose.yaml
+  authority_profile_id: native_control_bridge
+  actions:
+  - values:
+      propulsion.command.fraction: 0.5
+    duration_s: 0.1
+- id: b747-3dof-native-bridge
+  composition: examples/vehicle_composition/b747_racetrack_capability_3dof_compose.yaml
+  authority_profile_id: native_control_bridge
+  actions:
+  - values:
+      propulsion.command.fraction: 0.55
+    duration_s: 0.1
+- id: b747-pseudo6dof-native-bridge
+  composition: examples/vehicle_composition/b747_racetrack_capability_pseudo6dof_compose.yaml
+  authority_profile_id: native_control_bridge
+  actions:
+  - values:
+      propulsion.command.fraction: 0.5
+    duration_s: 0.1

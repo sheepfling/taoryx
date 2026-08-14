@@ -15,8 +15,11 @@ source .venv/bin/activate
 python -m tools.dev install-check
 ```
 
-Bootstrap installs the core and all four official plug-in distributions in
-editable mode. Do not infer that packages are installed merely because tests
+Bootstrap installs the core and the direct developer plug-in profile in
+editable mode; use `python scripts/bootstrap.py --profile compatibility` for
+an aggregate-only consumer, or `--profile full` when that consumer and every
+direct route must be exercised together. Do not infer that packages
+are installed merely because tests
 can import sibling source roots. The install check requires actual distribution
 metadata and entry points. Package profiles, individual installs, optional
 extras, Windows activation, and troubleshooting are documented in

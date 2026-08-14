@@ -414,6 +414,7 @@ class Rocket6gPlantSample(CadacModel):
     control_realization: str
     propulsion_mode: int
     rcs_moment_mode: int
+    rcs_force_mode: int
     tvc_mode: int
     mass_kg: float = Field(gt=0.0)
     remaining_fuel_kg: float
@@ -1360,6 +1361,7 @@ def _runtime_sample(
         control_realization=_phase_control_realization(phase),
         propulsion_mode=_int_value(runtime.source_values, "mprop", 0),
         rcs_moment_mode=_int_value(runtime.source_values, "mrcs_moment", 0),
+        rcs_force_mode=_int_value(runtime.source_values, "mrcs_force", 0),
         tvc_mode=_int_value(runtime.source_values, "mtvc", 0),
         mass_kg=runtime.propulsion.mass_kg,
         remaining_fuel_kg=runtime.remaining_fuel_kg,

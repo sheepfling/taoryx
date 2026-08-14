@@ -14,7 +14,7 @@ import math
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Annotated, Any, Literal, Protocol
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 
 from ..control_schemes import (
     ControlSchemeConsumerRole,
@@ -114,6 +114,14 @@ TrajectoryControlIntentResolution = Literal[
     "blocked",
     "unsupported",
 ]
+
+
+def _metadata_fingerprint(payload: object) -> str:
+    """Return a canonical SHA-256 revision for JSON-safe advertised metadata."""
+
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+    ####
 
 
 class NumericPresentationMetadata(BaseModel):
@@ -1135,10 +1143,7 @@ class TrajectoryControlAuthorityMetadata(BaseModel):
             raise ValueError(f"caller-owned control authority {self.id!r} cannot use provider selection scope")
         if self.switching_policy == "provider_managed" and self.command_owner == "caller":
             raise ValueError(f"caller-owned control authority {self.id!r} cannot use provider-managed switching")
-        if self.scheme_id is None and any(
-            item is not None
-            for item in (self.scheme_layer, self.streaming_preference, self.ui_order)
-        ):
+        if self.scheme_id is None and any(item is not None for item in (self.scheme_layer, self.streaming_preference, self.ui_order)):
             raise ValueError(f"control authority {self.id!r} scheme metadata requires scheme_id")
         if self.scheme_id is None and self.consumer_roles:
             raise ValueError(f"control authority {self.id!r} consumer roles require scheme_id")
@@ -1147,14 +1152,9 @@ class TrajectoryControlAuthorityMetadata(BaseModel):
         if self.scheme_id is not None:
             definition = control_scheme_definition(self.scheme_id)
             if definition is None and self.scheme_layer is None:
-                raise ValueError(
-                    f"provider-specific control scheme {self.scheme_id!r} requires scheme_layer"
-                )
+                raise ValueError(f"provider-specific control scheme {self.scheme_id!r} requires scheme_layer")
             if definition is not None and self.scheme_layer not in {None, definition.layer}:
-                raise ValueError(
-                    f"control scheme {self.scheme_id!r} belongs to {definition.layer!r}, "
-                    f"not {self.scheme_layer!r}"
-                )
+                raise ValueError(f"control scheme {self.scheme_id!r} belongs to {definition.layer!r}, not {self.scheme_layer!r}")
         active = self.availability in {"available", "available_in_batch"}
         if active != bool(self.operations):
             raise ValueError(f"control authority {self.id!r} availability {self.availability!r} disagrees with its operations")
@@ -1188,15 +1188,13 @@ class TrajectoryControlSchemeSupportMetadata(BaseModel):
     selection_scope: TrajectoryControlSelectionScope
     switching_policy: TrajectoryControlSwitchingPolicy
     applicable_phase_ids: tuple[str, ...] = ()
-    runtime_availability_path: Literal[
+    runtime_availability_path: Literal["session.observation.control_authority.runtime_availability"] = (
         "session.observation.control_authority.runtime_availability"
-    ] = "session.observation.control_authority.runtime_availability"
-    available_action_mask_path: Literal[
+    )
+    available_action_mask_path: Literal["session.observation.control_authority.available_action_ids"] = (
         "session.observation.control_authority.available_action_ids"
-    ] = "session.observation.control_authority.available_action_ids"
-    step_feedback_path: Literal[
-        "session.step.control_feedback"
-    ] = "session.step.control_feedback"
+    )
+    step_feedback_path: Literal["session.step.control_feedback"] = "session.step.control_feedback"
     advertisement_source: Literal["declared", "authority_kind_fallback"]
     claim_boundary: str = Field(min_length=1)
 
@@ -1234,9 +1232,7 @@ def build_control_scheme_support(
             )
         )
         if not fidelity_ids:
-            raise ValueError(
-                f"realization {realization.id!r} has no exact model fidelity for control-scheme support"
-            )
+            raise ValueError(f"realization {realization.id!r} has no exact model fidelity for control-scheme support")
         for authority in realization.controls.authorities:
             declared = authority.scheme_id is not None
             scheme_id = authority.scheme_id or default_control_scheme_id(
@@ -1246,9 +1242,7 @@ def build_control_scheme_support(
             definition = control_scheme_definition(scheme_id)
             if definition is None:
                 if authority.scheme_layer is None:
-                    raise ValueError(
-                        f"provider-specific control scheme {scheme_id!r} requires a declared layer"
-                    )
+                    raise ValueError(f"provider-specific control scheme {scheme_id!r} requires a declared layer")
                 label = scheme_id.replace(".", " ").replace("_", " ").title()
                 layer = authority.scheme_layer
                 consumer_roles = authority.consumer_roles or ("provider", "test_engineer")
@@ -1279,9 +1273,7 @@ def build_control_scheme_support(
                     selection_scope=authority.selection_scope,
                     switching_policy=authority.switching_policy,
                     applicable_phase_ids=authority.applicable_phase_ids,
-                    advertisement_source=(
-                        "declared" if declared else "authority_kind_fallback"
-                    ),
+                    advertisement_source=("declared" if declared else "authority_kind_fallback"),
                     claim_boundary=authority.claim_boundary,
                 )
             )
@@ -1361,9 +1353,7 @@ class TrajectoryControlAdvertisement(BaseModel):
             if authority is None:
                 raise KeyError(f"unknown control authority {authority_id!r}")
             if operation not in authority.operations:
-                raise ValueError(
-                    f"control authority {authority_id!r} is not available for {operation!r}"
-                )
+                raise ValueError(f"control authority {authority_id!r} is not available for {operation!r}")
             channel_ids = authority.channel_ids
         return build_rl_action_space(
             self,
@@ -1732,6 +1722,8 @@ class TrajectoryDeploymentMetadata(BaseModel):
     child_role: str = Field(min_length=1)
     child_model_id: str | None = None
     child_model_scope: Literal["provider_catalog", "provider_generated", "external"]
+    child_plugin_id: str | None = None
+    child_runtime_id: str | None = None
     child_model_kind: str = Field(min_length=1)
     minimum_children: int = Field(default=0, ge=0)
     maximum_children: int | None = Field(default=None, ge=1)
@@ -1771,6 +1763,10 @@ class TrajectoryDeploymentMetadata(BaseModel):
             raise ValueError(f"blocked deployment {self.id!r} requires blockers")
         if self.child_model_scope == "provider_catalog" and self.child_model_id is None:
             raise ValueError(f"catalog child deployment {self.id!r} requires child_model_id")
+        if self.child_model_scope != "external" and (self.child_plugin_id is not None or self.child_runtime_id is not None):
+            raise ValueError(f"non-external deployment {self.id!r} cannot advertise an external child plug-in runtime")
+        if self.child_runtime_id is not None and self.child_plugin_id is None:
+            raise ValueError(f"deployment {self.id!r} child runtime requires a child plug-in ID")
         if self.lifecycle == "independently_propagated" and self.child_model_id is None:
             raise ValueError(f"independently propagated deployment {self.id!r} requires child_model_id")
         if self.lifecycle == "event_only" and self.operations:
@@ -1824,33 +1820,27 @@ class TrajectoryModelMetadata(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def populate_control_scheme_support(cls, payload: object) -> object:
-        """Materialize the flattened matrix from exact authority metadata."""
+        """Materialize control support and discard serialized derived revision data."""
 
-        if not isinstance(payload, Mapping) or "control_scheme_support" in payload:
+        if not isinstance(payload, Mapping):
             return payload
         values = dict(payload)
+        # ``metadata_fingerprint`` is a derived computed field.  Accepting a
+        # serialized descriptor preserves the existing model-dump round-trip,
+        # while callers cannot inject or override the derived revision.
+        values.pop("metadata_fingerprint", None)
+        if "control_scheme_support" in values:
+            return values
         raw_realizations = values.get("realizations")
         raw_fidelities = values.get("fidelities")
-        if not isinstance(raw_realizations, Sequence) or isinstance(
-            raw_realizations, (str, bytes)
-        ):
+        if not isinstance(raw_realizations, Sequence) or isinstance(raw_realizations, (str, bytes)):
             return payload
-        if not isinstance(raw_fidelities, Sequence) or isinstance(
-            raw_fidelities, (str, bytes)
-        ):
+        if not isinstance(raw_fidelities, Sequence) or isinstance(raw_fidelities, (str, bytes)):
             return payload
         realizations = tuple(
-            item
-            if isinstance(item, TrajectoryRealizationMetadata)
-            else TrajectoryRealizationMetadata.model_validate(item)
-            for item in raw_realizations
+            item if isinstance(item, TrajectoryRealizationMetadata) else TrajectoryRealizationMetadata.model_validate(item) for item in raw_realizations
         )
-        fidelities = tuple(
-            item
-            if isinstance(item, TrajectoryFidelityMetadata)
-            else TrajectoryFidelityMetadata.model_validate(item)
-            for item in raw_fidelities
-        )
+        fidelities = tuple(item if isinstance(item, TrajectoryFidelityMetadata) else TrajectoryFidelityMetadata.model_validate(item) for item in raw_fidelities)
         values["control_scheme_support"] = build_control_scheme_support(
             realizations,
             fidelities,
@@ -1865,6 +1855,39 @@ class TrajectoryModelMetadata(BaseModel):
         return self.output_schema.channels
         ####
 
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def metadata_fingerprint(self) -> str:
+        """Return a revision token for every advertised model metadata field.
+
+        The package-managed ``version`` remains the compatibility/release
+        identifier.  This token changes for any metadata correction, including
+        control, output, provenance, or descriptive changes that a client may
+        need to refresh without guessing whether a version was compatible.
+        """
+
+        payload = self.model_dump(
+            mode="json",
+            by_alias=True,
+            exclude={"metadata_fingerprint"},
+        )
+        return _metadata_fingerprint(payload)
+        ####
+
+    def revision_public_dict(self) -> dict[str, str]:
+        """Return the compact cache and UI identity for this exact model."""
+
+        return {
+            "model_id": self.id,
+            "version": self.version,
+            "metadata_fingerprint": self.metadata_fingerprint,
+            "configuration_schema_id": self.configuration_schema_id,
+            "configuration_schema_fingerprint": self.configuration_schema_fingerprint,
+            "output_schema_id": self.output_schema_id,
+            "output_schema_fingerprint": self.output_schema_fingerprint,
+        }
+        ####
+
     @model_validator(mode="after")
     def validate_fidelity_graph(self) -> TrajectoryModelMetadata:
         fidelity_ids = tuple(item.id for item in self.fidelities)
@@ -1875,48 +1898,25 @@ class TrajectoryModelMetadata(BaseModel):
         if len(realization_ids) != len(set(realization_ids)):
             raise ValueError(f"model {self.id!r} has duplicate realization metadata")
         known_realizations = set(realization_ids)
-        expected_control_scheme_keys = {
-            (realization.id, authority.id)
-            for realization in self.realizations
-            for authority in realization.controls.authorities
-        }
-        actual_control_scheme_keys = {
-            (item.realization_id, item.authority_profile_id)
-            for item in self.control_scheme_support
-        }
+        expected_control_scheme_keys = {(realization.id, authority.id) for realization in self.realizations for authority in realization.controls.authorities}
+        actual_control_scheme_keys = {(item.realization_id, item.authority_profile_id) for item in self.control_scheme_support}
         if actual_control_scheme_keys != expected_control_scheme_keys:
-            raise ValueError(
-                f"model {self.id!r} control-scheme support does not cover every authority profile"
-            )
+            raise ValueError(f"model {self.id!r} control-scheme support does not cover every authority profile")
         expected_control_scheme_support = build_control_scheme_support(
             self.realizations,
             self.fidelities,
         )
         if self.control_scheme_support != expected_control_scheme_support:
-            raise ValueError(
-                f"model {self.id!r} control-scheme support is stale or not in canonical UI order"
-            )
+            raise ValueError(f"model {self.id!r} control-scheme support is stale or not in canonical UI order")
         for support in self.control_scheme_support:
-            realization = next(
-                item for item in self.realizations if item.id == support.realization_id
-            )
-            authority = next(
-                item
-                for item in realization.controls.authorities
-                if item.id == support.authority_profile_id
-            )
+            realization = next(item for item in self.realizations if item.id == support.realization_id)
+            authority = next(item for item in realization.controls.authorities if item.id == support.authority_profile_id)
             if set(support.fidelity_ids) != set(realization.fidelity_aliases) & known:
-                raise ValueError(
-                    f"model {self.id!r} control scheme {support.scheme_id!r} has stale fidelity support"
-                )
+                raise ValueError(f"model {self.id!r} control scheme {support.scheme_id!r} has stale fidelity support")
             if support.action_ids != authority.channel_ids:
-                raise ValueError(
-                    f"model {self.id!r} control scheme {support.scheme_id!r} has stale action IDs"
-                )
+                raise ValueError(f"model {self.id!r} control scheme {support.scheme_id!r} has stale action IDs")
             if support.operations != authority.operations or support.availability != authority.availability:
-                raise ValueError(
-                    f"model {self.id!r} control scheme {support.scheme_id!r} has stale availability"
-                )
+                raise ValueError(f"model {self.id!r} control scheme {support.scheme_id!r} has stale availability")
         if len(self.operations) != len(set(self.operations)):
             raise ValueError(f"model {self.id!r} has duplicate operations")
         if len(self.common_runner_operations) != len(set(self.common_runner_operations)):
@@ -1978,9 +1978,7 @@ class TrajectoryModelMetadata(BaseModel):
         for mission in self.mission_templates:
             unknown_mission_segments = sorted(set(mission.advertised_segment_ids) - segment_ids)
             if unknown_mission_segments:
-                raise ValueError(
-                    f"model {self.id!r} mission {mission.id!r} references unknown segment types {unknown_mission_segments!r}"
-                )
+                raise ValueError(f"model {self.id!r} mission {mission.id!r} references unknown segment types {unknown_mission_segments!r}")
         for realization in self.realizations:
             unknown_missions = sorted(set(realization.mission_template_ids) - mission_ids)
             if unknown_missions:
@@ -2057,6 +2055,43 @@ class TrajectoryProviderMetadata(BaseModel):
     model_count: int = Field(ge=0)
     provenance: str = ""
     claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def discard_derived_metadata_fingerprint(cls, payload: object) -> object:
+        """Allow metadata serialization to round-trip without accepting a forged revision."""
+
+        if not isinstance(payload, Mapping):
+            return payload
+        values = dict(payload)
+        values.pop("metadata_fingerprint", None)
+        return values
+        ####
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def metadata_fingerprint(self) -> str:
+        """Return the revision of this provider's own advertised identity."""
+
+        payload = self.model_dump(
+            mode="json",
+            by_alias=True,
+            exclude={"metadata_fingerprint"},
+        )
+        return _metadata_fingerprint(payload)
+        ####
+
+    def revision_public_dict(self, *, model_catalog_fingerprint: str) -> dict[str, str | int]:
+        """Return the provider identity plus its currently advertised model set."""
+
+        return {
+            "provider_id": self.id,
+            "version": self.version,
+            "metadata_fingerprint": self.metadata_fingerprint,
+            "model_count": self.model_count,
+            "model_catalog_fingerprint": model_catalog_fingerprint,
+        }
+        ####
 
 
 class TrajectoryConfigurationSchema(BaseModel):
@@ -2185,10 +2220,10 @@ class ConfigurableTrajectoryProviderRegistry:
 
     def __init__(self, providers: Sequence[ConfigurableTrajectoryProvider] = ()) -> None:
         self._providers = tuple(providers)
-        provider_ids = tuple(item.metadata.id for item in self._providers)
+        provider_ids = tuple(_configuration_provider_id(item) for item in self._providers)
         if len(provider_ids) != len(set(provider_ids)):
             raise ValueError("Mission Composition provider registry contains duplicate provider IDs")
-        self._by_id = {item.metadata.id: item for item in self._providers}
+        self._by_id = dict(zip(provider_ids, self._providers, strict=True))
         ####
 
     @property
@@ -2247,21 +2282,91 @@ class ConfigurableTrajectoryProviderRegistry:
         return self.provider(provider_id).validate_configuration(configuration)
         ####
 
-    def public_dict(self) -> dict[str, object]:
-        """Return a JSON-safe provider/model catalog without executable values."""
+    def provider_revision(self, provider_id: str) -> dict[str, str | int]:
+        """Return one provider/model-catalog revision for focused consumers."""
 
+        provider = self.provider(provider_id)
+        return self._provider_revision(provider.metadata, provider.list_models())
+        ####
+
+    @property
+    def fingerprint(self) -> str:
+        """Return the revision of all provider/model advertisements in this registry."""
+
+        revisions = [self._provider_revision(provider.metadata, provider.list_models()) for provider in self._providers]
+        return _metadata_fingerprint(
+            {
+                "schema": "taoryx.mission-composition-provider-catalog/v1",
+                "providers": revisions,
+            }
+        )
+        ####
+
+    @staticmethod
+    def _provider_revision(
+        metadata: TrajectoryProviderMetadata,
+        models: Sequence[TrajectoryModelMetadata],
+    ) -> dict[str, str | int]:
+        """Build a provider revision from its metadata and model revisions."""
+
+        model_catalog_fingerprint = _metadata_fingerprint(
+            {
+                "provider_id": metadata.id,
+                "models": [item.revision_public_dict() for item in models],
+            }
+        )
+        return metadata.revision_public_dict(model_catalog_fingerprint=model_catalog_fingerprint)
+        ####
+
+    def _provider_catalog_record(self, provider: ConfigurableTrajectoryProvider) -> dict[str, object]:
+        """Serialize one provider once, retaining compact revision projections."""
+
+        metadata = provider.metadata
+        models = provider.list_models()
         return {
-            "schema": "taoryx.mission-composition-provider-catalog/v1",
-            "providers": [
+            "metadata": metadata.model_dump(mode="json", by_alias=True),
+            "revision": self._provider_revision(metadata, models),
+            "models": [
                 {
-                    "metadata": provider.metadata.model_dump(mode="json", by_alias=True),
-                    "models": [item.model_dump(mode="json") for item in provider.list_models()],
+                    **item.model_dump(mode="json"),
+                    "revision": item.revision_public_dict(),
                 }
-                for provider in self._providers
+                for item in models
             ],
         }
         ####
 
+    def public_dict(self) -> dict[str, object]:
+        """Return a JSON-safe provider/model catalog without executable values."""
+
+        providers = [self._provider_catalog_record(provider) for provider in self._providers]
+        return {
+            "schema": "taoryx.mission-composition-provider-catalog/v1",
+            "fingerprint": _metadata_fingerprint(
+                {
+                    "schema": "taoryx.mission-composition-provider-catalog/v1",
+                    "providers": [item["revision"] for item in providers],
+                }
+            ),
+            "providers": providers,
+        }
+        ####
+
+    ####
+
+
+def _configuration_provider_id(provider: ConfigurableTrajectoryProvider) -> str:
+    """Read an eagerly available provider ID without forcing a deferred factory.
+
+    Ordinary providers remain governed by their concrete metadata. Deferred
+    plug-in providers publish the same ID at registration time, then validate
+    that declaration against their concrete metadata when selected.
+    """
+
+    advertised = getattr(provider, "__taoryx_provider_id__", None)
+    if isinstance(advertised, str) and advertised.strip():
+        return advertised
+    return provider.metadata.id
     ####
 
 

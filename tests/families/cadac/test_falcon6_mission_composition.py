@@ -76,7 +76,9 @@ def test_falcon6_common_runner_returns_one_physical_aircraft(tmp_path: Path) -> 
         prepared_configuration=prepared,
         output=MissionCompositionOutputSelection(mode="all"),
     )
-    result = registry.run(request).result
+    response = registry.run(request)
+    assert response.kind == "trajectory", response.model_dump(mode="json")
+    result = response.result
     assert result.primary_model_id == FALCON6_MODEL_ID
     assert len(result.objects) == 1
     aircraft = result.objects[0]
@@ -86,6 +88,8 @@ def test_falcon6_common_runner_returns_one_physical_aircraft(tmp_path: Path) -> 
         "quaternion_wxyz",
         "requested_surfaces_deg",
         "achieved_surfaces_deg",
+        "surface_position_limited",
+        "surface_rate_limited",
         "moment_body_nm",
     }
     assert aircraft.samples[-1].values["requested_surfaces_deg"][1] == 5.0

@@ -1,0 +1,211 @@
+schema: taoryx.vehicle-composition-overlay/v1alpha1
+version: 1
+description: Optional reachability-owned additions to the selected hl20_mod_k family
+  catalog.
+vehicles: []
+overlays:
+- family_id: hl20_mod_k
+  initialization_contracts:
+  - id: source_booster_launch
+    status: development
+    description: Exact synthetic-booster launch state accepted by the retained source-aerodynamic
+      HL-20 release witness.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: initial_speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Pinned source-witness initial speed.
+    - id: initial_mass_kg
+      canonical_unit: kg
+      required: true
+      description: Pinned HL-20 plus synthetic-booster mass.
+    - id: launch_azimuth_deg
+      canonical_unit: deg
+      required: true
+      description: Pinned launch azimuth.
+    - id: launch_elevation_deg
+      canonical_unit: deg
+      required: true
+      description: Pinned launch elevation.
+  - id: high_altitude_release
+    status: development
+    description: Source-grounded lifting-body release state with declared energy and
+      attitude assumptions.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: altitude_m
+      canonical_unit: m
+      required: true
+      description: Release altitude.
+    - id: mach
+      canonical_unit: dimensionless
+      required: true
+      description: Release Mach.
+    - id: heading_deg
+      canonical_unit: deg
+      required: true
+      description: Release heading.
+    - id: mass_kg
+      canonical_unit: kg
+      required: false
+      description: Initial mass.
+  segment_contracts:
+  - id: source_booster_release
+    status: development
+    description: Pinned synthetic-booster release time for the source-aerodynamic
+      replay witness.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: release_time_s
+      canonical_unit: s
+      required: true
+      description: Fixed source-witness booster release time.
+    permitted_transition_events:
+    - booster-release
+  - id: source_scheduled_bank
+    status: development
+    description: One retained source bank-schedule interval; this is replay configuration,
+      not a caller guidance command.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: bank_command_deg
+      canonical_unit: deg
+      required: true
+      description: Fixed signed source schedule bank value.
+    - id: duration_s
+      canonical_unit: s
+      required: true
+      description: Fixed source schedule interval duration.
+  - id: source_ground_contact
+    status: development
+    description: Fixed source-witness propagation horizon with independent ground-contact
+      terminal event.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: horizon_s
+      canonical_unit: s
+      required: true
+      description: Fixed source-witness propagation horizon.
+    permitted_transition_events:
+    - ground_contact
+  - id: trim_capture
+    status: development
+    description: Capture a source-domain glide condition after release.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: duration_s
+      canonical_unit: s
+      required: true
+      description: Capture duration.
+    required_control_intents:
+    - alpha
+    - bank
+  - id: glide_bank_reversal
+    status: development
+    description: Crossrange generation through a bounded signed bank command.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: bank_command_deg
+      canonical_unit: deg
+      required: true
+      description: Signed bank command; positive and negative values denote opposite
+        turn senses.
+    - id: target_crossrange_m
+      canonical_unit: m
+      required: true
+      description: Crossrange target.
+    required_control_intents:
+    - bank
+    - alpha
+  - id: energy_handoff
+    status: planned
+    description: Terminal glide energy, crossrange, heading, and altitude corridor.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Handoff altitude.
+    - id: target_energy
+      canonical_unit: J/kg
+      required: true
+      description: Specific-energy target.
+    - id: target_heading_deg
+      canonical_unit: deg
+      required: true
+      description: Handoff heading.
+    required_control_intents:
+    - bank
+    - alpha
+  mission_templates:
+  - id: hl20_source_booster_release_replay_v1
+    status: development
+    description: Reproducible source-aerodynamic HL-20 booster/release and scheduled-bank
+      witness ending at ground contact.
+    mission_capability_adapter_id: taoryx.hl20_source_booster_release_replay.capability.v1
+    mission_capability_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    semantic_translator_id: taoryx.hl20_source_booster_release_replay.v1
+    semantic_translator_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    initialization_contracts:
+    - source_booster_launch
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    segment_sequence:
+    - source_booster_release
+    - source_scheduled_bank
+    - source_scheduled_bank
+    - source_ground_contact
+  - id: lifting_body_glide_energy_management_v1
+    status: development
+    description: Release, trim capture, opposing bank reversals, crossrange correction,
+      and terminal energy handoff.
+    mission_capability_adapter_id: taoryx.hl20_glide_energy.capability.v1
+    mission_capability_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    semantic_translator_id: taoryx.hl20_glide_energy_intent.v1
+    semantic_translator_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    initialization_contracts:
+    - high_altitude_release
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - trim_capture
+    - glide_bank_reversal
+    - glide_bank_reversal
+    - energy_handoff

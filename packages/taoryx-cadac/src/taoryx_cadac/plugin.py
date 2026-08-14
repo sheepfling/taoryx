@@ -3,24 +3,31 @@
 from __future__ import annotations
 
 from functools import lru_cache
-
-from taoryx.families.cadac.mission_composition_plugin import CadacMissionCompositionProvider
+from typing import TYPE_CHECKING
 
 from taoryx.plugins import PluginDefinition, PluginMetadata, PluginRegistrar
+
+if TYPE_CHECKING:
+    from taoryx.families.cadac.mission_composition_plugin import CadacMissionCompositionProvider
+
+
+_PROVIDER_ID = "cadac"
 
 
 @lru_cache(maxsize=1)
 def _catalog_provider() -> CadacMissionCompositionProvider:
-    """Build metadata only; source cases are bound explicitly at execution time."""
+    """Build the CADAC catalog only after a host selects the provider API."""
+
+    from taoryx.families.cadac.mission_composition_plugin import CadacMissionCompositionProvider
 
     return CadacMissionCompositionProvider()
     ####
 
 
 def _register(registrar: PluginRegistrar) -> None:
-    """Publish the source-independent CADAC Mission Composition catalog."""
+    """Publish the catalog identity without constructing CADAC schemas at discovery."""
 
-    registrar.register_mission_composition_provider(_catalog_provider())
+    registrar.register_mission_composition_provider_factory(_PROVIDER_ID, _catalog_provider)
     ####
 
 

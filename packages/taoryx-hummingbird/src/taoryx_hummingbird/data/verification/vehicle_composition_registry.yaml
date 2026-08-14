@@ -1,0 +1,381 @@
+schema: taoryx.vehicle-composition-registry/v1alpha1
+version: 1
+description: 'User-facing vehicle-to-trajectory registry. This is a composition overlay:
+  it declares available initialization contracts, segment schemas, and mission templates
+  without duplicating vehicle physics or promoting a fidelity tier.'
+vehicles:
+- family_id: hummingbird
+  metadata:
+    summary: Quad-X multirotor research surrogate for hover, translation, rotor allocation,
+      and bounded landing composition.
+    model_version: 1.0.0+composition-v1
+    vehicle_class: multirotor
+    operating_domains:
+    - atmospheric
+    propulsion:
+    - electric_rotor
+    model_basis: public_research_surrogate
+    roles:
+    - hover
+    - waypoint_translation
+    - vertical_takeoff_and_landing
+    tags:
+    - quad_x
+    - individual_rotors
+    - rotor_allocation
+    claim_boundary: Public-research Hummingbird surrogate; it omits blade-resolved
+      flow, battery depletion, and flight qualification.
+  variant_parameters:
+  - id: grounded_operating_mass_kg
+    canonical_unit: kg
+    target_initialization_id: grounded_idle
+    target_parameter_id: mass_kg
+    status: runnable
+    compatible_fidelities:
+    - pseudo_6dof
+    runtime_adapter_id: taoryx.multirotor.aggregate_thrust_pseudo6dof.v1
+    runtime_input_path: HummingbirdPseudo6DOFModel.mass_kg
+    hard_lower: 1.0e-06
+    hard_upper: 5.1112
+    value_space_profile: positive_half_line
+    transform: log
+    requires_requalification: true
+    coupling_group: aggregate_thrust_hover_mass
+    derived_status_channels:
+    - resources.mass.total
+    status_derivation_relation: equal_to_target
+    resource_derivation: not_represented
+    derivation_claim_boundary: The aggregate-thrust pseudo-6DOF runtime consumes mass
+      and exposes total mass status. It does not derive battery energy, rotor inertia,
+      payload distribution, or individual-rotor resources.
+    derivation: Aggregate-thrust pseudo-6DOF model mass and total-mass status update
+      only.
+    invalidations:
+    - requalification:mass_kg
+    provenance: 'Pseudo-6DOF aggregate-thrust fixture: positive model mass and a 50.13
+      N maximum collective-thrust capacity, converted to the greatest mass with positive
+      stationary-hover reserve under standard gravity.'
+    description: Grounded mass forwarded to the aggregate-thrust pseudo-6DOF batch
+      and episode plants. It is a hard-valid surrogate parameter, not a qualified
+      payload, inertia, rotor-allocation, or battery-endurance envelope.
+  initialization_contracts:
+  - id: source_individual_rotor_hover_local_point
+    status: runnable
+    description: Pinned RotorPy-derived source-hover state used by bounded local control
+      screens.
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+  - id: grounded_idle
+    status: development
+    description: Pad-relative ground state before rotor spool and takeoff.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: pad_north_m
+      canonical_unit: m
+      required: true
+      description: Pad north coordinate.
+    - id: pad_east_m
+      canonical_unit: m
+      required: true
+      description: Pad east coordinate.
+    - id: heading_deg
+      canonical_unit: deg
+      required: true
+      description: Initial yaw.
+    - id: mass_kg
+      canonical_unit: kg
+      required: false
+      description: Initial mass.
+  - id: airborne_hover
+    status: runnable
+    description: Declared low-speed hover state for airborne control checks.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: north_m
+      canonical_unit: m
+      required: false
+      description: Hover north coordinate.
+    - id: east_m
+      canonical_unit: m
+      required: false
+      description: Hover east coordinate.
+    - id: altitude_m
+      canonical_unit: m
+      required: true
+      description: Hover altitude.
+    - id: heading_deg
+      canonical_unit: deg
+      required: true
+      description: Hover yaw.
+  segment_contracts:
+  - id: individual_rotor_hover_lqi_screen
+    status: runnable
+    description: One-second source-hover attitude/rate LQI screen with bounded quad-X
+      rotor allocation and motor lag.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - wrench
+  - id: individual_rotor_horizontal_translation_lqi_screen
+    status: runnable
+    description: Bounded source-local horizontal forward, yaw, lateral, rearward,
+      and return LQI screen through quad-X rotor allocation; it excludes altitude
+      and landing.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - position
+    - yaw
+    - wrench
+  - id: individual_rotor_vertical_translation_lqi_screen
+    status: runnable
+    description: Bounded source-local climb, hover, descent, and return LQI screen
+      through collective body-z force, attitude moments, and quad-X rotor allocation;
+      it excludes wind, contact, and landing.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - altitude
+    - wrench
+  - id: local_wrench_recovery_screen
+    status: runnable
+    description: Pinned source-hover six-axis direct-wrench recovery comparator; it
+      bypasses rotor allocation.
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    required_control_intents:
+    - wrench
+  - id: rotor_spool_takeoff
+    status: development
+    description: Rotor spool, vertical departure, and hover capture.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Hover target altitude.
+    - id: climb_rate_m_s
+      canonical_unit: m/s
+      required: true
+      description: Vertical rate limit.
+    required_control_intents:
+    - altitude
+  - id: hover_dwell
+    status: runnable
+    description: Position, velocity, and yaw constrained hover dwell.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_ned_m
+      canonical_unit: m
+      required: true
+      description: Hover target position.
+    - id: dwell_s
+      canonical_unit: s
+      required: true
+      description: Required settled dwell.
+    - id: target_heading_deg
+      canonical_unit: deg
+      required: false
+      description: Optional yaw target.
+    required_control_intents:
+    - position
+    - altitude
+    - yaw
+  - id: waypoint_translation
+    status: development
+    description: Forward, lateral, or rearward position transfer with a capture dwell.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_ned_m
+      canonical_unit: m
+      required: true
+      description: Waypoint position.
+    - id: maximum_speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Translational speed limit.
+    - id: dwell_s
+      canonical_unit: s
+      required: true
+      description: Capture dwell.
+    required_control_intents:
+    - position
+    - altitude
+    - yaw
+  - id: yaw_scan
+    status: development
+    description: Independent yaw maneuver while holding a declared hover region.
+    compatible_fidelities:
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_heading_deg
+      canonical_unit: deg
+      required: true
+      description: Target yaw.
+    - id: yaw_rate_limit_deg_s
+      canonical_unit: deg/s
+      required: true
+      description: Yaw rate limit.
+    required_control_intents:
+    - yaw
+  - id: touchdown_settle_disarm
+    status: development
+    description: Controlled descent, contact, settled hold, and motor shutdown.
+    compatible_fidelities:
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: pad_ned_m
+      canonical_unit: m
+      required: true
+      description: Landing pad position.
+    - id: maximum_sink_rate_m_s
+      canonical_unit: m/s
+      required: true
+      description: Touchdown vertical speed limit.
+    - id: settle_s
+      canonical_unit: s
+      required: true
+      description: Required post-contact hold.
+    required_control_intents:
+    - position
+    - altitude
+    - yaw
+    permitted_transition_events:
+    - contact
+    - motor_shutdown
+  mission_templates:
+  - id: hummingbird_local_individual_rotor_lqi_screen_v1
+    status: runnable
+    description: Source-hover four-rotor LQI and allocation screen; not a translation,
+      landing, or envelope-qualified mission.
+    mission_capability_adapter_id: taoryx.hummingbird.local_individual_rotor_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.hummingbird.local_individual_rotor_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_individual_rotor_hover_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - individual_rotor_hover_lqi_screen
+  - id: hummingbird_local_horizontal_translation_lqi_screen_v1
+    status: runnable
+    description: Bounded source-local horizontal translation and yaw LQI screen through
+      four allocated rotors; no altitude, wind, battery, contact, or landing claim.
+    mission_capability_adapter_id: taoryx.hummingbird.local_horizontal_translation_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.hummingbird.local_horizontal_translation_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_individual_rotor_hover_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - individual_rotor_horizontal_translation_lqi_screen
+  - id: hummingbird_local_vertical_translation_lqi_screen_v1
+    status: runnable
+    description: Bounded source-local vertical climb, hover, descent, and return-to-hover
+      LQI screen through collective force and four allocated rotors; no wind, battery,
+      contact, landing, or qualification claim.
+    mission_capability_adapter_id: taoryx.hummingbird.local_vertical_translation_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.hummingbird.local_vertical_translation_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_individual_rotor_hover_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - individual_rotor_vertical_translation_lqi_screen
+  - id: hummingbird_local_direct_wrench_screen_v1
+    status: runnable
+    description: Pinned RotorPy-source hover local six-axis direct-wrench recovery
+      comparator; no physical rotor allocation.
+    mission_capability_adapter_id: taoryx.hummingbird.local_direct_wrench_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_direct_wrench
+    semantic_translator_id: taoryx.hummingbird.local_direct_wrench_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_direct_wrench
+    initialization_contracts:
+    - source_individual_rotor_hover_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    segment_sequence:
+    - local_wrench_recovery_screen
+  - id: multirotor_pad_box_yaw_recovery_land_v1
+    status: development
+    description: Ground-to-ground multirotor route with hover, translation, yaw, recovery,
+      and settling finality.
+    mission_capability_adapter_id: taoryx.multirotor_hover_translation.capability.v1
+    mission_capability_fidelities:
+    - pseudo_6dof
+    semantic_translator_id: taoryx.hummingbird.hover_yaw_contact.pseudo6dof.v1
+    semantic_translator_fidelities:
+    - pseudo_6dof
+    initialization_contracts:
+    - grounded_idle
+    - airborne_hover
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - rotor_spool_takeoff
+    - hover_dwell
+    - waypoint_translation
+    - yaw_scan
+    - waypoint_translation
+    - hover_dwell
+    - touchdown_settle_disarm
+    graph_execution_extension:
+      fidelity: pseudo_6dof
+      translator_id: taoryx.hummingbird.hover_yaw_contact.pseudo6dof.v1
+      supported_transition_kinds:
+      - success
+      - timeout
+      supported_state_transfers:
+      - previous_terminal_truth_state
+      timeout_constraint:
+        source_nodes: any nonterminal declared mission instance
+        target: declared final touchdown instance only
+        result: safe touchdown recovery; skipped required objectives remain failures
+      unsupported_transition_kinds:
+      - abort
+      - resource_limit
+      - envelope_limit
+      claim_boundary: This is the one declared Hummingbird timeout recovery extension.
+        It does not make a timeout a successful mission or imply general branching
+        for the multirotor family.

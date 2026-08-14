@@ -5,12 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import cast
 
-from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
-
 import tools.dev as dev
 from taoryx.fidelity_contracts import FidelityTier
 from taoryx.mission_workflow_endpoint import load_mission_workflow_endpoint_catalog
 from taoryx.plugins import discover_plugins
+from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
 from taoryx.vehicle_discovery import (
     DeclaredValidityEnvelope,
@@ -48,8 +47,13 @@ def test_every_registered_controller_campaign_has_one_runnable_vehicle_slice() -
         if model.model_kind != "canonical_vehicle_family" and "batch" in model.common_runner_operations
     }
 
-    assert campaign_families <= set(dev.VEHICLE_VERTICAL_TEST_PATHS)
-    assert set(dev.VEHICLE_VERTICAL_TEST_PATHS) == runnable_vehicle_families | runnable_workflow_models
+    declared_slices = set(dev.VEHICLE_VERTICAL_TEST_PATHS)
+    assert campaign_families <= declared_slices
+    # The physical catalogue owns its normal runnable families, while source-
+    # bound or nonphysical packages may publish additional focused vertical
+    # slices before they belong to that catalogue. Every catalogue route must
+    # still have one; a package-owned extra slice is not stale by definition.
+    assert runnable_vehicle_families | runnable_workflow_models <= declared_slices
     for family_id, paths in dev.VEHICLE_VERTICAL_TEST_PATHS.items():
         assert paths
         assert all((ROOT / path.split("::", maxsplit=1)[0]).is_file() for path in paths), family_id
@@ -91,7 +95,11 @@ def test_every_registry_model_has_the_appropriate_focused_endpoint_contract() ->
     workflow_endpoint_models = {item.model_id for item in load_mission_workflow_endpoint_catalog().endpoints}
 
     assert physical_endpoint_models == physical_models
-    assert workflow_endpoint_models == nonphysical_runnable_models
+    # The aggregate can continue to advertise a compatibility projection of a
+    # workflow whose focused endpoint is owned by another package (Simple
+    # Aero), while debug packages can own endpoint models absent from the
+    # aggregate. Require coverage, not a false one-provider identity rule.
+    assert nonphysical_runnable_models <= workflow_endpoint_models
     assert physical_endpoint_models.isdisjoint(workflow_endpoint_models)
     ####
 

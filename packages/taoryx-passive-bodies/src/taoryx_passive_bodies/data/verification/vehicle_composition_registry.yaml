@@ -1,0 +1,111 @@
+schema: taoryx.vehicle-composition-registry/v1alpha1
+version: 1
+description: 'User-facing vehicle-to-trajectory registry. This is a composition overlay:
+  it declares available initialization contracts, segment schemas, and mission templates
+  without duplicating vehicle physics or promoting a fidelity tier.'
+vehicles:
+- family_id: tumbling_body
+  metadata:
+    summary: Passive geometry-driven atmospheric body family for release, tumbling
+      drag, descent, and impact analysis.
+    model_version: 1.0.0+composition-v1
+    vehicle_class: passive_atmospheric_body
+    operating_domains:
+    - atmospheric
+    propulsion:
+    - none
+    model_basis: analytical_geometry_model
+    roles:
+    - passive_release
+    - tumbling_aerodynamics
+    - impact_reachability
+    tags:
+    - uncontrolled
+    - geometry_variants
+    - passive_descent
+    claim_boundary: Analytical passive-body family; it has no actuator, controller,
+      propulsion, or vehicle-specific performance claim.
+  initialization_contracts:
+  - id: atmospheric_release
+    status: development
+    description: Passive-body release with geometry, orientation, angular-rate, and
+      atmospheric state declared.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: altitude_m
+      canonical_unit: m
+      required: true
+      description: Release altitude.
+    - id: speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Release speed.
+    - id: quaternion_wxyz
+      canonical_unit: dimensionless
+      required: false
+      description: Initial attitude; the direct-release witness accepts identity only.
+    - id: body_rates_rad_s
+      canonical_unit: rad/s
+      required: true
+      description: Initial body rates; retained even for 3DOF so cross-tier requests
+        are explicit.
+    - id: body_shape
+      canonical_unit: null
+      required: false
+      description: Named passive-body geometry realization selected independently
+        from dynamics fidelity.
+    - id: area_policy
+      canonical_unit: null
+      required: true
+      description: orientation_averaged_projected_area for 3DOF, or native_rigid_body_reuse_instantaneous_projected_area
+        for pseudo-6DOF.
+  segment_contracts:
+  - id: passive_coast
+    status: development
+    description: Maximum-horizon uncontrolled ballistic evolution with no controller
+      command.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: duration_s
+      canonical_unit: s
+      required: true
+      description: Passive evolution duration.
+  - id: atmospheric_descent
+    status: development
+    description: Passive descent with orientation-averaged 3DOF or rigid-body-reuse
+      rotational behavior.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    parameters:
+    - id: impact_plane_altitude_m
+      canonical_unit: m
+      required: true
+      description: Terminal impact-plane altitude.
+    permitted_transition_events:
+    - impact
+  mission_templates:
+  - id: tumbling_body_release_damping_impact_v1
+    status: development
+    description: Release, passive rotation or averaged-area descent, and terminal
+      impact state report.
+    mission_capability_adapter_id: taoryx.passive_tumbling_release.capability.v1
+    mission_capability_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    semantic_translator_id: taoryx.passive_tumbling_release.capability.v1
+    semantic_translator_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    initialization_contracts:
+    - atmospheric_release
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    segment_sequence:
+    - passive_coast
+    - atmospheric_descent

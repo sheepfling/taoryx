@@ -1,0 +1,42 @@
+{
+  "a_matrix": [
+    [
+      -0.004982539442238323
+    ]
+  ],
+  "b_matrix": [
+    []
+  ],
+  "claim_boundary": "source-bounded HL-20 pitch residual Jacobian; not full 6-DOF dynamics or controller qualification",
+  "control_names": [],
+  "family_id": "reference_hl20_mod_k",
+  "perturbations": {
+    "control_step": 1e-05,
+    "method": "central_finite_difference",
+    "state_step": 1e-05
+  },
+  "provenance": {
+    "document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+    "package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63"
+  },
+  "residual_names": [
+    "pitch_cm"
+  ],
+  "schema_version": "taoryx.daveml-hl20-linearization-evidence/v1",
+  "state_names": [
+    "alpha_deg"
+  ],
+  "status": "verified",
+  "trim": {
+    "controls": {},
+    "iterations": 5,
+    "max_residual": 1.1578411840407199e-14,
+    "residuals": {
+      "pitch_cm": 1.1578411840407199e-14
+    },
+    "state": {
+      "alpha_deg": 6.457652069267908
+    },
+    "success": true
+  }
+}

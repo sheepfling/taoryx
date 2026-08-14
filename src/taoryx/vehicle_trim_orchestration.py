@@ -285,10 +285,19 @@ def _residual(raw: object, path: str, findings: list[TrimRecipeFinding]) -> Trim
     ####
 
 
-def load_trim_recipe(path: str | Path) -> tuple[TrimRecipe | None, tuple[TrimRecipeFinding, ...]]:
-    """Load and structurally validate one declarative trim recipe."""
+def load_trim_recipe(
+    path: str | Path,
+    *,
+    resource_root: str | Path | None = None,
+) -> tuple[TrimRecipe | None, tuple[TrimRecipeFinding, ...]]:
+    """Load and structurally validate one declarative trim recipe.
+
+    ``resource_root`` lets a family plug-in validate package-relative evidence
+    when its recipe is installed outside the repository checkout.
+    """
 
     source = Path(path)
+    evidence_root = Path(resource_root) if resource_root is not None else ROOT
     findings: list[TrimRecipeFinding] = []
     try:
         raw = _read_yaml(source)
@@ -323,7 +332,7 @@ def load_trim_recipe(path: str | Path) -> tuple[TrimRecipe | None, tuple[TrimRec
         _finding(findings, "error", "operating-point-catalog-missing", _relative(source), "trim recipe does not name an operating-point catalog", "Declare the relative qualification/operating-points.yaml path.")
     if not source_evidence:
         _finding(findings, "warning", "source-evidence-missing", _relative(source), "trim recipe does not name source evidence", "Add the evidence artifact used to seed or validate the recipe.")
-    elif not (ROOT / source_evidence).is_file():
+    elif not (evidence_root / source_evidence).is_file():
         _finding(findings, "error", "source-evidence-not-found", source_evidence, "trim recipe source evidence does not exist", "Generate or correct the pinned evidence artifact before building a worklist.")
     solver_raw = raw.get("solver")
     continuation_raw = raw.get("continuation")
@@ -405,11 +414,21 @@ def _build_spec(recipe: TrimRecipe, point: Mapping[str, Any], point_id: str) -> 
     ####
 
 
-def orchestrate_trim_recipe(family_id: str, recipe_path: str | Path | None = None) -> TrimOrchestrationReport:
-    """Validate a family recipe and produce adapter-ready trim work items."""
+def orchestrate_trim_recipe(
+    family_id: str,
+    recipe_path: str | Path | None = None,
+    *,
+    resource_root: str | Path | None = None,
+) -> TrimOrchestrationReport:
+    """Validate a family recipe and produce adapter-ready trim work items.
+
+    A family package may supply both a package-relative recipe and resource
+    root.  Source-checkout callers retain the canonical repository-root
+    behavior by omitting both optional values.
+    """
 
     path = Path(recipe_path) if recipe_path is not None else ROOT / "families" / family_id / "qualification/trim-recipe.yaml"
-    recipe, recipe_findings = load_trim_recipe(path)
+    recipe, recipe_findings = load_trim_recipe(path, resource_root=resource_root)
     findings = list(recipe_findings)
     if recipe is None:
         return TrimOrchestrationReport(family_id, None, "blocked", "trim recipe is invalid; no solver is invoked", tuple(findings), (), None)

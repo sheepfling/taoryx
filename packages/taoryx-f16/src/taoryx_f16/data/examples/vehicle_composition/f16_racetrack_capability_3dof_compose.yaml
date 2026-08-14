@@ -1,0 +1,47 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: f16-racetrack-capability-3dof-semantic-v1
+vehicle: f16_s119
+fidelity: point_mass_3dof
+initialization:
+  id: airborne_trim
+  inputs:
+    altitude_m: {value: 0.0, unit: m}
+    speed_m_s: {value: 152.4, unit: m/s}
+    mach: {value: 0.447869133900138, unit: dimensionless}
+    heading_deg: {value: 90.0, unit: deg}
+mission:
+  id: powered_fixed_wing_racetrack_v1
+segments:
+  - id: trim_hold
+    inputs: {duration_s: {value: 60.0, unit: s}}
+  - id: climb_level_gate
+    inputs:
+      target_altitude_m: {value: 300.0, unit: m}
+      climb_rate_m_s: {value: 6.0, unit: m/s}
+      gate_center_ned_m: {value: [0.0, 18000.0, -300.0], unit: m}
+      corridor_m: {value: 500.0, unit: m}
+  - id: fly_by_turn
+    instance_id: left-turn
+    inputs:
+      turn_direction: {value: left}
+      turn_radius_m: {value: 7157.7425792334435, unit: m}
+      bank_limit_deg: {value: 20.0, unit: deg}
+      gate_center_ned_m: {value: [14315.485158466887, 18000.0, -300.0], unit: m}
+  - id: descent_level_gate
+    inputs:
+      target_altitude_m: {value: 0.0, unit: m}
+      descent_rate_m_s: {value: 6.0, unit: m/s}
+      gate_center_ned_m: {value: [14315.485158466887, 0.0, 0.0], unit: m}
+  - id: fly_by_turn
+    instance_id: right-turn
+    inputs:
+      turn_direction: {value: right}
+      turn_radius_m: {value: 7157.7425792334435, unit: m}
+      bank_limit_deg: {value: 20.0, unit: deg}
+      gate_center_ned_m: {value: [0.0, 0.0, 0.0], unit: m}
+  - id: terminal_state_gate
+    inputs:
+      target_ned_m: {value: [0.0, 0.0, 0.0], unit: m}
+      target_altitude_m: {value: 0.0, unit: m}
+      target_speed_m_s: {value: 152.4, unit: m/s}
+      target_heading_deg: {value: 90.0, unit: deg}

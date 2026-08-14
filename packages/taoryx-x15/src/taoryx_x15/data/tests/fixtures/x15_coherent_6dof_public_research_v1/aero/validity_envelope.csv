@@ -1,0 +1,9 @@
+dimension_or_rule,minimum,maximum,units,package_grid,rule,confidence
+Mach_source_numeric_support,0.0,9.0,Mach,0.3_to_6.7_at_source_breakpoints,piecewise linear; source-native clamping available,"computational support, not a validated envelope"
+Mach_recommended_research_use,0.3,6.7,Mach,see shared_grid_definition.json,reject beyond range for this package,"bounded by public X-15 operating record, not coefficient validation"
+angle_of_attack,-5.0,25.0,deg,"-5,0,5,10,15,20,25",linear derivative model between package nodes; no stall/separation model,upper bound follows source-declared NASA derivative-report scope
+sideslip,-10.0,10.0,deg,"-10,-5,0,5,10",linear beta model,chosen generation grid; source supplies no validated beta limit
+altitude_correction_tables,0.0,80000.0,ft,"0,40000,60000,80000",bilinear interpolation; source-native clamping outside range,source table support only
+dynamic_pressure,,,psf,not an aerodynamic-table axis,forces scale with qbar,no source validity limit supplied
+Reynolds_number,,,1,not modeled,no Reynolds correction,missing
+extrapolation_default,,,,strict evaluator option,engineering use should reject; source_clamp reproduces executable-model behavior,explicit package policy

@@ -1,0 +1,31 @@
+schema: taoryx.vehicle-execution-bindings/v1alpha1
+version: 1
+description: Explicit source-owned execution bindings for compiled vehicle compositions.
+  An entry is a public capability declaration, not a generic family fallback. Omitted
+  vehicle/fidelity/mission combinations are unavailable until their own native binding
+  exists.
+bindings:
+- family_id: reference_nesc_two_stage_rocket
+  mission: staged_rocket_launch_target_state_v1
+  fidelity: point_mass_3dof
+  operation: batch
+  status: runnable
+  execution_mode: source_history_replay
+  factory_id: nesc_source_replay.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Replay the exact source-qualified NESC translation history after source-compatible
+    semantic preflight.
+  claim_boundary: Source-history point-mass replay only; no participating rocket plant,
+    guidance, or gimbal-allocation claim.
+- family_id: reference_nesc_two_stage_rocket
+  mission: staged_rocket_launch_target_state_v1
+  fidelity: pseudo_6dof
+  operation: batch
+  status: runnable
+  execution_mode: source_history_replay
+  factory_id: nesc_source_replay.v1
+  batch_action_trace: emits_committed_interval_trace
+  description: Replay the NESC source translation with the declared phase-scheduled
+    attitude-response surrogate.
+  claim_boundary: Source translation plus named response-law evidence; no source-exact
+    attitude, gimbal, or control-allocation claim.

@@ -1,0 +1,265 @@
+schema: taoryx.vehicle-composition-registry/v1alpha1
+version: 1
+description: 'User-facing vehicle-to-trajectory registry. This is a composition overlay:
+  it declares available initialization contracts, segment schemas, and mission templates
+  without duplicating vehicle physics or promoting a fidelity tier.'
+vehicles:
+- family_id: x15
+  metadata:
+    summary: Rocket-aircraft research surrogate spanning staged boost, high-energy
+      coast, atmospheric handoff, and local source-control screens.
+    vehicle_class: rocket_aircraft
+    operating_domains:
+    - atmospheric
+    - near_space
+    propulsion:
+    - rocket
+    model_basis: public_research_surrogate
+    roles:
+    - air_launch
+    - high_energy_research
+    - atmospheric_glide
+    tags:
+    - rocket_plane
+    - staged_booster
+    - unpowered_glide
+    claim_boundary: Research X-15 surrogate and source-pinned witnesses; it is not
+      a complete historical X-15 flight or guidance reproduction.
+  initialization_contracts:
+  - id: air_launch_release
+    status: development
+    description: Carrier release state with explicit separation, mass, energy, and
+      flight-condition inputs.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: altitude_m
+      canonical_unit: m
+      required: true
+      description: Release altitude.
+    - id: speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Release speed.
+    - id: heading_deg
+      canonical_unit: deg
+      required: true
+      description: Release heading.
+    - id: mass_kg
+      canonical_unit: kg
+      required: false
+      description: Release mass.
+  - id: source_release_glide_local_point
+    status: runnable
+    description: Pinned X-15 source-load local release/glide operating point used
+      only by the direct-wrench recovery screen.
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+  - id: source_release_glide_surface_authority_anchor
+    status: runnable
+    description: Frozen X-15 source release/glide fixture used only by the three-surface
+      source-table authority allocation screen.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+  segment_contracts:
+  - id: separation
+    status: development
+    description: Carrier separation and clearance event.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: clearance_time_s
+      canonical_unit: s
+      required: true
+      description: Required separation clearance duration.
+    required_control_intents:
+    - attitude_rate
+    permitted_transition_events:
+    - release
+  - id: local_wrench_recovery_screen
+    status: runnable
+    description: Bounded local six-axis direct-wrench LQR recovery at the pinned source-load
+      operating point; it is not a navigation segment.
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    required_control_intents:
+    - wrench
+  - id: local_wrench_lqi_recovery_screen
+    status: runnable
+    description: Bounded local six-axis direct-wrench body-speed LQI recovery at the
+      pinned source-load operating point; it is not a physical-effector or navigation
+      segment.
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    required_control_intents:
+    - wrench
+  - id: source_surface_three_axis_authority_allocation_screen
+    status: runnable
+    description: Frozen X-15 source-table three-axis moment allocation through the
+      symmetric stabilator, differential stabilator, and rudder; it does not propagate
+      a flight state.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - wrench
+  - id: source_surface_attitude_rate_lqi_recovery_screen
+    status: runnable
+    description: Frozen-translation X-15 local attitude-error/body-rate LQI recovery
+      through bounded symmetric stabilator, differential stabilator, and rudder allocation;
+      it is not a full vehicle trim or flight segment.
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    required_control_intents:
+    - attitude_rate
+    - wrench
+  - id: powered_climb
+    status: development
+    description: Bounded rocket-powered acceleration and climb.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Climb target altitude.
+    - id: cutoff_condition
+      canonical_unit: null
+      required: true
+      description: Explicit engine cutoff or burnout condition.
+    required_control_intents:
+    - throttle
+    - flight_path
+    - bank
+  - id: coast_apogee
+    status: development
+    description: Ballistic coast through apogee with a declared energy corridor.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_energy
+      canonical_unit: J/kg
+      required: true
+      description: Energy corridor target.
+    required_control_intents:
+    - bank
+  - id: atmospheric_handoff
+    status: development
+    description: Re-entry/descent energy management to a named airborne handoff corridor.
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    parameters:
+    - id: target_altitude_m
+      canonical_unit: m
+      required: true
+      description: Handoff altitude.
+    - id: target_speed_m_s
+      canonical_unit: m/s
+      required: true
+      description: Handoff speed.
+    - id: target_heading_deg
+      canonical_unit: deg
+      required: true
+      description: Handoff heading.
+    required_control_intents:
+    - bank
+    - flight_path
+  mission_templates:
+  - id: x15_source_surface_authority_screen_v1
+    status: runnable
+    description: Nonlinear X-15 source-table three-surface, three-axis moment-authority
+      allocation screen at the frozen release/glide fixture; it is neither full vehicle
+      trim nor a flight mission.
+    mission_capability_adapter_id: taoryx.x15_source_surface_authority_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.x15_source_surface_authority_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_release_glide_surface_authority_anchor
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - source_surface_three_axis_authority_allocation_screen
+  - id: x15_source_surface_attitude_rate_lqi_screen_v1
+    status: runnable
+    description: Nonlinear X-15 source-table local attitude-error/body-rate LQI recovery
+      at the frozen release/glide fixture, with requested body moments allocated to
+      all three named source surfaces; it is not full-state trim or a high-energy
+      mission.
+    mission_capability_adapter_id: taoryx.x15_source_surface_attitude_rate_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_surface_allocated
+    semantic_translator_id: taoryx.x15_source_surface_attitude_rate_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_surface_allocated
+    initialization_contracts:
+    - source_release_glide_surface_authority_anchor
+    compatible_fidelities:
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - source_surface_attitude_rate_lqi_recovery_screen
+  - id: x15_local_direct_wrench_screen_v1
+    status: runnable
+    description: Local source-load direct-wrench recovery screen with source-derived
+      linearization and requested-versus-achieved wrench evidence.
+    mission_capability_adapter_id: taoryx.x15_local_direct_wrench_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_direct_wrench
+    semantic_translator_id: taoryx.x15_local_direct_wrench_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_direct_wrench
+    initialization_contracts:
+    - source_release_glide_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    segment_sequence:
+    - local_wrench_recovery_screen
+  - id: x15_local_direct_wrench_lqi_screen_v1
+    status: runnable
+    description: Local source-load direct-wrench body-speed LQI recovery screen with
+      source-derived candidate gain, bounded wrench projection, and integral-error
+      telemetry.
+    mission_capability_adapter_id: taoryx.x15_local_direct_wrench_lqi_screen.capability.v1
+    mission_capability_fidelities:
+    - rigid_body_6dof_direct_wrench
+    semantic_translator_id: taoryx.x15_local_direct_wrench_lqi_screen.capability.v1
+    semantic_translator_fidelities:
+    - rigid_body_6dof_direct_wrench
+    initialization_contracts:
+    - source_release_glide_local_point
+    compatible_fidelities:
+    - rigid_body_6dof_direct_wrench
+    segment_sequence:
+    - local_wrench_lqi_recovery_screen
+  - id: rocket_aircraft_high_energy_v1
+    status: development
+    description: Release, separation, burn, cutoff, coast/apogee, atmospheric energy
+      management, and terminal handoff.
+    initialization_contracts:
+    - air_launch_release
+    compatible_fidelities:
+    - point_mass_3dof
+    - pseudo_6dof
+    - rigid_body_6dof_direct_wrench
+    - rigid_body_6dof_surface_allocated
+    segment_sequence:
+    - separation
+    - powered_climb
+    - coast_apogee
+    - atmospheric_handoff

@@ -1,0 +1,217 @@
+schema_version: 1
+id: taoryx_vehicle_model_registry_v1
+description: Canonical vehicle descriptions used by generated problem files and the
+  common vehicle harness. Values are SI unless the field name says otherwise.
+vehicles:
+  b747:
+    display_name: Boeing 747-100 research surrogate
+    family_id: powered_fixed_wing
+    mode: rigid-body-6dof
+    realization:
+      force_source: coefficient_table
+      moment_source: direct_moment
+      actuator_realization: bounded_surface_allocator_candidate
+      propulsion_model: table_thrust
+      resource_model: fixed_mass
+      claim: source-bounded rigid-body trajectory with a local surface-allocation
+        candidate
+      nonclaims:
+      - physical actuator dynamics
+      - fuel depletion
+    allocation:
+      model: bounded_local_table_inversion
+      controls:
+      - elevator-deg
+      - aileron-deg
+      - rudder-deg
+      derivative_step_deg: 1.0
+      source: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/jet_b747/controls/actuator_limits.csv
+      qualification_status: candidate_not_runtime_qualified
+    trajectory_vehicle: b747
+    earth_model: wgs-84
+    earth_omega_rad_s: 0.0
+    body_frame: x-forward-y-right-z-down
+    reference_area_m2: 510.96672
+    reference_length_m: 8.324088
+    dry_mass_kg: 288756.9
+    nominal_mass_kg: 288756.9
+    inertia_kg_m2:
+      x: 24675886.7
+      y: 44877574.1
+      z: 67384152.0
+    envelope:
+      min_forward_speed_m_s: 20
+      max_mach: 0.9
+      max_alpha_deg: 4
+      max_beta_deg: 5
+    aero_alpha_reference_deg: 3.1
+    attitude_lqr_profile: b747-standard
+    controls:
+    - name: elevator-deg
+      default: 0.3861602391
+      lower: -10
+      upper: 10
+    - name: aileron-deg
+      default: 0.0
+      lower: -10
+      upper: 10
+    - name: rudder-deg
+      default: 0.0
+      lower: -10
+      upper: 10
+    actuator:
+      maximum_moment: 100000000
+      maximum_body_rate_deg_s: 90
+    table_bindings:
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_aileron_6axis.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_rudder_6axis.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    aero_convention:
+      force_frame: body_axes_x_forward_y_right_z_down
+      force_channels: cx_cy_cz
+      drag_note: cx and cz are body-axis force coefficients, not wind-axis drag/lift
+        coefficients.  Do not label cx or cz as CD; derive wind-axis drag only through
+        the documented body-to-wind transformation.
+      table_semantics: absolute_coefficients
+      control_table_rule: The elevator, aileron, and rudder decks include their nominal
+        zero-control baselines.  Use each as an absolute control-conditioned deck;
+        do not add any of them to the static deck unless an explicit delta composition
+        is introduced.
+      source_note: Static, elevator, aileron, and rudder tables are transcodes of
+        the jet_b747 source grids; source provenance is recorded in each table header
+        and the source differential tests.
+      problem_comment: Aero channels are body-axis cx/cy/cz (not direct CD/CL); B747
+        control tables are absolute source-grid values, including zero-control baseline.
+    source:
+      status: public-research-surrogate
+      bundle: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
+      model_path: jet_b747
+    audit_problem_globs:
+    - examples/mission_families/slower_b747/*.prb
+    - examples/generated/vehicles/b747_*.prb
+  skywalker_x8:
+    display_name: Skywalker X8 research surrogate
+    family_id: powered_fixed_wing
+    mode: rigid-body-6dof
+    realization:
+      force_source: coefficient_table
+      moment_source: aerodynamic_tables_or_direct_moment_by_fixture
+      actuator_realization: source_table_coordinate_allocator_candidate_or_direct_wrench_screen
+      propulsion_model: table_thrust
+      resource_model: fixed_mass
+      claim: source-bounded X8 response; bounded collective/differential source-table-coordinate
+        allocation with an explicit source-paper left/right conversion in declared
+        candidate fixtures
+      nonclaims:
+      - servo wiring and hinge-sign calibration
+      - full flight-control-law fidelity
+      - fuel depletion
+    allocation:
+      model: bounded_local_table_coordinate_inversion
+      controls:
+      - collective-elevon-deg
+      - differential-elevon-deg
+      derivative_step_deg: 1.0
+      source: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/cruise_class_uav_skywalker_x8/controls/actuator_limits.csv
+      qualification_status: local_source_coordinate_t4_pending_mapped_left_right_end_to_end_evidence
+    trajectory_vehicle: x8
+    earth_model: wgs-84
+    earth_omega_rad_s: 0.0
+    body_frame: x-forward-y-right-z-down
+    reference_area_m2: 0.75
+    reference_length_m: 0.36
+    dry_mass_kg: 3.364
+    nominal_mass_kg: 3.364
+    inertia_kg_m2:
+      x: 0.325
+      y: 0.14
+      z: 0.4
+    envelope:
+      min_forward_speed_m_s: 2
+      max_speed_m_s: 27
+      max_alpha_deg: 12
+      max_beta_deg: 5
+    attitude_lqr_profile: skywalker-x8-standard
+    controls:
+    - name: throttle
+      default: 0.5773431906
+      lower: 0
+      upper: 1
+    - name: collective-elevon-deg
+      default: -2.1478876544
+      lower: -20
+      upper: 20
+    - name: differential-elevon-deg
+      default: -3.9378035934
+      lower: -20
+      upper: 20
+    actuator:
+      maximum_moment: 20
+      maximum_body_rate_deg_s: 360
+    actuator_dynamics:
+      collective_elevon:
+        travel_deg:
+        - -20
+        - 20
+        rate_limit_deg_s: 120
+        time_constant_s: 0.05
+        source_class: PUBLISHED_LIMITS_WITH_IMPLEMENTATION_APPROXIMATION
+      differential_elevon:
+        travel_deg:
+        - -20
+        - 20
+        rate_limit_deg_s: 120
+        time_constant_s: 0.05
+        source_class: PUBLISHED_LIMITS_WITH_IMPLEMENTATION_APPROXIMATION
+      throttle:
+        time_constant_s: 0.2
+        source_class: IMPLEMENTATION_APPROXIMATION
+    table_bindings:
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_rate_p_6axis.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_rate_q_6axis.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_rate_r_6axis.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_propeller_ct.tbl
+    - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_propeller_cq.tbl
+    coefficient_composition:
+      table_semantics: absolute_coefficients_at_fixed_control_grid_reference_condition
+      baseline_table: skywalker_x8_static_6axis.tbl
+      runtime_rule: Add the static table once, then add each absolute control-table
+        contribution after subtracting the common static term.  Control tables are
+        not increments, and their zero-control value is not equal to the static table
+        because the source control grids use throttle=0.44 while the static grid uses
+        throttle=0.0.
+      formula: static + (collective - static) + (differential - static)
+      ingestion_check: 'At zero collective/differential deflection, the two control
+        tables must agree with each other at their shared fixed reference condition.  Do
+        not require equality with the static table: the source grids have different
+        throttle reference conditions.  If a replacement table has increment semantics,
+        stop before changing the runtime composition.'
+    aero_convention:
+      force_frame: body_axes_x_forward_y_right_z_down
+      force_channels: cx_cy_cz
+      table_semantics: absolute_coefficients_at_fixed_control_grid_reference_condition
+      drag_note: cx and cz are body-axis force coefficients, not wind-axis drag/lift
+        coefficients.  Do not label cx or cz as CD; derive wind-axis drag only through
+        the documented body-to-wind transformation.
+      source_note: Static, collective-elevon, and differential-elevon decks are transcodes
+        of the named public-research source grids.  The static grid is throttle=0.0;
+        control grids are throttle=0.44 and their source CSVs also expose delta_*
+        columns, while the checked-in .tbl files export total cx/cy/cz/cmx/cmy/cmz
+        channels.  Provenance is recorded in each table header and the source differential
+        tests.
+      problem_comment: Aero channels are body-axis cx/cy/cz (not direct CD/CL); X8
+        control decks are absolute total values at throttle=0.44, distinct from the
+        zero-throttle static deck, and are composed by the explicit formula.
+    source:
+      status: public-research-surrogate
+      bundle: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
+      model_path: cruise_class_uav_skywalker_x8
+    audit_problem_globs:
+    - examples/mission_families/slower_x8/*.prb
+    - examples/generated/vehicles/skywalker_x8_*.prb

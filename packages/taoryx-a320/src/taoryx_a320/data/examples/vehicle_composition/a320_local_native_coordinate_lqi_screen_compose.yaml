@@ -1,0 +1,10 @@
+schema: taoryx.vehicle-compose-request/v1alpha1
+id: a320-local-native-coordinate-lqi-screen-v1
+vehicle: a320_openap_3dof
+fidelity: pseudo_6dof
+initialization:
+  id: pseudo6dof_cruise_attitude_local_point
+mission:
+  id: a320_local_native_coordinate_lqi_screen_v1
+segments:
+  - id: native_coordinate_attitude_lqi_screen

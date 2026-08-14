@@ -1,0 +1,148 @@
+schema: taoryx.vehicle-endpoint-specs/v1alpha1
+version: 1
+description: Focused vertical contracts that join a selected vehicle composition to
+  its runtime factory, executable witness, capability advertisement, normalized output
+  surface, controller campaign, and planning ledger record.
+endpoints:
+- id: x8-source-surface-roll-pitch-lqi
+  family_id: skywalker_x8
+  model_id: skywalker_x8
+  mission_id: x8_local_physical_surface_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  execution_mode: closed_loop_controller
+  operations:
+  - operation: batch
+    factory_id: x8_local_physical_surface_lqi_screen.v1
+    witness_id: x8-local-physical-surface-lqi-screen-batch
+  controller_campaign_id: x8-source-surface-local-lqi-v1
+  required_tuning_operations:
+  - state_derivative
+  - trim
+  - linearize
+  required_core_output_ids:
+  - attitude.local.roll_error
+  - attitude.local.pitch_error
+  - angular_rate.body.x
+  - angular_rate.body.y
+  required_telemetry_output_ids:
+  - mass.total
+  - control.wrench.requested.moment.y
+  - control.wrench.achieved.moment.y
+  - control.wrench.residual.moment.y
+  - diagnostics.allocation_residual_norm
+  - diagnostics.saturation_count
+  - actuator.elevon.collective.actual
+  - actuator.elevon.differential.actual
+  robustness_screens:
+  - id: x8-local-lqi-matched-pitch-wrench-offset
+    kind: constant_offset
+    artifact_filename: robustness_report.json
+    execution_readiness: available
+    cases:
+    - id: nominal
+      parameters:
+        pitch_wrench_bias_fraction: 0.0
+      description: Retain the pinned source-trim local LQI recovery as the nominal
+        reference.
+    - id: positive-pitch-offset
+      parameters:
+        pitch_wrench_bias_fraction: 0.05
+      description: Apply a constant positive pitch moment equal to five percent of
+        the declared physical-wrench pitch scale.
+    - id: negative-pitch-offset
+      parameters:
+        pitch_wrench_bias_fraction: -0.05
+      description: Apply a constant negative pitch moment equal to five percent of
+        the declared physical-wrench pitch scale.
+    metrics:
+    - id: final_feedback_error_fraction
+      maximum: 0.05
+      unit: ratio
+      description: Final local feedback error norm divided by the initial norm using
+        the standard X8 recovery gate.
+    - id: saturation_fraction
+      maximum: 0.05
+      unit: fraction
+      description: Fraction of committed samples with an allocator or source-coordinate
+        saturation.
+    claim_boundary: Fixed source-trim matched pitch-moment screen through the declared
+      external body-moment plant seam. It does not establish wind or mass robustness,
+      nonlinear yaw/sideslip recovery, a gain schedule, route tracking, or qualification.
+  maturity_record_id: skywalker_x8
+  claim_boundary: Local source-trim X8 roll/pitch LQI and bounded collective/differential-elevon
+    allocation only, plus one fixed matched external pitch-moment screen; it does
+    not establish yaw authority, wind or mass robustness, a racetrack, a gain schedule,
+    individual-servo wiring, or flight qualification.
+- id: b747-condition3-source-surface-attitude-rate-lqi
+  family_id: b747
+  model_id: b747
+  mission_id: b747_condition3_local_physical_surface_lqi_screen_v1
+  fidelity: rigid_body_6dof_surface_allocated
+  execution_mode: closed_loop_controller
+  operations:
+  - operation: batch
+    factory_id: b747_condition3_local_physical_surface_lqi_screen.v1
+    witness_id: b747-condition3-local-physical-surface-lqi-screen-batch
+  controller_campaign_id: b747-source-surface-local-lqi-v1
+  required_tuning_operations:
+  - state_derivative
+  - trim
+  - linearize
+  required_core_output_ids:
+  - attitude.local.roll_error
+  - attitude.local.pitch_error
+  - attitude.local.yaw_error
+  - angular_rate.body.x
+  - angular_rate.body.y
+  - angular_rate.body.z
+  required_telemetry_output_ids:
+  - mass.total
+  - control.wrench.requested.moment.y
+  - control.wrench.achieved.moment.y
+  - control.wrench.residual.moment.y
+  - diagnostics.allocation_residual_norm
+  - diagnostics.saturation_count
+  - actuator.elevator.actual
+  - actuator.rudder.actual
+  robustness_screens:
+  - id: b747-local-lqi-matched-pitch-wrench-offset
+    kind: constant_offset
+    artifact_filename: robustness_report.json
+    execution_readiness: available
+    cases:
+    - id: nominal
+      parameters:
+        pitch_wrench_bias_fraction: 0.0
+      description: Retain the pinned NASA CR-2144 condition-3 LQI recovery as the
+        nominal reference.
+    - id: positive-pitch-offset
+      parameters:
+        pitch_wrench_bias_fraction: 0.05
+      description: Apply a constant positive pitch moment equal to five percent of
+        the declared condition-3 pitch-wrench scale.
+    - id: negative-pitch-offset
+      parameters:
+        pitch_wrench_bias_fraction: -0.05
+      description: Apply a constant negative pitch moment equal to five percent of
+        the declared condition-3 pitch-wrench scale.
+    metrics:
+    - id: final_feedback_error_fraction
+      maximum: 0.1
+      unit: ratio
+      description: Final local feedback error norm divided by the initial norm using
+        the standard condition-3 recovery gate.
+    - id: saturation_fraction
+      maximum: 0.05
+      unit: fraction
+      description: Fraction of committed samples with an allocation or source-coordinate
+        saturation.
+    claim_boundary: Fixed condition-3 source-table matched pitch-moment screen through
+      the declared external body-moment plant seam. It does not establish wind or
+      mass robustness, a gain schedule, a transport route, engine or servo dynamics,
+      or qualification.
+  maturity_record_id: b747
+  claim_boundary: Local NASA CR-2144 condition-3 B747 attitude/rate LQI and bounded
+    elevator, aileron, rudder, and throttle source-table allocation only, plus one
+    fixed matched external pitch-moment screen. It does not establish wind or mass
+    robustness, a transport racetrack, gain schedule, servo or engine dynamics, or
+    flight qualification.

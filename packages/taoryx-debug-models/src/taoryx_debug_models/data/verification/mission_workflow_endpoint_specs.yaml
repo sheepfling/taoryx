@@ -1,0 +1,84 @@
+schema: taoryx.mission-workflow-endpoint-specs/v1alpha1
+version: 1
+description: Focused provider-owned vertical proofs for registered nonphysical workflows
+  that intentionally do not claim membership in the physical vehicle-composition registry.
+endpoints:
+- id: reference-ballistic-3dof-batch
+  provider_id: taoryx.reference.mission-composition
+  model_id: reference_ballistic_3dof
+  model_kind: ballistic_3dof
+  fidelity: point_mass_3dof
+  realization_id: analytical_point_mass
+  mission_template_id: reference_ballistic_3dof_repeatable_sequence_v1
+  draft: verification/workflow_endpoint_witnesses/reference_ballistic_3dof.yaml
+  batch_executor_id: analytical-reference-executor
+  blocked_operations: []
+  required_core_output_ids:
+  - position.north_m
+  - position.altitude_m
+  - velocity.speed_m_s
+  required_telemetry_output_ids:
+  - attitude.heading_deg
+  - maneuver.load_factor_g
+  expected_primary_object_count: 1
+  maximum_samples_per_object: 128
+  robustness_disposition: not_applicable
+  robustness_reason: The deterministic constant-gravity analytical coast has no accepted
+    disturbance, tuning, atmospheric, actuator, or plant-uncertainty seam.
+  maturity_record_id: reference_ballistic_3dof
+  claim_boundary: This is a low-fidelity analytical batch contract witness. It is
+    not a source-grounded vehicle, atmosphere, controller, robustness, or qualification
+    claim.
+- id: reference-waypoint-3dof-batch
+  provider_id: taoryx.reference.mission-composition
+  model_id: reference_constant_velocity_waypoint_3dof
+  model_kind: constant_velocity_waypoint_3dof
+  fidelity: point_mass_3dof
+  realization_id: analytical_point_mass
+  mission_template_id: reference_constant_velocity_waypoint_3dof_repeatable_sequence_v1
+  draft: verification/workflow_endpoint_witnesses/reference_waypoint_3dof.yaml
+  batch_executor_id: analytical-reference-executor
+  blocked_operations: []
+  required_core_output_ids:
+  - position.north_m
+  - position.east_m
+  - position.altitude_m
+  - velocity.speed_m_s
+  required_telemetry_output_ids:
+  - attitude.heading_deg
+  - maneuver.load_factor_g
+  expected_primary_object_count: 1
+  maximum_samples_per_object: 128
+  robustness_disposition: not_applicable
+  robustness_reason: The deterministic kinematic waypoint fixture intentionally has
+    no turn-performance, controller, atmosphere, disturbance, or tuning seam.
+  maturity_record_id: reference_constant_velocity_waypoint_3dof
+  claim_boundary: This is a low-fidelity analytical guidance contract witness. It
+    is not a vehicle-navigation, controller, robustness, or qualification claim.
+- id: debug-contract-probe-batch
+  provider_id: taoryx.debug.mission-composition-contract-probe
+  model_id: contract_probe_vehicle
+  model_kind: contract_probe
+  fidelity: medium
+  realization_id: medium
+  mission_template_id: deployment_walkthrough
+  draft: verification/workflow_endpoint_witnesses/debug_contract_probe.yaml
+  batch_executor_id: contract-probe-executor
+  blocked_operations: []
+  required_core_output_ids:
+  - position.north_m
+  - velocity.speed_m_s
+  - attitude.heading_deg
+  required_telemetry_output_ids:
+  - mode.index
+  - health.valid
+  - event.marker
+  expected_primary_object_count: 3
+  maximum_samples_per_object: 3
+  robustness_disposition: not_applicable
+  robustness_reason: The synthetic probe exists to test typed configuration, controls,
+    output, and lineage contracts; it has no physical disturbance or robustness meaning.
+  maturity_record_id: contract_probe_vehicle
+  claim_boundary: This is a synthetic provider/API conformance witness. It is not
+    a physical vehicle, payload, deployment, controller, robustness, or qualification
+    claim.

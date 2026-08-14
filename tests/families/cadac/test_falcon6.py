@@ -217,6 +217,25 @@ def test_falcon6_second_order_actuator_exposes_requested_vs_achieved() -> None:
 ####
 
 
+def test_falcon6_plant_preserves_surface_limit_feedback(tmp_path: Path) -> None:
+    definition = load_falcon6_source_definition(_write_falcon_case(tmp_path))
+    result = run_falcon6_physical_plant(
+        definition,
+        Falcon6DirectPlantCommand(
+            surfaces=Falcon6SurfaceCommand(aileron_deg=30.0, elevator_deg=0.0, rudder_deg=-25.0),
+        ),
+        end_time_s=0.1,
+        sample_step_s=0.01,
+    )
+
+    assert any(any(sample.surface_position_limited) for sample in result.samples)
+    assert any(any(sample.surface_rate_limited) for sample in result.samples)
+    ####
+
+
+####
+
+
 def test_falcon6_second_order_actuator_remains_bounded() -> None:
     config = Falcon6ActuatorConfig(
         mode=2,

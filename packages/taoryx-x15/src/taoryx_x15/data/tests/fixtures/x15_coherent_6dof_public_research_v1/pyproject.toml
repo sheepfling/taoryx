@@ -1,0 +1,12 @@
+[project]
+name = "x15-coherent-6dof-public-research"
+version = "1.0.0"
+requires-python = ">=3.12"
+dependencies = ["numpy>=2.0"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"

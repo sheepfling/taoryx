@@ -31,6 +31,7 @@ dev = [
   "matplotlib>=3.9",
   "numpy>=2.0",
   "Pillow>=10.4",
+  "pyright>=1.1.410",
   "PyMuPDF>=1.24",
   "pypdf>=6.0",
   "pytest>=8.3",
@@ -50,12 +51,25 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+taoryx = ["data/**/*.yaml"]
+
 [tool.pytest.ini_options]
 pythonpath = [
   "src",
   "packages/taoryx-daveml/src",
   "packages/taoryx-cadac/src",
   "packages/taoryx-simple-aero/src",
+  "packages/taoryx-dual-launch/src",
+  "packages/taoryx-debug-models/src",
+  "packages/taoryx-a320/src",
+  "packages/taoryx-f16/src",
+  "packages/taoryx-hummingbird/src",
+  "packages/taoryx-nesc/src",
+  "packages/taoryx-passive-bodies/src",
+  "packages/taoryx-x15/src",
+  "packages/taoryx-hl20/src",
+  "packages/taoryx-source-table-fixed-wing/src",
   "packages/taoryx-reference-models/src",
   "packages/taoryx-reachability/src",
   ".",
@@ -98,6 +112,14 @@ extend-exclude = ["build", "dist", "qa"]
 # is enforced now, while a later cleanup can adopt Ruff's formatter and E501.
 select = ["F", "I"]
 
+[tool.pyright]
+# Pyright is enforced over the shared plug-in discovery/developer-route surface
+# by the portable quality task. Keeping its invocation scoped makes that CI
+# gate usable while the inherited parser and model code retain separately
+# tracked typing debt.
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+
 [tool.mypy]
 python_version = "3.12"
 files = [
@@ -105,6 +127,16 @@ files = [
   "packages/taoryx-daveml/src",
   "packages/taoryx-cadac/src",
   "packages/taoryx-simple-aero/src",
+  "packages/taoryx-dual-launch/src",
+  "packages/taoryx-debug-models/src",
+  "packages/taoryx-a320/src",
+  "packages/taoryx-f16/src",
+  "packages/taoryx-hummingbird/src",
+  "packages/taoryx-nesc/src",
+  "packages/taoryx-passive-bodies/src",
+  "packages/taoryx-x15/src",
+  "packages/taoryx-hl20/src",
+  "packages/taoryx-source-table-fixed-wing/src",
   "packages/taoryx-reference-models/src",
   "packages/taoryx-reachability/src",
 ]
@@ -118,6 +150,16 @@ mypy_path = [
   "packages/taoryx-daveml/src",
   "packages/taoryx-cadac/src",
   "packages/taoryx-simple-aero/src",
+  "packages/taoryx-dual-launch/src",
+  "packages/taoryx-debug-models/src",
+  "packages/taoryx-a320/src",
+  "packages/taoryx-f16/src",
+  "packages/taoryx-hummingbird/src",
+  "packages/taoryx-nesc/src",
+  "packages/taoryx-passive-bodies/src",
+  "packages/taoryx-x15/src",
+  "packages/taoryx-hl20/src",
+  "packages/taoryx-source-table-fixed-wing/src",
   "packages/taoryx-reference-models/src",
   "packages/taoryx-reachability/src",
 ]

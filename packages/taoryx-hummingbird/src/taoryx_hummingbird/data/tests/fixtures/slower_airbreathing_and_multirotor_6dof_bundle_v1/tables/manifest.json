@@ -1,0 +1,29 @@
+{
+  "dataset_name": "slower_airbreathing_and_multirotor_6dof_bundle_v1",
+  "fidelity": "vehicle-specific public research surrogates; not flight-qualified",
+  "generated": [
+    "hummingbird_cmx.tbl",
+    "hummingbird_cmy.tbl",
+    "hummingbird_cmz.tbl",
+    "hummingbird_cx.tbl",
+    "hummingbird_cy.tbl",
+    "hummingbird_cz.tbl",
+    "hummingbird_rotor_reaction_torque.tbl",
+    "hummingbird_rotor_static.tbl"
+  ],
+  "models": {
+    "hummingbird": {
+      "family": "multirotor",
+      "source": "quadcopter_hummingbird"
+    }
+  },
+  "omissions": [
+    "The bounded direct-wrench B747 table is a Taoryx-derived local beta extension and is not source-envelope qualification.",
+    "GTM remains a pointer-only alternate because its binary aero database was not supplied."
+  ],
+  "source_bundle_sha256": "17ee0ca897e3ee44d4dd68deb6eb6c4922fef9ef87de46fb032124596b39b911",
+  "source_preserved": true,
+  "taoryx_notional_first_cut": [
+    "b747_notional_fuel_flow.tbl"
+  ]
+}

@@ -1,0 +1,6 @@
+event,time_definition,mass_change,impulse_or_force,status
+carrier_release,scenario_t0,none_in_baseline_vehicle_model,not supplied,event metadata only
+main_engine_ignition,scenario_defined_after_release,continuous propellant depletion begins,source-native throttle map,ignition transient and delay unavailable
+main_engine_shutdown,commanded or first-feed-tank depletion,depletion stops,shutdown transient unavailable,ideal step used in included history
+lower_ventral_fin_jettison,mission dependent before landing,unknown,unknown,known physical event; no public mass/impulse value packaged
+external_tank_separation,X-15A-2 only,not applicable to baseline X-15 package,not applicable,excluded configuration

@@ -1,0 +1,36 @@
+schema_version: 1
+description: Capability-backed first-mission inputs for the reusable powered-fixed-wing
+  racetrack compiler. These are planning inputs, not controller or physical effector
+  qualification claims.
+baselines:
+  a320-cruise: a320-openap-3dof
+profiles:
+  a320-cruise:
+    realization_bindings:
+      point_mass_3dof: a320-openap-3dof
+      pseudo_6dof_kinematic_bridge: a320-openap-pseudo6dof
+    capability:
+      vehicle_id: a320_openap_3dof
+      operating_point_id: openap-cruise-230p1542mps
+      minimum_speed_m_s: 190.0
+      nominal_speed_m_s: 230.1542
+      maximum_speed_m_s: 250.0
+      maximum_bank_deg: 25.0
+      maximum_climb_rate_m_s: 4.0
+      maximum_descent_rate_m_s: 4.0
+      provenance: OpenAP cruise performance binding; pseudo-6DOF realization remains
+        a declared surrogate
+      evidence_class: derived_exact_3dof_planning_bound
+    intent:
+      id: powered-fixed-wing-racetrack
+      low_altitude_m: 10500.0
+      high_altitude_m: 11000.0
+      requested_speed_m_s: 230.1542
+      requested_bank_deg: 20.0
+      minimum_straight_length_m: 50000.0
+      level_dwell_s: 90.0
+      turn_radius_margin: 1.1
+      simulation_margin_s: 120.0
+      gate_corridor_m: 500.0
+      gate_altitude_tolerance_m: 75.0
+      gate_speed_tolerance_mps: 8.0

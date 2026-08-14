@@ -1,12 +1,14 @@
-# Fidelity data requirements and readiness checks
+# Fidelity tiers and vehicle plug-in requirements
 
-Status: implementation contract for model intake
+Status: developer-facing implementation and readiness contract
 
-This document defines what Taoryx must know before a vehicle can honestly be
-run or advertised at each of the four fidelity tiers:
+This document is the fidelity contract for a vehicle plug-in author. It defines
+what a package must contribute before one of its models can honestly advertise,
+run, or be evaluated at each of the four canonical fidelity tiers:
 
 1. `point_mass_3dof`
-2. `pseudo_6dof_kinematic_bridge`
+2. `pseudo_6dof` (the readiness checker accepts the legacy alias
+   `pseudo_6dof_kinematic_bridge`)
 3. `rigid_body_6dof_direct_wrench`
 4. `rigid_body_6dof_surface_allocated`
 
@@ -14,6 +16,67 @@ The fourth tier is not a fifth equation-of-motion mode. It is the physical
 effector realization split inside rigid-body 6DOF. A rigid-body integrator can
 run with a direct moment, a source table, or an actual allocator; those are
 different claims and must remain different readiness results.
+
+Start here when adding a family to a plug-in. For package layout, discovery,
+factories, and control-profile authoring, use
+[Authoring a vehicle plug-in](vehicle-plugin-authoring.md). For the underlying
+equations-of-motion ladder and the evidence/promotion sequence, use
+[Dynamics fidelity ladder](dynamics-fidelity-ladder.md) and the
+[fidelity-first integration program](../plan/fidelity-first-integration-program.md).
+
+## What “complete at a tier” means
+
+“Complete” has three deliberately separate meanings. A package must state
+which one it has reached:
+
+| Status | Meaning | What it does *not* mean |
+| --- | --- | --- |
+| **Contract-complete** | Identity, provenance, configuration, declared controls, outputs, claim boundary, and exact operation matrix are published; unavailable pieces are explicit. | The operation has an executable plant or qualified physics. |
+| **Ready for runtime probes** | Required source/data declarations for that tier are present and reachable, so the readiness validator can issue `ready_for_runtime_probes`. | Trim, numerical closure, control direction, mission performance, robustness, or source correlation passed. |
+| **Executable and qualified/promoted** | An exact factory/witness ran and the tier-specific runtime and evidence gates passed at its stated claim boundary. | A higher tier, an unmodeled actuator effect, or vehicle certification is implied. |
+
+A plug-in may publish a lower tier as executable while a higher tier remains
+`planned`, `blocked`, or batch-only. It may also run a higher tier as a
+diagnostic, but it cannot call that tier promoted while its lower-tier
+prerequisites or evidence remain incomplete.
+
+## Common plug-in deliverables for every tier
+
+The physical data changes by tier, but every advertised model/realization must
+provide the same public and operational seams:
+
+```text
+family/model identity + source/provenance + fidelity/claim boundary
+    -> configuration schema + output schema + exact control advertisement
+    -> resolved vehicle interface: units, frames, bounds, value spaces,
+       authority ownership, availability, and lowering
+    -> exact batch and/or episode execution binding, or an explicit blocker
+    -> committed status/telemetry and structured diagnostics
+    -> checked-in witness plus tier-appropriate validation evidence
+```
+
+The configuration schema says what can be fixed before a run; the control
+advertisement says what can be commanded during a run; the output/status
+contract says what actually happened. A provider must not substitute one for
+another. If `step` is advertised, the package also supplies a persistent
+episode factory whose selected action schema, runtime availability mask,
+requested/applied/lowered feedback, checkpoint/reset behavior, and committed
+observations match the advertised interface.
+
+## Tier contract at a glance
+
+| Canonical tier | Equations and control boundary | A plug-in must add beyond common deliverables | Minimum truthful control/status boundary | Explicit nonclaim |
+| --- | --- | --- | --- | --- |
+| `point_mass_3dof` | Translational position/velocity under declared force, lift-vector, acceleration, and propulsion/resource laws. | Initial state; mass/resource and environment policy; force/propulsion model and valid envelope; terminal/objective semantics. | Guidance or force-model intent; requested and achieved translational response, resources, envelope/terminal status. | Integrated attitude, body rates, moments, physical effectors. |
+| `pseudo_6dof` | 3DOF translation plus a named, bounded attitude/body-rate response realization. | Attitude representation/frame; response-law identity and provenance; initial attitude; lags, damping, rate/acceleration limits; calibration or comparison cases. | Guidance, attitude, or rate intent; commanded and achieved attitude/rate response, limiter/lag state, and declared lowering evidence. | Physical moment balance, inertia-derived attitude dynamics, or physical actuator activity unless separately modeled. |
+| `rigid_body_6dof_direct_wrench` | Newton–Euler translation and rotation with generalized body force/moment or source-induced loads. | Positive inertia and mass/CG policy; body/moment reference frames and signs; force/moment source; direct-wrench axis mapping and limits; rotational initial/trim evidence. | Direct desired wrench or a provider-owned source controller; requested/achieved force and moment, residual, load decomposition, and closure diagnostics. | Surface, rotor, gimbal, thruster, wheel, or other physical-effector allocation. |
+| `rigid_body_6dof_surface_allocated` | Same rigid-body equations, with commands realized through declared bounded physical or logical effectors. | Every effector's identity, geometry/axis/moment arm, map or effectiveness, trim offsets, travel/rate/lag/failure limits, allocator policy, and resource coupling. | High-level/body-motion/wrench commands and/or declared direct effectors; commanded and actual effectors, requested and achieved wrench, residual, saturation, and allocation status. | Any actuator, blade, inflow, plume, drivetrain, or control-law fidelity not actually declared and validated. |
+
+The two rigid-body tiers share the same native runtime mode but are distinct
+public fidelities. New plug-ins must never publish the ambiguous legacy name
+`rigid_body_6dof`: they select either `rigid_body_6dof_direct_wrench` or
+`rigid_body_6dof_surface_allocated` according to the actual control
+realization.
 
 The machine-readable source of truth is
 [`verification/fidelity_data_requirements.yaml`](../../verification/fidelity_data_requirements.yaml).
@@ -73,6 +136,13 @@ drag/lift or a direct acceleration model, and fuel/propellant/battery data when
 resource consumption is claimed. Inertia, moments, body rates, and individual
 effectors are not required and must not appear as implied claims.
 
+For a live session, expose the semantic translation/guidance inputs that the
+model actually accepts and publish their committed translational readback,
+resource state, envelope/terminal state, and any provider-owned guidance
+status. A point-mass model may offer a useful waypoint, velocity, bank, speed,
+or energy command surface; none of those inputs licenses an attitude, moment,
+or effector claim.
+
 Typical realization:
 
 ```text
@@ -100,6 +170,14 @@ It may integrate forces for translation and a response law for attitude. It
 does not require a physical inertia tensor if the response law does not use
 one, but it must not claim moment balance or physical effector activity.
 
+The response law is part of the model, not a generic UI convenience. A plug-in
+must name the law and expose enough committed readback to distinguish command,
+achieved attitude/rate, lag, rate/acceleration limiting, and resource or phase
+availability. A `gentle`/`sport` schedule may be a declared discrete action
+over the same response law; a change from attitude commands to rate commands
+is a different authority profile with its own action schema and handoff
+policy.
+
 Examples include a bank-to-turn response for a fixed-wing vehicle, a
 multirotor wrench-response surrogate, a helicopter scheduled response model,
 or a spacecraft pointing response. The name of the response law is part of
@@ -126,6 +204,13 @@ force or moment is applied to the rigid-body equations. It does not mean an
 elevon, rotor, thruster, wheel, or gimbal was solved. Source control-conditioned
 tables are also not automatically an actuator model; the manifest must say
 whether they are source-direct controls or part of an allocator.
+
+If a caller can request wrench, every component must use one declared frame,
+axis order, unit, bound, and sign convention. The returned status must keep
+requested wrench, applied/limited wrench, achieved/load-derived wrench, and
+residual separate. A direct-wrench controller or local screen is a valid and
+useful rigid-body endpoint, but it is not evidence that a physical actuator
+could create that wrench.
 
 ### 2.4 Rigid-body 6DOF with physical effector allocation
 
@@ -159,6 +244,15 @@ allocation, but only inside its table domain and stated travel/rate limits. It
 does not automatically provide a complete flight-control law, hinge moments,
 servo dynamics, blade dynamics, inflow, plume interaction, or certification
 fidelity.
+
+At this tier, an external high-level control still need not be an individual
+effector command. It may lower through guidance or a controller to a wrench and
+then through the allocator. The plug-in must make that chain inspectable. If it
+exposes direct effectors, those must be actual modeled coordinates—not labels
+borrowed from another realization—and status must include their commanded,
+actual, limited, or failed state. A VTOL conversion model, for example, needs
+the declared nacelle/mixer/transition behavior before it can claim an
+actuated-conversion tier; a mode selector alone is not allocation.
 
 ## 3. What changes by family?
 

@@ -21,8 +21,6 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field
 
 from .local_direct_wrench_screen_registry import resolve_local_direct_wrench_screen_advertisement
-from .local_native_coordinate_lqi_screen_registry import resolve_local_native_coordinate_lqi_screen_advertisement
-from .plugins.resources import packaged_resource_fallback
 from .trajectory.configuration_contract import (
     ConfigurableTrajectoryProvider,
     ConfigurableTrajectoryProviderRegistry,
@@ -53,6 +51,7 @@ from .trajectory.execution_contract import (
     MissionCompositionRunResponse,
     RunnableMissionCompositionProvider,
 )
+from .vehicle_catalog_resources import vehicle_catalog_resources
 
 if TYPE_CHECKING:
     from .controller_tuning_registry import (
@@ -61,15 +60,11 @@ if TYPE_CHECKING:
     )
     from .family_adapter_registry import FamilyAdapterRegistry
     from .local_controller_screen_advertisements import LocalControllerScreenAdvertisementRegistry
+    from .plugins import PluginCatalog
 
 AUTHORING_DRAFT_SCHEMA = "taoryx.model-authoring-draft/v1"
 REQUIRED_VALUE = "<REQUIRED>"
 SELECTION_REQUIRED = "<SELECT>"
-VEHICLE_MATURITY_REGISTRY = packaged_resource_fallback(
-    Path(__file__).resolve().parents[2] / "verification/vehicle_maturity_registry.yaml",
-    package="taoryx_reference_models",
-    resource="data/verification/vehicle_maturity_registry.yaml",
-)
 AuthoringPlanStatus = Literal["ready_to_author", "selection_required"]
 
 
@@ -154,6 +149,7 @@ class ModelAuthoringSelection:
             "provider_id": self.provider_id,
             "model_id": self.model.id,
             "model_version": self.model.version,
+            "model_metadata_fingerprint": self.model.metadata_fingerprint,
             "family_id": self.model.family_id,
             "physical_family": self.model.physical_family,
             "fidelity": self.fidelity,
@@ -542,7 +538,11 @@ def build_model_authoring_plan(
     )
     execution_advertisement = _execution_advertisement(selection)
     maturity_advertisement = _maturity_advertisement(selection)
-    focused_endpoint_verification = _focused_endpoint_verification_advertisement(selection)
+    provider_catalog = getattr(providers.provider(provider_id), "plugin_catalog", None)
+    focused_endpoint_verification = _focused_endpoint_verification_advertisement(
+        selection,
+        plugin_catalog=provider_catalog,
+    )
     segment_instances = _segment_instances(schema.root, selection.mission)
     navigation_parameters = [item for item in _parameter_records(schema.root) if _is_navigation_parameter(item)]
     selection_gaps: list[str] = []
@@ -633,13 +633,19 @@ def build_model_authoring_plan(
 def _vehicle_maturity_records() -> tuple[Mapping[str, object], ...]:
     """Load the small planning ledger once for public plan advertisements."""
 
-    payload = yaml.safe_load(VEHICLE_MATURITY_REGISTRY.read_text(encoding="utf-8"))
-    if not isinstance(payload, Mapping) or payload.get("registry_id") != "taoryx_vehicle_maturity_v1":
-        raise ValueError("invalid vehicle maturity registry")
-    records = payload.get("records")
-    if not isinstance(records, list):
-        raise ValueError("vehicle maturity registry must contain records")
-    return tuple(record for record in records if isinstance(record, Mapping))
+    records: list[Mapping[str, object]] = []
+    for source in vehicle_catalog_resources("verification/vehicle_maturity_registry.yaml"):
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping) or payload.get("registry_id") != "taoryx_vehicle_maturity_v1":
+            raise ValueError("invalid vehicle maturity registry")
+        fragment_records = payload.get("records")
+        if not isinstance(fragment_records, list):
+            raise ValueError("vehicle maturity registry must contain records")
+        records.extend(record for record in fragment_records if isinstance(record, Mapping))
+    identifiers = [record.get("id") for record in records]
+    if len(identifiers) != len(set(identifiers)):
+        raise ValueError("vehicle maturity registry has duplicate record IDs across plug-in fragments")
+    return tuple(records)
     ####
 
 
@@ -755,7 +761,11 @@ def _execution_advertisement(selection: ModelAuthoringSelection) -> dict[str, ob
     ####
 
 
-def _focused_endpoint_verification_advertisement(selection: ModelAuthoringSelection) -> dict[str, object]:
+def _focused_endpoint_verification_advertisement(
+    selection: ModelAuthoringSelection,
+    *,
+    plugin_catalog: PluginCatalog | None = None,
+) -> dict[str, object]:
     """Advertise checked-in vertical proofs without conflating them with a plan.
 
     Physical vehicle endpoints and provider-owned workflow endpoints have
@@ -776,9 +786,9 @@ def _focused_endpoint_verification_advertisement(selection: ModelAuthoringSelect
     selected_realization_id = selection.realization.id if selection.realization is not None else None
     endpoints: list[dict[str, object]] = []
 
-    if selection.provider_id == "taoryx.registry.mission-composition" and selection.model.model_kind == "canonical_vehicle_family":
+    if selection.model.model_kind == "canonical_vehicle_family":
         for vehicle_endpoint in load_vehicle_endpoint_spec_catalog().endpoints:
-            if vehicle_endpoint.model_id != selection.model.id:
+            if vehicle_endpoint.model_id != selection.model.id or selection.provider_id not in vehicle_endpoint.provider_ids:
                 continue
             matches_selected_mission_and_fidelity = vehicle_endpoint.mission_id == selected_mission_id and vehicle_endpoint.fidelity == selection.fidelity
             endpoints.append(
@@ -787,14 +797,18 @@ def _focused_endpoint_verification_advertisement(selection: ModelAuthoringSelect
                     "kind": "vehicle_composition",
                     "maturity_record_id": vehicle_endpoint.maturity_record_id,
                     "matches_selected_mission_and_fidelity": matches_selected_mission_and_fidelity,
-                    "match_scope": "model_id, mission_id, fidelity",
+                    "match_scope": "provider_id, model_id, mission_id, fidelity",
                     "command": f"taoryx vehicle verify {vehicle_endpoint.id}",
                     "execute_command": f"taoryx vehicle verify {vehicle_endpoint.id} --execute",
                 }
             )
 
-    if selection.model.model_kind in {"trajectory_workflow", "composition_proof_family"}:
-        for workflow_endpoint in load_mission_workflow_endpoint_catalog().endpoints:
+    # The provider/model identity is the workflow-proof boundary. New
+    # nonphysical kinds (for example, analytical or contract fixtures) do not
+    # need a core-code allowlist merely to advertise their package-owned
+    # endpoint evidence.
+    if selection.model.model_kind != "canonical_vehicle_family":
+        for workflow_endpoint in load_mission_workflow_endpoint_catalog(plugins=plugin_catalog).endpoints:
             if workflow_endpoint.provider_id != selection.provider_id or workflow_endpoint.model_id != selection.model.id:
                 continue
             matches_selected_configuration = (
@@ -1410,13 +1424,7 @@ def _automation_realization_record(
             "channel_count": len(controls.channels),
             "channels": [item.id for item in controls.channels],
             "authority_ids": [item.id for item in controls.authorities],
-            "control_scheme_ids": list(
-                dict.fromkeys(
-                    item.scheme_id
-                    for item in model.control_scheme_support
-                    if item.realization_id == realization.id
-                )
-            ),
+            "control_scheme_ids": list(dict.fromkeys(item.scheme_id for item in model.control_scheme_support if item.realization_id == realization.id)),
             "intent_ids": [item.id for item in controls.intents],
             "default_authority_id": controls.default_authority_id,
         },
@@ -1984,11 +1992,7 @@ def _controller_plan(
         (item for item in selection.model.presentation.properties if item.id == "physical_model"),
         None,
     )
-    explicitly_nonphysical = (
-        physical_model_property is not None
-        and physical_model_property.value_declared
-        and physical_model_property.value is False
-    )
+    explicitly_nonphysical = physical_model_property is not None and physical_model_property.value_declared and physical_model_property.value is False
     if realization.input_realization in {"uncontrolled", "source_replay"}:
         status = "not_applicable"
         pipeline = ["declare open-loop or replay semantics", "evaluate truth objectives"]
@@ -1998,9 +2002,7 @@ def _controller_plan(
             "exercise typed control transport and lowering",
             "retain the non-physical debug claim boundary",
         ]
-    elif controls.status == "internally_generated" or (
-        default_authority is not None and default_authority.command_owner != "caller"
-    ):
+    elif controls.status == "internally_generated" or (default_authority is not None and default_authority.command_owner != "caller"):
         status = "provider_managed_with_campaign" if campaigns else "provider_managed"
         pipeline = [
             "resolve mission capability and route",
@@ -2028,18 +2030,11 @@ def _controller_plan(
         ]
     public_campaigns = [item.public_dict() for item in campaigns]
     campaign_ids = [item.id for item in campaigns]
-    local_controller_screen = resolve_local_native_coordinate_lqi_screen_advertisement(
-        family_id=selection.model.family_id,
-        mission_id=selection.mission.id if selection.mission is not None else None,
-        fidelity=selection.fidelity,
-    )
     direct_wrench_screen = resolve_local_direct_wrench_screen_advertisement(
         family_id=selection.model.family_id,
         mission_id=selection.mission.id if selection.mission is not None else None,
         fidelity=selection.fidelity,
     )
-    if local_controller_screen is not None and direct_wrench_screen is not None:
-        raise RuntimeError("one selected composition endpoint cannot advertise two local controller screens")
     campaign_screens = tuple(
         screen
         for campaign in campaigns
@@ -2063,25 +2058,18 @@ def _controller_plan(
     if len(plug_in_screens) > 1:
         raise RuntimeError("one selected composition endpoint has multiple plug-in local-controller-screen advertisements")
     plug_in_screen = plug_in_screens[0].public_advertisement() if plug_in_screens else None
-    screens = tuple(item for item in (local_controller_screen, direct_wrench_screen, registered_screen, plug_in_screen) if item is not None)
+    screens = tuple(item for item in (direct_wrench_screen, registered_screen, plug_in_screen) if item is not None)
     if len(screens) > 1:
         raise RuntimeError("one selected composition endpoint has multiple local-controller-screen advertisements")
     has_live_switchable_profiles = (
-        sum(
-            item.availability in {"available", "available_in_batch"}
-            and item.switching_policy == "explicit_bumpless"
-            for item in controls.authorities
-        )
-        > 1
+        sum(item.availability in {"available", "available_in_batch"} and item.switching_policy == "explicit_bumpless" for item in controls.authorities) > 1
     )
     default_channel_ids = (
         {item.id for item in controls.channels} if default_authority is None or not has_live_switchable_profiles else set(default_authority.channel_ids)
     )
     default_channels = tuple(item for item in controls.channels if item.id in default_channel_ids)
     control_scheme_support = tuple(
-        item
-        for item in selection.model.control_scheme_support
-        if item.realization_id == realization.id and selection.fidelity in item.fidelity_ids
+        item for item in selection.model.control_scheme_support if item.realization_id == realization.id and selection.fidelity in item.fidelity_ids
     )
     return {
         "status": status,
@@ -2097,9 +2085,7 @@ def _controller_plan(
         "default_authority_id": controls.default_authority_id,
         "channel_projection": ("default_authority" if default_authority is not None and has_live_switchable_profiles else "complete_realization"),
         "authorities": [item.model_dump(mode="json") for item in controls.authorities],
-        "control_scheme_support": [
-            item.model_dump(mode="json") for item in control_scheme_support
-        ],
+        "control_scheme_support": [item.model_dump(mode="json") for item in control_scheme_support],
         "intents": [item.model_dump(mode="json") for item in controls.intents],
         "family_adapter": adapter_record,
         "tuning_adapter": {
@@ -2177,6 +2163,19 @@ def _tuning_cache_advertisement(campaign_ids: Sequence[str]) -> dict[str, object
             "validation, allocation, mission truth-objective checks, or qualification gates."
         ),
     }
+    ####
+
+
+def __getattr__(name: str) -> object:
+    """Resolve the historical maturity-registry path only for compatibility users."""
+
+    if name != "VEHICLE_MATURITY_REGISTRY":
+        raise AttributeError(name)
+    from .compatibility.vehicle_catalog_resources import legacy_vehicle_catalog_resource
+
+    value = legacy_vehicle_catalog_resource("verification/vehicle_maturity_registry.yaml")
+    globals()[name] = value
+    return value
     ####
 
 

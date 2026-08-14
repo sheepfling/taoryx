@@ -12,7 +12,7 @@ class TaoryxReachabilityProvider:
         id="taoryx.reachability.workbench",
         version="0.1.0a0",
         description="Reduced-order reachability envelopes, overlays, continuation, and visualization.",
-        families=("hl20_mod_k", "tumbling_body", "x15"),
+        families=("hl20_mod_k", "x15"),
         profiles=(
             "reachability.boost_glide.prelaunch_capture.v1",
             "reachability.glider.post_release_retarget.v1",

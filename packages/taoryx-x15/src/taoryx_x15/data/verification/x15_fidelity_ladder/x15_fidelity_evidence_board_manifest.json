@@ -1,0 +1,33 @@
+{
+  "board": {
+    "path": "verification/x15_fidelity_ladder/x15_fidelity_evidence_board.png",
+    "sha256": "6ff4f73f7f79726fa2332f85e7017259f17d4c4d1105ef13a4180050b421ee82"
+  },
+  "claim_boundary": {
+    "claim_boundary": "X-15-scaled staged reduced-order boost/coast/release/high-energy-corridor/glide witness with parent translation and explicit passive spent-booster deployment; no controlled terminal handoff, native X-15 batch provider, or physical-effector qualification is claimed.",
+    "nonclaims": [
+      "No controlled terminal approach or energy-managed handoff is claimed.",
+      "No physical stabilator, rudder, throttle, RCS, or control-surface allocation is claimed.",
+      "The pseudo-6DOF attitude channels are a named response bridge, not source-derived moments."
+    ],
+    "proves": "The reduced staged X-15 witness preserves the declared boost, cutoff, release, high-energy corridor, glide, open-loop atmospheric handoff gate, and impact event ordering."
+  },
+  "family_id": "x15",
+  "fidelity_records": [
+    {
+      "artifact": "verification/x15_fidelity_ladder/point_mass_3dof_evidence.json",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "sha256": "cc8d8dd17898858598c9971777ab11db18c529b2ff273c2dbb57b21d55fdb1dd"
+    },
+    {
+      "artifact": "verification/x15_fidelity_ladder/pseudo_6dof_evidence.json",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "sha256": "520195cfb3ed267e0f370c5e8d4f13de1f67fffda37a2e600d45cb03d2c39601"
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/render_x15_fidelity_board.py",
+  "schema": "taoryx.x15-fidelity-evidence-board/v1alpha1",
+  "status": "verified"
+}

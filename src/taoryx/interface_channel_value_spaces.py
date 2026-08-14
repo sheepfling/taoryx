@@ -27,7 +27,7 @@ from .vehicle_registry import ROOT
 
 INTERFACE_CHANNEL_VALUE_SPACE_CATALOG = packaged_resource_fallback(
     ROOT / "verification/interface_channel_value_space_catalog.yaml",
-    package="taoryx_reference_models",
+    package="taoryx",
     resource="data/verification/interface_channel_value_space_catalog.yaml",
 )
 

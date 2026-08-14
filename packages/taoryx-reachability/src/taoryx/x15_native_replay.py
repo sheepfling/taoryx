@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
-from taoryx_reference_models.resources import model_resource_root
+from taoryx_x15.resources import model_resource_root
 
 from .reachability_visualization import load_reachability_artifact
 from .runtime.runner import run_files

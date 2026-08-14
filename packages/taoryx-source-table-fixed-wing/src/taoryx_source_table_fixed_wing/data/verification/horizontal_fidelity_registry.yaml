@@ -1,0 +1,82 @@
+schema: taoryx.horizontal-fidelity-registry/v1alpha1
+version: 1
+description: The horizontal integration manifest for the current Alpha 3 family catalog.
+  Profile IDs are resolved against verification/pseudo6dof_profiles.yaml; this file
+  owns the physical-family overlay, adapter seam, and four-tier declaration.
+families:
+- family_id: skywalker_x8
+  physical_family: powered_fixed_wing
+  strategy_id: powered_fixed_wing.v1
+  mission_overlay: fixed_wing_racetrack
+  adapter_id: taoryx.fixed_wing.source_table.v1
+  automatic_lowering: true
+  vehicle_registry_id: skywalker_x8
+  tiers:
+    point_mass_3dof:
+      profile_id: skywalker_x8.point_mass_3dof.v1
+      promotion_status: development
+      blockers:
+      - family_flagship_mission
+    pseudo_6dof:
+      profile_id: skywalker_x8.attitude_response_p6dof.v1
+      promotion_status: development
+      blockers:
+      - family_flagship_mission
+    rigid_body_6dof_direct_wrench:
+      profile_id: skywalker_x8.direct_wrench_6dof.v1
+      promotion_status: development
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      blockers:
+      - envelope_robustness_and_flight_qualification
+    rigid_body_6dof_surface_allocated:
+      profile_id: skywalker_x8.surface_allocated_6dof.v1
+      promotion_status: development
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      - effectiveness
+      - allocate
+      blockers:
+      - end_to_end_surface_allocated_racetrack
+- family_id: b747
+  physical_family: powered_fixed_wing
+  strategy_id: powered_fixed_wing.v1
+  mission_overlay: heavy_transport_racetrack
+  adapter_id: taoryx.fixed_wing.source_table.v1
+  automatic_lowering: true
+  vehicle_registry_id: b747
+  tiers:
+    point_mass_3dof:
+      profile_id: b747.point_mass_3dof.v1
+      promotion_status: development
+      blockers:
+      - family_flagship_mission
+    pseudo_6dof:
+      profile_id: b747.attitude_response_p6dof.v1
+      promotion_status: development
+      blockers:
+      - family_flagship_mission
+    rigid_body_6dof_direct_wrench:
+      profile_id: b747.direct_wrench_6dof.v1
+      promotion_status: development
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      blockers:
+      - envelope_robustness_and_flight_qualification
+    rigid_body_6dof_surface_allocated:
+      profile_id: b747.surface_allocated_6dof.v1
+      promotion_status: development
+      required_operations:
+      - state_derivative
+      - trim
+      - linearize
+      - effectiveness
+      - allocate
+      blockers:
+      - end_to_end_surface_allocated_racetrack

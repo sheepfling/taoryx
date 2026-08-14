@@ -1,0 +1,38 @@
+schema_version: 1
+id: x15-release-glide-trim-adjudication-v1
+vehicle: x15
+source_problem: examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb
+source_claim: source-trimmed release glide condition
+decision: source_only_not_equilibrium
+status: adjudicated
+evidence:
+  execution:
+    integrator: rk4
+    max_steps: 2
+    profile: taoryx
+    runtime_status: incomplete_after_initial_rhs
+  initial_air_data:
+    alpha_deg: -0.1958395359473199
+    beta_deg: -1.8517532542751467
+  initial_wrench:
+    force_body_x_n: -96113.3227342223
+    force_body_y_n: 267264.7189874014
+    force_body_z_n: -104776.14302990033
+    moment_body_x_nm: 8485.436467289108
+    moment_body_y_nm: -59680.91570528686
+    moment_body_z_nm: -272814.3226162218
+  equation_closure:
+    translation_normalized: 4.2180156865457774e-16
+    rotation_normalized: 6.510462014341573e-18
+decision_basis:
+  - The source release condition has finite, closed equations but is not a zero-wrench equilibrium.
+  - The source problem prescribes a release/glide state and control schedule; it does not declare a static trim solve.
+  - The observed sideslip and nonzero moments make an automatic equilibrium claim inappropriate without a separately adjudicated release-state target.
+claim_boundary:
+  supported: source-prescribed release/glide initialization with equation closure
+  unsupported: independently solved X-15 force/moment trim
+  unsupported: source historical flight compatibility
+next_evidence:
+  - adjudicate the intended release alpha, beta, and angular-rate targets from the source data
+  - solve only after those targets are declared
+  - compare the solved candidate against the source release trajectory, not against zero wrench by assumption

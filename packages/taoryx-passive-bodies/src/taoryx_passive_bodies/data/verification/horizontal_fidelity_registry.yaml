@@ -1,0 +1,30 @@
+schema: taoryx.horizontal-fidelity-registry/v1alpha1
+version: 1
+description: The horizontal integration manifest for the current Alpha 3 family catalog.
+  Profile IDs are resolved against verification/pseudo6dof_profiles.yaml; this file
+  owns the physical-family overlay, adapter seam, and four-tier declaration.
+families:
+- family_id: tumbling_body
+  physical_family: passive_ballistic_tumbling_body
+  strategy_id: passive_ballistic_tumbling.v1
+  mission_overlay: release_damping_impact
+  adapter_id: taoryx.passive_body.rigid_aero.v1
+  automatic_lowering: false
+  vehicle_registry_id: null
+  tiers:
+    point_mass_3dof:
+      profile_id: tumbling_body.average_area_3dof.v1
+      promotion_status: development
+      blockers:
+      - orientation_averaged_area_is_not_tumble_proof
+    pseudo_6dof:
+      profile_id: tumbling_body.rigid_body_reuse_p6dof.v1
+      promotion_status: development
+      blockers:
+      - passive_uncontrolled_rotation_evidence
+    rigid_body_6dof_direct_wrench:
+      profile_id: null
+      promotion_status: not_applicable
+    rigid_body_6dof_surface_allocated:
+      profile_id: null
+      promotion_status: not_applicable

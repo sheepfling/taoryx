@@ -26,9 +26,10 @@ from .trajectory.pseudo6dof_profiles import (
     SurfaceAllocationProfile,
     load_pseudo6dof_catalog,
 )
-from .vehicle_registry import REGISTRY, ROOT
+from .vehicle_catalog_resources import vehicle_catalog_resources, vehicle_catalog_root
 
 if TYPE_CHECKING:
+    from .plugins.discovery import PluginCatalog
     from .trajectory.reference_families import ReferenceFamilyManifest
 
 
@@ -66,10 +67,7 @@ class UnifiedFamilyManifest:
             "source_manifest": self.source_manifest_path,
             "source_family_id": self.family.source_family_id,
             "resolved_source_family_id": self.source_manifest.family_id if self.source_manifest is not None else None,
-            "data_evidence": {
-                tier: evidence.model_dump(mode="json")
-                for tier, evidence in self.family.data_evidence.items()
-            },
+            "data_evidence": {tier: evidence.model_dump(mode="json") for tier, evidence in self.family.data_evidence.items()},
             "tiers": {
                 "point_mass_3dof": self.binding.point_mass_profile_id,
                 "pseudo_6dof": self.binding.pseudo_profile_id,
@@ -80,6 +78,7 @@ class UnifiedFamilyManifest:
             "vehicle_definition_present": self.vehicle_definition is not None,
         }
         ####
+
     ####
 
 
@@ -114,27 +113,39 @@ class UnifiedFamilyManifestCatalog:
             "status": "pass" if not self.errors else "fail",
             "family_count": len(self.families),
             "families": [family.as_dict() for family in self.families],
-            "findings": [
-                {"family_id": item.family_id, "code": item.code, "message": item.message}
-                for item in self.findings
-            ],
+            "findings": [{"family_id": item.family_id, "code": item.code, "message": item.message} for item in self.findings],
         }
         ####
+
     ####
 
 
-def _load_vehicle_definitions(path: str | Path = REGISTRY) -> Mapping[str, Mapping[str, Any]]:
+def _load_vehicle_definitions(
+    path: str | Path | None = None,
+    *,
+    plugins: PluginCatalog | None = None,
+) -> Mapping[str, Mapping[str, Any]]:
     import yaml
 
-    payload = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
-    vehicles = payload.get("vehicles") if isinstance(payload, Mapping) else None
-    if not isinstance(vehicles, Mapping):
-        raise ValueError(f"{path} must contain a vehicles mapping")
-    return {
-        str(key): value
-        for key, value in vehicles.items()
-        if isinstance(value, Mapping)
-    }
+    sources = (
+        (Path(path),)
+        if path is not None
+        else vehicle_catalog_resources("verification/vehicle_models.yaml", plugins=plugins)
+    )
+    result: dict[str, Mapping[str, Any]] = {}
+    for source in sources:
+        payload = yaml.safe_load(source.read_text(encoding="utf-8"))
+        vehicles = payload.get("vehicles") if isinstance(payload, Mapping) else None
+        if not isinstance(vehicles, Mapping):
+            raise ValueError(f"{source} must contain a vehicles mapping")
+        for key, value in vehicles.items():
+            if not isinstance(value, Mapping):
+                continue
+            identifier = str(key)
+            if identifier in result:
+                raise ValueError(f"vehicle definition {identifier!r} is owned by more than one catalog fragment")
+            result[identifier] = value
+    return result
     ####
 
 
@@ -147,11 +158,38 @@ def _profile_maps(catalog: Pseudo6DOFCatalog) -> tuple[dict[str, Pseudo6DOFProfi
     ####
 
 
+def _resource_root_for_relative_path(
+    relative_path: str,
+    *,
+    fallback: Path,
+    default_resources: bool,
+    plugins: PluginCatalog | None = None,
+) -> Path:
+    """Return the fragment root owning one family-specific package asset.
+
+    Aggregate catalog joins deliberately combine rows from independent vehicle
+    wheels.  A source-manifest or data-evidence path is therefore resolved
+    through the same fragment resolver rather than assumed to sit beside the
+    first aggregate registry fragment.  An explicit ``root`` remains an
+    isolated-provider boundary and bypasses that cross-package lookup.
+    """
+
+    if not default_resources:
+        return fallback
+    relative = Path(relative_path)
+    for candidate in vehicle_catalog_resources(relative_path, plugins=plugins):
+        if candidate.is_file():
+            return candidate.parents[len(relative.parts) - 1]
+    return fallback
+    ####
+
+
 def load_unified_family_manifest_catalog(
     *,
     horizontal: HorizontalFidelityRegistry | None = None,
     pseudo: Pseudo6DOFCatalog | None = None,
-    root: Path = ROOT,
+    root: Path | None = None,
+    plugins: PluginCatalog | None = None,
     validate_source_imports: bool = True,
 ) -> UnifiedFamilyManifestCatalog:
     """Resolve all family/tier bindings through one typed join.
@@ -162,12 +200,15 @@ def load_unified_family_manifest_catalog(
     to an explicit provenance or source-data operation.
     """
 
-    from .trajectory.reference_families import load_reference_family_manifest
-
-    horizontal_registry = horizontal or load_horizontal_registry()
-    pseudo_catalog = pseudo or load_pseudo6dof_catalog()
+    default_resources = root is None
+    resource_root = root or vehicle_catalog_root(plugins=plugins)
+    horizontal_registry = horizontal or load_horizontal_registry(plugins=plugins)
+    pseudo_catalog = pseudo or load_pseudo6dof_catalog(plugins=plugins)
     pseudo_map, direct_map, surface_map = _profile_maps(pseudo_catalog)
-    vehicle_definitions = _load_vehicle_definitions(root / "verification/vehicle_models.yaml")
+    vehicle_definitions = _load_vehicle_definitions(
+        None if default_resources else resource_root / "verification/vehicle_models.yaml",
+        plugins=plugins,
+    )
     findings: list[UnifiedFamilyManifestFinding] = []
     resolved: list[UnifiedFamilyManifest] = []
     pseudo_bindings = {binding.family_id: binding for binding in pseudo_catalog.bindings}
@@ -191,33 +232,71 @@ def load_unified_family_manifest_catalog(
         }
         actual_profile_ids: dict[FidelityTier, str | None] = {tier: family.tiers[tier].profile_id for tier in expected_profile_ids}
         if actual_profile_ids != expected_profile_ids:
-            findings.append(UnifiedFamilyManifestFinding(family.family_id, "tier-profile-mismatch", f"horizontal tier IDs {actual_profile_ids!r} do not match canonical catalog {expected_profile_ids!r}"))
+            findings.append(
+                UnifiedFamilyManifestFinding(
+                    family.family_id,
+                    "tier-profile-mismatch",
+                    f"horizontal tier IDs {actual_profile_ids!r} do not match canonical catalog {expected_profile_ids!r}",
+                )
+            )
         if binding.automatic_lowering != family.automatic_lowering:
-            findings.append(UnifiedFamilyManifestFinding(family.family_id, "lowering-policy-mismatch", "horizontal and pseudo catalogs disagree on automatic lowering"))
+            findings.append(
+                UnifiedFamilyManifestFinding(family.family_id, "lowering-policy-mismatch", "horizontal and pseudo catalogs disagree on automatic lowering")
+            )
         vehicle_definition = None
         if family.vehicle_registry_id is not None:
             vehicle_definition = vehicle_definitions.get(family.vehicle_registry_id)
             if vehicle_definition is None:
-                findings.append(UnifiedFamilyManifestFinding(family.family_id, "vehicle-definition-missing", f"vehicle registry ID {family.vehicle_registry_id!r} is not present"))
+                findings.append(
+                    UnifiedFamilyManifestFinding(
+                        family.family_id, "vehicle-definition-missing", f"vehicle registry ID {family.vehicle_registry_id!r} is not present"
+                    )
+                )
         source_manifest = None
         source_manifest_path = family.source_manifest
+        family_resource_root = resource_root
         if source_manifest_path is not None:
-            path = root / source_manifest_path
+            family_resource_root = _resource_root_for_relative_path(
+                source_manifest_path,
+                fallback=resource_root,
+                default_resources=default_resources,
+                plugins=plugins,
+            )
+            path = family_resource_root / source_manifest_path
             if not path.is_file():
-                findings.append(UnifiedFamilyManifestFinding(family.family_id, "source-manifest-missing", f"source manifest {source_manifest_path!r} does not exist"))
+                findings.append(
+                    UnifiedFamilyManifestFinding(family.family_id, "source-manifest-missing", f"source manifest {source_manifest_path!r} does not exist")
+                )
             else:
                 try:
+                    # Reference-family parsing is an optional model-package
+                    # concern.  A standalone family such as Hummingbird has
+                    # no source manifest and must not import that package.
+                    from .trajectory.reference_families import load_reference_family_manifest
+
                     source_manifest = load_reference_family_manifest(
                         path,
                         validate_daveml_import=validate_source_imports,
                     )
                     if family.source_family_id is not None and source_manifest.family_id != family.source_family_id:
-                        findings.append(UnifiedFamilyManifestFinding(family.family_id, "source-family-id-mismatch", f"source manifest declares {source_manifest.family_id!r}, expected {family.source_family_id!r}"))
+                        findings.append(
+                            UnifiedFamilyManifestFinding(
+                                family.family_id,
+                                "source-family-id-mismatch",
+                                f"source manifest declares {source_manifest.family_id!r}, expected {family.source_family_id!r}",
+                            )
+                        )
                 except (OSError, ValueError) as error:
                     findings.append(UnifiedFamilyManifestFinding(family.family_id, "source-manifest-invalid", str(error)))
         for tier, evidence in family.data_evidence.items():
             for evidence_path in evidence.paths:
-                path = root / evidence_path
+                evidence_root = _resource_root_for_relative_path(
+                    evidence_path,
+                    fallback=family_resource_root,
+                    default_resources=default_resources,
+                    plugins=plugins,
+                )
+                path = evidence_root / evidence_path
                 if not path.is_file():
                     findings.append(
                         UnifiedFamilyManifestFinding(

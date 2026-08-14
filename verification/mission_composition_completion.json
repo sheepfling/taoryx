@@ -1050,20 +1050,20 @@
             "action:available:propulsion.command.fraction->pilot-throttle-fraction",
             "action:available:pilot.longitudinal.command->pilot-longitudinal-normalized",
             "action:available:pilot.lateral.command->pilot-lateral-normalized",
-            "action:available:body_rate.roll.command->body-roll-rate-command-rad-s",
-            "action:available:body_rate.pitch.command->body-pitch-rate-command-rad-s",
-            "action:available:body_rate.yaw.command->body-yaw-rate-command-rad-s",
             "action:available:navigation.waypoint.north.command->waypoint-north-m",
             "action:available:navigation.waypoint.east.command->waypoint-east-m",
             "action:available:navigation.waypoint.altitude.command->waypoint-altitude-m",
             "action:available:navigation.waypoint.capture_radius.command->waypoint-capture-radius-m",
-            "action:available:navigation.waypoint.speed.command->waypoint-speed-mps"
+            "action:available:navigation.waypoint.speed.command->waypoint-speed-mps",
+            "action:available:body_rate.roll.command->body-roll-rate-command-rad-s",
+            "action:available:body_rate.pitch.command->body-pitch-rate-command-rad-s",
+            "action:available:body_rate.yaw.command->body-yaw-rate-command-rad-s"
           ],
           "control_authorities": [
             "available:kinematic:kinematic_guidance",
             "available:kinematic:reduced_pilot_command",
-            "available:body_motion:body_rate_command",
-            "available:mission:live_waypoint_guidance"
+            "available:mission:live_waypoint_guidance",
+            "available:body_motion:body_rate_command"
           ],
           "control_intents": [
             "external_channel:speed",
@@ -1766,10 +1766,21 @@
             "action:available:attitude.pitch.command->pitch_rad",
             "action:available:attitude.yaw.command->yaw_rad",
             "action:available:propulsion.command.fraction->thrust_ratio",
-            "action:available:propulsion.enable->motors_enabled"
+            "action:available:propulsion.enable->motors_enabled",
+            "action:available:velocity.north.command->velocity-north-mps",
+            "action:available:velocity.east.command->velocity-east-mps",
+            "action:available:velocity.vertical.command->velocity-vertical-mps",
+            "action:available:navigation.waypoint.north.command->waypoint-north-m",
+            "action:available:navigation.waypoint.east.command->waypoint-east-m",
+            "action:available:navigation.waypoint.altitude.command->waypoint-altitude-m",
+            "action:available:navigation.waypoint.capture_radius.command->waypoint-capture-radius-m",
+            "action:available:navigation.waypoint.speed.command->waypoint-speed-mps",
+            "action:available:navigation.waypoint.vertical_speed.command->waypoint-vertical-speed-mps"
           ],
           "control_authorities": [
-            "available:body_motion:body_motion_response"
+            "available:body_motion:body_motion_response",
+            "available:kinematic:velocity_yaw_command",
+            "available:mission:live_waypoint_guidance"
           ],
           "control_intents": [
             "external_channel:altitude",
@@ -2354,6 +2365,7 @@
       "capabilities": [
         "deployment",
         "staging",
+        "dynamic_child_generation",
         "multiple_stages",
         "submodels"
       ],
@@ -2401,6 +2413,7 @@
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
+            "dynamic_child_generation",
             "multiple_stages",
             "submodels"
           ],
@@ -2410,11 +2423,10 @@
             "mass.total"
           ],
           "spawned_child_behavior": [
-            "declared:stage_separation_lineage:event_only:nesc-spent-stage"
+            "available:stage_separation_lineage:independently_propagated:nesc-synthetic-cylinder"
           ],
           "blockers": [
-            "staged_rocket_launch_target_state_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered",
-            "deployment/stage_separation_lineage: independent spent-stage trajectory output is not registered by the source replay binding"
+            "staged_rocket_launch_target_state_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered"
           ]
         },
         {
@@ -2455,6 +2467,7 @@
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
+            "dynamic_child_generation",
             "multiple_stages",
             "submodels"
           ],
@@ -2464,11 +2477,10 @@
             "mass.total"
           ],
           "spawned_child_behavior": [
-            "declared:stage_separation_lineage:event_only:nesc-spent-stage"
+            "available:stage_separation_lineage:independently_propagated:nesc-synthetic-cylinder"
           ],
           "blockers": [
-            "staged_rocket_launch_target_state_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered",
-            "deployment/stage_separation_lineage: independent spent-stage trajectory output is not registered by the source replay binding"
+            "staged_rocket_launch_target_state_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered"
           ]
         },
         {
@@ -2508,16 +2520,16 @@
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
+            "dynamic_child_generation",
             "multiple_stages",
             "submodels"
           ],
           "optional_telemetry": [],
           "spawned_child_behavior": [
-            "declared:stage_separation_lineage:event_only:nesc-spent-stage"
+            "none"
           ],
           "blockers": [
-            "time_aligned_attitude_gimbal_effectivity",
-            "deployment/stage_separation_lineage: independent spent-stage trajectory output is not registered by the source replay binding"
+            "time_aligned_attitude_gimbal_effectivity"
           ]
         },
         {
@@ -2556,16 +2568,16 @@
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
+            "dynamic_child_generation",
             "multiple_stages",
             "submodels"
           ],
           "optional_telemetry": [],
           "spawned_child_behavior": [
-            "declared:stage_separation_lineage:event_only:nesc-spent-stage"
+            "none"
           ],
           "blockers": [
-            "time_aligned_attitude_gimbal_effectivity",
-            "deployment/stage_separation_lineage: independent spent-stage trajectory output is not registered by the source replay binding"
+            "time_aligned_attitude_gimbal_effectivity"
           ]
         }
       ]
