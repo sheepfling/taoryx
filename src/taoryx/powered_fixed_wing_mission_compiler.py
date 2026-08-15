@@ -15,7 +15,13 @@ from typing import Any, Final
 
 import yaml
 
-from taoryx.racetrack_template import RACETRACK_FIDELITIES, RacetrackFidelity, ResolvedRacetrack, resolve_racetrack_binding
+from taoryx.racetrack_template import (
+    RACETRACK_FIDELITIES,
+    RacetrackBinding,
+    RacetrackFidelity,
+    ResolvedRacetrack,
+    resolve_racetrack_binding,
+)
 
 STANDARD_GRAVITY_M_S2: Final[float] = 9.80665
 
@@ -60,7 +66,9 @@ class PoweredFixedWingCapability:
         if not self.provenance or not self.evidence_class:
             raise ValueError("capability provenance and evidence_class are required")
         ####
+
     ####
+
 
 @dataclass(frozen=True, slots=True)
 class PoweredFixedWingRacetrackIntent:
@@ -111,7 +119,9 @@ class PoweredFixedWingRacetrackIntent:
             if requested_value is not None and (not math.isfinite(requested_value) or requested_value <= 0.0):
                 raise ValueError(f"{requested_name} must be finite and positive when supplied")
         ####
+
     ####
+
 
 @dataclass(frozen=True, slots=True)
 class CapabilityScaledRacetrack:
@@ -155,6 +165,7 @@ class CapabilityScaledRacetrack:
             "nonclaim": "This planning artifact does not validate controller tracking, nonlinear dynamics, allocation, or physical effectors.",
         }
         ####
+
     ####
 
 
@@ -213,27 +224,27 @@ def compile_powered_fixed_wing_racetrack(
     if intent.requested_bank_deg is None:
         diagnostics.append("no bank requested; selected declared maximum bank for planning")
     status = "capability_clipped" if diagnostics else "capability_feasible"
-    values: dict[str, Any] = {
-        "vehicle_id": capability.vehicle_id,
-        "fidelity": fidelity,
-        "straight_length_m": selected_straight_length,
-        "turn_radius_m": selected_turn_radius,
-        "speed_m_s": speed,
-        "low_altitude_m": intent.low_altitude_m,
-        "high_altitude_m": intent.high_altitude_m,
-        "climb_rate_m_s": capability.maximum_climb_rate_m_s,
-        "descent_rate_m_s": capability.maximum_descent_rate_m_s,
-        "left_turn_bank_deg": -bank,
-        "right_turn_bank_deg": bank,
-        "simulation_margin_s": intent.simulation_margin_s,
-        "gate_corridor_m": intent.gate_corridor_m,
-        "gate_altitude_tolerance_m": intent.gate_altitude_tolerance_m,
-        "gate_speed_tolerance_mps": intent.gate_speed_tolerance_mps,
-        "source_realization": source_realization,
-        "status": status,
-    }
+    binding = RacetrackBinding(
+        vehicle_id=capability.vehicle_id,
+        fidelity=fidelity,
+        straight_length_m=selected_straight_length,
+        turn_radius_m=selected_turn_radius,
+        speed_m_s=speed,
+        low_altitude_m=intent.low_altitude_m,
+        high_altitude_m=intent.high_altitude_m,
+        climb_rate_m_s=capability.maximum_climb_rate_m_s,
+        descent_rate_m_s=capability.maximum_descent_rate_m_s,
+        left_turn_bank_deg=-bank,
+        right_turn_bank_deg=bank,
+        simulation_margin_s=intent.simulation_margin_s,
+        gate_corridor_m=intent.gate_corridor_m,
+        gate_altitude_tolerance_m=intent.gate_altitude_tolerance_m,
+        gate_speed_tolerance_mps=intent.gate_speed_tolerance_mps,
+        source_realization=source_realization,
+        status=status,
+    )
     resolved_binding_id = binding_id or f"{capability.vehicle_id}-{intent.id}-{fidelity}"
-    route = resolve_racetrack_binding("powered_fixed_wing_racetrack_v1", resolved_binding_id, values)
+    route = resolve_racetrack_binding("powered_fixed_wing_racetrack_v1", resolved_binding_id, binding)
     return CapabilityScaledRacetrack(
         capability=capability,
         intent=intent,
@@ -315,17 +326,11 @@ def compare_compiled_racetrack_to_baseline(
 
     findings: list[str] = []
     if baseline.vehicle_id != compiled.capability.vehicle_id:
-        findings.append(
-            f"baseline vehicle {baseline.vehicle_id!r} does not match capability vehicle {compiled.capability.vehicle_id!r}"
-        )
+        findings.append(f"baseline vehicle {baseline.vehicle_id!r} does not match capability vehicle {compiled.capability.vehicle_id!r}")
     if baseline.turn_radius_m < compiled.minimum_turn_radius_m:
-        findings.append(
-            "baseline turn radius is below the capability-derived minimum at the selected speed and bank limit"
-        )
+        findings.append("baseline turn radius is below the capability-derived minimum at the selected speed and bank limit")
     if baseline.straight_length_m < compiled.minimum_straight_length_m:
-        findings.append(
-            "baseline straight length is too short to isolate both vertical maneuvers and the declared level dwell"
-        )
+        findings.append("baseline straight length is too short to isolate both vertical maneuvers and the declared level dwell")
     return {
         "baseline_binding_id": baseline.binding_id,
         "vehicle_match": baseline.vehicle_id == compiled.capability.vehicle_id,

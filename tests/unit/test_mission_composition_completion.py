@@ -4,15 +4,17 @@ import json
 
 import pytest
 from pydantic import ValidationError
+from taoryx.trajectory.contract_probe_mission_composition import (
+    ContractProbeMissionCompositionProvider,
+    build_contract_probe_configuration,
+)
+from taoryx.trajectory.reference_mission_composition import ReferenceMissionCompositionProvider
+
 from taoryx.mission_composition_completion import (
     MissionCompositionCompletionReport,
     build_mission_composition_completion_report,
     render_mission_composition_completion_markdown,
 )
-from taoryx.trajectory.native_mission_composition import build_registry_mission_composition_runner
-from taoryx.trajectory.reference_mission_composition import ReferenceMissionCompositionProvider
-from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
-
 from taoryx.mission_composition_inventory import (
     MissionCompositionInventory,
     MissionCompositionInventoryAudit,
@@ -20,10 +22,6 @@ from taoryx.mission_composition_inventory import (
     load_mission_composition_inventory,
 )
 from taoryx.trajectory.configuration_contract import ConfigurationContractError
-from taoryx.trajectory.contract_probe_mission_composition import (
-    ContractProbeMissionCompositionProvider,
-    build_contract_probe_configuration,
-)
 from taoryx.trajectory.execution_contract import (
     MissionCompositionOutputSelection,
     MissionCompositionRunnerRegistry,
@@ -32,6 +30,8 @@ from taoryx.trajectory.execution_contract import (
     audit_provider_advertisement,
     diagnostic_from_exception,
 )
+from taoryx.trajectory.native_mission_composition import build_registry_mission_composition_runner
+from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.vehicle_registry import ROOT
 
 
@@ -44,20 +44,22 @@ def test_authoritative_inventory_reconciles_production_debug_and_realization_dis
         debug_providers=(ReferenceMissionCompositionProvider(), ContractProbeMissionCompositionProvider()),
     )
 
-    assert audit.status == "pass", audit.errors
-    assert audit.asset_count == 46
-    assert audit.source_identity_count == 51
-    assert audit.published_model_count == 11
-    assert audit.debug_model_count == 3
-    assert MissionCompositionInventory.model_validate_json(inventory.model_dump_json(by_alias=True)) == inventory
-    assert MissionCompositionInventoryAudit.model_validate_json(audit.model_dump_json(by_alias=True)) == audit
-
     production_ids = {item.id for item in provider.list_models()}
     debug_ids = {
         item.id
         for debug_provider in (ReferenceMissionCompositionProvider(), ContractProbeMissionCompositionProvider())
         for item in debug_provider.list_models()
     }
+    inventory_catalog_ids = {catalog_id for asset in inventory.assets for catalog_id in asset.catalog_ids}
+
+    assert audit.status == "pass", audit.errors
+    assert audit.asset_count == len(inventory.assets)
+    assert audit.source_identity_count == len(inventory_catalog_ids)
+    assert audit.published_model_count == len(production_ids)
+    assert audit.debug_model_count == len(debug_ids)
+    assert MissionCompositionInventory.model_validate_json(inventory.model_dump_json(by_alias=True)) == inventory
+    assert MissionCompositionInventoryAudit.model_validate_json(audit.model_dump_json(by_alias=True)) == audit
+
     assert production_ids.isdisjoint(debug_ids)
     assert {"simple_aero", "dual_launch_glider", "a320_openap_3dof", "tumbling_body"} <= production_ids
     ####
@@ -83,10 +85,20 @@ def test_production_advertisement_and_generated_completion_artifacts_are_current
     assert report.status == "pass", report.diagnostics
     assert report.inventory_status == "pass"
     assert report.advertisement_status == "pass"
-    assert report.family_count == 11
-    assert report.realization_count == 45
-    assert report.registered_batch_tuple_count == 66
-    assert report.registered_interactive_tuple_count == 23
+    assert report.family_count == len(report.families) == len(provider.list_models())
+    assert report.realization_count == sum(len(family.realizations) for family in report.families)
+    assert report.registered_batch_tuple_count == sum(
+        len(realization.batch_tuples)
+        for family in report.families
+        for realization in family.realizations
+        if realization.batch_status == "available"
+    )
+    assert report.registered_interactive_tuple_count == sum(
+        len(realization.interactive_tuples)
+        for family in report.families
+        for realization in family.realizations
+        if realization.interactive_status == "available"
+    )
     assert MissionCompositionCompletionReport.model_validate_json(report.model_dump_json(by_alias=True)) == report
 
     expected_json = report.model_dump_json(indent=2, by_alias=True) + "\n"

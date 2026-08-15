@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 from .composition_sensor_trace import BatchTruthSample
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
 from .vehicle_interface import (
+    CommittedNativeStatusValues,
     VehicleInterfaceContract,
     project_committed_status_values,
     validate_projected_status_values,
@@ -53,15 +54,12 @@ def build_committed_status_trace(
             contract,
             time_s=sample.time_s,
             execution_status=sample.execution_status,
-            raw_values=sample.raw_values,
+            raw_values=CommittedNativeStatusValues(sample.raw_values),
             include_batch_available=True,
         )
         missing = sorted(expected - set(values))
         if missing:
-            raise ValueError(
-                "committed status trace cannot resolve declared batch channel(s) at "
-                f"t={sample.time_s:.12g} s: {', '.join(missing)}"
-            )
+            raise ValueError(f"committed status trace cannot resolve declared batch channel(s) at t={sample.time_s:.12g} s: {', '.join(missing)}")
         validate_projected_status_values(
             contract,
             values,
@@ -134,9 +132,7 @@ def validate_committed_status_trace(
             raise ValueError(f"committed status trace sample {index} has no values mapping")
         missing = sorted(expected - set(values))
         if missing:
-            raise ValueError(
-                f"committed status trace sample {index} omits declared channel(s): {', '.join(missing)}"
-            )
+            raise ValueError(f"committed status trace sample {index} omits declared channel(s): {', '.join(missing)}")
         validate_projected_status_values(
             contract,
             values,

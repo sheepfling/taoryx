@@ -8,7 +8,7 @@ import pytest
 
 from taoryx.batch_episode_parity_dispatch import verify_serialized_declared_batch_episode_parity
 from taoryx.composition_episode import open_vehicle_composition_episode
-from taoryx.composition_policy import PolicyDecision, run_composition_policy
+from taoryx.composition_policy import POLICY_TRACE_SCHEMA, PolicyDecision, run_composition_policy
 from taoryx.plugins import discover_plugins
 from taoryx.vehicle_catalog_resources import vehicle_catalog_resources
 from taoryx.vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
@@ -90,6 +90,7 @@ def test_selected_plugin_without_a_registered_pair_reports_empty_parity_evidence
     ####
 
 
+@pytest.mark.slow
 def test_every_registered_batch_episode_pair_has_a_passing_replay_witness() -> None:
     report = validate_vehicle_execution_parity_witnesses()
 
@@ -128,7 +129,24 @@ def test_declared_parity_dispatch_refuses_a_pair_without_registered_evidence() -
     )
 
     with pytest.raises(ValueError, match="no declared batch/episode parity adapter"):
-        verify_serialized_declared_batch_episode_parity(composition, {})
+        verify_serialized_declared_batch_episode_parity(
+            composition,
+            {
+                "schema": POLICY_TRACE_SCHEMA,
+                "composition_id": "fixture",
+                "composition_identity_sha256": "fixture",
+                "interface_id": "fixture",
+                "interface_fingerprint_sha256": "fixture",
+                "authority_profile_id": "fixture",
+                "observation_profile_id": "fixture",
+                "initial_observation": {},
+                "steps": [],
+                "final_observation": {},
+                "final_status": {},
+                "stopped_by_policy": True,
+                "integration_step_s": None,
+            },
+        )
     ####
 
 

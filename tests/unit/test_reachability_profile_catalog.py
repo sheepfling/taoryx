@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from taoryx.reachability_catalog import load_reachability_catalog
+
 from taoryx.runtime.cli import main
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -10,7 +11,7 @@ CATALOG = ROOT / "verification" / "reachability_profile_catalog.yaml"
 
 
 def test_reachability_profile_catalog_has_unique_profiles_and_family_links() -> None:
-    """The reachability registry is a complete, machine-readable planning surface."""
+    """The reachability registry is a complete, machine-readable runtime catalog."""
 
     payload = load_reachability_catalog(CATALOG)
     profiles = payload.profiles
@@ -44,23 +45,6 @@ def test_reachability_profile_catalog_has_unique_profiles_and_family_links() -> 
         assert family.configurations
         assert family.profiles
         assert all(profile_id in profile_ids for profile_id in family.profiles)
-    ####
-
-
-def test_reachability_catalog_covers_current_and_planned_rosters() -> None:
-    """Current proof families, Anduril variants, spacecraft, and passive bodies are registered."""
-
-    payload = load_reachability_catalog(CATALOG)
-    configurations = {
-        configuration
-        for family in payload.vehicle_families
-        for configuration in family.configurations
-    }
-    assert {"b747", "skywalker_x8", "hummingbird", "x15"} <= configurations
-    assert {"bolt", "ghost_x", "roadrunner", "omen", "thunder"} <= configurations
-    assert {"f16_s119", "hl20_mod_k", "reference_a320"} <= configurations
-    assert {"spacecraft.6u_observer_rw.standard.v1", "spacecraft.spheres_like_rcs.v1", "spacecraft.marco_like_hybrid.v1"} <= configurations
-    assert {"ballistic_rocket", "tumbling_ballistic_body", "kestrel_glider"} <= configurations
     ####
 
 

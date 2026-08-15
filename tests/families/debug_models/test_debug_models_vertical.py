@@ -91,7 +91,17 @@ def test_debug_models_publish_versioned_models_controls_and_endpoint_ownership(
     assert revision.package == "taoryx-debug-models"
     assert revision.version == PACKAGE_VERSION
     assert revision.api_version == "1"
-    assert revision.contribution_count == 3
+    owned_contributions = {
+        (contribution.kind, contribution.id)
+        for contribution in plugins.contributions
+        if contribution.plugin.id == PACKAGE_ID
+    }
+    assert revision.contribution_count == len(owned_contributions)
+    assert {
+        ("mission_composition_provider", REFERENCE_PROVIDER_ID),
+        ("mission_composition_provider", PROBE_PROVIDER_ID),
+        ("mission_workflow_endpoint_catalog", "taoryx.debug-models.workflow-endpoints"),
+    } <= owned_contributions
     assert len(revision.fingerprint) == 64
     assert tuple(item.id for item in plugins.records("mission_composition_provider")) == (
         REFERENCE_PROVIDER_ID,

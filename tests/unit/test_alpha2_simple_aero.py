@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "verification" / "alpha2_family_catalog.yaml"
 CASES = ROOT / "tests" / "fixtures" / "alpha2_case_contracts"
 
+pytestmark = pytest.mark.simple_aero
+
 
 def _case(name: str):
     catalog = load_family_catalog(CATALOG)

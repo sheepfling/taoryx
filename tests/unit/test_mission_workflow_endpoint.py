@@ -43,10 +43,13 @@ def test_workflow_endpoint_catalog_exposes_exact_nonphysical_boundaries() -> Non
     }
     assert all(item.robustness_disposition == "not_applicable" for item in catalog.endpoints)
     assert catalog.endpoint("simple-aero-fixed-ld-batch").blocked_operations == ()
-    assert catalog.endpoint("dual-launch-attached-booster-batch").blocked_operations == ("step",)
+    dual_launch = catalog.endpoint("dual-launch-attached-booster-batch")
+    assert dual_launch.blocked_operations == ("step",)
+    assert dual_launch.provider_aliases == ("taoryx.registry.mission-composition",)
     listing = mission_workflow_endpoint_list()
     listed_endpoints = cast(list[dict[str, object]], listing["endpoints"])
     assert [item["id"] for item in listed_endpoints] == [item.id for item in catalog.endpoints]
+    assert next(item for item in listed_endpoints if item["id"] == dual_launch.id)["provider_aliases"] == list(dual_launch.provider_aliases)
     ####
 
 

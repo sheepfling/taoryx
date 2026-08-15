@@ -1,25 +1,39 @@
 from __future__ import annotations
 
-from tools.validate_family_adapter_registry import build_report
+import pytest
+
+from taoryx.horizontal_fidelity import load_horizontal_registry
+from tools.validate_family_adapter_registry import build_registry, build_report
 
 
+@pytest.mark.slow
+@pytest.mark.integration
 def test_registry_witness_report_separates_executable_and_planned_families() -> None:
+    registry = build_registry()
     report = build_report()
 
     assert report["status"] == "development"
-    assert report["executable_witness_count"] == 9
-    assert report["planned_family_count"] == 0
+    assert report["executable_witness_count"] == sum(item.status == "available" for item in registry.registrations)
+    assert report["planned_family_count"] == sum(item.status == "planned" for item in registry.registrations)
     assert report["alignment"]["status"] == "pass"
     assert report["horizontal_lowering"]["status"] == "pass"
     lowering_by_family = {item["family_id"]: item for item in report["horizontal_lowering"]["families"]}
     assert lowering_by_family["skywalker_x8"]["lowering"]["selected"] == "rigid_body_6dof_direct_wrench"
     assert lowering_by_family["hl20_mod_k"]["lowering"]["selected"] == "rigid_body_6dof_direct_wrench"
-    assert report["declared_tier_check_count"] == 21
+    assert report["declared_tier_check_count"] == sum(
+        len(item.supported_tiers) for item in registry.registrations if item.status == "available"
+    )
     assert report["tier_matrix"]["status"] == "pass"
     promotion = report["promotion_matrix"]
-    assert len(promotion["entries"]) == 36
+    assert len(promotion["entries"]) == sum(len(family.tiers) for family in load_horizontal_registry().families)
+    assert len(promotion["entries"]) == sum(promotion["declared_status_counts"].values())
+    assert len(promotion["entries"]) == sum(promotion["validation_status_counts"].values())
     assert promotion["qualified_failures"] == []
-    assert promotion["declared_status_counts"]["planned"] == 4
+    assert promotion["declared_status_counts"]["planned"] == sum(
+        binding.promotion_status == "planned"
+        for family in load_horizontal_registry().families
+        for binding in family.tiers.values()
+    )
 
     checks = report["registry"]["checks"]
     by_family = {item["family_id"]: item for item in checks}

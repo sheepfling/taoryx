@@ -7,9 +7,9 @@ future UI do not independently guess which reduced or native runtime to use.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import Protocol, cast
 
+from .composition_policy import parse_composition_policy_trace_record
 from .plugins import PluginCatalog, current_plugin_catalog, discover_plugins, plugin_catalog_scope
 from .vehicle_composition import CompiledVehicleComposition
 from .vehicle_execution_bindings import batch_episode_parity_record
@@ -31,7 +31,7 @@ ParityVerifier = object
 
 def verify_serialized_declared_batch_episode_parity(
     composition: CompiledVehicleComposition,
-    payload: Mapping[str, object],
+    payload: object,
     *,
     plugins: PluginCatalog | None = None,
 ) -> DeclaredParityReport:
@@ -43,19 +43,19 @@ def verify_serialized_declared_batch_episode_parity(
     used as a substitute.
     """
 
+    trace = parse_composition_policy_trace_record(payload)
     record = batch_episode_parity_record(
         composition.family_id,
         composition.mission,
         composition.fidelity,
         plugins=plugins,
     )
-    if record.get("availability") != "registered":
+    if record.availability != "registered":
         raise ValueError(
-            "no declared batch/episode parity adapter is registered for "
-            f"{composition.family_id!r}/{composition.mission!r}/{composition.fidelity!r}"
+            f"no declared batch/episode parity adapter is registered for {composition.family_id!r}/{composition.mission!r}/{composition.fidelity!r}"
         )
-    adapter_id = record.get("adapter_id")
-    if not isinstance(adapter_id, str):
+    adapter_id = record.adapter_id
+    if adapter_id is None:
         raise ValueError("registered batch/episode parity record lacks adapter_id")
     selected = plugins if plugins is not None else current_plugin_catalog()
     if selected is None:
@@ -66,14 +66,12 @@ def verify_serialized_declared_batch_episode_parity(
         raise ValueError(f"no parity verifier is registered for declared adapter {adapter_id!r}")
     verifier = contribution.value
     if not callable(verifier):
-        raise TypeError(
-            f"plug-in {contribution.plugin.id!r} supplied a non-callable parity verifier for {adapter_id!r}"
-        )
+        raise TypeError(f"plug-in {contribution.plugin.id!r} supplied a non-callable parity verifier for {adapter_id!r}")
     # Family-owned verifiers may resolve their exact interface contract while
     # comparing the trace. Keep the selected catalog active for that nested
     # work so a focused parity gate cannot widen into aggregate discovery.
     with plugin_catalog_scope(selected):
-        report = cast(DeclaredParityReport, verifier(composition, payload))
+        report = cast(DeclaredParityReport, verifier(composition, trace))
     if report.as_dict().get("adapter_id") != adapter_id:
         raise ValueError("declared batch/episode parity adapter disagrees with the verifier result")
     return report

@@ -88,6 +88,7 @@ markers = [
   "simple_aero: end-to-end or fixture tests for the SimpleAero problem/segment trajectory corpus",
   "daveml: DAVE-ML parser, evaluator, collection, and round-trip tests",
   "integration: cross-component or end-to-end integration tests",
+  "matrix: full cross-product, grid, or catalog-sweep tests",
   "external_oracle: tests that invoke an optional external model interpreter",
   "runtime: requires a historical or separately verified TAOS executable",
   "historical: exploratory or historically sourced runtime cases",

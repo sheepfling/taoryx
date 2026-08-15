@@ -425,6 +425,7 @@ def test_registered_reference_campaigns_have_a_well_formed_common_runner_contrac
 
 
 @pytest.mark.slow
+@pytest.mark.integration
 def test_registered_reference_campaigns_execute_through_the_common_runner(
     plugins: PluginCatalog,
 ) -> None:
@@ -546,6 +547,8 @@ def test_a320_named_surrogate_plan_and_lqi_campaign_are_selectable_and_cached(tm
 
 
 @pytest.mark.slow
+@pytest.mark.matrix
+@pytest.mark.integration
 def test_model_automation_assessment_exercises_every_advertised_realization(
     plugins: PluginCatalog,
 ) -> None:
@@ -564,24 +567,32 @@ def test_model_automation_assessment_exercises_every_advertised_realization(
         family_adapters=plugins.build_family_adapter_registry(),
         local_controller_screens=plugins.build_local_controller_screen_advertisement_registry(),
     )
+    advertised_model_keys = {
+        (provider.metadata.id, model.id)
+        for provider in providers.providers
+        for model in provider.list_models()
+    }
 
     assert assessment["schema"] == "taoryx.model-automation-assessment/v1"
     assert assessment["rslqr"]["status"] == "deferred"  # type: ignore[index]
     advertisement_summary = assessment["advertisement_readiness_summary"]
     assert advertisement_summary["status"] == "complete"
-    assert advertisement_summary["model_count"] == 14
+    assert advertisement_summary["model_count"] == len(advertised_model_keys)
+    assert advertisement_summary["complete_model_count"] == len(advertised_model_keys)
     assert advertisement_summary["incomplete_models"] == []
     readiness_summary = assessment["controller_readiness_summary"]
     assert readiness_summary["status"] == "complete"
-    assert readiness_summary["externally_controllable_fidelity_count"] == 12
-    assert readiness_summary["externally_tunable_fidelity_count"] == 12
     assert readiness_summary["external_control_gaps"] == []
     models = [
         model
         for provider in assessment["providers"]  # type: ignore[index]
         for model in provider["models"]  # type: ignore[index]
     ]
-    assert len(models) == 14
+    assert {
+        (str(provider["id"]), str(model["id"]))
+        for provider in assessment["providers"]  # type: ignore[index]
+        for model in provider["models"]  # type: ignore[index]
+    } == advertised_model_keys
     assert all(model["advertisement"]["status"] == "complete" for model in models)  # type: ignore[index]
     assert all(model["advertisement"]["plan_exercise"]["status"] == "pass" for model in models)  # type: ignore[index]
     assert all(
@@ -599,6 +610,24 @@ def test_model_automation_assessment_exercises_every_advertised_realization(
         for model in models
     )  # type: ignore[index]
     assert all(model["generic_authoring"]["status"] == "advertised" for model in models)  # type: ignore[index]
+    externally_controllable_fidelity_count = sum(
+        realization["status"] == "available"
+        and realization["control"]["status"] == "available"
+        and fidelity["controller_automation"]["status"] in {"campaign_registered", "campaign_registration_required"}
+        for model in models
+        for realization in model["realizations"]
+        for fidelity in realization["fidelities"]
+    )
+    externally_tunable_fidelity_count = sum(
+        realization["status"] == "available"
+        and realization["control"]["status"] == "available"
+        and fidelity["controller_automation"]["status"] == "campaign_registered"
+        for model in models
+        for realization in model["realizations"]
+        for fidelity in realization["fidelities"]
+    )
+    assert readiness_summary["externally_controllable_fidelity_count"] == externally_controllable_fidelity_count
+    assert readiness_summary["externally_tunable_fidelity_count"] == externally_tunable_fidelity_count
     for model in models:
         for realization in model["realizations"]:
             if realization["input_realization"] in {"uncontrolled", "source_replay"}:
@@ -710,6 +739,7 @@ def test_model_automation_assessment_exercises_every_advertised_realization(
 
 
 @pytest.mark.slow
+@pytest.mark.matrix
 def test_model_automation_assessment_fails_closed_when_common_plan_omits_advertisement_sections(
     monkeypatch: pytest.MonkeyPatch,
     plugins: PluginCatalog,
@@ -747,8 +777,13 @@ def test_model_automation_assessment_fails_closed_when_common_plan_omits_adverti
     assert "data_contract: missing mapping" in exercise["findings"]
     advertisement_summary = assessment["advertisement_readiness_summary"]
     assert advertisement_summary["status"] == "incomplete"
+    assert advertisement_summary["model_count"] == len(models)
     assert advertisement_summary["complete_model_count"] == 0
-    assert len(advertisement_summary["incomplete_models"]) == 14
+    assert advertisement_summary["incomplete_models"] == [
+        {"provider_id": str(provider["id"]), "model_id": str(model["id"])}
+        for provider in assessment["providers"]  # type: ignore[index]
+        for model in provider["models"]  # type: ignore[index]
+    ]
     ####
 
 
@@ -915,7 +950,7 @@ def test_model_plan_advertises_exact_workflow_endpoint_verifier(
             "kind": "mission_workflow",
             "maturity_record_id": model_id,
             "matches_selected_configuration": True,
-            "match_scope": "provider_id, model_id, mission_template_id, fidelity, realization_id",
+            "match_scope": "provider_id (or declared alias), model_id, mission_template_id, fidelity, realization_id",
             "command": f"taoryx model verify {endpoint_id}",
             "execute_command": f"taoryx model verify {endpoint_id} --execute",
         }
@@ -924,6 +959,7 @@ def test_model_plan_advertises_exact_workflow_endpoint_verifier(
 
 
 @pytest.mark.slow
+@pytest.mark.matrix
 def test_model_cli_lists_plans_and_scaffolds_installed_models(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],

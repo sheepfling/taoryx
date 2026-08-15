@@ -533,6 +533,7 @@ def test_b747_condition3_source_table_surface_lqr_screen_runs_through_public_com
     ####
 
 
+@pytest.mark.slow
 def test_b747_condition3_source_table_surface_lqi_screen_runs_through_public_composition(
     tmp_path: Path,
 ) -> None:

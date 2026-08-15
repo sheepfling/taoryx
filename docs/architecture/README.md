@@ -66,6 +66,13 @@ The common installed-model inventory, plain Python/YAML mission authoring,
 segment/waypoint scaffolding, and plug-in-owned campaign registration path is
 described in
 [Model-to-mission authoring and automation](model-authoring-automation.md).
+The generated, reviewer-facing vehicle cards that join an installed model's
+fidelity, source/provenance declarations, tuning method, missions, and
+editable parameters are described in
+[Vehicle model cards](vehicle-model-cards.md).
+For a repeatable survey of public loose payload bags and the configuration
+normalization rule, see
+[Typed boundary survey and configuration normalization](typed-boundaries.md).
 The promotion path from a direct-wrench LQR screen to bounded physical
 effectors and nonlinear validation is described in
 [`physically-realizable-lqr-control.md`](physically-realizable-lqr-control.md).

@@ -33,7 +33,42 @@ from taoryx.vehicle_execution_witnesses import (
 
 ROOT = Path(__file__).resolve().parents[2]
 
+_SLOW_LOCAL_CONTROLLER_SCREEN_COMPOSITIONS = frozenset(
+    {
+        "b747_condition3_local_physical_surface_lqi_screen_compose.yaml",
+        "f16_local_physical_surface_lqr_schedule_transition_screen_compose.yaml",
+        "hl20_source_surface_attitude_rate_lqi_screen_compose.yaml",
+        "x15_source_surface_attitude_rate_lqi_screen_compose.yaml",
+    }
+)
 
+
+def _local_controller_screen_parameters() -> tuple[object, ...]:
+    """Keep full controller-screen replays in the opt-in cost lane."""
+
+    names = (
+        "a320_local_native_coordinate_lqi_screen_compose.yaml",
+        "b747_condition3_local_physical_surface_lqi_screen_compose.yaml",
+        "f16_local_physical_direct_wrench_screen_compose.yaml",
+        "f16_local_physical_surface_screen_compose.yaml",
+        "f16_local_physical_surface_lqi_screen_compose.yaml",
+        "f16_local_physical_surface_lqr_schedule_interior_screen_compose.yaml",
+        "f16_local_physical_surface_lqi_schedule_interior_screen_compose.yaml",
+        "f16_local_physical_surface_lqr_schedule_transition_screen_compose.yaml",
+        "x8_local_physical_surface_lqi_long_recovery_screen_compose.yaml",
+        "x15_source_surface_attitude_rate_lqi_screen_compose.yaml",
+        "hl20_source_surface_attitude_rate_lqi_screen_compose.yaml",
+        "hummingbird_local_individual_rotor_lqi_screen_compose.yaml",
+        "hummingbird_local_vertical_translation_lqi_screen_compose.yaml",
+    )
+    return tuple(
+        pytest.param(name, marks=pytest.mark.slow if name in _SLOW_LOCAL_CONTROLLER_SCREEN_COMPOSITIONS else ())
+        for name in names
+    )
+    ####
+
+
+@pytest.mark.slow
 def test_every_runnable_execution_binding_has_a_checked_in_compilation_witness() -> None:
     catalog = load_vehicle_execution_witness_catalog()
     report = validate_vehicle_execution_witnesses(catalog)
@@ -91,6 +126,7 @@ def test_every_runnable_execution_binding_has_a_checked_in_compilation_witness()
     ####
 
 
+@pytest.mark.slow
 def test_family_scoped_execution_witnesses_keep_exact_endpoint_coverage() -> None:
     """A focused smoke validates one family without borrowing global witnesses."""
 
@@ -287,6 +323,7 @@ def test_variant_witness_batch_smoke_uses_the_exact_public_binding(monkeypatch: 
         composition: object,
         *,
         binding: object,
+        plugins: object | None = None,
     ) -> dict[str, object]:
         family_id = str(getattr(composition, "family_id"))
         factory_id = str(getattr(binding, "factory_id"))
@@ -461,23 +498,10 @@ def test_batch_witness_smoke_evaluates_a_local_controller_screen_by_its_declared
     ####
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "composition_name",
-    (
-        "a320_local_native_coordinate_lqi_screen_compose.yaml",
-        "b747_condition3_local_physical_surface_lqi_screen_compose.yaml",
-        "f16_local_physical_direct_wrench_screen_compose.yaml",
-        "f16_local_physical_surface_screen_compose.yaml",
-        "f16_local_physical_surface_lqi_screen_compose.yaml",
-        "f16_local_physical_surface_lqr_schedule_interior_screen_compose.yaml",
-        "f16_local_physical_surface_lqi_schedule_interior_screen_compose.yaml",
-        "f16_local_physical_surface_lqr_schedule_transition_screen_compose.yaml",
-        "x8_local_physical_surface_lqi_long_recovery_screen_compose.yaml",
-        "x15_source_surface_attitude_rate_lqi_screen_compose.yaml",
-        "hl20_source_surface_attitude_rate_lqi_screen_compose.yaml",
-        "hummingbird_local_individual_rotor_lqi_screen_compose.yaml",
-        "hummingbird_local_vertical_translation_lqi_screen_compose.yaml",
-    ),
+    _local_controller_screen_parameters(),
 )
 def test_batch_witness_smoke_normalizes_every_local_controller_screen(
     composition_name: str,
@@ -515,6 +539,7 @@ def test_batch_witness_smoke_normalizes_every_local_controller_screen(
     ####
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     ("composition_name", "control_realization"),
     (

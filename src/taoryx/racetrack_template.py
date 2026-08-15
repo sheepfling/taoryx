@@ -16,9 +16,10 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Final, Literal
+from typing import Final, Literal
 
 import yaml
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from taoryx.racetrack_timing import RacetrackTimingEstimate, estimate_racetrack_timing
 
@@ -34,6 +35,88 @@ RACETRACK_FIDELITIES: Final[tuple[RacetrackFidelity, ...]] = (
     "rigid_body_6dof_direct_wrench",
     "rigid_body_6dof_surface_allocated",
 )
+
+
+class RacetrackBinding(BaseModel):
+    """Validated declarative input for one reusable racetrack mission.
+
+    This is the owner boundary for YAML/catalog and compiler-derived route
+    settings.  Once parsed, downstream code receives named attributes rather
+    than indexing an open configuration bag.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    vehicle_id: str
+    fidelity: RacetrackFidelity
+    straight_length_m: float
+    turn_radius_m: float
+    speed_m_s: float
+    low_altitude_m: float
+    high_altitude_m: float
+    climb_rate_m_s: float
+    descent_rate_m_s: float
+    left_turn_bank_deg: float
+    right_turn_bank_deg: float
+    source_realization: str = "unspecified"
+    status: str = "unclassified"
+    simulation_margin_s: float = 0.0
+    altitude_capture_gain_per_s: float = 0.0
+    altitude_capture_max_mps: float = 0.0
+    position_capture_gain: float = 0.0
+    position_capture_max_correction_mps: float = 0.0
+    gate_corridor_m: float = 250.0
+    gate_altitude_tolerance_m: float = 35.0
+    gate_speed_tolerance_mps: float = 12.0
+    position_capture_bank_gain_rad_per_m: float = 2.5e-5
+    position_capture_max_bank_correction_deg: float = 3.0
+    turn_rate_command_scale: float = 1.0
+
+    @model_validator(mode="after")
+    def validate_route_values(self) -> RacetrackBinding:
+        """Reject non-finite values and invalid owner-level constraints."""
+
+        numeric_fields = (
+            "straight_length_m",
+            "turn_radius_m",
+            "speed_m_s",
+            "low_altitude_m",
+            "high_altitude_m",
+            "climb_rate_m_s",
+            "descent_rate_m_s",
+            "left_turn_bank_deg",
+            "right_turn_bank_deg",
+            "simulation_margin_s",
+            "altitude_capture_gain_per_s",
+            "altitude_capture_max_mps",
+            "position_capture_gain",
+            "position_capture_max_correction_mps",
+            "gate_corridor_m",
+            "gate_altitude_tolerance_m",
+            "gate_speed_tolerance_mps",
+            "position_capture_bank_gain_rad_per_m",
+            "position_capture_max_bank_correction_deg",
+            "turn_rate_command_scale",
+        )
+        invalid = [name for name in numeric_fields if not math.isfinite(getattr(self, name))]
+        if invalid:
+            raise ValueError("racetrack binding values must be finite: " + ", ".join(invalid))
+        if self.high_altitude_m < self.low_altitude_m:
+            raise ValueError("racetrack binding has high altitude below low altitude")
+        nonnegative = (
+            "simulation_margin_s",
+            "altitude_capture_gain_per_s",
+            "altitude_capture_max_mps",
+            "position_capture_gain",
+            "position_capture_max_correction_mps",
+        )
+        invalid_nonnegative = [name for name in nonnegative if getattr(self, name) < 0.0]
+        if invalid_nonnegative:
+            raise ValueError("racetrack binding requires non-negative values: " + ", ".join(invalid_nonnegative))
+        return self
+        ####
+
+    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -236,85 +319,45 @@ class RacetrackTemplateCatalog:
     ####
 
 
-def resolve_racetrack_binding(template_id: str, binding_id: str, values: dict[str, Any]) -> ResolvedRacetrack:
+def resolve_racetrack_binding(template_id: str, binding_id: str, binding: RacetrackBinding) -> ResolvedRacetrack:
     """Resolve one vehicle binding using the common powered-fixed-wing template."""
 
-    required = (
-        "vehicle_id",
-        "fidelity",
-        "straight_length_m",
-        "turn_radius_m",
-        "speed_m_s",
-        "low_altitude_m",
-        "high_altitude_m",
-        "climb_rate_m_s",
-        "descent_rate_m_s",
-        "left_turn_bank_deg",
-        "right_turn_bank_deg",
-    )
-    missing = [name for name in required if name not in values]
-    if missing:
-        raise ValueError(f"racetrack binding {binding_id!r} is missing: {', '.join(missing)}")
-    fidelity_value = str(values["fidelity"])
-    if fidelity_value not in RACETRACK_FIDELITIES:
-        allowed = ", ".join(RACETRACK_FIDELITIES)
-        raise ValueError(f"racetrack binding {binding_id!r} has unsupported fidelity {fidelity_value!r}; expected one of {allowed}")
-    fidelity = fidelity_value
-    low_altitude = float(values["low_altitude_m"])
-    high_altitude = float(values["high_altitude_m"])
-    if high_altitude < low_altitude:
-        raise ValueError(f"racetrack binding {binding_id!r} has high altitude below low altitude")
-    for name in ("left_turn_bank_deg", "right_turn_bank_deg"):
-        if not math.isfinite(float(values[name])):
-            raise ValueError(f"racetrack binding {binding_id!r} has non-finite {name}")
-    for name in (
-        "altitude_capture_gain_per_s",
-        "altitude_capture_max_mps",
-        "position_capture_gain",
-        "position_capture_max_correction_mps",
-    ):
-        value = float(values.get(name, 0.0))
-        if not math.isfinite(value) or value < 0.0:
-            raise ValueError(f"racetrack binding {binding_id!r} has invalid non-negative {name}")
     timing = estimate_racetrack_timing(
-        straight_length_m=float(values["straight_length_m"]),
-        turn_radius_m=float(values["turn_radius_m"]),
-        speed_m_s=float(values["speed_m_s"]),
-        altitude_delta_m=high_altitude - low_altitude,
-        climb_rate_m_s=float(values["climb_rate_m_s"]),
-        descent_rate_m_s=float(values["descent_rate_m_s"]),
+        straight_length_m=binding.straight_length_m,
+        turn_radius_m=binding.turn_radius_m,
+        speed_m_s=binding.speed_m_s,
+        altitude_delta_m=binding.high_altitude_m - binding.low_altitude_m,
+        climb_rate_m_s=binding.climb_rate_m_s,
+        descent_rate_m_s=binding.descent_rate_m_s,
     )
-    simulation_margin_s = float(values.get("simulation_margin_s", 0.0))
-    if not math.isfinite(simulation_margin_s) or simulation_margin_s < 0.0:
-        raise ValueError("simulation_margin_s must be finite and non-negative")
     return ResolvedRacetrack(
         template_id=template_id,
         binding_id=binding_id,
-        vehicle_id=str(values["vehicle_id"]),
-        fidelity=fidelity,
-        source_realization=str(values.get("source_realization", "unspecified")),
-        status=str(values.get("status", "unclassified")),
-        straight_length_m=float(values["straight_length_m"]),
-        turn_radius_m=float(values["turn_radius_m"]),
-        speed_m_s=float(values["speed_m_s"]),
-        low_altitude_m=low_altitude,
-        high_altitude_m=high_altitude,
-        climb_rate_m_s=float(values["climb_rate_m_s"]),
-        descent_rate_m_s=float(values["descent_rate_m_s"]),
-        left_turn_bank_deg=float(values["left_turn_bank_deg"]),
-        right_turn_bank_deg=float(values["right_turn_bank_deg"]),
+        vehicle_id=binding.vehicle_id,
+        fidelity=binding.fidelity,
+        source_realization=binding.source_realization,
+        status=binding.status,
+        straight_length_m=binding.straight_length_m,
+        turn_radius_m=binding.turn_radius_m,
+        speed_m_s=binding.speed_m_s,
+        low_altitude_m=binding.low_altitude_m,
+        high_altitude_m=binding.high_altitude_m,
+        climb_rate_m_s=binding.climb_rate_m_s,
+        descent_rate_m_s=binding.descent_rate_m_s,
+        left_turn_bank_deg=binding.left_turn_bank_deg,
+        right_turn_bank_deg=binding.right_turn_bank_deg,
         timing=timing,
-        simulation_margin_s=simulation_margin_s,
-        altitude_capture_gain_per_s=float(values.get("altitude_capture_gain_per_s", 0.0)),
-        altitude_capture_max_mps=float(values.get("altitude_capture_max_mps", 0.0)),
-        position_capture_gain=float(values.get("position_capture_gain", 0.0)),
-        position_capture_max_correction_mps=float(values.get("position_capture_max_correction_mps", 0.0)),
-        gate_corridor_m=float(values.get("gate_corridor_m", 250.0)),
-        gate_altitude_tolerance_m=float(values.get("gate_altitude_tolerance_m", 35.0)),
-        gate_speed_tolerance_mps=float(values.get("gate_speed_tolerance_mps", 12.0)),
-        position_capture_bank_gain_rad_per_m=float(values.get("position_capture_bank_gain_rad_per_m", 2.5e-5)),
-        position_capture_max_bank_correction_deg=float(values.get("position_capture_max_bank_correction_deg", 3.0)),
-        turn_rate_command_scale=float(values.get("turn_rate_command_scale", 1.0)),
+        simulation_margin_s=binding.simulation_margin_s,
+        altitude_capture_gain_per_s=binding.altitude_capture_gain_per_s,
+        altitude_capture_max_mps=binding.altitude_capture_max_mps,
+        position_capture_gain=binding.position_capture_gain,
+        position_capture_max_correction_mps=binding.position_capture_max_correction_mps,
+        gate_corridor_m=binding.gate_corridor_m,
+        gate_altitude_tolerance_m=binding.gate_altitude_tolerance_m,
+        gate_speed_tolerance_mps=binding.gate_speed_tolerance_mps,
+        position_capture_bank_gain_rad_per_m=binding.position_capture_bank_gain_rad_per_m,
+        position_capture_max_bank_correction_deg=binding.position_capture_max_bank_correction_deg,
+        turn_rate_command_scale=binding.turn_rate_command_scale,
     )
     ####
 
@@ -332,7 +375,14 @@ def load_racetrack_template_catalog(path: Path) -> RacetrackTemplateCatalog:
     bindings_payload = payload.get("bindings")
     if not isinstance(bindings_payload, dict) or not bindings_payload:
         raise ValueError("racetrack catalog requires non-empty bindings")
-    bindings = {str(binding_id): resolve_racetrack_binding(template_id, str(binding_id), dict(values)) for binding_id, values in bindings_payload.items()}
+    bindings = {
+        str(binding_id): resolve_racetrack_binding(
+            template_id,
+            str(binding_id),
+            RacetrackBinding.model_validate(values),
+        )
+        for binding_id, values in bindings_payload.items()
+    }
     return RacetrackTemplateCatalog(template_id=template_id, bindings=bindings)
     ####
 
@@ -344,6 +394,7 @@ def _number(value: float) -> str:
 
 __all__ = [
     "RACETRACK_FIDELITIES",
+    "RacetrackBinding",
     "RacetrackGate",
     "RacetrackFidelity",
     "RacetrackPhaseWindow",

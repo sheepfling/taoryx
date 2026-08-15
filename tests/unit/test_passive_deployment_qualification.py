@@ -8,6 +8,8 @@ import pytest
 from tools.validate_passive_deployment import run_qualification
 
 
+@pytest.mark.slow
+@pytest.mark.matrix
 def test_passive_deployment_qualification_is_deterministic_and_covers_all_shapes(tmp_path: Path) -> None:
     first = run_qualification(
         tmp_path / "first-report.json",

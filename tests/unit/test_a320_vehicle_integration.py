@@ -82,7 +82,20 @@ def test_a320_advertisement_builds_a_complete_pseudo6dof_authoring_plan(
     revision = plugins.plugin_revision("taoryx.a320")
     assert revision.version == "0.1.0a0"
     assert revision.api_version == "1"
-    assert revision.contribution_count == 15
+    owned_contributions = {
+        (contribution.kind, contribution.id)
+        for contribution in plugins.contributions
+        if contribution.plugin.id == "taoryx.a320"
+    }
+    assert revision.contribution_count == len(owned_contributions)
+    assert {
+        ("model", MODEL_ID),
+        ("mission_composition_provider", PROVIDER_ID),
+        ("controller_tuning_campaign", "a320-point-cruise-performance-lqr-v1"),
+        ("controller_tuning_campaign", "a320-pseudo-cruise-attitude-v1"),
+        ("local_native_coordinate_lqi_screen_definition", "a320-pseudo-cruise-native-coordinate-lqi-screen-v1"),
+        ("local_controller_screen_advertisement", "a320-pseudo-cruise-native-coordinate-lqi-screen-v1"),
+    } <= owned_contributions
     assert len(revision.fingerprint) == 64
 
     plan = build_model_authoring_plan(

@@ -1436,6 +1436,7 @@ def _validate_batch_result_catalog(
             "hummingbird_local_direct_wrench_screen.v1",
             "hl20_local_direct_wrench_screen.v1",
             "local_direct_wrench_screen.v1",
+            "x15_local_direct_wrench_screen.v1",
             "local_native_coordinate_lqi_screen.v1",
         }
         else "mission_evaluation"

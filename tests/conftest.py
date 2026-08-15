@@ -88,8 +88,10 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             item.add_marker("grammar")
         if relative_path.startswith("tests/unit/test_daveml"):
             item.add_marker("daveml")
-        if relative_path.startswith("tests/e2e/"):
+        if relative_path.startswith(("tests/e2e/", "tests/families/")):
             item.add_marker("integration")
+        if Path(relative_path).stem.endswith("_matrix"):
+            item.add_marker("matrix")
         if relative_path.startswith("tests/parser/test_table_parser.py"):
             item.add_marker("table")
         for view, paths in VIEW_FILES.items():

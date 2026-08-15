@@ -37,6 +37,7 @@ from taoryx.model_authoring import (
     scaffold_model_authoring_draft,
     write_model_authoring_draft,
 )
+from taoryx.model_overview import build_model_overview_catalog, render_model_overview_markdown
 from taoryx.outputs import RunArtifact
 from taoryx.plugins import PluginError, declared_plugin_entry_points, discover_plugins
 from taoryx.scenario import ScenarioCompileError, ScenarioCompiler
@@ -345,6 +346,14 @@ def main(argv: list[str] | None = None) -> int:
     model_list = model_subparsers.add_parser("list", help="list every composer model and registered tuning campaign")
     model_list.add_argument("--provider", help="restrict the inventory to one exact provider ID")
     model_list.add_argument("--output", type=Path)
+    model_overview = model_subparsers.add_parser(
+        "overview",
+        help="render evidence-bounded model cards with fidelity, provenance, tuning, missions, and parameters",
+    )
+    model_overview.add_argument("--provider", help="restrict cards to one exact provider ID")
+    model_overview.add_argument("--model", help="restrict cards to one exact model ID")
+    model_overview.add_argument("--format", choices=("markdown", "json"), default="markdown")
+    model_overview.add_argument("--output", type=Path)
     model_assess = model_subparsers.add_parser(
         "assess",
         help="report all-model advertisement, control, adapter, and tuning readiness",
@@ -1637,6 +1646,19 @@ def _print_json(payload: object, output: Path | None = None) -> None:
     ####
 
 
+def _print_text(payload: str, output: Path | None = None) -> None:
+    """Print or write one deterministic human-readable document."""
+
+    text = payload if payload.endswith("\n") else payload + "\n"
+    if output is None:
+        print(text, end="")
+        return
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(text, encoding="utf-8")
+    print(f"wrote {output}")
+    ####
+
+
 def _model_command(arguments: argparse.Namespace) -> int:
     """Drive every installed composer model through the common authoring seam."""
 
@@ -1656,6 +1678,19 @@ def _model_command(arguments: argparse.Namespace) -> int:
             )
             _print_json(report, arguments.output)
             return 0 if report["status"] == "pass" else 2
+        if arguments.model_command == "overview":
+            overview_payload = build_model_overview_catalog(
+                plugins,
+                providers,
+                campaigns,
+                provider_id=arguments.provider,
+                model_id=arguments.model,
+            )
+            if arguments.format == "json":
+                _print_json(overview_payload, arguments.output)
+            else:
+                _print_text(render_model_overview_markdown(overview_payload), arguments.output)
+            return 0
         if arguments.model_command == "list":
             selected_providers = providers.providers
             if arguments.provider is not None:
@@ -1858,14 +1893,18 @@ def _select_model_tuning_campaign(
 
     if arguments.campaign is not None:
         registration = campaigns.registration(arguments.campaign)
-        if registration.provider_id != arguments.provider_id or registration.model_id != arguments.model_id:
+        if arguments.provider_id not in (registration.provider_id, *registration.provider_aliases) or registration.model_id != arguments.model_id:
             raise ModelAuthoringError(
                 "campaign-model-mismatch",
                 (f"campaign targets {registration.provider_id!r}/{registration.model_id!r}, not {arguments.provider_id!r}/{arguments.model_id!r}"),
                 path="campaign",
             )
         return registration
-    matches = tuple(item for item in campaigns.registrations if item.provider_id == arguments.provider_id and item.model_id == arguments.model_id)
+    matches = tuple(
+        item
+        for item in campaigns.registrations
+        if arguments.provider_id in (item.provider_id, *item.provider_aliases) and item.model_id == arguments.model_id
+    )
     if len(matches) != 1:
         raise ModelAuthoringError(
             "campaign-selection-required",

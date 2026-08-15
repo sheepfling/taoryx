@@ -25,9 +25,10 @@ import json
 import math
 import os
 import tempfile
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass, field, replace
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any, Literal, Protocol, cast
 
 from .committed_boundary_sensor import CommittedBoundarySensor
@@ -51,6 +52,7 @@ from .vehicle_composition_registry import mission_graph_execution_contract
 from .vehicle_execution_bindings import VehicleExecutionBindingError, resolve_vehicle_execution_binding
 from .vehicle_execution_preflight import preflight_vehicle_composition
 from .vehicle_interface import (
+    CommittedNativeStatusValues,
     ObservationProfile,
     VehicleInterfaceContract,
     project_committed_status_values,
@@ -73,14 +75,17 @@ class EpisodeChannel:
     value_space: ValueSpaceSpec | None = field(default=None, repr=False)
     data_type: Literal["float64", "int64", "boolean", "string", "json"] | None = None
     shape: tuple[int | Literal["variable"], ...] = ()
-    sampling_semantics: Literal[
-        "continuous_sample",
-        "discrete_sample",
-        "event",
-        "interval",
-        "static",
-        "provider_reported",
-    ] | None = None
+    sampling_semantics: (
+        Literal[
+            "continuous_sample",
+            "discrete_sample",
+            "event",
+            "interval",
+            "static",
+            "provider_reported",
+        ]
+        | None
+    ) = None
 
     def __post_init__(self) -> None:
         if not self.name.strip() or not self.description.strip():
@@ -156,6 +161,39 @@ class ActionFrame:
             "values": _json_safe(self.values),
             "duration_s": self.duration_s,
         }
+        ####
+
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class NativeActionValues(Mapping[str, object]):
+    """Immutable native-control mapping lowered from one semantic action frame."""
+
+    entries: Mapping[str, object]
+
+    def __post_init__(self) -> None:
+        if any(not isinstance(key, str) for key in self.entries):
+            raise ValueError("native action values require string keys")
+        object.__setattr__(self, "entries", MappingProxyType(dict(self.entries)))
+        ####
+
+    def __getitem__(self, key: str) -> object:
+        return self.entries[key]
+        ####
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.entries)
+        ####
+
+    def __len__(self) -> int:
+        return len(self.entries)
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Return a portable copy for a runtime adapter."""
+
+        return dict(self.entries)
         ####
 
     ####
@@ -636,8 +674,6 @@ class LanguageBackedCompositionEpisode:
     ####
 
 
-
-
 def _reduced_fixed_wing_high_order_episode_channels(maximum_speed_m_s: float) -> tuple[EpisodeChannel, ...]:
     """Return native adapter coordinates shared by reduced fixed-wing profiles."""
 
@@ -744,9 +780,7 @@ class ReducedFixedWingCompositionEpisode:
         for identifier in profile.action_ids:
             native = semantic_channels[identifier].binding.get("native_action")
             if not isinstance(native, str) or native not in candidates:
-                raise ValueError(
-                    f"authority profile {authority_profile_id!r} has no reduced-episode adapter for {identifier!r}"
-                )
+                raise ValueError(f"authority profile {authority_profile_id!r} has no reduced-episode adapter for {identifier!r}")
             resolved.append(candidates[native])
         schema = tuple(resolved)
         self._authority_action_schema_cache[authority_profile_id] = schema
@@ -937,11 +971,7 @@ class ReducedFixedWingCompositionEpisode:
         lowering_state = payload.get("control_lowering_state", {})
         if not isinstance(lowering_state, Mapping):
             raise ValueError(f"{self._FAMILY_LABEL} checkpoint has invalid control-lowering state")
-        action_schema = (
-            self.action_schema
-            if active_authority_profile_id is None
-            else self.authority_action_schema(active_authority_profile_id)
-        )
+        action_schema = self.action_schema if active_authority_profile_id is None else self.authority_action_schema(active_authority_profile_id)
         _, held_native_action = self._resolve_action_against_schema(held, action_schema, {})
         self._held_native_action = held_native_action
         self._active_authority_profile_id = active_authority_profile_id
@@ -957,11 +987,7 @@ class ReducedFixedWingCompositionEpisode:
         ####
 
     def _resolve_action(self, action: Mapping[str, object]) -> tuple[dict[str, float], dict[str, float]]:
-        action_schema = (
-            self.action_schema
-            if self._active_authority_profile_id is None
-            else self.authority_action_schema(self._active_authority_profile_id)
-        )
+        action_schema = self.action_schema if self._active_authority_profile_id is None else self.authority_action_schema(self._active_authority_profile_id)
         return self._resolve_action_against_schema(action, action_schema, self._held_native_action)
         ####
 
@@ -1102,9 +1128,7 @@ class ReducedFixedWingCompositionEpisode:
                 )
             yaw_rate = action.get("body-yaw-rate-command-rad-s")
             if yaw_rate is not None:
-                rate_guidance["heading_deg"] = (
-                    math.degrees(current_heading_rad) + math.degrees(yaw_rate * hold_duration_s)
-                ) % 360.0
+                rate_guidance["heading_deg"] = (math.degrees(current_heading_rad) + math.degrees(yaw_rate * hold_duration_s)) % 360.0
             self._control_lowering_state.update(
                 {
                     "active_profile_id": profile_id,
@@ -1119,9 +1143,7 @@ class ReducedFixedWingCompositionEpisode:
             {
                 "active_profile_id": profile_id or "legacy_native_union",
                 "lowered_guidance": {
-                    name: value
-                    for name, value in action.items()
-                    if name in {"speed_m_s", "flight_path_angle_deg", "heading_deg", "bank_angle_deg"}
+                    name: value for name, value in action.items() if name in {"speed_m_s", "flight_path_angle_deg", "heading_deg", "bank_angle_deg"}
                 },
             }
         )
@@ -1144,6 +1166,7 @@ class ReducedFixedWingCompositionEpisode:
         ####
 
     ####
+
 
 class LocalDirectWrenchCompositionEpisode:
     """Bounded source-local direct-wrench bridge episode.
@@ -1429,12 +1452,7 @@ class LocalDirectWrenchCompositionEpisode:
 
         names = self.config.assessment_state_names or self.config.state_names
         scales = dict(zip(self.config.state_names, self.config.state_scales, strict=True))
-        return math.sqrt(
-            sum(
-                ((self._state[name] - self.config.reference_state[name]) / scales[name]) ** 2
-                for name in names
-            )
-        )
+        return math.sqrt(sum(((self._state[name] - self.config.reference_state[name]) / scales[name]) ** 2 for name in names))
         ####
 
     def _require_open(self) -> None:
@@ -1460,6 +1478,7 @@ def _open_language_backed_episode(
     del integration_step_s
     return LanguageBackedCompositionEpisode(composition, seed=seed)
     ####
+
 
 def _open_local_direct_wrench_episode(
     composition: CompiledVehicleComposition,
@@ -1608,9 +1627,7 @@ def validate_vehicle_composition_episode_contract(
                 findings.append(f"authority profile {profile.id!r} adapter schema contains duplicate names")
             for adapter_channel in resolved_profile_schema:
                 if adapter_channel.value_space is None:
-                    findings.append(
-                        f"authority profile {profile.id!r} adapter action {adapter_channel.name!r} omits a value-space declaration"
-                    )
+                    findings.append(f"authority profile {profile.id!r} adapter action {adapter_channel.name!r} omits a value-space declaration")
         for identifier in profile.action_ids:
             semantic_channel = semantic_actions_by_id[identifier]
             if semantic_channel.availability != "available":
@@ -1623,9 +1640,7 @@ def validate_vehicle_composition_episode_contract(
             semantic_to_native[identifier] = native
             bound_native_channel = profile_action_channels.get(native)
             if bound_native_channel is None:
-                findings.append(
-                    f"semantic action {identifier!r} maps to absent {profile.id!r} episode-adapter action {native!r}"
-                )
+                findings.append(f"semantic action {identifier!r} maps to absent {profile.id!r} episode-adapter action {native!r}")
                 continue
             if bound_native_channel.value_space is None:
                 findings.append(f"native action {native!r} has no declared value space")
@@ -1844,8 +1859,6 @@ def _numeric_action(action: Mapping[str, object]) -> dict[str, float]:
     ####
 
 
-
-
 def _episode_status(status: InteractiveStatus, closed: bool) -> EpisodeStatus:
     if closed:
         return "closed"
@@ -1873,7 +1886,7 @@ def _payload_digest(payload: Mapping[str, object]) -> str:
 def _native_action_for_frame(
     contract: VehicleInterfaceContract,
     action: ActionFrame,
-) -> dict[str, object]:
+) -> NativeActionValues:
     """Validate one semantic frame and map it to declared native controls."""
 
     if action.interface_id != contract.id:
@@ -1894,14 +1907,14 @@ def _native_action_for_frame(
         if not isinstance(native, str) or not native:
             raise ValueError(f"action channel {identifier!r} has no episode-native binding")
         result[native] = value
-    return result
+    return NativeActionValues(result)
     ####
 
 
 def native_action_for_frame(
     contract: VehicleInterfaceContract,
     action: ActionFrame,
-) -> dict[str, object]:
+) -> NativeActionValues:
     """Validate and lower a public semantic action frame for a plug-in runtime.
 
     Package-owned parity and episode adapters use this stable contract seam
@@ -1942,7 +1955,7 @@ def _status_frame(contract: VehicleInterfaceContract, observation: EpisodeObserv
         contract,
         time_s=observation.time_s,
         execution_status=observation.status,
-        raw_values=observation.values,
+        raw_values=CommittedNativeStatusValues(observation.values),
     )
     validate_projected_status_values(
         contract,
@@ -2131,6 +2144,7 @@ __all__ = [
     "F16ReducedCompositionEpisode",  # noqa: F822 - optional legacy export resolved through __getattr__.
     "LanguageBackedCompositionEpisode",
     "MissionCompositionEpisode",
+    "NativeActionValues",
     "ReducedFixedWingCompositionEpisode",
     "StatusFrame",
     "X15LocalDirectWrenchCompositionEpisode",

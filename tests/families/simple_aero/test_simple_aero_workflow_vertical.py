@@ -98,7 +98,17 @@ def test_simple_aero_focused_provider_advertises_versioned_workflow_controls(
     assert revision.package == "taoryx-simple-aero"
     assert revision.version == PACKAGE_VERSION
     assert revision.api_version == "1"
-    assert revision.contribution_count == 3
+    owned_contributions = {
+        (contribution.kind, contribution.id)
+        for contribution in plugins.contributions
+        if contribution.plugin.id == PACKAGE_ID
+    }
+    assert revision.contribution_count == len(owned_contributions)
+    assert {
+        ("trajectory_provider", "reference.point_mass"),
+        ("mission_composition_provider", PROVIDER_ID),
+        ("mission_workflow_endpoint_catalog", "taoryx.simple-aero.workflow-endpoints"),
+    } <= owned_contributions
     assert len(revision.fingerprint) == 64
     contribution = plugins.contribution("mission_workflow_endpoint_catalog", "taoryx.simple-aero.workflow-endpoints")
     fragment = contribution.value

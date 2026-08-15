@@ -4,11 +4,16 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+import pytest
+
 from taoryx.model_authoring import build_model_authoring_plan
 from taoryx.plugins import discover_plugins
 from taoryx.trajectory.configuration_contract import TrajectoryMissionOperationMetadata
 
 
+@pytest.mark.slow
+@pytest.mark.matrix
+@pytest.mark.integration
 def test_every_realization_specific_operation_row_is_selectable_and_projected_exactly() -> None:
     """Keep the public operation matrix aligned with selection and plan output.
 
@@ -25,6 +30,14 @@ def test_every_realization_specific_operation_row_is_selectable_and_projected_ex
     adapters = plugins.build_family_adapter_registry()
     local_screens = plugins.build_local_controller_screen_advertisement_registry()
 
+    advertised = {
+        (provider.metadata.id, model.id, mission.id, operation.fidelity, operation.realization_id)
+        for provider in providers.providers
+        for model in provider.list_models()
+        for mission in model.mission_templates
+        for operation in mission.operations
+        if operation.realization_id is not None
+    }
     exercised: set[tuple[str, str, str, str, str]] = set()
     for provider in providers.providers:
         for model in provider.list_models():
@@ -78,5 +91,5 @@ def test_every_realization_specific_operation_row_is_selectable_and_projected_ex
                             assert record.blockers
                     exercised.add((provider.metadata.id, model.id, mission.id, fidelity, realization_id))
 
-    assert len(exercised) == 70
+    assert exercised == advertised
     ####

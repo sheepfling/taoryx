@@ -10,6 +10,7 @@ from typing import Literal
 from taoryx.trajectory.a320_racetrack import A320RacetrackStepper
 
 from taoryx.composition_episode import ActionFrame, EpisodeObservation, StatusFrame, native_action_for_frame, status_frame_for_observation
+from taoryx.composition_policy import CompositionPolicyTraceRecord, parse_composition_policy_trace_record
 from taoryx.vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
 from taoryx.vehicle_execution_bindings import batch_episode_parity_record, resolve_vehicle_execution_binding
 from taoryx.vehicle_interface import VehicleInterfaceContract
@@ -41,6 +42,7 @@ class A320ReducedBatchEpisodeParityStep:
             "mismatches": list(self.mismatches),
         }
         ####
+
     ####
 
 
@@ -79,20 +81,22 @@ class A320ReducedBatchEpisodeParityReport:
             ),
         }
         ####
+
     ####
 
 
 def verify_serialized_a320_reduced_batch_episode_parity(
     composition: CompiledVehicleComposition,
-    payload: Mapping[str, object],
+    payload: object,
 ) -> A320ReducedBatchEpisodeParityReport:
     """Replay a persisted A320 policy trace through a fresh source stepper."""
 
-    _validate_identity(composition, payload)
+    trace = parse_composition_policy_trace_record(payload)
+    _validate_identity(composition, trace)
     contract = resolve_vehicle_composition_interface_contract(composition)
-    if _text(payload, "interface_id") != contract.id or _text(payload, "interface_fingerprint_sha256") != contract.fingerprint:
+    if trace["interface_id"] != contract.id or trace["interface_fingerprint_sha256"] != contract.fingerprint:
         raise ValueError("policy trace interface identity disagrees with the A320 parity composition")
-    authority_profile_id = _text(payload, "authority_profile_id")
+    authority_profile_id = trace["authority_profile_id"]
     if authority_profile_id != "kinematic_guidance":
         raise ValueError("A320 reduced parity requires the kinematic_guidance authority profile")
     batch_binding = resolve_vehicle_execution_binding(composition, "batch")
@@ -103,7 +107,7 @@ def verify_serialized_a320_reduced_batch_episode_parity(
     stepper = _a320_stepper_for_composition(composition)
     held_native: dict[str, float] = {}
     records: list[A320ReducedBatchEpisodeParityStep] = []
-    for index, item in enumerate(_sequence(payload.get("steps"), "steps")):
+    for index, item in enumerate(trace["steps"]):
         expected = _mapping(item, f"steps[{index}]")
         frame = _action_frame(_mapping(expected.get("action_frame"), f"steps[{index}].action_frame"))
         if frame.authority_profile_id != authority_profile_id:
@@ -121,10 +125,8 @@ def verify_serialized_a320_reduced_batch_episode_parity(
         if abs(expected_end - actual.time_s) > _TOLERANCE:
             mismatches.append("time_end_s differs from batch committed boundary")
         records.append(A320ReducedBatchEpisodeParityStep(index, start_time, actual.time_s, "pass" if not mismatches else "fail", tuple(mismatches)))
-    expected_final = _mapping(payload.get("final_status"), "final_status")
-    final_mismatches = _mismatches(
-        _mapping(expected_final.get("values"), "final status values"), _status(stepper, contract).values, "final_status"
-    )
+    expected_final = trace["final_status"]
+    final_mismatches = _mismatches(_mapping(expected_final.get("values"), "final status values"), _status(stepper, contract).values, "final_status")
     if final_mismatches:
         now = stepper.state.time_s
         records.append(A320ReducedBatchEpisodeParityStep(len(records), now, now, "fail", tuple(final_mismatches)))
@@ -142,9 +144,7 @@ def verify_serialized_a320_reduced_batch_episode_parity(
     ####
 
 
-def _validate_identity(composition: CompiledVehicleComposition, payload: Mapping[str, object]) -> None:
-    if _text(payload, "schema") != "taoryx.composition-policy-trace/v1alpha1":
-        raise ValueError("unsupported policy trace schema")
+def _validate_identity(composition: CompiledVehicleComposition, payload: CompositionPolicyTraceRecord) -> None:
     if (
         composition.family_id != "a320_openap_3dof"
         or composition.mission != "powered_fixed_wing_racetrack_v1"
@@ -152,7 +152,7 @@ def _validate_identity(composition: CompiledVehicleComposition, payload: Mapping
     ):
         raise ValueError("no A320 reduced batch/episode parity adapter is registered for this composition")
     parity = batch_episode_parity_record(composition.family_id, composition.mission, composition.fidelity)
-    if parity.get("availability") != "registered" or parity.get("adapter_id") != _ADAPTER_ID:
+    if parity.availability != "registered" or parity.adapter_id != _ADAPTER_ID:
         raise ValueError("no A320 reduced batch/episode parity adapter is registered for this composition")
     if _text(payload, "composition_id") != composition.id or _text(payload, "composition_identity_sha256") != composition.identity_sha256:
         raise ValueError("policy trace composition identity disagrees with the requested parity composition")

@@ -21,6 +21,7 @@ from taoryx.vehicle_composition import (
 )
 from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
 from taoryx.vehicle_interface import (
+    CommittedNativeStatusValues,
     InterfaceChannelBinding,
     bind_declared_sensor_profile,
     build_vehicle_interface_catalog_report,
@@ -137,16 +138,15 @@ def test_status_projection_uses_declared_episode_or_batch_binding_present_in_tru
         contract,
         time_s=0.0,
         execution_status="active",
-        raw_values={
-            "body_rate.roll": 0.1,
-            "body_rate.pitch": -0.2,
-            "body_rate.yaw": 0.3,
-        },
+        raw_values=CommittedNativeStatusValues(
+            {
+                "body_rate.roll": 0.1,
+                "body_rate.pitch": -0.2,
+                "body_rate.yaw": 0.3,
+            }
+        ),
     )
-    assert {
-        key: episode_values[key]
-        for key in ("body_rate.roll", "body_rate.pitch", "body_rate.yaw")
-    } == {
+    assert {key: episode_values[key] for key in ("body_rate.roll", "body_rate.pitch", "body_rate.yaw")} == {
         "body_rate.roll": 0.1,
         "body_rate.pitch": -0.2,
         "body_rate.yaw": 0.3,
@@ -156,12 +156,9 @@ def test_status_projection_uses_declared_episode_or_batch_binding_present_in_tru
         contract,
         time_s=0.0,
         execution_status="active",
-        raw_values={"body_rate_rad_s": [0.4, -0.5, 0.6]},
+        raw_values=CommittedNativeStatusValues({"body_rate_rad_s": [0.4, -0.5, 0.6]}),
     )
-    assert {
-        key: batch_values[key]
-        for key in ("body_rate.roll", "body_rate.pitch", "body_rate.yaw")
-    } == {
+    assert {key: batch_values[key] for key in ("body_rate.roll", "body_rate.pitch", "body_rate.yaw")} == {
         "body_rate.roll": 0.4,
         "body_rate.pitch": -0.5,
         "body_rate.yaw": 0.6,
@@ -173,10 +170,7 @@ def test_hummingbird_pseudo_interface_exposes_response_controls_and_battery_stat
     contract = resolve_vehicle_interface_contract("hummingbird", "pseudo_6dof")
 
     assert contract.authority_profile("body_motion_response").availability == "available"
-    assert {
-        profile.id: (profile.scheme_id, profile.switching_policy)
-        for profile in contract.authority_profiles
-    } == {
+    assert {profile.id: (profile.scheme_id, profile.switching_policy) for profile in contract.authority_profiles} == {
         "body_motion_response": ("body_motion.attitude", "explicit_bumpless"),
         "velocity_yaw_command": ("kinematic.velocity", "explicit_bumpless"),
         "live_waypoint_guidance": ("mission.waypoint", "explicit_bumpless"),
@@ -292,11 +286,7 @@ def test_every_resolved_public_interface_channel_has_an_explicit_catalog_entry()
     assert all(channel.as_dict()["value_space_source"] == "interface_channel_value_space_catalog" for channel in channels)
     numeric = [channel for channel in channels if channel.value_type in {"scalar", "vector3", "vector4"}]
     assert all(channel.canonical_unit is not None or channel.quantity_semantics is not None for channel in numeric)
-    assert {
-        (channel.id, channel.quantity_semantics)
-        for channel in numeric
-        if channel.canonical_unit is None
-    } == {
+    assert {(channel.id, channel.quantity_semantics) for channel in numeric if channel.canonical_unit is None} == {
         ("control.allocation.residual_norm", "mixed_wrench_norm"),
         ("control.allocation.saturation_count", "count"),
         ("control.feedback_norm", "normalized_error"),
@@ -355,11 +345,14 @@ def test_passive_pseudo_interface_reuses_rigid_truth_in_batch_without_a_response
     assert status["attitude.quaternion"].availability == "available_in_batch"
     assert status["body_rate"].availability == "available_in_batch"
     assert {"aerodynamics.drag_force", "aerodynamics.projected_area", "angular_rate.norm"} <= set(status)
-    assert all(status[item].availability == "available_in_batch" for item in {
-        "aerodynamics.drag_force",
-        "aerodynamics.projected_area",
-        "angular_rate.norm",
-    })
+    assert all(
+        status[item].availability == "available_in_batch"
+        for item in {
+            "aerodynamics.drag_force",
+            "aerodynamics.projected_area",
+            "angular_rate.norm",
+        }
+    )
     resources = {channel.id: channel for channel in contract.resource_channels}
     assert resources["resources.mass.total"].availability == "available_in_batch"
     assert validate_vehicle_interface_contract(contract) == ()
@@ -495,9 +488,7 @@ def test_hl20_direct_wrench_screen_publishes_the_same_explicit_bridge_without_su
 
 
 def test_composition_interface_does_not_borrow_the_x15_local_screen_episode_for_high_energy_mission() -> None:
-    composition = compile_vehicle_composition(
-        load_vehicle_composition_request(ROOT / "examples/vehicle_composition/x15_direct_wrench_compose.yaml")
-    )
+    composition = compile_vehicle_composition(load_vehicle_composition_request(ROOT / "examples/vehicle_composition/x15_direct_wrench_compose.yaml"))
     contract = resolve_vehicle_composition_interface_contract(composition)
 
     assert contract.authority_profile("direct_wrench").availability == "unavailable_at_runtime"
@@ -626,10 +617,7 @@ def test_every_advertised_fidelity_resolves_a_fail_closed_interface_contract() -
             assert validate_vehicle_interface_contract(contract) == ()
             available_profiles = [item for item in contract.authority_profiles if item.availability == "available"]
             if available_profiles:
-                assert any(
-                    record.operation == "episode" and record.status == "runnable"
-                    for record in contract.execution_records
-                )
+                assert any(record.operation == "episode" and record.status == "runnable" for record in contract.execution_records)
     ####
 
 

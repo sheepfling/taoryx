@@ -114,7 +114,16 @@ def test_dual_launch_focused_provider_advertises_versioned_batch_only_controls(
     assert revision.package == "taoryx-dual-launch"
     assert revision.version == PACKAGE_VERSION
     assert revision.api_version == "1"
-    assert revision.contribution_count == 2
+    owned_contributions = {
+        (contribution.kind, contribution.id)
+        for contribution in plugins.contributions
+        if contribution.plugin.id == PACKAGE_ID
+    }
+    assert revision.contribution_count == len(owned_contributions)
+    assert {
+        ("mission_composition_provider", PROVIDER_ID),
+        ("mission_workflow_endpoint_catalog", "taoryx.dual-launch.workflow-endpoints"),
+    } <= owned_contributions
     assert len(revision.fingerprint) == 64
     contribution = plugins.contribution(
         "mission_workflow_endpoint_catalog",

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from taoryx.racetrack_template import RACETRACK_FIDELITIES, load_racetrack_template_catalog
+from taoryx.racetrack_template import RACETRACK_FIDELITIES, RacetrackBinding, load_racetrack_template_catalog
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "verification/racetrack_templates.yaml"
@@ -87,7 +87,7 @@ def test_racetrack_template_rejects_vertical_phase_that_does_not_fit() -> None:
     from taoryx.racetrack_template import resolve_racetrack_binding
 
     with pytest.raises(ValueError, match="straight length"):
-        resolve_racetrack_binding(catalog.template_id, "invalid", values)
+        resolve_racetrack_binding(catalog.template_id, "invalid", RacetrackBinding.model_validate(values))
     ####
 
 

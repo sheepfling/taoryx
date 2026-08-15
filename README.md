@@ -101,6 +101,7 @@ taoryx plugins list --json
 taoryx model list
 taoryx model assess --output build/model-assessment.json
 taoryx model plan taoryx.hummingbird.mission-composition hummingbird --fidelity pseudo_6dof
+taoryx model overview --provider taoryx.hummingbird.mission-composition --model hummingbird --output build/hummingbird-model-card.md
 ```
 
 `taoryx model assess` is the compact all-model readiness matrix: it shows
@@ -114,6 +115,9 @@ for the complete data, waypoint, segment, controller, and plug-in workflow.
 Model plug-ins can generate common LQR/LQI campaigns from the compact
 `ControlAutomationDeclaration`; `taoryx model tune` content-addresses reports
 under `build/controller-cache` unless `--no-cache` is selected.
+For a reviewer-facing model/fidelity/provenance/tuning/segment-parameter
+summary that stays tied to those installed contracts, use
+[`taoryx model overview`](docs/architecture/vehicle-model-cards.md).
 
 The core wheel contains the language and simulation host. Optional wheels own
 DAVE-ML, development-only debug providers, Simple Aero, the standalone A320,

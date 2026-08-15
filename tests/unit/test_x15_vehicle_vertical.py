@@ -521,6 +521,7 @@ def test_x15_source_surface_authority_screen_is_public_physical_table_allocation
     ####
 
 
+@pytest.mark.slow
 def test_x15_source_surface_lqi_screen_runs_through_the_public_composition_path(
     tmp_path: Path,
     plugins: PluginCatalog,
@@ -598,6 +599,7 @@ def test_x15_source_surface_lqi_screen_runs_through_the_public_composition_path(
     ####
 
 
+@pytest.mark.slow
 def test_x15_source_surface_lqi_screen_applies_the_exact_common_tuning_candidate(
     tmp_path: Path,
     plugins: PluginCatalog,

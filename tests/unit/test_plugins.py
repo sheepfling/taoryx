@@ -183,6 +183,17 @@ def test_plugin_revision_is_scoped_to_its_owned_identity_and_contributions() -> 
     assert unrelated_update.fingerprint != catalog.fingerprint
     assert unrelated_update.plugin_fingerprint("example.alpha") == alpha_revision.fingerprint
 
+    augmented = discover_plugins(
+        include_builtin=False,
+        entry_points=(
+            _EntryPoint("example.alpha", "example:alpha", alpha),
+            _EntryPoint("example.beta", "example:beta", beta),
+            _EntryPoint("example.gamma", "example:gamma", _model_plugin("example.gamma", "gamma-model")),
+        ),
+    )
+    assert augmented.fingerprint != catalog.fingerprint
+    assert augmented.plugin_fingerprint("example.alpha") == alpha_revision.fingerprint
+
     changed_alpha = discover_plugins(
         include_builtin=False,
         entry_points=(

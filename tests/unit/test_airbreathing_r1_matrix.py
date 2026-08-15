@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from tools.validate_airbreathing_r1_matrix import _mutate_problem, run_matrix
 
 
@@ -20,6 +22,7 @@ def test_problem_mutation_changes_only_initial_state(tmp_path: Path) -> None:
     ####
 
 
+@pytest.mark.slow
 def test_airbreathing_r1_matrix_records_boundary_cases(tmp_path: Path) -> None:
     report = run_matrix(tmp_path, families=("skywalker_x8",))
 

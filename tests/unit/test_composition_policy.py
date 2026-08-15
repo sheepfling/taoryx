@@ -18,6 +18,7 @@ from taoryx.composition_policy import (
 )
 from taoryx.runtime.cli import main
 from taoryx.vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
+from taoryx.vehicle_execution_bindings import VehicleBatchEpisodeParityAdvertisement
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -186,13 +187,15 @@ def test_policy_replay_does_not_emit_parity_for_an_unregistered_pair(
 
     monkeypatch.setattr(
         "taoryx.composition_policy.batch_episode_parity_record",
-        lambda family_id, mission, fidelity: {
-            "family_id": family_id,
-            "mission": mission,
-            "fidelity": fidelity,
-            "availability": "not_registered",
-            "reason": "test disposition",
-        },
+        lambda family_id, mission, fidelity, **_: VehicleBatchEpisodeParityAdvertisement(
+            family_id=family_id,
+            mission=mission,
+            fidelity=fidelity,
+            availability="not_registered",
+            runnable_operations=("batch", "episode"),
+            reason="test disposition",
+            claim_boundary="Test-only unregistered parity disposition.",
+        ),
     )
 
     replay = replay_composition_policy_trace(composition, trace)
@@ -212,9 +215,7 @@ def test_policy_trace_replay_refuses_a_nearby_composition_identity() -> None:
         lambda observation, contract: None,
         authority_profile_id="native_control_bridge",
     )
-    incompatible = compile_vehicle_composition(
-        load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / "x8_racetrack_capability_compose.yaml")
-    )
+    incompatible = compile_vehicle_composition(load_vehicle_composition_request(ROOT / "examples/vehicle_composition" / "x8_racetrack_capability_compose.yaml"))
 
     with pytest.raises(ValueError, match="composition identity"):
         replay_composition_policy_trace(incompatible, trace)
@@ -258,9 +259,7 @@ def test_persisted_policy_trace_rejects_modified_public_frame(tmp_path: Path) ->
     episode = open_vehicle_composition_episode(composition)
     trace = run_composition_policy(
         episode,
-        lambda observation, contract: PolicyDecision({"attitude.yaw.command": 0.5}, 0.1)
-        if observation.time_s == 0.0
-        else None,
+        lambda observation, contract: PolicyDecision({"attitude.yaw.command": 0.5}, 0.1) if observation.time_s == 0.0 else None,
         authority_profile_id="body_motion_response",
     )
     payload = trace.as_dict()

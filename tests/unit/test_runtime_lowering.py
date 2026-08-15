@@ -2950,6 +2950,7 @@ def test_inherited_trajectory_activates_at_source_segment(tmp_path: Path) -> Non
 ####
 
 
+@pytest.mark.slow
 def test_run_cli_returns_input_error_and_writes_json_report(tmp_path: Path, capsys) -> None:
     report = tmp_path / "run.json"
     exit_code = main(["run", str(tmp_path / "missing.prb"), "--report", str(report), "--json"])

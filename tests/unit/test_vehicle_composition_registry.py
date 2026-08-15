@@ -1975,6 +1975,7 @@ def test_vehicle_run_executes_x8_translation_ready_composition(tmp_path: Path, c
     ####
 
 
+@pytest.mark.slow
 def test_vehicle_run_executes_b747_point_mass_translation_ready_composition(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],

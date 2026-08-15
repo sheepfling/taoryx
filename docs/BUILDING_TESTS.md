@@ -65,6 +65,8 @@ python -m tools.dev test-control-api-pilot  # four reduced-order control/API fix
 python -m tools.dev test-quick      # curated smoke/contracts; stop on first failure
 python -m tools.dev test-changed     # changed tests, or test-quick when no mapping exists
 python -m tools.dev test-parallel    # broad fast suite across workers, optional xdist
+python -m tools.dev test-integration # end-to-end and package-vertical view
+python -m tools.dev test-matrices    # full catalog, grid, and cross-product view
 python -m tools.dev test             # broad local regression suite
 python -m tools.dev check            # full handoff/release validation
 ```
@@ -192,6 +194,16 @@ worker. Before relying on parallel execution, tests must write only to
 `tmp_path`, the shared `artifact_dir` fixture, or another worker-safe output
 root; fixed repository-root outputs can race.
 
+Both broad runners print the 25 slowest tests. Use that report to maintain the
+cost boundary: apply `slow` to an intentionally long simulation, a full
+catalog/grid sweep, or a test that consistently exceeds roughly 20 seconds on
+the reference development machine. Do not mark a test `slow` merely because
+its `max_steps` is high when its normal stop condition makes it fast. Apply the
+mark to the exact parameter or test when possible; use a module mark only when
+the whole module has that cost. Parallel duration reports include worker and
+CPU contention, so use an isolated or serial timing to decide a marker; use
+the parallel runner to measure end-to-end wall-clock time.
+
 | Marker | Meaning |
 | --- | --- |
 | `grammar` | Parser, lexer, EBNF, corpus, and language-validation view |
@@ -200,18 +212,59 @@ root; fixed repository-root outputs can race.
 | `slow` | Long-running tests, including stress and historical runtime cases |
 | `artifact` | Tests that intentionally write human-readable output under `artifacts/` |
 | `simple_aero` | Simple Aero problem, segment, and trajectory corpus tests |
+| `daveml` | DAVE-ML parser, evaluator, collection, and round-trip view |
+| `integration` | Cross-component or end-to-end integration view; all `tests/e2e/` and `tests/families/` tests receive it |
+| `matrix` | Full cross-product, grid, or catalog-sweep view; additive, not a cost label |
+| `external_oracle` | Tests that invoke an optional external model interpreter |
+| `runtime` | Tests requiring a historical or separately verified TAOS executable |
+| `historical` | Exploratory or historically sourced runtime cases |
+| `stress` | Intentionally large or long-running runtime cases |
 | `segment` | Isolated segment contracts, maneuver objectives, and promotion gates |
 | `plot` | Plotting and visualization-only checks; normally unit-level and fast |
+| `negative_runtime` | Malformed inputs for executable-level rejection checks |
+| `metamorphic` | Tests comparing multiple TAOS executions |
 | `b747` | Boeing 747 family plant, trajectory, controller, and artifact tests |
 | `x8` | Skywalker X8 family plant, trajectory, controller, and artifact tests |
 | `hummingbird` | AscTec Hummingbird family plant, rotor, trajectory, and artifact tests |
 | `x15` | X-15 family plant, glider, and artifact tests |
+
+Collection assigns `integration` to end-to-end and package-vertical tests, and
+assigns `matrix` to files named `test_*_matrix.py`. A broader cross-product
+test may declare `matrix` explicitly. Both are semantic selection views; only
+`slow`, `artifact`, and `simple_aero` alter the default fast selection.
+
+## Inventory assertions in a plug-in host
+
+Use an exact inventory count only when the artifact itself is a closed,
+versioned corpus (for example, the historical equation registry). A test over
+discoverable plug-ins should instead enumerate the current advertised
+identities and prove that every one was exercised or projected. Package-local
+tests may assert their required contribution IDs, but should not rely on a
+total contribution count when an additive package change is valid.
+
+Repository tests normally use `include_external=False`, so installing an
+unrelated compatible wheel does not change the checked-in release scope. A
+host or test that intentionally enables external discovery must treat an
+additional valid provider, model, campaign, or endpoint as additive rather
+than as a failed snapshot count.
+
+## Planning documents are not unit-test contracts
+
+Do not make a unit test assert a roadmap, backlog, milestone, release plan,
+or the current completion state of a planning report. Those are deliberately
+short-lived decision records. Test executable planners, validators, and public
+CLI/API boundaries with stable inputs instead. A machine-readable file that is
+consumed at runtime may have schema and behavior coverage, but its temporary
+delivery ordering or project-status wording is not a permanent regression
+contract.
 
 The portable development runner provides the usual selections:
 
 ```bash
 python -m tools.dev test             # fast tests: excludes slow/artifact/simple_aero
 python -m tools.dev test-all         # every test category
+python -m tools.dev test-integration # e2e and package-vertical integration view
+python -m tools.dev test-matrices    # catalog/grid/cross-product matrix view
 python -m tools.dev test-simple_aero     # only Simple Aero tests
 python -m tools.dev test-artifacts   # only artifact-producing tests
 python -m tools.dev test-slow        # only slow tests

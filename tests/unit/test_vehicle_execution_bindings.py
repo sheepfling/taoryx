@@ -35,6 +35,7 @@ from taoryx.vehicle_composition import (
 )
 from taoryx.vehicle_composition_registry import load_resolved_vehicle_composition_catalog
 from taoryx.vehicle_execution_bindings import (
+    VehicleBatchEpisodeParityAdvertisement,
     VehicleExecutionBinding,
     VehicleExecutionBindingError,
     batch_episode_parity_record,
@@ -93,9 +94,7 @@ def test_execution_binding_catalog_references_declared_family_missions_and_tiers
     assert "not_emitted" not in declared_dispositions
     assert all(item.batch_action_trace == "not_applicable" for item in catalog.bindings if item.operation == "episode")
     assert all(
-        item.batch_action_trace == "emits_committed_interval_trace"
-        for item in catalog.bindings
-        if item.operation == "batch" and item.status == "runnable"
+        item.batch_action_trace == "emits_committed_interval_trace" for item in catalog.bindings if item.operation == "batch" and item.status == "runnable"
     )
     assert all(item.batch_action_trace == "planned" for item in catalog.bindings if item.status == "planned")
     assert all(item.execution_mode == "planned" for item in catalog.bindings if item.status == "planned")
@@ -192,10 +191,18 @@ def test_batch_episode_parity_registry_is_explicit_and_never_inferred() -> None:
     assert validate_batch_episode_parity_bindings(parity_catalog.bindings, execution_bindings=execution_catalog.bindings) == ()
 
     hummingbird = batch_episode_parity_record("hummingbird", "multirotor_pad_box_yaw_recovery_land_v1", "pseudo_6dof", parity_catalog=parity_catalog)
-    hummingbird_physical = batch_episode_parity_record("hummingbird", "hummingbird_local_individual_rotor_lqi_screen_v1", "rigid_body_6dof_surface_allocated", parity_catalog=parity_catalog)
-    hummingbird_horizontal = batch_episode_parity_record("hummingbird", "hummingbird_local_horizontal_translation_lqi_screen_v1", "rigid_body_6dof_surface_allocated", parity_catalog=parity_catalog)
-    hummingbird_vertical = batch_episode_parity_record("hummingbird", "hummingbird_local_vertical_translation_lqi_screen_v1", "rigid_body_6dof_surface_allocated", parity_catalog=parity_catalog)
-    hummingbird_direct = batch_episode_parity_record("hummingbird", "hummingbird_local_direct_wrench_screen_v1", "rigid_body_6dof_direct_wrench", parity_catalog=parity_catalog)
+    hummingbird_physical = batch_episode_parity_record(
+        "hummingbird", "hummingbird_local_individual_rotor_lqi_screen_v1", "rigid_body_6dof_surface_allocated", parity_catalog=parity_catalog
+    )
+    hummingbird_horizontal = batch_episode_parity_record(
+        "hummingbird", "hummingbird_local_horizontal_translation_lqi_screen_v1", "rigid_body_6dof_surface_allocated", parity_catalog=parity_catalog
+    )
+    hummingbird_vertical = batch_episode_parity_record(
+        "hummingbird", "hummingbird_local_vertical_translation_lqi_screen_v1", "rigid_body_6dof_surface_allocated", parity_catalog=parity_catalog
+    )
+    hummingbird_direct = batch_episode_parity_record(
+        "hummingbird", "hummingbird_local_direct_wrench_screen_v1", "rigid_body_6dof_direct_wrench", parity_catalog=parity_catalog
+    )
     x8 = batch_episode_parity_record("skywalker_x8", "powered_fixed_wing_racetrack_v1", "point_mass_3dof", parity_catalog=parity_catalog)
     x8_pseudo = batch_episode_parity_record("skywalker_x8", "powered_fixed_wing_racetrack_v1", "pseudo_6dof", parity_catalog=parity_catalog)
     a320 = batch_episode_parity_record("a320_openap_3dof", "powered_fixed_wing_racetrack_v1", "pseudo_6dof", parity_catalog=parity_catalog)
@@ -203,6 +210,7 @@ def test_batch_episode_parity_registry_is_explicit_and_never_inferred() -> None:
     x15 = batch_episode_parity_record("x15", "x15_local_direct_wrench_screen_v1", "rigid_body_6dof_direct_wrench", parity_catalog=parity_catalog)
     hl20 = batch_episode_parity_record("hl20_mod_k", "hl20_local_direct_wrench_screen_v1", "rigid_body_6dof_direct_wrench", parity_catalog=parity_catalog)
 
+    assert isinstance(hummingbird, VehicleBatchEpisodeParityAdvertisement)
     assert hummingbird["availability"] == "registered"
     assert hummingbird["adapter_id"] == "taoryx.hummingbird.aggregate_thrust_batch_episode_parity.v1"
     assert hummingbird_physical["availability"] == "not_available"
@@ -461,9 +469,7 @@ def test_hummingbird_timeout_recovery_graph_runs_the_nominal_path_without_promot
 def test_hummingbird_timeout_recovery_graph_executes_safe_landing_branch_and_fails_mission(tmp_path: Path) -> None:
     """An actual controller timeout follows the declared landing edge, never success."""
 
-    request = load_vehicle_composition_request(
-        ROOT / "examples/vehicle_composition/hummingbird_timeout_recovery_graph_pseudo6dof_compose.yaml"
-    )
+    request = load_vehicle_composition_request(ROOT / "examples/vehicle_composition/hummingbird_timeout_recovery_graph_pseudo6dof_compose.yaml")
     timed_segment = request.segments[2]
     forced_timeout = SegmentSelection(
         id=timed_segment.id,
@@ -473,9 +479,7 @@ def test_hummingbird_timeout_recovery_graph_executes_safe_landing_branch_and_fai
             "target_ned_m": CompositionValue(value=[1000.0, 0.0, -2.0], unit="m"),
         },
     )
-    composition = compile_vehicle_composition(
-        request.model_copy(update={"segments": (*request.segments[:2], forced_timeout, *request.segments[3:])})
-    )
+    composition = compile_vehicle_composition(request.model_copy(update={"segments": (*request.segments[:2], forced_timeout, *request.segments[3:])}))
 
     result = execute_hummingbird_pseudo_composition(composition, tmp_path / "hummingbird-timeout-recovery-executed")
 

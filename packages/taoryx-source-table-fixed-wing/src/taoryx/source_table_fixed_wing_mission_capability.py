@@ -29,7 +29,7 @@ from .powered_fixed_wing_mission_compiler import (
     compile_powered_fixed_wing_racetrack,
     resolve_powered_fixed_wing_mission_profile,
 )
-from .racetrack_template import RacetrackFidelity, resolve_racetrack_binding
+from .racetrack_template import RacetrackBinding, RacetrackFidelity, resolve_racetrack_binding
 from .vehicle_composition import CompiledSegment, CompiledVehicleComposition
 
 _ROOT = model_resource_root()
@@ -53,9 +53,7 @@ class B747SourceRacetrackCapabilityAdapter:
 
     def supports(self, composition: CompiledVehicleComposition) -> bool:
         return (
-            composition.family_id == "b747"
-            and composition.mission == "powered_fixed_wing_racetrack_v1"
-            and composition.fidelity in _RACETRACK_FIDELITY_BY_TIER
+            composition.family_id == "b747" and composition.mission == "powered_fixed_wing_racetrack_v1" and composition.fidelity in _RACETRACK_FIDELITY_BY_TIER
         )
         ####
 
@@ -81,6 +79,7 @@ class B747SourceRacetrackCapabilityAdapter:
             plan=proposal,
         )
         ####
+
     ####
 
 
@@ -119,6 +118,7 @@ class X8SourceRacetrackCapabilityAdapter:
             plan=proposal,
         )
         ####
+
     ####
 
 
@@ -139,10 +139,7 @@ def compile_powered_fixed_wing_racetrack_from_composition(
 
     profile_id = _POWERED_FIXED_WING_PROFILE_BY_FAMILY.get(composition.family_id)
     if profile_id is None or composition.mission != "powered_fixed_wing_racetrack_v1":
-        raise ValueError(
-            "powered-fixed-wing racetrack translation requires a registered family and the "
-            "powered_fixed_wing_racetrack_v1 mission"
-        )
+        raise ValueError("powered-fixed-wing racetrack translation requires a registered family and the powered_fixed_wing_racetrack_v1 mission")
     if composition.fidelity not in _RACETRACK_FIDELITY_BY_TIER:
         raise ValueError(f"no powered-fixed-wing racetrack realization is registered for tier {composition.fidelity!r}")
     capability, profile_intent = resolve_powered_fixed_wing_mission_profile(
@@ -168,7 +165,7 @@ def compile_powered_fixed_wing_racetrack_from_composition(
     right_bank_deg = _number(right_turn, "bank_limit_deg")
     if not math.isclose(left_bank_deg, right_bank_deg, rel_tol=1.0e-9, abs_tol=1.0e-6):
         raise ValueError("powered-fixed-wing racetrack requires equal left/right bank limits")
-    
+
     intent = PoweredFixedWingRacetrackIntent(
         id=profile_intent.id,
         low_altitude_m=_number(descent, "target_altitude_m"),
@@ -205,11 +202,7 @@ def compile_b747_source_direct_wrench_racetrack_from_composition(
     bank-radius safety clip would change the source mission before runtime.
     """
 
-    if (
-        composition.family_id != "b747"
-        or composition.mission != "powered_fixed_wing_racetrack_v1"
-        or composition.fidelity != "rigid_body_6dof_direct_wrench"
-    ):
+    if composition.family_id != "b747" or composition.mission != "powered_fixed_wing_racetrack_v1" or composition.fidelity != "rigid_body_6dof_direct_wrench":
         raise ValueError("B747 source direct-wrench lowering requires its declared racetrack realization")
     capability, profile_intent = resolve_powered_fixed_wing_mission_profile(
         _MISSION_PROFILES,
@@ -256,29 +249,31 @@ def compile_b747_source_direct_wrench_racetrack_from_composition(
     route = resolve_racetrack_binding(
         "powered_fixed_wing_racetrack_v1",
         f"{composition.id}-source-direct-wrench",
-        {
-            "vehicle_id": "b747",
-            "fidelity": "rigid_body_6dof_direct_wrench",
-            "straight_length_m": straight_length_m,
-            "turn_radius_m": left_radius_m,
-            "speed_m_s": _number(initialization, "speed_m_s"),
-            "low_altitude_m": _number(descent, "target_altitude_m"),
-            "high_altitude_m": _number(climb, "target_altitude_m"),
-            "climb_rate_m_s": _number(climb, "climb_rate_m_s"),
-            "descent_rate_m_s": _number(descent, "descent_rate_m_s"),
-            "left_turn_bank_deg": -left_bank_deg,
-            "right_turn_bank_deg": right_bank_deg,
-            "simulation_margin_s": _setting_number(source_route, "simulation_margin_s"),
-            "altitude_capture_gain_per_s": _setting_number(source_route, "altitude_capture_gain_per_s"),
-            "altitude_capture_max_mps": _setting_number(source_route, "altitude_capture_max_mps"),
-            "position_capture_gain": _setting_number(source_route, "position_capture_gain_per_m"),
-            "position_capture_max_correction_mps": _setting_number(source_route, "position_capture_max_correction_mps"),
-            "gate_corridor_m": _number(climb, "corridor_m"),
-            "gate_altitude_tolerance_m": profile_intent.gate_altitude_tolerance_m,
-            "gate_speed_tolerance_mps": profile_intent.gate_speed_tolerance_mps,
-            "source_realization": str(source_route["control_owner"]),
-            "status": "source_nominal_baseline",
-        },
+        RacetrackBinding.model_validate(
+            {
+                "vehicle_id": "b747",
+                "fidelity": "rigid_body_6dof_direct_wrench",
+                "straight_length_m": straight_length_m,
+                "turn_radius_m": left_radius_m,
+                "speed_m_s": _number(initialization, "speed_m_s"),
+                "low_altitude_m": _number(descent, "target_altitude_m"),
+                "high_altitude_m": _number(climb, "target_altitude_m"),
+                "climb_rate_m_s": _number(climb, "climb_rate_m_s"),
+                "descent_rate_m_s": _number(descent, "descent_rate_m_s"),
+                "left_turn_bank_deg": -left_bank_deg,
+                "right_turn_bank_deg": right_bank_deg,
+                "simulation_margin_s": _setting_number(source_route, "simulation_margin_s"),
+                "altitude_capture_gain_per_s": _setting_number(source_route, "altitude_capture_gain_per_s"),
+                "altitude_capture_max_mps": _setting_number(source_route, "altitude_capture_max_mps"),
+                "position_capture_gain": _setting_number(source_route, "position_capture_gain_per_m"),
+                "position_capture_max_correction_mps": _setting_number(source_route, "position_capture_max_correction_mps"),
+                "gate_corridor_m": _number(climb, "corridor_m"),
+                "gate_altitude_tolerance_m": profile_intent.gate_altitude_tolerance_m,
+                "gate_speed_tolerance_mps": profile_intent.gate_speed_tolerance_mps,
+                "source_realization": str(source_route["control_owner"]),
+                "status": "source_nominal_baseline",
+            }
+        ),
     )
     return CapabilityScaledRacetrack(
         capability=capability,
@@ -384,29 +379,31 @@ def compile_x8_source_direct_wrench_racetrack_from_composition(
     route = resolve_racetrack_binding(
         "powered_fixed_wing_racetrack_v1",
         f"{composition.id}-source-direct-wrench",
-        {
-            "vehicle_id": "skywalker_x8",
-            "fidelity": "rigid_body_6dof_direct_wrench",
-            "straight_length_m": straight_length_m,
-            "turn_radius_m": left_radius_m,
-            "speed_m_s": _number(initialization, "speed_m_s"),
-            "low_altitude_m": _number(descent, "target_altitude_m"),
-            "high_altitude_m": _number(climb, "target_altitude_m"),
-            "climb_rate_m_s": _number(climb, "climb_rate_m_s"),
-            "descent_rate_m_s": _number(descent, "descent_rate_m_s"),
-            "left_turn_bank_deg": -left_bank_deg,
-            "right_turn_bank_deg": _setting_number(source_route, "right_turn_bank_sign") * right_bank_deg,
-            "simulation_margin_s": _setting_number(source_route, "simulation_margin_s"),
-            "altitude_capture_gain_per_s": _setting_number(source_route, "altitude_capture_gain_per_s"),
-            "altitude_capture_max_mps": _setting_number(source_route, "altitude_capture_max_mps"),
-            "position_capture_gain": _setting_number(source_route, "position_capture_gain_per_m"),
-            "position_capture_max_correction_mps": _setting_number(source_route, "position_capture_max_correction_mps"),
-            "gate_corridor_m": _number(climb, "corridor_m"),
-            "gate_altitude_tolerance_m": profile_intent.gate_altitude_tolerance_m,
-            "gate_speed_tolerance_mps": profile_intent.gate_speed_tolerance_mps,
-            "source_realization": str(source_route["control_owner"]),
-            "status": "source_nominal_baseline",
-        },
+        RacetrackBinding.model_validate(
+            {
+                "vehicle_id": "skywalker_x8",
+                "fidelity": "rigid_body_6dof_direct_wrench",
+                "straight_length_m": straight_length_m,
+                "turn_radius_m": left_radius_m,
+                "speed_m_s": _number(initialization, "speed_m_s"),
+                "low_altitude_m": _number(descent, "target_altitude_m"),
+                "high_altitude_m": _number(climb, "target_altitude_m"),
+                "climb_rate_m_s": _number(climb, "climb_rate_m_s"),
+                "descent_rate_m_s": _number(descent, "descent_rate_m_s"),
+                "left_turn_bank_deg": -left_bank_deg,
+                "right_turn_bank_deg": _setting_number(source_route, "right_turn_bank_sign") * right_bank_deg,
+                "simulation_margin_s": _setting_number(source_route, "simulation_margin_s"),
+                "altitude_capture_gain_per_s": _setting_number(source_route, "altitude_capture_gain_per_s"),
+                "altitude_capture_max_mps": _setting_number(source_route, "altitude_capture_max_mps"),
+                "position_capture_gain": _setting_number(source_route, "position_capture_gain_per_m"),
+                "position_capture_max_correction_mps": _setting_number(source_route, "position_capture_max_correction_mps"),
+                "gate_corridor_m": _number(climb, "corridor_m"),
+                "gate_altitude_tolerance_m": profile_intent.gate_altitude_tolerance_m,
+                "gate_speed_tolerance_mps": profile_intent.gate_speed_tolerance_mps,
+                "source_realization": str(source_route["control_owner"]),
+                "status": "source_nominal_baseline",
+            }
+        ),
     )
     return CapabilityScaledRacetrack(
         capability=capability,

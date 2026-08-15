@@ -20,7 +20,12 @@ from .local_direct_wrench import LocalDirectWrenchScreenConfig
 from .local_direct_wrench_screen_registry import resolve_local_direct_wrench_screen_definition
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
 from .vehicle_execution_bindings import batch_episode_parity_record, resolve_vehicle_execution_binding
-from .vehicle_interface import VehicleInterfaceContract, project_committed_status_values, validate_projected_status_values
+from .vehicle_interface import (
+    CommittedNativeStatusValues,
+    VehicleInterfaceContract,
+    project_committed_status_values,
+    validate_projected_status_values,
+)
 
 _X15_ADAPTER_ID = "taoryx.x15.local_direct_wrench_batch_episode_parity.v1"
 _HL20_ADAPTER_ID = "taoryx.hl20.local_direct_wrench_batch_episode_parity.v1"
@@ -48,6 +53,7 @@ class LocalDirectWrenchBatchEpisodeParityStep:
             "mismatches": list(self.mismatches),
         }
         ####
+
     ####
 
 
@@ -83,6 +89,7 @@ class LocalDirectWrenchBatchEpisodeParityReport:
             "claim_boundary": self.claim_boundary,
         }
         ####
+
     ####
 
 
@@ -98,8 +105,8 @@ def verify_serialized_local_direct_wrench_batch_episode_parity(
     if definition is None:
         raise ValueError("no local direct-wrench parity adapter is registered for this composition")
     parity = batch_episode_parity_record(composition.family_id, composition.mission, composition.fidelity)
-    adapter_id = parity.get("adapter_id")
-    if parity.get("availability") != "registered" or adapter_id not in _SUPPORTED_ADAPTER_IDS:
+    adapter_id = parity.adapter_id
+    if parity.availability != "registered" or adapter_id not in _SUPPORTED_ADAPTER_IDS:
         raise ValueError("no declared local direct-wrench parity adapter is registered for this composition")
     if _text(payload, "composition_id") != composition.id or _text(payload, "composition_identity_sha256") != composition.identity_sha256:
         raise ValueError("policy trace composition identity disagrees with the requested parity composition")
@@ -145,7 +152,11 @@ def verify_serialized_local_direct_wrench_batch_episode_parity(
         mismatches = _mismatches(_mapping(expected_status.get("values"), f"steps[{index}].status_frame.values"), actual_status, "status")
         if abs(_finite(step.get("time_end_s"), f"steps[{index}].time_end_s") - time_s) > _TOLERANCE:
             mismatches.append("time_end_s differs from batch committed boundary")
-        records.append(LocalDirectWrenchBatchEpisodeParityStep(index, _finite(step.get("time_start_s"), f"steps[{index}].time_start_s"), time_s, "pass" if not mismatches else "fail", tuple(mismatches)))
+        records.append(
+            LocalDirectWrenchBatchEpisodeParityStep(
+                index, _finite(step.get("time_start_s"), f"steps[{index}].time_start_s"), time_s, "pass" if not mismatches else "fail", tuple(mismatches)
+            )
+        )
 
     final_status = _mapping(payload.get("final_status"), "final_status")
     final_mismatches = _mismatches(
@@ -169,8 +180,7 @@ def verify_serialized_local_direct_wrench_batch_episode_parity(
         (
             "This compares one declared total-wrench action trace through the selected source-local batch and "
             "episode bridge paths at committed boundaries. It is not a flight mission, physical effector allocation, "
-            "trim, robustness, or vehicle qualification result. "
-            + definition.claim_boundary
+            "trim, robustness, or vehicle qualification result. " + definition.claim_boundary
         ),
     )
     ####
@@ -233,7 +243,7 @@ def _status_values(
         contract,
         time_s=time_s,
         execution_status="completed" if time_s >= horizon_s - _TOLERANCE else "active",
-        raw_values=raw_values,
+        raw_values=CommittedNativeStatusValues(raw_values),
     )
     validate_projected_status_values(contract, values, context=f"local direct-wrench batch parity t={time_s:.12g} s")
     return values
@@ -245,12 +255,7 @@ def _feedback_norm(config: LocalDirectWrenchScreenConfig, state: Mapping[str, fl
 
     names = config.assessment_state_names or config.state_names
     scales = dict(zip(config.state_names, config.state_scales, strict=True))
-    return math.sqrt(
-        sum(
-            ((float(state[name]) - float(config.reference_state[name])) / scales[name]) ** 2
-            for name in names
-        )
-    )
+    return math.sqrt(sum(((float(state[name]) - float(config.reference_state[name])) / scales[name]) ** 2 for name in names))
     ####
 
 
@@ -299,9 +304,7 @@ def _mismatches(expected: Mapping[str, object], actual: Mapping[str, object], la
     for name, expected_value in expected.items():
         actual_value = actual[name]
         if isinstance(expected_value, list) and isinstance(actual_value, list):
-            if len(expected_value) != len(actual_value) or any(
-                not _close(left, right) for left, right in zip(expected_value, actual_value, strict=True)
-            ):
+            if len(expected_value) != len(actual_value) or any(not _close(left, right) for left, right in zip(expected_value, actual_value, strict=True)):
                 mismatches.append(f"{label}.{name} differs")
         elif not _close(expected_value, actual_value):
             mismatches.append(f"{label}.{name} differs")

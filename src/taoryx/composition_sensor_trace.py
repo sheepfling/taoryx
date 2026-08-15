@@ -13,7 +13,7 @@ from dataclasses import dataclass
 
 from .committed_boundary_sensor import CommittedBoundarySensor
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
-from .vehicle_interface import project_committed_status_values, validate_projected_status_values
+from .vehicle_interface import CommittedNativeStatusValues, project_committed_status_values, validate_projected_status_values
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,7 +63,7 @@ def build_declared_sensor_trace(
             contract,
             time_s=sample.time_s,
             execution_status=sample.execution_status,
-            raw_values=sample.raw_values,
+            raw_values=CommittedNativeStatusValues(sample.raw_values),
         )
         validate_projected_status_values(
             contract,

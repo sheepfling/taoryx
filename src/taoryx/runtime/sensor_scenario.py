@@ -26,11 +26,13 @@ from taoryx.navigation import (
 )
 from taoryx.rigid_body import RIGID_BODY_STATE_NAMES, RigidBody6DofState
 from taoryx.sensor_api import (
+    MeasurementPacketRecord,
     SensorBuildContext,
     SensorContext,
     SensorServices,
     packet_from_record,
     packet_to_record,
+    parse_measurement_packet_record,
     sensor_plugin_registry,
 )
 from taoryx.sensors import MeasurementPacket, TruthPoint
@@ -53,8 +55,7 @@ from .truth import AttitudePolicyFactory, CompositeTruthProvider, Pseudo6DofTrut
 class _Navigator(Protocol):
     state: Any
 
-    def propagate(self, packet: MeasurementPacket[Any]) -> Any:
-        ...
+    def propagate(self, packet: MeasurementPacket[Any]) -> Any: ...
 
 
 def _as_vector(value: object, name: str) -> tuple[float, ...] | None:
@@ -150,10 +151,7 @@ class SensorScenarioSpec:
             raise ValueError("truth_mode must be vehicle, translation-only, rotation-only, pseudo-6dof, or hybrid-6dof")
         if self.truth_mode not in manifest.supported_truth_modes:
             supported = ", ".join(sorted(manifest.supported_truth_modes))
-            raise ValueError(
-                f"sensor provider {manifest.kind!r} does not support truth mode {self.truth_mode!r}; "
-                f"supported: {supported}"
-            )
+            raise ValueError(f"sensor provider {manifest.kind!r} does not support truth mode {self.truth_mode!r}; supported: {supported}")
         if not math.isfinite(self.speed_threshold_mps) or self.speed_threshold_mps <= 0.0:
             raise ValueError("speed_threshold_mps must be positive and finite")
         if self.alignment != "velocity":
@@ -191,10 +189,7 @@ class SensorScenarioSpec:
         if self.drop_every_n is not None and self.drop_every_n <= 0:
             raise ValueError("drop_every_n must be positive when supplied")
         if self.estimator_modes and manifest.family != "inertial":
-            raise ValueError(
-                f"sensor provider {manifest.kind!r} emits {manifest.family} payloads; "
-                "the inertial navigation consumers cannot be attached"
-            )
+            raise ValueError(f"sensor provider {manifest.kind!r} emits {manifest.family} payloads; the inertial navigation consumers cannot be attached")
         if not self.estimator_modes and self.feedback.source != "plant-truth":
             raise ValueError("sensor-derived navigation feedback requires a declared estimator")
         if self.observation_model is not None and self.observation_model.stages and manifest.family != "inertial":
@@ -508,10 +503,14 @@ class SensorAdapterFactory:
         )
         return sensor_plugin_registry().create(kind, provider.config, build_context)
         ####
+
     ####
 
 
-def _packet_record(packet: MeasurementPacket[Any], provenance: Mapping[str, object] | None = None) -> dict[str, object]:
+def _packet_record(
+    packet: MeasurementPacket[Any],
+    provenance: Mapping[str, object] | None = None,
+) -> MeasurementPacketRecord:
     return packet_to_record(packet, provenance=provenance)
     ####
 
@@ -606,13 +605,9 @@ class SensorScenarioRuntime:
 
         binding = next(item for item in self.bus.bindings if item.name == self.spec.sensor_name)
         if binding.context_provider is not None:
-            raise TypeError(
-                f"sensor binding {binding.name!r} uses a runtime context callback and requires explicit rebind on restore"
-            )
+            raise TypeError(f"sensor binding {binding.name!r} uses a runtime context callback and requires explicit rebind on restore")
         if binding.drop_predicate is not None and binding.checkpoint_drop_policy_id != "drop_every_n":
-            raise TypeError(
-                f"sensor binding {binding.name!r} uses an unregistered drop callback and cannot be checkpointed automatically"
-            )
+            raise TypeError(f"sensor binding {binding.name!r} uses an unregistered drop callback and cannot be checkpointed automatically")
         snapshot = getattr(binding.model, "snapshot", None)
         if not callable(snapshot):
             raise TypeError(f"sensor model {binding.name!r} does not support checkpointing")
@@ -638,19 +633,10 @@ class SensorScenarioRuntime:
                         "rng_state": binding.rng_state(),
                     }
                 },
-                "queued": {
-                    name: [_checkpoint_packet(packet) for packet in packets]
-                    for name, packets in self.bus.queued.items()
-                },
-                "delivered": {
-                    name: [_checkpoint_packet(packet) for packet in packets]
-                    for name, packets in self.bus.delivered.items()
-                },
+                "queued": {name: [_checkpoint_packet(packet) for packet in packets] for name, packets in self.bus.queued.items()},
+                "delivered": {name: [_checkpoint_packet(packet) for packet in packets] for name, packets in self.bus.delivered.items()},
             },
-            "estimators": {
-                name: _checkpoint_estimator(estimator)
-                for name, estimator in self.estimators.items()
-            },
+            "estimators": {name: _checkpoint_estimator(estimator) for name, estimator in self.estimators.items()},
             "histories": {name: list(history) for name, history in self.histories.items()},
             "estimator_gaps": {name: list(gaps) for name, gaps in self.estimator_gaps.items()},
             "feedback_selected_count": self.feedback_selected_count,
@@ -688,11 +674,7 @@ class SensorScenarioRuntime:
         if not isinstance(raw_binding, Mapping):
             raise ValueError(f"sensor scenario checkpoint is missing binding state for {binding.name!r}")
         binding.interval_start = _restore_checkpoint_truth(raw_binding.get("interval_start"))
-        binding.interval_start_context = (
-            None
-            if binding.interval_start is None
-            else SensorContext.from_host(binding.interval_start)
-        )
+        binding.interval_start_context = None if binding.interval_start is None else SensorContext.from_host(binding.interval_start)
         binding.samples_emitted = _checkpoint_int(raw_binding.get("samples_emitted", 0))
         binding.invalid_samples = _checkpoint_int(raw_binding.get("invalid_samples", 0))
         binding.dropped_samples = _checkpoint_int(raw_binding.get("dropped_samples", 0))
@@ -785,10 +767,7 @@ class SensorScenarioRuntime:
                 "standalone_clock_kind": plugin_manifest.clock_kind,
                 "required_truth": sorted(plugin_manifest.required_truth),
                 "sample_modes": sorted(plugin_manifest.sample_modes),
-                "outputs": [
-                    {"port": output.name, "schema_id": output.schema_id}
-                    for output in plugin_manifest.outputs
-                ],
+                "outputs": [{"port": output.name, "schema_id": output.schema_id} for output in plugin_manifest.outputs],
             },
             "truth_contract": {
                 **dict(self.truth_contract),
@@ -799,7 +778,9 @@ class SensorScenarioRuntime:
                 },
                 "earth_rate": {
                     "mode": self.spec.earth_rate_mode,
-                    "omega_rad_s": self.spec.earth_omega_rad_s if self.spec.earth_rate_mode == "explicit" else (7.2921151467e-5 if self.spec.earth_rate_mode == "nominal" else None),
+                    "omega_rad_s": self.spec.earth_omega_rad_s
+                    if self.spec.earth_rate_mode == "explicit"
+                    else (7.2921151467e-5 if self.spec.earth_rate_mode == "nominal" else None),
                 },
                 "support_mode": self.truth_contract.get("support_mode", "free-flight"),
                 "velocity_without_gravity": "accepted-acceleration-minus-gravity-integrated-when-available",
@@ -855,7 +836,9 @@ class SensorScenarioRuntime:
         packet_path.write_text("".join(json.dumps(_packet_record(packet, binding.provenance), sort_keys=True) + "\n" for packet in packets), encoding="utf-8")
         paths.append(packet_path)
         dropped_path = destination / f"{self.spec.sensor_name}-dropped.jsonl"
-        dropped_path.write_text("".join(json.dumps(_packet_record(packet, binding.provenance), sort_keys=True) + "\n" for packet in binding.dropped_packets), encoding="utf-8")
+        dropped_path.write_text(
+            "".join(json.dumps(_packet_record(packet, binding.provenance), sort_keys=True) + "\n" for packet in binding.dropped_packets), encoding="utf-8"
+        )
         paths.append(dropped_path)
         for name, history in self.histories.items():
             estimate_path = destination / f"{name}-estimates.jsonl"
@@ -907,9 +890,7 @@ def attach_sensor_scenario(
         raise RuntimeError(f"vehicle {vehicle.name!r} has no lowered truth provider")
     plugin_manifest = sensor_plugin_registry().descriptor(spec.resolved_provider_config().kind).manifest
     if "entities" in plugin_manifest.required_truth and sensor_context_provider is None:
-        raise ValueError(
-            f"sensor provider {plugin_manifest.kind!r} requires a committed sensor_context_provider with scene entities"
-        )
+        raise ValueError(f"sensor provider {plugin_manifest.kind!r} requires a committed sensor_context_provider with scene entities")
     truth_provider = vehicle.truth_provider
     if spec.truth_mode == "pseudo-6dof":
         truth_definition = spec.resolved_truth_config()
@@ -928,8 +909,7 @@ def attach_sensor_scenario(
     if existing_clock is not None and existing_clock.kind not in plugin_manifest.language_kinds:
         compatible = ", ".join(sorted(plugin_manifest.language_kinds))
         raise ValueError(
-            f"sensor clock {existing_clock.name!r} declares language kind {existing_clock.kind!r}, but provider "
-            f"{plugin_manifest.kind!r} accepts: {compatible}"
+            f"sensor clock {existing_clock.name!r} declares language kind {existing_clock.kind!r}, but provider {plugin_manifest.kind!r} accepts: {compatible}"
         )
     adapter = build_observation_pipeline(
         SensorAdapterFactory.create(spec, services=sensor_services),
@@ -1011,8 +991,7 @@ def attach_sensor_scenario(
             if spec.feedback.max_age_s is not None and age > spec.feedback.max_age_s + 1.0e-12:
                 last_available_text = "none" if last_available is None else f"{last_available:g}s"
                 raise RuntimeError(
-                    f"navigation feedback source {spec.feedback.source!r} is stale at {time_s:g}s; "
-                    f"last delivered estimate was {last_available_text}"
+                    f"navigation feedback source {spec.feedback.source!r} is stale at {time_s:g}s; last delivered estimate was {last_available_text}"
                 )
 
         problem.feedback_guard = feedback_guard
@@ -1151,9 +1130,7 @@ def _checkpoint_truth(truth: TruthPoint | None) -> dict[str, object] | None:
         "gravity_eci_mps2": truth.gravity_eci_mps2.tolist(),
         "angular_rate_body_radps": None if truth.angular_rate_body_radps is None else truth.angular_rate_body_radps.tolist(),
         "acceleration_eci_mps2": None if truth.acceleration_eci_mps2 is None else truth.acceleration_eci_mps2.tolist(),
-        "angular_acceleration_body_radps2": None
-        if truth.angular_acceleration_body_radps2 is None
-        else truth.angular_acceleration_body_radps2.tolist(),
+        "angular_acceleration_body_radps2": None if truth.angular_acceleration_body_radps2 is None else truth.angular_acceleration_body_radps2.tolist(),
         "temperature_celsius": truth.temperature_celsius,
     }
     ####
@@ -1175,9 +1152,7 @@ def _restore_checkpoint_truth(value: object) -> TruthPoint | None:
         np.asarray(value["gravity_eci_mps2"], dtype=float),
         None if value.get("angular_rate_body_radps") is None else np.asarray(value["angular_rate_body_radps"], dtype=float),
         None if value.get("acceleration_eci_mps2") is None else np.asarray(value["acceleration_eci_mps2"], dtype=float),
-        None
-        if value.get("angular_acceleration_body_radps2") is None
-        else np.asarray(value["angular_acceleration_body_radps2"], dtype=float),
+        None if value.get("angular_acceleration_body_radps2") is None else np.asarray(value["angular_acceleration_body_radps2"], dtype=float),
         None if value.get("temperature_celsius") is None else float(value["temperature_celsius"]),
     )
     ####
@@ -1187,15 +1162,14 @@ def _checkpoint_packet(packet: MeasurementPacket[Any]) -> dict[str, object]:
     """Serialize a packet through its registered versioned payload codec."""
 
     record = packet_to_record(packet)
-    record.pop("provenance", None)
-    return record
+    return {name: value for name, value in record.items() if name != "provenance"}
     ####
 
 
 def _restore_checkpoint_packet(value: Mapping[str, object]) -> MeasurementPacket[Any]:
     """Restore one versioned or legacy packet through the codec registry."""
 
-    return packet_from_record(value)
+    return packet_from_record(parse_measurement_packet_record(value))
     ####
 
 
@@ -1534,7 +1508,13 @@ def render_sensor_scenario_plots(
     for name, color in (("dead_reckoning", "#2563eb"), ("mekf", "#d97706")):
         history = [item for item in records(name) if has_vector(item, "position_eci_m")]
         if history:
-            axis.plot([vector(item, "position_eci_m")[0] for item in history], [vector(item, "position_eci_m")[1] for item in history], color=color, linewidth=1.2, label=name)
+            axis.plot(
+                [vector(item, "position_eci_m")[0] for item in history],
+                [vector(item, "position_eci_m")[1] for item in history],
+                color=color,
+                linewidth=1.2,
+                label=name,
+            )
     axis.set_title("Flown trajectory and estimator paths", loc="left", fontweight="semibold")
     axis.set_xlabel("ECI/ECFC x (m)")
     axis.set_ylabel("ECI/ECFC y (m)")
@@ -1553,7 +1533,9 @@ def render_sensor_scenario_plots(
                 axes[0].plot(estimate_times, [vector(item, "position_eci_m")[index] for item in history], color=color, alpha=0.75, label=f"{name} {label}")
     if truth_times and truth_position[0]:
         for index, label in enumerate(("x", "y", "z")):
-            axes[0].plot(truth_times[: len(truth_position[index])], truth_position[index], color="#0f172a", linewidth=1.0, linestyle="--", label=f"truth {label}")
+            axes[0].plot(
+                truth_times[: len(truth_position[index])], truth_position[index], color="#0f172a", linewidth=1.0, linestyle="--", label=f"truth {label}"
+            )
     axes[0].set_title("Truth versus estimated position", loc="left", fontweight="semibold")
     axes[0].set_ylabel("position (m)")
     axes[0].grid(True, color="#cbd5e1", linewidth=0.8)

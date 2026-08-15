@@ -18,7 +18,7 @@ from typing import Any, Literal
 import yaml
 
 from .generic_tuning import LinearAuthorityRequirement, linear_authority_preflight
-from .racetrack_template import resolve_racetrack_binding
+from .racetrack_template import RacetrackBinding, resolve_racetrack_binding
 from .vehicle_composition import compile_vehicle_composition, load_vehicle_composition_request
 from .vehicle_execution_preflight import preflight_vehicle_composition
 from .vehicle_registry import ROOT
@@ -47,6 +47,7 @@ class PreflightFinding:
             "hint": self.hint,
         }
         ####
+
     ####
 
 
@@ -79,6 +80,7 @@ class ControllerPreflightResult:
             "findings": [item.as_dict() for item in self.findings],
         }
         ####
+
     ####
 
 
@@ -113,6 +115,7 @@ class MissionPreflightResult:
             "findings": [item.as_dict() for item in self.findings],
         }
         ####
+
     ####
 
 
@@ -136,12 +139,7 @@ class VehicleControllerMissionPreflightReport:
     def caveats(self) -> tuple[PreflightFinding, ...]:
         """Return warnings and informational findings."""
 
-        return tuple(
-            item
-            for result in (self.controller, self.mission)
-            for item in result.findings
-            if item.severity != "error"
-        )
+        return tuple(item for result in (self.controller, self.mission) for item in result.findings if item.severity != "error")
         ####
 
     def as_dict(self) -> dict[str, object]:
@@ -157,6 +155,7 @@ class VehicleControllerMissionPreflightReport:
             "caveats": [item.as_dict() for item in self.caveats],
         }
         ####
+
     ####
 
 
@@ -293,9 +292,7 @@ def _authority_preflight_for_controller(
             str(requirement_payload.get("id", "")),
             tuple(names),
             minimum_controllability_rank=(
-                int(requirement_payload["minimum_controllability_rank"])
-                if requirement_payload.get("minimum_controllability_rank") is not None
-                else None
+                int(requirement_payload["minimum_controllability_rank"]) if requirement_payload.get("minimum_controllability_rank") is not None else None
             ),
             maximum_uncontrolled_fraction=float(requirement_payload.get("maximum_uncontrolled_fraction", 1.0e-8)),
             maximum_controllability_condition=(
@@ -340,7 +337,14 @@ def _controller_preflight(family_id: str) -> ControllerPreflightResult:
     profile_ids: list[str] = []
     authority_reports: dict[str, Mapping[str, object]] = {}
     if not controller_dir.is_dir():
-        _finding(findings, "info", "controller-directory-absent", _relative(controller_dir), "no controller profiles are declared", "Use not_applicable only when the family contract explicitly declares no controller.")
+        _finding(
+            findings,
+            "info",
+            "controller-directory-absent",
+            _relative(controller_dir),
+            "no controller profiles are declared",
+            "Use not_applicable only when the family contract explicitly declares no controller.",
+        )
         return ControllerPreflightResult(family_id, "not_applicable", (), tuple(findings), {"profiles_checked": 0})
     control_names = _load_control_names(family_dir)
     for path in sorted(controller_dir.glob("*.yaml")):
@@ -353,33 +357,93 @@ def _controller_preflight(family_id: str) -> ControllerPreflightResult:
         profile_ids.append(profile_id)
         for required in ("controller_id", "method", "fidelity", "state_names"):
             if required not in payload:
-                _finding(findings, "error", "controller-field-missing", f"{_relative(path)}:{required}", f"controller profile lacks {required!r}", "Declare the controller identity and ordered state contract.")
+                _finding(
+                    findings,
+                    "error",
+                    "controller-field-missing",
+                    f"{_relative(path)}:{required}",
+                    f"controller profile lacks {required!r}",
+                    "Declare the controller identity and ordered state contract.",
+                )
         implementation = str(payload.get("method", ""))
         linearization_path: Path | None = None
         if implementation in {"continuous_lqr", "lqr", "lqi", "gain_scheduled_lqr"} and not payload.get("linearization_artifact"):
-            _finding(findings, "error", "controller-linearization-missing", _relative(path), "LQR profile does not name a linearization artifact", "Bind the controller to a plant-derived A/B artifact.")
+            _finding(
+                findings,
+                "error",
+                "controller-linearization-missing",
+                _relative(path),
+                "LQR profile does not name a linearization artifact",
+                "Bind the controller to a plant-derived A/B artifact.",
+            )
         if implementation in {"continuous_lqr", "lqr", "lqi", "gain_scheduled_lqr"}:
             artifact_value = payload.get("linearization_artifact")
             linearization_path = _path_from_value(artifact_value)
             if linearization_path is not None and not linearization_path.is_file():
-                _finding(findings, "error", "controller-linearization-missing", _relative(linearization_path), "controller linearization artifact does not exist", "Generate the referenced linearization evidence before controller preflight.")
+                _finding(
+                    findings,
+                    "error",
+                    "controller-linearization-missing",
+                    _relative(linearization_path),
+                    "controller linearization artifact does not exist",
+                    "Generate the referenced linearization evidence before controller preflight.",
+                )
             authority = _authority_preflight_for_controller(path, payload, linearization_path, findings)
             if authority is not None:
                 authority_reports[profile_id] = authority
         effectiveness_path = _path_from_value(payload.get("effectiveness_artifact"))
         if effectiveness_path is not None and not effectiveness_path.is_file():
-            _finding(findings, "error", "controller-effectiveness-missing", _relative(effectiveness_path), "controller effectiveness artifact does not exist", "Generate or correct the effectivity evidence.")
+            _finding(
+                findings,
+                "error",
+                "controller-effectiveness-missing",
+                _relative(effectiveness_path),
+                "controller effectiveness artifact does not exist",
+                "Generate or correct the effectivity evidence.",
+            )
         effectors = payload.get("effector_names", payload.get("control_names", ()))
         if not payload.get("effector_names"):
-            _finding(findings, "warning", "controller-effectors-unresolved", _relative(path), "controller profile does not declare a separate physical-effector realization", "Keep the profile at screen/development evidence until the allocator and actuator path are explicit.")
+            _finding(
+                findings,
+                "warning",
+                "controller-effectors-unresolved",
+                _relative(path),
+                "controller profile does not declare a separate physical-effector realization",
+                "Keep the profile at screen/development evidence until the allocator and actuator path are explicit.",
+            )
         if isinstance(effectors, list) and control_names:
             missing = [item for item in effectors if _normalize_channel(item) not in control_names]
             if missing:
-                _finding(findings, "error", "controller-effector-unbound", _relative(path), f"controller effectors are not in the canonical control binding: {missing}", "Add explicit control binding or correct the profile channel names.")
-        if "direct_wrench" in str(payload.get("fidelity", "")).lower() or "wrench" in str(payload.get("control_space", "")).lower() and not payload.get("effector_names"):
-            _finding(findings, "warning", "direct-wrench-screen", _relative(path), "controller profile uses a direct-wrench or non-effector control path", "Keep this result at development/screen evidence until physical allocation reaches the nonlinear plant.")
+                _finding(
+                    findings,
+                    "error",
+                    "controller-effector-unbound",
+                    _relative(path),
+                    f"controller effectors are not in the canonical control binding: {missing}",
+                    "Add explicit control binding or correct the profile channel names.",
+                )
+        if (
+            "direct_wrench" in str(payload.get("fidelity", "")).lower()
+            or "wrench" in str(payload.get("control_space", "")).lower()
+            and not payload.get("effector_names")
+        ):
+            _finding(
+                findings,
+                "warning",
+                "direct-wrench-screen",
+                _relative(path),
+                "controller profile uses a direct-wrench or non-effector control path",
+                "Keep this result at development/screen evidence until physical allocation reaches the nonlinear plant.",
+            )
         if not payload.get("evidence") and not payload.get("linearization_artifact"):
-            _finding(findings, "warning", "controller-evidence-missing", _relative(path), "controller profile names no evidence artifact or source", "Attach the design, trim, and nonlinear validation evidence.")
+            _finding(
+                findings,
+                "warning",
+                "controller-evidence-missing",
+                _relative(path),
+                "controller profile names no evidence artifact or source",
+                "Attach the design, trim, and nonlinear validation evidence.",
+            )
     status = _status_from_findings(findings, empty="passed" if profile_ids else "not_applicable")
     return ControllerPreflightResult(
         family_id,
@@ -404,7 +468,11 @@ def _estimate_racetrack(template_id: str, binding_id: str, binding: Mapping[str,
     """
 
     try:
-        return resolve_racetrack_binding(template_id, binding_id, dict(binding)).horizon_s
+        return resolve_racetrack_binding(
+            template_id,
+            binding_id,
+            RacetrackBinding.model_validate(binding),
+        ).horizon_s
     except (KeyError, TypeError, ValueError):
         return None
     ####
@@ -484,7 +552,14 @@ def _semantic_composition_mission_preflight(
     for index, realization in enumerate(realizations):
         path = f"{_relative(binding_path)}:realizations[{index}]"
         if not isinstance(realization, Mapping):
-            _finding(findings, "error", "mission-realization-invalid", path, "mission realization must be a mapping", "Declare fidelity, composition, and expected_preflight_status.")
+            _finding(
+                findings,
+                "error",
+                "mission-realization-invalid",
+                path,
+                "mission realization must be a mapping",
+                "Declare fidelity, composition, and expected_preflight_status.",
+            )
             continue
         fidelity = str(realization.get("fidelity", ""))
         expected_status = str(realization.get("expected_preflight_status", ""))
@@ -588,7 +663,14 @@ def _mission_preflight(family_id: str) -> MissionPreflightResult:
     binding_path = semantic_binding_path if semantic_binding_path.is_file() else family_dir / "qualification/racetrack-binding.yaml"
     findings: list[PreflightFinding] = []
     if not binding_path.is_file():
-        _finding(findings, "error", "mission-binding-missing", _relative(binding_path), "no reusable mission binding is declared for this family", "Declare a family mission binding before running or estimating a flagship mission.")
+        _finding(
+            findings,
+            "error",
+            "mission-binding-missing",
+            _relative(binding_path),
+            "no reusable mission binding is declared for this family",
+            "Declare a family mission binding before running or estimating a flagship mission.",
+        )
         return MissionPreflightResult(family_id, "blocked", None, (), tuple(findings), {"estimated_duration_s": None})
     try:
         binding = _read_yaml(binding_path)
@@ -600,46 +682,125 @@ def _mission_preflight(family_id: str) -> MissionPreflightResult:
     template_path = _path_from_value(binding.get("source_catalog"))
     evidence = [_relative(binding_path)]
     if template_path is None or not template_path.is_file():
-        _finding(findings, "error", "mission-template-missing", _relative(template_path or (family_dir / "qualification")), "mission binding does not resolve to a source catalog", "Pin the reusable mission template before estimating route timing.")
-        return MissionPreflightResult(family_id, "blocked", binding.get("mission_profile") and str(binding["mission_profile"]), tuple(evidence), tuple(findings), {"estimated_duration_s": None})
+        _finding(
+            findings,
+            "error",
+            "mission-template-missing",
+            _relative(template_path or (family_dir / "qualification")),
+            "mission binding does not resolve to a source catalog",
+            "Pin the reusable mission template before estimating route timing.",
+        )
+        return MissionPreflightResult(
+            family_id,
+            "blocked",
+            binding.get("mission_profile") and str(binding["mission_profile"]),
+            tuple(evidence),
+            tuple(findings),
+            {"estimated_duration_s": None},
+        )
     evidence.append(_relative(template_path))
     try:
         catalog = _read_yaml(template_path)
     except (OSError, ValueError, yaml.YAMLError) as error:
         _finding(findings, "error", "mission-template-load-failed", _relative(template_path), str(error), "Repair the mission template before preflight.")
-        return MissionPreflightResult(family_id, "blocked", str(binding.get("mission_profile", "")) or None, tuple(evidence), tuple(findings), {"estimated_duration_s": None})
+        return MissionPreflightResult(
+            family_id, "blocked", str(binding.get("mission_profile", "")) or None, tuple(evidence), tuple(findings), {"estimated_duration_s": None}
+        )
     binding_ids = binding.get("binding_ids")
     catalog_bindings = catalog.get("bindings")
     template = catalog.get("template")
     template_id = str(template.get("id", "")) if isinstance(template, Mapping) else ""
     if not template_id:
-        _finding(findings, "error", "mission-template-id-missing", _relative(template_path), "mission template has no semantic identifier", "Declare template.id before resolving route timing.")
+        _finding(
+            findings,
+            "error",
+            "mission-template-id-missing",
+            _relative(template_path),
+            "mission template has no semantic identifier",
+            "Declare template.id before resolving route timing.",
+        )
     if not isinstance(binding_ids, list) or not binding_ids:
-        _finding(findings, "error", "mission-binding-ids-missing", _relative(binding_path), "mission binding declares no realization IDs", "List the 3DOF, pseudo-6DOF, and/or 6DOF realizations explicitly.")
+        _finding(
+            findings,
+            "error",
+            "mission-binding-ids-missing",
+            _relative(binding_path),
+            "mission binding declares no realization IDs",
+            "List the 3DOF, pseudo-6DOF, and/or 6DOF realizations explicitly.",
+        )
     if not isinstance(catalog_bindings, Mapping):
-        _finding(findings, "error", "mission-catalog-bindings-missing", _relative(template_path), "mission catalog has no binding map", "Declare vehicle-specific mission realization values in the shared template.")
+        _finding(
+            findings,
+            "error",
+            "mission-catalog-bindings-missing",
+            _relative(template_path),
+            "mission catalog has no binding map",
+            "Declare vehicle-specific mission realization values in the shared template.",
+        )
         catalog_bindings = {}
     estimates: dict[str, float] = {}
     for binding_id in binding_ids if isinstance(binding_ids, list) else ():
         candidate = catalog_bindings.get(binding_id)
         if not isinstance(candidate, Mapping):
-            _finding(findings, "error", "mission-realization-missing", f"{_relative(template_path)}:bindings.{binding_id}", f"mission realization {binding_id!r} is not in the shared catalog", "Add the realization or remove it from the family binding.")
+            _finding(
+                findings,
+                "error",
+                "mission-realization-missing",
+                f"{_relative(template_path)}:bindings.{binding_id}",
+                f"mission realization {binding_id!r} is not in the shared catalog",
+                "Add the realization or remove it from the family binding.",
+            )
             continue
         if str(candidate.get("vehicle_id")) != family_id:
-            _finding(findings, "error", "mission-realization-family-mismatch", f"{_relative(template_path)}:bindings.{binding_id}", "mission realization belongs to a different vehicle family", "Use only bindings whose vehicle_id matches the selected family.")
+            _finding(
+                findings,
+                "error",
+                "mission-realization-family-mismatch",
+                f"{_relative(template_path)}:bindings.{binding_id}",
+                "mission realization belongs to a different vehicle family",
+                "Use only bindings whose vehicle_id matches the selected family.",
+            )
         estimate = _estimate_racetrack(template_id, str(binding_id), candidate) if template_id else None
         if estimate is None:
-            _finding(findings, "error", "mission-time-estimate-unavailable", f"{_relative(template_path)}:bindings.{binding_id}", "route timing cannot be estimated from the declared geometry and rates", "Declare positive speed, turn radius, leg length, and climb/descent rates.")
+            _finding(
+                findings,
+                "error",
+                "mission-time-estimate-unavailable",
+                f"{_relative(template_path)}:bindings.{binding_id}",
+                "route timing cannot be estimated from the declared geometry and rates",
+                "Declare positive speed, turn radius, leg length, and climb/descent rates.",
+            )
         else:
             estimates[str(binding_id)] = estimate
         realization = str(candidate.get("source_realization", ""))
         if "direct" in realization.lower() or "wrench" in realization.lower() or "moment_injection" in realization.lower():
-            _finding(findings, "warning", "mission-direct-wrench-realization", f"{_relative(template_path)}:bindings.{binding_id}", "mission realization declares direct-wrench or moment-injection behavior", "Keep this mission as an integration baseline until physical effector realization is selected.")
+            _finding(
+                findings,
+                "warning",
+                "mission-direct-wrench-realization",
+                f"{_relative(template_path)}:bindings.{binding_id}",
+                "mission realization declares direct-wrench or moment-injection behavior",
+                "Keep this mission as an integration baseline until physical effector realization is selected.",
+            )
         if "pending" in str(candidate.get("status", "")).lower():
-            _finding(findings, "warning", "mission-realization-pending", f"{_relative(template_path)}:bindings.{binding_id}", f"mission realization is declared {candidate.get('status')!r}", "Do not promote the mission until its truth objectives and controls pass.")
+            _finding(
+                findings,
+                "warning",
+                "mission-realization-pending",
+                f"{_relative(template_path)}:bindings.{binding_id}",
+                f"mission realization is declared {candidate.get('status')!r}",
+                "Do not promote the mission until its truth objectives and controls pass.",
+            )
     phase_order = binding.get("phase_order")
     if not isinstance(phase_order, list) or not phase_order:
-        _finding(findings, "error", "mission-phase-order-missing", _relative(binding_path), "mission binding has no ordered phase contract", "Declare the characteristic mission lifecycle in order.")
+        _finding(
+            findings,
+            "error",
+            "mission-phase-order-missing",
+            _relative(binding_path),
+            "mission binding has no ordered phase contract",
+            "Declare the characteristic mission lifecycle in order.",
+        )
     mission_id = str(binding.get("mission_profile", "")) or None
     status = _status_from_findings(findings, empty="passed")
     metrics: dict[str, object] = {"realization_count": len(estimates), "estimated_duration_s_by_realization": estimates}

@@ -311,6 +311,7 @@ def test_b747_condition3_table_reproduces_source_grid() -> None:
     ####
 
 
+@pytest.mark.slow
 def test_source_differential_report_has_complete_provenance() -> None:
     reports = source_differential_reports()
     assert reports["b747-condition3-static"]["sample_count"] == 25

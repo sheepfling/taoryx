@@ -11,7 +11,7 @@ import math
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
 from types import MappingProxyType
-from typing import Any, Generic, Protocol, TypeVar, cast
+from typing import Any, Generic, NotRequired, Protocol, TypeAlias, TypedDict, TypeVar, cast
 
 import numpy as np
 from pydantic import BaseModel
@@ -128,6 +128,7 @@ class TruthPoint:
         if self.temperature_celsius is not None and not np.isfinite(self.temperature_celsius):
             raise ValueError("temperature_celsius must be finite when supplied")
         ####
+
     ####
 
 
@@ -142,6 +143,7 @@ class TruthSegment:
         if self.end.time_s <= self.start.time_s:
             raise ValueError("truth segment end must be later than its start")
         ####
+
     ####
 
 
@@ -168,6 +170,7 @@ class EntityTruth:
             )
         object.__setattr__(self, "properties", _immutable_mapping(self.properties))
         ####
+
     ####
 
 
@@ -180,6 +183,7 @@ class EnvironmentSnapshot:
     def __post_init__(self) -> None:
         object.__setattr__(self, "properties", _immutable_mapping(self.properties))
         ####
+
     ####
 
 
@@ -208,6 +212,7 @@ class SensorContext:
         identity = snapshot_id or f"committed@{host.time_s:.17g}"
         return cls(identity, host)
         ####
+
     ####
 
 
@@ -222,6 +227,7 @@ class SensorContextSegment:
         if self.end.host.time_s <= self.start.host.time_s:
             raise ValueError("sensor context segment end must be later than its start")
         ####
+
     ####
 
 
@@ -245,6 +251,7 @@ class SensorSampleRequest:
     @property
     def interval_start_s(self) -> float | None:
         return None if self.segment is None else self.segment.start.host.time_s
+
     ####
 
 
@@ -283,6 +290,64 @@ class MeasurementPacket(Generic[MeasurementT]):
         if self.valid and self.invalid_reason is not None:
             raise ValueError("valid measurements cannot declare invalid_reason")
         ####
+
+    ####
+
+
+PacketPayloadRecord: TypeAlias = dict[str, object]
+PacketPayloadContract: TypeAlias = dict[str, object]
+PacketProvenanceRecord: TypeAlias = dict[str, object]
+PacketProvenanceInput: TypeAlias = Mapping[str, object]
+
+
+class MeasurementPacketRecord(TypedDict):
+    """Stable serialized envelope around one codec-owned sensor payload."""
+
+    sampled_at_s: float
+    available_at_s: float
+    interval_start_s: float | None
+    valid: bool
+    payload: PacketPayloadRecord | None
+    payload_contract: PacketPayloadContract
+    provenance: PacketProvenanceRecord
+    sensor_id: NotRequired[str]
+    port: NotRequired[str]
+    sequence: NotRequired[int]
+    schema_id: NotRequired[str]
+    invalid_reason: NotRequired[str]
+
+
+def parse_measurement_packet_record(value: object) -> MeasurementPacketRecord:
+    """Normalize an untyped checkpoint/object record into the packet envelope.
+
+    Payload and provenance contents remain codec- or producer-owned, but this
+    function owns the outer wire shape and converts compatible mappings to
+    ordinary string-keyed dictionaries before a codec consumes them.
+    """
+
+    if not isinstance(value, Mapping):
+        raise ValueError("measurement packet record must be a mapping")
+    if any(not isinstance(key, str) for key in value):
+        raise ValueError("measurement packet record requires string keys")
+    missing = [name for name in ("sampled_at_s", "available_at_s") if name not in value]
+    if missing:
+        raise ValueError("measurement packet record is missing: " + ", ".join(missing))
+    record: dict[str, object] = dict(value)
+    record.setdefault("interval_start_s", None)
+    record.setdefault("valid", True)
+    record.setdefault("payload", None)
+    for field_name in ("payload_contract", "provenance"):
+        record.setdefault(field_name, {})
+    for field_name in ("payload", "payload_contract", "provenance"):
+        raw = record[field_name]
+        if raw is None and field_name == "payload":
+            continue
+        if not isinstance(raw, Mapping):
+            raise ValueError(f"measurement packet {field_name} must be a mapping")
+        if any(not isinstance(key, str) for key in raw):
+            raise ValueError(f"measurement packet {field_name} requires string keys")
+        record[field_name] = dict(raw)
+    return cast(MeasurementPacketRecord, record)
     ####
 
 
@@ -304,6 +369,7 @@ class ArrayFrameReference:
         if len(self.sha256) != 64 or any(character not in "0123456789abcdef" for character in self.sha256.casefold()):
             raise ValueError("array-frame sha256 must be a 64-character hexadecimal digest")
         ####
+
     ####
 
 
@@ -336,6 +402,7 @@ class SensorServices:
     def __post_init__(self) -> None:
         object.__setattr__(self, "extensions", _immutable_mapping(self.extensions))
         ####
+
     ####
 
 
@@ -348,6 +415,7 @@ class SensorOutputPort:
         if not self.name.strip() or not self.schema_id.strip():
             raise ValueError("sensor output port name and schema_id must not be empty")
         ####
+
     ####
 
 
@@ -378,10 +446,7 @@ class SensorPluginManifest:
         if not self.language_kinds or any(not kind.strip() for kind in self.language_kinds):
             raise ValueError("sensor plug-in language_kinds must contain nonempty provider-neutral families")
         if self.api_version != SENSOR_PLUGIN_API_VERSION:
-            raise ValueError(
-                f"sensor plug-in {self.kind!r} requires API {self.api_version!r}; "
-                f"host supports {SENSOR_PLUGIN_API_VERSION!r}"
-            )
+            raise ValueError(f"sensor plug-in {self.kind!r} requires API {self.api_version!r}; host supports {SENSOR_PLUGIN_API_VERSION!r}")
         if not self.outputs or len({port.name for port in self.outputs}) != len(self.outputs):
             raise ValueError("sensor plug-in outputs must be nonempty and uniquely named")
         if not self.supported_truth_modes or any(not mode.strip() for mode in self.supported_truth_modes):
@@ -393,6 +458,7 @@ class SensorPluginManifest:
         if not math.isfinite(self.default_cadence_s) or self.default_cadence_s <= 0.0:
             raise ValueError("sensor plug-in default cadence must be positive and finite")
         ####
+
     ####
 
 
@@ -416,6 +482,7 @@ class SensorBuildContext:
         object.__setattr__(self, "lever_arm_body_m", _vector3(self.lever_arm_body_m, "lever_arm_body_m"))
         object.__setattr__(self, "resources", _immutable_mapping(self.resources))
         ####
+
     ####
 
 
@@ -437,6 +504,7 @@ class SensorPluginDescriptor:
     def validate_config(self, value: Mapping[str, object] | None = None) -> BaseModel:
         return self.config_model.model_validate(dict(value or {}))
         ####
+
     ####
 
 
@@ -516,6 +584,7 @@ class RegisteredSensorInstance:
             raise TypeError(f"sensor plug-in {self.manifest.kind!r} does not support checkpoint restoration")
         restore(checkpoint)
         ####
+
     ####
 
 
@@ -559,6 +628,7 @@ class SensorPluginRegistry:
         implementation = descriptor.factory(config, context)
         return RegisteredSensorInstance(descriptor, config, implementation)
         ####
+
     ####
 
 
@@ -582,6 +652,7 @@ class PayloadCodec:
             raise ValueError("payload codec schema_id must not be empty")
         object.__setattr__(self, "contract", _immutable_mapping(self.contract))
         ####
+
     ####
 
 
@@ -626,6 +697,7 @@ class PayloadCodecRegistry:
         except KeyError as exc:
             raise ValueError(f"unknown legacy measurement payload kind {kind!r}") from exc
         ####
+
     ####
 
 
@@ -662,30 +734,28 @@ def payload_codec_registry() -> PayloadCodecRegistry:
 def packet_to_record(
     packet: MeasurementPacket[Any],
     *,
-    provenance: Mapping[str, object] | None = None,
-) -> dict[str, object]:
+    provenance: PacketProvenanceInput | None = None,
+) -> MeasurementPacketRecord:
     """Serialize a packet using its registered payload schema."""
 
     codec: PayloadCodec | None = None
-    payload_record: Mapping[str, object] | None = None
+    payload_record: PacketPayloadRecord | None = None
     if packet.payload is not None:
         codec = payload_codec_registry().for_payload(packet.payload)
         if packet.schema_id is not None and packet.schema_id != codec.schema_id:
-            raise ValueError(
-                f"packet schema {packet.schema_id!r} does not match payload codec {codec.schema_id!r}"
-            )
-        payload_record = codec.encode(packet.payload)
+            raise ValueError(f"packet schema {packet.schema_id!r} does not match payload codec {codec.schema_id!r}")
+        payload_record = _packet_record_mapping(codec.encode(packet.payload), field_name="payload")
     elif packet.schema_id is not None:
         codec = payload_codec_registry().for_schema(packet.schema_id)
     schema_id = packet.schema_id if packet.schema_id is not None else (None if codec is None else codec.schema_id)
-    record: dict[str, object] = {
+    record: MeasurementPacketRecord = {
         "sampled_at_s": packet.sampled_at_s,
         "available_at_s": packet.available_at_s,
         "interval_start_s": packet.interval_start_s,
         "valid": packet.valid,
-        "payload": None if payload_record is None else dict(payload_record),
-        "payload_contract": {} if codec is None else dict(codec.contract),
-        "provenance": dict(provenance or {}),
+        "payload": payload_record,
+        "payload_contract": {} if codec is None else _packet_record_mapping(codec.contract, field_name="payload_contract"),
+        "provenance": _packet_record_mapping(provenance or {}, field_name="provenance"),
     }
     if packet.sensor_id is not None:
         record["sensor_id"] = packet.sensor_id
@@ -701,11 +771,11 @@ def packet_to_record(
     ####
 
 
-def packet_from_record(value: Mapping[str, object]) -> MeasurementPacket[Any]:
+def packet_from_record(record: MeasurementPacketRecord) -> MeasurementPacket[Any]:
     """Restore a packet encoded by :func:`packet_to_record` or schema-v1 checkpoints."""
 
-    raw_payload = value.get("payload")
-    schema_id_value = value.get("schema_id")
+    raw_payload = record.get("payload")
+    schema_id_value = record.get("schema_id")
     schema_id = None if schema_id_value is None else str(schema_id_value)
     payload: object | None = None
     if raw_payload is not None:
@@ -723,21 +793,26 @@ def packet_from_record(value: Mapping[str, object]) -> MeasurementPacket[Any]:
     elif schema_id is not None:
         payload_codec_registry().for_schema(schema_id)
     return MeasurementPacket(
-        sampled_at_s=float(cast(float | int | str, value["sampled_at_s"])),
-        available_at_s=float(cast(float | int | str, value["available_at_s"])),
-        interval_start_s=(
-            None
-            if value.get("interval_start_s") is None
-            else float(cast(float | int | str, value["interval_start_s"]))
-        ),
+        sampled_at_s=float(cast(float | int | str, record["sampled_at_s"])),
+        available_at_s=float(cast(float | int | str, record["available_at_s"])),
+        interval_start_s=(None if record.get("interval_start_s") is None else float(cast(float | int | str, record["interval_start_s"]))),
         payload=payload,
-        valid=bool(value.get("valid", True)),
-        sensor_id=None if value.get("sensor_id") is None else str(value["sensor_id"]),
-        port=str(value.get("port", "measurement")),
-        sequence=None if value.get("sequence") is None else int(cast(int | str, value["sequence"])),
+        valid=bool(record.get("valid", True)),
+        sensor_id=None if record.get("sensor_id") is None else str(record["sensor_id"]),
+        port=str(record.get("port", "measurement")),
+        sequence=None if record.get("sequence") is None else int(cast(int | str, record["sequence"])),
         schema_id=schema_id,
-        invalid_reason=None if value.get("invalid_reason") is None else str(value["invalid_reason"]),
+        invalid_reason=None if record.get("invalid_reason") is None else str(record["invalid_reason"]),
     )
+    ####
+
+
+def _packet_record_mapping(value: Mapping[str, object], *, field_name: str) -> dict[str, object]:
+    """Copy one codec-owned JSON object while preserving the packet boundary."""
+
+    if any(not isinstance(key, str) for key in value):
+        raise ValueError(f"measurement packet {field_name} requires string keys")
+    return dict(value)
     ####
 
 
@@ -748,6 +823,7 @@ __all__ = [
     "EntityTruth",
     "EnvironmentSnapshot",
     "MeasurementPacket",
+    "MeasurementPacketRecord",
     "PayloadCodec",
     "PayloadCodecRegistry",
     "RegisteredSensorInstance",
@@ -765,6 +841,7 @@ __all__ = [
     "TruthPoint",
     "TruthSegment",
     "packet_from_record",
+    "parse_measurement_packet_record",
     "packet_to_record",
     "payload_codec_registry",
     "sensor_plugin_registry",

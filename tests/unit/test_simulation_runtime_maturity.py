@@ -103,6 +103,7 @@ def test_simulation_runtime_manifest_rejects_unknown_schema(tmp_path: Path) -> N
     ####
 
 
+@pytest.mark.slow
 def test_simulation_runtime_bundle_collects_inputs_manifest_and_reproduction(tmp_path: Path) -> None:
     scenario = load_simulation_runtime_catalog().find("two-stage-ballistic")
 

@@ -612,9 +612,7 @@ def _validate_release_evidence_artifact(
         evidence = ClaimBoundEvidenceArtifact.from_payload(payload)
         expected_kind = _release_evidence_kind(name)
         if evidence.release_evidence_kind != expected_kind:
-            raise ValueError(
-                f"release evidence kind mismatch: expected {expected_kind!r}, got {evidence.release_evidence_kind!r}"
-            )
+            raise ValueError(f"release evidence kind mismatch: expected {expected_kind!r}, got {evidence.release_evidence_kind!r}")
         if expected_subject is None:
             raise ValueError("typed release evidence requires a verified compiled composition sidecar")
         subject = evidence.release_evidence_subject.model_dump(mode="json")
@@ -1060,9 +1058,7 @@ def _runtime_tuning_binding(runtime: Mapping[str, object], method: object) -> di
     if raw_binding is None and raw_bindings is None:
         return {
             "status": "not_declared",
-            "claim_boundary": (
-                "The runtime did not claim that this controller was instantiated from a common tuning-campaign candidate."
-            ),
+            "claim_boundary": ("The runtime did not claim that this controller was instantiated from a common tuning-campaign candidate."),
         }
     if raw_binding is not None:
         if not isinstance(raw_binding, Mapping):
@@ -1123,9 +1119,7 @@ def _local_controller_screen_record(
         plant_id = _nonempty_string(payload, "plant_id")
         fidelity = _nonempty_string(payload, "fidelity")
         control_realization = _nonempty_string(payload, "control_realization")
-        if schema == _LOCAL_DIRECT_WRENCH_SCREEN_SCHEMA and (
-            fidelity != "rigid_body_6dof_direct_wrench" or control_realization != "direct_wrench"
-        ):
+        if schema == _LOCAL_DIRECT_WRENCH_SCREEN_SCHEMA and (fidelity != "rigid_body_6dof_direct_wrench" or control_realization != "direct_wrench"):
             raise ValueError("local direct-wrench screen has incompatible fidelity or control realization")
         if schema == _LOCAL_NATIVE_COORDINATE_LQI_SCREEN_SCHEMA and control_realization != "native_named_coordinates":
             raise ValueError("local native-coordinate LQI screen must declare native_named_coordinates")
@@ -1139,10 +1133,7 @@ def _local_controller_screen_record(
             raise ValueError(f"invalid local controller screen composition provenance: {provenance.get('error')}")
         capability_preflight_evidence = _capability_preflight_evidence(output_directory, provenance)
         if capability_preflight_evidence["status"] == "invalid":
-            raise ValueError(
-                "invalid local controller screen concrete capability preflight: "
-                f"{capability_preflight_evidence.get('error')}"
-            )
+            raise ValueError(f"invalid local controller screen concrete capability preflight: {capability_preflight_evidence.get('error')}")
         graph_execution_evidence = _graph_execution_evidence(output_directory, provenance)
         if graph_execution_evidence["status"] == "invalid":
             raise ValueError(f"invalid local controller screen graph evidence: {graph_execution_evidence.get('error')}")
@@ -1154,16 +1145,10 @@ def _local_controller_screen_record(
             raise ValueError(f"invalid local controller screen reproduction record: {reproduction_evidence.get('error')}")
         control_execution_evidence = _control_execution_evidence(output_directory, provenance)
         if control_execution_evidence["status"] == "invalid":
-            raise ValueError(
-                "invalid local controller screen control evidence: "
-                f"{control_execution_evidence.get('error')}"
-            )
+            raise ValueError(f"invalid local controller screen control evidence: {control_execution_evidence.get('error')}")
         controller_execution_evidence = _controller_execution_evidence(output_directory, provenance)
         if controller_execution_evidence["status"] == "invalid":
-            raise ValueError(
-                "invalid local controller screen execution evidence: "
-                f"{controller_execution_evidence.get('error')}"
-            )
+            raise ValueError(f"invalid local controller screen execution evidence: {controller_execution_evidence.get('error')}")
     except (OSError, ValueError, json.JSONDecodeError) as error:
         return (
             {
@@ -1247,8 +1232,7 @@ def _reproduction_evidence(
                 "path": str(source),
                 "line_count": len(lines),
                 "claim_boundary": (
-                    "The reproduction record is retained, but no compiled Taoryx composition sidecar is available "
-                    "to bind its command or identity."
+                    "The reproduction record is retained, but no compiled Taoryx composition sidecar is available to bind its command or identity."
                 ),
             }
         if len(commands) != 1:
@@ -1475,9 +1459,7 @@ def _capability_preflight_evidence(
         }
         for field, expected in expected_identity.items():
             if payload.get(field) != expected:
-                raise ValueError(
-                    f"preflight {field} does not match compiled composition: {payload.get(field)!r} != {expected!r}"
-                )
+                raise ValueError(f"preflight {field} does not match compiled composition: {payload.get(field)!r} != {expected!r}")
         status = payload.get("status")
         if status not in {"translation_ready", "blocked", "not_applicable"}:
             raise ValueError("preflight status is invalid")
@@ -1512,10 +1494,7 @@ def _capability_preflight_evidence(
         }
         for field, expected in expected_capability.items():
             if capability.get(field) != expected:
-                raise ValueError(
-                    f"concrete capability {field} does not match preflight/composition: "
-                    f"{capability.get(field)!r} != {expected!r}"
-                )
+                raise ValueError(f"concrete capability {field} does not match preflight/composition: {capability.get(field)!r} != {expected!r}")
         adapter_id = capability.get("adapter_id")
         if not isinstance(adapter_id, str) or not adapter_id.strip():
             raise ValueError("concrete capability estimate has no adapter ID")
@@ -1854,7 +1833,12 @@ def _reconstruct_graph_dispatches(
             raise ValueError(f"mission-graph dispatch {index} has invalid segment ID")
         if outcome not in outcomes:
             raise ValueError(f"mission-graph dispatch {index} has invalid outcome")
-        if isinstance(committed_time_s, bool) or not isinstance(committed_time_s, int | float) or not math.isfinite(float(committed_time_s)) or float(committed_time_s) < 0.0:
+        if (
+            isinstance(committed_time_s, bool)
+            or not isinstance(committed_time_s, int | float)
+            or not math.isfinite(float(committed_time_s))
+            or float(committed_time_s) < 0.0
+        ):
             raise ValueError(f"mission-graph dispatch {index} has invalid committed time")
         if transition_status not in transition_statuses:
             raise ValueError(f"mission-graph dispatch {index} has invalid transition status")
@@ -2019,7 +2003,7 @@ def _batch_episode_parity_disposition(composition_provenance: Mapping[str, objec
             "reason": "verified composition provenance omitted one parity lookup identity",
             "claim_boundary": "No parity is claimed from incomplete composition provenance.",
         }
-    return batch_episode_parity_record(family_id, mission_id, cast(FidelityTier, fidelity))
+    return batch_episode_parity_record(family_id, mission_id, cast(FidelityTier, fidelity)).as_dict()
     ####
 
 
@@ -2043,6 +2027,7 @@ def _local_screen_composition_provenance(output_directory: Path) -> dict[str, ob
             "hummingbird_local_direct_wrench_screen.v1",
             "hl20_local_direct_wrench_screen.v1",
             "local_direct_wrench_screen.v1",
+            "x15_local_direct_wrench_screen.v1",
             "local_native_coordinate_lqi_screen.v1",
             "hl20_source_surface_pitch_authority_screen.v1",
             "x15_source_surface_authority_screen.v1",

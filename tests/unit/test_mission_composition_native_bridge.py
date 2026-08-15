@@ -25,16 +25,28 @@ from taoryx.vehicle_registry import ROOT
 PROVIDER = RegistryMissionCompositionProvider()
 RUNNER = build_registry_mission_composition_runner(PROVIDER)
 BATCH_WITNESSES = tuple(item for item in load_vehicle_execution_witness_catalog().witnesses if item.operation == "batch")
-_SLOW_BATCH_WITNESS_IDS = frozenset({"b747-direct-wrench-batch"})
+_SLOW_BATCH_WITNESS_IDS = frozenset(
+    {
+        "b747-3dof-batch",
+        "b747-direct-wrench-batch",
+        "b747-pseudo6dof-batch",
+        "b747-condition3-local-physical-surface-lqi-screen-batch",
+        "f16-local-surface-lqr-schedule-transition-screen-batch",
+        "hl20-source-surface-attitude-rate-lqi-screen-batch",
+        "x15-source-surface-attitude-rate-lqi-screen-batch",
+        "x8-direct-wrench-batch",
+        "x8-local-physical-surface-lqi-screen-batch",
+    }
+)
 
 
 def _batch_witness_parameters() -> tuple[object, ...]:
-    """Keep the 66k-step B747 direct-route proof out of the inner loop.
+    """Keep long transport and controller-screen proofs out of the inner loop.
 
-    The marked witness still executes its exact advertised common-runner path
-    in the complete suite.  Its separate marker prevents one full transport
-    route from turning every focused native-output edit into a many-minute
-    test run.
+    The marked witnesses still execute their exact advertised common-runner
+    paths in the complete suite. Their separate marker prevents full routes
+    and schedule-transition screens from turning focused native-output edits
+    into a many-minute test run.
     """
 
     return tuple(
@@ -110,6 +122,7 @@ def test_common_runner_registrations_match_batch_ready_models() -> None:
     ####
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize("witness", _batch_witness_parameters())
 def test_every_native_batch_tuple_executes_through_common_runner(witness: object) -> None:
     request, composition = _request(witness)

@@ -50,6 +50,7 @@ class MissionWorkflowEndpointSpec(BaseModel):
 
     id: str = Field(min_length=1)
     provider_id: str = Field(min_length=1)
+    provider_aliases: tuple[str, ...] = ()
     model_id: str = Field(min_length=1)
     # Model-kind vocabulary belongs to the provider. The verifier checks this
     # value for exact equality with the advertised model without requiring the
@@ -71,8 +72,21 @@ class MissionWorkflowEndpointSpec(BaseModel):
     maturity_record_id: str = Field(min_length=1)
     claim_boundary: str = Field(min_length=1)
 
+    @property
+    def provider_ids(self) -> tuple[str, ...]:
+        """Return the owning provider plus explicit planning aliases."""
+
+        return (self.provider_id, *self.provider_aliases)
+        ####
+
     @model_validator(mode="after")
     def validate_endpoint_shape(self) -> MissionWorkflowEndpointSpec:
+        if (
+            len(self.provider_aliases) != len(set(self.provider_aliases))
+            or any(not identifier.strip() for identifier in self.provider_aliases)
+            or self.provider_id in self.provider_aliases
+        ):
+            raise ValueError(f"workflow endpoint {self.id!r} has invalid provider aliases")
         if Path(self.draft).is_absolute() or ".." in Path(self.draft).parts:
             raise ValueError(f"workflow endpoint {self.id!r} draft must be a relative checked-in path")
         output_ids = (*self.required_core_output_ids, *self.required_telemetry_output_ids)
@@ -104,9 +118,13 @@ class MissionWorkflowEndpointCatalog(BaseModel):
         ids = tuple(item.id for item in self.endpoints)
         if len(ids) != len(set(ids)):
             raise ValueError("mission workflow endpoint catalog has duplicate IDs")
-        identities = tuple((item.provider_id, item.model_id, item.mission_template_id, item.fidelity) for item in self.endpoints)
+        identities = tuple(
+            (provider_id, item.model_id, item.mission_template_id, item.fidelity)
+            for item in self.endpoints
+            for provider_id in item.provider_ids
+        )
         if len(identities) != len(set(identities)):
-            raise ValueError("mission workflow endpoint catalog has duplicate provider/model/mission/fidelity identities")
+            raise ValueError("mission workflow endpoint catalog has duplicate selectable provider/model/mission/fidelity identities")
         return self
         ####
 
@@ -164,6 +182,7 @@ def mission_workflow_endpoint_list(*, plugins: PluginCatalog | None = None) -> d
             {
                 "id": item.id,
                 "provider_id": item.provider_id,
+                "provider_aliases": list(item.provider_aliases),
                 "model_id": item.model_id,
                 "fidelity": item.fidelity,
                 "realization_id": item.realization_id,

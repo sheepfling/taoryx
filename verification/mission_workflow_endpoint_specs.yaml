@@ -38,6 +38,8 @@ endpoints:
       physical vehicle, navigation, robustness, controller-tuning, or qualification claim.
   - id: dual-launch-attached-booster-batch
     provider_id: taoryx.dual-launch.mission-composition
+    provider_aliases:
+      - taoryx.registry.mission-composition
     model_id: dual_launch_glider
     model_kind: composition_proof_family
     fidelity: point_mass_3dof

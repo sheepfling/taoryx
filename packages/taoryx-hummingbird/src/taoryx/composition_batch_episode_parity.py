@@ -8,11 +8,16 @@ from dataclasses import dataclass
 from typing import cast
 
 from .committed_boundary_sensor import CommittedBoundarySensor
-from .composition_policy import CompositionPolicyTrace
+from .composition_policy import CompositionPolicyTrace, parse_composition_policy_trace_record
 from .trajectory.hummingbird_pseudo6dof import HummingbirdPseudo6DOFCommand, HummingbirdPseudo6DOFModel, HummingbirdPseudo6DOFState
 from .vehicle_composition import CompiledVehicleComposition, resolve_vehicle_composition_interface_contract
 from .vehicle_execution_bindings import batch_episode_parity_record, resolve_vehicle_execution_binding
-from .vehicle_interface import VehicleInterfaceContract, project_committed_status_values, validate_projected_status_values
+from .vehicle_interface import (
+    CommittedNativeStatusValues,
+    VehicleInterfaceContract,
+    project_committed_status_values,
+    validate_projected_status_values,
+)
 
 _TOLERANCE = 1.0e-12
 _ADAPTER_ID = "taoryx.hummingbird.aggregate_thrust_batch_episode_parity.v1"
@@ -37,6 +42,7 @@ class BatchEpisodeParityStep:
             "mismatches": list(self.mismatches),
         }
         ####
+
     ####
 
 
@@ -74,6 +80,7 @@ class BatchEpisodeParityReport:
             ),
         }
         ####
+
     ####
 
 
@@ -94,7 +101,7 @@ def verify_composition_batch_episode_parity(
 
 def verify_serialized_composition_batch_episode_parity(
     composition: CompiledVehicleComposition,
-    payload: Mapping[str, object],
+    payload: object,
 ) -> BatchEpisodeParityReport:
     """Compare a persisted semantic trace through the registered batch path.
 
@@ -105,23 +112,18 @@ def verify_serialized_composition_batch_episode_parity(
     not receive a plausible-looking parity result from substituted dynamics.
     """
 
-    if _text(payload, "schema") != "taoryx.composition-policy-trace/v1alpha1":
-        raise ValueError("unsupported policy trace schema")
-    if (
-        composition.family_id != "hummingbird"
-        or composition.fidelity != "pseudo_6dof"
-        or composition.mission != "multirotor_pad_box_yaw_recovery_land_v1"
-    ):
+    trace = parse_composition_policy_trace_record(payload)
+    if composition.family_id != "hummingbird" or composition.fidelity != "pseudo_6dof" or composition.mission != "multirotor_pad_box_yaw_recovery_land_v1":
         raise ValueError("no batch/episode action-trace parity adapter is registered for this composition")
     parity = batch_episode_parity_record(composition.family_id, composition.mission, composition.fidelity)
-    if parity.get("availability") != "registered" or parity.get("adapter_id") != _ADAPTER_ID:
+    if parity.availability != "registered" or parity.adapter_id != _ADAPTER_ID:
         raise ValueError("no batch/episode action-trace parity adapter is registered for this composition")
-    if _text(payload, "composition_id") != composition.id or _text(payload, "composition_identity_sha256") != composition.identity_sha256:
+    if trace["composition_id"] != composition.id or trace["composition_identity_sha256"] != composition.identity_sha256:
         raise ValueError("policy trace composition identity disagrees with the requested parity composition")
-    authority_profile_id = _text(payload, "authority_profile_id")
+    authority_profile_id = trace["authority_profile_id"]
     if authority_profile_id != "body_motion_response":
         raise ValueError("Hummingbird parity requires the body_motion_response authority profile")
-    integration_step_s = _positive_finite(payload.get("integration_step_s"), "integration_step_s")
+    integration_step_s = _positive_finite(trace["integration_step_s"], "integration_step_s")
 
     batch_binding = resolve_vehicle_execution_binding(composition, "batch")
     episode_binding = resolve_vehicle_execution_binding(composition, "episode")
@@ -130,7 +132,7 @@ def verify_serialized_composition_batch_episode_parity(
     if episode_binding.factory_id != "hummingbird_aggregate_thrust_episode.v1":
         raise ValueError("Hummingbird parity does not recognize the selected episode factory")
     contract = resolve_vehicle_composition_interface_contract(composition)
-    if _text(payload, "interface_id") != contract.id or _text(payload, "interface_fingerprint_sha256") != contract.fingerprint:
+    if trace["interface_id"] != contract.id or trace["interface_fingerprint_sha256"] != contract.fingerprint:
         raise ValueError("policy trace interface identity disagrees with the parity composition")
 
     model = HummingbirdPseudo6DOFModel(mass_kg=_initial_mass_kg(composition))
@@ -139,7 +141,7 @@ def verify_serialized_composition_batch_episode_parity(
     sensor = _sensor(contract, composition)
     _advance_sensor(sensor, _status_values(contract, state, model, "ready"))
     records: list[BatchEpisodeParityStep] = []
-    for index, serialized_step in enumerate(_sequence(payload.get("steps"), "steps")):
+    for index, serialized_step in enumerate(trace["steps"]):
         episode_step = _mapping(serialized_step, f"steps[{index}]")
         frame = _mapping(episode_step.get("action_frame"), f"steps[{index}].action_frame")
         if _text(frame, "interface_id") != contract.id or _text(frame, "interface_fingerprint_sha256") != contract.fingerprint:
@@ -175,7 +177,7 @@ def verify_serialized_composition_batch_episode_parity(
                 tuple(mismatches),
             )
         )
-    final_status = _mapping(payload.get("final_status"), "final_status")
+    final_status = trace["final_status"]
     final_mismatches = _mismatches(
         _mapping(final_status.get("values"), "final_status.values"),
         _status_values(contract, state, model, "active"),
@@ -355,7 +357,12 @@ def _status_values(
         "controller_method": "attitude_response_law",
         "physical_motor_allocation": False,
     }
-    values = project_committed_status_values(contract, time_s=state.time_s, execution_status=execution_status, raw_values=raw)
+    values = project_committed_status_values(
+        contract,
+        time_s=state.time_s,
+        execution_status=execution_status,
+        raw_values=CommittedNativeStatusValues(raw),
+    )
     validate_projected_status_values(contract, values, context=f"Hummingbird batch parity t={state.time_s:.12g} s")
     return values
     ####

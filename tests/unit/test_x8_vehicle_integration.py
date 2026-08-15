@@ -599,6 +599,7 @@ def test_x8_local_source_table_surface_lqr_screen_runs_through_public_compositio
     ####
 
 
+@pytest.mark.slow
 def test_x8_local_source_table_surface_lqi_screen_runs_through_public_composition(
     tmp_path: Path,
 ) -> None:
@@ -654,6 +655,7 @@ def test_x8_local_source_table_surface_lqi_screen_runs_through_public_compositio
     ####
 
 
+@pytest.mark.slow
 def test_x8_physical_lqi_screen_applies_the_exact_common_tuning_candidate(
     tmp_path: Path,
     plugins: PluginCatalog,

@@ -58,6 +58,7 @@ class LanguageBackedBatchEpisodeParityStep:
             "mismatches": list(self.mismatches),
         }
         ####
+
     ####
 
 
@@ -97,6 +98,7 @@ class LanguageBackedBatchEpisodeParityReport:
             ),
         }
         ####
+
     ####
 
 
@@ -163,11 +165,7 @@ def verify_serialized_language_backed_batch_episode_parity(
     expected_final = _mapping(payload.get("final_status"), "final_status")
     final_mismatches = _mismatches(_mapping(expected_final.get("values"), "final_status.values"), actual_final.values, "final_status")
     if final_mismatches:
-        records.append(
-            LanguageBackedBatchEpisodeParityStep(
-                len(records), actual_final.time_s, actual_final.time_s, "fail", tuple(final_mismatches)
-            )
-        )
+        records.append(LanguageBackedBatchEpisodeParityStep(len(records), actual_final.time_s, actual_final.time_s, "fail", tuple(final_mismatches)))
     return LanguageBackedBatchEpisodeParityReport(
         composition.id,
         composition.identity_sha256,
@@ -193,7 +191,7 @@ def _validate_identity(composition: CompiledVehicleComposition, payload: Mapping
     ):
         raise ValueError("no language-backed batch/episode parity adapter is registered for this composition")
     parity = batch_episode_parity_record(composition.family_id, composition.mission, composition.fidelity)
-    if parity.get("availability") != "registered" or parity.get("adapter_id") != _ADAPTER_ID:
+    if parity.availability != "registered" or parity.adapter_id != _ADAPTER_ID:
         raise ValueError("no language-backed batch/episode parity adapter is registered for this composition")
     if _text(payload, "composition_id") != composition.id or _text(payload, "composition_identity_sha256") != composition.identity_sha256:
         raise ValueError("policy trace composition identity disagrees with the requested parity composition")

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.runtime.runner import run_files
 from taoryx.trajectory import load_case_intent, load_family_catalog, render_fidelity_problems, resolve_case
@@ -9,6 +11,8 @@ from taoryx.trajectory import load_case_intent, load_family_catalog, render_fide
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "verification" / "alpha2_family_catalog.yaml"
 CASE = ROOT / "tests" / "fixtures" / "alpha2_case_contracts" / "case-t5-ladder.yaml"
+
+pytestmark = pytest.mark.simple_aero
 
 
 def _resolved_case():

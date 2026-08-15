@@ -9,7 +9,7 @@ onboarding work, not permission to run a neighboring vehicle model.
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -86,13 +86,17 @@ class VehicleExecutionBinding(BaseModel):
             raise ValueError("an episode execution binding must declare batch action tracing not_applicable")
         if self.operation == "batch" and self.status == "runnable" and self.batch_action_trace == "planned":
             raise ValueError("a runnable batch execution binding cannot declare planned batch action tracing")
-        if self.execution_mode in {
-            "source_native_autonomous",
-            "native_autonomous",
-            "source_history_replay",
-            "source_scheduled_replay",
-            "passive_uncontrolled",
-        } and self.operation != "batch":
+        if (
+            self.execution_mode
+            in {
+                "source_native_autonomous",
+                "native_autonomous",
+                "source_history_replay",
+                "source_scheduled_replay",
+                "passive_uncontrolled",
+            }
+            and self.operation != "batch"
+        ):
             raise ValueError(f"execution_mode {self.execution_mode!r} supports batch execution only")
         if self.execution_mode == "local_direct_wrench_screen" and self.fidelity != "rigid_body_6dof_direct_wrench":
             raise ValueError("local_direct_wrench_screen requires rigid_body_6dof_direct_wrench fidelity")
@@ -102,6 +106,8 @@ class VehicleExecutionBinding(BaseModel):
             raise ValueError("source_surface_authority_screen supports batch execution only")
         return self
         ####
+
+
 ####
 
 
@@ -123,6 +129,8 @@ class VehicleExecutionBindingCatalog(BaseModel):
             raise ValueError(f"execution binding catalog has duplicate keys: {duplicates}")
         return self
         ####
+
+
 ####
 
 
@@ -159,10 +167,12 @@ class VehicleBatchEpisodeParityCatalog(BaseModel):
             raise ValueError(f"batch/episode parity catalog has duplicate keys: {duplicates}")
         return self
         ####
+
+
 ####
 
 
-class VehicleBatchEpisodeParityAdvertisement(BaseModel):
+class VehicleBatchEpisodeParityAdvertisement(BaseModel, Mapping[str, object]):
     """Typed non-promotional status of one exact batch/episode pair.
 
     This is intentionally separate from the checked-in witness binding.  It
@@ -212,6 +222,19 @@ class VehicleBatchEpisodeParityAdvertisement(BaseModel):
 
         return self.model_dump(mode="json", exclude_none=True)
         ####
+
+    def __getitem__(self, key: str) -> object:
+        return self.as_dict()[key]
+        ####
+
+    def __iter__(self) -> Iterator[str]:  # type: ignore[override]
+        return iter(self.as_dict())
+        ####
+
+    def __len__(self) -> int:
+        return len(self.as_dict())
+        ####
+
     ####
 
 
@@ -227,11 +250,9 @@ class VehicleExecutionBindingError(ValueError):
         self.composition = composition
         self.operation = operation
         self.reason = reason
-        super().__init__(
-            f"no {operation} execution binding for {composition.family_id!r}/"
-            f"{composition.mission!r}/{composition.fidelity!r}: {reason}"
-        )
+        super().__init__(f"no {operation} execution binding for {composition.family_id!r}/{composition.mission!r}/{composition.fidelity!r}: {reason}")
         ####
+
     ####
 
 
@@ -369,10 +390,7 @@ def execution_binding_records(
 ) -> list[dict[str, object]]:
     """Serialize bindings for discovery without constructing any runtime."""
 
-    return [
-        item.model_dump(mode="json")
-        for item in bindings_for_family(family_id, catalog=catalog, plugins=plugins)
-    ]
+    return [item.model_dump(mode="json") for item in bindings_for_family(family_id, catalog=catalog, plugins=plugins)]
     ####
 
 
@@ -395,16 +413,8 @@ def resolve_batch_episode_parity_advertisement(
 
     selected_execution = execution_catalog or load_vehicle_execution_binding_catalog(plugins=plugins)
     selected_parity = parity_catalog or load_vehicle_batch_episode_parity_catalog(plugins=plugins)
-    matching = tuple(
-        item
-        for item in selected_execution.bindings
-        if item.family_id == family_id and item.mission == mission and item.fidelity == fidelity
-    )
-    runnable = {
-        item.operation: item
-        for item in matching
-        if item.status == "runnable" and item.factory_id is not None
-    }
+    matching = tuple(item for item in selected_execution.bindings if item.family_id == family_id and item.mission == mission and item.fidelity == fidelity)
+    runnable = {item.operation: item for item in matching if item.status == "runnable" and item.factory_id is not None}
     required = {"batch", "episode"}
     if set(runnable) != required:
         return VehicleBatchEpisodeParityAdvertisement(
@@ -419,11 +429,7 @@ def resolve_batch_episode_parity_advertisement(
                 "not permission to substitute another family or fidelity."
             ),
         )
-    witnesses = tuple(
-        item
-        for item in selected_parity.bindings
-        if item.family_id == family_id and item.mission == mission and item.fidelity == fidelity
-    )
+    witnesses = tuple(item for item in selected_parity.bindings if item.family_id == family_id and item.mission == mission and item.fidelity == fidelity)
     if not witnesses:
         return VehicleBatchEpisodeParityAdvertisement(
             family_id=family_id,
@@ -432,16 +438,11 @@ def resolve_batch_episode_parity_advertisement(
             availability="not_registered",
             runnable_operations=tuple(sorted(runnable)),
             reason="both paths are runnable but no exact committed-boundary parity witness is registered",
-            claim_boundary=(
-                "Runnable batch and episode paths do not establish equivalent state, status, event, or sensor behavior."
-            ),
+            claim_boundary=("Runnable batch and episode paths do not establish equivalent state, status, event, or sensor behavior."),
         )
     witness = witnesses[0]
     if witness.batch_factory_id != runnable["batch"].factory_id or witness.episode_factory_id != runnable["episode"].factory_id:
-        raise ValueError(
-            "batch/episode parity witness factory IDs disagree with runnable execution bindings: "
-            f"{family_id}/{mission}/{fidelity}"
-        )
+        raise ValueError(f"batch/episode parity witness factory IDs disagree with runnable execution bindings: {family_id}/{mission}/{fidelity}")
     return VehicleBatchEpisodeParityAdvertisement(
         family_id=family_id,
         mission=mission,
@@ -463,8 +464,8 @@ def batch_episode_parity_record(
     execution_catalog: VehicleExecutionBindingCatalog | None = None,
     parity_catalog: VehicleBatchEpisodeParityCatalog | None = None,
     plugins: PluginCatalog | None = None,
-) -> dict[str, object]:
-    """Serialize the typed parity advertisement for existing JSON consumers."""
+) -> VehicleBatchEpisodeParityAdvertisement:
+    """Return the typed parity advertisement at the producer/consumer seam."""
 
     return resolve_batch_episode_parity_advertisement(
         family_id,
@@ -473,7 +474,7 @@ def batch_episode_parity_record(
         execution_catalog=execution_catalog,
         parity_catalog=parity_catalog,
         plugins=plugins,
-    ).as_dict()
+    )
     ####
 
 
@@ -483,17 +484,11 @@ def batch_episode_parity_records(
     execution_catalog: VehicleExecutionBindingCatalog | None = None,
     parity_catalog: VehicleBatchEpisodeParityCatalog | None = None,
     plugins: PluginCatalog | None = None,
-) -> list[dict[str, object]]:
-    """Return non-inferred parity state for every declared execution tuple."""
+) -> list[VehicleBatchEpisodeParityAdvertisement]:
+    """Return typed non-inferred parity state for every declared execution tuple."""
 
     selected_execution = execution_catalog or load_vehicle_execution_binding_catalog(plugins=plugins)
-    keys = sorted(
-        {
-            (item.mission, item.fidelity)
-            for item in selected_execution.bindings
-            if item.family_id == family_id
-        }
-    )
+    keys = sorted({(item.mission, item.fidelity) for item in selected_execution.bindings if item.family_id == family_id})
     return [
         batch_episode_parity_record(
             family_id,
@@ -515,10 +510,7 @@ def validate_batch_episode_parity_bindings(
 ) -> tuple[str, ...]:
     """Reject stale parity claims against the authoritative factory bindings."""
 
-    indexed = {
-        (item.family_id, item.mission, item.fidelity, item.operation): item
-        for item in execution_bindings
-    }
+    indexed = {(item.family_id, item.mission, item.fidelity, item.operation): item for item in execution_bindings}
     errors: list[str] = []
     for parity in parity_bindings:
         batch = indexed.get((parity.family_id, parity.mission, parity.fidelity, "batch"))
@@ -560,10 +552,7 @@ def validate_execution_bindings(
             errors.append(f"unknown execution-binding mission: {binding.family_id}/{binding.mission}")
             continue
         if binding.fidelity not in supported:
-            errors.append(
-                f"execution binding declares unsupported fidelity: "
-                f"{binding.family_id}/{binding.mission}/{binding.fidelity}"
-            )
+            errors.append(f"execution binding declares unsupported fidelity: {binding.family_id}/{binding.mission}/{binding.fidelity}")
     return tuple(errors)
     ####
 

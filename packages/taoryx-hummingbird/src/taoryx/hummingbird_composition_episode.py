@@ -42,7 +42,7 @@ from taoryx.composition_episode import (
     _three_vector,
 )
 from taoryx.vehicle_composition import CompiledVehicleComposition
-from taoryx.vehicle_interface import project_committed_status_values
+from taoryx.vehicle_interface import CommittedNativeStatusValues, project_committed_status_values
 
 EpisodeStatus = Literal["ready", "active", "completed", "closed"]
 
@@ -135,18 +135,13 @@ class HummingbirdPseudoCompositionEpisode:
         if cached is not None:
             return cached
         profile = self.interface_contract.authority_profile(authority_profile_id)
-        candidates = {
-            channel.name: channel
-            for channel in (*self.action_schema, *_hummingbird_high_order_episode_channels())
-        }
+        candidates = {channel.name: channel for channel in (*self.action_schema, *_hummingbird_high_order_episode_channels())}
         semantic_channels = {channel.id: channel for channel in self.interface_contract.action_channels}
         resolved: list[EpisodeChannel] = []
         for identifier in profile.action_ids:
             native = semantic_channels[identifier].binding.get("native_action")
             if not isinstance(native, str) or native not in candidates:
-                raise ValueError(
-                    f"authority profile {authority_profile_id!r} has no Hummingbird episode adapter for {identifier!r}"
-                )
+                raise ValueError(f"authority profile {authority_profile_id!r} has no Hummingbird episode adapter for {identifier!r}")
             resolved.append(candidates[native])
         schema = tuple(resolved)
         self._authority_action_schema_cache[authority_profile_id] = schema
@@ -240,7 +235,7 @@ class HummingbirdPseudoCompositionEpisode:
             self.interface_contract,
             time_s=self._state.time_s,
             execution_status=self._status,
-            raw_values=raw_values,
+            raw_values=CommittedNativeStatusValues(raw_values),
         )
         return EpisodeObservation(self._state.time_s, {**raw_values, **semantic_values}, self._status)
         ####
@@ -562,15 +557,11 @@ class HummingbirdPseudoCompositionEpisode:
                     "achieved_thrust_fraction": self._state.thrust_n / self.model.maximum_thrust_n,
                     "battery_fraction": self._state.battery_fraction,
                     "thrust_achievement_limited": (
-                        bool(lowered["motors_enabled"])
-                        and lowered_thrust_ratio > 0.0
-                        and self._state.battery_fraction < 1.0 - 1.0e-12
+                        bool(lowered["motors_enabled"]) and lowered_thrust_ratio > 0.0 and self._state.battery_fraction < 1.0 - 1.0e-12
                     ),
                     "achievement_limit_reason_codes": (
                         ["battery_derate"]
-                        if bool(lowered["motors_enabled"])
-                        and lowered_thrust_ratio > 0.0
-                        and self._state.battery_fraction < 1.0 - 1.0e-12
+                        if bool(lowered["motors_enabled"]) and lowered_thrust_ratio > 0.0 and self._state.battery_fraction < 1.0 - 1.0e-12
                         else (["propulsion_disabled"] if not bool(lowered["motors_enabled"]) else [])
                     ),
                 }

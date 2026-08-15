@@ -15,10 +15,10 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, NotRequired, TypeAlias, TypedDict
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .local_direct_wrench_screen_registry import resolve_local_direct_wrench_screen_advertisement
 from .trajectory.configuration_contract import (
@@ -66,6 +66,81 @@ AUTHORING_DRAFT_SCHEMA = "taoryx.model-authoring-draft/v1"
 REQUIRED_VALUE = "<REQUIRED>"
 SELECTION_REQUIRED = "<SELECT>"
 AuthoringPlanStatus = Literal["ready_to_author", "selection_required"]
+AuthoringScalar: TypeAlias = str | int | float | bool | None
+AuthoringValue: TypeAlias = AuthoringScalar | list["AuthoringValue"] | dict[str, "AuthoringValue"]
+AuthoringPlanRecord: TypeAlias = dict[str, AuthoringValue]
+
+
+class ModelAuthoringSelectionProjection(TypedDict):
+    """Portable selection identity embedded in an authoring-plan projection."""
+
+    provider_id: str
+    model_id: str
+    model_version: str
+    model_metadata_fingerprint: str
+    family_id: str | None
+    physical_family: str | None
+    fidelity: str
+    realization_id: str | None
+    mission_template_id: str | None
+    sources: dict[str, str]
+
+    ####
+
+
+class ModelAuthoringPlanProjection(TypedDict):
+    """Stable JSON projection returned by :func:`build_model_authoring_plan`.
+
+    The plan is a reviewer- and CLI-facing discovery document, rather than an
+    executable configuration.  Its named sections deliberately remain plain
+    JSON records so it can be written directly to JSON, YAML, or a UI client;
+    every record is normalized through :func:`normalize_authoring_values`
+    before it leaves this owner.
+    """
+
+    schema: Literal["taoryx.model-authoring-plan/v1"]
+    status: AuthoringPlanStatus
+    selection: ModelAuthoringSelectionProjection
+    selection_gaps: list[str]
+    data_contract: AuthoringPlanRecord
+    controller_automation: AuthoringPlanRecord
+    execution_advertisement: AuthoringPlanRecord
+    maturity_advertisement: AuthoringPlanRecord
+    focused_endpoint_verification: AuthoringPlanRecord
+    navigation_automation: AuthoringPlanRecord
+    mode_automation: AuthoringPlanRecord
+    segment_automation: AuthoringPlanRecord
+    configuration_draft: AuthoringPlanRecord
+    workflow: list[str]
+    claim_boundary: str
+
+    ####
+
+
+class AuthoringChoiceProjection(TypedDict):
+    """Canonical plain-value envelope for a configuration choice."""
+
+    selected: str
+    values: dict[str, AuthoringValue]
+
+    ####
+
+
+class AuthoringSegmentOccurrenceProjection(AuthoringChoiceProjection):
+    """A choice projection with an optional stable sequence occurrence ID."""
+
+    instance_id: NotRequired[str]
+
+    ####
+
+
+class AuthoringSequenceProjection(TypedDict):
+    """Canonical plain-value envelope for a templated or custom sequence."""
+
+    template: str | None
+    items: list[AuthoringValue]
+
+    ####
 
 
 class ModelAuthoringError(ValueError):
@@ -77,6 +152,181 @@ class ModelAuthoringError(ValueError):
         super().__init__(f"{code}: {path}: {message}")
         ####
 
+    ####
+
+
+def normalize_authoring_values(value: object, *, path: str = "values") -> AuthoringValue:
+    """Canonicalize portable authoring values before schema-specific compilation.
+
+    Provider schemas still decide which leaf fields, variants, units, and
+    ranges are valid.  This boundary handles the separate transport concern:
+    a public authoring draft must contain only ordinary JSON-shaped values, not
+    mutable custom mappings, framework objects, or opaque Python instances.
+    """
+
+    if isinstance(value, BaseModel):
+        return normalize_authoring_values(value.model_dump(mode="python", by_alias=True), path=path)
+    if value is None or isinstance(value, str | bool):
+        return value
+    if isinstance(value, int | float):
+        return value
+    if isinstance(value, Mapping):
+        normalized: dict[str, AuthoringValue] = {}
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise ModelAuthoringError(
+                    "nonportable-mapping-key",
+                    f"expected string key, received {type(key).__name__}",
+                    path=path,
+                )
+            normalized[key] = normalize_authoring_values(item, path=f"{path}.{key}")
+        return normalized
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes):
+        return [normalize_authoring_values(item, path=f"{path}[{index}]") for index, item in enumerate(value)]
+    raise ModelAuthoringError(
+        "nonportable-authoring-value",
+        f"expected a JSON-shaped value, received {type(value).__name__}",
+        path=path,
+    )
+    ####
+
+
+def _authoring_mapping(value: object, *, path: str) -> dict[str, AuthoringValue]:
+    """Normalize an authoring object that must remain a string-keyed mapping."""
+
+    normalized = normalize_authoring_values(value, path=path)
+    if not isinstance(normalized, dict):
+        raise ModelAuthoringError("invalid-projection-values", "expected a mapping", path=path)
+    return normalized
+    ####
+
+
+def _authoring_plan_record(value: object, *, path: str) -> AuthoringPlanRecord:
+    """Normalize one named public plan section into canonical JSON values."""
+
+    return _authoring_mapping(value, path=path)
+    ####
+
+
+def _authoring_plan_text(value: object, *, path: str) -> str:
+    """Require one non-empty text field in a public plan projection."""
+
+    if not isinstance(value, str) or not value.strip():
+        raise ModelAuthoringError("invalid-plan-projection", "expected non-empty text", path=path)
+    return value
+    ####
+
+
+def _authoring_plan_optional_text(value: object, *, path: str) -> str | None:
+    """Require an optional text field in a public plan projection."""
+
+    if value is None:
+        return None
+    return _authoring_plan_text(value, path=path)
+    ####
+
+
+def _authoring_plan_text_list(value: object, *, path: str) -> list[str]:
+    """Require a canonical ordered text list in a public plan projection."""
+
+    if not isinstance(value, list):
+        raise ModelAuthoringError("invalid-plan-projection", "expected a list", path=path)
+    return [_authoring_plan_text(item, path=f"{path}[{index}]") for index, item in enumerate(value)]
+    ####
+
+
+def _model_authoring_selection_projection(value: object) -> ModelAuthoringSelectionProjection:
+    """Validate the stable identity section of a public authoring plan."""
+
+    payload = _authoring_plan_record(value, path="model_authoring_plan.selection")
+    raw_sources = payload.get("sources")
+    sources = _authoring_plan_record(raw_sources, path="model_authoring_plan.selection.sources")
+    return {
+        "provider_id": _authoring_plan_text(payload.get("provider_id"), path="model_authoring_plan.selection.provider_id"),
+        "model_id": _authoring_plan_text(payload.get("model_id"), path="model_authoring_plan.selection.model_id"),
+        "model_version": _authoring_plan_text(payload.get("model_version"), path="model_authoring_plan.selection.model_version"),
+        "model_metadata_fingerprint": _authoring_plan_text(
+            payload.get("model_metadata_fingerprint"),
+            path="model_authoring_plan.selection.model_metadata_fingerprint",
+        ),
+        "family_id": _authoring_plan_optional_text(payload.get("family_id"), path="model_authoring_plan.selection.family_id"),
+        "physical_family": _authoring_plan_optional_text(
+            payload.get("physical_family"),
+            path="model_authoring_plan.selection.physical_family",
+        ),
+        "fidelity": _authoring_plan_text(payload.get("fidelity"), path="model_authoring_plan.selection.fidelity"),
+        "realization_id": _authoring_plan_optional_text(
+            payload.get("realization_id"),
+            path="model_authoring_plan.selection.realization_id",
+        ),
+        "mission_template_id": _authoring_plan_optional_text(
+            payload.get("mission_template_id"),
+            path="model_authoring_plan.selection.mission_template_id",
+        ),
+        "sources": {key: _authoring_plan_text(item, path=f"model_authoring_plan.selection.sources.{key}") for key, item in sources.items()},
+    }
+    ####
+
+
+def _model_authoring_plan_projection(value: object) -> ModelAuthoringPlanProjection:
+    """Validate and normalize the public authoring-plan envelope once at its owner."""
+
+    payload = _authoring_plan_record(value, path="model_authoring_plan")
+    if payload.get("schema") != "taoryx.model-authoring-plan/v1":
+        raise ModelAuthoringError(
+            "invalid-plan-projection",
+            "expected schema taoryx.model-authoring-plan/v1",
+            path="model_authoring_plan.schema",
+        )
+    raw_status = payload.get("status")
+    if raw_status == "ready_to_author":
+        status: AuthoringPlanStatus = "ready_to_author"
+    elif raw_status == "selection_required":
+        status = "selection_required"
+    else:
+        raise ModelAuthoringError(
+            "invalid-plan-projection",
+            "expected ready_to_author or selection_required status",
+            path="model_authoring_plan.status",
+        )
+    return {
+        "schema": "taoryx.model-authoring-plan/v1",
+        "status": status,
+        "selection": _model_authoring_selection_projection(payload.get("selection")),
+        "selection_gaps": _authoring_plan_text_list(payload.get("selection_gaps"), path="model_authoring_plan.selection_gaps"),
+        "data_contract": _authoring_plan_record(payload.get("data_contract"), path="model_authoring_plan.data_contract"),
+        "controller_automation": _authoring_plan_record(
+            payload.get("controller_automation"),
+            path="model_authoring_plan.controller_automation",
+        ),
+        "execution_advertisement": _authoring_plan_record(
+            payload.get("execution_advertisement"),
+            path="model_authoring_plan.execution_advertisement",
+        ),
+        "maturity_advertisement": _authoring_plan_record(
+            payload.get("maturity_advertisement"),
+            path="model_authoring_plan.maturity_advertisement",
+        ),
+        "focused_endpoint_verification": _authoring_plan_record(
+            payload.get("focused_endpoint_verification"),
+            path="model_authoring_plan.focused_endpoint_verification",
+        ),
+        "navigation_automation": _authoring_plan_record(
+            payload.get("navigation_automation"),
+            path="model_authoring_plan.navigation_automation",
+        ),
+        "mode_automation": _authoring_plan_record(payload.get("mode_automation"), path="model_authoring_plan.mode_automation"),
+        "segment_automation": _authoring_plan_record(
+            payload.get("segment_automation"),
+            path="model_authoring_plan.segment_automation",
+        ),
+        "configuration_draft": _authoring_plan_record(
+            payload.get("configuration_draft"),
+            path="model_authoring_plan.configuration_draft",
+        ),
+        "workflow": _authoring_plan_text_list(payload.get("workflow"), path="model_authoring_plan.workflow"),
+        "claim_boundary": _authoring_plan_text(payload.get("claim_boundary"), path="model_authoring_plan.claim_boundary"),
+    }
     ####
 
 
@@ -106,6 +356,19 @@ class ModelAuthoringDraft(BaseModel):
         "It is not executable until the exact provider validates it, and it "
         "does not qualify the selected model, controller, or mission."
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_plain_values(cls, payload: object) -> object:
+        """Keep the serialized draft at a portable, canonical projection boundary."""
+
+        if not isinstance(payload, Mapping):
+            return payload
+        values = dict(payload)
+        if "values" in values:
+            values["values"] = normalize_authoring_values(values["values"])
+        return values
+        ####
 
     @property
     def unresolved_inputs(self) -> tuple[str, ...]:
@@ -142,7 +405,7 @@ class ModelAuthoringSelection:
     mission: TrajectoryMissionTemplateMetadata | None
     sources: Mapping[str, str]
 
-    def public_dict(self) -> dict[str, object]:
+    def public_dict(self) -> ModelAuthoringSelectionProjection:
         """Return the selected identities without embedding full schemas."""
 
         return {
@@ -166,7 +429,7 @@ def select_variant(
     variant_id: str,
     values: Mapping[str, Any] | None = None,
     **parameters: Any,
-) -> dict[str, Any]:
+) -> AuthoringChoiceProjection:
     """Build the plain authoring form for one advertised choice variant."""
 
     if not variant_id.strip():
@@ -176,19 +439,25 @@ def select_variant(
     if overlap:
         raise ValueError(f"choice values were supplied twice: {overlap!r}")
     merged.update(parameters)
-    return {"selected": variant_id, "values": merged}
+    return {
+        "selected": variant_id,
+        "values": _authoring_mapping(merged, path=f"choice[{variant_id}].values"),
+    }
     ####
 
 
 def sequence_template(
     template_id: str,
     *items: Mapping[str, Any],
-) -> dict[str, Any]:
+) -> AuthoringSequenceProjection:
     """Build a concise ordered segment value using an advertised template."""
 
     if not template_id.strip():
         raise ValueError("sequence template ID must be non-empty")
-    return {"template": template_id, "items": [dict(item) for item in items]}
+    return {
+        "template": template_id,
+        "items": [normalize_authoring_values(item, path=f"sequence[{template_id}].items[{index}]") for index, item in enumerate(items)],
+    }
     ####
 
 
@@ -198,10 +467,14 @@ def segment_occurrence(
     *,
     instance_id: str | None = None,
     **parameters: Any,
-) -> dict[str, Any]:
+) -> AuthoringSegmentOccurrenceProjection:
     """Build one explicitly typed occurrence for an open segment sequence."""
 
-    occurrence = select_variant(segment_id, values, **parameters)
+    projection = select_variant(segment_id, values, **parameters)
+    occurrence: AuthoringSegmentOccurrenceProjection = {
+        "selected": projection["selected"],
+        "values": projection["values"],
+    }
     if instance_id is not None:
         if not instance_id.strip():
             raise ValueError("segment instance ID must be non-empty when supplied")
@@ -210,10 +483,13 @@ def segment_occurrence(
     ####
 
 
-def custom_sequence(*items: Mapping[str, Any]) -> dict[str, Any]:
+def custom_sequence(*items: Mapping[str, Any]) -> AuthoringSequenceProjection:
     """Build an open ordered sequence from explicit segment occurrences."""
 
-    return {"template": None, "items": [dict(item) for item in items]}
+    return {
+        "template": None,
+        "items": [normalize_authoring_values(item, path=f"custom_sequence.items[{index}]") for index, item in enumerate(items)],
+    }
     ####
 
 
@@ -498,7 +774,7 @@ def build_model_authoring_plan(
     fidelity: str | None = None,
     realization_id: str | None = None,
     mission_template_id: str | None = None,
-) -> dict[str, object]:
+) -> ModelAuthoringPlanProjection:
     """Join advertised data, controls, tuning, navigation, and segment work."""
 
     selection = resolve_model_authoring_selection(
@@ -551,81 +827,85 @@ def build_model_authoring_plan(
     if selection.model.mission_templates and selection.mission is None:
         selection_gaps.append("select_mission_template")
     status: AuthoringPlanStatus = "selection_required" if selection_gaps else "ready_to_author"
-    return {
-        "schema": "taoryx.model-authoring-plan/v1",
-        "status": status,
-        "selection": selection.public_dict(),
-        "selection_gaps": selection_gaps,
-        "data_contract": {
-            "model_kind": selection.model.model_kind,
-            "source_refs": list(selection.model.source_refs),
-            "provenance": selection.model.provenance,
-            "properties": [item.model_dump(mode="json") for item in selection.model.presentation.properties],
-            "reference_frames": [item.model_dump(mode="json") for item in selection.model.reference_frames],
-            "configuration_schema_id": selection.model.configuration_schema_id,
-            "configuration_schema_fingerprint": selection.model.configuration_schema_fingerprint,
-            "output_schema_id": selection.model.output_schema_id,
-            "output_schema_fingerprint": selection.model.output_schema_fingerprint,
-            "core_output_channels": [item.id for item in selection.model.output_schema.core_channels],
-            "telemetry_groups": [item.id for item in selection.model.output_schema.telemetry_groups],
-        },
-        "controller_automation": controller,
-        "execution_advertisement": execution_advertisement,
-        "maturity_advertisement": maturity_advertisement,
-        "focused_endpoint_verification": focused_endpoint_verification,
-        "navigation_automation": {
-            "mission_template": selection.mission.model_dump(mode="json") if selection.mission is not None else None,
-            "navigation_parameters": navigation_parameters,
-            "policy": (
-                "Route and waypoint geometry come from declared mission parameters or a registered "
-                "capability compiler. The authoring layer never invents coordinates or envelope limits."
-            ),
-        },
-        "mode_automation": {
-            "initialization_modes": list(selection.model.capabilities.initialization_modes),
-            "segment_types": list(selection.model.capabilities.segment_types),
-            "termination_modes": list(selection.model.capabilities.termination_modes),
-            "selected_realization": selection.realization.id if selection.realization is not None else None,
-            "default_authority": (selection.realization.controls.default_authority_id if selection.realization is not None else None),
-            "control_intents": ([item.model_dump(mode="json") for item in selection.realization.controls.intents] if selection.realization is not None else []),
-        },
-        "segment_automation": {
-            "supports_custom_segments": selection.model.capabilities.supports_custom_segments,
-            "instances": segment_instances,
-            "plain_value_api": {
-                "python": "taoryx.model_authoring.author_configuration",
-                "choice_helper": "taoryx.model_authoring.select_variant",
-                "sequence_helper": "taoryx.model_authoring.sequence_template",
-                "segment_helper": "taoryx.model_authoring.segment_occurrence",
-                "custom_sequence_helper": "taoryx.model_authoring.custom_sequence",
-                "canonical_unit_rule": "plain numeric values use the units advertised by the selected parameter schema",
+    return _model_authoring_plan_projection(
+        {
+            "schema": "taoryx.model-authoring-plan/v1",
+            "status": status,
+            "selection": selection.public_dict(),
+            "selection_gaps": selection_gaps,
+            "data_contract": {
+                "model_kind": selection.model.model_kind,
+                "source_refs": list(selection.model.source_refs),
+                "provenance": selection.model.provenance,
+                "properties": [item.model_dump(mode="json") for item in selection.model.presentation.properties],
+                "reference_frames": [item.model_dump(mode="json") for item in selection.model.reference_frames],
+                "configuration_schema_id": selection.model.configuration_schema_id,
+                "configuration_schema_fingerprint": selection.model.configuration_schema_fingerprint,
+                "output_schema_id": selection.model.output_schema_id,
+                "output_schema_fingerprint": selection.model.output_schema_fingerprint,
+                "core_output_channels": [item.id for item in selection.model.output_schema.core_channels],
+                "telemetry_groups": [item.id for item in selection.model.output_schema.telemetry_groups],
             },
-        },
-        "configuration_draft": {
-            "schema": AUTHORING_DRAFT_SCHEMA,
-            "unresolved_input_count": len(draft.unresolved_inputs),
-            "unresolved_inputs": list(draft.unresolved_inputs),
-        },
-        "workflow": [
-            f"taoryx model scaffold {provider_id} {model_id} --fidelity {selection.fidelity}"
-            + (f" --mission {selection.mission.id}" if selection.mission is not None else "")
-            + " --output <draft.yaml>",
-            "edit <draft.yaml> and replace every <REQUIRED>/<SELECT> placeholder",
-            "taoryx model compile <draft.yaml> --output <prepared-configuration.json>",
-            *(
-                [
-                    f"taoryx model tune {provider_id} {model_id} --fidelity {selection.fidelity} "
-                    f"--campaign {campaign_matches[0].id} --output <tuning-report.json>"
-                ]
-                if len(campaign_matches) == 1
-                else []
+            "controller_automation": controller,
+            "execution_advertisement": execution_advertisement,
+            "maturity_advertisement": maturity_advertisement,
+            "focused_endpoint_verification": focused_endpoint_verification,
+            "navigation_automation": {
+                "mission_template": selection.mission.model_dump(mode="json") if selection.mission is not None else None,
+                "navigation_parameters": navigation_parameters,
+                "policy": (
+                    "Route and waypoint geometry come from declared mission parameters or a registered "
+                    "capability compiler. The authoring layer never invents coordinates or envelope limits."
+                ),
+            },
+            "mode_automation": {
+                "initialization_modes": list(selection.model.capabilities.initialization_modes),
+                "segment_types": list(selection.model.capabilities.segment_types),
+                "termination_modes": list(selection.model.capabilities.termination_modes),
+                "selected_realization": selection.realization.id if selection.realization is not None else None,
+                "default_authority": (selection.realization.controls.default_authority_id if selection.realization is not None else None),
+                "control_intents": (
+                    [item.model_dump(mode="json") for item in selection.realization.controls.intents] if selection.realization is not None else []
+                ),
+            },
+            "segment_automation": {
+                "supports_custom_segments": selection.model.capabilities.supports_custom_segments,
+                "instances": segment_instances,
+                "plain_value_api": {
+                    "python": "taoryx.model_authoring.author_configuration",
+                    "choice_helper": "taoryx.model_authoring.select_variant",
+                    "sequence_helper": "taoryx.model_authoring.sequence_template",
+                    "segment_helper": "taoryx.model_authoring.segment_occurrence",
+                    "custom_sequence_helper": "taoryx.model_authoring.custom_sequence",
+                    "canonical_unit_rule": "plain numeric values use the units advertised by the selected parameter schema",
+                },
+            },
+            "configuration_draft": {
+                "schema": AUTHORING_DRAFT_SCHEMA,
+                "unresolved_input_count": len(draft.unresolved_inputs),
+                "unresolved_inputs": list(draft.unresolved_inputs),
+            },
+            "workflow": [
+                f"taoryx model scaffold {provider_id} {model_id} --fidelity {selection.fidelity}"
+                + (f" --mission {selection.mission.id}" if selection.mission is not None else "")
+                + " --output <draft.yaml>",
+                "edit <draft.yaml> and replace every <REQUIRED>/<SELECT> placeholder",
+                "taoryx model compile <draft.yaml> --output <prepared-configuration.json>",
+                *(
+                    [
+                        f"taoryx model tune {provider_id} {model_id} --fidelity {selection.fidelity} "
+                        f"--campaign {campaign_matches[0].id} --output <tuning-report.json>"
+                    ]
+                    if len(campaign_matches) == 1
+                    else []
+                ),
+            ],
+            "claim_boundary": (
+                "This plan automates discovery, draft generation, schema validation, and registered local tuning campaigns. "
+                "It does not infer missing physics, operating points, authority, route geometry, or qualification evidence."
             ),
-        ],
-        "claim_boundary": (
-            "This plan automates discovery, draft generation, schema validation, and registered local tuning campaigns. "
-            "It does not infer missing physics, operating points, authority, route geometry, or qualification evidence."
-        ),
-    }
+        }
+    )
     ####
 
 
@@ -809,7 +1089,7 @@ def _focused_endpoint_verification_advertisement(
     # endpoint evidence.
     if selection.model.model_kind != "canonical_vehicle_family":
         for workflow_endpoint in load_mission_workflow_endpoint_catalog(plugins=plugin_catalog).endpoints:
-            if workflow_endpoint.provider_id != selection.provider_id or workflow_endpoint.model_id != selection.model.id:
+            if selection.provider_id not in workflow_endpoint.provider_ids or workflow_endpoint.model_id != selection.model.id:
                 continue
             matches_selected_configuration = (
                 workflow_endpoint.fidelity == selection.fidelity
@@ -822,7 +1102,7 @@ def _focused_endpoint_verification_advertisement(
                     "kind": "mission_workflow",
                     "maturity_record_id": workflow_endpoint.maturity_record_id,
                     "matches_selected_configuration": matches_selected_configuration,
-                    "match_scope": "provider_id, model_id, mission_template_id, fidelity, realization_id",
+                    "match_scope": "provider_id (or declared alias), model_id, mission_template_id, fidelity, realization_id",
                     "command": f"taoryx model verify {workflow_endpoint.id}",
                     "execute_command": f"taoryx model verify {workflow_endpoint.id} --execute",
                 }
@@ -2181,9 +2461,12 @@ def __getattr__(name: str) -> object:
 
 __all__ = [
     "AUTHORING_DRAFT_SCHEMA",
+    "AuthoringPlanRecord",
     "ModelAuthoringDraft",
     "ModelAuthoringError",
+    "ModelAuthoringPlanProjection",
     "ModelAuthoringSelection",
+    "ModelAuthoringSelectionProjection",
     "REQUIRED_VALUE",
     "SELECTION_REQUIRED",
     "author_configuration",

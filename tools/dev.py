@@ -524,7 +524,18 @@ def typecheck() -> None:
 
 
 def test() -> None:
-    run([project_python(), "-m", "pytest", "-m", "not slow and not artifact and not simple_aero", "--basetemp", ".pytest-fast"])
+    run(
+        [
+            project_python(),
+            "-m",
+            "pytest",
+            "-m",
+            "not slow and not artifact and not simple_aero",
+            "--durations=25",
+            "--basetemp",
+            ".pytest-fast",
+        ]
+    )
     ####
 
 
@@ -668,6 +679,7 @@ def test_parallel() -> None:
             "loadfile",
             "-m",
             "not slow and not artifact and not simple_aero",
+            "--durations=25",
             "--basetemp",
             ".pytest-parallel",
         ]
@@ -684,6 +696,20 @@ def test_all() -> None:
 def test_category(marker: str) -> None:
     """Run one explicitly selected pytest marker."""
     run([project_python(), "-m", "pytest", "-m", marker])
+    ####
+
+
+def test_integration() -> None:
+    """Run the explicitly selected cross-component and vertical package view."""
+
+    test_category("integration")
+    ####
+
+
+def test_matrices() -> None:
+    """Run full catalog, grid, and cross-product matrix tests on demand."""
+
+    test_category("matrix")
     ####
 
 
@@ -893,6 +919,8 @@ def test_views() -> None:
     print("  test-quick   curated smoke and contract suite")
     print("  test-changed tests associated with current Git changes")
     print("  test-parallel default fast suite with pytest-xdist when installed")
+    print("  test-integration explicit end-to-end and package-vertical view")
+    print("  test-matrices full catalog, grid, and cross-product view")
     print(f"  test-vehicle <family> runnable one-family Composition vertical slice ({', '.join(sorted(VEHICLE_VERTICAL_TEST_PATHS))})")
     print("  test-debug-models standalone analytical ballistic/waypoint/contract-probe plug-in slice")
     print("  test-daveml  DAVE-ML discovery and lazy model-format import slice")
@@ -979,7 +1007,7 @@ def test_views() -> None:
     print("  language-reference build the manual-parallel TAORYX language reference PDF")
     print("  docs-doctor diagnose tools needed for every documentation PDF")
     print("  all-pdfs rebuild the historical and successor documentation PDFs")
-    print("Commands: test-grammar, test-equations, test-algorithms, test-slow, test-artifacts, test-simple_aero")
+    print("Commands: test-grammar, test-equations, test-algorithms, test-integration, test-matrices, test-slow, test-artifacts, test-simple_aero")
     print("Vehicle families: test-b747, test-x8, test-hummingbird, test-x15")
     ####
 
@@ -2112,6 +2140,8 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-control-api-pilot": test_control_api_pilot,
     "test-changed": test_changed,
     "test-parallel": test_parallel,
+    "test-integration": test_integration,
+    "test-matrices": test_matrices,
     "test-all": test_all,
     "test-artifacts": lambda: test_category("artifact"),
     "test-algorithms": lambda: test_category("algorithms"),

@@ -37,6 +37,7 @@ GOLDEN_PLANT_CASES = tuple(
 X15_CASE = next(case for case in GOLDEN_CATALOG if case.vehicle == "X-15")
 
 
+@pytest.mark.slow
 @pytest.mark.dof6
 @pytest.mark.x15
 def test_x15_research_anchor_passes_the_convention_firewall(tmp_path: Path) -> None:

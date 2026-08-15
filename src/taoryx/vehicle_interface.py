@@ -21,7 +21,8 @@ import math
 from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeAlias, cast
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -94,6 +95,46 @@ BindingSourceKind = Literal[
     "composition_parameter",
     "extension",
 ]
+ProjectedStatusValues: TypeAlias = dict[str, object]
+
+
+@dataclass(frozen=True, slots=True)
+class CommittedNativeStatusValues(Mapping[str, object]):
+    """Immutable top-level native values from one committed truth boundary.
+
+    The exact key vocabulary stays adapter-owned and is resolved by a
+    ``VehicleInterfaceContract``.  This wrapper makes that otherwise dynamic
+    contract explicit at the cross-module projection seam and prevents a
+    caller from mutating the selected sample after it was committed.
+    """
+
+    entries: Mapping[str, object]
+
+    def __post_init__(self) -> None:
+        if any(not isinstance(key, str) for key in self.entries):
+            raise ValueError("committed native status values require string keys")
+        object.__setattr__(self, "entries", MappingProxyType(dict(self.entries)))
+        ####
+
+    def __getitem__(self, key: str) -> object:
+        return self.entries[key]
+        ####
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.entries)
+        ####
+
+    def __len__(self) -> int:
+        return len(self.entries)
+        ####
+
+    def as_dict(self) -> dict[str, object]:
+        """Return a shallow portable copy for diagnostics or persistence."""
+
+        return dict(self.entries)
+        ####
+
+    ####
 
 
 class InterfaceChannelBinding(BaseModel, Mapping[str, object]):
@@ -274,13 +315,9 @@ class InterfaceChannel:
         if self.kind != "parameter" and self.scope is not None:
             raise ValueError(f"non-parameter channel {self.id!r} cannot declare a parameter scope")
         if self.quantity_semantics is not None and self.value_type != "scalar":
-            raise ValueError(
-                f"interface channel {self.id!r} declares unitless quantity semantics but is not a scalar"
-            )
+            raise ValueError(f"interface channel {self.id!r} declares unitless quantity semantics but is not a scalar")
         if self.value_type in {"scalar", "vector3", "vector4"} and self.canonical_unit is None and self.quantity_semantics is None:
-            raise ValueError(
-                f"numeric interface channel {self.id!r} requires a canonical unit or explicit quantity semantics"
-            )
+            raise ValueError(f"numeric interface channel {self.id!r} requires a canonical unit or explicit quantity semantics")
         if self.lower is not None and self.upper is not None and self.lower > self.upper:
             raise ValueError(f"interface channel {self.id!r} has inverted bounds")
         if self.availability == "available" and not self.claim_boundary.strip():
@@ -303,11 +340,9 @@ class InterfaceChannel:
             "event": "string",
         }[self.value_type]
         if not value_space.representation.startswith(expected_representation):
-            raise ValueError(
-                f"interface channel {self.id!r} has {self.value_type!r} storage but "
-                f"value-space representation {value_space.representation!r}"
-            )
+            raise ValueError(f"interface channel {self.id!r} has {self.value_type!r} storage but value-space representation {value_space.representation!r}")
         ####
+
     ####
 
     def as_dict(self) -> dict[str, object]:
@@ -322,9 +357,7 @@ class InterfaceChannel:
             "value_type": self.value_type,
             "value_space": value_space.as_dict(),
             "value_space_source": (
-                "interface_channel_value_space_catalog"
-                if interface_channel_value_space_profile(self.id) is not None
-                else "ad_hoc_primitive_fallback"
+                "interface_channel_value_space_catalog" if interface_channel_value_space_profile(self.id) is not None else "ad_hoc_primitive_fallback"
             ),
             "canonical_unit": self.canonical_unit,
             "quantity_semantics": self.quantity_semantics,
@@ -340,6 +373,7 @@ class InterfaceChannel:
             "claim_boundary": self.claim_boundary,
         }
         ####
+
     ####
 
 
@@ -365,11 +399,7 @@ class AuthorityProfile:
     ui_order: int | None = None
 
     def __post_init__(self) -> None:
-        definition = (
-            None
-            if self.scheme_id is None
-            else control_scheme_definition(self.scheme_id)
-        )
+        definition = None if self.scheme_id is None else control_scheme_definition(self.scheme_id)
         if definition is not None:
             if self.scheme_layer is None:
                 object.__setattr__(self, "scheme_layer", definition.layer)
@@ -399,10 +429,7 @@ class AuthorityProfile:
             raise ValueError(f"caller-owned authority profile {self.id!r} cannot use provider selection scope")
         if self.switching_policy == "provider_managed" and self.command_owner == "caller":
             raise ValueError(f"caller-owned authority profile {self.id!r} cannot use provider-managed switching")
-        if self.scheme_id is None and any(
-            item is not None
-            for item in (self.scheme_layer, self.streaming_preference, self.ui_order)
-        ):
+        if self.scheme_id is None and any(item is not None for item in (self.scheme_layer, self.streaming_preference, self.ui_order)):
             raise ValueError(f"authority profile {self.id!r} scheme metadata requires scheme_id")
         if self.scheme_id is None and self.consumer_roles:
             raise ValueError(f"authority profile {self.id!r} consumer roles require scheme_id")
@@ -410,15 +437,11 @@ class AuthorityProfile:
             raise ValueError(f"authority profile {self.id!r} ui_order cannot be negative")
         if self.scheme_id is not None:
             if definition is None and self.scheme_layer is None:
-                raise ValueError(
-                    f"provider-specific control scheme {self.scheme_id!r} requires scheme_layer"
-                )
+                raise ValueError(f"provider-specific control scheme {self.scheme_id!r} requires scheme_layer")
             if definition is not None and self.scheme_layer not in {None, definition.layer}:
-                raise ValueError(
-                    f"control scheme {self.scheme_id!r} belongs to {definition.layer!r}, "
-                    f"not {self.scheme_layer!r}"
-                )
+                raise ValueError(f"control scheme {self.scheme_id!r} belongs to {definition.layer!r}, not {self.scheme_layer!r}")
         ####
+
     ####
 
     def as_dict(self) -> dict[str, object]:
@@ -443,6 +466,7 @@ class AuthorityProfile:
             "claim_boundary": self.claim_boundary,
         }
         ####
+
     ####
 
 
@@ -508,6 +532,7 @@ class ObservationProfile:
         if self.source != "sensor" and self.channel_errors:
             raise ValueError(f"non-sensor observation profile {self.id!r} cannot declare measurement errors")
         ####
+
     ####
 
     def as_dict(self) -> dict[str, object]:
@@ -525,6 +550,7 @@ class ObservationProfile:
             "channel_errors": {identifier: dict(error) for identifier, error in self.channel_errors.items()},
         }
         ####
+
     ####
 
 
@@ -627,9 +653,7 @@ class VehicleInterfaceContract:
         authority_ids = tuple(profile.id for profile in self.authority_profiles)
         if len(authority_ids) != len(set(authority_ids)):
             raise ValueError("vehicle interface contains duplicate authority-profile IDs")
-        available_authority_ids = tuple(
-            profile.id for profile in self.authority_profiles if profile.availability == "available"
-        )
+        available_authority_ids = tuple(profile.id for profile in self.authority_profiles if profile.availability == "available")
         default_authority_profile_id = self.default_authority_profile_id
         if default_authority_profile_id is None and available_authority_ids:
             default_authority_profile_id = available_authority_ids[0]
@@ -644,30 +668,18 @@ class VehicleInterfaceContract:
             *(item.id for item in self.resource_channels),
             *(item.id for item in self.diagnostic_channels),
         }
-        observable_by_id = {
-            item.id: item
-            for item in (*self.status_channels, *self.resource_channels, *self.diagnostic_channels)
-        }
+        observable_by_id = {item.id: item for item in (*self.status_channels, *self.resource_channels, *self.diagnostic_channels)}
         for action in self.action_channels:
-            feedback_channel_id = cast(InterfaceChannelBinding, action.binding).get(
-                "feedback_channel_id"
-            )
+            feedback_channel_id = cast(InterfaceChannelBinding, action.binding).get("feedback_channel_id")
             if feedback_channel_id is None:
                 continue
             if not isinstance(feedback_channel_id, str) or feedback_channel_id not in observable_ids:
-                raise ValueError(
-                    f"action channel {action.id!r} references unknown feedback channel {feedback_channel_id!r}"
-                )
+                raise ValueError(f"action channel {action.id!r} references unknown feedback channel {feedback_channel_id!r}")
             feedback = observable_by_id[feedback_channel_id]
             unit_pair = {action.canonical_unit, feedback.canonical_unit}
-            units_match = (
-                action.canonical_unit == feedback.canonical_unit
-                or unit_pair == {"1", "dimensionless"}
-            )
+            units_match = action.canonical_unit == feedback.canonical_unit or unit_pair == {"1", "dimensionless"}
             if not units_match or action.value_type != feedback.value_type:
-                raise ValueError(
-                    f"action channel {action.id!r} feedback {feedback_channel_id!r} has an incompatible unit or shape"
-                )
+                raise ValueError(f"action channel {action.id!r} feedback {feedback_channel_id!r} has an incompatible unit or shape")
         for observation_profile in self.observation_profiles:
             unknown = sorted(set(observation_profile.channel_ids) - observable_ids)
             if unknown:
@@ -675,13 +687,11 @@ class VehicleInterfaceContract:
             if observation_profile.channel_errors:
                 _normalize_sensor_channel_errors(
                     channel_ids=observation_profile.channel_ids,
-                    channel_descriptors={
-                        item.id: item
-                        for item in (*self.status_channels, *self.resource_channels, *self.diagnostic_channels)
-                    },
+                    channel_descriptors={item.id: item for item in (*self.status_channels, *self.resource_channels, *self.diagnostic_channels)},
                     channel_errors=observation_profile.channel_errors,
                 )
         ####
+
     ####
 
     @property
@@ -690,6 +700,7 @@ class VehicleInterfaceContract:
 
         return f"{self.family_id}/{self.fidelity}"
         ####
+
     ####
 
     @property
@@ -699,6 +710,7 @@ class VehicleInterfaceContract:
         encoded = json.dumps(self._payload(), sort_keys=True, separators=(",", ":")).encode("utf-8")
         return hashlib.sha256(encoded).hexdigest()
         ####
+
     ####
 
     def authority_profile(self, identifier: str) -> AuthorityProfile:
@@ -709,6 +721,7 @@ class VehicleInterfaceContract:
                 return profile
         raise KeyError(f"{self.id}: unknown authority profile {identifier!r}")
         ####
+
     ####
 
     def observation_profile(self, identifier: str) -> ObservationProfile:
@@ -761,6 +774,7 @@ class VehicleInterfaceContract:
             "claim_boundary": self.claim_boundary,
         }
         ####
+
     ####
 
 
@@ -814,11 +828,7 @@ def interface_contract_for_composition(
         batch_runnable=batch_runnable,
         plugins=plugins,
     )
-    if (
-        augmentation.authority_profiles
-        and len(authority_profiles) == 1
-        and authority_profiles[0].id == "no_external_action"
-    ):
+    if augmentation.authority_profiles and len(authority_profiles) == 1 and authority_profiles[0].id == "no_external_action":
         # A family-owned augmentation supplies the public semantic authority
         # in place of core's conservative empty fallback.  The extension is
         # still additive for every real generic contract, while core remains
@@ -829,11 +839,7 @@ def interface_contract_for_composition(
     status = (*status, *augmentation.status_channels)
     resources = (*resources, *augmentation.resource_channels)
     diagnostics = (*diagnostics, *augmentation.diagnostic_channels)
-    execution_records = tuple(
-        item
-        for item in bindings_for_family(family.family_id, plugins=plugins)
-        if item.fidelity == fidelity
-    )
+    execution_records = tuple(item for item in bindings_for_family(family.family_id, plugins=plugins) if item.fidelity == fidelity)
     return VehicleInterfaceContract(
         vehicle_id=vehicle_id,
         family_id=family.family_id,
@@ -890,21 +896,12 @@ def _interface_contract_augmentation(
         declared_family_id = getattr(candidate, "family_id", None)
         if declared_family_id != family_id:
             continue
-        extension = (
-            candidate.resolve_extension()
-            if isinstance(candidate, DeferredVehicleInterfaceExtension)
-            else candidate
-        )
+        extension = candidate.resolve_extension() if isinstance(candidate, DeferredVehicleInterfaceExtension) else candidate
         if getattr(extension, "family_id", None) != family_id:
-            raise TypeError(
-                f"plug-in {contribution.plugin.id!r} supplied an interface extension for another family"
-            )
+            raise TypeError(f"plug-in {contribution.plugin.id!r} supplied an interface extension for another family")
         augment = getattr(extension, "augment", None)
         if not callable(augment):
-            raise TypeError(
-                f"plug-in {contribution.plugin.id!r} supplied an invalid vehicle interface extension "
-                f"for {contribution.id!r}"
-            )
+            raise TypeError(f"plug-in {contribution.plugin.id!r} supplied an invalid vehicle interface extension for {contribution.id!r}")
         augmentation = augment(
             fidelity,
             episode_runnable=episode_runnable,
@@ -913,10 +910,7 @@ def _interface_contract_augmentation(
         if augmentation is None:
             continue
         if not isinstance(augmentation, InterfaceContractAugmentation):
-            raise TypeError(
-                f"plug-in {contribution.plugin.id!r} interface extension {contribution.id!r} "
-                "returned an invalid augmentation"
-            )
+            raise TypeError(f"plug-in {contribution.plugin.id!r} interface extension {contribution.id!r} returned an invalid augmentation")
         result = InterfaceContractAugmentation(
             action_channels=(*result.action_channels, *augmentation.action_channels),
             authority_profiles=(*result.authority_profiles, *augmentation.authority_profiles),
@@ -989,8 +983,7 @@ def _parameter_channel(
         sampling="reset_only" if scope == "episode_reset" else "segment_transition",
         binding={**binding, "options": list(parameter.options)} if parameter.options else binding,
         claim_boundary=(
-            "This is a declared composition input. Coupled physics, trim, and "
-            "qualification requirements remain the selected family adapter's responsibility."
+            "This is a declared composition input. Coupled physics, trim, and qualification requirements remain the selected family adapter's responsibility."
         ),
         value_space=parameter.value_space,
     )
@@ -1154,13 +1147,7 @@ def _action_contract(
             "hl20_mod_k",
             "x15",
         }
-        direct_available: InterfaceAvailability = (
-            "available"
-            if episode_runnable
-            else "available_in_batch"
-            if batch_internal_controller_trace
-            else "planned"
-        )
+        direct_available: InterfaceAvailability = "available" if episode_runnable else "available_in_batch" if batch_internal_controller_trace else "planned"
         wrench_channels: tuple[InterfaceChannel, ...] = (
             InterfaceChannel(
                 "wrench.force.command",
@@ -1248,8 +1235,22 @@ def _fixed_wing_bridge_controls(
     if family_id == "skywalker_x8":
         return (
             ("propulsion.command.fraction", "dimensionless", 0.0, 1.0, "Source-runtime propulsion control fraction.", "throttle"),
-            ("control.longitudinal.bridge.command", "deg", -20.0, 20.0, "Collective elevon source-table coordinate accepted by the selected runtime.", "collective-elevon-deg"),
-            ("control.lateral.bridge.command", "deg", -20.0, 20.0, "Differential elevon source-table coordinate accepted by the selected runtime.", "differential-elevon-deg"),
+            (
+                "control.longitudinal.bridge.command",
+                "deg",
+                -20.0,
+                20.0,
+                "Collective elevon source-table coordinate accepted by the selected runtime.",
+                "collective-elevon-deg",
+            ),
+            (
+                "control.lateral.bridge.command",
+                "deg",
+                -20.0,
+                20.0,
+                "Differential elevon source-table coordinate accepted by the selected runtime.",
+                "differential-elevon-deg",
+            ),
         )
     if family_id == "b747":
         return (
@@ -1390,11 +1391,7 @@ def _reduced_fixed_wing_high_order_controls(
             binding={
                 "native_action": native,
                 **common_waypoint_binding,
-                **(
-                    {"feedback_channel_id": waypoint_feedback[identifier]}
-                    if identifier in waypoint_feedback
-                    else {}
-                ),
+                **({"feedback_channel_id": waypoint_feedback[identifier]} if identifier in waypoint_feedback else {}),
             },
             claim_boundary=(
                 "The caller may update this value at an accepted session boundary. The provider lowers the held "
@@ -1828,26 +1825,12 @@ def _status_contract(
     *,
     plugins: PluginCatalog | None = None,
 ) -> tuple[tuple[InterfaceChannel, ...], tuple[InterfaceChannel, ...], tuple[InterfaceChannel, ...]]:
-    runtime_availability: InterfaceAvailability = (
-        "available"
-        if episode_runnable
-        else "available_in_batch"
-        if batch_runnable
-        else "unavailable_at_runtime"
-    )
+    runtime_availability: InterfaceAvailability = "available" if episode_runnable else "available_in_batch" if batch_runnable else "unavailable_at_runtime"
     execution_time_binding = (
-        {"episode_field": "time_s"}
-        if episode_runnable
-        else {"batch_telemetry": "time_s"}
-        if batch_runnable
-        else {"episode_field": "time_s"}
+        {"episode_field": "time_s"} if episode_runnable else {"batch_telemetry": "time_s"} if batch_runnable else {"episode_field": "time_s"}
     )
     execution_status_binding = (
-        {"episode_field": "status"}
-        if episode_runnable
-        else {"batch_report": "status"}
-        if batch_runnable
-        else {"episode_field": "status"}
+        {"episode_field": "status"} if episode_runnable else {"batch_report": "status"} if batch_runnable else {"episode_field": "status"}
     )
     status = [
         InterfaceChannel(
@@ -2267,10 +2250,46 @@ def _status_contract(
                     binding={"batch_telemetry": "residual_moment_body_nm", "frame": "body"},
                     provenance="derived",
                 ),
-                _status("control.wrench.status", None, "Bounded X-15 source-surface allocator disposition.", "wrench_status", runtime_availability, value_type="enum", binding={"batch_telemetry": "wrench_status"}, provenance="derived"),
-                _status("control.wrench.saturated", None, "Whether a surface position constraint limited the committed X-15 allocation.", "wrench_saturated", runtime_availability, value_type="boolean", binding={"batch_telemetry": "wrench_saturated"}, provenance="derived"),
-                _status("control.physical_effector_allocation", None, "Whether this screen allocated its three-axis moment request to all three bounded X-15 source surfaces.", "physical_effector_allocation", runtime_availability, value_type="boolean", binding={"batch_telemetry": "physical_effector_allocation"}, provenance="derived"),
-                _status("trim.full_state.status", None, "Availability of a full X-15 source equilibrium for the selected screen.", "full_state_trim_status", runtime_availability, value_type="enum", binding={"batch_telemetry": "full_state_trim_status"}, provenance="derived"),
+                _status(
+                    "control.wrench.status",
+                    None,
+                    "Bounded X-15 source-surface allocator disposition.",
+                    "wrench_status",
+                    runtime_availability,
+                    value_type="enum",
+                    binding={"batch_telemetry": "wrench_status"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.wrench.saturated",
+                    None,
+                    "Whether a surface position constraint limited the committed X-15 allocation.",
+                    "wrench_saturated",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "wrench_saturated"},
+                    provenance="derived",
+                ),
+                _status(
+                    "control.physical_effector_allocation",
+                    None,
+                    "Whether this screen allocated its three-axis moment request to all three bounded X-15 source surfaces.",
+                    "physical_effector_allocation",
+                    runtime_availability,
+                    value_type="boolean",
+                    binding={"batch_telemetry": "physical_effector_allocation"},
+                    provenance="derived",
+                ),
+                _status(
+                    "trim.full_state.status",
+                    None,
+                    "Availability of a full X-15 source equilibrium for the selected screen.",
+                    "full_state_trim_status",
+                    runtime_availability,
+                    value_type="enum",
+                    binding={"batch_telemetry": "full_state_trim_status"},
+                    provenance="derived",
+                ),
             )
         )
         resources.append(
@@ -2290,10 +2309,39 @@ def _status_contract(
         diagnostics.extend(
             (
                 _diagnostic("control.realization", "control_realization", runtime_availability, binding={"batch_telemetry": "control_realization"}),
-                _diagnostic("control.physical_effector_allocation", "physical_effector_allocation", runtime_availability, binding={"batch_telemetry": "physical_effector_allocation"}),
-                _diagnostic("control.allocation.residual_norm", "allocation_controlled_residual_norm", runtime_availability, value_type="scalar", unit="N*m", description="Controlled moment residual reported by the bounded X-15 source-surface allocator.", binding={"batch_telemetry": "allocation_controlled_residual_norm"}),
-                _diagnostic("control.allocation.saturation_count", "saturation_count", runtime_availability, value_type="scalar", quantity_semantics="count", description="Number of active X-15 source-surface allocator constraints.", binding={"batch_telemetry": "saturation_count"}),
-                _diagnostic("control.source_effectiveness_rank", "source_effectiveness_rank", runtime_availability, value_type="scalar", quantity_semantics="count", description="Rank of the source-load finite-difference three-surface effectiveness matrix at the frozen fixture.", binding={"batch_telemetry": "source_effectiveness_rank"}),
+                _diagnostic(
+                    "control.physical_effector_allocation",
+                    "physical_effector_allocation",
+                    runtime_availability,
+                    binding={"batch_telemetry": "physical_effector_allocation"},
+                ),
+                _diagnostic(
+                    "control.allocation.residual_norm",
+                    "allocation_controlled_residual_norm",
+                    runtime_availability,
+                    value_type="scalar",
+                    unit="N*m",
+                    description="Controlled moment residual reported by the bounded X-15 source-surface allocator.",
+                    binding={"batch_telemetry": "allocation_controlled_residual_norm"},
+                ),
+                _diagnostic(
+                    "control.allocation.saturation_count",
+                    "saturation_count",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="count",
+                    description="Number of active X-15 source-surface allocator constraints.",
+                    binding={"batch_telemetry": "saturation_count"},
+                ),
+                _diagnostic(
+                    "control.source_effectiveness_rank",
+                    "source_effectiveness_rank",
+                    runtime_availability,
+                    value_type="scalar",
+                    quantity_semantics="count",
+                    description="Rank of the source-load finite-difference three-surface effectiveness matrix at the frozen fixture.",
+                    binding={"batch_telemetry": "source_effectiveness_rank"},
+                ),
             )
         )
     elif family_id == "hl20_mod_k" and fidelity == "rigid_body_6dof_surface_allocated":
@@ -2424,7 +2472,12 @@ def _status_contract(
         diagnostics.extend(
             (
                 _diagnostic("control.realization", "control_realization", runtime_availability, binding={"batch_telemetry": "control_realization"}),
-                _diagnostic("control.physical_effector_allocation", "physical_effector_allocation", runtime_availability, binding={"batch_telemetry": "physical_effector_allocation"}),
+                _diagnostic(
+                    "control.physical_effector_allocation",
+                    "physical_effector_allocation",
+                    runtime_availability,
+                    binding={"batch_telemetry": "physical_effector_allocation"},
+                ),
                 _diagnostic(
                     "control.allocation.residual_norm",
                     "allocation_controlled_residual_norm",
@@ -3413,8 +3466,7 @@ def _status_contract(
                     sampling="truth_boundary",
                     binding={"batch_telemetry": "mass_kg"},
                     claim_boundary=(
-                        "The comparator holds this source-hover mass fixed. It does not establish battery, payload, "
-                        "inertia, or mass-flow behavior."
+                        "The comparator holds this source-hover mass fixed. It does not establish battery, payload, inertia, or mass-flow behavior."
                     ),
                 )
             )
@@ -3449,8 +3501,7 @@ def _status_contract(
                     sampling="truth_boundary",
                     binding={"batch_telemetry": "mass_kg", "episode_value": "mass_kg"},
                     claim_boundary=(
-                        "The local source screen holds the declared mass fixed. It does not establish fuel, propellant, "
-                        "inertia, or mass-property scheduling."
+                        "The local source screen holds the declared mass fixed. It does not establish fuel, propellant, inertia, or mass-property scheduling."
                     ),
                 )
             )
@@ -3490,8 +3541,7 @@ def _status_contract(
             binding={"batch_telemetry": "controller_method", "episode_value": "controller_method"},
             value_type="enum",
             description=(
-                "Executed named controller or response-law family for this committed sample, or not_applicable "
-                "when this execution mode has no controller."
+                "Executed named controller or response-law family for this committed sample, or not_applicable when this execution mode has no controller."
             ),
         )
     )
@@ -3622,9 +3672,7 @@ def bind_declared_sensor_profile(
     if not channel_ids:
         raise ValueError("declared sensor profile must name at least one channel")
     available = {
-        item.id
-        for item in (*contract.status_channels, *contract.resource_channels, *contract.diagnostic_channels)
-        if item.availability == "available"
+        item.id for item in (*contract.status_channels, *contract.resource_channels, *contract.diagnostic_channels) if item.availability == "available"
     }
     unknown = sorted(set(channel_ids) - available)
     if unknown:
@@ -3637,10 +3685,7 @@ def bind_declared_sensor_profile(
         raise ValueError("declared sensor latency_s must be nonnegative and finite")
     normalized_errors = _normalize_sensor_channel_errors(
         channel_ids=channel_ids,
-        channel_descriptors={
-            item.id: item
-            for item in (*contract.status_channels, *contract.resource_channels, *contract.diagnostic_channels)
-        },
+        channel_descriptors={item.id: item for item in (*contract.status_channels, *contract.resource_channels, *contract.diagnostic_channels)},
         channel_errors=channel_errors,
     )
 
@@ -3716,11 +3761,7 @@ def _normalize_sensor_channel_errors(
         if stddev < 0.0:
             raise ValueError(f"sensor Gaussian deviation for {channel_id!r} must be nonnegative")
         quantization_raw = raw.get("quantization_step")
-        quantization = (
-            None
-            if quantization_raw is None
-            else _sensor_scalar(quantization_raw, f"sensor quantization step for {channel_id}")
-        )
+        quantization = None if quantization_raw is None else _sensor_scalar(quantization_raw, f"sensor quantization step for {channel_id}")
         if quantization is not None and quantization <= 0.0:
             raise ValueError(f"sensor quantization step for {channel_id!r} must be positive")
         normalized[channel_id] = {
@@ -3744,9 +3785,9 @@ def project_committed_status_values(
     *,
     time_s: float,
     execution_status: str,
-    raw_values: Mapping[str, object],
+    raw_values: CommittedNativeStatusValues,
     include_batch_available: bool = False,
-) -> dict[str, object]:
+) -> ProjectedStatusValues:
     """Project one committed native-truth mapping to portable status values.
 
     Episode and batch paths both use the same descriptor bindings.  This
@@ -3756,7 +3797,7 @@ def project_committed_status_values(
 
     if not math.isfinite(time_s):
         raise ValueError("committed status time_s must be finite")
-    values: dict[str, object] = {
+    values: ProjectedStatusValues = {
         "execution.time": time_s,
         "execution.status": execution_status,
     }
@@ -3932,7 +3973,7 @@ _STATUS_MISSING = _StatusMissing()
 
 def _bound_status_value(
     channel: InterfaceChannel,
-    raw_values: Mapping[str, object],
+    raw_values: CommittedNativeStatusValues,
     contract: VehicleInterfaceContract,
 ) -> object:
     """Read one declared native status binding without guessing data.
@@ -3981,7 +4022,7 @@ def _bound_status_value(
 def _derived_status_value(
     source: str,
     transform: str,
-    raw_values: Mapping[str, object],
+    raw_values: CommittedNativeStatusValues,
 ) -> object:
     """Apply one explicitly declared portable status transform.
 
@@ -4136,16 +4177,8 @@ def build_vehicle_interface_catalog_report(
         raise ValueError("fidelity_ids must contain at least one non-empty fidelity ID")
     known_families = {item.family.family_id for item in catalog.vehicles}
     unknown_families = () if family_filter is None else tuple(sorted(family_filter - known_families))
-    selected_vehicles = tuple(
-        composition
-        for composition in catalog.vehicles
-        if family_filter is None or composition.family.family_id in family_filter
-    )
-    selected_fidelities = {
-        fidelity
-        for composition in selected_vehicles
-        for fidelity in composition.family.family.tiers
-    }
+    selected_vehicles = tuple(composition for composition in catalog.vehicles if family_filter is None or composition.family.family_id in family_filter)
+    selected_fidelities = {fidelity for composition in selected_vehicles for fidelity in composition.family.family.tiers}
     unknown_fidelities = () if fidelity_filter is None else tuple(sorted(fidelity_filter - selected_fidelities))
     records: list[dict[str, object]] = []
     error_count = len(unknown_families) + len(unknown_fidelities)
@@ -4155,16 +4188,9 @@ def build_vehicle_interface_catalog_report(
                 continue
             contract = interface_contract_for_composition(composition, fidelity, plugins=plugins)
             findings = list(validate_vehicle_interface_contract(contract))
-            episode_runnable = any(
-                item.operation == "episode" and item.status == "runnable"
-                for item in contract.execution_records
-            )
-            available_authority = tuple(
-                item.id for item in contract.authority_profiles if item.availability == "available"
-            )
-            available_observations = tuple(
-                item.id for item in contract.observation_profiles if item.availability == "available"
-            )
+            episode_runnable = any(item.operation == "episode" and item.status == "runnable" for item in contract.execution_records)
+            available_authority = tuple(item.id for item in contract.authority_profiles if item.availability == "available")
+            available_observations = tuple(item.id for item in contract.observation_profiles if item.availability == "available")
             if available_authority and not episode_runnable:
                 findings.append("available authority profile has no runnable episode execution binding")
             if available_observations and not episode_runnable:
@@ -4213,10 +4239,7 @@ def build_vehicle_interface_catalog_report(
             *(f"requested fidelity is unavailable for the selected vehicle family: {item}" for item in unknown_fidelities),
         ],
         "interfaces": records,
-        "claim_boundary": (
-            "This is a registry/interface conformance report. It does not execute, qualify, "
-            "or promote any vehicle or control realization."
-        ),
+        "claim_boundary": ("This is a registry/interface conformance report. It does not execute, qualify, or promote any vehicle or control realization."),
     }
     ####
 
@@ -4228,8 +4251,7 @@ def _has_runnable_episode(
     plugins: PluginCatalog | None = None,
 ) -> bool:
     return any(
-        item.operation == "episode" and item.fidelity == fidelity and item.status == "runnable"
-        for item in bindings_for_family(family_id, plugins=plugins)
+        item.operation == "episode" and item.fidelity == fidelity and item.status == "runnable" for item in bindings_for_family(family_id, plugins=plugins)
     )
     ####
 
@@ -4243,8 +4265,7 @@ def _has_runnable_batch(
     """Return whether an exact family/fidelity batch binding exists."""
 
     return any(
-        item.operation == "batch" and item.fidelity == fidelity and item.status == "runnable"
-        for item in bindings_for_family(family_id, plugins=plugins)
+        item.operation == "batch" and item.fidelity == fidelity and item.status == "runnable" for item in bindings_for_family(family_id, plugins=plugins)
     )
     ####
 
@@ -4283,6 +4304,7 @@ __all__ = [
     "AuthorityProfile",
     "AuthoritySelectionScope",
     "AuthoritySwitchingPolicy",
+    "CommittedNativeStatusValues",
     "build_vehicle_interface_catalog_report",
     "project_authority_action_values",
     "project_committed_status_values",
@@ -4293,6 +4315,7 @@ __all__ = [
     "InterfaceValueType",
     "ObservationProfile",
     "ParameterScope",
+    "ProjectedStatusValues",
     "SCHEMA_ID",
     "VehicleInterfaceContract",
     "VehicleInterfaceExtension",
