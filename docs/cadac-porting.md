@@ -349,6 +349,11 @@ The first executable source definition lowers a single `AIM5` plus `AIRCRAFT3` e
 
 The missile carries translational state plus reduced-order alpha/beta and rate-loop dynamics. It does not integrate the complete rigid-body attitude/body-rate/moment closure required for Taoryx's two rigid-body tiers.
 
+The public AIM5 `response_law` variant group makes the source alpha/beta limit,
+rate-loop time constant, PI ratio, and acceleration-loop gain explicitly
+configurable with units and source-model bounds. These are fixed per-run
+parameters, not physical-effector controls or a promotion to rigid-body 6DoF.
+
 ### Participating source modules
 
 ```text

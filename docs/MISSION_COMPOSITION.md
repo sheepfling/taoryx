@@ -39,6 +39,7 @@ discover models and capabilities (no plant execution)
 | Client need | Contract surface | Treat this as authoritative |
 | --- | --- | --- |
 | Model picker, catalogue, or capability search | `list_models()` / `taoryx model list` | Model identity, presentation metadata, exact available operations, blockers, and claim boundary |
+| Composition editor or backend capability negotiation | `model.composition_advertisement` | Exhaustive authoring, execution, graph, node, transition, rearrangement, entity-topology, and state-transfer feature rows |
 | Configuration form or generated mission input | `get_model_schema()` / `taoryx model plan` or `scaffold` | Typed inputs, defaults, units, bounds, choices, compatible fidelity, and validation rules |
 | Control-mode picker | `control_scheme_support` and the realization's authority profiles | UI order, consumer roles, ownership, streaming preference, switching policy, and which action channels belong to one mode |
 | Live action form or agent policy | Open-session descriptor | The selected action schema, units, bounds, topology, action ordering, and normalization projection |
@@ -78,6 +79,9 @@ authentication, reconnect, and safety policy. In particular, a held action for
 
 For the complete schema reference, see the
 [Mission Composition Provider API](architecture/mission-composition-provider-api.md).
+For the standalone capability contract that another trajectory backend can
+publish without using the Taoryx runtime, see the
+[Vehicle Composition Advertisement API](architecture/vehicle-composition-advertisement-api.md).
 For the authority, lowering, status, and claim-boundary rules that every
 consumer must preserve, see the
 [Vehicle Interface Contract](architecture/vehicle-interface-contract.md).

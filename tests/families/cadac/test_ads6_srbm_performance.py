@@ -4,6 +4,7 @@ from pathlib import Path
 from time import perf_counter
 
 from taoryx.families.cadac.ads6_srbm_mission_composition import (
+    ADS6_SRBM_MODEL_VERSION,
     CadacAds6SrbmMissionCompositionProvider,
     build_default_ads6_srbm_configuration,
 )
@@ -26,7 +27,7 @@ def test_ads6_srbm_persistent_source_loop_stays_within_interactive_smoke_budget(
         MissionCompositionOpenSessionRequest(
             session_id="ads6-srbm-performance",
             provider_id="cadac",
-            provider_version="0.9.0",
+            provider_version=ADS6_SRBM_MODEL_VERSION,
             prepared_configuration=prepared,
             integration_step_s=0.01,
         )

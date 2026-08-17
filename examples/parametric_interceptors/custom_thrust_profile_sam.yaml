@@ -1,0 +1,37 @@
+# Explicit normalized thrust-time shape and absolute mean thrust.
+interceptor_id: custom-thrust-profile-sam
+parameter_set_version: 0.1.0
+surrogate_archetype_id: generic_slender_sam_v1
+
+launch_mass_kg: 350.0
+propellant_fraction: 0.45
+length_m: 5.0
+body_diameter_m: 0.35
+propulsion_architecture: single_stage_solid
+burn_time_s: 8.0
+
+# Active-burn mean before assumption-case or thrust_scale changes. A raw flat
+# value is a simulation assumption, not an observed motor datum.
+nominal_thrust_n: 25000.0
+thrust_profile_schedule:
+  schedule_id: custom-boost-sustain-v1
+  interpolation: step_previous
+  points:
+    - {burn_fraction: 0.0, multiplier: 1.6}
+    - {burn_fraction: 0.2, multiplier: 0.85}
+    - {burn_fraction: 1.0, multiplier: 0.85}
+  origin: simulation_assumption
+  confidence: low
+  method: developer-authored relative thrust-time shape
+
+aero_archetype: generic_slender_supersonic
+drag_class: nominal
+maneuverability_class: moderate
+control_bandwidth_class: nominal
+guidance_family: command
+guidance_archetype: waypoint_pursuit
+target_classes: [air_breathing]
+
+model_notes: >-
+  Developer example only. Both mean thrust and normalized time shape are
+  explicit simulation assumptions; neither is evidence about a real motor.

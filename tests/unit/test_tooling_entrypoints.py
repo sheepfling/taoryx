@@ -62,9 +62,7 @@ def test_ruff_fix_is_local_and_uses_the_same_quality_surface(monkeypatch: pytest
 
     dev.ruff_fix()
 
-    assert commands == [
-        [dev.project_python(), "-m", "ruff", "check", "--no-cache", "--fix", *dev.RUFF_QUALITY_PATHS]
-    ]
+    assert commands == [[dev.project_python(), "-m", "ruff", "check", "--no-cache", "--fix", *dev.RUFF_QUALITY_PATHS]]
     ####
 
 
@@ -84,7 +82,7 @@ def test_core_quality_workflow_has_static_quality_and_a_deterministic_pytest_tem
     assert "--basetemp build/ci-quality-pytest" in workflow
     assert "--strict-markers" in workflow
     assert 'python-version: "3.12"' in workflow
-    assert "python -m pip install -e \".[dev]\"" in workflow
+    assert 'python -m pip install -e ".[dev]"' in workflow
     ####
 
 
@@ -140,10 +138,7 @@ def test_declared_composition_families_have_one_focused_versioned_plugin_boundar
             assert family_id not in owner_by_family, f"multiple vehicle catalog fragments own {family_id!r}"
             owner_by_family[family_id] = contribution.plugin.id
 
-    declared_families = {
-        declaration.family_id
-        for declaration in load_vehicle_composition_registry(plugins=plugins).vehicles
-    }
+    declared_families = {declaration.family_id for declaration in load_vehicle_composition_registry(plugins=plugins).vehicles}
     assert set(owner_by_family) == declared_families
     assert set(dev.FOCUSED_VEHICLE_PLUGIN_IDS) >= declared_families
     assert set(dev.VEHICLE_VERTICAL_TEST_PATHS) >= declared_families
@@ -1215,6 +1210,8 @@ def test_bootstrap_full_profile_installs_every_editable_distribution() -> None:
         "-e",
         "packages/taoryx-passive-bodies",
         "-e",
+        "packages/taoryx-parametric-interceptors",
+        "-e",
         "packages/taoryx-simple-aero",
         "-e",
         "packages/taoryx-dual-launch",
@@ -1240,7 +1237,7 @@ def test_bootstrap_developer_profile_installs_direct_plug_ins_without_compatibil
         with_sensors=False,
     )
 
-    assert command.count("-e") == 14
+    assert command.count("-e") == 15
     assert "packages/taoryx-reference-models" not in command
     assert command[-1] == "packages/taoryx-reachability"
     ####
@@ -1271,7 +1268,7 @@ def test_bootstrap_offline_sensor_fallback_keeps_full_local_distribution_set() -
     )
 
     assert command[4:6] == ["--no-build-isolation", "--no-deps"]
-    assert command.count("-e") == 15
+    assert command.count("-e") == 16
     assert command[-1] == "packages/taoryx-reachability"
     ####
 
@@ -1356,6 +1353,7 @@ def test_plugin_wheel_smoke_defaults_to_each_currently_isolated_distribution() -
         "x15",
         "hl20",
         "debug-models",
+        "parametric-interceptors",
         "simple-aero",
         "dual-launch",
         "nesc",
@@ -1397,6 +1395,19 @@ def test_plugin_wheel_smoke_defaults_to_each_currently_isolated_distribution() -
         "taoryx.passive_tumbling_composition_execution",
         "taoryx.passive_tumbling_mission_translation",
     )
+    parametric_interceptors = selected_specs(("parametric-interceptors",))[0]
+    assert parametric_interceptors.console_scripts == (
+        ("taoryx-interceptor", "taoryx_parametric_interceptors.__main__:main"),
+    )
+    assert parametric_interceptors.model_authoring_plan_requests == (
+        (
+            "taoryx.parametric-interceptors.mission-composition",
+            "aim9x-block2",
+            "attitude_response_pseudo_6dof",
+            "direct_lateral_acceleration_control",
+        ),
+    )
+    assert "taoryx_parametric_interceptors.authoring" in parametric_interceptors.owned_modules
     f16 = selected_specs(("f16",))[1]
     assert f16.deferred_module_names == (
         "numpy",

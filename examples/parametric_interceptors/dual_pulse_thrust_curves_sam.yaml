@@ -1,0 +1,52 @@
+# Two source-shaped pulses compiled into the shared dual-pulse runtime.
+interceptor_id: dual-pulse-thrust-curves-sam
+parameter_set_version: 0.1.0
+surrogate_archetype_id: high_energy_dual_pulse_interceptor_v1
+
+launch_mass_kg: 320.0
+# Optional common effective Isp closes the mass model without hand-entering
+# burnout mass or a pulse split. It is an assumption in this developer example.
+effective_specific_impulse_s: 250.0
+length_m: 5.0
+body_diameter_m: 0.29
+
+dual_pulse_thrust_program:
+  program_id: developer-two-curve-motor-v1
+  first_pulse:
+    curve_id: developer-first-pulse-v1
+    time_unit: ms
+    thrust_unit: kN
+    points:
+      - {time: 0.0, thrust: 0.0}
+      - {time: 500.0, thrust: 80.0}
+      - {time: 2000.0, thrust: 0.0}
+    origin: simulation_assumption
+    method: developer-authored first-pulse curve
+  inter_pulse_coast_time: 3000.0
+  coast_time_unit: ms
+  second_pulse:
+    curve_id: developer-second-pulse-v1
+    time_unit: ms
+    thrust_unit: kN
+    points:
+      - {time: 0.0, thrust: 0.0}
+      - {time: 1000.0, thrust: 35.0}
+      - {time: 4000.0, thrust: 0.0}
+    origin: simulation_assumption
+    method: developer-authored second-pulse curve
+  origin: simulation_assumption
+  method: developer-authored coast timing and pulse association
+
+aero_archetype: high_energy_slender_supersonic
+drag_class: nominal
+maneuverability_class: high
+control_bandwidth_class: fast
+guidance_family: active_radar
+guidance_archetype: proportional_navigation
+navigation_constant: 4.0
+target_classes: [air_breathing, ballistic]
+
+model_notes: >-
+  Developer example only. Curves, coast timing, effective specific impulse,
+  and the resulting mass history are simulation assumptions and are not
+  PAC-3 MSE engineering data.

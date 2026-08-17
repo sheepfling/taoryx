@@ -6,8 +6,10 @@ from collections.abc import Mapping
 from typing import Literal, TypeAlias
 
 from taoryx.trajectory.configuration_contract import (
+    ConfigurationBound,
     ConfigurationGroupSchema,
     ConfigurationGroupValue,
+    ConfigurationInterval,
     ConfigurationParameterSchema,
     ConfigurationParameterValue,
     PreparedTrajectoryConfiguration,
@@ -66,7 +68,7 @@ Ads6SamActuatorType: TypeAlias = Literal[
 ]
 
 ADS6_SAM_MODEL_ID = "cadac.ads6.sam"
-ADS6_SAM_MODEL_VERSION = "0.8.0"
+ADS6_SAM_MODEL_VERSION = "0.9.0"
 ADS6_SAM_FIN_PHASE_ID = "fin_control"
 ADS6_SAM_TVC_PHASE_ID = "tvc_control"
 ADS6_SAM_RCS_PHASE_ID = "aggregate_rcs"
@@ -243,6 +245,15 @@ def build_default_ads6_sam_configuration(
         "lateral_acceleration_command_g": ("commands", "lateral_acceleration_command_g"),
         "normal_acceleration_command_g": ("commands", "normal_acceleration_command_g"),
         "thrust_vector_unit_body": ("commands", "thrust_vector_unit_body"),
+        "fin_position_limit_deg": ("actuation", "fin_position_limit_deg"),
+        "fin_rate_limit_deg_s": ("actuation", "fin_rate_limit_deg_s"),
+        "fin_natural_frequency_rad_s": ("actuation", "fin_natural_frequency_rad_s"),
+        "fin_damping_ratio": ("actuation", "fin_damping_ratio"),
+        "tvc_position_limit_deg": ("actuation", "tvc_position_limit_deg"),
+        "tvc_rate_limit_deg_s": ("actuation", "tvc_rate_limit_deg_s"),
+        "tvc_natural_frequency_rad_s": ("actuation", "tvc_natural_frequency_rad_s"),
+        "tvc_damping_ratio": ("actuation", "tvc_damping_ratio"),
+        "tvc_initial_gain": ("actuation", "tvc_initial_gain"),
         "end_time_s": ("runtime", "end_time_s"),
         "sample_step_s": ("runtime", "sample_step_s"),
     }
@@ -435,6 +446,94 @@ def _build_configuration_schema(plugin: Ads6SamVehiclePlugin) -> TrajectoryConfi
                     ),
                 ),
                 ConfigurationGroupSchema(
+                    id="actuation",
+                    label="Physical-effector tuning",
+                    description=(
+                        "Source-backed actuator limits and second-order dynamics. These values define a reproducible "
+                        "vehicle variant before propagation; they are not live command channels."
+                    ),
+                    children=(
+                        _parameter(
+                            "fin_position_limit_deg",
+                            "Fin position limit",
+                            "Maximum physical cross-fin deflection used by the source actuator.",
+                            default=source.fin_actuator.position_limit_deg,
+                            unit="deg",
+                            role="variant",
+                            interval=_positive_interval(),
+                        ),
+                        _parameter(
+                            "fin_rate_limit_deg_s",
+                            "Fin rate limit",
+                            "Maximum physical cross-fin slew rate used by the source actuator.",
+                            default=source.fin_actuator.rate_limit_deg_s,
+                            unit="deg/s",
+                            role="variant",
+                            interval=_positive_interval(),
+                        ),
+                        _parameter(
+                            "fin_natural_frequency_rad_s",
+                            "Fin natural frequency",
+                            "Second-order cross-fin actuator natural frequency.",
+                            default=source.fin_actuator.natural_frequency_rad_s,
+                            unit="rad/s",
+                            role="variant",
+                            interval=_positive_interval(),
+                        ),
+                        _parameter(
+                            "fin_damping_ratio",
+                            "Fin damping ratio",
+                            "Second-order cross-fin actuator damping ratio.",
+                            default=source.fin_actuator.damping_ratio,
+                            role="variant",
+                            interval=_nonnegative_interval(),
+                        ),
+                        _parameter(
+                            "tvc_position_limit_deg",
+                            "TVC position limit",
+                            "Maximum physical pitch/yaw nozzle deflection used by the source TVC actuator.",
+                            default=source.tvc.position_limit_deg,
+                            unit="deg",
+                            role="variant",
+                            interval=_positive_interval(),
+                        ),
+                        _parameter(
+                            "tvc_rate_limit_deg_s",
+                            "TVC rate limit",
+                            "Maximum physical pitch/yaw nozzle slew rate used by the source TVC actuator.",
+                            default=source.tvc.rate_limit_deg_s,
+                            unit="deg/s",
+                            role="variant",
+                            interval=_positive_interval(),
+                        ),
+                        _parameter(
+                            "tvc_natural_frequency_rad_s",
+                            "TVC natural frequency",
+                            "Second-order pitch/yaw TVC actuator natural frequency.",
+                            default=source.tvc.natural_frequency_rad_s,
+                            unit="rad/s",
+                            role="variant",
+                            interval=_positive_interval(),
+                        ),
+                        _parameter(
+                            "tvc_damping_ratio",
+                            "TVC damping ratio",
+                            "Second-order pitch/yaw TVC actuator damping ratio.",
+                            default=source.tvc.damping_ratio,
+                            role="variant",
+                            interval=_nonnegative_interval(),
+                        ),
+                        _parameter(
+                            "tvc_initial_gain",
+                            "TVC initial gain",
+                            "Source TVC command gain before any selected dynamic-pressure scheduling.",
+                            default=source.tvc.initial_gain,
+                            role="variant",
+                            interval=_nonnegative_interval(),
+                        ),
+                    ),
+                ),
+                ConfigurationGroupSchema(
                     id="runtime",
                     label="Runtime",
                     children=(
@@ -473,6 +572,7 @@ def _parameter(
     unit: str | None = None,
     frame: str | None = None,
     role: Ads6SamConfigurationRole = "initialization",
+    interval: ConfigurationInterval | None = None,
 ) -> ConfigurationParameterSchema:
     return ConfigurationParameterSchema(
         id=parameter_id,
@@ -484,6 +584,7 @@ def _parameter(
         required=False,
         default=default,
         default_declared=True,
+        interval=interval,
         role=role,
         compatible_fidelities=_FIDELITY_IDS,
         frame=frame,
@@ -983,6 +1084,7 @@ def _overrides_from_resolved(resolved: Mapping[str, object]) -> Ads6SamPluginOve
     ####
     initial = _group(resolved, "initialization")
     commands = _group(resolved, "commands")
+    actuation = _group(resolved, "actuation")
     runtime = _group(resolved, "runtime")
     return Ads6SamPluginOverrides(
         source_phase=phase,
@@ -1008,6 +1110,15 @@ def _overrides_from_resolved(resolved: Mapping[str, object]) -> Ads6SamPluginOve
         lateral_acceleration_command_g=float(commands["lateral_acceleration_command_g"]),
         normal_acceleration_command_g=float(commands["normal_acceleration_command_g"]),
         thrust_vector_unit_body=_vector3(commands["thrust_vector_unit_body"]),
+        fin_position_limit_deg=float(actuation["fin_position_limit_deg"]),
+        fin_rate_limit_deg_s=float(actuation["fin_rate_limit_deg_s"]),
+        fin_natural_frequency_rad_s=float(actuation["fin_natural_frequency_rad_s"]),
+        fin_damping_ratio=float(actuation["fin_damping_ratio"]),
+        tvc_position_limit_deg=float(actuation["tvc_position_limit_deg"]),
+        tvc_rate_limit_deg_s=float(actuation["tvc_rate_limit_deg_s"]),
+        tvc_natural_frequency_rad_s=float(actuation["tvc_natural_frequency_rad_s"]),
+        tvc_damping_ratio=float(actuation["tvc_damping_ratio"]),
+        tvc_initial_gain=float(actuation["tvc_initial_gain"]),
         end_time_s=float(runtime["end_time_s"]),
         sample_step_s=float(runtime["sample_step_s"]),
     )
@@ -1058,11 +1169,19 @@ def _configuration_unit(parameter_id: str) -> str | None:
         "yaw_attitude_command_deg",
         "alpha_command_deg",
         "beta_command_deg",
+        "fin_position_limit_deg",
+        "tvc_position_limit_deg",
     }:
         return "deg"
     ####
     if parameter_id == "body_rates_deg_s":
         return "deg/s"
+    ####
+    if parameter_id in {"fin_rate_limit_deg_s", "tvc_rate_limit_deg_s"}:
+        return "deg/s"
+    ####
+    if parameter_id in {"fin_natural_frequency_rad_s", "tvc_natural_frequency_rad_s"}:
+        return "rad/s"
     ####
     if parameter_id in {"lateral_acceleration_command_g", "normal_acceleration_command_g"}:
         return "g"
@@ -1071,6 +1190,24 @@ def _configuration_unit(parameter_id: str) -> str | None:
         return "s"
     ####
     return None
+
+
+####
+
+
+def _positive_interval() -> ConfigurationInterval:
+    """Return the source-model domain for a strictly positive scalar."""
+
+    return ConfigurationInterval(minimum=ConfigurationBound(value=0.0, inclusive=False))
+
+
+####
+
+
+def _nonnegative_interval() -> ConfigurationInterval:
+    """Return the source-model domain for a nonnegative scalar."""
+
+    return ConfigurationInterval(minimum=ConfigurationBound(value=0.0))
 
 
 ####

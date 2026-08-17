@@ -38,6 +38,22 @@ finite-run command/response analysis and like-for-like controller comparison;
 local linear stability and frequency margins remain blocked until a declared
 operating point and complete closed-loop state model are published.
 
+## Parametric physical-effector variants
+
+In addition to the fixed-within-run command channels, a caller can construct a
+reproducible source-case variant through `build_default_ads6_sam_configuration`.
+The `actuation` group exposes the physical fin and TVC position limits,
+rate limits, natural frequencies, damping ratios, and TVC initial gain. The
+same aliases are accepted by the helper: `fin_*` and `tvc_*` (for example,
+`fin_rate_limit_deg_s` and `tvc_initial_gain`). Units and the source-model
+nonnegative/strictly-positive domains are included in the configuration
+schema, so a UI or agent can validate a proposed variant before execution.
+
+These are initialization-time `variant` parameters, not additional live
+controls. They are copied into a per-run immutable source definition, never
+written back to the installed CADAC case, and do not extend the standalone
+model's vehicle-only guidance or sensor claim.
+
 ## Result composition
 
 Mission Composition returns one independent root object:

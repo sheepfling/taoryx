@@ -14,7 +14,7 @@ from taoryx.families.cadac.agm6_mission_composition import (
     build_default_agm6_configuration,
     register_agm6_mission_composition,
 )
-from taoryx.families.cadac.agm6_plugin import Agm6VehiclePlugin
+from taoryx.families.cadac.agm6_plugin import Agm6PluginOverrides, Agm6VehiclePlugin
 from test_agm6 import _write_agm6_case
 
 from taoryx.trajectory.execution_contract import (
@@ -213,6 +213,59 @@ def test_agm6_default_configuration_routes_target_aircraft_seed_and_runtime_over
     assert prepared.resolved["aircraft"]["aircraft_option"] == 1
     assert prepared.resolved["aircraft"]["turn_g"] == 2.0
     assert prepared.resolved["stochastic"]["random_seed"] == 99
+
+
+####
+
+
+def test_agm6_configuration_routes_public_tuning_into_the_plugin(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider = _provider(tmp_path)
+    configuration = build_default_agm6_configuration(
+        provider,
+        overrides={
+            "fin_position_limit_deg": 12.0,
+            "fin_rate_limit_deg_s": 310.0,
+            "fin_natural_frequency_rad_s": 220.0,
+            "fin_damping_ratio": 0.95,
+            "seeker_acquisition_range_m": 7_000.0,
+            "seeker_filter_gain_per_s": 2.8,
+            "seeker_filter_natural_frequency_rad_s": 17.0,
+            "seeker_filter_damping_ratio": 0.8,
+            "structural_limit_g": 16.0,
+            "propulsion_throttle": 0.75,
+            "end_time_s": 0.01,
+            "sample_step_s": 0.005,
+        },
+    )
+    prepared = provider.validate_configuration(configuration)
+    captured: list[Agm6PluginOverrides] = []
+    original = provider._plugin.run_batch
+
+    def capture(overrides: Agm6PluginOverrides | None = None) -> object:
+        assert overrides is not None
+        captured.append(overrides)
+        return original(overrides)
+
+    monkeypatch.setattr(provider._plugin, "run_batch", capture)
+    provider.execute_batch(
+        MissionCompositionRunRequest(
+            request_id="agm6-tuning",
+            provider_id="cadac",
+            provider_version=provider.metadata.version,
+            prepared_configuration=prepared,
+            output=MissionCompositionOutputSelection(mode="core"),
+        )
+    )
+
+    assert prepared.resolved["actuation"]["fin_position_limit_deg"] == 12.0
+    assert prepared.resolved["seeker"]["acquisition_range_m"] == 7_000.0
+    assert captured[0].fin_rate_limit_deg_s == 310.0
+    assert captured[0].seeker_filter_natural_frequency_rad_s == 17.0
+    assert captured[0].structural_limit_g == 16.0
+    assert captured[0].propulsion_throttle == 0.75
 
 
 ####

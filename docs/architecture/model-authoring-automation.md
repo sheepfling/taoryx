@@ -128,6 +128,12 @@ python -m pip install taoryx-hummingbird
 taoryx plugins list --no-builtin
 taoryx model list --provider taoryx.hummingbird.mission-composition
 
+python -m pip install taoryx-parametric-interceptors
+taoryx-interceptor init my-sam.yaml --interceptor-id my-sam
+taoryx-interceptor inspect my-sam.yaml --output my-sam-report.json
+taoryx-interceptor run my-sam.yaml --set runtime.duration_s=2
+taoryx model list --provider taoryx.parametric-interceptors.mission-composition
+
 # Shared source-table fixed wing has one focused provider per family:
 python -m pip install taoryx-source-table-fixed-wing
 taoryx plugins list --no-builtin
@@ -171,6 +177,29 @@ promote blocked realizations merely because their schemas are discoverable.
 specified and the presentation-default mission is incompatible with that
 tier, it selects the first compatible mission with a runnable batch or episode
 endpoint. An explicit incompatible mission/fidelity pair still fails closed.
+
+Parametric interceptor intake has one extra pre-registration step because the
+model identity itself comes from a user evidence file. `taoryx-interceptor`
+owns that file-specific validation and report. Its `run` command still uses the
+standard Composition provider and runner. The common `taoryx model` workflow
+then applies unchanged to the fixed examples advertised by the installed entry
+point; no host special case or ambient profile directory is involved.
+
+The interceptor authoring schema is also the machine-readable option catalogue
+for profile-level choices. For mixed aerodynamic/TVC studies it advertises
+`control_allocation_policy` as exactly `aerodynamic_first`,
+`thrust_vector_first`, or `proportional`; the resolved Composition model repeats
+that domain in `control_allocation_policy.supported` and reports the active
+policy plus achieved component shares at runtime. This keeps editors, agents,
+and the model runner on one enum instead of relying on comments or silent
+fallbacks.
+
+For pseudo-6DOF response studies, the response-analysis request similarly owns
+an explicit `command_support_fraction` from zero through one. The analysis and
+bounded step witness use that same frozen multiplier, while Composition mission
+telemetry reports the changing runtime fraction. This lets a developer compare
+response tuning at a declared authority condition without pretending that a
+local pole calculation qualifies an autopilot or a complete flight envelope.
 
 ### Common capability advertisement
 

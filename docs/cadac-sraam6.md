@@ -61,6 +61,22 @@ finite-run control traces and like-for-like controller comparisons. They do
 not establish a trim, a closed-loop linearization, or formal stability or
 frequency-margin claims.
 
+## Parametric source-case variants
+
+`build_default_sraam6_configuration` exposes an explicit, typed tuning surface
+for source-backed variants. `actuation` contains the fin position/rate limits
+and second-order natural-frequency/damping parameters; `seeker` contains
+acquisition range and LOS-filter gain/frequency/damping; and `controller`
+contains the structural acceleration limit. The corresponding helper aliases
+are prefixed `fin_`, `seeker_`, and `structural_limit_g`.
+
+Every public value carries a canonical unit and its source-model lower bound in
+the configuration schema. These are initialization-time `variant` inputs, not
+session actions: they are copied into a per-run immutable definition and leave
+the installed source case untouched. The native Taoryx relative-state track
+remains the generic sensor output; seeker tuning configures the CADAC source
+model rather than introducing a parallel sensor API.
+
 ## Fidelity decision
 
 The executable standard realization is T4 because all of the following participate in the closed loop:

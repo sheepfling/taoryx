@@ -20,6 +20,23 @@ evidence-bounded toolchain that can:
 - preserve the boundary between what is documented, what is executable, and
   what still needs historical confirmation.
 
+## First-class API products
+
+The repository's reusable contracts are products in their own right, not only
+interfaces to the bundled vehicle models. In particular, the
+[Vehicle Composition Advertisement API](docs/architecture/vehicle-composition-advertisement-api.md)
+lets any trajectory backend publish a closed, JSON-safe account of its mission
+authoring, execution, graph, node, transition, rearrangement, runtime-change,
+multi-entity, and state-transfer capabilities. A backend may wrap a native
+simulator, remote service, analytical model, or recorded data without adopting
+the Taoryx runtime internally.
+
+The broader [Mission Composition Provider API](docs/architecture/mission-composition-provider-api.md)
+adds typed configuration, exact operation selection, batch results, failures,
+and persistent sessions. Together they are the provider-neutral integration
+surface for catalogues, planners, UIs, agents, and independent trajectory
+providers.
+
 ## What lives here
 
 - `manual/` - canonical editable LaTeX for the reconstructed manual
@@ -47,7 +64,7 @@ python -m tools.dev install-check
 python -m tools.dev doctor
 ```
 
-Bootstrap installs the core plus the thirteen direct model/overlay plug-ins used
+Bootstrap installs the core plus the fourteen direct model/overlay plug-ins used
 for development. The compatibility aggregate is an explicit opt-in profile for
 existing catalogue consumers, rather than a dependency of new vehicle work.
 Core-only, model-suite, compatibility, full-suite, wheelhouse, optional sensor,
@@ -160,6 +177,8 @@ python tools/aero_drag_analysis.py --all --output-dir build/aero-drag
 - [Installation and package selection](docs/INSTALLATION.md)
 - [Agent workflows](docs/AGENT_WORKFLOWS.md)
 - [Mission Composition and interactive-control front door](docs/MISSION_COMPOSITION.md) — the consumer API for model discovery, typed configuration, batch execution, and persistent live-control sessions
+- [Vehicle Composition Advertisement API](docs/architecture/vehicle-composition-advertisement-api.md) — the standalone capability-negotiation contract for Taoryx and independent trajectory backends
+- [Mission Composition Provider API reference](docs/architecture/mission-composition-provider-api.md)
 - [Model-to-mission authoring and automation](docs/architecture/model-authoring-automation.md)
 - [Simulation Runtime onboarding: find, set up, step, and diagnose](docs/SIMULATION_RUNTIME_ONBOARDING.md)
 - [Authoring → Runtime → Composition showcase guide](docs/AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md)

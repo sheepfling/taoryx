@@ -89,3 +89,38 @@ def test_ads6_sam_plugin_rejects_zero_thrust_vector_direction(tmp_path: Path) ->
 
 
 ####
+
+
+def test_ads6_sam_plugin_materializes_source_backed_effector_tuning_without_mutating_installation(tmp_path: Path) -> None:
+    plugin = Ads6SamVehiclePlugin(_write_ads6_sam_case(tmp_path))
+    installed = plugin.source_definition()
+
+    prepared = plugin.prepare_definition(
+        Ads6SamPluginOverrides(
+            fin_position_limit_deg=12.0,
+            fin_rate_limit_deg_s=350.0,
+            fin_natural_frequency_rad_s=240.0,
+            fin_damping_ratio=0.9,
+            tvc_position_limit_deg=5.0,
+            tvc_rate_limit_deg_s=120.0,
+            tvc_natural_frequency_rad_s=80.0,
+            tvc_damping_ratio=1.1,
+            tvc_initial_gain=0.65,
+        )
+    )
+
+    assert prepared.fin_actuator.position_limit_deg == 12.0
+    assert prepared.fin_actuator.rate_limit_deg_s == 350.0
+    assert prepared.fin_actuator.natural_frequency_rad_s == 240.0
+    assert prepared.fin_actuator.damping_ratio == 0.9
+    assert prepared.tvc.position_limit_deg == 5.0
+    assert prepared.tvc.rate_limit_deg_s == 120.0
+    assert prepared.tvc.natural_frequency_rad_s == 80.0
+    assert prepared.tvc.damping_ratio == 1.1
+    assert prepared.tvc.initial_gain == 0.65
+    assert plugin.source_definition() is installed
+    assert installed.fin_actuator.position_limit_deg != prepared.fin_actuator.position_limit_deg
+    assert installed.tvc.initial_gain != prepared.tvc.initial_gain
+
+
+####

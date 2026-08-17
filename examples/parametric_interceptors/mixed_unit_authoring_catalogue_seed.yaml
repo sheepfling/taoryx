@@ -1,0 +1,104 @@
+kind: interceptor_evidence_record
+interceptor_id: int:example-mixed-unit-sam
+model_id: example-mixed-unit-sam
+variant_basis: Public-source mixed-unit authoring witness
+source_record_ids:
+  - source:example-public-datasheet
+resolution_status: mixed
+
+evidence:
+  launch_mass:
+    value: 356
+    unit: lb
+    origin: observed
+    confidence: high
+  length:
+    value: 12
+    unit: ft
+    origin: observed
+  body_diameter:
+    value: 7
+    unit: in
+    origin: observed
+  wingspan:
+    value: 19
+    unit: in
+    origin: observed
+  propellant_fraction:
+    value: 44
+    unit: "%"
+    origin: inferred
+  propulsion_architecture:
+    value: single_stage_solid
+    origin: observed
+  burn_time:
+    value: 8000
+    unit: ms
+    origin: inferred
+  guidance_architecture:
+    value: active_radar
+    origin: observed
+  max_body_rate_rad_s:
+    value: 180
+    unit: deg/s
+    origin: simulation_assumption
+  max_body_acceleration_rad_s2:
+    value: 900
+    unit: deg/s^2
+    origin: simulation_assumption
+  max_bank_angle_rad:
+    value: 75
+    unit: deg
+    origin: simulation_assumption
+  induced_drag_factor:
+    value: 0.12
+    unit: "1"
+    origin: simulation_assumption
+  operating_altitude_min:
+    value: 1000
+    unit: ft
+    origin: observed
+  operating_altitude_max:
+    value: 60000
+    unit: ft
+    origin: observed
+  operating_mach_min:
+    value: 0.2
+    unit: "1"
+    origin: observed
+  operating_mach_max:
+    value: 5.0
+    unit: "1"
+    origin: observed
+  reported_speed:
+    value: 2500
+    unit: km/h
+    origin: reported
+
+derived:
+  reference_area:
+    value: 248.3
+    unit: cm^2
+    method: circular_area_from_reported_body_diameter
+  slenderness_ratio:
+    value: 20.57
+    unit: "1"
+    method: length_divided_by_body_diameter
+
+evidence_intervals:
+  - parameter_id: launch_mass
+    minimum_value: 348
+    maximum_value: 358
+    unit: lb
+    origin: observed_variant_interval
+    note: Family interval retained without selecting another variant.
+
+resolver_assumptions:
+  surrogate_archetype_id: medium_range_active_rf_sam_v1
+  required_diagnostics:
+    - public_source_units_normalized
+
+model_notes: >-
+  Developer-only witness showing direct source-unit ingestion, including a
+  declared advisory altitude/Mach model domain. Converted values are simulation
+  inputs; the source scalar and unit remain attached to each evidence record.

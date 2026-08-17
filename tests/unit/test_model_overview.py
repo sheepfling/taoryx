@@ -95,6 +95,9 @@ def test_model_overview_markdown_keeps_claim_boundaries_visible() -> None:
     markdown = render_model_overview_markdown(overview)
 
     assert "# Taoryx vehicle model cards" in markdown
+    assert "#### Provider scope" in markdown
+    assert "#### Composition surface" in markdown
+    assert "taoryx.trajectory-composition-advertisement/v1" in markdown
     assert "#### Fidelity ladder" in markdown
     assert "#### Data provenance" in markdown
     assert "hummingbird-pseudo-hover-attitude-v1" in markdown

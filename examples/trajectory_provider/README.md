@@ -1,6 +1,24 @@
 # Mission Composition provider example
 
-This directory has five complementary Mission Composition walkthroughs.
+This directory has six complementary Mission Composition walkthroughs.
+
+`composition_advertisement.py` treats capability negotiation as a standalone
+product. It discovers any installed provider/model pair, validates the
+embedded `taoryx.trajectory-composition-advertisement/v1` artifact through a
+JSON round trip, prints its usable feature matrix, or exports the structural
+JSON Schema for a non-Python gateway:
+
+```bash
+python examples/trajectory_provider/composition_advertisement.py
+python examples/trajectory_provider/composition_advertisement.py --include-unavailable
+python examples/trajectory_provider/composition_advertisement.py --json
+python examples/trajectory_provider/composition_advertisement.py --json-schema
+```
+
+Use `--provider` and `--model` to inspect another installed trajectory
+backend. The JSON Schema covers the portable field shape; the semantic
+partition and cross-record conformance rules are documented in the
+[Vehicle Composition Advertisement API](../../docs/architecture/vehicle-composition-advertisement-api.md).
 
 `mission_composition_catalog.py` exercises the self-describing configuration
 contract for all nine canonical vehicle families and the Simple Aero workflow:

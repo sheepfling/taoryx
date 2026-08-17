@@ -26,6 +26,10 @@ and AI/RL observation boundary is defined in
 The portable Mission Composition vehicle/trajectory plug-in publication,
 request, and standard result envelope is defined in
 [Mission Composition Provider API](mission-composition-provider-api.md).
+Its independently reusable capability-negotiation product—the closed,
+JSON-safe description of composition modes, graph semantics, mutations,
+multi-entity topology, and state transfer—is defined in the
+[Vehicle Composition Advertisement API](vehicle-composition-advertisement-api.md).
 Installable Python package discovery, typed registry aggregation, collision
 rules, and the current extraction state are defined in
 [Installable model and provider plug-ins](plugins.md).

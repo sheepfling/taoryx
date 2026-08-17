@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taoryx-parametric-interceptors"
+version = "0.1.0a32"
+description = "Evidence-aware parametric interceptor surrogate models for Taoryx"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["taoryx>=0.1.0a0,<0.2", "numpy>=2.0", "PyYAML>=6.0"]
+
+[project.entry-points."taoryx.plugins"]
+"taoryx.parametric-interceptors" = "taoryx_parametric_interceptors.plugin:PLUGIN"
+
+[project.scripts]
+taoryx-interceptor = "taoryx_parametric_interceptors.__main__:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

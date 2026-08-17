@@ -1,0 +1,250 @@
+\documentclass[10pt]{article}
+
+% Executive project brief. This successor-side document intentionally does not
+% modify or repaginate the reconstructed 1995 TAOS User's Manual.
+\usepackage[letterpaper,margin=0.40in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{array,tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{navy}{HTML}{0B2545}
+\definecolor{teal}{HTML}{007C82}
+\definecolor{sky}{HTML}{EAF4F5}
+\definecolor{mist}{HTML}{F4F7FA}
+\definecolor{line}{HTML}{D9E2E9}
+\definecolor{slate}{HTML}{475569}
+\definecolor{gold}{HTML}{D78517}
+\definecolor{green}{HTML}{18765C}
+
+\hypersetup{
+  pdftitle={TAORYX Executive Project Brief},
+  pdfauthor={TAORYX project},
+  pdfsubject={A source-linked trajectory analysis and modeling platform}
+}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlist[itemize]{leftmargin=1.05em,itemsep=3pt,topsep=2pt,parsep=0pt}
+\renewcommand{\arraystretch}{1.08}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\newcommand{\taoryx}{\textsc{TAORYX}}
+\newcommand{\sectiontitle}[1]{%
+  \vspace{0.34em}%
+  {\color{navy}\bfseries\large #1}\par\vspace{0.08em}%
+  {\color{teal}\rule{\linewidth}{0.8pt}}\par\vspace{0.22em}%
+}
+\newcommand{\scopebox}[2]{%
+  \fcolorbox{line}{white}{%
+    \begin{minipage}[t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}%
+      {\color{teal}\bfseries #1}\par\vspace{0.14em}%
+      {\small #2}%
+    \end{minipage}%
+  }%
+}
+\newcommand{\metric}[2]{%
+  \begin{minipage}[t]{0.235\linewidth}\centering
+    {\color{teal}\fontsize{19}{20}\selectfont\bfseries #1}\par
+    \vspace{1pt}{\color{slate}\scriptsize #2}
+  \end{minipage}%
+}
+
+\begin{document}
+\raggedbottom
+
+\noindent\colorbox{navy}{%
+  \begin{minipage}{\dimexpr\linewidth-2\fboxsep\relax}
+    \vspace{0.12em}
+    \begin{minipage}[t]{0.73\linewidth}
+      {\color{white}\fontsize{26}{28}\selectfont\bfseries TAORYX}\par
+      \vspace{0.12em}{\color{white}\large From the TAOS legacy to a modular model-composition and controls platform}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.23\linewidth}\raggedleft
+      \vspace{0.12em}{\color{white!80}\scriptsize EXECUTIVE PROJECT BRIEF}\par
+      \vspace{0.35em}{\color{white!85}\footnotesize Historical knowledge. Modern engineering.}
+    \end{minipage}
+    \vspace{0.15em}
+  \end{minipage}%
+}\par
+
+\vspace{0.34em}
+{\large\color{navy}\bfseries What it is}\par
+\vspace{0.18em}
+{\small\color{slate}
+  \taoryx{} turns the 1995 \emph{Trajectory Analysis and Optimization System}
+  (TAOS) User's Manual into a living engineering asset: a rebuildable,
+  provenance-linked reference edition plus a typed software platform for
+  trajectory modeling, analysis, and mission workflows. It preserves what is
+  documented, makes supported behavior inspectable, and leaves unverified
+  claims visibly bounded.
+}\par
+
+\vspace{0.28em}
+\noindent\colorbox{mist}{%
+  \begin{minipage}{\dimexpr\linewidth-2\fboxsep\relax}\centering
+    \metric{307}{physical source pages represented}\hfill
+    \metric{326}{numbered equations source-mapped}\hfill
+    \metric{72}{editable figures and semantic listings}\hfill
+    \metric{14}{direct plug-ins in the developer route}
+  \end{minipage}%
+}\par
+
+\vspace{0.3em}
+\begin{center}
+\begin{tikzpicture}[
+  stage/.style={draw=line, fill=sky, rounded corners=2pt, minimum width=1.13in,
+    minimum height=0.48in, align=center, font=\scriptsize\bfseries\color{navy}},
+  arrow/.style={-{Stealth[length=2.2mm]}, draw=teal, line width=0.7pt}
+]
+  \node[stage] (source) {Historical\\source};
+  \node[stage, right=0.12in of source] (assets) {Typed assets\\and data};
+  \node[stage, right=0.12in of assets] (catalog) {Vehicle\\catalogue};
+  \node[stage, right=0.12in of catalog] (api) {Composition\\API};
+  \node[stage, right=0.12in of api] (runtime) {Selected\\runtime};
+  \node[stage, right=0.12in of runtime] (output) {Trajectory\\and evidence};
+  \draw[arrow] (source) -- (assets);
+  \draw[arrow] (assets) -- (catalog);
+  \draw[arrow] (catalog) -- (api);
+  \draw[arrow] (api) -- (runtime);
+  \draw[arrow] (runtime) -- (output);
+\end{tikzpicture}
+\end{center}
+
+\vspace{-0.2em}
+\begin{minipage}[t]{0.48\linewidth}
+  \sectiontitle{1. Models, data, and fidelity}
+  \fcolorbox{line}{mist}{%
+    \begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+      {\color{navy}\small\bfseries Developer path}\par\vspace{0.14em}
+      {\scriptsize\color{slate}\texttt{bootstrap} and select the developer
+      profile \(\rightarrow\) \texttt{model list}/\texttt{assess}
+      \(\rightarrow\) \texttt{model plan} \(\rightarrow\)
+      \texttt{scaffold} \(\rightarrow\) validate/compile \(\rightarrow\)
+      batch run, live session, or registered \texttt{model tune}.}\par\vspace{0.14em}
+      {\scriptsize\color{slate}The selected plug-in owns its data, adapter,
+      controls, focused tests, and evidence. A model can be discoverable while
+      honestly advertising a blocked or batch-only realization.}
+    \end{minipage}%
+  }%\par\vspace{0.34em}
+
+  \scopebox{Evidence-backed data forms}{Legacy \texttt{.tbl}/\texttt{.prb}
+  files; DAVE-ML and CADAC inputs; source tables; geometry, mass/inertia,
+  aerodynamic, propulsion, actuator, atmosphere/wind, route, waypoint, and
+  telemetry data. Typed metadata retains units, frames, bounds, provenance,
+  and availability.}\par\vspace{0.34em}
+
+  \scopebox{Existing model portfolio}{Analytical Simple Aero; A320, F-16,
+  Hummingbird, X-15, HL-20, Skywalker X8, B747, NESC staging/replay, passive
+  bodies, dual launch, and parametric interceptors. Reachability is an optional
+  overlay; CADAC is a separately installable source-bound catalog.}\par\vspace{0.34em}
+
+  \fcolorbox{line}{white}{%
+    \begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+      {\color{teal}\small\bfseries Fidelity ladder}\par\vspace{0.13em}
+      {\scriptsize\color{slate}\textbf{1. Point-mass 3DOF:} translation only.
+      \textbf{2. Pseudo-6DOF:} declared attitude/rate response bridge.
+      \textbf{3. Rigid-body direct wrench:} full Newton-Euler dynamics without
+      an effector claim. \textbf{4. Surface allocated:} declared effectors,
+      limits, and allocation.}\par\vspace{0.2em}
+      {\scriptsize\color{slate}\textbf{Important:} fidelity is an explicit
+      request graph, not a silent switch. Step-up always requests a named tier;
+      step-down is either exact-only or an opt-in, evidence-qualified
+      \texttt{validated\_lower\_only} fallback.}
+    \end{minipage}%
+  }%
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.495\linewidth}
+  \sectiontitle{2. Vehicle Composition API}
+  \fcolorbox{line}{mist}{%
+    \begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+      {\color{navy}\small\bfseries One generic front door for every model}\par\vspace{0.16em}
+      {\scriptsize\color{slate}\texttt{list\_models()} \(\rightarrow\)
+      choose model, realization, fidelity, and operation \(\rightarrow\)
+      fetch typed configuration and output schemas \(\rightarrow\)
+      validate a fingerprinted configuration \(\rightarrow\) batch trajectory
+      or persistent \texttt{open / inspect / step / reset / close} session.}
+    \end{minipage}%
+  }%\par\vspace{0.34em}
+
+  \scopebox{Built for UI, AI, and library consumers}{The provider publishes
+  labels, units, bounds, choices, defaults, validation, compatible fidelity,
+  available telemetry, and control authority. A client builds forms and model
+  pickers from this publication without importing a vehicle-specific dynamics
+  class or guessing action meanings from names.}\par\vspace{0.34em}
+
+  \fcolorbox{line}{white}{%
+    \begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+      {\color{teal}\small\bfseries HTML / JavaScript opportunity}\par\vspace{0.13em}
+      {\scriptsize\color{slate}Schemas and diagnostics are JSON-safe,
+      fingerprinted, unit-aware, and intended for generated forms, catalogues,
+      plots, and agent clients. Today the public contract is transport-neutral
+      Python/domain API, not an included REST or WebSocket service. A thin web
+      adapter can expose discovery, configuration, batch results, and session
+      steps while the application owns authentication, reconnect, and deadman
+      safety policy.}
+    \end{minipage}%
+  }%\par\vspace{0.34em}
+
+  \sectiontitle{3. Controls: intent to plant}
+  \fcolorbox{line}{mist}{%
+    \begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+      {\scriptsize\color{slate}\textbf{High level:} provider/open-loop,
+      destination, waypoint, route. \textbf{Reduced:} position, velocity,
+      flight path, energy. \textbf{Operator:} pilot-like axes, attitude, or
+      body rate. \textbf{Expert/diagnostic:} direct wrench or direct effector.}\par\vspace{0.22em}
+      {\scriptsize\color{slate}\textbf{Lowering chain:} mission intent
+      \(\rightarrow\) guidance/reference \(\rightarrow\) regulator
+      (LQR/LQI or declared family control) \(\rightarrow\) generalized demand
+      \(\rightarrow\) allocator and actuator limits \(\rightarrow\) plant.}\par\vspace{0.22em}
+      {\scriptsize\color{slate}A session selects one coherent authority
+      profile at a time, not a misleading union of every model control. Each
+      step returns requested, applied, achieved, lowered, and availability
+      feedback so a consumer can see what really reached the model.}
+    \end{minipage}%
+  }%
+\end{minipage}
+
+\vspace{0.3em}
+\noindent\colorbox{sky}{%
+  \begin{minipage}{\dimexpr\linewidth-2\fboxsep\relax}
+    \begin{tabularx}{\linewidth}{@{}Y Y Y Y@{}}
+      {\color{green}\small\bfseries Preserve the record} &
+      {\color{green}\small\bfseries Onboard models safely} &
+      {\color{green}\small\bfseries Compose missions generically} &
+      {\color{green}\small\bfseries Expose honest control} \\
+      {\scriptsize\color{slate}Manual, source pages, equations, figures, and
+      provenance remain editable and auditable.} &
+      {\scriptsize\color{slate}A selected plug-in takes source data through
+      declared fidelity and evidence gates.} &
+      {\scriptsize\color{slate}One API can drive catalogues, batch studies,
+      live sessions, telemetry, and plots.} &
+      {\scriptsize\color{slate}High-level guidance and low-level seams remain
+      selectable, typed, and visibly bounded.}
+    \end{tabularx}
+  \end{minipage}%
+}\par
+
+\vspace{0.22em}
+\noindent\fcolorbox{gold}{white}{%
+  \begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+    {\color{navy}\scriptsize\bfseries Evidence boundary:} {\scriptsize\color{slate}
+    \taoryx{} preserves and operationalizes the documented TAOS legacy, but
+    does not claim full equivalence with the unavailable TAOS 96.0 executable
+    or table library. Runtime and model capabilities remain limited to declared
+    source and executable evidence.}
+  \end{minipage}%
+}\par
+
+\vfill
+{\color{slate}\scriptsize\textsc{TAORYX} \quad | \quad Source-linked manual reconstruction, typed language tooling, modular simulation, and evidence-backed model delivery}
+
+\end{document}

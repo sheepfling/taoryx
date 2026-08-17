@@ -35,6 +35,10 @@ class Aim5PluginOverrides(CadacModel):
     target_turn_g: float | None = None
     end_time_s: float | None = Field(default=None, gt=0.0)
     sample_step_s: float | None = Field(default=None, gt=0.0)
+    alpha_max_deg: float | None = Field(default=None, gt=0.0)
+    rate_loop_time_constant_s: float | None = Field(default=None, gt=0.0)
+    proportional_integral_ratio: float | None = Field(default=None, gt=0.0)
+    acceleration_loop_gain_rad_s2: float | None = Field(default=None, gt=0.0)
 
     @model_validator(mode="after")
     def validate_finite_values(self) -> "Aim5PluginOverrides":
@@ -57,6 +61,10 @@ class Aim5PluginOverrides(CadacModel):
             "target_turn_g",
             "end_time_s",
             "sample_step_s",
+            "alpha_max_deg",
+            "rate_loop_time_constant_s",
+            "proportional_integral_ratio",
+            "acceleration_loop_gain_rad_s2",
         ):
             value = getattr(self, name)
             if value is not None:
@@ -183,6 +191,10 @@ def _apply_overrides(
         ("missile_alpha_deg", "alpha_deg"),
         ("missile_beta_deg", "beta_deg"),
         ("navigation_gain", "navigation_gain"),
+        ("alpha_max_deg", "alpha_max_deg"),
+        ("rate_loop_time_constant_s", "rate_loop_time_constant_s"),
+        ("proportional_integral_ratio", "proportional_integral_ratio"),
+        ("acceleration_loop_gain_rad_s2", "acceleration_loop_gain_rad_s2"),
     ):
         value = getattr(overrides, override_name)
         if value is not None:

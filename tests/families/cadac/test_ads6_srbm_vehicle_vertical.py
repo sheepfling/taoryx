@@ -9,6 +9,7 @@ from taoryx.families.cadac.ads6_srbm_mission_composition import (
     ADS6_SRBM_FIDELITY_ID,
     ADS6_SRBM_MISSION_ID,
     ADS6_SRBM_MODEL_ID,
+    ADS6_SRBM_MODEL_VERSION,
     ADS6_SRBM_REALIZATION_ID,
 )
 from taoryx.families.cadac.mission_composition_plugin import (
@@ -64,7 +65,7 @@ def test_bound_ads6_srbm_preserves_catalog_identity_controls_and_sensor_api(tmp_
     with pytest.raises(KeyError, match="unknown CADAC trajectory plug-in"):
         provider.get_model_schema("cadac.aim5.missile")
     assert runner.registrations() == ((CADAC_PROVIDER_ID, ADS6_SRBM_MODEL_ID),)
-    assert model.version == "0.9.0"
+    assert model.version == ADS6_SRBM_MODEL_VERSION
     assert model.common_runner_operations == ("batch", "step")
     assert model.realizations[0].id == ADS6_SRBM_REALIZATION_ID
     assert model.realizations[0].controls.status == "internally_generated"

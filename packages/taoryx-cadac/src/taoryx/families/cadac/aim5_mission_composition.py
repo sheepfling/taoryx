@@ -11,8 +11,10 @@ from taoryx.runtime import SensorBinding, SensorBus, SensorClockSpec
 from taoryx.sensor_api import MeasurementPacket, SensorBuildContext
 from taoryx.sensor_plugins.relative_state import RelativeStateTrackerConfig, RelativeStateTrackerSensor
 from taoryx.trajectory.configuration_contract import (
+    ConfigurationBound,
     ConfigurationGroupSchema,
     ConfigurationGroupValue,
+    ConfigurationInterval,
     ConfigurationParameterSchema,
     ConfigurationParameterValue,
     ConfigurationRole,
@@ -86,7 +88,7 @@ from .session_authority import (
 CADAC_PROVIDER_ID = "cadac"
 AIM5_MODEL_ID = "cadac.aim5.missile"
 AIM5_TARGET_MODEL_ID = "cadac.aim5.target"
-AIM5_MODEL_VERSION = "0.5.0"
+AIM5_MODEL_VERSION = "0.6.0"
 AIM5_REALIZATION_ID = "cadac-source-compatibility"
 AIM5_MISSION_ID = "air_intercept"
 AIM5_EXECUTOR_ID = "cadac.aim5.source_compatibility.batch"
@@ -704,6 +706,7 @@ def build_default_aim5_configuration(
         "missile": {},
         "target": {},
         "guidance": {},
+        "response_law": {},
         "runtime": {},
     }
     routes = {
@@ -720,6 +723,10 @@ def build_default_aim5_configuration(
         "target_aircraft_option": ("target", "aircraft_option"),
         "target_turn_g": ("target", "turn_g"),
         "navigation_gain": ("guidance", "navigation_gain"),
+        "alpha_max_deg": ("response_law", "alpha_max_deg"),
+        "rate_loop_time_constant_s": ("response_law", "rate_loop_time_constant_s"),
+        "proportional_integral_ratio": ("response_law", "proportional_integral_ratio"),
+        "acceleration_loop_gain_rad_s2": ("response_law", "acceleration_loop_gain_rad_s2"),
         "end_time_s": ("runtime", "end_time_s"),
         "sample_step_s": ("runtime", "sample_step_s"),
     }
@@ -775,8 +782,10 @@ def _parameter(
     value_type: ConfigurationValueType = "number",
     unit: str | None = None,
     frame: str | None = None,
+    role: ConfigurationRole | None = None,
+    interval: ConfigurationInterval | None = None,
 ) -> ConfigurationParameterSchema:
-    role: ConfigurationRole = "constraint" if parameter_id in {"end_time_s", "sample_step_s"} else "initialization"
+    resolved_role: ConfigurationRole = role or ("constraint" if parameter_id in {"end_time_s", "sample_step_s"} else "initialization")
     return ConfigurationParameterSchema(
         id=parameter_id,
         label=label,
@@ -787,7 +796,8 @@ def _parameter(
         required=False,
         default=default,
         default_declared=True,
-        role=role,
+        interval=interval,
+        role=resolved_role,
         compatible_fidelities=("pseudo_6dof",),
         frame=frame,
         provenance="lowered from the installed CADAC AIM5 source case",
@@ -852,6 +862,51 @@ def _build_configuration_schema(plugin: Aim5VehiclePlugin) -> TrajectoryConfigur
                 id="guidance",
                 label="Guidance",
                 children=(_parameter("navigation_gain", "Navigation gain", "AIM5 proportional-navigation gain.", default=missile.navigation_gain),),
+            ),
+            ConfigurationGroupSchema(
+                id="response_law",
+                label="Pseudo-6DoF response-law tuning",
+                description=(
+                    "Source-backed reduced-order alpha/beta and pitch/yaw-rate response settings. These parameters "
+                    "define a reproducible pseudo-6DoF variant; they do not create rigid-body attitude or effector dynamics."
+                ),
+                children=(
+                    _parameter(
+                        "alpha_max_deg",
+                        "Alpha/beta limit",
+                        "Source response-law maximum magnitude for angle of attack and sideslip.",
+                        default=missile.alpha_max_deg,
+                        unit="deg",
+                        role="variant",
+                        interval=_positive_interval(),
+                    ),
+                    _parameter(
+                        "rate_loop_time_constant_s",
+                        "Rate-loop time constant",
+                        "Source reduced-order pitch/yaw rate-loop time constant.",
+                        default=missile.rate_loop_time_constant_s,
+                        unit="s",
+                        role="variant",
+                        interval=_positive_interval(),
+                    ),
+                    _parameter(
+                        "proportional_integral_ratio",
+                        "PI ratio",
+                        "Source acceleration-response proportional-to-integral ratio.",
+                        default=missile.proportional_integral_ratio,
+                        role="variant",
+                        interval=_positive_interval(),
+                    ),
+                    _parameter(
+                        "acceleration_loop_gain_rad_s2",
+                        "Acceleration-loop gain",
+                        "Source reduced-order acceleration-loop gain.",
+                        default=missile.acceleration_loop_gain_rad_s2,
+                        unit="rad/s^2",
+                        role="variant",
+                        interval=_positive_interval(),
+                    ),
+                ),
             ),
             ConfigurationGroupSchema(
                 id="runtime",
@@ -1175,6 +1230,7 @@ def _overrides_from_resolved(resolved: Any) -> Aim5PluginOverrides:
     missile = _group(resolved, "missile")
     target = _group(resolved, "target")
     guidance = _group(resolved, "guidance")
+    response_law = _group(resolved, "response_law")
     runtime = _group(resolved, "runtime")
     return Aim5PluginOverrides(
         missile_position_ned_m=_vector3(missile["position_ned_m"]),
@@ -1190,6 +1246,10 @@ def _overrides_from_resolved(resolved: Any) -> Aim5PluginOverrides:
         target_aircraft_option=int(target["aircraft_option"]),
         target_turn_g=float(target["turn_g"]),
         navigation_gain=float(guidance["navigation_gain"]),
+        alpha_max_deg=float(response_law["alpha_max_deg"]),
+        rate_loop_time_constant_s=float(response_law["rate_loop_time_constant_s"]),
+        proportional_integral_ratio=float(response_law["proportional_integral_ratio"]),
+        acceleration_loop_gain_rad_s2=float(response_law["acceleration_loop_gain_rad_s2"]),
         end_time_s=float(runtime["end_time_s"]),
         sample_step_s=float(runtime["sample_step_s"]),
     )
@@ -1226,13 +1286,25 @@ def _configuration_unit(parameter_id: str) -> str | None:
     if parameter_id == "speed_mps":
         return "m/s"
     ####
-    if parameter_id in {"heading_deg", "flight_path_deg", "alpha_deg", "beta_deg"}:
+    if parameter_id in {"heading_deg", "flight_path_deg", "alpha_deg", "beta_deg", "alpha_max_deg"}:
         return "deg"
     ####
-    if parameter_id in {"end_time_s", "sample_step_s"}:
+    if parameter_id in {"rate_loop_time_constant_s", "end_time_s", "sample_step_s"}:
         return "s"
     ####
+    if parameter_id == "acceleration_loop_gain_rad_s2":
+        return "rad/s^2"
+    ####
     return None
+
+
+####
+
+
+def _positive_interval() -> ConfigurationInterval:
+    """Return the source-model domain for a strictly positive scalar."""
+
+    return ConfigurationInterval(minimum=ConfigurationBound(value=0.0, inclusive=False))
 
 
 ####

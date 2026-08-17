@@ -731,6 +731,13 @@ class ProviderModelAdvertisementConformance(BaseModel):
     configuration_schema_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     output_schema_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     status: Literal["pass", "fail"]
+    composition_schema_id: str = Field(min_length=1)
+    composition_feature_count: int = Field(ge=1)
+    available_composition_feature_count: int = Field(default=0, ge=0)
+    conditional_composition_feature_count: int = Field(default=0, ge=0)
+    declared_composition_feature_count: int = Field(default=0, ge=0)
+    blocked_composition_feature_count: int = Field(default=0, ge=0)
+    unavailable_composition_feature_count: int = Field(default=0, ge=0)
     common_runner_operations: tuple[Literal["batch", "step"], ...] = ()
     adapter_required_operations: tuple[Literal["batch", "step"], ...] = ()
     deployment_ids: tuple[str, ...] = ()
@@ -892,12 +899,8 @@ def audit_provider_advertisement(
                 )
             if "step" in realization.operations:
                 step_actions = tuple(item for item in active_channels if item.channel_kind == "action" and "step" in item.operations)
-                source_program_owns_step = (
-                    realization.controls.status == "internally_generated"
-                    and any(
-                        authority.command_owner == "source_program" and "step" in authority.operations
-                        for authority in active_authorities
-                    )
+                source_program_owns_step = realization.controls.status == "internally_generated" and any(
+                    authority.command_owner == "source_program" and "step" in authority.operations for authority in active_authorities
                 )
                 if not step_actions and not source_program_owns_step:
                     model_diagnostics.append(
@@ -1129,6 +1132,13 @@ def audit_provider_advertisement(
                 configuration_schema_fingerprint=model.configuration_schema_fingerprint,
                 output_schema_fingerprint=model.output_schema_fingerprint,
                 status="fail" if model_diagnostics else "pass",
+                composition_schema_id=model.composition_advertisement.schema_id,
+                composition_feature_count=len(model.composition_advertisement.features),
+                available_composition_feature_count=sum(item.status == "available" for item in model.composition_advertisement.features),
+                conditional_composition_feature_count=sum(item.status == "conditional" for item in model.composition_advertisement.features),
+                declared_composition_feature_count=sum(item.status == "declared" for item in model.composition_advertisement.features),
+                blocked_composition_feature_count=sum(item.status == "blocked" for item in model.composition_advertisement.features),
+                unavailable_composition_feature_count=sum(item.status == "not_available" for item in model.composition_advertisement.features),
                 common_runner_operations=model.common_runner_operations,
                 adapter_required_operations=tuple(
                     operation

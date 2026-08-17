@@ -14,7 +14,7 @@ from taoryx.families.cadac.sraam6_mission_composition import (
     build_default_sraam6_configuration,
     register_sraam6_mission_composition,
 )
-from taoryx.families.cadac.sraam6_plugin import Sraam6VehiclePlugin
+from taoryx.families.cadac.sraam6_plugin import Sraam6PluginOverrides, Sraam6VehiclePlugin
 from test_sraam6 import _write_sraam6_case
 
 from taoryx.trajectory.execution_contract import (
@@ -132,6 +132,57 @@ def test_sraam6_core_output_selection_keeps_full_rigid_body_truth(tmp_path: Path
         "position_ned_m",
         "velocity_ned_mps",
     ]
+
+
+####
+
+
+def test_sraam6_configuration_routes_public_tuning_into_the_plugin(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider = _provider(tmp_path)
+    configuration = build_default_sraam6_configuration(
+        provider,
+        overrides={
+            "fin_position_limit_deg": 11.0,
+            "fin_rate_limit_deg_s": 280.0,
+            "fin_natural_frequency_rad_s": 200.0,
+            "fin_damping_ratio": 0.9,
+            "seeker_acquisition_range_m": 8_000.0,
+            "seeker_filter_gain_per_s": 3.2,
+            "seeker_filter_natural_frequency_rad_s": 19.0,
+            "seeker_filter_damping_ratio": 0.85,
+            "structural_limit_g": 20.0,
+            "end_time_s": 0.01,
+            "sample_step_s": 0.005,
+        },
+    )
+    prepared = provider.validate_configuration(configuration)
+    captured: list[Sraam6PluginOverrides] = []
+    original = provider._plugin.run_batch
+
+    def capture(overrides: Sraam6PluginOverrides | None = None) -> object:
+        assert overrides is not None
+        captured.append(overrides)
+        return original(overrides)
+
+    monkeypatch.setattr(provider._plugin, "run_batch", capture)
+    provider.execute_batch(
+        MissionCompositionRunRequest(
+            request_id="sraam6-tuning",
+            provider_id="cadac",
+            provider_version=provider.metadata.version,
+            prepared_configuration=prepared,
+            output=MissionCompositionOutputSelection(mode="core"),
+        )
+    )
+
+    assert prepared.resolved["actuation"]["fin_position_limit_deg"] == 11.0
+    assert prepared.resolved["seeker"]["acquisition_range_m"] == 8_000.0
+    assert captured[0].fin_rate_limit_deg_s == 280.0
+    assert captured[0].seeker_filter_natural_frequency_rad_s == 19.0
+    assert captured[0].structural_limit_g == 20.0
 
 
 ####

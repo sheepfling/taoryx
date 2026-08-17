@@ -107,7 +107,12 @@ def render_model_overview_markdown(report: Mapping[str, object]) -> str:
         provider_metadata = _mapping(provider.get("metadata"))
         plugin = _mapping(provider_card.get("plugin"))
         plugin_metadata = _mapping(plugin.get("metadata"))
-        display_name = _text(provider_metadata.get("presentation"), "display_name", fallback=_text(provider_metadata.get("name")))
+        presentation = _mapping(provider_metadata.get("presentation"))
+        display_name = _text(presentation, "display_name", fallback=_text(provider_metadata.get("name")))
+        provider_summary = _text(presentation.get("summary"), fallback="")
+        provider_description = _text(provider_metadata.get("description"), fallback="")
+        categories = _code_list(presentation.get("categories"))
+        links = _mapping_records(presentation.get("links"))
         lines.extend(
             (
                 f"## {display_name}",
@@ -118,8 +123,25 @@ def render_model_overview_markdown(report: Mapping[str, object]) -> str:
                 f"{_text(plugin_metadata.get('version'), fallback='unknown version')})",
                 f"- Provider status: `{_text(provider_metadata.get('status'))}`",
                 "",
+                "#### Provider scope",
+                "",
             )
         )
+        if provider_summary:
+            lines.extend((provider_summary, ""))
+        if provider_description:
+            lines.extend((provider_description, ""))
+        if categories != "—":
+            lines.append(f"- Categories: {categories}")
+        if links:
+            rendered_links = ", ".join(
+                f"[{_text(link.get('label'))}]({_text(link.get('uri'))})"
+                for link in links
+                if _text(link.get("label"), fallback="") and _text(link.get("uri"), fallback="")
+            )
+            if rendered_links:
+                lines.append(f"- Documentation: {rendered_links}")
+        lines.append("")
         for card in _mapping_records(provider_card.get("models")):
             _render_model_card_markdown(lines, card)
 
@@ -138,11 +160,7 @@ def _provider_card(
     """Build every selected model card from one owning provider."""
 
     owner = next(
-        (
-            item
-            for item in plugins.records("mission_composition_provider")
-            if item.id == provider.metadata.id
-        ),
+        (item for item in plugins.records("mission_composition_provider") if item.id == provider.metadata.id),
         None,
     )
     if owner is None:
@@ -204,6 +222,7 @@ def _model_card(
         },
         "presentation": model.presentation.model_dump(mode="json"),
         "description": model.description,
+        "composition": model.composition_advertisement.model_dump(mode="json", by_alias=True),
         "fidelity_ladder": [_fidelity_card(item) for item in model.fidelities],
         "realizations": [_realization_card(item) for item in model.realizations],
         "missions": [_mission_card(item) for item in model.mission_templates],
@@ -298,16 +317,8 @@ def _configuration_card(root: ConfigurationNode, schema: TrajectoryConfiguration
     """Flatten editable parameters while retaining initialization and segment shape."""
 
     parameters = _configuration_parameter_records(root)
-    initialization_choices = [
-        _choice_card(node, path=())
-        for node in _nodes_named(root, "initialization")
-        if isinstance(node, ConfigurationChoiceSchema)
-    ]
-    segment_sequences = [
-        _sequence_card(node, path=())
-        for node in _nodes_named(root, "segments")
-        if isinstance(node, ConfigurationSequenceSchema)
-    ]
+    initialization_choices = [_choice_card(node, path=()) for node in _nodes_named(root, "initialization") if isinstance(node, ConfigurationChoiceSchema)]
+    segment_sequences = [_sequence_card(node, path=()) for node in _nodes_named(root, "segments") if isinstance(node, ConfigurationSequenceSchema)]
     provenance_count = sum(bool(_text(item.get("provenance"))) for item in parameters)
     return {
         "schema_id": schema.schema_id,
@@ -321,8 +332,7 @@ def _configuration_card(root: ConfigurationNode, schema: TrajectoryConfiguration
             "parameters_with_declared_provenance": provenance_count,
             "parameters_without_declared_provenance": len(parameters) - provenance_count,
             "claim_boundary": (
-                "These are metadata-field counts only. A populated provenance field does not independently validate "
-                "the source or qualify the parameter value."
+                "These are metadata-field counts only. A populated provenance field does not independently validate the source or qualify the parameter value."
             ),
         },
         "parameters": parameters,
@@ -346,17 +356,9 @@ def _configuration_parameter_records(
     if isinstance(node, ConfigurationParameterSchema):
         return [_parameter_card(node, path=(*path, node.id))]
     if isinstance(node, ConfigurationGroupSchema):
-        return [
-            record
-            for child in node.children
-            for record in _configuration_parameter_records(child, path=(*path, node.id))
-        ]
+        return [record for child in node.children for record in _configuration_parameter_records(child, path=(*path, node.id))]
     if isinstance(node, ConfigurationChoiceSchema):
-        return [
-            record
-            for variant in node.variants
-            for record in _configuration_parameter_records(variant.node, path=(*path, node.id, variant.id))
-        ]
+        return [record for variant in node.variants for record in _configuration_parameter_records(variant.node, path=(*path, node.id, variant.id))]
     if isinstance(node, ConfigurationSequenceSchema):
         return _configuration_parameter_records(node.item, path=(*path, f"{node.id}[]"))
     if isinstance(node, ConfigurationOptionalSchema):
@@ -527,25 +529,18 @@ def _tuning_card(
     """Describe registered tuning inputs without running their numerical screens."""
 
     registrations = tuple(
-        item
-        for item in tuning_campaigns.registrations
-        if item.model_id == model_id and provider_id in (item.provider_id, *item.provider_aliases)
+        item for item in tuning_campaigns.registrations if item.model_id == model_id and provider_id in (item.provider_id, *item.provider_aliases)
     )
     campaigns: list[dict[str, object]] = []
     for registration in registrations:
         definition = registration.campaign_factory().as_dict()
         if definition["campaign_id"] != registration.id:
-            raise ValueError(
-                f"tuning registration {registration.id!r} returned campaign {definition['campaign_id']!r}"
-            )
+            raise ValueError(f"tuning registration {registration.id!r} returned campaign {definition['campaign_id']!r}")
         campaigns.append(
             {
                 "registration": registration.public_dict(),
                 "campaign_definition": definition,
-                "command": (
-                    f"taoryx model tune {provider_id} {model_id} --fidelity {registration.fidelity} "
-                    f"--campaign {registration.id}"
-                ),
+                "command": (f"taoryx model tune {provider_id} {model_id} --fidelity {registration.fidelity} --campaign {registration.id}"),
             }
         )
     return {
@@ -576,6 +571,36 @@ def _render_model_card_markdown(lines: list[str], card: Mapping[str, object]) ->
             f"- Family: `{_text(identity.get('family_id'), fallback='not declared')}`",
             f"- Kind / status: `{_text(identity.get('model_kind'))}` / `{_text(identity.get('status'))}`",
             f"- Model metadata fingerprint: `{_text(identity.get('metadata_fingerprint'))}`",
+            "",
+            "#### Composition surface",
+            "",
+        )
+    )
+    composition = _mapping(card.get("composition"))
+    composition_features = _mapping_records(composition.get("features"))
+    active_composition_features = tuple(item for item in composition_features if _text(item.get("status")) != "not_available")
+    composition_rows = [
+        (
+            _text(item.get("category")),
+            _text(item.get("id")),
+            _text(item.get("status")),
+            _code_list(item.get("operations")),
+            _code_list(item.get("mutation_timing")),
+        )
+        for item in active_composition_features
+    ]
+    lines.extend(
+        _markdown_table(
+            ("Category", "Feature", "Status", "Operations", "Mutation timing"),
+            composition_rows,
+        )
+    )
+    lines.extend(
+        (
+            "",
+            f"- Advertisement: `{_text(composition.get('schema'))}`; "
+            f"{len(active_composition_features)} usable/declared/blocked features and "
+            f"{len(composition_features) - len(active_composition_features)} explicitly unavailable features.",
             "",
             "#### Fidelity ladder",
             "",
@@ -774,10 +799,7 @@ def _sequence_summary(sequence: Mapping[str, object]) -> str:
 def _operation_summary(value: object) -> str:
     """Summarize mission operation availability without dropping blocked rows."""
 
-    return "; ".join(
-        f"`{_text(item.get('operation'))}`:{_text(item.get('status'))}"
-        for item in _mapping_records(value)
-    ) or "—"
+    return "; ".join(f"`{_text(item.get('operation'))}`:{_text(item.get('status'))}" for item in _mapping_records(value)) or "—"
     ####
 
 

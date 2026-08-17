@@ -6,6 +6,7 @@ import pytest
 from taoryx.families.cadac.ads6_sam_mission_composition import (
     ADS6_SAM_FIN_REALIZATION_ID,
     ADS6_SAM_MODEL_ID,
+    ADS6_SAM_MODEL_VERSION,
     ADS6_SAM_RCS_REALIZATION_ID,
     ADS6_SAM_T3_FIDELITY_ID,
     ADS6_SAM_T4_FIDELITY_ID,
@@ -14,7 +15,7 @@ from taoryx.families.cadac.ads6_sam_mission_composition import (
     build_default_ads6_sam_configuration,
     register_ads6_sam_mission_composition,
 )
-from taoryx.families.cadac.ads6_sam_plugin import Ads6SamVehiclePlugin
+from taoryx.families.cadac.ads6_sam_plugin import Ads6SamPluginOverrides, Ads6SamVehiclePlugin
 from test_ads6_sam import _write_ads6_sam_case
 
 from taoryx.trajectory.execution_contract import (
@@ -100,7 +101,7 @@ def test_ads6_sam_common_runner_preserves_exact_phase_fidelity(
         MissionCompositionRunRequest(
             request_id=f"ads6-sam-{phase}",
             provider_id="cadac",
-            provider_version="0.8.0",
+            provider_version=ADS6_SAM_MODEL_VERSION,
             prepared_configuration=prepared,
             output=MissionCompositionOutputSelection(mode="all"),
         )
@@ -132,7 +133,7 @@ def test_ads6_sam_core_selection_keeps_full_rigid_body_truth(tmp_path: Path) -> 
         MissionCompositionRunRequest(
             request_id="ads6-sam-core",
             provider_id="cadac",
-            provider_version="0.8.0",
+            provider_version=ADS6_SAM_MODEL_VERSION,
             prepared_configuration=prepared,
             output=MissionCompositionOutputSelection(mode="core"),
         )
@@ -144,6 +145,56 @@ def test_ads6_sam_core_selection_keeps_full_rigid_body_truth(tmp_path: Path) -> 
         "quaternion_wxyz",
         "body_rates_rad_s",
     ]
+
+
+####
+
+
+def test_ads6_sam_configuration_routes_public_effector_tuning_into_the_plugin(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider = _provider(tmp_path)
+    configuration = build_default_ads6_sam_configuration(
+        provider,
+        overrides={
+            "fin_position_limit_deg": 14.0,
+            "fin_rate_limit_deg_s": 320.0,
+            "fin_natural_frequency_rad_s": 225.0,
+            "fin_damping_ratio": 0.8,
+            "tvc_position_limit_deg": 6.0,
+            "tvc_rate_limit_deg_s": 160.0,
+            "tvc_natural_frequency_rad_s": 90.0,
+            "tvc_damping_ratio": 0.9,
+            "tvc_initial_gain": 0.6,
+            "end_time_s": 0.01,
+            "sample_step_s": 0.005,
+        },
+    )
+    prepared = provider.validate_configuration(configuration)
+    captured: list[Ads6SamPluginOverrides] = []
+    original = provider._plugin.run_batch
+
+    def capture(overrides: Ads6SamPluginOverrides | None = None) -> object:
+        assert overrides is not None
+        captured.append(overrides)
+        return original(overrides)
+
+    monkeypatch.setattr(provider._plugin, "run_batch", capture)
+    provider.execute_batch(
+        MissionCompositionRunRequest(
+            request_id="ads6-sam-tuning",
+            provider_id="cadac",
+            provider_version=ADS6_SAM_MODEL_VERSION,
+            prepared_configuration=prepared,
+            output=MissionCompositionOutputSelection(mode="core"),
+        )
+    )
+
+    assert prepared.resolved["actuation"]["fin_position_limit_deg"] == 14.0
+    assert captured[0].fin_rate_limit_deg_s == 320.0
+    assert captured[0].tvc_natural_frequency_rad_s == 90.0
+    assert captured[0].tvc_initial_gain == 0.6
 
 
 ####

@@ -11,7 +11,9 @@ This page is the top-level map. Use
 [vehicle plug-in isolation](vehicle-plugin-isolation.md) for the detailed
 ownership and verification evidence, and
 [authoring a vehicle plug-in](vehicle-plugin-authoring.md) for the contributor
-workflow.
+workflow. The provider-neutral capability product shared by every direct
+package is the
+[Vehicle Composition Advertisement API](vehicle-composition-advertisement-api.md).
 
 ## Target topology
 

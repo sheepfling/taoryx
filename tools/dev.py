@@ -99,6 +99,7 @@ PYRIGHT_QUALITY_PATHS = (
     "src/taoryx/compatibility/vehicle_catalog_resources.py",
     "src/taoryx/vehicle_catalog_resources.py",
     "src/taoryx/trajectory/catalog_mission_composition.py",
+    "packages/taoryx-parametric-interceptors/src/taoryx_parametric_interceptors",
     "tools/dev.py",
     "tools/validate_plugin_developer_route.py",
     "tools/verify_plugin_wheels.py",

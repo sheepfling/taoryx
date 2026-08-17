@@ -1,6 +1,6 @@
 # Installing Taoryx and its model packages
 
-Taoryx is distributed as a small core host plus thirteen direct official
+Taoryx is distributed as a small core host plus fourteen direct official
 plug-in distributions and one compatibility aggregate. Choose the smallest
 profile that contains the work you need; contributors and automation agents
 should use the direct `developer` profile by default.
@@ -31,6 +31,7 @@ taoryx (language, compiler, engine, registries, common CLI)
 ├── taoryx-hummingbird
 ├── taoryx-nesc requires taoryx-daveml
 ├── taoryx-passive-bodies
+├── taoryx-parametric-interceptors
 ├── taoryx-simple-aero
 ├── taoryx-dual-launch
 ├── taoryx-x15
@@ -62,6 +63,7 @@ taoryx-cadac (optional source-bound CADAC catalog and converter)
 | `taoryx-hummingbird` | AscTec Hummingbird source assets, fidelity/control metadata, composition provider, rotor screens, and tuning campaigns | `taoryx` |
 | `taoryx-nesc` | NASA/NESC Scenario 17 source-replay assets, adapters, focused composition provider, and stage-separation parent contract | `taoryx`, `taoryx-daveml` |
 | `taoryx-passive-bodies` | reusable tumbling/released bodies, direct-release witnesses, and composition-selected child propagation | `taoryx` |
+| `taoryx-parametric-interceptors` | evidence-aware parametric SAM/interceptor profiles, assumption-case resolution, and selectable guided point-mass or attitude-response pseudo-6DOF Composition tiers | `taoryx` |
 | `taoryx-simple-aero` | analytical Simple Aero models, fixtures, and the point-mass provider | `taoryx` |
 | `taoryx-dual-launch` | synthetic dual-launch glider workflow, source-problem lowering, focused batch provider, and package-owned endpoint witness | `taoryx` |
 | `taoryx-x15` | X-15 source tables, local direct-wrench and source-surface controller screens, focused Composition provider, campaigns, and family-owned evidence | `taoryx` |
@@ -103,15 +105,18 @@ python -m tools.dev doctor
 On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1` instead.
 
 `bootstrap` creates or reuses `.venv`, installs `taoryx[dev]`, installs the
-thirteen direct local plug-in distributions in editable mode, and runs the
+fourteen direct local plug-in distributions in editable mode, and runs the
 strict `developer` installation check. The explicit second check is useful in
-agent logs and after changing package metadata. Use `--profile full` only when
-you are intentionally validating compatibility consumers.
+agent logs. After changing a distribution's `pyproject.toml` metadata—especially
+its version or entry points—rerun `python -m tools.dev bootstrap` before
+`install-check`; editable source imports update immediately, but installed
+distribution metadata must be refreshed. Use `--profile full` only when you
+are intentionally validating compatibility consumers.
 
 Do not treat a passing source-tree test as proof that the distributions are
 installed. The repository test configuration adds sibling `src` directories
 to `PYTHONPATH`; `install-check` deliberately ignores that source fallback and
-requires real distribution metadata plus all thirteen direct `taoryx.plugins`
+requires real distribution metadata plus all fourteen direct `taoryx.plugins`
 entry points.
 
 ## Install from a source checkout
@@ -142,6 +147,7 @@ python -m pip install \
   -e packages/taoryx-hummingbird \
   -e packages/taoryx-nesc \
   -e packages/taoryx-passive-bodies \
+  -e packages/taoryx-parametric-interceptors \
   -e packages/taoryx-simple-aero \
   -e packages/taoryx-dual-launch \
   -e packages/taoryx-x15 \
@@ -180,6 +186,7 @@ python -m pip install \
   -e packages/taoryx-hummingbird \
   -e packages/taoryx-nesc \
   -e packages/taoryx-passive-bodies \
+  -e packages/taoryx-parametric-interceptors \
   -e packages/taoryx-simple-aero \
   -e packages/taoryx-dual-launch \
   -e packages/taoryx-x15 \
@@ -214,10 +221,11 @@ python -m pip install --find-links /path/to/taoryx-wheels \
   taoryx-reference-models==0.1.0a0 \
   taoryx-debug-models==0.1.0a0 \
   taoryx-passive-bodies==0.1.0a0 \
+  taoryx-parametric-interceptors==0.1.0a0 \
   taoryx-reachability==0.1.0a0
 ```
 
-Keep the fifteen Taoryx distributions on compatible versions. The current alpha
+Keep the sixteen Taoryx distributions on compatible versions. The current alpha
 plug-ins require `taoryx>=0.1.0a0,<0.2`; pip should resolve the dependency
 graph rather than installing plug-in wheels with `--no-deps`.
 
@@ -301,8 +309,8 @@ taoryx model plan \
 ```
 
 `model list` exposes focused A320, F-16, HL-20, Hummingbird, NESC
-source-replay, X8, B747, and `tumbling_body` passive-body providers in the
-direct developer profile. The compatibility aggregate appears only after its
+source-replay, X8, B747, `tumbling_body` passive-body, and generic parametric
+interceptor providers in the direct developer profile. The compatibility aggregate appears only after its
 explicit profile is installed. The A320 pseudo-6DOF entry, Hummingbird
 pseudo-6DOF entry, X8/B747 lower-tier guidance, and Hummingbird source-hover
 rotor screen also advertise registered tuning campaign IDs.
@@ -311,7 +319,7 @@ for scaffold, compile, and tune commands.
 
 `--no-builtin` is important in a checkout: it disables the convenience source
 fallback and shows only installed Python entry points. A full profile is ready
-only when the check reports all fifteen distributions and these fourteen plug-in IDs:
+only when the check reports all sixteen distributions and these fifteen plug-in IDs:
 
 ```text
 taoryx.daveml
@@ -322,6 +330,7 @@ taoryx.hl20
 taoryx.hummingbird
 taoryx.nesc
 taoryx.passive-bodies
+taoryx.parametric-interceptors
 taoryx.simple-aero
 taoryx.dual-launch
 taoryx.x15

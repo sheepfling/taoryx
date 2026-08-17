@@ -114,6 +114,83 @@ TrajectoryControlIntentResolution = Literal[
     "blocked",
     "unsupported",
 ]
+CompositionFeatureCategory = Literal[
+    "authoring_mode",
+    "execution_mode",
+    "graph_form",
+    "node_kind",
+    "transition_kind",
+    "rearrangement",
+    "runtime_transition",
+    "entity_topology",
+    "state_transfer",
+]
+CompositionFeatureStatus = Literal["available", "conditional", "declared", "blocked", "not_available"]
+CompositionFeatureOperation = Literal["validate", "batch", "step"]
+CompositionMutationTiming = Literal[
+    "configuration",
+    "preflight",
+    "between_segments",
+    "accepted_boundary",
+    "session_boundary",
+    "in_step",
+]
+
+# This vocabulary is intentionally closed. Adding a new graph primitive or
+# mutation semantic changes what generic consumers must understand and
+# therefore requires a new advertisement schema version.
+COMPOSITION_FEATURE_VOCABULARY: tuple[tuple[CompositionFeatureCategory, tuple[str, ...]], ...] = (
+    (
+        "authoring_mode",
+        ("fixed_template", "caller_ordered_sequence", "caller_authored_graph", "provider_generated_graph"),
+    ),
+    (
+        "execution_mode",
+        ("batch", "stateful_session", "provider_controlled_program", "caller_controlled_actions", "multi_entity"),
+    ),
+    (
+        "graph_form",
+        (
+            "linear_sequence",
+            "directed_acyclic",
+            "conditional_branching",
+            "cyclic",
+            "parallel_fork_join",
+            "nested_subgraph",
+            "runtime_mutable",
+        ),
+    ),
+    (
+        "node_kind",
+        ("segment", "decision", "fork", "join", "deployment", "synchronization", "terminal", "subgraph", "external"),
+    ),
+    (
+        "transition_kind",
+        ("success", "timeout", "abort", "resource_limit", "envelope_limit", "event", "condition", "manual"),
+    ),
+    (
+        "rearrangement",
+        ("reorder", "insert", "remove", "replace", "duplicate", "rewire", "enable_disable", "parameter_patch", "bind_deployment"),
+    ),
+    (
+        "runtime_transition",
+        ("authority_switch", "fidelity_switch", "mode_switch", "graph_patch", "model_migration"),
+    ),
+    (
+        "entity_topology",
+        ("spawn", "attach", "detach", "split", "merge", "replace_child", "recursive_spawn"),
+    ),
+    (
+        "state_transfer",
+        (
+            "previous_terminal_truth_state",
+            "accepted_boundary_snapshot",
+            "state_continuous_reference_handoff",
+            "fidelity_projection",
+            "provider_defined",
+        ),
+    ),
+)
 
 
 def _metadata_fingerprint(payload: object) -> str:
@@ -1547,6 +1624,110 @@ class TrajectoryModelCapabilities(BaseModel):
     ####
 
 
+class TrajectoryCompositionFeatureMetadata(BaseModel):
+    """One normalized composition capability with exact applicability.
+
+    ``category`` and ``id`` form a closed vocabulary.  Status is deliberately
+    independent from presence: unsupported and blocked behaviors remain in
+    every advertisement so clients never infer them from omission.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    category: CompositionFeatureCategory
+    id: str = Field(min_length=1)
+    status: CompositionFeatureStatus
+    operations: tuple[CompositionFeatureOperation, ...] = ()
+    mutation_timing: tuple[CompositionMutationTiming, ...] = ()
+    mission_template_ids: tuple[str, ...] = ()
+    fidelity_ids: tuple[str, ...] = ()
+    realization_ids: tuple[str, ...] = ()
+    requirements: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_feature(self) -> TrajectoryCompositionFeatureMetadata:
+        vocabulary = dict(COMPOSITION_FEATURE_VOCABULARY)
+        if self.id not in vocabulary[self.category]:
+            raise ValueError(f"unknown {self.category} composition feature {self.id!r}")
+        for name in (
+            "operations",
+            "mutation_timing",
+            "mission_template_ids",
+            "fidelity_ids",
+            "realization_ids",
+            "requirements",
+            "blockers",
+        ):
+            values = getattr(self, name)
+            if len(values) != len(set(values)):
+                raise ValueError(f"composition feature {self.category}/{self.id} has duplicate {name}")
+        if self.status in {"available", "conditional"} and not self.operations:
+            raise ValueError(f"usable composition feature {self.category}/{self.id} requires an operation")
+        if self.status == "blocked" and not self.blockers:
+            raise ValueError(f"blocked composition feature {self.category}/{self.id} requires blockers")
+        if self.status == "not_available" and (
+            self.operations
+            or self.mutation_timing
+            or self.mission_template_ids
+            or self.fidelity_ids
+            or self.realization_ids
+            or self.requirements
+            or self.blockers
+        ):
+            raise ValueError(f"unavailable composition feature {self.category}/{self.id} cannot advertise applicability")
+        return self
+        ####
+
+    ####
+
+
+class TrajectoryCompositionAdvertisement(BaseModel):
+    """Exhaustive provider-neutral advertisement of composition semantics.
+
+    The feature matrix is a capability partition, not an inventory snapshot.
+    Every feature in the versioned vocabulary appears exactly once, including
+    behaviors a model does not support.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid", populate_by_name=True)
+
+    schema_id: Literal["taoryx.trajectory-composition-advertisement/v1"] = Field(
+        default="taoryx.trajectory-composition-advertisement/v1",
+        alias="schema",
+        serialization_alias="schema",
+    )
+    features: tuple[TrajectoryCompositionFeatureMetadata, ...] = Field(min_length=1)
+    claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_complete_partition(self) -> TrajectoryCompositionAdvertisement:
+        expected = tuple((category, identifier) for category, identifiers in COMPOSITION_FEATURE_VOCABULARY for identifier in identifiers)
+        actual = tuple((item.category, item.id) for item in self.features)
+        if len(actual) != len(set(actual)):
+            raise ValueError("composition advertisement contains duplicate feature keys")
+        missing = tuple(item for item in expected if item not in set(actual))
+        unknown = tuple(item for item in actual if item not in set(expected))
+        if missing or unknown:
+            raise ValueError(f"composition advertisement must exhaust the v1 feature vocabulary; missing={missing!r}, unknown={unknown!r}")
+        if actual != expected:
+            raise ValueError("composition advertisement features are not in canonical vocabulary order")
+        return self
+        ####
+
+    def feature(self, category: CompositionFeatureCategory, identifier: str) -> TrajectoryCompositionFeatureMetadata:
+        """Return one exact feature row without client-side matrix parsing."""
+
+        for item in self.features:
+            if item.category == category and item.id == identifier:
+                return item
+        raise KeyError(f"unknown composition feature {category}/{identifier}")
+        ####
+
+    ####
+
+
 class TrajectoryFidelityTransition(BaseModel):
     """Explicit adjacent movement through a model's fidelity ladder."""
 
@@ -1783,6 +1964,447 @@ class TrajectoryDeploymentMetadata(BaseModel):
     ####
 
 
+def build_trajectory_composition_advertisement(
+    *,
+    capabilities: TrajectoryModelCapabilities,
+    realizations: tuple[TrajectoryRealizationMetadata, ...],
+    mission_templates: tuple[TrajectoryMissionTemplateMetadata, ...],
+    deployments: tuple[TrajectoryDeploymentMetadata, ...],
+    output_schema: TrajectoryOutputSchema,
+    fidelity_transitions: tuple[TrajectoryFidelityTransition, ...],
+) -> TrajectoryCompositionAdvertisement:
+    """Derive the canonical composition feature matrix from model authorities.
+
+    This projection intentionally cannot promote behavior.  Exact mission
+    operations, control authorities, deployment records, entity-output
+    metadata, and fidelity transitions remain authoritative; the normalized
+    matrix gives generic clients one exhaustive place to inspect them.
+    """
+
+    advertised_operations = {operation.operation for mission in mission_templates for operation in mission.operations if operation.status == "available"}
+    unavailable_operations = advertised_operations - set(capabilities.operations)
+    if unavailable_operations:
+        raise ValueError(f"composition operations are absent from model capabilities: {sorted(unavailable_operations)!r}")
+
+    features = {
+        (category, identifier): TrajectoryCompositionFeatureMetadata(
+            category=category,
+            id=identifier,
+            status="not_available",
+            claim_boundary="No provider-neutral support for this v1 composition feature is advertised by the model.",
+        )
+        for category, identifiers in COMPOSITION_FEATURE_VOCABULARY
+        for identifier in identifiers
+    }
+
+    operation_order: tuple[CompositionFeatureOperation, ...] = ("validate", "batch", "step")
+
+    def publish(
+        category: CompositionFeatureCategory,
+        identifier: str,
+        *,
+        status: CompositionFeatureStatus,
+        operations: Sequence[CompositionFeatureOperation] = (),
+        mutation_timing: Sequence[CompositionMutationTiming] = (),
+        mission_template_ids: Sequence[str] = (),
+        fidelity_ids: Sequence[str] = (),
+        realization_ids: Sequence[str] = (),
+        requirements: Sequence[str] = (),
+        blockers: Sequence[str] = (),
+        claim_boundary: str,
+    ) -> None:
+        features[(category, identifier)] = TrajectoryCompositionFeatureMetadata(
+            category=category,
+            id=identifier,
+            status=status,
+            operations=tuple(item for item in operation_order if item in set(operations)),
+            mutation_timing=tuple(dict.fromkeys(mutation_timing)),
+            mission_template_ids=tuple(dict.fromkeys(mission_template_ids)),
+            fidelity_ids=tuple(dict.fromkeys(fidelity_ids)),
+            realization_ids=tuple(dict.fromkeys(realization_ids)),
+            requirements=tuple(dict.fromkeys(requirements)),
+            blockers=tuple(dict.fromkeys(blockers)),
+            claim_boundary=claim_boundary,
+        )
+        ####
+
+    def mission_scope(
+        selected: Sequence[TrajectoryMissionTemplateMetadata],
+    ) -> tuple[tuple[CompositionFeatureOperation, ...], tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
+        selected_ids = {item.id for item in selected}
+        rows = tuple(
+            (mission, operation)
+            for mission in mission_templates
+            if mission.id in selected_ids
+            for operation in mission.operations
+            if operation.status == "available"
+        )
+        operations = tuple(item for item in operation_order if any(row.operation == item for _, row in rows))
+        mission_ids = tuple(mission.id for mission in selected if any(owner.id == mission.id for owner, _ in rows))
+        fidelity_ids = tuple(dict.fromkeys(row.fidelity for _, row in rows))
+        realization_ids = tuple(dict.fromkeys(row.realization_id for _, row in rows if row.realization_id is not None))
+        return operations, mission_ids, fidelity_ids, realization_ids
+        ####
+
+    fixed_missions = tuple(item for item in mission_templates if item.open_segment_sequence is None)
+    open_missions = tuple(item for item in mission_templates if item.open_segment_sequence is not None)
+    all_mission_operations, all_mission_ids, all_fidelity_ids, all_realization_ids = mission_scope(mission_templates)
+
+    if fixed_missions:
+        operations, mission_ids, fidelity_ids, realization_ids = mission_scope(fixed_missions)
+        publish(
+            "authoring_mode",
+            "fixed_template",
+            status="available",
+            operations=operations or ("validate",),
+            mutation_timing=("configuration", "preflight"),
+            mission_template_ids=mission_ids,
+            fidelity_ids=fidelity_ids,
+            realization_ids=realization_ids,
+            claim_boundary="Only each template's advertised ordered segment recipe is selectable.",
+        )
+    if open_missions:
+        operations, mission_ids, fidelity_ids, realization_ids = mission_scope(open_missions)
+        publish(
+            "authoring_mode",
+            "caller_ordered_sequence",
+            status="conditional",
+            operations=operations or ("validate",),
+            mutation_timing=("configuration", "preflight"),
+            mission_template_ids=mission_ids,
+            fidelity_ids=fidelity_ids,
+            realization_ids=realization_ids,
+            requirements=("The sequence must satisfy its advertised segment vocabulary and cardinality.",),
+            claim_boundary="Caller control is limited to the exact open-sequence grammar; it is not arbitrary graph authoring.",
+        )
+
+    available_rows = tuple((mission, operation) for mission in mission_templates for operation in mission.operations if operation.status == "available")
+    for operation_id, feature_id in (("batch", "batch"), ("step", "stateful_session")):
+        rows = tuple((mission, operation) for mission, operation in available_rows if operation.operation == operation_id)
+        if not rows:
+            continue
+        publish(
+            "execution_mode",
+            feature_id,
+            status="conditional",
+            operations=(operation_id,),  # type: ignore[arg-type]
+            mission_template_ids=tuple(dict.fromkeys(mission.id for mission, _ in rows)),
+            fidelity_ids=tuple(dict.fromkeys(operation.fidelity for _, operation in rows)),
+            realization_ids=tuple(dict.fromkeys(operation.realization_id for _, operation in rows if operation.realization_id is not None)),
+            requirements=("The exact mission/fidelity/realization operation row must be available.",),
+            claim_boundary="Availability applies only to the listed exact operation tuples and their registered executor.",
+        )
+
+    caller_authorities: list[tuple[TrajectoryRealizationMetadata, TrajectoryControlAuthorityMetadata]] = []
+    provider_authorities: list[tuple[TrajectoryRealizationMetadata, TrajectoryControlAuthorityMetadata]] = []
+    switchable_realization_ids: list[str] = []
+    for realization in realizations:
+        switchable = tuple(
+            authority for authority in realization.controls.authorities if authority.switching_policy == "explicit_bumpless" and "step" in authority.operations
+        )
+        if len(switchable) >= 2:
+            switchable_realization_ids.append(realization.id)
+        for authority in realization.controls.authorities:
+            if authority.command_owner == "caller" and authority.operations:
+                caller_authorities.append((realization, authority))
+            if authority.command_owner in {"source_program", "provider_controller"} and authority.operations:
+                provider_authorities.append((realization, authority))
+
+    for feature_id, authorities in (
+        ("caller_controlled_actions", caller_authorities),
+        ("provider_controlled_program", provider_authorities),
+    ):
+        if authorities:
+            publish(
+                "execution_mode",
+                feature_id,
+                status="conditional",
+                operations=tuple(operation for _, authority in authorities for operation in authority.operations),
+                realization_ids=tuple(realization.id for realization, _ in authorities),
+                requirements=("The selected realization and authority profile must be currently available.",),
+                claim_boundary="This row classifies command ownership; it does not extend any authority's exact channel set.",
+            )
+
+    dynamic_deployments = tuple(item for item in deployments if item.status == "available" and item.lifecycle == "independently_propagated")
+    if output_schema.entity_output.supports_multiple_entities:
+        multi_entity_rows = tuple((mission, operation) for mission, operation in available_rows if operation.operation in {"batch", "step"})
+        multi_entity_operations = tuple(operation for item in dynamic_deployments for operation in item.operations)
+        if not multi_entity_operations:
+            multi_entity_operations = tuple(
+                item for item in operation_order if item in {operation.operation for _, operation in available_rows} and item in {"batch", "step"}
+            )
+        publish(
+            "execution_mode",
+            "multi_entity",
+            status="conditional",
+            operations=multi_entity_operations,
+            mission_template_ids=tuple(dict.fromkeys(mission.id for mission, _ in multi_entity_rows)),
+            fidelity_ids=tuple(
+                dict.fromkeys(
+                    (
+                        *(fidelity for item in dynamic_deployments for fidelity in item.compatible_fidelities),
+                        *(operation.fidelity for _, operation in multi_entity_rows),
+                    )
+                )
+            ),
+            realization_ids=tuple(dict.fromkeys(operation.realization_id for _, operation in multi_entity_rows if operation.realization_id is not None)),
+            requirements=("The exact operation must advertise multi-entity output; dynamic children additionally require an available deployment binding.",),
+            claim_boundary=(
+                "Multi-entity output may contain provider-owned roots or advertised deployment children. Only deployment children imply lineage or topology mutation."
+            ),
+        )
+
+    if mission_templates:
+        publish(
+            "graph_form",
+            "linear_sequence",
+            status="available",
+            operations=all_mission_operations or ("validate",),
+            mission_template_ids=all_mission_ids,
+            fidelity_ids=all_fidelity_ids,
+            realization_ids=all_realization_ids,
+            claim_boundary="Execution follows one ordered segment sequence; no unlisted branch or edge is implied.",
+        )
+        for node_id in ("segment", "terminal"):
+            publish(
+                "node_kind",
+                node_id,
+                status="available",
+                operations=all_mission_operations or ("validate",),
+                mission_template_ids=all_mission_ids,
+                fidelity_ids=all_fidelity_ids,
+                realization_ids=all_realization_ids,
+                claim_boundary="The node is part of the advertised linear mission grammar only.",
+            )
+        publish(
+            "transition_kind",
+            "success",
+            status="available",
+            operations=all_mission_operations or ("validate",),
+            mission_template_ids=all_mission_ids,
+            fidelity_ids=all_fidelity_ids,
+            realization_ids=all_realization_ids,
+            claim_boundary="Success transfers the previous segment's terminal truth state to the next ordered segment.",
+        )
+        publish(
+            "state_transfer",
+            "previous_terminal_truth_state",
+            status="available",
+            operations=all_mission_operations or ("validate",),
+            mutation_timing=("between_segments",),
+            mission_template_ids=all_mission_ids,
+            fidelity_ids=all_fidelity_ids,
+            realization_ids=all_realization_ids,
+            claim_boundary="This transfer applies to adjacent segments in the advertised sequence only.",
+        )
+        publish(
+            "rearrangement",
+            "parameter_patch",
+            status="available",
+            operations=("validate",),
+            mutation_timing=("configuration", "preflight"),
+            mission_template_ids=tuple(item.id for item in mission_templates),
+            claim_boundary="Only declared typed configuration parameters may be changed before execution.",
+        )
+
+    if open_missions:
+        open_operations, open_ids, open_fidelities, open_realizations = mission_scope(open_missions)
+        for rearrangement in ("reorder", "insert", "remove", "duplicate"):
+            publish(
+                "rearrangement",
+                rearrangement,
+                status="conditional",
+                operations=open_operations or ("validate",),
+                mutation_timing=("configuration", "preflight"),
+                mission_template_ids=open_ids,
+                fidelity_ids=open_fidelities,
+                realization_ids=open_realizations,
+                requirements=("The resulting sequence must satisfy the advertised open-sequence grammar.",),
+                claim_boundary="The edit changes a pre-run linear sequence and cannot create branches or mutate a running graph.",
+            )
+        replaceable = tuple(
+            item for item in open_missions if item.open_segment_sequence is not None and len(item.open_segment_sequence.allowed_segment_ids) > 1
+        )
+        if replaceable:
+            replace_operations, replace_ids, replace_fidelities, replace_realizations = mission_scope(replaceable)
+            publish(
+                "rearrangement",
+                "replace",
+                status="conditional",
+                operations=replace_operations or ("validate",),
+                mutation_timing=("configuration", "preflight"),
+                mission_template_ids=replace_ids,
+                fidelity_ids=replace_fidelities,
+                realization_ids=replace_realizations,
+                requirements=("The replacement must be an allowed segment type and preserve sequence cardinality.",),
+                claim_boundary="Replacement is a pre-run sequence edit, not runtime graph rewiring.",
+            )
+
+    visible_deployments = tuple(item for item in deployments if item.status != "not_available")
+    if visible_deployments:
+        deployment_status: CompositionFeatureStatus
+        if any(item.status == "available" for item in visible_deployments):
+            deployment_status = "conditional"
+        elif any(item.status == "blocked" for item in visible_deployments):
+            deployment_status = "blocked"
+        else:
+            deployment_status = "declared"
+        deployment_operations = tuple(operation for item in visible_deployments for operation in item.operations)
+        deployment_blockers = tuple(blocker for item in visible_deployments for blocker in item.blockers)
+        deployment_requirements = tuple(f"deployment:{item.id}:{item.status}" for item in visible_deployments)
+        publish(
+            "node_kind",
+            "deployment",
+            status=deployment_status,
+            operations=deployment_operations,
+            mutation_timing=("accepted_boundary",) if deployment_operations else (),
+            fidelity_ids=tuple(fidelity for item in visible_deployments for fidelity in item.compatible_fidelities),
+            requirements=deployment_requirements if deployment_status in {"conditional", "declared"} else (),
+            blockers=deployment_blockers or (("No available deployment executor is registered.",) if deployment_status == "blocked" else ()),
+            claim_boundary="Deployment nodes are limited to the exact trigger, child identity, lifecycle, and executor rows.",
+        )
+        external = tuple(item for item in visible_deployments if item.child_model_scope == "external")
+        if external:
+            external_operations = tuple(operation for item in external for operation in item.operations)
+            publish(
+                "node_kind",
+                "external",
+                status="conditional" if external_operations else "declared",
+                operations=external_operations,
+                mutation_timing=("accepted_boundary",) if external_operations else (),
+                fidelity_ids=tuple(fidelity for item in external for fidelity in item.compatible_fidelities),
+                requirements=tuple(f"external-runtime:{item.child_plugin_id}:{item.child_runtime_id}" for item in external),
+                claim_boundary="External nodes require the exact advertised plug-in, runtime, model, and deployment binding.",
+            )
+
+    if dynamic_deployments:
+        deployment_operations = tuple(operation for item in dynamic_deployments for operation in item.operations)
+        deployment_fidelities = tuple(fidelity for item in dynamic_deployments for fidelity in item.compatible_fidelities)
+        publish(
+            "rearrangement",
+            "bind_deployment",
+            status="conditional",
+            operations=deployment_operations,
+            mutation_timing=("configuration", "preflight"),
+            fidelity_ids=deployment_fidelities,
+            requirements=tuple(f"deployment:{item.id}" for item in dynamic_deployments),
+            claim_boundary="A binding selects an advertised child before execution; it cannot invent or replace child models.",
+        )
+        publish(
+            "entity_topology",
+            "spawn",
+            status="conditional",
+            operations=deployment_operations,
+            mutation_timing=("accepted_boundary",),
+            fidelity_ids=deployment_fidelities,
+            requirements=tuple(f"deployment:{item.id}" for item in dynamic_deployments),
+            claim_boundary="Spawn is an accepted-boundary parent-to-child relationship with an explicit initial-state snapshot.",
+        )
+        publish(
+            "state_transfer",
+            "accepted_boundary_snapshot",
+            status="conditional",
+            operations=deployment_operations,
+            mutation_timing=("accepted_boundary",),
+            fidelity_ids=deployment_fidelities,
+            requirements=tuple(f"deployment:{item.id}:{item.state_initialization}" for item in dynamic_deployments),
+            claim_boundary="Only the selected deployment's advertised child initialization policy is supported.",
+        )
+        if any(kind in {"release", "separation"} for kind in output_schema.entity_output.relationship_kinds):
+            publish(
+                "entity_topology",
+                "split",
+                status="conditional",
+                operations=deployment_operations,
+                mutation_timing=("accepted_boundary",),
+                fidelity_ids=deployment_fidelities,
+                requirements=("An available release or separation deployment relationship is required.",),
+                claim_boundary="Split means one advertised child is emitted; it does not mutate arbitrary object topology.",
+            )
+        if any(item.lifecycle == "attached_only" for item in deployments if item.status == "available"):
+            attached = tuple(item for item in deployments if item.status == "available" and item.lifecycle == "attached_only")
+            publish(
+                "entity_topology",
+                "attach",
+                status="conditional",
+                operations=tuple(operation for item in attached for operation in item.operations),
+                mutation_timing=("accepted_boundary",),
+                requirements=tuple(f"deployment:{item.id}" for item in attached),
+                claim_boundary="Attachment is limited to an advertised attached-only deployment lifecycle.",
+            )
+        if any(item.state_initialization == "provider_defined_at_accepted_boundary" for item in dynamic_deployments):
+            provider_defined = tuple(item for item in dynamic_deployments if item.state_initialization == "provider_defined_at_accepted_boundary")
+            publish(
+                "state_transfer",
+                "provider_defined",
+                status="conditional",
+                operations=tuple(operation for item in provider_defined for operation in item.operations),
+                mutation_timing=("accepted_boundary",),
+                requirements=tuple(f"deployment:{item.id}" for item in provider_defined),
+                claim_boundary="Provider-defined transfer is available only through the named deployment contract.",
+            )
+
+    if output_schema.entity_output.supports_recursive_spawning:
+        publish(
+            "entity_topology",
+            "recursive_spawn",
+            status="conditional",
+            operations=tuple(operation for item in dynamic_deployments for operation in item.operations),
+            mutation_timing=("accepted_boundary",),
+            requirements=(f"maximum-descendant-depth:{output_schema.entity_output.maximum_descendant_depth}",),
+            claim_boundary="Recursive spawning is bounded by the advertised descendant depth and child-schema policy.",
+        )
+
+    if switchable_realization_ids:
+        publish(
+            "runtime_transition",
+            "authority_switch",
+            status="conditional",
+            operations=("step",),
+            mutation_timing=("session_boundary",),
+            realization_ids=switchable_realization_ids,
+            requirements=("Both authority profiles must declare explicit_bumpless switching and be currently available.",),
+            claim_boundary="The transfer preserves plant time and state while replacing only the active authority profile.",
+        )
+        publish(
+            "state_transfer",
+            "state_continuous_reference_handoff",
+            status="conditional",
+            operations=("step",),
+            mutation_timing=("session_boundary",),
+            realization_ids=switchable_realization_ids,
+            requirements=("An advertised explicit bumpless authority pair is required.",),
+            claim_boundary="This handoff applies only to authority switching; it is not a fidelity or model-state transfer.",
+        )
+
+    selectable_fidelity_transitions = tuple(item for item in fidelity_transitions if item.status in {"available", "conditional"})
+    if selectable_fidelity_transitions:
+        publish(
+            "runtime_transition",
+            "fidelity_switch",
+            status="blocked",
+            blockers=("Live fidelity state transfer is not advertised; prepare a new run at the selected fidelity.",),
+            claim_boundary="Fidelity-transition rows authorize selection or fallback only, never in-stream model replacement.",
+        )
+        publish(
+            "state_transfer",
+            "fidelity_projection",
+            status="blocked",
+            blockers=("No provider-neutral live fidelity state projection is advertised.",),
+            claim_boundary="A fidelity relationship does not imply executable state projection between model realizations.",
+        )
+
+    ordered = tuple(features[(category, identifier)] for category, identifiers in COMPOSITION_FEATURE_VOCABULARY for identifier in identifiers)
+    return TrajectoryCompositionAdvertisement(
+        features=ordered,
+        claim_boundary=(
+            "This exhaustive v1 matrix normalizes already-authoritative model metadata. Conditional support remains limited "
+            "to the listed exact mission, fidelity, realization, operation, timing, and prerequisite selectors."
+        ),
+    )
+    ####
+
+
 class TrajectoryModelMetadata(BaseModel):
     """Common provider-independent model identity and capability metadata."""
 
@@ -1801,6 +2423,7 @@ class TrajectoryModelMetadata(BaseModel):
     operations: tuple[Literal["discover", "validate", "batch", "step"], ...] = ("discover", "validate")
     common_runner_operations: tuple[Literal["batch", "step"], ...] = ()
     capabilities: TrajectoryModelCapabilities
+    composition_advertisement: TrajectoryCompositionAdvertisement
     realizations: tuple[TrajectoryRealizationMetadata, ...] = Field(min_length=1)
     control_scheme_support: tuple[TrajectoryControlSchemeSupportMetadata, ...] = ()
     mission_templates: tuple[TrajectoryMissionTemplateMetadata, ...] = ()
@@ -1819,8 +2442,8 @@ class TrajectoryModelMetadata(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def populate_control_scheme_support(cls, payload: object) -> object:
-        """Materialize control support and discard serialized derived revision data."""
+    def populate_derived_advertisements(cls, payload: object) -> object:
+        """Materialize canonical UI projections and discard derived revision data."""
 
         if not isinstance(payload, Mapping):
             return payload
@@ -1829,8 +2452,6 @@ class TrajectoryModelMetadata(BaseModel):
         # serialized descriptor preserves the existing model-dump round-trip,
         # while callers cannot inject or override the derived revision.
         values.pop("metadata_fingerprint", None)
-        if "control_scheme_support" in values:
-            return values
         raw_realizations = values.get("realizations")
         raw_fidelities = values.get("fidelities")
         if not isinstance(raw_realizations, Sequence) or isinstance(raw_realizations, (str, bytes)):
@@ -1841,10 +2462,42 @@ class TrajectoryModelMetadata(BaseModel):
             item if isinstance(item, TrajectoryRealizationMetadata) else TrajectoryRealizationMetadata.model_validate(item) for item in raw_realizations
         )
         fidelities = tuple(item if isinstance(item, TrajectoryFidelityMetadata) else TrajectoryFidelityMetadata.model_validate(item) for item in raw_fidelities)
-        values["control_scheme_support"] = build_control_scheme_support(
-            realizations,
-            fidelities,
-        )
+        if "control_scheme_support" not in values:
+            values["control_scheme_support"] = build_control_scheme_support(
+                realizations,
+                fidelities,
+            )
+        if "composition_advertisement" not in values:
+            raw_capabilities = values.get("capabilities")
+            raw_output_schema = values.get("output_schema")
+            if raw_capabilities is None or raw_output_schema is None:
+                return values
+            capabilities = (
+                raw_capabilities if isinstance(raw_capabilities, TrajectoryModelCapabilities) else TrajectoryModelCapabilities.model_validate(raw_capabilities)
+            )
+            mission_templates = tuple(
+                item if isinstance(item, TrajectoryMissionTemplateMetadata) else TrajectoryMissionTemplateMetadata.model_validate(item)
+                for item in values.get("mission_templates", ())
+            )
+            deployments = tuple(
+                item if isinstance(item, TrajectoryDeploymentMetadata) else TrajectoryDeploymentMetadata.model_validate(item)
+                for item in values.get("deployments", ())
+            )
+            output_schema = (
+                raw_output_schema if isinstance(raw_output_schema, TrajectoryOutputSchema) else TrajectoryOutputSchema.model_validate(raw_output_schema)
+            )
+            fidelity_transitions = tuple(
+                item if isinstance(item, TrajectoryFidelityTransition) else TrajectoryFidelityTransition.model_validate(item)
+                for item in values.get("fidelity_transitions", ())
+            )
+            values["composition_advertisement"] = build_trajectory_composition_advertisement(
+                capabilities=capabilities,
+                realizations=realizations,
+                mission_templates=mission_templates,
+                deployments=deployments,
+                output_schema=output_schema,
+                fidelity_transitions=fidelity_transitions,
+            )
         return values
         ####
 
@@ -2022,6 +2675,16 @@ class TrajectoryModelMetadata(BaseModel):
             raise ValueError(f"model {self.id!r} capability and top-level operation declarations disagree")
         if self.capabilities.supports_dynamic_child_generation != self.output_schema.entity_output.supports_dynamic_spawning:
             raise ValueError(f"model {self.id!r} capability and output child-generation declarations disagree")
+        expected_composition_advertisement = build_trajectory_composition_advertisement(
+            capabilities=self.capabilities,
+            realizations=self.realizations,
+            mission_templates=self.mission_templates,
+            deployments=self.deployments,
+            output_schema=self.output_schema,
+            fidelity_transitions=self.fidelity_transitions,
+        )
+        if self.composition_advertisement != expected_composition_advertisement:
+            raise ValueError(f"model {self.id!r} composition advertisement is stale or overclaims source metadata")
         return self
         ####
 
@@ -2046,6 +2709,7 @@ class TrajectoryProviderMetadata(BaseModel):
     status: str = Field(min_length=1)
     tags: tuple[str, ...] = ()
     configuration_contract: str = "taoryx.trajectory-provider-configuration-schema/v1"
+    composition_advertisement_contract: str = "taoryx.trajectory-composition-advertisement/v1"
     output_contract: str = "taoryx.trajectory-provider-output-schema/v1"
     run_request_contract: str = "taoryx.mission-composition-run-request/v1"
     session_contract: str = "taoryx.mission-composition-session/v1"
@@ -2663,6 +3327,11 @@ for _value_model in (
 
 
 __all__ = [
+    "COMPOSITION_FEATURE_VOCABULARY",
+    "CompositionFeatureCategory",
+    "CompositionFeatureOperation",
+    "CompositionFeatureStatus",
+    "CompositionMutationTiming",
     "ConfigurableTrajectoryProvider",
     "ConfigurationBound",
     "ConfigurationChoiceSchema",
@@ -2698,6 +3367,8 @@ __all__ = [
     "PresentationLinkMetadata",
     "TrajectoryConfigurationInstance",
     "TrajectoryConfigurationSchema",
+    "TrajectoryCompositionAdvertisement",
+    "TrajectoryCompositionFeatureMetadata",
     "TrajectoryControlCommandOwner",
     "TrajectoryControlSchemeSupportMetadata",
     "TrajectoryControlSelectionScope",
@@ -2727,6 +3398,7 @@ __all__ = [
     "TrajectoryTelemetryGroupMetadata",
     "ValuePresentationMetadata",
     "build_control_scheme_support",
+    "build_trajectory_composition_advertisement",
     "render_configuration_schema",
     "validate_configuration_instance",
 ]

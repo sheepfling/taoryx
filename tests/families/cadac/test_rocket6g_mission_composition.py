@@ -6,6 +6,7 @@ import pytest
 from taoryx.families.cadac.rocket6g_mission_composition import (
     ROCKET6G_FIDELITY_ID,
     ROCKET6G_MODEL_ID,
+    ROCKET6G_MODEL_VERSION,
     CadacRocket6gMissionCompositionProvider,
     build_default_rocket6g_configuration,
     register_rocket6g_mission_composition,
@@ -76,9 +77,9 @@ def test_rocket6g_common_runner_returns_phase_and_stage_telemetry(tmp_path: Path
     register_rocket6g_mission_composition(provider, registry)
     response = registry.run(
         MissionCompositionRunRequest(
-            request_id="rocket6g-phase-smoke",
-            provider_id="cadac",
-            provider_version="0.5.0",
+                request_id="rocket6g-phase-smoke",
+                provider_id="cadac",
+                provider_version=ROCKET6G_MODEL_VERSION,
             prepared_configuration=prepared,
             output=MissionCompositionOutputSelection(mode="all"),
         )
@@ -115,7 +116,7 @@ def test_rocket6g_core_selection_keeps_rigid_body_truth_only(tmp_path: Path) -> 
         MissionCompositionRunRequest(
             request_id="rocket6g-core",
             provider_id="cadac",
-            provider_version="0.5.0",
+            provider_version=ROCKET6G_MODEL_VERSION,
             prepared_configuration=prepared,
             output=MissionCompositionOutputSelection(mode="core"),
         )

@@ -36,6 +36,9 @@ class Ads6SrbmPluginOverrides(CadacModel):
     maneuver_initial_amplitude_g: float | None = Field(default=None, ge=0.0)
     maneuver_frequency_rad_s: float | None = Field(default=None, ge=0.0)
     maneuver_tgo63_s: float | None = Field(default=None, ge=0.0)
+    alpha_limit_deg: float | None = Field(default=None, gt=0.0)
+    endo_boundary_altitude_m: float | None = Field(default=None, gt=0.0)
+    ascent_normal_bias_g: float | None = None
     end_time_s: float | None = Field(default=None, gt=0.0)
     sample_step_s: float | None = Field(default=None, gt=0.0)
 
@@ -52,6 +55,9 @@ class Ads6SrbmPluginOverrides(CadacModel):
             "maneuver_initial_amplitude_g",
             "maneuver_frequency_rad_s",
             "maneuver_tgo63_s",
+            "alpha_limit_deg",
+            "endo_boundary_altitude_m",
+            "ascent_normal_bias_g",
             "end_time_s",
             "sample_step_s",
         )
@@ -177,6 +183,17 @@ class Ads6SrbmVehiclePlugin:
         ####
         if guidance_updates:
             updates["guidance"] = Ads6SrbmGuidanceConfig.model_validate({**definition.guidance.model_dump(), **guidance_updates})
+        ####
+        if resolved.alpha_limit_deg is not None:
+            updates["aerodynamics"] = definition.aerodynamics.model_copy(update={"alpha_limit_deg": resolved.alpha_limit_deg})
+        ####
+        control_updates = {
+            name: value
+            for name in ("endo_boundary_altitude_m", "ascent_normal_bias_g")
+            if (value := getattr(resolved, name)) is not None
+        }
+        if control_updates:
+            updates["control"] = definition.control.model_copy(update=control_updates)
         ####
         if resolved.end_time_s is not None:
             updates["end_time_s"] = resolved.end_time_s

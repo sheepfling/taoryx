@@ -11,8 +11,10 @@ from taoryx.runtime import SensorBinding, SensorBus, SensorClockSpec
 from taoryx.sensor_api import MeasurementPacket, SensorBuildContext
 from taoryx.sensor_plugins.relative_state import RelativeStateTrackerConfig, RelativeStateTrackerSensor
 from taoryx.trajectory.configuration_contract import (
+    ConfigurationBound,
     ConfigurationGroupSchema,
     ConfigurationGroupValue,
+    ConfigurationInterval,
     ConfigurationParameterSchema,
     ConfigurationParameterValue,
     PreparedTrajectoryConfiguration,
@@ -77,7 +79,7 @@ from .session_authority import (
 )
 
 ADS6_SRBM_MODEL_ID = "cadac.ads6.srbm"
-ADS6_SRBM_MODEL_VERSION = "0.9.0"
+ADS6_SRBM_MODEL_VERSION = "0.10.0"
 ADS6_SRBM_FIDELITY_ID = "pseudo_6dof"
 ADS6_SRBM_REALIZATION_ID = "cadac-ads6-srbm-response-law"
 ADS6_SRBM_PHASE_ID = "source_model"
@@ -666,6 +668,9 @@ def build_default_ads6_srbm_configuration(
         "maneuver_initial_amplitude_g": ("guidance", "maneuver_initial_amplitude_g"),
         "maneuver_frequency_rad_s": ("guidance", "maneuver_frequency_rad_s"),
         "maneuver_tgo63_s": ("guidance", "maneuver_tgo63_s"),
+        "alpha_limit_deg": ("response_law", "alpha_limit_deg"),
+        "endo_boundary_altitude_m": ("response_law", "endo_boundary_altitude_m"),
+        "ascent_normal_bias_g": ("response_law", "ascent_normal_bias_g"),
         "end_time_s": ("runtime", "end_time_s"),
         "sample_step_s": ("runtime", "sample_step_s"),
     }
@@ -749,6 +754,42 @@ def _build_configuration_schema(plugin: Ads6SrbmVehiclePlugin) -> TrajectoryConf
                     ),
                 ),
                 ConfigurationGroupSchema(
+                    id="response_law",
+                    label="Pseudo-6DoF response-law tuning",
+                    description=(
+                        "Source-backed reduced-order incidence and endo-response settings. These parameters define "
+                        "a pseudo-6DoF variant and do not create rigid-body attitude, moment, or actuator dynamics."
+                    ),
+                    children=(
+                        _parameter(
+                            "alpha_limit_deg",
+                            "Alpha/beta limit",
+                            "Source aerodynamic limit applied to reduced-order alpha and beta response.",
+                            default=source.aerodynamics.alpha_limit_deg,
+                            unit="deg",
+                            role="variant",
+                            interval=_positive_interval(),
+                        ),
+                        _parameter(
+                            "endo_boundary_altitude_m",
+                            "Endo boundary altitude",
+                            "Source altitude threshold between endo response and exo ballistic phases.",
+                            default=source.control.endo_boundary_altitude_m,
+                            unit="m",
+                            role="variant",
+                            interval=_positive_interval(),
+                        ),
+                        _parameter(
+                            "ascent_normal_bias_g",
+                            "Ascent normal bias",
+                            "Source normal-acceleration bias while in the endo-ascent response phase.",
+                            default=source.control.ascent_normal_bias_g,
+                            unit="g",
+                            role="variant",
+                        ),
+                    ),
+                ),
+                ConfigurationGroupSchema(
                     id="guidance",
                     label="Guidance and target",
                     children=(
@@ -825,6 +866,7 @@ def _parameter(
     unit: str | None = None,
     role: str = "initialization",
     choices: tuple[object, ...] = (),
+    interval: ConfigurationInterval | None = None,
 ) -> ConfigurationParameterSchema:
     return ConfigurationParameterSchema(
         id=parameter_id,
@@ -836,6 +878,7 @@ def _parameter(
         required=False,
         default=default,
         default_declared=True,
+        interval=interval,
         choices=choices,
         role=role,
         compatible_fidelities=(ADS6_SRBM_FIDELITY_ID,),
@@ -1183,6 +1226,7 @@ def _overrides_from_resolved(resolved: Any) -> Ads6SrbmPluginOverrides:
         raise ValueError("ADS6 SRBM resolved configuration root must be a mapping")
     ####
     initial = _group(resolved, "initialization")
+    response_law = _group(resolved, "response_law")
     guidance = _group(resolved, "guidance")
     runtime = _group(resolved, "runtime")
     return Ads6SrbmPluginOverrides(
@@ -1192,6 +1236,9 @@ def _overrides_from_resolved(resolved: Any) -> Ads6SrbmPluginOverrides:
         flight_path_deg=float(initial["flight_path_deg"]),
         alpha_deg=float(initial["alpha_deg"]),
         beta_deg=float(initial["beta_deg"]),
+        alpha_limit_deg=float(response_law["alpha_limit_deg"]),
+        endo_boundary_altitude_m=float(response_law["endo_boundary_altitude_m"]),
+        ascent_normal_bias_g=float(response_law["ascent_normal_bias_g"]),
         target_position_ned_m=(
             float(guidance["target_north_m"]),
             float(guidance["target_east_m"]),
@@ -1230,7 +1277,7 @@ def _configuration_unit(parameter_id: str) -> str | None:
     if parameter_id == "speed_mps":
         return "m/s"
     ####
-    if parameter_id in {"heading_deg", "flight_path_deg", "alpha_deg", "beta_deg"}:
+    if parameter_id in {"heading_deg", "flight_path_deg", "alpha_deg", "beta_deg", "alpha_limit_deg"}:
         return "deg"
     ####
     if parameter_id in {"maneuver_tgo_start_s", "maneuver_tgo63_s", "end_time_s", "sample_step_s"}:
@@ -1239,10 +1286,22 @@ def _configuration_unit(parameter_id: str) -> str | None:
     if parameter_id == "maneuver_initial_amplitude_g":
         return "g"
     ####
+    if parameter_id == "ascent_normal_bias_g":
+        return "g"
+    ####
     if parameter_id == "maneuver_frequency_rad_s":
         return "rad/s"
     ####
     return None
+
+
+####
+
+
+def _positive_interval() -> ConfigurationInterval:
+    """Return the source-model domain for a strictly positive scalar."""
+
+    return ConfigurationInterval(minimum=ConfigurationBound(value=0.0, inclusive=False))
 
 
 ####

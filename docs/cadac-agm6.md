@@ -12,7 +12,24 @@ The missile uses four individually lagged and limited aerodynamic fins. Achieved
 
 ## Source ownership
 
-The provider owns source actor order, module order, event progression, stored-derivative integration, table extrapolation, tracking cadence, packet refresh, the resulting datalink lag, target-position-norm update detection, launch-relative track extrapolation, and the source-literal 100 m target-plane interception sphere. Callers may override semantic initial conditions, guidance gain, random seed, end time, and output cadence.
+The provider owns source actor order, module order, event progression, stored-derivative integration, table extrapolation, tracking cadence, packet refresh, the resulting datalink lag, target-position-norm update detection, launch-relative track extrapolation, and the source-literal 100 m target-plane interception sphere. Callers may override semantic initial conditions, guidance gain, source-case tuning, random seed, end time, and output cadence.
+
+## Parametric source-case variants
+
+`build_default_agm6_configuration` publishes source-backed initialization-time
+variants in four typed groups: `actuation` (fin position/rate limits and
+second-order dynamics), `seeker` (acquisition range and LOS-filter
+gain/frequency/damping), `controller` (structural acceleration limit), and
+`propulsion` (constant rocket throttle). Use the matching helper aliases such
+as `fin_position_limit_deg`, `seeker_acquisition_range_m`,
+`structural_limit_g`, and `propulsion_throttle`.
+
+The configuration schema supplies canonical units plus the source model's
+nonnegative or strictly-positive domain for every bounded value. These are not
+new live actions: each run receives an immutable copy of the source definition
+with the requested tuning applied. The native Taoryx relative-state track
+remains the model's generic sensor integration; source seeker settings do not
+create a competing sensor interface.
 
 ## Result composition
 

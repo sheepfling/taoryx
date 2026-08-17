@@ -1,0 +1,36 @@
+# Source-shaped single-pulse motor intake; no manual normalization is required.
+interceptor_id: absolute-thrust-curve-sam
+parameter_set_version: 0.1.0
+surrogate_archetype_id: generic_slender_sam_v1
+
+launch_mass_kg: 350.0
+propellant_fraction: 0.45
+length_m: 5.0
+body_diameter_m: 0.35
+propulsion_architecture: single_stage_solid
+
+thrust_time_curve:
+  curve_id: developer-static-motor-curve-v1
+  time_unit: ms
+  thrust_unit: kN
+  interpolation: linear
+  points:
+    - {time: 0.0, thrust: 0.0}
+    - {time: 250.0, thrust: 80.0}
+    - {time: 1500.0, thrust: 30.0}
+    - {time: 4000.0, thrust: 0.0}
+  origin: simulation_assumption
+  confidence: low
+  method: developer-authored absolute motor curve for API demonstration
+
+aero_archetype: generic_slender_supersonic
+drag_class: nominal
+maneuverability_class: moderate
+control_bandwidth_class: nominal
+guidance_family: command
+guidance_archetype: waypoint_pursuit
+target_classes: [air_breathing]
+
+model_notes: >-
+  Developer example only. The curve is an explicit simulation assumption and
+  does not describe a real interceptor motor.

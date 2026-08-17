@@ -385,6 +385,9 @@ reproducible.
 The authoritative rules and field definitions are in the
 [Vehicle Interface Contract](vehicle-interface-contract.md) and
 [Mission Composition Provider API](mission-composition-provider-api.md).
+The independently reusable capability-negotiation layer and its canonical
+derivation rules are in the
+[Vehicle Composition Advertisement API](vehicle-composition-advertisement-api.md).
 
 ## Choose validated lowering explicitly
 

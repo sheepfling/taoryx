@@ -45,6 +45,16 @@ class Agm6PluginOverrides(CadacModel):
     aircraft_turn_g: float | None = None
     aircraft_longitudinal_acceleration_g: float | None = None
     navigation_gain: float | None = Field(default=None, ge=0.0)
+    fin_position_limit_deg: float | None = Field(default=None, gt=0.0)
+    fin_rate_limit_deg_s: float | None = Field(default=None, gt=0.0)
+    fin_natural_frequency_rad_s: float | None = Field(default=None, gt=0.0)
+    fin_damping_ratio: float | None = Field(default=None, ge=0.0)
+    seeker_acquisition_range_m: float | None = Field(default=None, gt=0.0)
+    seeker_filter_gain_per_s: float | None = Field(default=None, ge=0.0)
+    seeker_filter_natural_frequency_rad_s: float | None = Field(default=None, gt=0.0)
+    seeker_filter_damping_ratio: float | None = Field(default=None, ge=0.0)
+    structural_limit_g: float | None = Field(default=None, gt=0.0)
+    propulsion_throttle: float | None = Field(default=None, ge=0.0)
     random_seed: int | None = None
     end_time_s: float | None = Field(default=None, gt=0.0)
     sample_step_s: float | None = Field(default=None, gt=0.0)
@@ -80,6 +90,16 @@ class Agm6PluginOverrides(CadacModel):
             "aircraft_turn_g",
             "aircraft_longitudinal_acceleration_g",
             "navigation_gain",
+            "fin_position_limit_deg",
+            "fin_rate_limit_deg_s",
+            "fin_natural_frequency_rad_s",
+            "fin_damping_ratio",
+            "seeker_acquisition_range_m",
+            "seeker_filter_gain_per_s",
+            "seeker_filter_natural_frequency_rad_s",
+            "seeker_filter_damping_ratio",
+            "structural_limit_g",
+            "propulsion_throttle",
             "end_time_s",
             "sample_step_s",
         ):
@@ -186,6 +206,36 @@ class Agm6VehiclePlugin:
         if resolved.navigation_gain is not None:
             updates["guidance"] = definition.guidance.model_copy(update={"navigation_gain": resolved.navigation_gain})
         ####
+        actuator_updates = _component_updates(
+            resolved,
+            {
+                "fin_position_limit_deg": "position_limit_deg",
+                "fin_rate_limit_deg_s": "rate_limit_deg_s",
+                "fin_natural_frequency_rad_s": "natural_frequency_rad_s",
+                "fin_damping_ratio": "damping_ratio",
+            },
+        )
+        if actuator_updates:
+            updates["actuator"] = definition.actuator.model_copy(update=actuator_updates)
+        ####
+        seeker_updates = _component_updates(
+            resolved,
+            {
+                "seeker_acquisition_range_m": "acquisition_range_m",
+                "seeker_filter_gain_per_s": "filter_gain_per_s",
+                "seeker_filter_natural_frequency_rad_s": "filter_natural_frequency_rad_s",
+                "seeker_filter_damping_ratio": "filter_damping_ratio",
+            },
+        )
+        if seeker_updates:
+            updates["sensor"] = definition.sensor.model_copy(update=seeker_updates)
+        ####
+        if resolved.structural_limit_g is not None:
+            updates["control"] = definition.control.model_copy(update={"structural_limit_g": resolved.structural_limit_g})
+        ####
+        if resolved.propulsion_throttle is not None:
+            updates["propulsion"] = definition.propulsion.model_copy(update={"throttle": resolved.propulsion_throttle})
+        ####
         if resolved.random_seed is not None:
             updates["monte_carlo_seed"] = resolved.random_seed
         ####
@@ -203,6 +253,22 @@ class Agm6VehiclePlugin:
         return self._definition
 
     ####
+
+
+####
+
+
+def _component_updates(
+    overrides: Agm6PluginOverrides,
+    routes: dict[str, str],
+) -> dict[str, float]:
+    """Return explicitly supplied scalar fields for one source component."""
+
+    return {
+        component_field: float(value)
+        for override_field, component_field in routes.items()
+        if (value := getattr(overrides, override_field)) is not None
+    }
 
 
 ####

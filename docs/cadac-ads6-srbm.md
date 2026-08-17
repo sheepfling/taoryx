@@ -50,6 +50,20 @@ guidance behavior, which remain separately visible in the source sensor
 telemetry. The local-NED adapter carries no CADAC gravity or atmosphere model
 into the shared Taoryx sensor interface.
 
+## Parametric pseudo-6DoF variants
+
+`build_default_ads6_srbm_configuration` exposes the source response-law as a
+typed `response_law` configuration group. `alpha_limit_deg` changes the
+reduced-order alpha/beta limit, `endo_boundary_altitude_m` selects the source
+endo/exo response boundary, and `ascent_normal_bias_g` adjusts the source
+endo-ascent normal-command bias. All are initialization-time `variant` inputs
+copied into an immutable source definition; none is a live command or a
+physical actuator claim.
+
+The existing `guidance` group continues to own seeker, PN, target, and spiral
+settings. Its native Taoryx relative-state track remains a generic sensor
+readback, distinct from source seeker configuration.
+
 ## Source-data smoke
 
 The verification artifact separates exact-step and structural evidence. Both pinned upstream SRBM cases execute through `70 s` at the source `0.001 s` step and cross from endo ascent into exo ballistic coast near `63 s`. Full-course structural runs use `0.01 s`: the ballistic case reaches the configured `470 s` end time after reentry, while the PN-plus-spiral case reaches target closest approach near `477.670 s` with a reconstructed `1.864 m` miss. The accelerated results are not parity evidence. No CADAC source or deck is bundled, full-course exact-step completion remains open, and no compiled-executable parity claim is made.

@@ -1,0 +1,44 @@
+kind: interceptor_evidence_record
+interceptor_id: int:us-pac3-mse
+model_id: pac3-mse
+variant_basis: PAC-3_MSE
+source_record_ids:
+  - int:us-pac3-mse
+  - source:lockheed-martin-pac3-mse-public-description
+resolution_status: resolved_primarily_from_archetype
+
+evidence:
+  propulsion_architecture:
+    value: dual_pulse_solid
+    origin: observed
+    catalogue_claim_id: cl:us-mse-propulsion
+  intercept_mechanism: {value: hit_to_kill, origin: observed}
+  control_features: {value: [enlarged_control_fins], origin: observed}
+  launch_mass: {value: null, unit: kg, status: not_resolved_in_current_extract}
+  length: {value: null, unit: m, status: not_resolved_in_current_extract}
+  body_diameter: {value: null, unit: m, status: not_resolved_in_current_extract}
+  reported_range:
+    value: null
+    unit: m
+    status: no_scenario_qualified_numeric_observation
+  reported_altitude:
+    value: null
+    unit: m
+    status: no_scenario_qualified_numeric_observation
+
+resolver_assumptions:
+  surrogate_archetype_id: high_energy_dual_pulse_interceptor_v1
+  assumption_case: nominal
+  required_diagnostics:
+    - geometry_missing
+    - mass_properties_missing
+    - motor_pulse_timing_missing
+    - aerodynamic_model_missing
+    - control_authority_missing
+
+model_notes: >-
+  Catalogue-linked, official-source-backed prototype evidence seed supplied
+  for Taoryx resolver development; not a verbatim SQL export and not
+  independently measured. Resolver/provenance witness only in the built-in
+  catalogue; the archetype-dominant case is not registered as a
+  performance-credible runnable exemplar.

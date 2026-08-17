@@ -1,0 +1,46 @@
+kind: interceptor_evidence_record
+interceptor_id: int:us-aim9x-block2
+model_id: aim9x-block2
+variant_basis: AIM-9X Block II
+application_context: NASAMS_surface_launch
+source_record_ids:
+  - int:us-aim9x-block2
+  - source:navair-aim9x-public-description
+resolution_status: source_dominant
+
+evidence:
+  launch_mass: {value: 84.37, unit: kg, origin: observed}
+  length: {value: 3.02, unit: m, origin: observed}
+  body_diameter: {value: 0.13, unit: m, origin: observed}
+  wingspan: {value: 0.45, unit: m, origin: observed}
+  propulsion_architecture: {value: single_stage_solid, origin: observed}
+  motor_designation: {value: ATK_MK_139, origin: observed}
+  guidance_architecture: {value: infrared_homing_with_datalink, origin: observed}
+  control_features: {value: [thrust_vectoring], origin: observed}
+  reported_speed: {value: null, unit: m/s, status: classified}
+  reported_range: {value: null, unit: m, status: classified}
+
+derived:
+  reference_area:
+    value: 0.01327
+    unit: m^2
+    method: circular_area_from_body_diameter
+  slenderness_ratio:
+    value: 23.23
+    unit: "1"
+    method: length_divided_by_body_diameter
+
+resolver_assumptions:
+  surrogate_archetype_id: compact_high_agility_sam_v1
+  unresolved_parameters:
+    - burnout_mass
+    - propellant_mass
+    - thrust_time_profile
+    - drag_coefficient_model
+    - lateral_acceleration_limit
+    - control_bandwidth
+
+model_notes: >-
+  Catalogue-linked, official-source-backed prototype evidence seed supplied
+  for Taoryx resolver development; not a verbatim SQL export and not
+  independently measured.

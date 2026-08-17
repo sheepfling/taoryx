@@ -1,0 +1,36 @@
+# Scenario-qualified surrogate comparison for generic_medium_sam.yaml.
+scenario_id: generic-medium-sam-speed-screen
+fidelity: point_mass_3dof
+scenario_basis: >-
+  Prototype sea-level fixed-waypoint launch screen. The 1200 m/s value is a
+  developer assumption from the example profile, not an observed weapon claim.
+
+mission:
+  launch_north_m: 0.0
+  launch_east_m: 0.0
+  launch_altitude_m: 0.0
+  launch_speed_mps: 20.0
+  launch_heading_deg: 0.0
+  launch_flight_path_deg: 45.0
+  waypoint_north_m: 20000.0
+  waypoint_east_m: 0.0
+  waypoint_altitude_m: 5000.0
+  capture_radius_m: 100.0
+  duration_s: 20.0
+  time_step_s: 0.05
+
+targets:
+  - metric_id: peak_speed_mps
+    target: 1200.0
+    tolerance: 240.0
+    unit: m/s
+    severity: advisory
+    source_parameter_id: reported_max_speed_mps
+    source_origin: simulation_assumption
+    source_basis: >-
+      Example-profile value explicitly promoted into this scenario for an
+      interface and sensitivity screen.
+
+claim_boundary: >-
+  This compares a generic surrogate against a developer-declared target under
+  one explicit scenario. It is not source validation or weapon performance.

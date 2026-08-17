@@ -11,8 +11,10 @@ from taoryx.runtime import SensorBinding, SensorBus, SensorClockSpec
 from taoryx.sensor_api import MeasurementPacket, SensorBuildContext
 from taoryx.sensor_plugins.relative_state import RelativeStateTrackerConfig, RelativeStateTrackerSensor
 from taoryx.trajectory.configuration_contract import (
+    ConfigurationBound,
     ConfigurationGroupSchema,
     ConfigurationGroupValue,
+    ConfigurationInterval,
     ConfigurationParameterSchema,
     ConfigurationParameterValue,
     ConfigurationRole,
@@ -79,7 +81,7 @@ CADAC_PROVIDER_ID = "cadac"
 AGM6_MODEL_ID = "cadac.agm6.missile"
 AGM6_TARGET_MODEL_ID = "cadac.agm6.ground_target"
 AGM6_AIRCRAFT_MODEL_ID = "cadac.agm6.aircraft"
-AGM6_MODEL_VERSION = "0.6.0"
+AGM6_MODEL_VERSION = "0.7.0"
 AGM6_FIDELITY_ID = "rigid_body_6dof_surface_allocated"
 AGM6_REALIZATION_ID = "cadac-standard-four-fin"
 AGM6_MISSION_ID = "air_to_ground_engagement"
@@ -831,6 +833,16 @@ def build_default_agm6_configuration(
             "longitudinal_acceleration_g",
         ),
         "navigation_gain": ("guidance", "navigation_gain"),
+        "fin_position_limit_deg": ("actuation", "fin_position_limit_deg"),
+        "fin_rate_limit_deg_s": ("actuation", "fin_rate_limit_deg_s"),
+        "fin_natural_frequency_rad_s": ("actuation", "fin_natural_frequency_rad_s"),
+        "fin_damping_ratio": ("actuation", "fin_damping_ratio"),
+        "seeker_acquisition_range_m": ("seeker", "acquisition_range_m"),
+        "seeker_filter_gain_per_s": ("seeker", "filter_gain_per_s"),
+        "seeker_filter_natural_frequency_rad_s": ("seeker", "filter_natural_frequency_rad_s"),
+        "seeker_filter_damping_ratio": ("seeker", "filter_damping_ratio"),
+        "structural_limit_g": ("controller", "structural_limit_g"),
+        "propulsion_throttle": ("propulsion", "throttle"),
         "random_seed": ("stochastic", "random_seed"),
         "end_time_s": ("runtime", "end_time_s"),
         "sample_step_s": ("runtime", "sample_step_s"),
@@ -896,6 +908,7 @@ def _parameter(
     unit: str | None = None,
     frame: str | None = None,
     role: ConfigurationRole | None = None,
+    interval: ConfigurationInterval | None = None,
 ) -> ConfigurationParameterSchema:
     resolved_role: ConfigurationRole = role or ("constraint" if parameter_id in {"end_time_s", "sample_step_s"} else "initialization")
     return ConfigurationParameterSchema(
@@ -908,6 +921,7 @@ def _parameter(
         required=False,
         default=default,
         default_declared=True,
+        interval=interval,
         role=resolved_role,
         compatible_fidelities=(AGM6_FIDELITY_ID,),
         frame=frame,
@@ -1045,6 +1059,125 @@ def _build_configuration_schema(plugin: Agm6VehiclePlugin) -> TrajectoryConfigur
                         "Navigation gain",
                         "AGM6 proportional-navigation gain.",
                         default=source.guidance.navigation_gain,
+                    ),
+                ),
+            ),
+            ConfigurationGroupSchema(
+                id="actuation",
+                label="Physical-fin tuning",
+                description=(
+                    "Source-backed physical actuator limits and dynamics. These values define a reproducible vehicle "
+                    "variant before a run; they are not live fin commands."
+                ),
+                children=(
+                    _parameter(
+                        "fin_position_limit_deg",
+                        "Fin position limit",
+                        "Maximum physical four-fin deflection used by the source actuator.",
+                        default=source.actuator.position_limit_deg,
+                        unit="deg",
+                        role="variant",
+                        interval=_positive_interval(),
+                    ),
+                    _parameter(
+                        "fin_rate_limit_deg_s",
+                        "Fin rate limit",
+                        "Maximum physical four-fin slew rate used by the source actuator.",
+                        default=source.actuator.rate_limit_deg_s,
+                        unit="deg/s",
+                        role="variant",
+                        interval=_positive_interval(),
+                    ),
+                    _parameter(
+                        "fin_natural_frequency_rad_s",
+                        "Fin natural frequency",
+                        "Second-order physical fin-actuator natural frequency.",
+                        default=source.actuator.natural_frequency_rad_s,
+                        unit="rad/s",
+                        role="variant",
+                        interval=_positive_interval(),
+                    ),
+                    _parameter(
+                        "fin_damping_ratio",
+                        "Fin damping ratio",
+                        "Second-order physical fin-actuator damping ratio.",
+                        default=source.actuator.damping_ratio,
+                        role="variant",
+                        interval=_nonnegative_interval(),
+                    ),
+                ),
+            ),
+            ConfigurationGroupSchema(
+                id="seeker",
+                label="Source seeker tuning",
+                description=(
+                    "Source dynamic-seeker acquisition and LOS-filter parameters. The native relative-state sensor "
+                    "output remains the Taoryx sensor interface; these settings configure the CADAC source model."
+                ),
+                children=(
+                    _parameter(
+                        "acquisition_range_m",
+                        "Acquisition range",
+                        "Maximum source seeker acquisition range.",
+                        default=source.sensor.acquisition_range_m,
+                        unit="m",
+                        role="variant",
+                        interval=_positive_interval(),
+                    ),
+                    _parameter(
+                        "filter_gain_per_s",
+                        "LOS filter gain",
+                        "Source seeker line-of-sight rate-filter gain.",
+                        default=source.sensor.filter_gain_per_s,
+                        unit="1/s",
+                        role="variant",
+                        interval=_nonnegative_interval(),
+                    ),
+                    _parameter(
+                        "filter_natural_frequency_rad_s",
+                        "LOS filter natural frequency",
+                        "Source seeker line-of-sight rate-filter natural frequency.",
+                        default=source.sensor.filter_natural_frequency_rad_s,
+                        unit="rad/s",
+                        role="variant",
+                        interval=_positive_interval(),
+                    ),
+                    _parameter(
+                        "filter_damping_ratio",
+                        "LOS filter damping ratio",
+                        "Source seeker line-of-sight rate-filter damping ratio.",
+                        default=source.sensor.filter_damping_ratio,
+                        role="variant",
+                        interval=_nonnegative_interval(),
+                    ),
+                ),
+            ),
+            ConfigurationGroupSchema(
+                id="controller",
+                label="Source controller tuning",
+                children=(
+                    _parameter(
+                        "structural_limit_g",
+                        "Structural acceleration limit",
+                        "Source controller acceleration limit applied before physical fin allocation.",
+                        default=source.control.structural_limit_g,
+                        unit="g",
+                        role="variant",
+                        interval=_positive_interval(),
+                    ),
+                ),
+            ),
+            ConfigurationGroupSchema(
+                id="propulsion",
+                label="Source propulsion tuning",
+                children=(
+                    _parameter(
+                        "throttle",
+                        "Throttle",
+                        "Source constant throttle multiplier for the configured rocket motor.",
+                        default=source.propulsion.throttle,
+                        role="variant",
+                        interval=_nonnegative_interval(),
                     ),
                 ),
             ),
@@ -1504,6 +1637,10 @@ def _overrides_from_resolved(resolved: Mapping[str, object]) -> Agm6PluginOverri
     target = _group(resolved, "target")
     aircraft = _group(resolved, "aircraft")
     guidance = _group(resolved, "guidance")
+    actuation = _group(resolved, "actuation")
+    seeker = _group(resolved, "seeker")
+    controller = _group(resolved, "controller")
+    propulsion = _group(resolved, "propulsion")
     stochastic = _group(resolved, "stochastic")
     runtime = _group(resolved, "runtime")
     return Agm6PluginOverrides(
@@ -1529,6 +1666,16 @@ def _overrides_from_resolved(resolved: Mapping[str, object]) -> Agm6PluginOverri
         aircraft_turn_g=float(aircraft["turn_g"]),
         aircraft_longitudinal_acceleration_g=float(aircraft["longitudinal_acceleration_g"]),
         navigation_gain=float(guidance["navigation_gain"]),
+        fin_position_limit_deg=float(actuation["fin_position_limit_deg"]),
+        fin_rate_limit_deg_s=float(actuation["fin_rate_limit_deg_s"]),
+        fin_natural_frequency_rad_s=float(actuation["fin_natural_frequency_rad_s"]),
+        fin_damping_ratio=float(actuation["fin_damping_ratio"]),
+        seeker_acquisition_range_m=float(seeker["acquisition_range_m"]),
+        seeker_filter_gain_per_s=float(seeker["filter_gain_per_s"]),
+        seeker_filter_natural_frequency_rad_s=float(seeker["filter_natural_frequency_rad_s"]),
+        seeker_filter_damping_ratio=float(seeker["filter_damping_ratio"]),
+        structural_limit_g=float(controller["structural_limit_g"]),
+        propulsion_throttle=float(propulsion["throttle"]),
         random_seed=int(stochastic["random_seed"]),
         end_time_s=float(runtime["end_time_s"]),
         sample_step_s=float(runtime["sample_step_s"]),
@@ -1560,7 +1707,7 @@ def _vector3(value: object) -> tuple[float, float, float]:
 
 
 def _configuration_unit(parameter_id: str) -> str | None:
-    if parameter_id == "position_ned_m":
+    if parameter_id in {"position_ned_m", "acquisition_range_m"}:
         return "m"
     ####
     if parameter_id == "speed_mps":
@@ -1574,19 +1721,47 @@ def _configuration_unit(parameter_id: str) -> str | None:
         "beta_deg",
         "heading_deg",
         "flight_path_deg",
+        "fin_position_limit_deg",
     }:
         return "deg"
     ####
     if parameter_id == "body_rates_deg_s":
         return "deg/s"
     ####
-    if parameter_id in {"longitudinal_acceleration_g", "lateral_acceleration_g", "turn_g"}:
+    if parameter_id == "fin_rate_limit_deg_s":
+        return "deg/s"
+    ####
+    if parameter_id in {"fin_natural_frequency_rad_s", "filter_natural_frequency_rad_s"}:
+        return "rad/s"
+    ####
+    if parameter_id == "filter_gain_per_s":
+        return "1/s"
+    ####
+    if parameter_id in {"longitudinal_acceleration_g", "lateral_acceleration_g", "turn_g", "structural_limit_g"}:
         return "g"
     ####
     if parameter_id in {"end_time_s", "sample_step_s"}:
         return "s"
     ####
     return None
+
+
+####
+
+
+def _positive_interval() -> ConfigurationInterval:
+    """Return the source-model domain for a strictly positive scalar."""
+
+    return ConfigurationInterval(minimum=ConfigurationBound(value=0.0, inclusive=False))
+
+
+####
+
+
+def _nonnegative_interval() -> ConfigurationInterval:
+    """Return the source-model domain for a nonnegative scalar."""
+
+    return ConfigurationInterval(minimum=ConfigurationBound(value=0.0))
 
 
 ####

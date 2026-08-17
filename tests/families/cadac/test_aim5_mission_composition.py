@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from taoryx.families.cadac.aim5_mission_composition import (
     AIM5_MODEL_ID,
     AIM5_TARGET_MODEL_ID,
@@ -9,7 +10,7 @@ from taoryx.families.cadac.aim5_mission_composition import (
     build_default_aim5_configuration,
     register_aim5_mission_composition,
 )
-from taoryx.families.cadac.aim5_plugin import Aim5VehiclePlugin
+from taoryx.families.cadac.aim5_plugin import Aim5PluginOverrides, Aim5VehiclePlugin
 from test_aim5 import AERO, INPUT, PROP
 
 from taoryx.trajectory.execution_contract import (
@@ -107,6 +108,51 @@ def test_aim5_core_output_selection_keeps_target_as_separate_entity(tmp_path: Pa
 
     assert [item.id for item in result.objects[0].channels] == ["position_ned_m", "velocity_ned_mps"]
     assert [item.id for item in result.objects[1].channels] == ["position_ned_m", "velocity_ned_mps"]
+
+
+####
+
+
+def test_aim5_configuration_routes_pseudo6_response_law_tuning_into_the_plugin(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider = _provider(tmp_path)
+    configuration = build_default_aim5_configuration(
+        provider,
+        overrides={
+            "alpha_max_deg": 30.0,
+            "rate_loop_time_constant_s": 0.075,
+            "proportional_integral_ratio": 1.2,
+            "acceleration_loop_gain_rad_s2": 48.0,
+            "end_time_s": 0.05,
+            "sample_step_s": 0.05,
+        },
+    )
+    prepared = provider.validate_configuration(configuration)
+    captured: list[Aim5PluginOverrides] = []
+    original = provider._plugin.run_batch
+
+    def capture(overrides: Aim5PluginOverrides | None = None) -> object:
+        assert overrides is not None
+        captured.append(overrides)
+        return original(overrides)
+
+    monkeypatch.setattr(provider._plugin, "run_batch", capture)
+    provider.execute_batch(
+        MissionCompositionRunRequest(
+            request_id="aim5-response-law-tuning",
+            provider_id=provider.metadata.id,
+            provider_version=provider.metadata.version,
+            prepared_configuration=prepared,
+            output=MissionCompositionOutputSelection(mode="core"),
+        )
+    )
+
+    assert prepared.resolved["response_law"]["alpha_max_deg"] == 30.0
+    assert captured[0].rate_loop_time_constant_s == 0.075
+    assert captured[0].proportional_integral_ratio == 1.2
+    assert captured[0].acceleration_loop_gain_rad_s2 == 48.0
 
 
 ####

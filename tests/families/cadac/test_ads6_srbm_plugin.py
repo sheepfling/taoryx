@@ -74,3 +74,26 @@ def test_ads6_srbm_plugin_rejects_invalid_guidance_encoding() -> None:
 
 
 ####
+
+
+def test_ads6_srbm_plugin_materializes_pseudo6_response_law_tuning_without_mutating_source(tmp_path: Path) -> None:
+    plugin = Ads6SrbmVehiclePlugin(_write_ads6_srbm_case(tmp_path))
+    installed = plugin.source_definition()
+
+    prepared = plugin.prepare_definition(
+        Ads6SrbmPluginOverrides(
+            alpha_limit_deg=22.0,
+            endo_boundary_altitude_m=25_000.0,
+            ascent_normal_bias_g=0.75,
+        )
+    )
+
+    assert prepared.aerodynamics.alpha_limit_deg == 22.0
+    assert prepared.control.endo_boundary_altitude_m == 25_000.0
+    assert prepared.control.ascent_normal_bias_g == 0.75
+    assert plugin.source_definition() is installed
+    assert installed.aerodynamics.alpha_limit_deg == 28.0
+    assert installed.control.endo_boundary_altitude_m == 30_000.0
+
+
+####

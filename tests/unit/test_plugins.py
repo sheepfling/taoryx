@@ -224,13 +224,7 @@ def test_source_checkout_declarations_are_the_canonical_plugin_inventory() -> No
         for item in source_declarations
     ]
     assert tuple(item.id for item in catalog.plugins) == tuple(item.name for item in source_declarations)
-    assert {
-        item.id: (item.package, item.version)
-        for item in catalog.plugins
-    } == {
-        item.name: (item.distribution, item.version)
-        for item in source_declarations
-    }
+    assert {item.id: (item.package, item.version) for item in catalog.plugins} == {item.name: (item.distribution, item.version) for item in source_declarations}
     ####
 
 
@@ -449,6 +443,7 @@ def test_bundled_vehicle_registrations_cross_the_plugin_boundary_without_id_drif
         "taoryx.hl20",
         "taoryx.hummingbird",
         "taoryx.nesc",
+        "taoryx.parametric-interceptors",
         "taoryx.passive-bodies",
         "taoryx.reachability",
         "taoryx.reference-models",
@@ -488,10 +483,7 @@ def test_bundled_vehicle_registrations_cross_the_plugin_boundary_without_id_drif
         "taoryx.source-table-fixed-wing",
         "taoryx.x15",
     }
-    catalog_fragments = {
-        item.plugin.id: item.value
-        for item in catalog.records("vehicle_catalog_fragment")
-    }
+    catalog_fragments = {item.plugin.id: item.value for item in catalog.records("vehicle_catalog_fragment")}
     assert set(catalog_fragments) == {
         "taoryx.a320",
         "taoryx.f16",
@@ -504,10 +496,7 @@ def test_bundled_vehicle_registrations_cross_the_plugin_boundary_without_id_drif
         "taoryx.x15",
     }
     assert all(isinstance(fragment, VehicleCatalogFragment) for fragment in catalog_fragments.values())
-    assert {
-        plugin_id: fragment.family_ids
-        for plugin_id, fragment in catalog_fragments.items()
-    } == {
+    assert {plugin_id: fragment.family_ids for plugin_id, fragment in catalog_fragments.items()} == {
         "taoryx.a320": ("a320_openap_3dof",),
         "taoryx.f16": ("f16_s119",),
         "taoryx.hl20": ("hl20_mod_k",),
@@ -524,10 +513,7 @@ def test_bundled_vehicle_registrations_cross_the_plugin_boundary_without_id_drif
         "taoryx.reachability.hl20-catalog-overlay",
     }
     assert all(isinstance(fragment, VehicleCatalogOverlayFragment) for fragment in catalog_overlays.values())
-    assert {
-        identifier: (fragment.extends_fragment_ids, fragment.resource_root, fragment.family_ids)
-        for identifier, fragment in catalog_overlays.items()
-    } == {
+    assert {identifier: (fragment.extends_fragment_ids, fragment.resource_root, fragment.family_ids) for identifier, fragment in catalog_overlays.items()} == {
         "taoryx.reachability.x15-staged-catalog-overlay": (
             ("taoryx.x15.vehicle-catalog",),
             "data/x15_overlay",
@@ -681,6 +667,7 @@ def test_bundled_vehicle_registrations_cross_the_plugin_boundary_without_id_drif
         "taoryx.hl20.mission-composition",
         "taoryx.hummingbird.mission-composition",
         "taoryx.nesc.mission-composition",
+        "taoryx.parametric-interceptors.mission-composition",
         "taoryx.passive-bodies.mission-composition",
         "taoryx.registry.mission-composition",
         "taoryx.simple-aero.mission-composition",
@@ -699,6 +686,7 @@ def test_bundled_vehicle_registrations_cross_the_plugin_boundary_without_id_drif
         "taoryx.hl20.mission-composition",
         "taoryx.hummingbird.mission-composition",
         "taoryx.nesc.mission-composition",
+        "taoryx.parametric-interceptors.mission-composition",
         "taoryx.passive-bodies.mission-composition",
         "taoryx.registry.mission-composition",
         "taoryx.simple-aero.mission-composition",
@@ -744,12 +732,8 @@ def test_external_simple_aero_entry_point_registers_the_extracted_provider() -> 
     assert contribution.plugin.package == "taoryx-simple-aero"
     assert contribution.value.capabilities.families == ("simple_aero",)  # type: ignore[attr-defined]
     assert contribution.value.__class__.__module__ == "taoryx_simple_aero.provider"
-    assert tuple(item.id for item in first.records("mission_composition_provider")) == (
-        "taoryx.simple-aero.mission-composition",
-    )
-    assert tuple(item.id for item in first.records("mission_workflow_endpoint_catalog")) == (
-        "taoryx.simple-aero.workflow-endpoints",
-    )
+    assert tuple(item.id for item in first.records("mission_composition_provider")) == ("taoryx.simple-aero.mission-composition",)
+    assert tuple(item.id for item in first.records("mission_workflow_endpoint_catalog")) == ("taoryx.simple-aero.workflow-endpoints",)
     providers = first.build_trajectory_provider_registry()
     assert providers.provider("reference.point_mass") is contribution.value
     ####
@@ -770,12 +754,8 @@ def test_external_dual_launch_entry_point_registers_only_its_focused_workflow() 
     assert first.fingerprint == second.fingerprint
     contribution = first.contribution("mission_composition_provider", "taoryx.dual-launch.mission-composition")
     assert contribution.plugin.package == "taoryx-dual-launch"
-    assert tuple(item.id for item in first.records("mission_composition_provider")) == (
-        "taoryx.dual-launch.mission-composition",
-    )
-    assert tuple(item.id for item in first.records("mission_workflow_endpoint_catalog")) == (
-        "taoryx.dual-launch.workflow-endpoints",
-    )
+    assert tuple(item.id for item in first.records("mission_composition_provider")) == ("taoryx.dual-launch.mission-composition",)
+    assert tuple(item.id for item in first.records("mission_workflow_endpoint_catalog")) == ("taoryx.dual-launch.workflow-endpoints",)
     provider = first.build_mission_composition_provider_registry().provider("taoryx.dual-launch.mission-composition")
     assert provider.metadata.version == "0.1.0a0"
     assert tuple(item.id for item in provider.list_models()) == ("dual_launch_glider",)
@@ -879,6 +859,7 @@ def test_plugin_cli_lists_typed_contributions_without_constructing_plants(capsys
         "taoryx.hl20",
         "taoryx.hummingbird",
         "taoryx.nesc",
+        "taoryx.parametric-interceptors",
         "taoryx.passive-bodies",
         "taoryx.reachability",
         "taoryx.reference-models",
@@ -941,9 +922,7 @@ raise SystemExit(exit_code)
     assert completed.returncode == 0, completed.stderr
     payload = json.loads(completed.stdout)
     assert payload["schema"] == "taoryx.plugin-entry-point-catalog/v1"
-    assert [item["plugin_id"] for item in payload["entry_points"]] == sorted(
-        item["plugin_id"] for item in payload["entry_points"]
-    )
+    assert [item["plugin_id"] for item in payload["entry_points"]] == sorted(item["plugin_id"] for item in payload["entry_points"])
     cadac = next(item for item in payload["entry_points"] if item["plugin_id"] == "taoryx.cadac")
     assert cadac == {
         "plugin_id": "taoryx.cadac",
@@ -960,6 +939,16 @@ def test_plugin_cli_checks_full_installed_distribution_profile(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     catalog = discover_plugins(include_external=False)
+    distribution_versions = {"taoryx": runtime_cli.importlib_metadata.version("taoryx")}
+    distribution_versions.update(
+        {
+            distribution: runtime_cli.importlib_metadata.version(distribution)
+            for distribution in (
+                runtime_cli._OFFICIAL_PLUGIN_DISTRIBUTIONS[plugin_id]
+                for plugin_id in runtime_cli._PLUGIN_INSTALL_PROFILES["full"]
+            )
+        }
+    )
 
     def discover_installed(**kwargs: object) -> object:
         assert kwargs == {"include_builtin": False, "strict": False}
@@ -974,7 +963,7 @@ def test_plugin_cli_checks_full_installed_distribution_profile(
                 target=f"example_{index}.plugin:PLUGIN",
                 origin="installed",
                 distribution=runtime_cli._OFFICIAL_PLUGIN_DISTRIBUTIONS[plugin_id],
-                version="0.1.0a0",
+                version=distribution_versions[runtime_cli._OFFICIAL_PLUGIN_DISTRIBUTIONS[plugin_id]],
             )
             for index, plugin_id in enumerate(runtime_cli._PLUGIN_INSTALL_PROFILES["full"])
         )
@@ -982,7 +971,7 @@ def test_plugin_cli_checks_full_installed_distribution_profile(
 
     monkeypatch.setattr(runtime_cli, "discover_plugins", discover_installed)
     monkeypatch.setattr(runtime_cli, "declared_plugin_entry_points", declared_installed)
-    monkeypatch.setattr(runtime_cli.importlib_metadata, "version", lambda _name: "0.1.0a0")
+    monkeypatch.setattr(runtime_cli.importlib_metadata, "version", lambda name: distribution_versions[name])
 
     assert runtime_cli.main(["plugins", "check", "--profile", "full", "--json"]) == 0
 
@@ -998,6 +987,7 @@ def test_plugin_cli_checks_full_installed_distribution_profile(
         "taoryx-hummingbird",
         "taoryx-nesc",
         "taoryx-passive-bodies",
+        "taoryx-parametric-interceptors",
         "taoryx-simple-aero",
         "taoryx-x15",
         "taoryx-hl20",
@@ -1042,6 +1032,7 @@ def test_plugin_cli_fails_closed_for_missing_model_profile_distribution(
         "taoryx-hummingbird",
         "taoryx-nesc",
         "taoryx-passive-bodies",
+        "taoryx-parametric-interceptors",
         "taoryx-simple-aero",
         "taoryx-x15",
         "taoryx-hl20",
@@ -1091,9 +1082,7 @@ def test_minimal_compatibility_aggregate_excludes_the_optional_passive_body() ->
         include_external=False,
         selected=runtime_cli._PLUGIN_INSTALL_PROFILES["compatibility"],
     )
-    provider = catalog.build_mission_composition_provider_registry().provider(
-        "taoryx.registry.mission-composition"
-    )
+    provider = catalog.build_mission_composition_provider_registry().provider("taoryx.registry.mission-composition")
 
     assert tuple(model.id for model in provider.list_models()) == (
         "a320_openap_3dof",
@@ -1157,6 +1146,7 @@ def test_disabling_reference_models_removes_only_the_compatibility_aggregate() -
         "taoryx.hl20",
         "taoryx.hummingbird",
         "taoryx.nesc",
+        "taoryx.parametric-interceptors",
         "taoryx.passive-bodies",
         "taoryx.reachability",
         "taoryx.simple-aero",
@@ -1196,6 +1186,7 @@ def test_disabling_reference_models_removes_only_the_compatibility_aggregate() -
         "taoryx.hl20.mission-composition",
         "taoryx.hummingbird.mission-composition",
         "taoryx.nesc.mission-composition",
+        "taoryx.parametric-interceptors.mission-composition",
         "taoryx.passive-bodies.mission-composition",
         "taoryx.simple-aero.mission-composition",
         "taoryx.x8.mission-composition",
@@ -1243,6 +1234,7 @@ def test_disabling_reference_models_removes_only_the_compatibility_aggregate() -
         ("taoryx.hl20", "loaded"),
         ("taoryx.hummingbird", "loaded"),
         ("taoryx.nesc", "loaded"),
+        ("taoryx.parametric-interceptors", "loaded"),
         ("taoryx.passive-bodies", "loaded"),
         ("taoryx.reachability", "loaded"),
         ("taoryx.reference-models", "disabled"),
@@ -1269,6 +1261,7 @@ def test_disabling_reachability_removes_only_reachability_owned_overlays() -> No
         "taoryx.hl20",
         "taoryx.hummingbird",
         "taoryx.nesc",
+        "taoryx.parametric-interceptors",
         "taoryx.passive-bodies",
         "taoryx.reference-models",
         "taoryx.simple-aero",
@@ -1298,6 +1291,7 @@ def test_disabling_reachability_removes_only_reachability_owned_overlays() -> No
         ("taoryx.hl20", "loaded"),
         ("taoryx.hummingbird", "loaded"),
         ("taoryx.nesc", "loaded"),
+        ("taoryx.parametric-interceptors", "loaded"),
         ("taoryx.passive-bodies", "loaded"),
         ("taoryx.reachability", "disabled"),
         ("taoryx.reference-models", "loaded"),
@@ -1399,7 +1393,10 @@ from pathlib import Path
 sys.path[:] = [
     entry
     for entry in sys.path
-    if not any(part in {"taoryx-reachability", "taoryx-cadac"} for part in Path(entry).parts)
+    if not any(
+        part in {"taoryx-reachability", "taoryx-cadac", "taoryx-parametric-interceptors"}
+        for part in Path(entry).parts
+    )
 ]
 from taoryx.plugins import discover_plugins
 
@@ -1472,7 +1469,7 @@ sys.path[:] = [
     entry
     for entry in sys.path
     if not any(
-        part in {"taoryx-debug-models", "taoryx-reachability", "taoryx-cadac"}
+        part in {"taoryx-debug-models", "taoryx-reachability", "taoryx-cadac", "taoryx-parametric-interceptors"}
         for part in Path(entry).parts
     )
 ]
@@ -1534,6 +1531,7 @@ sys.path[:] = [
             "taoryx-hl20",
                 "taoryx-source-table-fixed-wing",
                 "taoryx-cadac",
+                "taoryx-parametric-interceptors",
         }
         for part in Path(entry).parts
     )
@@ -1682,6 +1680,7 @@ sys.path[:] = [
             "taoryx-hl20",
                 "taoryx-source-table-fixed-wing",
                 "taoryx-cadac",
+                "taoryx-parametric-interceptors",
         }
         for part in Path(entry).parts
     )
@@ -2396,9 +2395,7 @@ def test_packaged_plugin_assets_preserve_explicit_family_ownership() -> None:
     hummingbird_models = yaml.safe_load((hummingbird_data / "verification/vehicle_models.yaml").read_text(encoding="utf-8"))
     nesc_models = yaml.safe_load((nesc_data / "verification/vehicle_models.yaml").read_text(encoding="utf-8"))
     passive_models = yaml.safe_load((passive_data / "verification/vehicle_models.yaml").read_text(encoding="utf-8"))
-    source_table_fixed_wing_models = yaml.safe_load(
-        (source_table_fixed_wing_data / "verification/vehicle_models.yaml").read_text(encoding="utf-8")
-    )
+    source_table_fixed_wing_models = yaml.safe_load((source_table_fixed_wing_data / "verification/vehicle_models.yaml").read_text(encoding="utf-8"))
     x15_models = yaml.safe_load((x15_data / "verification/vehicle_models.yaml").read_text(encoding="utf-8"))
     hl20_models = yaml.safe_load((hl20_data / "verification/vehicle_models.yaml").read_text(encoding="utf-8"))
     assert "hummingbird" not in reference_models["vehicles"]
@@ -2414,17 +2411,10 @@ def test_packaged_plugin_assets_preserve_explicit_family_ownership() -> None:
     assert tuple(source_table_fixed_wing_models["vehicles"]) == ("b747", "skywalker_x8")
     assert tuple(x15_models["vehicles"]) == ("x15",)
     assert hl20_models["vehicles"] == {}
-    source_table_missions = yaml.safe_load(
-        (source_table_fixed_wing_data / "verification/family_qualification_missions.yaml").read_text(encoding="utf-8")
-    )
-    source_table_routes = yaml.safe_load(
-        (source_table_fixed_wing_data / "verification/racetrack_templates.yaml").read_text(encoding="utf-8")
-    )
+    source_table_missions = yaml.safe_load((source_table_fixed_wing_data / "verification/family_qualification_missions.yaml").read_text(encoding="utf-8"))
+    source_table_routes = yaml.safe_load((source_table_fixed_wing_data / "verification/racetrack_templates.yaml").read_text(encoding="utf-8"))
     assert {mission["family"] for mission in source_table_missions["missions"]} == {"b747", "skywalker_x8"}
-    assert {
-        binding["vehicle_id"]
-        for binding in source_table_routes["bindings"].values()
-    } == {"b747", "skywalker_x8"}
+    assert {binding["vehicle_id"] for binding in source_table_routes["bindings"].values()} == {"b747", "skywalker_x8"}
     for mission in source_table_missions["missions"]:
         assert (source_table_fixed_wing_data / mission["problem"]).is_file()
         assert all((source_table_fixed_wing_data / table).is_file() for table in mission["tables"])
@@ -2458,15 +2448,11 @@ def test_packaged_plugin_assets_preserve_explicit_family_ownership() -> None:
         "hl20",
     ):
         assert foreign_family not in source_table_fixed_wing_text
+
     def has_transient_tool_cache(data_root: Path) -> bool:
         """Identify files that must never become a packaged model asset."""
 
-        return any(
-            "__pycache__" in packaged.parts
-            or ".ruff_cache" in packaged.parts
-            or packaged.suffix == ".pyc"
-            for packaged in data_root.rglob("*")
-        )
+        return any("__pycache__" in packaged.parts or ".ruff_cache" in packaged.parts or packaged.suffix == ".pyc" for packaged in data_root.rglob("*"))
         ####
 
     assert not has_transient_tool_cache(f16_data)
@@ -2485,9 +2471,7 @@ def test_packaged_plugin_assets_preserve_explicit_family_ownership() -> None:
     simple_aero_provenance = json.loads((simple_aero_data / "package_data_provenance.json").read_text(encoding="utf-8"))
     assert simple_aero_provenance["schema"] == "taoryx.simple-aero-package-data/v1"
     assert simple_aero_provenance["endpoint_id"] == "simple-aero-fixed-ld-batch"
-    simple_aero_workflows = yaml.safe_load(
-        (simple_aero_data / "verification/mission_workflow_endpoint_specs.yaml").read_text(encoding="utf-8")
-    )
+    simple_aero_workflows = yaml.safe_load((simple_aero_data / "verification/mission_workflow_endpoint_specs.yaml").read_text(encoding="utf-8"))
     assert [item["id"] for item in simple_aero_workflows["endpoints"]] == ["simple-aero-fixed-ld-batch"]
     assert (simple_aero_data / "verification/workflow_endpoint_witnesses/simple_aero_fixed_ld_baseline.yaml").is_file()
     assert not has_transient_tool_cache(simple_aero_data)
@@ -2496,15 +2480,9 @@ def test_packaged_plugin_assets_preserve_explicit_family_ownership() -> None:
     assert dual_launch_provenance["schema"] == "taoryx.dual-launch-package-data/v1"
     assert dual_launch_provenance["family_id"] == "dual_launch_glider"
     assert dual_launch_provenance["endpoint_id"] == "dual-launch-attached-booster-batch"
-    dual_launch_families = yaml.safe_load(
-        (dual_launch_data / "verification/dual_launch_family_catalog.yaml").read_text(encoding="utf-8")
-    )
-    dual_launch_maturity = yaml.safe_load(
-        (dual_launch_data / "verification/vehicle_maturity_registry.yaml").read_text(encoding="utf-8")
-    )
-    dual_launch_workflows = yaml.safe_load(
-        (dual_launch_data / "verification/mission_workflow_endpoint_specs.yaml").read_text(encoding="utf-8")
-    )
+    dual_launch_families = yaml.safe_load((dual_launch_data / "verification/dual_launch_family_catalog.yaml").read_text(encoding="utf-8"))
+    dual_launch_maturity = yaml.safe_load((dual_launch_data / "verification/vehicle_maturity_registry.yaml").read_text(encoding="utf-8"))
+    dual_launch_workflows = yaml.safe_load((dual_launch_data / "verification/mission_workflow_endpoint_specs.yaml").read_text(encoding="utf-8"))
     assert [item["family_id"] for item in dual_launch_families["families"]] == ["dual_launch_glider"]
     assert [item["id"] for item in dual_launch_maturity["records"]] == ["dual_launch_glider"]
     assert [item["id"] for item in dual_launch_workflows["endpoints"]] == ["dual-launch-attached-booster-batch"]
@@ -2517,9 +2495,7 @@ def test_packaged_plugin_assets_preserve_explicit_family_ownership() -> None:
         "reference-waypoint-3dof-batch",
         "debug-contract-probe-batch",
     ]
-    debug_model_workflows = yaml.safe_load(
-        (debug_models_data / "verification/mission_workflow_endpoint_specs.yaml").read_text(encoding="utf-8")
-    )
+    debug_model_workflows = yaml.safe_load((debug_models_data / "verification/mission_workflow_endpoint_specs.yaml").read_text(encoding="utf-8"))
     assert [item["id"] for item in debug_model_workflows["endpoints"]] == debug_models_provenance["endpoint_ids"]
     for witness in (
         "reference_ballistic_3dof.yaml",
@@ -2546,9 +2522,7 @@ def test_packaged_plugin_assets_preserve_explicit_family_ownership() -> None:
     for data_root, excluded_prefixes in (
         (
             reference_data,
-            (
-                "verification/",
-            ),
+            ("verification/",),
         ),
         (
             hummingbird_data,

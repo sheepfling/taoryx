@@ -26,6 +26,7 @@ class PluginWheelSpec:
     plugin_id: str
     plugin_version: str
     owned_modules: tuple[str, ...]
+    console_scripts: tuple[tuple[str, str], ...] = ()
     deferred_module_names: tuple[str, ...] = ()
     model_format_imports: tuple[tuple[str, str], ...] = ()
     adapter_builds: tuple[tuple[str, str], ...] = ()
@@ -35,6 +36,7 @@ class PluginWheelSpec:
     batch_only_witnesses: tuple[str, ...] = ()
     focused_provider_id: str | None = None
     focused_provider_models: tuple[tuple[str, tuple[str, ...]], ...] = ()
+    model_authoring_plan_requests: tuple[tuple[str, str, str, str], ...] = ()
     excluded_mission_template_ids: tuple[str, ...] = ()
     trim_evidence_family_id: str | None = None
     exercise_episode: bool = True
@@ -388,6 +390,53 @@ PLUGIN_WHEEL_SPECS: tuple[PluginWheelSpec, ...] = (
         ),
     ),
     PluginWheelSpec(
+        selector="parametric-interceptors",
+        project=ROOT / "packages" / "taoryx-parametric-interceptors",
+        wheel_stem="taoryx_parametric_interceptors",
+        plugin_id="taoryx.parametric-interceptors",
+        plugin_version="0.1.0a32",
+        owned_modules=(
+            "taoryx_parametric_interceptors.__main__",
+            "taoryx_parametric_interceptors.aerodynamics",
+            "taoryx_parametric_interceptors.applicability",
+            "taoryx_parametric_interceptors.authoring",
+            "taoryx_parametric_interceptors.calibration",
+            "taoryx_parametric_interceptors.catalogue",
+            "taoryx_parametric_interceptors.control_authority",
+            "taoryx_parametric_interceptors.event_detection",
+            "taoryx_parametric_interceptors.fitting",
+            "taoryx_parametric_interceptors.guidance",
+            "taoryx_parametric_interceptors.kernel",
+            "taoryx_parametric_interceptors.profile",
+            "taoryx_parametric_interceptors.propulsion",
+            "taoryx_parametric_interceptors.provider",
+            "taoryx_parametric_interceptors.pseudo6",
+            "taoryx_parametric_interceptors.response_analysis",
+            "taoryx_parametric_interceptors.resolver",
+            "taoryx_parametric_interceptors.sensor_suite",
+            "taoryx_parametric_interceptors.thrust_curve",
+            "taoryx_parametric_interceptors.thrust_schedule",
+            "taoryx_parametric_interceptors.units",
+            "taoryx_parametric_interceptors.witnesses",
+        ),
+        console_scripts=(("taoryx-interceptor", "taoryx_parametric_interceptors.__main__:main"),),
+        focused_provider_models=(
+            (
+                "taoryx.parametric-interceptors.mission-composition",
+                ("generic-medium-sam", "aim9x-block2", "aim120-amraam-c5-c7"),
+            ),
+        ),
+        model_authoring_plan_requests=(
+            (
+                "taoryx.parametric-interceptors.mission-composition",
+                "aim9x-block2",
+                "attitude_response_pseudo_6dof",
+                "direct_lateral_acceleration_control",
+            ),
+        ),
+        exercise_episode=False,
+    ),
+    PluginWheelSpec(
         selector="simple-aero",
         project=ROOT / "packages" / "taoryx-simple-aero",
         wheel_stem="taoryx_simple_aero",
@@ -528,9 +577,10 @@ sys.path[:] = [
 ]
 sys.path.insert(0, str(target))
 
+installed_distributions = tuple(distributions(path=[str(target)]))
 entries = tuple(
     entry
-    for distribution in distributions(path=[str(target)])
+    for distribution in installed_distributions
     for entry in distribution.entry_points
     if entry.group == "taoryx.plugins"
 )
@@ -538,6 +588,24 @@ entry_ids = {entry.name for entry in entries}
 expected_ids = {item["plugin_id"] for item in expected}
 if entry_ids != expected_ids:
     raise RuntimeError(f"wheel entry points were {sorted(entry_ids)!r}, expected {sorted(expected_ids)!r}")
+
+console_scripts = {
+    (entry.name, entry.value)
+    for distribution in installed_distributions
+    for entry in distribution.entry_points
+    if entry.group == "console_scripts"
+}
+expected_console_scripts = {
+    tuple(entry)
+    for item in expected
+    for entry in item["console_scripts"]
+}
+missing_console_scripts = expected_console_scripts - console_scripts
+if missing_console_scripts:
+    raise RuntimeError(
+        f"wheel console scripts were missing {sorted(missing_console_scripts)!r}; "
+        f"installed scripts were {sorted(console_scripts)!r}"
+    )
 
 from taoryx.plugins.discovery import discover_plugins
 
@@ -731,6 +799,48 @@ if providers is not None:
             if leaked:
                 raise RuntimeError(
                     f"wheel provider {provider_id!r} exposed missions owned by an optional overlay: {leaked!r}"
+                )
+
+    plan_requests = tuple(
+        request
+        for item in provider_items
+        for request in item["model_authoring_plan_requests"]
+    )
+    if plan_requests:
+        from taoryx.model_authoring import build_model_authoring_plan
+
+        campaigns = catalog.build_controller_tuning_campaign_registry()
+        family_adapters = (
+            catalog.build_family_adapter_registry()
+            if catalog.records("family_adapter")
+            else None
+        )
+        local_controller_screens = (
+            catalog.build_local_controller_screen_advertisement_registry()
+            if catalog.records("local_controller_screen_advertisement")
+            else None
+        )
+        for provider_id, model_id, fidelity_id, mission_template_id in plan_requests:
+            plan = build_model_authoring_plan(
+                providers,
+                campaigns,
+                provider_id,
+                model_id,
+                family_adapters=family_adapters,
+                local_controller_screens=local_controller_screens,
+                fidelity=fidelity_id,
+                mission_template_id=mission_template_id,
+            )
+            if plan["status"] != "ready_to_author":
+                raise RuntimeError(
+                    f"wheel model plan for {provider_id!r}/{model_id!r} was {plan['status']!r}, "
+                    "expected 'ready_to_author'"
+                )
+            selection = plan["selection"]
+            if selection["fidelity"] != fidelity_id or selection["mission_template_id"] != mission_template_id:
+                raise RuntimeError(
+                    f"wheel model plan for {provider_id!r}/{model_id!r} selected {selection!r}, "
+                    f"expected fidelity {fidelity_id!r} and mission {mission_template_id!r}"
                 )
 
 adapter_registry = None
@@ -965,6 +1075,7 @@ def smoke_expectations(
             "exercise_boundary": spec.selector in exercised_selectors,
             "deferred_module_names": spec.deferred_module_names,
             "owned_modules": spec.owned_modules,
+            "console_scripts": spec.console_scripts,
             "model_format_imports": spec.model_format_imports,
             "adapter_builds": spec.adapter_builds,
             "resource_module": spec.resource_module,
@@ -973,6 +1084,7 @@ def smoke_expectations(
             "batch_only_witnesses": spec.batch_only_witnesses,
             "focused_provider_id": spec.focused_provider_id,
             "focused_provider_models": spec.focused_provider_models,
+            "model_authoring_plan_requests": spec.model_authoring_plan_requests,
             "excluded_mission_template_ids": spec.excluded_mission_template_ids,
             "trim_evidence_family_id": spec.trim_evidence_family_id,
             "exercise_episode": spec.exercise_episode,

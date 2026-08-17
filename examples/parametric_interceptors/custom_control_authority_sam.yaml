@@ -1,0 +1,34 @@
+# Copy-ready reduced-order authority example. Every raw value is a simulation
+# assumption; this file makes no actuator, controller, or aerodynamic-deck claim.
+interceptor_id: custom-control-authority-sam
+variant: developer_mixed_authority
+parameter_set_version: 0.1.0
+surrogate_archetype_id: generic_slender_sam_v1
+
+launch_mass_kg: 300.0
+propellant_fraction: 0.45
+length_m: 4.8
+body_diameter_m: 0.30
+propulsion_architecture: single_stage_solid
+burn_time_class: medium
+thrust_profile_class: boost_sustain
+
+aero_archetype: generic_slender_supersonic
+drag_class: nominal
+maneuverability_class: moderate
+control_configuration: mixed
+control_allocation_policy: proportional
+normal_force_coefficient_limit: 8.0
+max_thrust_vector_angle_rad: 0.1745329252
+maneuver_drag_factor: 0.1
+control_bandwidth_class: nominal
+
+guidance_family: command
+guidance_archetype: waypoint_pursuit
+target_classes: [air_breathing]
+
+model_notes: >-
+  Developer-authored mixed force-authority surrogate. Aerodynamic authority is
+  dynamic-pressure dependent, thrust-vector authority is present only while
+  the resolved propulsion program produces thrust, and achieved demand is
+  divided in proportion to their instantaneous unconstrained authority.

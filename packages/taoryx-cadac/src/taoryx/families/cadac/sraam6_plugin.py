@@ -37,6 +37,15 @@ class Sraam6PluginOverrides(CadacModel):
     target_option: int | None = None
     target_turn_g: float | None = None
     navigation_gain: float | None = Field(default=None, ge=0.0)
+    fin_position_limit_deg: float | None = Field(default=None, gt=0.0)
+    fin_rate_limit_deg_s: float | None = Field(default=None, gt=0.0)
+    fin_natural_frequency_rad_s: float | None = Field(default=None, gt=0.0)
+    fin_damping_ratio: float | None = Field(default=None, ge=0.0)
+    seeker_acquisition_range_m: float | None = Field(default=None, gt=0.0)
+    seeker_filter_gain_per_s: float | None = Field(default=None, ge=0.0)
+    seeker_filter_natural_frequency_rad_s: float | None = Field(default=None, gt=0.0)
+    seeker_filter_damping_ratio: float | None = Field(default=None, ge=0.0)
+    structural_limit_g: float | None = Field(default=None, gt=0.0)
     end_time_s: float | None = Field(default=None, gt=0.0)
     sample_step_s: float | None = Field(default=None, gt=0.0)
 
@@ -64,6 +73,15 @@ class Sraam6PluginOverrides(CadacModel):
             "target_flight_path_deg",
             "target_turn_g",
             "navigation_gain",
+            "fin_position_limit_deg",
+            "fin_rate_limit_deg_s",
+            "fin_natural_frequency_rad_s",
+            "fin_damping_ratio",
+            "seeker_acquisition_range_m",
+            "seeker_filter_gain_per_s",
+            "seeker_filter_natural_frequency_rad_s",
+            "seeker_filter_damping_ratio",
+            "structural_limit_g",
             "end_time_s",
             "sample_step_s",
         ):
@@ -165,6 +183,33 @@ class Sraam6VehiclePlugin:
         if resolved.navigation_gain is not None:
             updates["guidance"] = definition.guidance.model_copy(update={"navigation_gain": resolved.navigation_gain})
         ####
+        actuator_updates = _component_updates(
+            resolved,
+            {
+                "fin_position_limit_deg": "position_limit_deg",
+                "fin_rate_limit_deg_s": "rate_limit_deg_s",
+                "fin_natural_frequency_rad_s": "natural_frequency_rad_s",
+                "fin_damping_ratio": "damping_ratio",
+            },
+        )
+        if actuator_updates:
+            updates["actuator"] = definition.actuator.model_copy(update=actuator_updates)
+        ####
+        seeker_updates = _component_updates(
+            resolved,
+            {
+                "seeker_acquisition_range_m": "acquisition_range_m",
+                "seeker_filter_gain_per_s": "filter_gain_per_s",
+                "seeker_filter_natural_frequency_rad_s": "filter_natural_frequency_rad_s",
+                "seeker_filter_damping_ratio": "filter_damping_ratio",
+            },
+        )
+        if seeker_updates:
+            updates["seeker"] = definition.seeker.model_copy(update=seeker_updates)
+        ####
+        if resolved.structural_limit_g is not None:
+            updates["control"] = definition.control.model_copy(update={"structural_limit_g": resolved.structural_limit_g})
+        ####
         if resolved.end_time_s is not None:
             updates["end_time_s"] = resolved.end_time_s
         ####
@@ -207,6 +252,22 @@ def _override_initial_state(
         ####
     ####
     return initial.model_copy(update=updates) if updates else initial
+
+
+####
+
+
+def _component_updates(
+    overrides: Sraam6PluginOverrides,
+    routes: dict[str, str],
+) -> dict[str, float]:
+    """Return explicitly supplied scalar fields for one source component."""
+
+    return {
+        component_field: float(value)
+        for override_field, component_field in routes.items()
+        if (value := getattr(overrides, override_field)) is not None
+    }
 
 
 ####

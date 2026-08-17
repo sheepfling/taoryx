@@ -45,3 +45,40 @@ def test_agm6_plugin_applies_missile_target_aircraft_and_runtime_overrides(tmp_p
 
 
 ####
+
+
+def test_agm6_plugin_materializes_source_backed_tuning_without_mutating_installation(tmp_path: Path) -> None:
+    plugin = Agm6VehiclePlugin(_write_agm6_case(tmp_path))
+    installed = plugin.source_definition()
+
+    prepared = plugin.prepare_definition(
+        Agm6PluginOverrides(
+            fin_position_limit_deg=11.0,
+            fin_rate_limit_deg_s=300.0,
+            fin_natural_frequency_rad_s=210.0,
+            fin_damping_ratio=0.9,
+            seeker_acquisition_range_m=6_500.0,
+            seeker_filter_gain_per_s=2.5,
+            seeker_filter_natural_frequency_rad_s=16.0,
+            seeker_filter_damping_ratio=0.75,
+            structural_limit_g=15.0,
+            propulsion_throttle=0.7,
+        )
+    )
+
+    assert prepared.actuator.position_limit_deg == 11.0
+    assert prepared.actuator.rate_limit_deg_s == 300.0
+    assert prepared.actuator.natural_frequency_rad_s == 210.0
+    assert prepared.actuator.damping_ratio == 0.9
+    assert prepared.sensor.acquisition_range_m == 6_500.0
+    assert prepared.sensor.filter_gain_per_s == 2.5
+    assert prepared.sensor.filter_natural_frequency_rad_s == 16.0
+    assert prepared.sensor.filter_damping_ratio == 0.75
+    assert prepared.control.structural_limit_g == 15.0
+    assert prepared.propulsion.throttle == 0.7
+    assert plugin.source_definition() is installed
+    assert installed.actuator.position_limit_deg != prepared.actuator.position_limit_deg
+    assert installed.propulsion.throttle != prepared.propulsion.throttle
+
+
+####

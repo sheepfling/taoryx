@@ -35,6 +35,7 @@ def build_session_interface_contract(
     family_id: str,
     physical_family: str,
     claim_boundary: str,
+    default_authority_profile_id: str | None = None,
 ) -> tuple[VehicleInterfaceContract, tuple[EpisodeChannel, ...]]:
     """Build one exact step-capable interface from published model metadata."""
 
@@ -70,17 +71,24 @@ def build_session_interface_contract(
     output_channels = tuple(
         item
         for item in model.output_schema.channels
-        if item.availability == "guaranteed" and (not item.operations or "step" in item.operations)
+        if item.availability == "guaranteed"
+        and (not item.operations or "step" in item.operations)
+        and (not item.compatible_fidelities or fidelity in item.compatible_fidelities)
+        and (not item.compatible_realizations or realization_id in item.compatible_realizations)
     )
     if not output_channels:
         # Legacy output metadata was historically batch-scoped.  A provider
         # that explicitly advertises a step tuple may still reuse those exact
         # channel definitions while it migrates the operations annotation.
         output_channels = tuple(
-            item for item in model.output_schema.channels if item.availability == "guaranteed"
+            item
+            for item in model.output_schema.channels
+            if item.availability == "guaranteed"
+            and (not item.compatible_fidelities or fidelity in item.compatible_fidelities)
+            and (not item.compatible_realizations or realization_id in item.compatible_realizations)
         )
     status_channels = tuple(_status_channel(item) for item in output_channels if item.data_type != "json")
-    default_id = realization.controls.default_authority_id
+    default_id = default_authority_profile_id or realization.controls.default_authority_id
     available_ids = {item.id for item in authorities}
     if default_id not in available_ids:
         default_id = authorities[0].id if authorities else None
@@ -151,11 +159,7 @@ def _action_channel(channel: TrajectoryControlChannelMetadata) -> InterfaceChann
     if canonical_unit is None and value_type in {"scalar", "vector3", "vector4"}:
         canonical_unit = "dimensionless"
     feedback_channel_id = channel.provider_binding.get("feedback_channel_id")
-    feedback_binding = (
-        {"feedback_channel_id": feedback_channel_id}
-        if isinstance(feedback_channel_id, str) and feedback_channel_id
-        else {}
-    )
+    feedback_binding = {"feedback_channel_id": feedback_channel_id} if isinstance(feedback_channel_id, str) and feedback_channel_id else {}
     semantics = channel.semantics
     semantic_binding = {
         "command_mode": semantics.command_mode,
@@ -221,10 +225,7 @@ def _control_action_values(
     count = last - first + 1
     if count < 2 or count > 4096:
         raise ValueError(f"step control {channel.id!r} has an invalid detent count")
-    return tuple(
-        quantization.origin + index * quantization.step
-        for index in range(first, last + 1)
-    )
+    return tuple(quantization.origin + index * quantization.step for index in range(first, last + 1))
     ####
 
 
@@ -242,11 +243,7 @@ def _status_channel(channel: TrajectoryOutputChannelMetadata) -> InterfaceChanne
         kind="status",
         value_type=value_type,
         canonical_unit=canonical_unit,
-        quantity_semantics=(
-            "count"
-            if value_type == "scalar" and canonical_unit is None and channel.data_type == "int64"
-            else None
-        ),
+        quantity_semantics=("count" if value_type == "scalar" and canonical_unit is None and channel.data_type == "int64" else None),
         description=channel.description,
         frame=channel.frame,
         availability="available",
@@ -323,9 +320,7 @@ def _value_space(source: object, value_type: InterfaceValueType) -> ValueSpaceSp
         "enum": "string",
         "event": "string",
     }[value_type]
-    components = tuple(
-        _value_space(item, "scalar") for item in getattr(source, "components", ())
-    )
+    components = tuple(_value_space(item, "scalar") for item in getattr(source, "components", ()))
     return ValueSpaceSpec(
         topology=cast(ValueSpaceTopology, normalized),
         representation=representation,

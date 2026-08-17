@@ -66,3 +66,29 @@ def test_aim5_plugin_validation_rejects_missing_source_case(tmp_path: Path) -> N
 
 
 ####
+
+
+def test_aim5_plugin_materializes_pseudo6_response_law_tuning_without_mutating_source(tmp_path: Path) -> None:
+    plugin = Aim5VehiclePlugin(_write_case(tmp_path))
+    installed = plugin.source_definition()
+
+    prepared = plugin.prepare_definition(
+        Aim5PluginOverrides(
+            alpha_max_deg=32.0,
+            rate_loop_time_constant_s=0.08,
+            proportional_integral_ratio=1.5,
+            acceleration_loop_gain_rad_s2=55.0,
+        )
+    )
+    response = prepared.missiles[0].config
+
+    assert response.alpha_max_deg == 32.0
+    assert response.rate_loop_time_constant_s == 0.08
+    assert response.proportional_integral_ratio == 1.5
+    assert response.acceleration_loop_gain_rad_s2 == 55.0
+    assert plugin.source_definition() is installed
+    assert installed.missiles[0].config.alpha_max_deg == 40.0
+    assert installed.missiles[0].config.rate_loop_time_constant_s == 0.1
+
+
+####

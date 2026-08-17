@@ -1,0 +1,72 @@
+kind: interceptor_evidence_record
+interceptor_id: int:us-aim120-amraam
+model_id: aim120-amraam-c5-c7
+variant_basis: AIM-120C5_or_C7
+application_context: NASAMS_surface_launch
+source_record_ids:
+  - int:us-aim120-amraam
+  - source:navair-amraam-public-description
+resolution_status: source_dominant
+
+evidence:
+  launch_mass:
+    value: 161.48
+    unit: kg
+    origin: observed_converted
+    source_value: {value: 356, unit: lb}
+  length:
+    value: 3.66
+    unit: m
+    origin: observed_converted
+    source_value: {value: 12, unit: ft}
+  body_diameter:
+    value: 0.1778
+    unit: m
+    origin: observed_converted
+    source_value: {value: 7, unit: in}
+  wingspan:
+    value: 0.4826
+    unit: m
+    origin: observed_converted
+    source_value: {value: 19, unit: in}
+  propulsion_architecture: {value: single_stage_solid, origin: observed}
+  guidance_architecture: {value: active_radar, origin: observed}
+  reported_speed: {value: null, unit: m/s, status: classified}
+  reported_range: {value: null, unit: m, status: classified}
+
+derived:
+  reference_area:
+    value: 0.02483
+    unit: m^2
+    method: circular_area_from_body_diameter
+  slenderness_ratio:
+    value: 20.57
+    unit: "1"
+    method: length_divided_by_body_diameter
+
+evidence_intervals:
+  - parameter_id: launch_mass
+    minimum_value: 157.85
+    maximum_value: 162.39
+    unit: kg
+    origin: observed_variant_interval
+    note: >-
+      Unresolved AMRAAM-family public mass interval; selected C5/C7 witness
+      uses 161.48 kg.
+
+resolver_assumptions:
+  surrogate_archetype_id: medium_range_active_rf_sam_v1
+  required_diagnostics: [family_identity_narrowed_to_c5_or_c7]
+  unresolved_parameters:
+    - burnout_mass
+    - motor_burn_time
+    - thrust_time_profile
+    - drag_model
+    - lift_or_maneuver_authority
+    - control_bandwidth
+    - terminal_guidance_response
+
+model_notes: >-
+  Catalogue-linked, official-source-backed prototype evidence seed supplied
+  for Taoryx resolver development; not a verbatim SQL export and not
+  independently measured.

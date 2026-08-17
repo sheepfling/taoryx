@@ -6,12 +6,13 @@ import pytest
 from taoryx.families.cadac.ads6_srbm_mission_composition import (
     ADS6_SRBM_FIDELITY_ID,
     ADS6_SRBM_MODEL_ID,
+    ADS6_SRBM_MODEL_VERSION,
     ADS6_SRBM_REALIZATION_ID,
     CadacAds6SrbmMissionCompositionProvider,
     build_default_ads6_srbm_configuration,
     register_ads6_srbm_mission_composition,
 )
-from taoryx.families.cadac.ads6_srbm_plugin import Ads6SrbmVehiclePlugin
+from taoryx.families.cadac.ads6_srbm_plugin import Ads6SrbmPluginOverrides, Ads6SrbmVehiclePlugin
 from test_ads6_srbm import _write_ads6_srbm_case
 
 from taoryx.trajectory.execution_contract import (
@@ -67,7 +68,7 @@ def test_ads6_srbm_common_runner_emits_translation_as_core_truth(tmp_path: Path)
         MissionCompositionRunRequest(
             request_id="ads6-srbm-core",
             provider_id="cadac",
-            provider_version="0.9.0",
+            provider_version=ADS6_SRBM_MODEL_VERSION,
             prepared_configuration=prepared,
             output=MissionCompositionOutputSelection(mode="core"),
         )
@@ -99,7 +100,7 @@ def test_ads6_srbm_all_output_keeps_response_states_as_telemetry(tmp_path: Path)
         MissionCompositionRunRequest(
             request_id="ads6-srbm-all",
             provider_id="cadac",
-            provider_version="0.9.0",
+            provider_version=ADS6_SRBM_MODEL_VERSION,
             prepared_configuration=prepared,
             output=MissionCompositionOutputSelection(mode="all"),
         )
@@ -118,6 +119,49 @@ def test_ads6_srbm_all_output_keeps_response_states_as_telemetry(tmp_path: Path)
 ####
 
 
+def test_ads6_srbm_configuration_routes_pseudo6_response_law_tuning_into_the_plugin(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider = _provider(tmp_path)
+    configuration = build_default_ads6_srbm_configuration(
+        provider,
+        overrides={
+            "alpha_limit_deg": 24.0,
+            "endo_boundary_altitude_m": 24_000.0,
+            "ascent_normal_bias_g": 0.7,
+            "end_time_s": 0.05,
+            "sample_step_s": 0.05,
+        },
+    )
+    prepared = provider.validate_configuration(configuration)
+    captured: list[Ads6SrbmPluginOverrides] = []
+    original = provider._plugin.run_batch
+
+    def capture(overrides: Ads6SrbmPluginOverrides | None = None) -> object:
+        assert overrides is not None
+        captured.append(overrides)
+        return original(overrides)
+
+    monkeypatch.setattr(provider._plugin, "run_batch", capture)
+    provider.execute_batch(
+        MissionCompositionRunRequest(
+            request_id="ads6-srbm-response-law-tuning",
+            provider_id="cadac",
+            provider_version=ADS6_SRBM_MODEL_VERSION,
+            prepared_configuration=prepared,
+            output=MissionCompositionOutputSelection(mode="core"),
+        )
+    )
+
+    assert prepared.resolved["response_law"]["alpha_limit_deg"] == 24.0
+    assert captured[0].endo_boundary_altitude_m == 24_000.0
+    assert captured[0].ascent_normal_bias_g == 0.7
+
+
+####
+
+
 def test_ads6_srbm_persistent_session_owns_response_state_and_native_sensor_bus(tmp_path: Path) -> None:
     provider = _provider(tmp_path)
     configuration = build_default_ads6_srbm_configuration(
@@ -129,7 +173,7 @@ def test_ads6_srbm_persistent_session_owns_response_state_and_native_sensor_bus(
         MissionCompositionOpenSessionRequest(
             session_id="ads6-srbm-persistent",
             provider_id="cadac",
-            provider_version="0.9.0",
+            provider_version=ADS6_SRBM_MODEL_VERSION,
             prepared_configuration=prepared,
             seed=23,
             integration_step_s=0.01,
@@ -179,7 +223,7 @@ def test_ads6_srbm_projected_events_include_exo_and_reentry_transitions(tmp_path
         MissionCompositionRunRequest(
             request_id="ads6-srbm-transition",
             provider_id="cadac",
-            provider_version="0.9.0",
+            provider_version=ADS6_SRBM_MODEL_VERSION,
             prepared_configuration=prepared,
             output=MissionCompositionOutputSelection(mode="all"),
         )
@@ -214,7 +258,7 @@ def test_ads6_srbm_executor_rejects_neighboring_model_request(tmp_path: Path) ->
     wrong = MissionCompositionRunRequest(
         request_id="ads6-srbm-wrong-provider",
         provider_id="another-provider",
-        provider_version="0.9.0",
+        provider_version=ADS6_SRBM_MODEL_VERSION,
         prepared_configuration=prepared,
     )
 

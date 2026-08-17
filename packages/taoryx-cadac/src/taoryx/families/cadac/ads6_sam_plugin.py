@@ -47,6 +47,15 @@ class Ads6SamPluginOverrides(CadacModel):
     lateral_acceleration_command_g: float = 0.0
     normal_acceleration_command_g: float = 0.0
     thrust_vector_unit_body: tuple[float, float, float] = (1.0, 0.0, 0.0)
+    fin_position_limit_deg: float | None = Field(default=None, gt=0.0)
+    fin_rate_limit_deg_s: float | None = Field(default=None, gt=0.0)
+    fin_natural_frequency_rad_s: float | None = Field(default=None, gt=0.0)
+    fin_damping_ratio: float | None = Field(default=None, ge=0.0)
+    tvc_position_limit_deg: float | None = Field(default=None, gt=0.0)
+    tvc_rate_limit_deg_s: float | None = Field(default=None, gt=0.0)
+    tvc_natural_frequency_rad_s: float | None = Field(default=None, gt=0.0)
+    tvc_damping_ratio: float | None = Field(default=None, ge=0.0)
+    tvc_initial_gain: float | None = Field(default=None, ge=0.0)
     end_time_s: float | None = Field(default=None, gt=0.0)
     sample_step_s: float | None = Field(default=None, gt=0.0)
 
@@ -75,6 +84,15 @@ class Ads6SamPluginOverrides(CadacModel):
             "beta_command_deg",
             "lateral_acceleration_command_g",
             "normal_acceleration_command_g",
+            "fin_position_limit_deg",
+            "fin_rate_limit_deg_s",
+            "fin_natural_frequency_rad_s",
+            "fin_damping_ratio",
+            "tvc_position_limit_deg",
+            "tvc_rate_limit_deg_s",
+            "tvc_natural_frequency_rad_s",
+            "tvc_damping_ratio",
+            "tvc_initial_gain",
             "end_time_s",
             "sample_step_s",
         ):
@@ -201,31 +219,12 @@ class Ads6SamVehiclePlugin:
     def run_batch(self, overrides: Ads6SamPluginOverrides | None = None) -> Ads6SamRunResult:
         """Run one exact fin, TVC, or aggregate-RCS realization."""
 
-        definition = self.source_definition()
         resolved = overrides or Ads6SamPluginOverrides()
         phase_blockers = self.validate_realization(resolved.source_phase, resolved)
         if phase_blockers:
             raise ValueError("ADS6 SAM realization is unavailable: " + "; ".join(phase_blockers))
         ####
-        updates: dict[str, object] = {}
-        for override_name in (
-            "position_ned_m",
-            "speed_mps",
-            "yaw_deg",
-            "pitch_deg",
-            "roll_deg",
-            "alpha_deg",
-            "beta_deg",
-            "body_rates_deg_s",
-        ):
-            value = getattr(resolved, override_name)
-            if value is not None:
-                updates[override_name] = value
-            ####
-        ####
-        if updates:
-            definition = definition.model_copy(update={"initial_state": definition.initial_state.model_copy(update=updates)})
-        ####
+        definition = self.prepare_definition(resolved)
         command = Ads6SamDirectCommand(
             phase=resolved.source_phase,
             control=Ads6SamControlCommand(
@@ -255,6 +254,60 @@ class Ads6SamVehiclePlugin:
 
     ####
 
+    def prepare_definition(self, overrides: Ads6SamPluginOverrides | None = None) -> Ads6SamSourceDefinition:
+        """Materialize source-backed physical-effector tuning for one session."""
+
+        definition = self.source_definition()
+        resolved = overrides or Ads6SamPluginOverrides()
+        updates: dict[str, object] = {}
+        for override_name in (
+            "position_ned_m",
+            "speed_mps",
+            "yaw_deg",
+            "pitch_deg",
+            "roll_deg",
+            "alpha_deg",
+            "beta_deg",
+            "body_rates_deg_s",
+        ):
+            value = getattr(resolved, override_name)
+            if value is not None:
+                updates[override_name] = value
+            ####
+        ####
+        if updates:
+            definition = definition.model_copy(update={"initial_state": definition.initial_state.model_copy(update=updates)})
+        ####
+        fin_updates = _component_updates(
+            resolved,
+            {
+                "fin_position_limit_deg": "position_limit_deg",
+                "fin_rate_limit_deg_s": "rate_limit_deg_s",
+                "fin_natural_frequency_rad_s": "natural_frequency_rad_s",
+                "fin_damping_ratio": "damping_ratio",
+            },
+        )
+        if fin_updates:
+            definition = definition.model_copy(update={"fin_actuator": definition.fin_actuator.model_copy(update=fin_updates)})
+        ####
+        tvc_updates = _component_updates(
+            resolved,
+            {
+                "tvc_position_limit_deg": "position_limit_deg",
+                "tvc_rate_limit_deg_s": "rate_limit_deg_s",
+                "tvc_natural_frequency_rad_s": "natural_frequency_rad_s",
+                "tvc_damping_ratio": "damping_ratio",
+                "tvc_initial_gain": "initial_gain",
+            },
+        )
+        if tvc_updates:
+            definition = definition.model_copy(update={"tvc": definition.tvc.model_copy(update=tvc_updates)})
+        ####
+        return definition
+
+
+    ####
+
     def _load_definition(self) -> Ads6SamSourceDefinition:
         if self._definition is None:
             if self._missile_actor_index is None:
@@ -269,6 +322,22 @@ class Ads6SamVehiclePlugin:
         return self._definition
 
     ####
+
+
+####
+
+
+def _component_updates(
+    overrides: Ads6SamPluginOverrides,
+    routes: dict[str, str],
+) -> dict[str, float]:
+    """Return the explicitly supplied fields for one immutable source component."""
+
+    return {
+        component_field: float(value)
+        for override_field, component_field in routes.items()
+        if (value := getattr(overrides, override_field)) is not None
+    }
 
 
 ####

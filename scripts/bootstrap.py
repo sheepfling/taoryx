@@ -19,6 +19,7 @@ _DIRECT_MODEL_PROJECTS: tuple[str, ...] = (
     "packages/taoryx-hummingbird",
     "packages/taoryx-nesc",
     "packages/taoryx-passive-bodies",
+    "packages/taoryx-parametric-interceptors",
     "packages/taoryx-simple-aero",
     "packages/taoryx-dual-launch",
     "packages/taoryx-x15",

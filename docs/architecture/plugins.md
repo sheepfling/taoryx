@@ -55,6 +55,11 @@ when a packaged catalog fragment supplies the standard Composition API. The
 older registry-named host remains solely a compatibility import for existing
 aggregate consumers.
 
+Every direct provider publishes the same closed
+[Vehicle Composition Advertisement API](vehicle-composition-advertisement-api.md),
+so a catalogue or planner can negotiate capabilities without importing that
+provider's plant or depending on the compatibility aggregate.
+
 The current exemplar packages are deliberately complementary:
 
 - `taoryx-debug-models` is the smallest development-only provider;
@@ -169,6 +174,9 @@ for subsequent vehicle splits are documented in
 For the developer recipe for a new vehicle package—including controls,
 authority profiles, factories, data ownership, and verification—start with
 [Authoring a vehicle plug-in](vehicle-plugin-authoring.md).
+For the compact ontology-to-surrogate route, including evidence status,
+assumption cases, and the first guided point-mass tier, see
+[Parametric interceptor model architecture](parametric-interceptor-models.md).
 Its per-realization fidelity definition of done is
 [Fidelity tiers and vehicle plug-in requirements](fidelity-data-requirements.md).
 
@@ -499,7 +507,7 @@ blocked.
 
 ## Current package set
 
-The direct `developer` profile installs the core plus thirteen independent
+The direct `developer` profile installs the core plus fourteen independent
 plug-in distributions. The `full` profile adds the separate compatibility
 aggregate for migration/release integration; the source-bound CADAC integration
 is an additional optional wheel:
@@ -514,6 +522,7 @@ is an additional optional wheel:
 | `taoryx-hummingbird` | `taoryx.hummingbird` | AscTec Hummingbird source tables/assets, fidelity and endpoint fragments, native and pseudo adapters, `taoryx.hummingbird.mission-composition`, control campaigns, and Hummingbird-only execution factories/witnesses |
 | `taoryx-nesc` | `taoryx.nesc` | NASA/NESC Scenario 17 source-replay assets, catalog fragments, point/pseudo adapters, `taoryx.nesc.mission-composition`, source-replay preflight/execution, and the stage-separation parent contract |
 | `taoryx-passive-bodies` | `taoryx.passive-bodies` | reusable tumbling/released-body source fragments, direct-release adapters and witnesses, and the `taoryx.passive-bodies.local-atmosphere-release.v1` child runtime; it has no parent-vehicle import dependency |
+| `taoryx-parametric-interceptors` | `taoryx.parametric-interceptors` | compact evidence profiles, explicit archetype/assumption-case resolution, and package-owned guided point-mass plus attitude-response pseudo-6DOF Composition tiers with standard ideal-IMU projection; it records an optional CADAC calibration reference without depending on CADAC |
 | `taoryx-simple-aero` | `taoryx.simple-aero` | Simple Aero builder, validation, fixtures, fidelity ladder, `reference.point_mass`, the focused `taoryx.simple-aero.mission-composition` provider, and its workflow endpoint fragment/witness |
 | `taoryx-dual-launch` | `taoryx.dual-launch` | synthetic dual-launch family metadata, source-problem lowering, `taoryx.dual-launch.mission-composition`, normalized batch projection, and its workflow endpoint fragment/witness; it has no compatibility-aggregate dependency |
 | `taoryx-x15` | `taoryx.x15` | X-15 source tables, catalog fragments, direct-wrench and source-surface local screens, `taoryx.x15.mission-composition`, controller campaigns, and X-15-only execution/episode/parity witnesses; its focused API excludes the optional reachability-owned staged overlay and it consumes only core host services |
@@ -528,7 +537,7 @@ source-backed runtimes retain the published DAVE-ML parser boundary. The
 reference-model distribution depends on source-table fixed-wing, DAVE-ML,
 A320, F-16, Hummingbird, NESC, Simple Aero, Dual Launch, X-15, and HL-20 because its
 compatibility aggregate advertises their installed workflows. The debug-provider,
-A320, Hummingbird, passive-body, Simple Aero, Dual Launch, source-table fixed-wing, and
+A320, Hummingbird, passive-body, parametric-interceptor, Simple Aero, Dual Launch, source-table fixed-wing, and
 X-15 plug-ins consume no sibling Taoryx model plug-in. All focused family
 packages remain discoverable and executable without the reference aggregate. A NESC
 composition can select a passive child only when that separately installed

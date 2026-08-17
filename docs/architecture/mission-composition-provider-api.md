@@ -10,6 +10,10 @@ The canonical Python surface is
 [`taoryx.trajectory.mission_composition`](../../src/taoryx/trajectory/mission_composition.py).
 The shortest consumer guide is the
 [Mission Composition front door](../MISSION_COMPOSITION.md).
+The composition advertisement is also a standalone first-class product; its
+normative vocabulary, compatibility policy, provider adoption guide, and
+transport-neutral JSON usage are documented in the
+[Vehicle Composition Advertisement API](vehicle-composition-advertisement-api.md).
 
 ## Contract separation
 
@@ -39,6 +43,7 @@ The public schemas are:
 | Artifact | Schema ID |
 | --- | --- |
 | Provider metadata | `taoryx.trajectory-provider-metadata/v1` |
+| Composition advertisement | `taoryx.trajectory-composition-advertisement/v1` |
 | Configuration schema | `taoryx.trajectory-provider-configuration-schema/v1` |
 | Output schema | `taoryx.trajectory-provider-output-schema/v1` |
 | Per-realization control advertisement | Nested `TrajectoryControlAdvertisement` in model metadata |
@@ -230,6 +235,55 @@ conversion belongs at the application boundary.
 values plus a fingerprint over both the caller-authored configuration and
 those resolved values. `PreparedTrajectoryConfiguration` rechecks that digest
 when parsed, so a stale or modified handoff fails before execution.
+
+## Exhaustive composition advertisement
+
+This section summarizes how the advertisement participates in the complete
+provider protocol. For the normative standalone contract and adoption guide,
+see [Vehicle Composition Advertisement API](vehicle-composition-advertisement-api.md).
+
+Every `TrajectoryModelMetadata` includes a derived
+`TrajectoryCompositionAdvertisement`. It is the normalized answer to “what
+can be composed?” and covers more than the top-level `batch` and `step`
+operation list. The v1 feature vocabulary is closed and partitioned into:
+
+- authoring modes: fixed template, caller-ordered sequence, caller-authored
+  graph, and provider-generated graph;
+- execution modes: batch, stateful session, provider-controlled program,
+  caller-controlled actions, and multi-entity output;
+- graph forms: linear, directed acyclic, conditional, cyclic, parallel
+  fork/join, nested, and runtime-mutable;
+- node and transition kinds, including decision/fork/join/deployment nodes and
+  success/timeout/abort/resource/envelope/event/condition/manual edges;
+- pre-run rearrangements, including reorder/insert/remove/replace/duplicate,
+  rewiring, enable/disable, typed parameter patches, and deployment binding;
+- runtime transitions for authority, fidelity, mode, graph, and model changes;
+- entity-topology operations for spawn/attach/detach/split/merge/replacement
+  and recursive generation; and
+- state-transfer semantics for segment handoff, accepted-boundary child
+  snapshots, bumpless authority changes, fidelity projection, and
+  provider-defined transfers.
+
+Every feature appears exactly once with status `available`, `conditional`,
+`declared`, `blocked`, or `not_available`. Usable rows name their exact
+operations, mutation timing, mission templates, fidelities, realizations, and
+requirements. Blocked rows name blockers. Unsupported behavior is serialized
+instead of disappearing, so a UI cannot confuse omission with permission.
+
+The matrix is a canonical projection of mission operation rows, realization
+authority records, deployments, entity-output metadata, and fidelity
+transitions. Providers do not maintain a second capability claim: model
+validation recomputes the matrix and rejects stale or more optimistic
+advertisements. Extending the closed feature vocabulary requires a new schema
+version; additive provider-specific strings cannot silently create a new graph
+or mutation semantic.
+
+Current registry models remain deliberately conservative. A fixed sequence is
+not promoted to a general DAG merely because every line is technically
+acyclic. An open sequence permits only the advertised pre-run sequence edits.
+A fidelity transition advertises selection or fallback, not live state
+projection. A deployment authorizes only its named accepted-boundary child
+relationship, not generic object attachment or topology mutation.
 
 ## Exact operation and fidelity publication
 
@@ -633,17 +687,19 @@ PYTHONPATH=src python3 examples/trajectory_provider/mission_composition_contract
 4. Publish canonical units, bounds, periodicity, topology, defaults, provenance,
    and fidelity compatibility for every parameter.
 5. Publish exact mission/fidelity/operation availability and blockers.
-6. Publish every child-emission capability, including event-only boundaries.
-7. Validate into an immutable prepared configuration before execution.
-8. Register the exact provider/model executor with the common runner.
-9. Adapt interactive execution through open/inspect/step/reset/close sessions;
+6. Derive the exhaustive composition advertisement from those authoritative
+   operation, control, deployment, output, and fidelity records.
+7. Publish every child-emission capability, including event-only boundaries.
+8. Validate into an immutable prepared configuration before execution.
+9. Register the exact provider/model executor with the common runner.
+10. Adapt interactive execution through open/inspect/step/reset/close sessions;
    never substitute a stateless step request.
-10. Raise structured public errors and keep private traces in correlated logs.
-11. Return one object history per independently propagated body with explicit
+11. Raise structured public errors and keep private traces in correlated logs.
+12. Return one object history per independently propagated body with explicit
     lineage events, a first-class relationship record, and an initial-state
     snapshot at the accepted spawn boundary.
-12. Add every source asset and non-compatibility realization to the inventory.
-13. Run the advertisement, inventory, exact-tuple, serialization, output, and
+13. Add every source asset and non-compatibility realization to the inventory.
+14. Run the advertisement, inventory, exact-tuple, serialization, output, and
     lineage audits while preserving each underlying claim boundary.
 
 Mission Composition owns discovery and mission assembly. Model Authoring owns

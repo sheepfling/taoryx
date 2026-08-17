@@ -182,8 +182,13 @@ if TYPE_CHECKING:
     )
     from .hummingbird_pseudo6dof import HummingbirdPseudo6DOFCommand, HummingbirdPseudo6DOFModel, HummingbirdPseudo6DOFState
     from .mission_composition import (
+        COMPOSITION_FEATURE_VOCABULARY,
         CONTRACT_PROBE_MODEL_ID,
         CONTRACT_PROBE_PROVIDER_ID,
+        CompositionFeatureCategory,
+        CompositionFeatureOperation,
+        CompositionFeatureStatus,
+        CompositionMutationTiming,
         ConfigurableTrajectoryProvider,
         ConfigurableTrajectoryProviderRegistry,
         ConfigurationBound,
@@ -299,6 +304,8 @@ if TYPE_CHECKING:
         TrajectoryChannelMetadata,
         TrajectoryConfigurationInstance,
         TrajectoryConfigurationSchema,
+        TrajectoryCompositionAdvertisement,
+        TrajectoryCompositionFeatureMetadata,
         TrajectoryControlAdvertisement,
         TrajectoryControlAuthorityKind,
         TrajectoryControlAuthorityMetadata,
@@ -347,6 +354,7 @@ if TYPE_CHECKING:
         build_contract_probe_configuration,
         build_registry_mission_composition_runner,
         build_rl_action_space,
+        build_trajectory_composition_advertisement,
         build_simple_aero_configuration,
         build_simple_aero_example_configuration,
         build_simple_aero_prepared_configuration,
@@ -410,6 +418,7 @@ if TYPE_CHECKING:
     from .response_laws import AxisResponseState, bounded_axis_acceleration, bounded_axis_rate_command, step_bounded_axis_response
 
 _LAZY_EXPORTS: Final[dict[str, tuple[str, str]]] = {
+    'COMPOSITION_FEATURE_VOCABULARY': ('.mission_composition', 'COMPOSITION_FEATURE_VOCABULARY'),
     'A320GuidanceOverride': ('.a320_racetrack', 'A320GuidanceOverride'),
     'A320OpenAPControlPlant': ('.a320_adapter', 'A320OpenAPControlPlant'),
     'A320OpenAPEnvelopeError': ('.a320_openap', 'A320OpenAPEnvelopeError'),
@@ -450,6 +459,10 @@ _LAZY_EXPORTS: Final[dict[str, tuple[str, str]]] = {
     'ComponentSlot': ('.contracts', 'ComponentSlot'),
     'ConfigurableTrajectoryProvider': ('.mission_composition', 'ConfigurableTrajectoryProvider'),
     'ConfigurableTrajectoryProviderRegistry': ('.mission_composition', 'ConfigurableTrajectoryProviderRegistry'),
+    'CompositionFeatureCategory': ('.mission_composition', 'CompositionFeatureCategory'),
+    'CompositionFeatureOperation': ('.mission_composition', 'CompositionFeatureOperation'),
+    'CompositionFeatureStatus': ('.mission_composition', 'CompositionFeatureStatus'),
+    'CompositionMutationTiming': ('.mission_composition', 'CompositionMutationTiming'),
     'ConfigurationBound': ('.mission_composition', 'ConfigurationBound'),
     'ConfigurationChoiceSchema': ('.mission_composition', 'ConfigurationChoiceSchema'),
     'ConfigurationChoiceValue': ('.mission_composition', 'ConfigurationChoiceValue'),
@@ -679,6 +692,8 @@ _LAZY_EXPORTS: Final[dict[str, tuple[str, str]]] = {
     'TrajectoryChannelMetadata': ('.mission_composition', 'TrajectoryChannelMetadata'),
     'TrajectoryConfigurationInstance': ('.mission_composition', 'TrajectoryConfigurationInstance'),
     'TrajectoryConfigurationSchema': ('.mission_composition', 'TrajectoryConfigurationSchema'),
+    'TrajectoryCompositionAdvertisement': ('.mission_composition', 'TrajectoryCompositionAdvertisement'),
+    'TrajectoryCompositionFeatureMetadata': ('.mission_composition', 'TrajectoryCompositionFeatureMetadata'),
     'TrajectoryControlAdvertisement': ('.mission_composition', 'TrajectoryControlAdvertisement'),
     'TrajectoryControlAuthorityKind': ('.mission_composition', 'TrajectoryControlAuthorityKind'),
     'TrajectoryControlAuthorityMetadata': ('.mission_composition', 'TrajectoryControlAuthorityMetadata'),
@@ -745,6 +760,7 @@ _LAZY_EXPORTS: Final[dict[str, tuple[str, str]]] = {
     'bounded_axis_rate_command': ('.response_laws', 'bounded_axis_rate_command'),
     'build_automatic_lowering_report': ('.pseudo6dof_profiles', 'build_automatic_lowering_report'),
     'build_contract_probe_configuration': ('.mission_composition', 'build_contract_probe_configuration'),
+    'build_trajectory_composition_advertisement': ('.mission_composition', 'build_trajectory_composition_advertisement'),
     'build_daveml_family_import': ('.daveml_import', 'build_daveml_family_import'),
     'build_daveml_ir': ('.daveml_semantic', 'build_daveml_ir'),
     'build_f16_reduced_control_plant': ('.f16_reduced_adapter', 'build_f16_reduced_control_plant'),
@@ -843,6 +859,11 @@ __all__ = ['AllocationSchema', 'ClosedLoopPole', 'ControllerChannel', 'Controlle
 # Keep newly added provider-contract types visible through wildcard imports;
 # the historical facade list above remains ordered for compatibility.
 __all__ += [
+    "COMPOSITION_FEATURE_VOCABULARY",
+    "CompositionFeatureCategory",
+    "CompositionFeatureOperation",
+    "CompositionFeatureStatus",
+    "CompositionMutationTiming",
     "ConfigurableTrajectoryProviderRegistry",
     "ControlAgentNormalizationPolicy",
     "ControlCommandMode",
@@ -864,6 +885,8 @@ __all__ += [
     "RLActionSpaceSpec",
     "RLControlChannelSpec",
     "TrajectoryControlAdvertisement",
+    "TrajectoryCompositionAdvertisement",
+    "TrajectoryCompositionFeatureMetadata",
     "TrajectoryControlAuthorityKind",
     "TrajectoryControlAuthorityMetadata",
     "TrajectoryControlCommandOwner",
@@ -897,6 +920,7 @@ __all__ += [
     "SimpleAeroSegmentKind",
     "SimpleAeroSurrogate",
     "build_rl_action_space",
+    "build_trajectory_composition_advertisement",
     "build_simple_aero_configuration",
     "build_simple_aero_template_configuration",
     "decode_agent_action",

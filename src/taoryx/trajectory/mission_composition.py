@@ -1,8 +1,10 @@
-"""Canonical Mission Composition provider API.
+"""Canonical Mission Composition and composition-advertisement API.
 
 This module collects provider discovery, typed configuration, execution,
 diagnostic, and standardized trajectory-result contracts behind one public
-import surface.
+import surface. Its closed ``TrajectoryCompositionAdvertisement`` artifact is
+also usable independently by trajectory backends that do not execute through
+the Taoryx runtime.
 """
 
 from typing import TYPE_CHECKING
@@ -33,6 +35,11 @@ from .analytical_mission_composition import (
     MissionCompositionVehicle,
 )
 from .configuration_contract import (
+    COMPOSITION_FEATURE_VOCABULARY,
+    CompositionFeatureCategory,
+    CompositionFeatureOperation,
+    CompositionFeatureStatus,
+    CompositionMutationTiming,
     ConfigurableTrajectoryProvider,
     ConfigurableTrajectoryProviderRegistry,
     ConfigurationBound,
@@ -68,6 +75,8 @@ from .configuration_contract import (
     PreparedTrajectoryConfiguration,
     PresentationLinkMetadata,
     TrajectoryActuatorType,
+    TrajectoryCompositionAdvertisement,
+    TrajectoryCompositionFeatureMetadata,
     TrajectoryConfigurationInstance,
     TrajectoryConfigurationSchema,
     TrajectoryControlAdvertisement,
@@ -108,6 +117,7 @@ from .configuration_contract import (
     TrajectorySamplingSemantics,
     TrajectoryTelemetryGroupMetadata,
     ValuePresentationMetadata,
+    build_trajectory_composition_advertisement,
     render_configuration_schema,
     validate_configuration_instance,
 )
@@ -293,6 +303,11 @@ def __getattr__(name: str) -> object:
 
 
 __all__ = [
+    "COMPOSITION_FEATURE_VOCABULARY",
+    "CompositionFeatureCategory",
+    "CompositionFeatureOperation",
+    "CompositionFeatureStatus",
+    "CompositionMutationTiming",
     "ConfigurableTrajectoryProvider",
     "ConfigurableTrajectoryProviderRegistry",
     "CONTRACT_PROBE_MODEL_ID",
@@ -387,6 +402,8 @@ __all__ = [
     "SimpleAeroSurrogate",
     "TrajectoryConfigurationInstance",
     "TrajectoryConfigurationSchema",
+    "TrajectoryCompositionAdvertisement",
+    "TrajectoryCompositionFeatureMetadata",
     "TrajectoryControlAdvertisement",
     "TrajectoryControlAuthorityKind",
     "TrajectoryControlAuthorityMetadata",
@@ -433,6 +450,7 @@ __all__ = [
     "TrajectorySegmentResult",
     "TrajectoryStateSnapshot",
     "audit_provider_advertisement",
+    "build_trajectory_composition_advertisement",
     "build_simple_aero_configuration",
     "build_simple_aero_prepared_configuration",
     "build_simple_aero_example_configuration",

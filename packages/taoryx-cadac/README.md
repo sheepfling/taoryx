@@ -75,6 +75,10 @@ python tools/verify_plugin_wheels.py --plugin cadac --python .venv/bin/python
 Neither check includes a redistributed CADAC deck or scans a workstation for a
 source checkout.
 
+For the source-backed variant contract, pseudo-6DoF boundary, and the focused
+authoring/test workflow for AIM5, ADS6 SRBM, ADS6 SAM, SRAAM6, and AGM6, see
+[CADAC missile tuning and reduced-order authoring](../../docs/cadac-missile-tuning.md).
+
 ### Vertical scope boundary
 
 Every source-bound CADAC vertical gate now binds one source case into a matching
