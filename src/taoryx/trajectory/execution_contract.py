@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import math
 import re
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from typing import Annotated, Any, Literal, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError, model_validator
@@ -36,6 +36,7 @@ from .configuration_contract import (
     TrajectoryOutputSchema,
     TrajectorySamplingSemantics,
 )
+from .standard_output import StandardEcefState, project_standard_ecef_samples, standard_ecef_state_from_values
 
 DiagnosticSeverity = Literal["error", "warning", "info"]
 DiagnosticPhase = Literal["discovery", "configuration", "preflight", "execution", "projection"]
@@ -264,13 +265,35 @@ class TrajectoryChannelMetadata(BaseModel):
 
 
 class TrajectorySample(BaseModel):
-    """One accepted truth sample for exactly one mission object."""
+    """One accepted truth sample for exactly one mission object.
+
+    ``standard_ecef`` is the required cross-provider minimum: ECEF position,
+    velocity, derived acceleration, body angular velocity, and ECEF-from-body
+    orientation. Native ``values`` remain lossless provider evidence and may
+    add model-specific telemetry without changing that standard view.
+    """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     time_s: float = Field(ge=0.0)
     values: dict[str, Any]
     segment_instance_id: str | None = None
+    standard_ecef: StandardEcefState
+
+    @model_validator(mode="before")
+    @classmethod
+    def project_standard_ecef(cls, value: object) -> object:
+        if not isinstance(value, Mapping):
+            return value
+        payload = dict(value)
+        if payload.get("standard_ecef") is not None:
+            return payload
+        time_s = payload.get("time_s")
+        values = payload.get("values")
+        if isinstance(time_s, int | float) and not isinstance(time_s, bool) and isinstance(values, Mapping):
+            payload["standard_ecef"] = standard_ecef_state_from_values(float(time_s), values)
+        return payload
+        ####
 
     @model_validator(mode="after")
     def validate_values(self) -> TrajectorySample:
@@ -471,6 +494,71 @@ class TrajectoryObject(BaseModel):
     ####
 
 
+def _standardize_object_payload(value: object) -> object:
+    """Attach the universal ECEF/ECFC pose before Pydantic freezes an object."""
+
+    if isinstance(value, TrajectoryObject):
+        payload: dict[str, Any] = value.model_dump(mode="python")
+    elif isinstance(value, Mapping):
+        payload = dict(value)
+    else:
+        return value
+    raw_channels = payload.get("channels")
+    raw_samples = payload.get("samples")
+    if not isinstance(raw_channels, Sequence) or isinstance(raw_channels, str | bytes):
+        return payload
+    if not isinstance(raw_samples, Sequence) or isinstance(raw_samples, str | bytes):
+        return payload
+    frames: dict[str, str | None] = {}
+    units: dict[str, str | None] = {}
+    for channel in raw_channels:
+        if isinstance(channel, TrajectoryChannelMetadata):
+            frames[channel.id] = channel.frame
+            units[channel.id] = channel.unit
+        elif isinstance(channel, Mapping):
+            identifier = channel.get("id")
+            if isinstance(identifier, str):
+                frame = channel.get("frame")
+                unit = channel.get("unit")
+                frames[identifier] = frame if isinstance(frame, str) else None
+                units[identifier] = unit if isinstance(unit, str) else None
+    sample_payloads: list[dict[str, Any]] = []
+    source_samples: list[tuple[float, Mapping[str, Any]]] = []
+    existing: list[StandardEcefState | None] = []
+    for sample in raw_samples:
+        if isinstance(sample, TrajectorySample):
+            sample_payload = sample.model_dump(mode="python")
+        elif isinstance(sample, Mapping):
+            sample_payload = dict(sample)
+        else:
+            return payload
+        time_s = sample_payload.get("time_s")
+        values = sample_payload.get("values")
+        if isinstance(time_s, bool) or not isinstance(time_s, int | float) or not isinstance(values, Mapping):
+            return payload
+        standard = sample_payload.get("standard_ecef")
+        if standard is None or isinstance(standard, StandardEcefState):
+            existing.append(standard)
+        elif isinstance(standard, Mapping):
+            existing.append(StandardEcefState.model_validate(standard))
+        else:
+            return payload
+        source_samples.append((float(time_s), values))
+        sample_payloads.append(sample_payload)
+    states = project_standard_ecef_samples(
+        tuple(source_samples),
+        channel_frames=frames,
+        channel_units=units,
+        existing=tuple(existing),
+    )
+    payload["samples"] = tuple(
+        {**sample, "standard_ecef": state}
+        for sample, state in zip(sample_payloads, states, strict=True)
+    )
+    return payload
+    ####
+
+
 class MissionCompositionTrajectoryResult(BaseModel):
     """Standard provider-independent, multi-object Mission Composition result."""
 
@@ -494,8 +582,28 @@ class MissionCompositionTrajectoryResult(BaseModel):
     diagnostics: tuple[MissionCompositionDiagnostic, ...] = ()
     claim_boundary: str = Field(min_length=1)
 
+    @model_validator(mode="before")
+    @classmethod
+    def project_standard_ecef(cls, value: object) -> object:
+        if not isinstance(value, Mapping):
+            return value
+        payload = dict(value)
+        objects = payload.get("objects")
+        if isinstance(objects, Sequence) and not isinstance(objects, str | bytes):
+            payload["objects"] = tuple(_standardize_object_payload(item) for item in objects)
+        return payload
+        ####
+
     @model_validator(mode="after")
     def validate_result(self) -> MissionCompositionTrajectoryResult:
+        missing_standard = tuple(
+            f"{item.object_id}[{index}]"
+            for item in self.objects
+            for index, sample in enumerate(item.samples)
+            if sample.standard_ecef is None
+        )
+        if missing_standard:
+            raise ValueError(f"trajectory result is missing standard ECEF samples {missing_standard!r}")
         object_ids = tuple(item.object_id for item in self.objects)
         if len(object_ids) != len(set(object_ids)):
             raise ValueError("trajectory result object IDs must be unique")

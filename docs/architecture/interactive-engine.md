@@ -140,8 +140,9 @@ Callers do not need to inspect `RuntimeState.named` for ordinary flight data.
 `RuntimeProblem.observe()` and `LoadedProgram.observe()` expose three levels:
 
 1. `standard`: a compact `StandardRuntimeOutput` containing time, ECFC
-   position/velocity/acceleration, optional attitude quaternion/body rate,
-   mass, and current segment;
+   position/velocity/acceleration, optional native attitude quaternion/body
+   rate, mass, current segment, and required `standard_ecef` ECEF kinematics,
+   world-from-body quaternion, and body angular rate;
 2. `status`: declared model-specific values such as thermal state, throttle,
    stage, mode, or health flags;
 3. `deep`: the complete named/internal state, only when explicitly requested.

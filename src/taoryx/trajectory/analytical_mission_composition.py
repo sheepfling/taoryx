@@ -60,6 +60,7 @@ from .configuration_contract import (
     ValuePresentationMetadata,
     validate_configuration_instance,
 )
+from .standard_output import StandardEcefState, project_standard_ecef_samples, standard_ecef_state_from_values
 
 MissionCompositionStatus = Literal["declared", "development", "runnable", "deprecated"]
 MissionCompositionCapabilityStatus = Literal["native", "emulated", "approximated", "unsupported"]
@@ -488,13 +489,31 @@ class MissionCompositionPreparedRequest(BaseModel):
 
 
 class MissionCompositionTrajectorySample(BaseModel):
-    """One accepted truth sample in the standard trajectory envelope."""
+    """One accepted truth sample and its required standard ECEF state."""
 
     model_config = ConfigDict(frozen=True, extra="forbid", populate_by_name=True)
 
     time_s: float = Field(ge=0.0)
     values: dict[str, float]
     segment_instance_id: str | None = None
+    standard_ecef: StandardEcefState
+
+    @model_validator(mode="before")
+    @classmethod
+    def project_standard_ecef(cls, value: object) -> object:
+        """Attach the single-sample ECEF minimum for direct construction."""
+
+        if not isinstance(value, Mapping):
+            return value
+        payload = dict(value)
+        if payload.get("standard_ecef") is not None:
+            return payload
+        time_s = payload.get("time_s")
+        values = payload.get("values")
+        if isinstance(time_s, int | float) and not isinstance(time_s, bool) and isinstance(values, Mapping):
+            payload["standard_ecef"] = standard_ecef_state_from_values(float(time_s), values)
+        return payload
+        ####
 
 
 ####
@@ -556,6 +575,48 @@ class MissionCompositionTrajectory(BaseModel):
     channel_units: dict[str, str | None] = Field(default_factory=dict)
     diagnostics: tuple[str, ...] = ()
     claim_boundary: str = Field(min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def project_standard_ecef(cls, value: object) -> object:
+        """Reproject the full accepted history for derivative kinematics."""
+
+        if not isinstance(value, Mapping):
+            return value
+        payload = dict(value)
+        raw_samples = payload.get("samples")
+        if not isinstance(raw_samples, Sequence) or isinstance(raw_samples, str | bytes):
+            return payload
+
+        source_samples: list[tuple[float, Mapping[str, float]]] = []
+        sample_payloads: list[dict[str, Any]] = []
+        for sample in raw_samples:
+            if isinstance(sample, MissionCompositionTrajectorySample):
+                sample_payload = sample.model_dump(mode="python")
+            elif isinstance(sample, Mapping):
+                sample_payload = dict(sample)
+            else:
+                return payload
+            time_s = sample_payload.get("time_s")
+            values = sample_payload.get("values")
+            if isinstance(time_s, bool) or not isinstance(time_s, int | float) or not isinstance(values, Mapping):
+                return payload
+            source_samples.append((float(time_s), values))
+            sample_payloads.append(sample_payload)
+
+        if not source_samples:
+            return payload
+        channel_units = payload.get("channel_units")
+        states = project_standard_ecef_samples(
+            tuple(source_samples),
+            channel_units=channel_units if isinstance(channel_units, Mapping) else None,
+        )
+        payload["samples"] = tuple(
+            {**sample, "standard_ecef": state}
+            for sample, state in zip(sample_payloads, states, strict=True)
+        )
+        return payload
+        ####
 
     @model_validator(mode="after")
     def validate_timeline(self) -> MissionCompositionTrajectory:

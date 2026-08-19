@@ -8,13 +8,20 @@ from typing import cast
 
 from taoryx.contracts import Vector3
 from taoryx.modes import Quaternion
+from taoryx.trajectory.standard_output import StandardEcefState, standard_ecef_state_from_values
 
 from .common import RuntimeVehicle
 
 
 @dataclass(frozen=True, slots=True)
 class StandardRuntimeOutput:
-    """Stable hot-path snapshot shared by controllers, UIs, and telemetry."""
+    """Stable hot-path snapshot shared by controllers, UIs, and telemetry.
+
+    The historical nullable convenience fields remain available, while the
+    required ``standard_ecef`` sidecar gives every runtime observation the
+    common kinematic minimum even when the underlying vehicle only exposes a
+    partial native state.
+    """
 
     time: float
     position_ecfc: Vector3 | None
@@ -24,6 +31,7 @@ class StandardRuntimeOutput:
     omega_body: Vector3 | None
     mass: float | None
     segment: int
+    standard_ecef: StandardEcefState
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,6 +56,7 @@ class RuntimeObservation:
                 "omega_body": _vector_payload(standard.omega_body),
                 "mass": standard.mass,
                 "segment": standard.segment,
+                "standard_ecef": standard.standard_ecef.model_dump(mode="json", by_alias=True),
             },
             "status": dict(self.status),
             "deep": None if self.deep is None else dict(self.deep),
@@ -77,14 +86,24 @@ def observe_vehicle(
     attitude = vehicle.kinematic_state.attitude if vehicle.kinematic_state is not None else None
     omega = vehicle.body_rate_provider(state) if vehicle.body_rate_provider is not None else None
     standard = StandardRuntimeOutput(
-        state.time,
-        position,
-        velocity,
-        acceleration,
-        attitude,
-        omega,
-        _number(named.get("mass", named.get("wt"))),
-        vehicle.segment_number,
+        time=state.time,
+        position_ecfc=position,
+        velocity_ecfc=velocity,
+        acceleration_ecfc=acceleration,
+        attitude_quaternion=attitude,
+        omega_body=omega,
+        mass=_number(named.get("mass", named.get("wt"))),
+        segment=vehicle.segment_number,
+        standard_ecef=standard_ecef_state_from_values(
+            state.time,
+            _standard_ecef_values(
+                position=position,
+                velocity=velocity,
+                acceleration=acceleration,
+                attitude=attitude,
+                angular_velocity=omega,
+            ),
+        ),
     )
     status = {name: named[name.casefold()] for name in status_names if name.casefold() in named}
     deep = dict(named) if include_deep else None
@@ -121,6 +140,31 @@ def _acceleration(vehicle: RuntimeVehicle) -> Vector3 | None:
         return None
     return Vector3(*rates[3:6])
 ####
+
+
+def _standard_ecef_values(
+    *,
+    position: Vector3 | None,
+    velocity: Vector3 | None,
+    acceleration: Vector3 | None,
+    attitude: Quaternion | None,
+    angular_velocity: Vector3 | None,
+) -> dict[str, tuple[float, float, float] | tuple[float, float, float, float]]:
+    """Map the runtime's typed native values into the shared projector."""
+
+    values: dict[str, tuple[float, float, float] | tuple[float, float, float, float]] = {}
+    if position is not None:
+        values["position_ecfc_m"] = (position.x, position.y, position.z)
+    if velocity is not None:
+        values["velocity_ecfc_mps"] = (velocity.x, velocity.y, velocity.z)
+    if acceleration is not None:
+        values["acceleration_ecfc_mps2"] = (acceleration.x, acceleration.y, acceleration.z)
+    if attitude is not None:
+        values["ecef_from_body_wxyz"] = (attitude.w, attitude.x, attitude.y, attitude.z)
+    if angular_velocity is not None:
+        values["angular_velocity_body_radps"] = (angular_velocity.x, angular_velocity.y, angular_velocity.z)
+    return values
+    ####
 
 
 def _number(value: object) -> float | None:

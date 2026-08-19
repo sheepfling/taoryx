@@ -20,6 +20,7 @@ from .providers import (
     TranslationEntry,
     TranslationReport,
     _case_number,
+    reproject_standard_ecef_history,
 )
 
 
@@ -164,6 +165,8 @@ class _TaoryxSession:
         snapshot = self._session.step(duration_s, arbitration.values)
         state = self._state_from_runtime()
         self._history.append(state)
+        self._history = list(reproject_standard_ecef_history(self._history))
+        state = self._history[-1]
         self._controls.append(dict(arbitration.values))
         requested = {**frame.values, **frame.rates}
         self._requested_controls.append(requested)

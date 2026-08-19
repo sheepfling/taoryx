@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import Literal
 
 import numpy as np
@@ -14,6 +14,7 @@ from taoryx.equations.atmosphere import atmos_gravity_inverse_square
 from taoryx.runtime.environment_runtime import EnvironmentProvider, EnvironmentSample, ExponentialAtmosphereProvider
 from taoryx.sensor_api import EntityTruth, SensorContext, TruthPoint
 from taoryx.sensors import AccelerationIncrement, TranslationAccelerationAdapter
+from taoryx.trajectory.standard_output import StandardEcefState, project_standard_ecef_samples, standard_ecef_state_from_values
 
 from .aerodynamics import evaluate_maneuver_drag
 from .applicability import InterceptorApplicabilityEnvelope
@@ -262,7 +263,7 @@ class PointMassState:
 
 @dataclass(frozen=True, slots=True)
 class PointMassSample:
-    """One fully labeled point-mass sample."""
+    """One fully labeled point-mass sample with required standard ECEF data."""
 
     time_s: float
     phase_id: str
@@ -379,17 +380,44 @@ class PointMassSample:
     translation_acceleration_schema_id: str = "taoryx.acceleration.increment/v1"
     translation_acceleration_delivery_fresh: bool = False
     translation_acceleration_sequence: int = -1
+    standard_ecef: StandardEcefState = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "standard_ecef", standard_ecef_state_from_values(self.time_s, _point_mass_standard_values(self)))
+        ####
 
 
 ####
 
 
+def _point_mass_standard_values(sample: PointMassSample) -> dict[str, object]:
+    """Return the explicit local-NED truth used by the common projector."""
+
+    return {
+        "position.local.north": sample.north_m,
+        "position.local.east": sample.east_m,
+        "position.geometric.altitude": sample.altitude_m,
+        "velocity.local.north": sample.north_velocity_mps,
+        "velocity.local.east": sample.east_velocity_mps,
+        "velocity.local.vertical": sample.vertical_velocity_mps,
+    }
+    ####
+
+
 @dataclass(frozen=True, slots=True)
 class PointMassRun:
-    """Kernel history and terminal disposition."""
+    """Kernel history and terminal disposition with history-aware ECEF data."""
 
     samples: tuple[PointMassSample, ...]
     termination: str
+
+    def __post_init__(self) -> None:
+        standard_states = project_standard_ecef_samples(
+            tuple((sample.time_s, _point_mass_standard_values(sample)) for sample in self.samples)
+        )
+        for sample, standard_state in zip(self.samples, standard_states, strict=True):
+            object.__setattr__(sample, "standard_ecef", standard_state)
+        ####
 
     ####
 

@@ -39,6 +39,7 @@ from .configuration_contract import (
 from .execution_contract import MissionCompositionDiagnostic, MissionCompositionExecutionError
 from .native_mission_composition import compile_prepared_vehicle_composition
 from .registry_mission_composition import RegistryMissionCompositionProvider
+from .standard_output import StandardEcefState, project_standard_ecef_samples, standard_ecef_state_from_values
 
 SessionLifecycle = Literal["ready", "active", "completed", "closed", "failed"]
 
@@ -370,7 +371,13 @@ class MissionCompositionControlAuthorityState(BaseModel):
 
 
 class MissionCompositionSessionObservation(BaseModel):
-    """One inspectable committed state at a session boundary."""
+    """One inspectable committed state at a session boundary.
+
+    Every committed observation includes the required ECEF kinematics,
+    body-frame angular velocity, and ECEF-from-body orientation that finalized
+    batch trajectories carry, while ``values`` retains the selected
+    provider-native observation schema.
+    """
 
     model_config = ConfigDict(frozen=True, extra="forbid", populate_by_name=True)
 
@@ -388,6 +395,22 @@ class MissionCompositionSessionObservation(BaseModel):
     spawned_entity_ids: tuple[str, ...] = ()
     diagnostics: tuple[MissionCompositionDiagnostic, ...] = ()
     control_authority: MissionCompositionControlAuthorityState | None = None
+    standard_ecef: StandardEcefState
+
+    @model_validator(mode="before")
+    @classmethod
+    def project_standard_ecef(cls, value: object) -> object:
+        if not isinstance(value, Mapping):
+            return value
+        payload = dict(value)
+        if payload.get("standard_ecef") is not None:
+            return payload
+        time_s = payload.get("time_s")
+        values = payload.get("values")
+        if isinstance(time_s, int | float) and not isinstance(time_s, bool) and isinstance(values, Mapping):
+            payload["standard_ecef"] = standard_ecef_state_from_values(float(time_s), values)
+        return payload
+        ####
 
     @model_validator(mode="after")
     def validate_time(self) -> MissionCompositionSessionObservation:
@@ -914,6 +937,7 @@ class MissionCompositionSessionManager:
                 record.sequence,
                 observed,
                 record.descriptor.observation_schema,
+                previous=record.observation,
                 control_authority=_episode_descriptor_authority_state(
                     record.episode,
                     record.descriptor,
@@ -1075,6 +1099,7 @@ class MissionCompositionSessionManager:
                 record.sequence,
                 native.observation,
                 record.descriptor.observation_schema,
+                previous=record.observation,
                 events=native.events,
                 diagnostics=diagnostics,
                 control_authority=_episode_descriptor_authority_state(
@@ -1199,6 +1224,7 @@ class MissionCompositionSessionManager:
                 record.sequence,
                 observed,
                 record.descriptor.observation_schema,
+                previous=record.observation,
                 events=(f"authority_profile_changed:{previous.id}->{selected.id}",),
                 control_authority=_episode_authority_state(
                     record.episode,
@@ -1856,6 +1882,7 @@ def _observation(
     native: EpisodeObservation,
     schema: tuple[MissionCompositionSessionChannel, ...],
     *,
+    previous: MissionCompositionSessionObservation | None = None,
     events: tuple[str, ...] = (),
     diagnostics: tuple[MissionCompositionDiagnostic, ...] = (),
     control_authority: MissionCompositionControlAuthorityState | None = None,
@@ -1868,6 +1895,21 @@ def _observation(
             values[item.id],
             path=f"session observation channel {item.id!r}",
         )
+    if previous is not None and abs(native.time_s - previous.time_s) <= 1.0e-12:
+        standard_ecef = previous.standard_ecef
+    elif previous is None:
+        standard_ecef = standard_ecef_state_from_values(native.time_s, values)
+    else:
+        channel_frames = {item.id: item.frame for item in schema}
+        channel_units = {item.id: item.unit for item in schema}
+        standard_ecef = project_standard_ecef_samples(
+            (
+                (previous.time_s, previous.values),
+                (native.time_s, values),
+            ),
+            channel_frames=channel_frames,
+            channel_units=channel_units,
+        )[-1]
     return MissionCompositionSessionObservation(
         session_id=session_id,
         sequence=sequence,
@@ -1877,6 +1919,7 @@ def _observation(
         events=events,
         diagnostics=diagnostics,
         control_authority=control_authority,
+        standard_ecef=standard_ecef,
     )
     ####
 

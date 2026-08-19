@@ -149,6 +149,7 @@ from .execution_contract import (
 )
 from .rl_control import RLActionSpaceSpec, RLControlChannelSpec, build_rl_action_space, decode_agent_action, encode_agent_action
 from .runtime_mission_composition import RuntimeArtifactProjection, trajectory_result_from_run_artifact
+from .standard_output import StandardEcefState, project_standard_ecef_samples, standard_ecef_state_from_values
 
 if TYPE_CHECKING:
     from .contract_probe_mission_composition import (
@@ -449,6 +450,7 @@ __all__ = [
     "TrajectorySample",
     "TrajectorySegmentResult",
     "TrajectoryStateSnapshot",
+    "StandardEcefState",
     "audit_provider_advertisement",
     "build_trajectory_composition_advertisement",
     "build_simple_aero_configuration",
@@ -467,6 +469,8 @@ __all__ = [
     "resolve_output_selection",
     "render_configuration_schema",
     "trajectory_result_from_run_artifact",
+    "project_standard_ecef_samples",
+    "standard_ecef_state_from_values",
     "execute_registry_batch_request",
     "validate_configuration_instance",
     "ValuePresentationMetadata",

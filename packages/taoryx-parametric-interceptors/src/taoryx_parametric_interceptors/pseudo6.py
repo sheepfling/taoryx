@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
 
 import numpy as np
@@ -14,6 +14,7 @@ from taoryx.equations.atmosphere import atmos_gravity_inverse_square
 from taoryx.runtime.environment_runtime import EnvironmentProvider, ExponentialAtmosphereProvider
 from taoryx.sensor_api import TruthPoint
 from taoryx.sensors import IdealImuAdapter, ImuIncrement
+from taoryx.trajectory.standard_output import StandardEcefState, project_standard_ecef_samples, standard_ecef_state_from_values
 
 from .aerodynamics import evaluate_maneuver_drag
 from .applicability import InterceptorApplicabilityEnvelope
@@ -62,7 +63,7 @@ Pseudo6ResponseAxis = Literal["roll", "pitch", "yaw"]
 
 @dataclass(frozen=True, slots=True)
 class Pseudo6Sample:
-    """One pseudo-6DOF truth sample plus standard ideal-IMU readback."""
+    """One pseudo-6DOF truth sample plus required standard ECEF data."""
 
     time_s: float
     phase_id: str
@@ -201,17 +202,68 @@ class Pseudo6Sample:
     imu_schema_id: str
     imu_delivery_fresh: bool
     imu_sequence: int
+    standard_ecef: StandardEcefState = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "standard_ecef", standard_ecef_state_from_values(self.time_s, _pseudo6_standard_values(self)))
+        ####
 
 
 ####
 
 
+def _pseudo6_standard_values(sample: Pseudo6Sample) -> dict[str, object]:
+    """Return local-NED pose and body-rate truth for the common projector."""
+
+    return {
+        "position.local.north": sample.north_m,
+        "position.local.east": sample.east_m,
+        "position.geometric.altitude": sample.altitude_m,
+        "velocity.local.north": sample.north_velocity_mps,
+        "velocity.local.east": sample.east_velocity_mps,
+        "velocity.local.vertical": sample.vertical_velocity_mps,
+        "ned_from_body_wxyz": _ned_from_body_wxyz(sample.roll_rad, sample.pitch_rad, sample.yaw_rad),
+        "angular_velocity_body_radps": (
+            sample.body_rate_p_rad_s,
+            sample.body_rate_q_rad_s,
+            sample.body_rate_r_rad_s,
+        ),
+    }
+    ####
+
+
+def _ned_from_body_wxyz(roll_rad: float, pitch_rad: float, yaw_rad: float) -> tuple[float, float, float, float]:
+    """Convert the module's 3-2-1 NED-from-body Euler convention to WXYZ."""
+
+    half_roll = 0.5 * roll_rad
+    half_pitch = 0.5 * pitch_rad
+    half_yaw = 0.5 * yaw_rad
+    cos_roll, sin_roll = math.cos(half_roll), math.sin(half_roll)
+    cos_pitch, sin_pitch = math.cos(half_pitch), math.sin(half_pitch)
+    cos_yaw, sin_yaw = math.cos(half_yaw), math.sin(half_yaw)
+    return (
+        cos_roll * cos_pitch * cos_yaw + sin_roll * sin_pitch * sin_yaw,
+        sin_roll * cos_pitch * cos_yaw - cos_roll * sin_pitch * sin_yaw,
+        cos_roll * sin_pitch * cos_yaw + sin_roll * cos_pitch * sin_yaw,
+        cos_roll * cos_pitch * sin_yaw - sin_roll * sin_pitch * cos_yaw,
+    )
+    ####
+
+
 @dataclass(frozen=True, slots=True)
 class Pseudo6Run:
-    """Pseudo-6DOF history and terminal disposition."""
+    """Pseudo-6DOF history and terminal disposition with ECEF truth."""
 
     samples: tuple[Pseudo6Sample, ...]
     termination: str
+
+    def __post_init__(self) -> None:
+        standard_states = project_standard_ecef_samples(
+            tuple((sample.time_s, _pseudo6_standard_values(sample)) for sample in self.samples)
+        )
+        for sample, standard_state in zip(self.samples, standard_states, strict=True):
+            object.__setattr__(sample, "standard_ecef", standard_state)
+        ####
 
     ####
 

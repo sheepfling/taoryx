@@ -121,9 +121,21 @@ def test_both_tiers_execute_direct_control_without_fake_capture_or_target_sensor
         assert initial.guidance_available
         assert not initial.target_track_applicable
         assert not initial.target_track_valid
+        assert all(sample.standard_ecef.frame_id == "ecfc" for sample in run.samples)
+        assert all(
+            len(sample.standard_ecef.position_ecef_m) == 3
+            and len(sample.standard_ecef.velocity_ecef_mps) == 3
+            and len(sample.standard_ecef.acceleration_ecef_mps2) == 3
+            and len(sample.standard_ecef.angular_velocity_body_radps) == 3
+            and len(sample.standard_ecef.ecef_from_body_wxyz) == 4
+            for sample in run.samples
+        )
 
     assert point.samples[0].lateral_acceleration_achieved_vector_mps2[1] > 0.0
+    assert point.samples[0].standard_ecef.orientation_kind == "kinematic_velocity_aligned"
     assert pseudo.samples[0].lateral_acceleration_achieved_vector_mps2 == (0.0, 0.0, 0.0)
+    assert pseudo.samples[0].standard_ecef.orientation_kind == "native_ned_from_body"
+    assert pseudo.samples[0].standard_ecef.angular_velocity_kind == "native_body_rate"
     assert pseudo.samples[-1].yaw_command_rad > 0.0
     assert pseudo.samples[-1].east_velocity_mps > 0.0
     ####
@@ -416,6 +428,16 @@ def test_live_direct_acceleration_holds_partial_updates_and_reports_realization(
     assert first.observation.values["sensor.target_track.applicable"] is False
     assert first.observation.values["control.lateral_acceleration.accepted.local.north"] == pytest.approx(5.0)
     assert first.observation.values["control.lateral_acceleration.accepted.local.east"] == pytest.approx(10.0)
+    standard = first.observation.standard_ecef
+    assert standard.frame_id == "ecfc"
+    assert len(standard.position_ecef_m) == 3
+    assert len(standard.velocity_ecef_mps) == 3
+    assert len(standard.acceleration_ecef_mps2) == 3
+    assert len(standard.angular_velocity_body_radps) == 3
+    assert len(standard.ecef_from_body_wxyz) == 4
+    if fidelity == "point_mass_3dof":
+        assert standard.angular_velocity_kind == "orientation_finite_difference"
+        assert any(abs(value) > 1.0e-6 for value in standard.angular_velocity_body_radps)
     feedback = {item.channel_id: item for item in first.control_feedback}
     assert feedback["control.lateral_acceleration.local.east.command"].achievement_status == "observed"
     assert feedback["control.lateral_acceleration.local.east.command"].achieved_value == pytest.approx(

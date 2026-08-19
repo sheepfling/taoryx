@@ -210,6 +210,41 @@ model actually exposes them. A reduced or local controller-screen realization
 does not fabricate unavailable attitude or navigation state merely to fill a
 larger vector; its exact core scope and claim boundary remain discoverable.
 
+### Universal ECFC/ECEF pose
+
+Every finalized Mission Composition trajectory sample—whether it uses the
+legacy `MissionCompositionTrajectory` envelope or the common
+`MissionCompositionTrajectoryResult` envelope—and every
+`MissionCompositionSessionObservation` is required to carry `standard_ecef`.
+It is the absolute common minimum regardless of
+`MissionCompositionOutputSelection`, so a consumer can use one stable
+trajectory pose without replacing or guessing a provider's source-native
+`values`. `frame_id: "ecfc"` is TAOS terminology for the
+standard WGS-84 Earth-centred, Earth-fixed (ECEF) frame. The sidecar contains
+metres of position, Earth-relative metres-per-second velocity, native or
+finite-difference Earth-relative acceleration, body-frame angular velocity in
+radians per second, and a scalar-first `ecef_from_body_wxyz` quaternion that maps
+forward/right/down body-reference axes into ECFC.
+
+`position_projection`, `source_frame`, and `orientation_kind` are required
+provenance rather than optional caveats. Native ECFC, ECIC/inertial, geodetic,
+and documented local frames are transformed at the common boundary. A
+published source quaternion is used only where its body/reference-frame
+convention is explicitly established; otherwise orientation is a declared
+velocity-aligned kinematic reference, not a fabricated 6-DOF attitude. Local
+models without a global datum use the documented WGS-84 equatorial tangent
+embedding (`north=+Z`, `east=+Y`, `up=+X`) and identify it in
+`position_projection`. A model with no locatable translation gets the same
+explicit reference-origin projection, never an unlabeled ECEF relabeling.
+`angular_velocity_body_radps` uses a documented Earth-relative body-rate
+channel where available; otherwise it is the accepted-sample finite difference
+of `ecef_from_body_wxyz`, with `angular_velocity_kind` identifying which.
+`acceleration_kind` likewise distinguishes native Earth-relative acceleration
+from a finite difference. The older neutral `TrajectoryResult` / `SessionState`
+provider lifecycle and the Runtime observation tier carry the same required
+sidecar, so model consumers do not need a separate coordinate or orientation
+adapter when they use those routes.
+
 The configuration schema is a portable AST:
 
 | Node | Meaning |

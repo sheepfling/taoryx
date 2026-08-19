@@ -57,6 +57,15 @@ def test_batch_execution_is_repeated_public_step_transition() -> None:
         batch = provider.new_session(compiled).run_to_completion(controls)
         assert len(batch.requested_controls) == len(batch.applied_controls)
         assert len(batch.resource_observations) == len(batch.applied_controls)
+        assert all(sample.standard_ecef.frame_id == "ecfc" for sample in batch.samples)
+        assert all(
+            len(sample.standard_ecef.position_ecef_m) == 3
+            and len(sample.standard_ecef.velocity_ecef_mps) == 3
+            and len(sample.standard_ecef.acceleration_ecef_mps2) == 3
+            and len(sample.standard_ecef.angular_velocity_body_radps) == 3
+            and len(sample.standard_ecef.ecef_from_body_wxyz) == 4
+            for sample in batch.samples
+        )
         stepped_session = provider.new_session(compiled)
         stepped = [stepped_session.reset()]
         for frame in controls:
@@ -65,5 +74,6 @@ def test_batch_execution_is_repeated_public_step_transition() -> None:
         for expected, actual in zip(batch.samples, stepped, strict=True):
             assert actual.time_s == pytest.approx(expected.time_s)
             assert actual.values.keys() == expected.values.keys()
+            assert actual.standard_ecef.frame_id == "ecfc"
             for key in expected.values:
                 assert actual.values[key] == pytest.approx(expected.values[key])

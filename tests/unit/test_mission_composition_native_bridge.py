@@ -1,12 +1,8 @@
+import math
+
 import pytest
 from taoryx.passive_tumbling_mission_translation import compile_passive_tumbling_mission
 from taoryx.trajectory.dual_launch_mission_composition import DUAL_LAUNCH_MODEL_ID
-from taoryx.trajectory.native_mission_composition import (
-    build_registry_mission_composition_runner,
-    compile_prepared_vehicle_composition,
-    configuration_instance_from_vehicle_request,
-)
-from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.trajectory.simple_aero_mission_composition import build_simple_aero_example_configuration
 
 from taoryx.trajectory.configuration_contract import ConfigurationParameterValue
@@ -16,6 +12,12 @@ from taoryx.trajectory.execution_contract import (
     parse_mission_composition_response,
     resolve_output_selection,
 )
+from taoryx.trajectory.native_mission_composition import (
+    build_registry_mission_composition_runner,
+    compile_prepared_vehicle_composition,
+    configuration_instance_from_vehicle_request,
+)
+from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.vehicle_batch_execution import registered_vehicle_batch_factory_ids
 from taoryx.vehicle_composition import load_vehicle_composition_request
 from taoryx.vehicle_execution_bindings import load_vehicle_execution_binding_catalog
@@ -142,6 +144,26 @@ def test_every_native_batch_tuple_executes_through_common_runner(witness: object
     )
     assert {item.id for item in primary.channels} == {item.id for item in advertised}
     assert all(item.values.keys() == {channel.id for channel in primary.channels} for item in primary.samples)
+    for item in result.objects:
+        for sample in item.samples:
+            standard = sample.standard_ecef
+            assert standard.frame_id == "ecfc"
+            assert len(standard.position_ecef_m) == 3
+            assert len(standard.velocity_ecef_mps) == 3
+            assert len(standard.acceleration_ecef_mps2) == 3
+            assert len(standard.angular_velocity_body_radps) == 3
+            assert len(standard.ecef_from_body_wxyz) == 4
+            assert all(
+                math.isfinite(value)
+                for value in (
+                    *standard.position_ecef_m,
+                    *standard.velocity_ecef_mps,
+                    *standard.acceleration_ecef_mps2,
+                    *standard.angular_velocity_body_radps,
+                    *standard.ecef_from_body_wxyz,
+                )
+            )
+            assert math.isclose(sum(value * value for value in standard.ecef_from_body_wxyz), 1.0, abs_tol=1.0e-9)
     assert any(item.channel_class == "core_state" for item in primary.channels)
     assert parse_mission_composition_response(response.model_dump(mode="json", by_alias=True)) == response
     if composition.vehicle_id in {"x15", "hl20_mod_k"} and composition.fidelity in {

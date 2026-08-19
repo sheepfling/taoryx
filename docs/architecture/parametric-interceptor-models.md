@@ -6,6 +6,26 @@ It is separate from `taoryx-cadac`: a profile may name a CADAC model as a
 calibration reference, but it neither imports CADAC code nor copies a CADAC
 vehicle/environment/controller stack.
 
+Its source-native channels remain local-NED/NEU where that is the truthful
+surrogate contract. The common Mission Composition result nevertheless always
+adds `sample.standard_ecef`: a WGS-84 ECFC/ECEF position, Earth-relative
+velocity, native-or-finite-difference acceleration, body-frame angular
+velocity, and an ECEF-from-body quaternion. Since this plug-in has no
+profile-specific global launch datum, that position is
+explicitly labeled as the shared equatorial tangent embedding; its orientation
+is explicitly labeled kinematic unless a selected realization publishes
+physical attitude truth, and its body angular velocity is derived from those
+standard quaternions when no physical rate is available. The sidecar is a
+portable consumer view, not a claim
+that the point-mass surrogate has acquired CADAC-style Earth rotation or
+rigid-body dynamics.
+
+The direct developer APIs (`PointMassRun` and `Pseudo6Run`) expose the same
+per-sample minimum. The pseudo-6DOF tier supplies its explicit NED-from-body
+attitude and body rate to that projection; the point-mass tier honestly uses a
+velocity-aligned kinematic orientation and derived rate. Both preserve their
+source-native fields alongside the common ECEF sidecar.
+
 ## Developer path
 
 The authoring path has four intentionally small stages:

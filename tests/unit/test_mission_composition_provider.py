@@ -124,6 +124,15 @@ def test_run_returns_standard_trajectory_with_segment_spans_and_events(tmp_path:
     assert result.channel_units["maneuver.load_factor_g"] == "g0"
     assert all(sample.values["maneuver.load_factor_g"] == pytest.approx(1.0) for sample in result.samples)
     assert result.samples[-1].values["position.east_m"] == pytest.approx(0.0)
+    assert all(sample.standard_ecef.frame_id == "ecfc" for sample in result.samples)
+    assert all(
+        len(sample.standard_ecef.position_ecef_m) == 3
+        and len(sample.standard_ecef.velocity_ecef_mps) == 3
+        and len(sample.standard_ecef.acceleration_ecef_mps2) == 3
+        and len(sample.standard_ecef.angular_velocity_body_radps) == 3
+        and len(sample.standard_ecef.ecef_from_body_wxyz) == 4
+        for sample in result.samples
+    )
     assert [item.segment_instance_id for item in result.events if item.kind == "waypoint_captured"] == [
         "01-waypoint_leg",
         "02-waypoint_leg",

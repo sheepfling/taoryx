@@ -15,6 +15,7 @@ from taoryx.trajectory.providers import (
     TrajectoryResult,
     TranslationEntry,
     TranslationReport,
+    reproject_standard_ecef_history,
 )
 
 
@@ -192,6 +193,8 @@ class ReferencePointMassSession:
         self._time += duration_s
         state = self._state()
         self._history.append(state)
+        self._history = list(reproject_standard_ecef_history(self._history))
+        state = self._history[-1]
         self._controls.append(dict(applied))
         requested = {**frame.values, **frame.rates}
         self._requested_controls.append(requested)

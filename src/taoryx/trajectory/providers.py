@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from .contracts import ControlFrame, FidelityProfile, ResolvedCase
 from .evaluation import TrajectoryEvaluation
+from .standard_output import StandardEcefState, project_standard_ecef_samples, standard_ecef_state_from_values
 
 if TYPE_CHECKING:
     from taoryx_simple_aero.provider import ReferencePointMassProvider
@@ -88,11 +89,38 @@ class CompiledCase:
 
 @dataclass(frozen=True, slots=True)
 class SessionState:
-    """Normalized state observation at one accepted time boundary."""
+    """Normalized state observation at one accepted time boundary.
+
+    ``standard_ecef`` is mandatory even for the legacy neutral-provider
+    lifecycle.  It gives downstream consumers the same ECEF position,
+    velocity, acceleration, world-from-body quaternion, and body angular rate
+    that the Mission Composition contract guarantees.
+    """
 
     time_s: float
     values: Mapping[str, float]
+    standard_ecef: StandardEcefState = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "standard_ecef", standard_ecef_state_from_values(self.time_s, self.values))
+        ####
+
+    def with_standard_ecef(self, state: StandardEcefState) -> SessionState:
+        """Return this observation with a history-aware standard sidecar."""
+
+        result = SessionState(self.time_s, self.values)
+        object.__setattr__(result, "standard_ecef", state)
+        return result
+        ####
 ####
+
+
+def reproject_standard_ecef_history(samples: Sequence[SessionState]) -> tuple[SessionState, ...]:
+    """Attach history-aware acceleration and body-rate sidecars to states."""
+
+    standard_states = project_standard_ecef_samples(tuple((sample.time_s, sample.values) for sample in samples))
+    return tuple(sample.with_standard_ecef(state) for sample, state in zip(samples, standard_states, strict=True))
+    ####
 
 
 @dataclass(frozen=True, slots=True)
@@ -127,6 +155,14 @@ class TrajectoryResult:
     resource_observations: tuple[Mapping[str, float], ...] = ()
     evaluation: TrajectoryEvaluation | None = None
 
+    def __post_init__(self) -> None:
+        """Reproject the whole history for finite-difference kinematics."""
+
+        if not self.samples:
+            return
+        object.__setattr__(self, "samples", reproject_standard_ecef_history(self.samples))
+        ####
+
     def to_dict(self) -> dict[str, object]:
         """Return a stable machine-readable result envelope."""
 
@@ -134,7 +170,14 @@ class TrajectoryResult:
             "provider_id": self.provider_id,
             "case_id": self.case_id,
             "status": self.status,
-            "samples": [{"time_s": sample.time_s, "values": dict(sample.values)} for sample in self.samples],
+            "samples": [
+                {
+                    "time_s": sample.time_s,
+                    "values": dict(sample.values),
+                    "standard_ecef": sample.standard_ecef.model_dump(mode="json", by_alias=True),
+                }
+                for sample in self.samples
+            ],
             "applied_controls": [dict(frame) for frame in self.applied_controls],
             "events": list(self.events),
             "diagnostics": list(self.diagnostics),
@@ -256,6 +299,7 @@ __all__ = [
     "ProviderCapabilities",
     "ProviderRegistry",
     "ProviderSession",
+    "reproject_standard_ecef_history",
     "ReferencePointMassProvider",
     "SessionState",
     "StepResult",
