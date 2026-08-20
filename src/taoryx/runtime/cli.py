@@ -30,6 +30,7 @@ from taoryx.model_authoring import (
     build_model_authoring_plan,
     build_model_automation_assessment,
     build_model_automation_readiness_summary,
+    build_model_default_configuration,
     compile_model_authoring_draft,
     load_model_authoring_draft,
     resolve_model_authoring_selection,
@@ -385,6 +386,13 @@ def main(argv: list[str] | None = None) -> int:
     model_scaffold.add_argument("--draft-id")
     model_scaffold.add_argument("--configuration-id")
     model_scaffold.add_argument("--output", type=Path, required=True)
+    model_default = model_subparsers.add_parser(
+        "default",
+        help="write a deterministic provider-selected runnable default configuration",
+    )
+    model_default.add_argument("provider_id")
+    model_default.add_argument("model_id")
+    model_default.add_argument("--output", type=Path)
     model_compile = model_subparsers.add_parser(
         "compile",
         help="compile a plain-value draft through the exact provider schema",
@@ -1806,6 +1814,15 @@ def _model_command(arguments: argparse.Namespace) -> int:
                     "next": f"taoryx model compile {destination}",
                 }
             )
+            return 0
+        if arguments.model_command == "default":
+            configuration = build_model_default_configuration(
+                providers,
+                arguments.provider_id,
+                arguments.model_id,
+            )
+            prepared = providers.validate_configuration(arguments.provider_id, configuration)
+            _print_json(prepared.model_dump(mode="json", by_alias=True), arguments.output)
             return 0
         if arguments.model_command == "compile":
             draft = load_model_authoring_draft(arguments.draft)

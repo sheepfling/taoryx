@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 VENV = ROOT / ".venv"
+_FOUNDATION_PROJECTS: tuple[str, ...] = ("packages/taoryx-trajectory-contracts",)
 
 _DIRECT_MODEL_PROJECTS: tuple[str, ...] = (
     "packages/taoryx-daveml",
@@ -85,7 +86,7 @@ def editable_install_command(
     if with_sensors:
         extras.append("sensors")
     root_spec = f".[{','.join(extras)}]" if with_dependencies else "."
-    for project in (root_spec, *PROFILE_PROJECTS[profile]):
+    for project in (*_FOUNDATION_PROJECTS, root_spec, *PROFILE_PROJECTS[profile]):
         command.extend(("-e", project))
     return command
     ####

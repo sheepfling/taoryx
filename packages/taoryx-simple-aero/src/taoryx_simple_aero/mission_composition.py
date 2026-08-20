@@ -160,6 +160,24 @@ class SimpleAeroMissionCompositionProvider:
         return prepared
         ####
 
+    def build_model_default_configuration(
+        self,
+        model_id: str,
+        *,
+        configuration_id: str,
+    ) -> TrajectoryConfigurationInstance:
+        """Return the package-owned fixed-L/D onboarding configuration."""
+
+        self.model(model_id)
+        from taoryx.trajectory.simple_aero_mission_composition import (
+            build_simple_aero_example_configuration,
+        )
+
+        return build_simple_aero_example_configuration(schema=self._schema).model_copy(
+            update={"configuration_id": configuration_id}
+        )
+        ####
+
     def open_session_episode(
         self,
         prepared: PreparedTrajectoryConfiguration,

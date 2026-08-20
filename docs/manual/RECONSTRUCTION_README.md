@@ -63,7 +63,7 @@ lossless language implementation or a historically equivalent TAOS runtime.
 
 ## Build
 
-See [BUILDING.md](BUILDING.md) for environment details.
+See [BUILDING.md](../BUILDING.md) for environment details.
 
 ```bash
 python tools/dev.py manual
@@ -98,7 +98,7 @@ The handoff bundle contains:
 - the parser wheel;
 - a complete file-level SHA-256 manifest.
 
-Start with [CODEX_HANDOFF.md](CODEX_HANDOFF.md) and [AGENTS.md](AGENTS.md) when opening the repository in Codex.
+Start with [CODEX_HANDOFF.md](CODEX_HANDOFF.md) and [AGENTS.md](../../AGENTS.md) when opening the repository in Codex.
 
 ## Validation boundaries
 

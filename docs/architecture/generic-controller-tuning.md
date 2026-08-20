@@ -112,7 +112,7 @@ taoryx model tune taoryx.x15.mission-composition x15 \
 
 The core owns `run_tuning_campaign`; the reference-model plug-in owns the
 adapter and campaign factories. See
-[Model-to-mission authoring and automation](model-authoring-automation.md) for
+[Model-to-mission authoring and automation](../developer/model-authoring-automation.md) for
 the complete authoring and registration path.
 
 Hummingbird's pseudo-6DOF hover-attitude inner loop, the A320 pseudo-6DOF

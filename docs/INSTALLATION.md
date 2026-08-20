@@ -1,9 +1,10 @@
 # Installing Taoryx and its model packages
 
-Taoryx is distributed as a small core host plus fourteen direct official
-plug-in distributions and one compatibility aggregate. Choose the smallest
-profile that contains the work you need; contributors and automation agents
-should use the direct `developer` profile by default.
+Taoryx is distributed as a standalone trajectory-interface package, a small
+language/runtime host, direct official plug-in distributions, and one
+compatibility aggregate. Choose the smallest profile that contains the work you
+need; contributors and automation agents should use the direct `developer`
+profile by default.
 
 `taoryx-cadac` is a separately installable, source-bound CADAC integration.
 It is deliberately outside the default model and full profiles because it does
@@ -23,7 +24,10 @@ migration and release integration.
 ## Package map
 
 ```text
-taoryx (language, compiler, engine, registries, common CLI)
+taoryx-trajectory-contracts (provider-neutral composition, batch, streaming, and ECEF contracts)
+└── pydantic
+
+taoryx (language, compiler, engine, registries, common CLI) requires taoryx-trajectory-contracts
 ├── taoryx-daveml
 ├── taoryx-debug-models
 ├── taoryx-a320
@@ -55,7 +59,8 @@ taoryx-cadac (optional source-bound CADAC catalog and converter)
 
 | Distribution | Install it when you need | Direct Taoryx dependencies |
 | --- | --- | --- |
-| `taoryx` | `.tbl` / `.prb` language tools, the simulation host, common contracts, registries, and CLI | none |
+| `taoryx-trajectory-contracts` | the standalone composition, batch, streaming-control, conformance, and standard ECEF interface; hosts or foreign providers that do not need the TAORYX runtime | none |
+| `taoryx` | `.tbl` / `.prb` language tools, the simulation host, TAORYX adapter, registries, and CLI | `taoryx-trajectory-contracts` |
 | `taoryx-daveml` | DAVE-ML import, semantic evaluation, replay, and model-format registration | `taoryx` |
 | `taoryx-debug-models` | development-only analytical and contract-probe Mission Composition providers | `taoryx` |
 | `taoryx-a320` | OpenAP point-mass and explicitly surrogate pseudo-6DOF A320 products, focused composition provider, local named-coordinate LQI screen, and A320-only source/evidence resources | `taoryx` |
@@ -104,8 +109,9 @@ python -m tools.dev doctor
 
 On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1` instead.
 
-`bootstrap` creates or reuses `.venv`, installs `taoryx[dev]`, installs the
-fourteen direct local plug-in distributions in editable mode, and runs the
+`bootstrap` creates or reuses `.venv`, installs the trajectory-contracts
+foundation, installs `taoryx[dev]`, installs the fourteen direct local plug-in
+distributions in editable mode, and runs the
 strict `developer` installation check. The explicit second check is useful in
 agent logs. After changing a distribution's `pyproject.toml` metadata—especially
 its version or entry points—rerun `python -m tools.dev bootstrap` before
@@ -131,14 +137,21 @@ source .venv/bin/activate
 Core language and engine only:
 
 ```bash
-python -m pip install -e .
+python -m pip install -e packages/taoryx-trajectory-contracts -e .
 taoryx plugins check --profile core
+```
+
+Interface-only host or independent provider, with no TAORYX runtime:
+
+```bash
+python -m pip install -e packages/taoryx-trajectory-contracts
 ```
 
 All model and model-format packages, without reachability:
 
 ```bash
 python -m pip install \
+  -e packages/taoryx-trajectory-contracts \
   -e . \
   -e packages/taoryx-daveml \
   -e packages/taoryx-debug-models \
@@ -178,6 +191,7 @@ The complete official suite:
 
 ```bash
 python -m pip install \
+  -e packages/taoryx-trajectory-contracts \
   -e . \
   -e packages/taoryx-daveml \
   -e packages/taoryx-debug-models \
@@ -210,6 +224,9 @@ internal release location:
 # Core only
 python -m pip install --find-links /path/to/taoryx-wheels taoryx==0.1.0a0
 
+# Interface only
+python -m pip install --find-links /path/to/taoryx-wheels taoryx-trajectory-contracts==0.1.0a0
+
 # Compatibility aggregate and its declared plug-in dependencies
 python -m pip install --find-links /path/to/taoryx-wheels taoryx-reference-models==0.1.0a0
 
@@ -225,7 +242,7 @@ python -m pip install --find-links /path/to/taoryx-wheels \
   taoryx-reachability==0.1.0a0
 ```
 
-Keep the sixteen Taoryx distributions on compatible versions. The current alpha
+Keep all released Taoryx distributions on compatible versions. The current alpha
 plug-ins require `taoryx>=0.1.0a0,<0.2`; pip should resolve the dependency
 graph rather than installing plug-in wheels with `--no-deps`.
 
@@ -235,9 +252,9 @@ These are root-package extras, not additional Taoryx model distributions:
 
 | Extra | Command | Adds |
 | --- | --- | --- |
-| Development | `python -m pip install -e '.[dev]'` | build, plotting, numerical, PDF, test, lint, and type-check tools |
-| Sensors | `python -m pip install -e '.[sensors]'` | `imu-error-model==0.1.3` and NumPy |
-| SciPy integration | `python -m pip install -e '.[scipy]'` | SciPy for custom model plug-ins or direct use of trim/LQR APIs; `taoryx-source-table-fixed-wing` already requires it |
+| Development | `python -m pip install -e packages/taoryx-trajectory-contracts -e '.[dev]'` | build, plotting, numerical, PDF, test, lint, and type-check tools |
+| Sensors | `python -m pip install -e packages/taoryx-trajectory-contracts -e '.[sensors]'` | `imu-error-model==0.1.3` and NumPy |
+| SciPy integration | `python -m pip install -e packages/taoryx-trajectory-contracts -e '.[scipy]'` | SciPy for custom model plug-ins or direct use of trim/LQR APIs; `taoryx-source-table-fixed-wing` already requires it |
 
 For a fresh direct developer environment that also exercises the optional
 sensor dependency, use:
@@ -314,12 +331,13 @@ interceptor providers in the direct developer profile. The compatibility aggrega
 explicit profile is installed. The A320 pseudo-6DOF entry, Hummingbird
 pseudo-6DOF entry, X8/B747 lower-tier guidance, and Hummingbird source-hover
 rotor screen also advertise registered tuning campaign IDs.
-See [Model-to-mission authoring and automation](architecture/model-authoring-automation.md)
+See [Model-to-mission authoring and automation](developer/model-authoring-automation.md)
 for scaffold, compile, and tune commands.
 
 `--no-builtin` is important in a checkout: it disables the convenience source
 fallback and shows only installed Python entry points. A full profile is ready
-only when the check reports all sixteen distributions and these fifteen plug-in IDs:
+only when the check reports every expected foundation/core/plug-in distribution
+and these fifteen plug-in IDs:
 
 ```text
 taoryx.daveml
@@ -342,7 +360,7 @@ taoryx.reachability
 The CADAC plug-in remains an explicit source-bound installation:
 
 ```bash
-python -m pip install -e . -e packages/taoryx-cadac
+python -m pip install -e packages/taoryx-trajectory-contracts -e . -e packages/taoryx-cadac
 taoryx plugins check --profile cadac
 taoryx-cadac convert-tree /path/to/CADAC --output build/cadac-tables
 ```

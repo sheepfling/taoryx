@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+TRAJECTORY_CONTRACTS_PROJECT = ROOT / "packages" / "taoryx-trajectory-contracts"
 
 
 @dataclass(frozen=True, slots=True)
@@ -1207,6 +1208,7 @@ def build_and_smoke(
         # setuptools a new build tree, so stale files in this checkout's build/
         # directory cannot be carried into an artifact.
         build_command = [python, "-m", "build", "--no-isolation", "--outdir", str(wheelhouse)]
+        run_command([*build_command, str(TRAJECTORY_CONTRACTS_PROJECT)], cwd=temporary_root, environment=environment)
         run_command([*build_command, str(ROOT)], cwd=temporary_root, environment=environment)
         for spec in specs:
             run_command([*build_command, str(spec.project)], cwd=temporary_root, environment=environment)
@@ -1214,7 +1216,11 @@ def build_and_smoke(
         plugin_wheels = {spec.selector: wheel_for(wheelhouse, spec.wheel_stem) for spec in specs}
         for spec in specs:
             verify_wheel_layout(plugin_wheels[spec.selector], spec)
-        wheels = [wheel_for(wheelhouse, "taoryx"), *(plugin_wheels[spec.selector] for spec in specs)]
+        wheels = [
+            wheel_for(wheelhouse, "taoryx_trajectory_contracts"),
+            wheel_for(wheelhouse, "taoryx"),
+            *(plugin_wheels[spec.selector] for spec in specs),
+        ]
         run_command(
             [python, "-m", "pip", "install", "--no-deps", "--target", str(target), *(str(item) for item in wheels)],
             cwd=temporary_root,

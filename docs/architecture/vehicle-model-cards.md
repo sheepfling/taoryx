@@ -65,4 +65,4 @@ support. In particular:
 For the authoritative definitions of the four fidelity tiers, see
 [Fidelity tiers and vehicle plug-in requirements](fidelity-data-requirements.md).
 For authoring, compiling, executing, and tuning a selected configuration, see
-[Model-to-mission authoring and automation](model-authoring-automation.md).
+[Model-to-mission authoring and automation](../developer/model-authoring-automation.md).

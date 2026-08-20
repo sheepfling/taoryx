@@ -1,9 +1,15 @@
 # Installable model and provider plug-ins
 
-Taoryx separates the language and simulation host from optional vehicle,
-model-format, and provider packages. The host contract lives in
-`taoryx.plugins`; packages publish implementations through the standard Python
-entry-point group `taoryx.plugins`.
+Taoryx separates its provider-neutral public trajectory contracts, language,
+and simulation host from optional vehicle, model-format, and provider packages.
+`taoryx-trajectory-contracts` carries the public composition, batch,
+streaming-control, and standard ECEF contracts; `taoryx` implements and adapts
+those contracts. Model packages publish implementations through the standard
+Python entry-point group `taoryx.plugins`.
+
+This page covers the internal TAORYX plug-in layer. For the role-first choice
+between it and the separate external provider/consumer contract, see
+[Developer interface layers](../developer/interface-layers.md).
 
 This is a software-discovery boundary. It does not weaken the existing source,
 fidelity, qualification, or execution claims. A discovered adapter still has
@@ -36,6 +42,9 @@ source .venv/bin/activate
 taoryx plugins check --profile developer
 python tools/dev.py check-developer-plugins
 
+# Print this package's discovery, contract, wheel, and owned-vehicle commands.
+python tools/dev.py plugin-focus f16
+
 # Examples of normal vertical loops.
 python tools/dev.py check-vehicle f16_s119
 python tools/dev.py check-vehicle hummingbird
@@ -56,7 +65,7 @@ older registry-named host remains solely a compatibility import for existing
 aggregate consumers.
 
 Every direct provider publishes the same closed
-[Vehicle Composition Advertisement API](vehicle-composition-advertisement-api.md),
+[Vehicle Composition Advertisement API](../api/vehicle-composition-advertisement-api.md),
 so a catalogue or planner can negotiate capabilities without importing that
 provider's plant or depending on the compatibility aggregate.
 
@@ -89,11 +98,15 @@ or focused vehicle test loop.
 The intended distribution shape is:
 
 ```text
+taoryx-trajectory-contracts
+  provider-neutral composition, batch, streaming-control, conformance, and
+  standard ECEF state contracts; usable directly by hosts and foreign providers
+
 taoryx
   language, compiler, simulation engine
-  units, frames, state/control/telemetry contracts
-  typed registries and plug-in discovery
+  units, frames, TAORYX configuration language, typed registries, and plug-in discovery
   common CLI and result envelopes
+  adapter implementing taoryx-trajectory-contracts
 
 taoryx-simple-aero
   analytical Simple Aero providers and workflow assets
@@ -173,10 +186,10 @@ for subsequent vehicle splits are documented in
 [Vehicle plug-in isolation](vehicle-plugin-isolation.md).
 For the developer recipe for a new vehicle package—including controls,
 authority profiles, factories, data ownership, and verification—start with
-[Authoring a vehicle plug-in](vehicle-plugin-authoring.md).
+[Authoring a vehicle plug-in](../developer/vehicle-plugin-authoring.md).
 For the compact ontology-to-surrogate route, including evidence status,
 assumption cases, and the first guided point-mass tier, see
-[Parametric interceptor model architecture](parametric-interceptor-models.md).
+[Parametric interceptor model architecture](../../packages/taoryx-parametric-interceptors/docs/model-architecture.md).
 Its per-realization fidelity definition of done is
 [Fidelity tiers and vehicle plug-in requirements](fidelity-data-requirements.md).
 
@@ -392,7 +405,7 @@ report = campaigns.registration(
 ```
 
 This split is described in
-[Model-to-mission authoring and automation](model-authoring-automation.md).
+[Model-to-mission authoring and automation](../developer/model-authoring-automation.md).
 
 `taoryx-debug-models` registers the two development-only analytical and
 contract-probe providers. `taoryx-a320` registers the focused

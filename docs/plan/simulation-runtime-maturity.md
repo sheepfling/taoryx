@@ -142,7 +142,7 @@ Deliverables:
 - freeze the Simulation Runtime status vocabulary: `passed`, `development`, `blocked`,
   `incomplete`, `out_of_envelope`, and `failed`;
 - define the minimum run-manifest fields and schema compatibility policy in
-  [the Simulation Runtime run-manifest contract](../architecture/simulation-runtime-run-manifest.md); and
+  [the Simulation Runtime run-manifest contract](../api/simulation-runtime-run-manifest.md); and
 - record baseline timings, artifact sizes, and deterministic repeatability for
   the canonical regression set in
   [`verification/simulation_runtime_baseline.json`](../../verification/simulation_runtime_baseline.json),

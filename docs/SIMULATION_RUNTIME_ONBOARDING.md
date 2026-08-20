@@ -406,5 +406,5 @@ The ongoing release criteria are tracked in the
 [Simulation Runtime maturity plan](plan/simulation-runtime-maturity.md). The broader
 architecture and timing contracts remain the authoritative references for
 [interactive stepping](architecture/interactive-engine.md),
-[accepted truth](architecture/eom-timing-contract.md), and
+[accepted truth](api/eom-timing-contract.md), and
 [vehicle realizations](architecture/vehicle-realizations.md).

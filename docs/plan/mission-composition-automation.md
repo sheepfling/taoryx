@@ -1,7 +1,7 @@
 # Mission composition and vehicle-onboarding automation
 
 > **Priority:** This plan supplies the Runtime and Composition portions of the
-> [Authoring → Runtime → Composition execution roadmap](authoring-runtime-composition-execution-roadmap.md).
+> [Authoring → Runtime → Composition roadmap](authoring-runtime-composition-roadmap.md).
 > Its next executable outcome is a fail-closed semantic-segment translator and
 > `vehicle compose` → `vehicle run` path, first for the X8 and then for the
 > shared airbreather template.  Registry visibility or adapter binding alone

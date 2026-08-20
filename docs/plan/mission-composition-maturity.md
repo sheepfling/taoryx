@@ -7,10 +7,10 @@ environment discover a supported vehicle, understand its evidence boundary,
 configure a bounded variant and mission, compile it into an exact execution
 binding, run it, and inspect an independently evaluated result.
 
-**Companion documents:** [Authoring → Runtime → Composition execution roadmap](authoring-runtime-composition-execution-roadmap.md),
+**Companion documents:** [Authoring → Runtime → Composition roadmap](authoring-runtime-composition-roadmap.md),
 [Authoring → Runtime → Composition showcase guide](../AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md), [vehicle
-composition registry](../architecture/vehicle-composition-registry.md), and
-[vehicle interface contract](../architecture/vehicle-interface-contract.md),
+composition registry](../api/vehicle-composition-registry.md), and
+[vehicle interface contract](../api/vehicle-interface-contract.md),
 and the [living Mission Composition coverage audit](mission-composition-coverage-audit.md).
 
 ## Mission Composition decision
@@ -68,7 +68,7 @@ bindings; and the common truth-objective input schema. A pending topology or a
 missing observation-channel topology is a report failure. This proves only the
 mathematical contract—not source fidelity, executable support, or qualification.
 The public-facing operation rules and addition checklist are collected in the
-[public value-space contract](../architecture/public-value-spaces.md): circular
+[public value-space contract](../api/public-value-spaces.md): circular
 heading/yaw values use wrapped error while their rates remain linear, and
 discrete events/modes remain non-interpolable.
 Initialization and segment parameters are now additionally resolved through

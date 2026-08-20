@@ -11,7 +11,8 @@ Simulation Runtime, and Mission Composition—start with the
 This page is the deeper reference for the runtime and its boundaries.
 
 Use this section when you want the runtime shape, the table explorer / plotter
-boundary, the telemetry contract, or the analysis workspace in one place.
+boundary, or the analysis workspace in one place. Public contracts are grouped
+separately in the [API reference](../api/README.md).
 
 The broader implementation sequence is tracked in
 [`../plan/taoryx-successor-roadmap.md`](../plan/taoryx-successor-roadmap.md).
@@ -22,14 +23,20 @@ tracked in
 [`../plan/composable-scenario-runtime.md`](../plan/composable-scenario-runtime.md).
 The common vehicle metadata, parameter, semantic control, resource, status,
 and AI/RL observation boundary is defined in
-[vehicle-interface-contract.md](vehicle-interface-contract.md).
+[vehicle-interface-contract.md](../api/vehicle-interface-contract.md).
 The portable Mission Composition vehicle/trajectory plug-in publication,
 request, and standard result envelope is defined in
-[Mission Composition Provider API](mission-composition-provider-api.md).
+[Mission Composition Provider API](../api/mission-composition-provider-api.md).
+For the role-first choice between the external provider/consumer seam and the
+internal TAORYX model-plug-in seam, start with
+[Developer interface layers](../developer/interface-layers.md).
+The independently installable provider/host boundary for discovery, batch,
+streaming control, conformance, and standard ECEF output is defined in
+[Standalone trajectory contracts](../api/trajectory-contracts.md).
 Its independently reusable capability-negotiation product—the closed,
 JSON-safe description of composition modes, graph semantics, mutations,
 multi-entity topology, and state transfer—is defined in the
-[Vehicle Composition Advertisement API](vehicle-composition-advertisement-api.md).
+[Vehicle Composition Advertisement API](../api/vehicle-composition-advertisement-api.md).
 Installable Python package discovery, typed registry aggregation, collision
 rules, and the current extraction state are defined in
 [Installable model and provider plug-ins](plugins.md).
@@ -39,7 +46,7 @@ rules, package profiles, and focused verification model are defined in
 The developer-facing procedure for contributing a new vehicle package and its
 controls—including typed coordinate fields, validated fidelity lowering,
 caller/provider controller ownership, and common LQR/LQI campaign inputs—is
-[Authoring a vehicle plug-in](vehicle-plugin-authoring.md).
+[Authoring a vehicle plug-in](../developer/vehicle-plugin-authoring.md).
 Package selection, source and wheel installation, contributor bootstrap, and
 installed-entry-point verification are covered by the
 [installation guide](../INSTALLATION.md).
@@ -69,7 +76,7 @@ tuning pipeline is described in
 The common installed-model inventory, plain Python/YAML mission authoring,
 segment/waypoint scaffolding, and plug-in-owned campaign registration path is
 described in
-[Model-to-mission authoring and automation](model-authoring-automation.md).
+[Model-to-mission authoring and automation](../developer/model-authoring-automation.md).
 The generated, reviewer-facing vehicle cards that join an installed model's
 fidelity, source/provenance declarations, tuning method, missions, and
 editable parameters are described in
@@ -81,10 +88,10 @@ The promotion path from a direct-wrench LQR screen to bounded physical
 effectors and nonlinear validation is described in
 [`physically-realizable-lqr-control.md`](physically-realizable-lqr-control.md).
 The accepted-state, force-evaluation, and sensor timing boundary is defined in
-[`eom-timing-contract.md`](eom-timing-contract.md).
+[`eom-timing-contract.md`](../api/eom-timing-contract.md).
 The typed sensor-family extension boundary, committed scene context, payload
 codecs, and bundled inertial/IR/GNSS implementations are defined in
-[`sensor-plugin-api.md`](sensor-plugin-api.md).
+[`sensor-plugin-api.md`](../api/sensor-plugin-api.md).
 The language/implementation contract for pre/post truth around events is
 defined in [`../extensions/transition-truth.md`](../extensions/transition-truth.md).
 
@@ -185,11 +192,11 @@ declared model/status values second, and deep diagnostics only on request.
 - [`docs/architecture/vehicle-data-model.md`](vehicle-data-model.md) groups
   the successor-side geometry, mass, propulsion, and effector data families
   that sit above the current TAOS `.tbl` abstraction.
-- [`docs/architecture/vehicle-interface-contract.md`](vehicle-interface-contract.md)
+- [`docs/api/vehicle-interface-contract.md`](../api/vehicle-interface-contract.md)
   defines the resolved vehicle-facing parameter, action, status, resource,
   truth, and observation contract used by composition and interactive
   execution.
-- [`docs/architecture/telemetry.md`](telemetry.md) defines the structured
+- [`docs/api/telemetry.md`](../api/telemetry.md) defines the structured
   runtime artifact consumed by reports and visualization backends.
 - [`docs/architecture/table-explorer.md`](table-explorer.md) explains the
   renderer-independent table inspection and plotting boundary.

@@ -106,7 +106,7 @@ with zeros or precise-looking guesses.
     terminal state, reproduction command, limitations, and open questions.
 
 Once stages 1–3 can publish a Mission Composition advertisement, use the
-common [model-to-mission automation](../architecture/model-authoring-automation.md)
+common [model-to-mission automation](../developer/model-authoring-automation.md)
 instead of creating a parallel model-specific authoring tool:
 
 ```bash

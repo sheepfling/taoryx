@@ -16,7 +16,24 @@ import json
 from collections.abc import Iterable, Sequence
 from typing import Any, Literal
 
+from taoryx_trajectory_contracts import (
+    BatchOutputSelection,
+    BatchRunRequest,
+    CloseStreamingSessionRequest,
+    OpenStreamingSessionRequest,
+    StreamingStepRequest,
+    audit_batch_result,
+    audit_default_configuration_provider,
+    audit_provider_descriptor,
+    audit_streaming_descriptor,
+    audit_streaming_step,
+)
+from taoryx_trajectory_contracts import (
+    StandardEcefState as PublicStandardEcefState,
+)
+
 from taoryx.plugins import PluginCatalog, discover_plugins
+from taoryx.trajectory.contracts_adapter import TaoryxTrajectoryContractsAdapter
 from taoryx.trajectory.execution_contract import (
     MissionCompositionRunnerRegistry,
     TrajectorySample,
@@ -59,6 +76,8 @@ def _standard_ecef_contract() -> dict[str, Any]:
     frame_id = None if frame_field is None else frame_field.default
     if frame_id != "ecfc":
         errors.append("StandardEcefState.frame_id must be fixed to 'ecfc' (ECEF)")
+    if StandardEcefState is not PublicStandardEcefState:
+        errors.append("TAORYX standard ECEF state must be the public trajectory-contracts type")
     sample_field = TrajectorySample.model_fields.get("standard_ecef")
     if sample_field is None or not sample_field.is_required():
         errors.append("TrajectorySample.standard_ecef must be required")
@@ -83,6 +102,124 @@ def _standard_ecef_contract() -> dict[str, Any]:
         "result_sample_required": sample_field is not None and sample_field.is_required(),
         "session_observation_required": observation_field is not None and observation_field.is_required(),
         "required_fields": list(_STANDARD_ECEF_FIELDS),
+        "errors": errors,
+    }
+    ####
+
+
+def _public_contract_projection(
+    provider: Any,
+    *,
+    require_defaults: bool,
+) -> dict[str, Any]:
+    """Audit the standalone projection and, when required, its defaults.
+
+    This remains provider-scoped and stops before numerical execution.  It
+    proves that a host can take each advertised model from discovery through a
+    deterministic provider-selected runnable default and normal preparation
+    without guessing at required catalog values. Full batch and streaming
+    execution remain separate integration checks.
+    """
+
+    try:
+        adapter = TaoryxTrajectoryContractsAdapter(provider)
+        descriptor = adapter.descriptor
+        audit = audit_provider_descriptor(descriptor)
+        default_audit = audit_default_configuration_provider(adapter) if require_defaults else None
+    except Exception as error:  # noqa: BLE001 - preserve a concise plug-in boundary report
+        return {
+            "status": "fail",
+            "model_count": 0,
+            "available_batch_tuple_count": 0,
+            "available_step_tuple_count": 0,
+            "default_configuration_count": 0,
+            "defaults": {},
+            "errors": [f"public trajectory-contract projection failed: {type(error).__name__}: {error}"],
+        }
+    source_models = tuple(provider.list_models())
+    source_tuples = {
+        (
+            model.id,
+            mission.id,
+            operation.fidelity,
+            operation.realization_id,
+            operation.operation,
+            operation.status,
+        )
+        for model in source_models
+        for mission in model.mission_templates
+        for operation in mission.operations
+    }
+    public_tuples = {
+        (
+            model.id,
+            operation.mission_template_id,
+            operation.fidelity,
+            operation.realization_id,
+            operation.operation,
+            "available" if operation.availability == "available" else "blocked",
+        )
+        for model in descriptor.models
+        for operation in model.operations
+    }
+    errors: list[str] = []
+    if descriptor.id != provider.metadata.id or descriptor.version != provider.metadata.version:
+        errors.append("public trajectory-contract descriptor identity disagrees with provider metadata")
+    if source_tuples != public_tuples:
+        errors.append("public trajectory-contract operation tuples disagree with the native provider advertisement")
+    if audit.status != "pass":
+        errors.extend(f"public trajectory-contract audit {item.code}: {item.message}" for item in audit.findings)
+    if default_audit is not None and default_audit.status != "pass":
+        errors.extend(
+            f"public trajectory-contract default audit {item.code}: {item.message}"
+            for item in default_audit.findings
+        )
+    defaults: dict[str, dict[str, object]] = {}
+    if require_defaults:
+        for model in descriptor.models:
+            try:
+                configuration = adapter.build_default_configuration(model.id)
+                prepared = adapter.prepare_configuration(configuration)
+            except Exception as error:  # noqa: BLE001 - retain a model-specific portable construction error
+                message = f"default configuration failed: {type(error).__name__}: {error}"
+                defaults[model.id] = {
+                    "status": "fail",
+                    "configuration_id": model.default_configuration_id,
+                    "errors": [message],
+                }
+                errors.append(f"model {model.id}: {message}")
+                continue
+            default_errors: list[str] = []
+            if configuration.configuration_id != model.default_configuration_id:
+                default_errors.append(
+                    "default configuration ID disagrees with the public model descriptor"
+                )
+            if prepared.configuration.configuration_id != configuration.configuration_id:
+                default_errors.append(
+                    "prepared default configuration identity disagrees with its authored configuration"
+                )
+            defaults[model.id] = {
+                "status": "pass" if not default_errors else "fail",
+                "configuration_id": configuration.configuration_id,
+                "fidelity": configuration.fidelity,
+                "realization_id": configuration.realization_id,
+                "mission_template_id": configuration.mission_template_id,
+                "errors": default_errors,
+            }
+            errors.extend(f"model {model.id}: {message}" for message in default_errors)
+    available = tuple(
+        item
+        for model in descriptor.models
+        for item in model.operations
+        if item.availability == "available"
+    )
+    return {
+        "status": "pass" if not errors else "fail",
+        "model_count": len(descriptor.models),
+        "available_batch_tuple_count": sum(item.operation == "batch" for item in available),
+        "available_step_tuple_count": sum(item.operation == "step" for item in available),
+        "default_configuration_count": sum(item["status"] == "pass" for item in defaults.values()),
+        "defaults": defaults,
         "errors": errors,
     }
     ####
@@ -139,15 +276,85 @@ def _capability_shape(batches: tuple[tuple[Any, Any], ...], steps: tuple[tuple[A
     ####
 
 
+def _execute_public_default(
+    provider: Any,
+    model_id: str,
+    *,
+    execute_batch: bool,
+) -> dict[str, object]:
+    """Exercise one prepared default through public step and optional batch interfaces."""
+
+    adapter = TaoryxTrajectoryContractsAdapter(provider)
+    configuration = adapter.build_default_configuration(model_id)
+    prepared = adapter.prepare_configuration(configuration)
+    batch_entity_count: int | None = None
+    batch_sample_count: int | None = None
+    if execute_batch:
+        batch = adapter.run_batch(
+            BatchRunRequest(
+                request_id=f"contract-default-batch-{model_id}",
+                prepared_configuration=prepared,
+                output=BatchOutputSelection(
+                    include_events=False,
+                    include_segments=False,
+                    maximum_entities=2,
+                ),
+            )
+        )
+        batch_audit = audit_batch_result(batch)
+        if batch_audit.status != "pass":
+            raise ValueError("public batch result does not satisfy the trajectory-contracts audit")
+        batch_entity_count = len(batch.entities)
+        batch_sample_count = sum(len(entity.samples) for entity in batch.entities)
+    session_id = f"contract-default-stream-{model_id}"
+    opened = adapter.open_stream(
+        OpenStreamingSessionRequest(
+            session_id=session_id,
+            prepared_configuration=prepared,
+            seed=19,
+        )
+    )
+    try:
+        descriptor_audit = audit_streaming_descriptor(opened)
+        if descriptor_audit.status != "pass":
+            raise ValueError("public streaming descriptor does not satisfy the trajectory-contracts audit")
+        stepped = adapter.step_stream(
+            StreamingStepRequest(
+                session_id=session_id,
+                duration_s=0.02,
+                expected_sequence=0,
+            )
+        )
+        step_audit = audit_streaming_step(stepped)
+        if step_audit.status != "pass":
+            raise ValueError("public streaming step does not satisfy the trajectory-contracts audit")
+    finally:
+        adapter.close_stream(CloseStreamingSessionRequest(session_id=session_id))
+    return {
+        "status": "pass",
+        "configuration_id": configuration.configuration_id,
+        "batch_executed": execute_batch,
+        "batch_entity_count": batch_entity_count,
+        "batch_sample_count": batch_sample_count,
+        "stream_session_id": session_id,
+        "stream_step_sequence": stepped.sequence,
+    }
+    ####
+
+
 def _provider_report(
     *,
     contribution_id: str,
     plugin_id: str,
     provider: Any,
     contract_profile: ContractProfile,
+    execute_defaults: bool = False,
+    execute_batch_defaults: bool = False,
 ) -> dict[str, object]:
     """Audit one resolved provider against one explicit host profile."""
 
+    if execute_batch_defaults:
+        execute_defaults = True
     errors: list[str] = []
     try:
         metadata = provider.metadata
@@ -179,6 +386,9 @@ def _provider_report(
     except Exception as error:  # noqa: BLE001 - preserve a scoped construction/audit error
         errors.append(f"model discovery failed: {type(error).__name__}: {error}")
         provider_models = ()
+    require_defaults = contract_profile == "taoryx_universal" or execute_defaults
+    public_contract = _public_contract_projection(provider, require_defaults=require_defaults)
+    errors.extend(str(item) for item in public_contract["errors"])
     batches_by_model = {
         model.id: _registered_operations(model, "batch")
         for model in provider_models
@@ -216,11 +426,39 @@ def _provider_report(
         errors.append(f"advertisement audit failed: {type(error).__name__}: {error}")
         audit_status = "fail"
 
+    executed_defaults: dict[str, dict[str, object]] = {}
+    if execute_defaults:
+        for model in provider_models:
+            try:
+                executed_defaults[model.id] = _execute_public_default(
+                    provider,
+                    model.id,
+                    execute_batch=execute_batch_defaults,
+                )
+            except Exception as error:  # noqa: BLE001 - report a portable model-specific integration failure
+                executed_defaults[model.id] = {
+                    "status": "fail",
+                    "errors": [f"default execution failed: {type(error).__name__}: {error}"],
+                }
+
     models: list[dict[str, object]] = []
     registered_batch_tuple_count = 0
     registered_step_tuple_count = 0
     for model in provider_models:
         model_errors: list[str] = []
+        default = public_contract["defaults"].get(model.id)
+        if require_defaults:
+            if default is None:
+                model_errors.append("public trajectory-contract projection omitted this model's default configuration")
+            elif default["status"] != "pass":
+                model_errors.extend(str(item) for item in default["errors"])
+        executed_default = executed_defaults.get(model.id)
+        if executed_default is not None and executed_default["status"] != "pass":
+            execution_errors = executed_default.get("errors", ())
+            if isinstance(execution_errors, list | tuple):
+                model_errors.extend(str(item) for item in execution_errors)
+            else:
+                model_errors.append("default execution failed without a structured error list")
         batches = batches_by_model[model.id]
         steps = _registered_operations(model, "step")
         registered_batch_tuple_count += len(batches)
@@ -292,6 +530,8 @@ def _provider_report(
                 "status": "pass" if not model_errors else "fail",
                 "registered_batch_tuple_count": len(batches),
                 "registered_step_tuple_count": len(steps),
+                "default_configuration": default,
+                "default_execution": executed_default,
                 "batches": batch_records,
                 "steps": step_records,
                 "errors": model_errors,
@@ -315,6 +555,14 @@ def _provider_report(
         "registered_batch_tuple_count": registered_batch_tuple_count,
         "registered_step_tuple_count": registered_step_tuple_count,
         "capability_shape_counts": capability_shape_counts,
+        "default_execution_enabled": execute_defaults,
+        "default_execution_count": sum(item["status"] == "pass" for item in executed_defaults.values()),
+        "default_batch_execution_enabled": execute_batch_defaults,
+        "default_batch_execution_count": sum(
+            item["status"] == "pass" and item.get("batch_executed") is True
+            for item in executed_defaults.values()
+        ),
+        "public_trajectory_contract": public_contract,
         "models": models,
         "errors": errors,
     }
@@ -326,12 +574,16 @@ def build_report(
     plugin_ids: Iterable[str],
     contract_profile: ContractProfile = "interoperable",
     include_external: bool = False,
+    execute_defaults: bool = False,
+    execute_batch_defaults: bool = False,
     catalog: PluginCatalog | None = None,
 ) -> dict[str, Any]:
     """Build a profile-specific report limited to selected plug-in ownership."""
 
     if contract_profile not in _CONTRACT_PROFILES:
         raise ValueError(f"unknown provider contract profile {contract_profile!r}")
+    if execute_batch_defaults:
+        execute_defaults = True
     selected = _normalize_plugin_ids(plugin_ids)
     if catalog is None:
         catalog = discover_plugins(
@@ -420,6 +672,8 @@ def build_report(
                     plugin_id=record.plugin.id,
                     provider=provider,
                     contract_profile=contract_profile,
+                    execute_defaults=execute_defaults,
+                    execute_batch_defaults=execute_batch_defaults,
                 )
             )
     errors.extend(
@@ -448,6 +702,12 @@ def build_report(
         "model_count": sum(int(provider["model_count"]) for provider in providers),
         "registered_batch_tuple_count": sum(int(provider["registered_batch_tuple_count"]) for provider in providers),
         "registered_step_tuple_count": sum(int(provider["registered_step_tuple_count"]) for provider in providers),
+        "default_execution_enabled": execute_defaults,
+        "default_execution_count": sum(int(provider.get("default_execution_count", 0)) for provider in providers),
+        "default_batch_execution_enabled": execute_batch_defaults,
+        "default_batch_execution_count": sum(
+            int(provider.get("default_batch_execution_count", 0)) for provider in providers
+        ),
         "capability_shape_counts": {
             shape: sum(int(provider["capability_shape_counts"].get(shape, 0)) for provider in providers)
             for shape in ("batch_and_step", "batch_only", "step_only", "catalog_only")
@@ -457,9 +717,12 @@ def build_report(
         "providers": providers,
         "claim_boundary": (
             "This is a selected-plug-in structural and provider-construction gate. It verifies the common "
-            "ECEF result/session types, metadata schemas, and exact advertised operation seams. The "
+            "ECEF result/session types, metadata schemas, exact advertised operation seams, and a preparable "
+            "provider-selected runnable default for every model. The "
             "taoryx_universal profile additionally requires matching batch and step tuples for every "
-            "host-facing model. It does not integrate a mission; use check-vehicle for a focused execution witness."
+            "host-facing model. --execute-defaults additionally runs each selected model through one public "
+            "streaming step. --execute-batch-defaults also runs the full public batch, which may be intentionally "
+            "long for a transport-scale witness; use check-vehicle for a family-specific vertical evidence ladder."
         ),
     }
     ####
@@ -477,6 +740,10 @@ def _summary(report: dict[str, Any]) -> dict[str, Any]:
         "model_count": report["model_count"],
         "registered_batch_tuple_count": report["registered_batch_tuple_count"],
         "registered_step_tuple_count": report["registered_step_tuple_count"],
+        "default_execution_enabled": report["default_execution_enabled"],
+        "default_execution_count": report["default_execution_count"],
+        "default_batch_execution_enabled": report["default_batch_execution_enabled"],
+        "default_batch_execution_count": report["default_batch_execution_count"],
         "capability_shape_counts": report["capability_shape_counts"],
         "error_count": report["error_count"],
         "errors": report["errors"],
@@ -507,6 +774,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="include installed third-party entry points when validating named plug-ins",
     )
+    parser.add_argument(
+        "--execute-defaults",
+        action="store_true",
+        help="run each selected provider-selected default through one public streaming step",
+    )
+    parser.add_argument(
+        "--execute-batch-defaults",
+        action="store_true",
+        help="also run the full public batch for each selected default; implies --execute-defaults",
+    )
     parser.add_argument("--summary", action="store_true", help="print counts and findings instead of each model tuple")
     args = parser.parse_args(argv)
     if args.all:
@@ -522,6 +799,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         plugin_ids=plugin_ids,
         contract_profile=contract_profile,
         include_external=args.include_external,
+        execute_defaults=args.execute_defaults,
+        execute_batch_defaults=args.execute_batch_defaults,
     )
     print(json.dumps(_summary(report) if args.summary else report, indent=2, sort_keys=True))
     return 0 if report["status"] == "pass" else 2

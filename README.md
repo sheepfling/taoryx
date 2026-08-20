@@ -24,18 +24,24 @@ evidence-bounded toolchain that can:
 
 The repository's reusable contracts are products in their own right, not only
 interfaces to the bundled vehicle models. In particular, the
-[Vehicle Composition Advertisement API](docs/architecture/vehicle-composition-advertisement-api.md)
+[Vehicle Composition Advertisement API](docs/api/vehicle-composition-advertisement-api.md)
 lets any trajectory backend publish a closed, JSON-safe account of its mission
 authoring, execution, graph, node, transition, rearrangement, runtime-change,
 multi-entity, and state-transfer capabilities. A backend may wrap a native
 simulator, remote service, analytical model, or recorded data without adopting
 the Taoryx runtime internally.
 
-The broader [Mission Composition Provider API](docs/architecture/mission-composition-provider-api.md)
-adds typed configuration, exact operation selection, batch results, failures,
-and persistent sessions. Together they are the provider-neutral integration
-surface for catalogues, planners, UIs, agents, and independent trajectory
-providers.
+The standalone [Trajectory contracts](docs/api/trajectory-contracts.md)
+package adds versioned discovery, batch results, optional persistent sessions,
+and the mandatory ECEF/ECFC kinematic-and-attitude state. TAORYX is one
+provider of that interface through an adapter; other providers may adopt it
+without importing the TAORYX runtime. The richer
+[Mission Composition Provider API](docs/api/mission-composition-provider-api.md)
+remains TAORYX's typed language and execution surface.
+
+For the practical choice between consuming/providing those external contracts
+and contributing a vehicle package to TAORYX itself, see
+[Developer interface layers](docs/developer/interface-layers.md).
 
 ## What lives here
 
@@ -43,6 +49,7 @@ providers.
 - `metadata/` - equation, figure, source-page, fixture, and catalog registries
 - `grammars/` - documentary EBNF for TAOS table and problem files
 - `src/taoryx/` - the installable Python package
+- `packages/taoryx-trajectory-contracts/` - standalone provider/host interface package
 - `packages/` - separately buildable model and provider plug-ins
 - `tests/` - parser, runtime, equation, algorithm, Simple Aero, and artifact tests
 - `tools/` - build, audit, validation, and reporting commands
@@ -64,9 +71,10 @@ python -m tools.dev install-check
 python -m tools.dev doctor
 ```
 
-Bootstrap installs the core plus the fourteen direct model/overlay plug-ins used
-for development. The compatibility aggregate is an explicit opt-in profile for
-existing catalogue consumers, rather than a dependency of new vehicle work.
+Bootstrap installs the public trajectory-contracts foundation, the core, and
+the fourteen direct model/overlay plug-ins used for development. The
+compatibility aggregate is an explicit opt-in profile for existing catalogue
+consumers, rather than a dependency of new vehicle work.
 Core-only, model-suite, compatibility, full-suite, wheelhouse, optional sensor,
 and Windows instructions are in [Installing Taoryx and its model packages](docs/INSTALLATION.md).
 If you already have a working environment, the portable runner will use `.venv`
@@ -127,7 +135,7 @@ for every realization. Generate a plain-value mission draft, validate it
 through its exact provider, or run a model-owned campaign through the common
 automatic-tuning pipeline with `taoryx model scaffold`, `taoryx model compile`, and
 `taoryx model tune`. See
-[Model-to-mission authoring and automation](docs/architecture/model-authoring-automation.md)
+[Model-to-mission authoring and automation](docs/developer/model-authoring-automation.md)
 for the complete data, waypoint, segment, controller, and plug-in workflow.
 Model plug-ins can generate common LQR/LQI campaigns from the compact
 `ControlAutomationDeclaration`; `taoryx model tune` content-addresses reports
@@ -177,9 +185,12 @@ python tools/aero_drag_analysis.py --all --output-dir build/aero-drag
 - [Installation and package selection](docs/INSTALLATION.md)
 - [Agent workflows](docs/AGENT_WORKFLOWS.md)
 - [Mission Composition and interactive-control front door](docs/MISSION_COMPOSITION.md) — the consumer API for model discovery, typed configuration, batch execution, and persistent live-control sessions
-- [Vehicle Composition Advertisement API](docs/architecture/vehicle-composition-advertisement-api.md) — the standalone capability-negotiation contract for Taoryx and independent trajectory backends
-- [Mission Composition Provider API reference](docs/architecture/mission-composition-provider-api.md)
-- [Model-to-mission authoring and automation](docs/architecture/model-authoring-automation.md)
+- [Documentation home](docs/README.md) — browse by public API, developer workflow, package owner, architecture, or verification evidence
+- [Developer interface layers](docs/developer/interface-layers.md) — choose the external provider/consumer seam or the internal TAORYX vehicle plug-in seam
+- [Vehicle Composition Advertisement API](docs/api/vehicle-composition-advertisement-api.md) — the standalone capability-negotiation contract for Taoryx and independent trajectory backends
+- [Standalone trajectory contracts](docs/api/trajectory-contracts.md) — installable discovery, batch, streaming-control, ECEF, and conformance interfaces for any provider or host
+- [Mission Composition Provider API reference](docs/api/mission-composition-provider-api.md)
+- [Model-to-mission authoring and automation](docs/developer/model-authoring-automation.md)
 - [Simulation Runtime onboarding: find, set up, step, and diagnose](docs/SIMULATION_RUNTIME_ONBOARDING.md)
 - [Authoring → Runtime → Composition showcase guide](docs/AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md)
 - [Simulation Runtime maturity plan](docs/plan/simulation-runtime-maturity.md)

@@ -1207,6 +1207,8 @@ def test_bootstrap_full_profile_installs_every_editable_distribution() -> None:
         "pip",
         "install",
         "-e",
+        "packages/taoryx-trajectory-contracts",
+        "-e",
         ".[dev]",
         "-e",
         "packages/taoryx-daveml",
@@ -1250,7 +1252,8 @@ def test_bootstrap_developer_profile_installs_direct_plug_ins_without_compatibil
         with_sensors=False,
     )
 
-    assert command.count("-e") == 15
+    assert command.count("-e") == 16
+    assert command[5] == "packages/taoryx-trajectory-contracts"
     assert "packages/taoryx-reference-models" not in command
     assert command[-1] == "packages/taoryx-reachability"
     ####
@@ -1264,7 +1267,8 @@ def test_bootstrap_compatibility_profile_installs_only_aggregate_dependencies() 
         with_sensors=False,
     )
 
-    assert command.count("-e") == 12
+    assert command.count("-e") == 13
+    assert "packages/taoryx-trajectory-contracts" in command
     assert "packages/taoryx-reference-models" in command
     assert "packages/taoryx-debug-models" not in command
     assert "packages/taoryx-passive-bodies" not in command
@@ -1281,7 +1285,7 @@ def test_bootstrap_offline_sensor_fallback_keeps_full_local_distribution_set() -
     )
 
     assert command[4:6] == ["--no-build-isolation", "--no-deps"]
-    assert command.count("-e") == 16
+    assert command.count("-e") == 17
     assert command[-1] == "packages/taoryx-reachability"
     ####
 
@@ -1292,7 +1296,21 @@ def test_developer_source_roots_follow_declared_entry_points() -> None:
     expected_roots = {entry_point.project.parent / "src" for entry_point in source_plugin_entry_points()}
 
     assert dev.SOURCE_ROOTS[0] == dev.ROOT / "src"
-    assert set(dev.SOURCE_ROOTS[1:]) == expected_roots
+    assert set(dev.SOURCE_ROOTS[1:]) == {*dev.FOUNDATION_SOURCE_ROOTS, *expected_roots}
+    ####
+
+
+def test_trajectory_contracts_wheel_gate_uses_the_project_interpreter(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[list[str]] = []
+    monkeypatch.setattr(dev, "run", commands.append)
+
+    dev.check_trajectory_contracts()
+
+    assert commands == [
+        tool_script("verify_trajectory_contracts_wheel.py", "--python", dev.project_python()),
+    ]
     ####
 
 
@@ -1332,6 +1350,60 @@ def test_focused_taoryx_universal_contract_does_not_require_the_aggregate_catalo
     assert report["registered_batch_tuple_count"] == registered_batch_tuple_count
     assert report["standard_ecef_contract"]["status"] == "pass"
     assert [item["plugin_id"] for item in report["plugins"]] == [plugin_id]
+    ####
+
+
+def test_a320_cadac_and_aggregate_provider_construction_regression() -> None:
+    """Keep the historical manifest and missing-runner failures at the plug-in boundary."""
+
+    catalog = discover_plugins(
+        include_external=False,
+        selected=("taoryx.a320", "taoryx.cadac"),
+    )
+    registry = catalog.build_mission_composition_provider_registry()
+
+    assert isinstance(
+        registry.provider("taoryx.a320.mission-composition").build_runner(),
+        MissionCompositionRunnerRegistry,
+    )
+    assert isinstance(registry.provider("cadac").build_runner(), MissionCompositionRunnerRegistry)
+    aggregate = RegistryMissionCompositionProvider()
+    assert aggregate.list_models()
+    assert isinstance(aggregate.build_runner(), MissionCompositionRunnerRegistry)
+    ####
+
+
+def test_universal_contract_requires_one_preparable_default_for_every_source_model() -> None:
+    """A new model cannot regress to an editable-but-unrunnable catalog scaffold."""
+
+    report = build_provider_contract_report(
+        plugin_ids=tuple(item.name for item in source_plugin_entry_points()),
+        contract_profile="taoryx_universal",
+    )
+
+    assert report["status"] == "pass", report["errors"]
+    assert all(
+        model["default_configuration"]["status"] == "pass"
+        for provider in report["providers"]
+        for model in provider["models"]
+    )
+    ####
+
+
+def test_focused_public_default_execution_exercises_batch_and_step_without_aggregate() -> None:
+    """The opt-in consumer smoke remains narrow enough for plug-in authors."""
+
+    report = build_provider_contract_report(
+        plugin_ids=("taoryx.debug-models",),
+        contract_profile="taoryx_universal",
+        execute_batch_defaults=True,
+    )
+
+    assert report["status"] == "pass", report["errors"]
+    assert report["default_execution_enabled"] is True
+    assert report["default_execution_count"] == report["model_count"]
+    assert report["default_batch_execution_enabled"] is True
+    assert report["default_batch_execution_count"] == report["model_count"]
     ####
 
 
@@ -1542,6 +1614,75 @@ def test_fast_focused_plugin_contract_gate_avoids_the_wheel_build(
             "--summary",
         ),
     ]
+    ####
+
+
+def test_interface_guide_separates_external_and_internal_paths(capsys: pytest.CaptureFixture[str]) -> None:
+    dev.interface_guide()
+
+    output = capsys.readouterr().out
+
+    assert "External provider / consumer layer" in output
+    assert "Internal TAORYX vehicle plug-in layer" in output
+    assert "python tools/dev.py check-trajectory-contracts" in output
+    assert "python tools/dev.py plugin-focus <wheel-selector>" in output
+    ####
+
+
+def test_documentation_layout_task_uses_the_ownership_and_navigation_validator(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[list[str]] = []
+    monkeypatch.setattr(dev, "run", commands.append)
+
+    dev.documentation_layout()
+
+    assert commands == [tool_script("validate_documentation_layout.py")]
+    ####
+
+
+def test_plugin_focus_prints_only_the_selected_plugin_loop(capsys: pytest.CaptureFixture[str]) -> None:
+    dev.plugin_focus("hummingbird")
+
+    output = capsys.readouterr().out
+
+    assert "Plug-in ID: taoryx.hummingbird" in output
+    assert "packages/taoryx-hummingbird/README.md" in output
+    assert "taoryx plugins inspect taoryx.hummingbird --json" in output
+    assert "python tools/dev.py check-plugin-contract hummingbird" in output
+    assert "python tools/dev.py check-plugin hummingbird" in output
+    assert "python tools/dev.py test-vehicle hummingbird" in output
+    assert "python tools/dev.py check-vehicle hummingbird" in output
+    assert "catalogue-wide test run" not in output
+    ####
+
+
+def test_plugin_focus_includes_a_named_parametric_interceptor_vertical_slice(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    dev.plugin_focus("parametric-interceptors")
+
+    output = capsys.readouterr().out
+
+    assert "Plug-in ID: taoryx.parametric-interceptors" in output
+    assert "packages/taoryx-parametric-interceptors/README.md" in output
+    assert "packages/taoryx-parametric-interceptors/docs/README.md" in output
+    assert "python tools/dev.py test-parametric-interceptors" in output
+    assert "no registered physical vehicle vertical slice" not in output
+    ####
+
+
+def test_every_plugin_wheel_selector_has_a_focused_developer_evidence_route() -> None:
+    """A new wheel must choose its own narrow test route before broad integration."""
+
+    selectors_without_route = [
+        spec.selector
+        for spec in PLUGIN_WHEEL_SPECS
+        if not dev._focused_vehicle_families_for_plugin(spec.plugin_id)
+        and spec.selector not in dev.PLUGIN_FOCUS_EXTRA_COMMANDS
+    ]
+
+    assert selectors_without_route == []
     ####
 
 

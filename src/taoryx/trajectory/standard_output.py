@@ -19,94 +19,23 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from taoryx_trajectory_contracts.standard import (
+    EcefAccelerationKind,
+    EcefAngularVelocityKind,
+    EcefOrientationKind,
+    EcefProjectionKind,
+    QuaternionWxyz,
+    StandardEcefState,
+    Vector3,
+)
 
 _WGS84_EQUATORIAL_RADIUS_M = 6_378_137.0
 _WGS84_FLATTENING = 1.0 / 298.257223563
 _WGS84_ECCENTRICITY_SQUARED = _WGS84_FLATTENING * (2.0 - _WGS84_FLATTENING)
 _EARTH_ROTATION_RADPS = 7.2921150e-5
 _EPSILON = 1.0e-12
-
-EcefProjectionKind = Literal[
-    "native_ecfc",
-    "geodetic_wgs84",
-    "ecic_to_ecfc_zero_epoch",
-    "local_ned_wgs84_equatorial_embedding",
-    "local_cartesian_wgs84_equatorial_embedding",
-    "reference_origin_wgs84_equatorial_embedding",
-]
-EcefOrientationKind = Literal[
-    "native_ecef_from_body",
-    "native_ned_from_body",
-    "native_ecic_from_body",
-    "native_body_from_local_ned",
-    "native_inertial_to_body",
-    "kinematic_velocity_aligned",
-    "held_kinematic_orientation",
-    "local_ned_reference",
-]
-EcefAccelerationKind = Literal[
-    "native_earth_relative_acceleration",
-    "finite_difference_earth_relative_velocity",
-]
-EcefAngularVelocityKind = Literal["native_body_rate", "orientation_finite_difference"]
-Vector3 = tuple[float, float, float]
-QuaternionWxyz = tuple[float, float, float, float]
-
-
-class StandardEcefState(BaseModel):
-    """Required cross-provider ECEF kinematics and world-from-body attitude.
-
-    ``ecef_from_body_wxyz`` maps a forward/right/down body-reference vector
-    into the ECEF world frame. ``orientation_kind`` distinguishes native
-    physical attitude truth from the velocity-aligned kinematic orientation
-    used when a provider does not expose rigid-body attitude. Acceleration is
-    either native Earth-relative truth or the finite-difference derivative of
-    the standardized Earth-relative velocity at accepted sample boundaries.
-    Angular velocity uses documented body rates when present and otherwise is
-    derived from that quaternion.
-    """
-
-    model_config = ConfigDict(frozen=True, extra="forbid", populate_by_name=True)
-
-    schema_id: Literal["taoryx.standard-ecef-state/v1"] = Field(
-        default="taoryx.standard-ecef-state/v1",
-        alias="schema",
-        serialization_alias="schema",
-    )
-    frame_id: Literal["ecfc"] = "ecfc"
-    position_ecef_m: Vector3
-    velocity_ecef_mps: Vector3
-    acceleration_ecef_mps2: Vector3
-    acceleration_kind: EcefAccelerationKind = "finite_difference_earth_relative_velocity"
-    angular_velocity_body_radps: Vector3
-    angular_velocity_kind: EcefAngularVelocityKind
-    ecef_from_body_wxyz: QuaternionWxyz
-    position_projection: EcefProjectionKind
-    source_frame: str = Field(min_length=1)
-    orientation_kind: EcefOrientationKind
-
-    @model_validator(mode="after")
-    def validate_state(self) -> StandardEcefState:
-        values = (
-            *self.position_ecef_m,
-            *self.velocity_ecef_mps,
-            *self.acceleration_ecef_mps2,
-            *self.angular_velocity_body_radps,
-            *self.ecef_from_body_wxyz,
-        )
-        if not all(math.isfinite(value) for value in values):
-            raise ValueError("standard ECEF state requires finite position, velocity, and orientation values")
-        norm = math.sqrt(sum(value * value for value in self.ecef_from_body_wxyz))
-        if not math.isclose(norm, 1.0, rel_tol=0.0, abs_tol=1.0e-9):
-            raise ValueError("standard ECEF orientation quaternion must have unit norm")
-        return self
-        ####
-
-    ####
-
 
 @dataclass(frozen=True, slots=True)
 class _Pose:
@@ -756,7 +685,7 @@ def _vector_from_components(values: Mapping[str, Any], groups: Sequence[tuple[st
     for identifiers in groups:
         vector = tuple(_finite_number(values.get(identifier)) for identifier in identifiers)
         if all(value is not None for value in vector):
-            return (float(vector[0]), float(vector[1]), float(vector[2]))
+            return (cast(float, vector[0]), cast(float, vector[1]), cast(float, vector[2]))
     return None
     ####
 
@@ -767,7 +696,7 @@ def _vector_value(values: Mapping[str, Any], identifiers: Sequence[str]) -> Vect
         if isinstance(raw, Sequence) and not isinstance(raw, str | bytes) and len(raw) == 3:
             vector = tuple(_finite_number(item) for item in raw)
             if all(value is not None for value in vector):
-                return (float(vector[0]), float(vector[1]), float(vector[2]))
+                return (cast(float, vector[0]), cast(float, vector[1]), cast(float, vector[2]))
     return None
     ####
 
@@ -778,7 +707,12 @@ def _quaternion_value(values: Mapping[str, Any], identifiers: Sequence[str]) -> 
         if isinstance(raw, Sequence) and not isinstance(raw, str | bytes) and len(raw) == 4:
             components = tuple(_finite_number(item) for item in raw)
             if all(component is not None for component in components):
-                quaternion = tuple(float(component) for component in components)
+                quaternion: QuaternionWxyz = (
+                    cast(float, components[0]),
+                    cast(float, components[1]),
+                    cast(float, components[2]),
+                    cast(float, components[3]),
+                )
                 norm = math.sqrt(sum(component * component for component in quaternion))
                 if norm > _EPSILON:
                     return tuple(component / norm for component in quaternion)  # type: ignore[return-value]

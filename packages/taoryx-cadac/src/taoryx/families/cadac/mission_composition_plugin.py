@@ -387,6 +387,28 @@ class CadacMissionCompositionProvider:
 
     ####
 
+    def build_model_default_configuration(
+        self,
+        model_id: str,
+        *,
+        configuration_id: str,
+    ) -> TrajectoryConfigurationInstance:
+        """Return the exact source/runtime-bound runnable default.
+
+        This succeeds only for a model the current CADAC host actually
+        advertises.  It intentionally never invents a neighboring actor or an
+        unavailable source runtime.
+        """
+
+        if model_id not in self._models:
+            raise KeyError(f"unknown CADAC trajectory plug-in {model_id!r}")
+        return build_default_cadac_configuration(
+            self,
+            model_id,
+            configuration_id=configuration_id,
+        )
+        ####
+
     def get_model_schema(self, model_id: str) -> TrajectoryConfigurationSchema:
         """Return one exact actor plug-in configuration schema."""
 

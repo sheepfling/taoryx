@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 TOOLS = ROOT / "tools"
 VENV_PYTHON = ROOT / ".venv" / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
+FOUNDATION_SOURCE_ROOTS = (ROOT / "packages" / "taoryx-trajectory-contracts" / "src",)
 
 
 def _declared_source_roots() -> tuple[Path, ...]:
@@ -31,7 +32,10 @@ def _declared_source_roots() -> tuple[Path, ...]:
     integration tasks.
     """
 
-    roots = [ROOT / "src"]
+    roots = [ROOT / "src", *FOUNDATION_SOURCE_ROOTS]
+    for source_root in FOUNDATION_SOURCE_ROOTS:
+        if not source_root.is_dir():
+            raise RuntimeError(f"foundation contract package has no source root {source_root}")
     for project in sorted((ROOT / "packages").glob("*/pyproject.toml")):
         try:
             document = tomllib.loads(project.read_text(encoding="utf-8"))
@@ -99,10 +103,13 @@ PYRIGHT_QUALITY_PATHS = (
     "src/taoryx/compatibility/vehicle_catalog_resources.py",
     "src/taoryx/vehicle_catalog_resources.py",
     "src/taoryx/trajectory/catalog_mission_composition.py",
+    "src/taoryx/trajectory/contracts_adapter.py",
+    "packages/taoryx-trajectory-contracts/src/taoryx_trajectory_contracts",
     "packages/taoryx-parametric-interceptors/src/taoryx_parametric_interceptors",
     "tools/dev.py",
     "tools/validate_plugin_developer_route.py",
     "tools/validate_mission_composition_provider_contract.py",
+    "tools/verify_trajectory_contracts_wheel.py",
     "tools/verify_plugin_wheels.py",
 )
 PLUGIN_ENTRY_POINT_PATHS = _declared_plugin_entry_point_paths()
@@ -132,6 +139,9 @@ DEBUG_MODEL_VERTICAL_TEST_PATHS = ("tests/families/debug_models/test_debug_model
 DAVEML_PLUGIN_VERTICAL_TEST_PATHS = ("tests/families/daveml/test_daveml_plugin_vertical.py",)
 CADAC_PLUGIN_BOUNDARY_TEST_PATHS = ("tests/families/cadac/test_taoryx_plugin.py",)
 REACHABILITY_PLUGIN_VERTICAL_TEST_PATHS = ("tests/families/reachability/test_reachability_plugin_vertical.py",)
+PARAMETRIC_INTERCEPTOR_VERTICAL_TEST_PATHS = (
+    "tests/families/parametric_interceptors/test_parametric_interceptor_vertical.py",
+)
 SOURCE_TABLE_FIXED_WING_PLUGIN_BOUNDARY_TEST_PATHS = (
     "tests/families/source_table_fixed_wing/test_source_table_fixed_wing_plugin_boundary.py",
 )
@@ -316,6 +326,21 @@ FOCUSED_VEHICLE_PARITY_FAMILIES = frozenset(
     }
 )
 
+# These commands cover package types that do not map to one of the physical
+# vehicle gates above. They remain scoped to the selected package or explicit
+# cross-package seam; ``plugin-focus`` combines them with any owned vehicle
+# slices instead of asking a contributor to discover a repository-wide test.
+PLUGIN_FOCUS_EXTRA_COMMANDS: dict[str, tuple[str, ...]] = {
+    "daveml": ("python tools/dev.py test-daveml", "python tools/dev.py check-daveml"),
+    "cadac": ("python tools/dev.py test-cadac-discovery", "python tools/dev.py test-vehicle cadac_aim5"),
+    "reachability": ("python tools/dev.py test-reachability", "python tools/dev.py check-reachability"),
+    "debug-models": ("python tools/dev.py test-debug-models",),
+    "parametric-interceptors": ("python tools/dev.py test-parametric-interceptors",),
+    "simple-aero": ("python tools/dev.py test-vehicle simple_aero",),
+    "reference-models": ("taoryx plugins check --profile compatibility",),
+    "cross-plugin-deployment": ("python -m pytest tests/unit/test_cross_plugin_deployment.py -q",),
+}
+
 
 def project_python() -> str:
     if VENV_PYTHON.exists():
@@ -412,6 +437,13 @@ def check_developer_plugins() -> None:
     ####
 
 
+def check_trajectory_contracts() -> None:
+    """Build and import the standalone public trajectory-contracts wheel."""
+
+    run(tool_script("verify_trajectory_contracts_wheel.py", "--python", project_python()))
+    ####
+
+
 def plugin_wheel_smoke() -> None:
     """Build and exercise the independently installable vehicle plug-in wheels."""
 
@@ -419,14 +451,13 @@ def plugin_wheel_smoke() -> None:
     ####
 
 
-def _plugin_id_for_wheel_selector(selector: str) -> str:
-    """Resolve the provider owner from the canonical wheel-boundary registry.
+def _plugin_wheel_details_for_selector(selector: str) -> tuple[str, Path]:
+    """Resolve a focused plug-in's owner and source project from its wheel spec.
 
     This is deliberately derived from ``PluginWheelSpec`` rather than a
     second selector map. Adding a wheel boundary therefore automatically gives
-    ``check-plugin`` the correct focused universal-contract owner, including
-    selectors such as cross-package deployment proofs whose name differs from
-    their owning plug-in ID.
+    focused validation and documentation guidance the correct owner/project,
+    including selectors whose name differs from their owning plug-in ID.
     """
 
     if __package__:
@@ -434,11 +465,22 @@ def _plugin_id_for_wheel_selector(selector: str) -> str:
     else:
         from verify_plugin_wheels import PLUGIN_WHEEL_SPECS
 
-    matches = tuple(item.plugin_id for item in PLUGIN_WHEEL_SPECS if item.selector == selector)
+    matches = tuple(
+        (item.plugin_id, item.project)
+        for item in PLUGIN_WHEEL_SPECS
+        if item.selector == selector
+    )
     if len(matches) != 1:
         available = ", ".join(sorted(item.selector for item in PLUGIN_WHEEL_SPECS))
         raise ValueError(f"unknown plug-in wheel selector {selector!r}; available: {available}")
     return matches[0]
+    ####
+
+
+def _plugin_id_for_wheel_selector(selector: str) -> str:
+    """Resolve the provider owner from the canonical wheel-boundary registry."""
+
+    return _plugin_wheel_details_for_selector(selector)[0]
     ####
 
 
@@ -485,6 +527,115 @@ def check_plugin_install(plugin: str) -> None:
 
     check_plugin_contract(plugin)
     run(tool_script("verify_plugin_wheels.py", "--plugin", plugin, "--python", project_python()))
+    ####
+
+
+def interface_guide() -> None:
+    """Print the role-first map for the external and internal interface layers."""
+
+    print(
+        "\n".join(
+            (
+                "TAORYX developer interface guide",
+                "",
+                "External provider / consumer layer",
+                "  Use this to integrate a host or trajectory backend without adopting the TAORYX runtime.",
+                "  Contract package: taoryx-trajectory-contracts",
+                "  Start: docs/developer/interface-layers.md",
+                "  Verify this repository's standalone contract wheel: python tools/dev.py check-trajectory-contracts",
+                "",
+                "Internal TAORYX vehicle plug-in layer",
+                "  Use this to add a vehicle, model family, controls, or execution binding to TAORYX itself.",
+                "  Start: docs/developer/vehicle-plugin-authoring.md",
+                "  Discover installed contributions: taoryx plugins list --json",
+                "  Get one package's exact inner loop: python tools/dev.py plugin-focus <wheel-selector>",
+                "",
+                "If a model must appear inside TAORYX, use the internal plug-in layer. TAORYX then",
+                "adapts its common results to the external contract; do not maintain a second solver API.",
+            )
+        )
+    )
+    ####
+
+
+def documentation_layout() -> None:
+    """Validate documentation ownership, migration pointers, and navigation links."""
+
+    run(tool_script("validate_documentation_layout.py"))
+    ####
+
+
+def _focused_vehicle_families_for_plugin(plugin_id: str) -> tuple[str, ...]:
+    """Return runnable vertical slices owned by one selected plug-in."""
+
+    return tuple(
+        family
+        for family, plugin_ids in sorted(FOCUSED_VEHICLE_PLUGIN_IDS.items())
+        if plugin_id in plugin_ids
+    )
+    ####
+
+
+def plugin_focus(plugin: str) -> None:
+    """Print discovery and narrow validation commands for one wheel selector.
+
+    The guide intentionally starts from the wheel-boundary selector used by
+    ``check-plugin-contract``. A contributor can therefore discover and prove
+    the exact package under change without replacing its inner loop with a
+    catalogue-wide test run.
+    """
+
+    plugin_id, package_project = _plugin_wheel_details_for_selector(plugin)
+    package_readme = package_project / "README.md"
+    package_docs = package_project / "docs" / "README.md"
+    if not package_readme.is_file():
+        raise RuntimeError(f"plug-in project {package_project} has no package README")
+    families = _focused_vehicle_families_for_plugin(plugin_id)
+    extra_commands = PLUGIN_FOCUS_EXTRA_COMMANDS.get(plugin, ())
+    lines = [
+        f"Focused TAORYX plug-in workflow: {plugin}",
+        f"Plug-in ID: {plugin_id}",
+        "",
+        "Package-owned documentation:",
+        f"  {package_readme.relative_to(ROOT).as_posix()}",
+        "",
+        "Discover the installed package without constructing a plant:",
+        f"  taoryx plugins inspect {plugin_id} --json",
+        "",
+        "Fast package-local contract gate (direct route plus common TAORYX batch/step and ECEF contract):",
+        f"  python tools/dev.py check-plugin-contract {plugin}",
+        "",
+        "Handoff boundary (the fast gate plus a fresh isolated wheel install):",
+        f"  python tools/dev.py check-plugin {plugin}",
+    ]
+    if package_docs.is_file():
+        lines.extend(("", "Package-specific notes:", f"  {package_docs.relative_to(ROOT).as_posix()}"))
+    if families:
+        lines.extend(("", "Owned runnable vehicle slices:"))
+        for family in families:
+            lines.append(f"  python tools/dev.py test-vehicle {family}")
+            if family in VEHICLE_INTERFACE_VERTICAL_FAMILIES:
+                lines.append(f"  python tools/dev.py check-vehicle {family}")
+    if extra_commands:
+        lines.extend(("", "Additional package-scoped evidence:"))
+        lines.extend(f"  {command}" for command in extra_commands)
+    if not families and not extra_commands:
+        lines.extend(
+            (
+                "",
+                "This package has no registered physical vehicle vertical slice. Its package-local",
+                "contract and wheel gates above remain the narrow default; consult its package README",
+                "for any format- or overlay-specific witness.",
+            )
+        )
+    lines.extend(
+        (
+            "",
+            "Authoring reference: docs/developer/vehicle-plugin-authoring.md",
+            "Layer guide: docs/developer/interface-layers.md",
+        )
+    )
+    print("\n".join(lines))
     ####
 
 
@@ -804,6 +955,13 @@ def test_debug_models() -> None:
     ####
 
 
+def test_parametric_interceptors() -> None:
+    """Run the focused discovery-to-execution proof for parametric interceptors."""
+
+    test_slice(PARAMETRIC_INTERCEPTOR_VERTICAL_TEST_PATHS, "not slow and not artifact")
+    ####
+
+
 def test_daveml_plugin() -> None:
     """Run the DAVE-ML plug-in discovery and lazy-import boundary only."""
 
@@ -971,6 +1129,10 @@ def vehicle_catalogue() -> None:
 
 def test_views() -> None:
     """Print the supported pytest views and cost-category selections."""
+    print("Developer interface navigation:")
+    print("  interface-guide  choose the external provider/consumer or internal TAORYX plug-in layer")
+    print("  plugin-focus <plugin> exact discovery and narrow validation commands for one wheel selector")
+    print("  docs-layout      documentation ownership, migration pointers, and navigation links")
     print("Inner-loop commands:")
     print("  test-quick   curated smoke and contract suite")
     print("  test-changed tests associated with current Git changes")
@@ -979,6 +1141,7 @@ def test_views() -> None:
     print("  test-matrices full catalog, grid, and cross-product view")
     print(f"  test-vehicle <family> runnable one-family Composition vertical slice ({', '.join(sorted(VEHICLE_VERTICAL_TEST_PATHS))})")
     print("  test-debug-models standalone analytical ballistic/waypoint/contract-probe plug-in slice")
+    print("  test-parametric-interceptors focused parametric interceptor discovery-to-execution slice")
     print("  test-daveml  DAVE-ML discovery and lazy model-format import slice")
     print("  check-daveml DAVE-ML focused slice plus isolated wheel smoke")
     print("  test-reachability optional overlay discovery, package data, and lazy implementation slice")
@@ -2156,6 +2319,8 @@ def handoff() -> None:
 
 
 def check() -> None:
+    documentation_layout()
+    check_trajectory_contracts()
     check_developer_plugins()
     check_vehicle_models()
     check_supported_reference_families()
@@ -2197,6 +2362,9 @@ TASKS: dict[str, Callable[[], None]] = {
     "bootstrap": bootstrap,
     "doctor": doctor,
     "install-check": installation_check,
+    "check-trajectory-contracts": check_trajectory_contracts,
+    "interface-guide": interface_guide,
+    "docs-layout": documentation_layout,
     "check-developer-plugins": check_developer_plugins,
     "docs-doctor": docs_doctor,
     "source-pdf": source_pdf,
@@ -2226,6 +2394,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-simple_aero": lambda: test_category("simple_aero"),
     "test-simple_aero-segments": test_simple_aero_segments,
     "test-debug-models": test_debug_models,
+    "test-parametric-interceptors": test_parametric_interceptors,
     "test-daveml": test_daveml_plugin,
     "test-reachability": test_reachability_plugin,
     "test-b747": lambda: test_vehicle_family("b747"),
@@ -2375,7 +2544,7 @@ TASKS: dict[str, Callable[[], None]] = {
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("task", choices=sorted((*TASKS, "check-plugin", "check-plugin-contract", "check-vehicle", "test-vehicle")))
+    parser.add_argument("task", choices=sorted((*TASKS, "check-plugin", "check-plugin-contract", "check-vehicle", "plugin-focus", "test-vehicle")))
     parser.add_argument("vehicle", nargs="?")
     args = parser.parse_args()
     if args.task in {"check-vehicle", "test-vehicle"}:
@@ -2386,13 +2555,15 @@ def main() -> int:
         else:
             test_vehicle_vertical(args.vehicle)
         return 0
-    if args.task in {"check-plugin", "check-plugin-contract"}:
+    if args.task in {"check-plugin", "check-plugin-contract", "plugin-focus"}:
         if args.vehicle is None:
             parser.error(f"{args.task} requires a wheel selector, for example: f16")
         if args.task == "check-plugin":
             check_plugin_install(args.vehicle)
-        else:
+        elif args.task == "check-plugin-contract":
             check_plugin_contract(args.vehicle)
+        else:
+            plugin_focus(args.vehicle)
         return 0
     if args.vehicle is not None:
         parser.error(f"{args.task} does not accept a vehicle family")

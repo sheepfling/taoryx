@@ -34,6 +34,21 @@ lint` and Mypy gates remain available for release work; the inherited parser
 and model corpus has tracked type debt outside this actionable entry-point
 surface.
 
+## Documentation layout
+
+Browse documentation from the [documentation home](README.md): public
+contracts live under `docs/api/`, contributor workflows under
+`docs/developer/`, and model-specific notes with their owning package. Verify
+that layout and every local Markdown navigation link with:
+
+```bash
+python -m tools.dev docs-layout
+```
+
+The full `check` task includes this gate. Compatibility pointers preserve old
+links, but new documentation links must use the canonical API, developer,
+package, architecture, verification, or plan location.
+
 ## Choose the smallest useful tier
 
 The repository has four development tiers. Start vehicle work with one
@@ -43,6 +58,9 @@ tests even though it excludes the explicitly marked `slow`, `artifact`, and
 `simple_aero` categories.
 
 ```bash
+python -m tools.dev interface-guide  # choose the external-provider/consumer or internal plug-in path
+python -m tools.dev docs-layout       # documentation ownership and local-link validation
+python -m tools.dev plugin-focus hummingbird  # exact discovery and narrow evidence for one wheel selector
 python -m tools.dev test-vehicle f16_s119  # one runnable F-16 Composition path
 python -m tools.dev test-f16               # convenience alias for the same slice
 python -m tools.dev test-vehicle a320_openap_3dof
@@ -55,6 +73,7 @@ python -m tools.dev check-vehicle-maturity
 python -m tools.dev test-vehicle simple_aero  # runnable fixed-L/D batch and persistent-session workflow
 python -m tools.dev test-vehicle dual_launch_glider  # source-generated point-mass batch forms
 python -m tools.dev test-debug-models  # isolated ballistic, waypoint, and contract-probe provider workflow
+python -m tools.dev test-parametric-interceptors  # focused parametric interceptor discovery-to-execution witness
 python -m tools.dev check-daveml  # selected DAVE-ML format handler and installed-wheel boundary
 python -m tools.dev test-reachability  # exact reachability overlay data and deferred-registration boundary
 python -m tools.dev check-reachability  # plus the direct-dependency installed-wheel boundary
@@ -133,6 +152,12 @@ ballistic and waypoint fixtures plus the synthetic contract probe. It proves
 their package version, model/control advertisements, selected plug-in scope,
 streamed action/readback paths, package-owned endpoint data, and concrete batch
 results. It does not scan or execute physical vehicle families.
+
+`test-parametric-interceptors` is the focused discovery-to-execution witness
+for the parametric interceptor package. It exercises its package-owned profile,
+advertisement, batch result, and common session flow without invoking another
+vehicle family. Pair it with `check-plugin-contract parametric-interceptors`
+for the package's universal batch/step and standard-ECEF contract gate.
 
 `check-daveml` is the corresponding shared-format gate. It selects only the
 `daveml` model-format contribution, verifies its package revision, invokes the

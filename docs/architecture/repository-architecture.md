@@ -1,25 +1,30 @@
 # Repository and package architecture
 
-TAORYX is one repository with two deliberately different extension surfaces:
-the small, provider-neutral **core** and independently installable **model
-plug-ins**. The historical manual, semantic parser, generic simulation
-contracts, and plug-in host belong to core. A vehicle's plant, source data,
-controls, composition endpoints, and focused evidence belong to the package
-that advertises that vehicle.
+TAORYX is one repository with three deliberately different extension surfaces:
+the standalone provider-neutral **trajectory contracts**, the language/runtime
+**core**, and independently installable **model plug-ins**. The historical
+manual, semantic parser, generic simulation contracts, and plug-in host belong
+to core. A vehicle's plant, source data, controls, composition endpoints, and
+focused evidence belong to the package that advertises that vehicle.
 
 This page is the top-level map. Use
 [vehicle plug-in isolation](vehicle-plugin-isolation.md) for the detailed
 ownership and verification evidence, and
-[authoring a vehicle plug-in](vehicle-plugin-authoring.md) for the contributor
+[authoring a vehicle plug-in](../developer/vehicle-plugin-authoring.md) for the contributor
 workflow. The provider-neutral capability product shared by every direct
 package is the
-[Vehicle Composition Advertisement API](vehicle-composition-advertisement-api.md).
+[Vehicle Composition Advertisement API](../api/vehicle-composition-advertisement-api.md).
 
 ## Target topology
 
 ```text
+          taoryx-trajectory-contracts wheel
+     discovery + batch + optional streaming + ECEF
+                               ▲
+                               │ TAORYX is one provider through an adapter
+                               │
                   taoryx core wheel
-  language + simulation + typed contracts + discovery + generic execution
+ language + simulation + TAORYX-native schemas + discovery + generic execution
                                |
                                | declares host API / loads entry points
                                v
@@ -55,6 +60,7 @@ same selected scope.
 
 | Location | Owns | Must not own |
 | --- | --- | --- |
+| `packages/taoryx-trajectory-contracts/` | versioned provider-neutral composition, batch, streaming-control, ECEF, and conformance interfaces | TAORYX language/runtime imports, vehicle data, or model execution |
 | `src/taoryx/` | language/toolchain, simulation engine, generic schemas, discovery, generic composition/compiler/session contracts | a package-specific plant, source deck, vehicle endpoint, or family test fixture |
 | `packages/taoryx-*/` | one independently installable contribution, its source/data/assets, adapter, provider, controls, focused tests, and package README | hidden imports of sibling model packages or the compatibility aggregate |
 | `packages/taoryx-reference-models/` | the explicit compatibility aggregate and adapters for older catalogue consumers | new vehicle ownership or the normal authoring path |
@@ -178,7 +184,8 @@ installed-wheel proof instead.
 
 - [Installable model and provider plug-ins](plugins.md)
 - [Vehicle plug-in isolation](vehicle-plugin-isolation.md)
-- [Vehicle plug-in authoring](vehicle-plugin-authoring.md)
-- [Mission Composition Provider API](mission-composition-provider-api.md)
-- [Model-to-mission authoring and automation](model-authoring-automation.md)
+- [Vehicle plug-in authoring](../developer/vehicle-plugin-authoring.md)
+- [Mission Composition Provider API](../api/mission-composition-provider-api.md)
+- [Standalone trajectory contracts](../api/trajectory-contracts.md)
+- [Model-to-mission authoring and automation](../developer/model-authoring-automation.md)
 - [Installation and package profiles](../INSTALLATION.md)

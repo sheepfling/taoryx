@@ -1213,7 +1213,7 @@ def test_model_card_advertises_developer_scope_and_extension_guides() -> None:
 
     assert "#### Provider scope" in markdown
     assert "Create and integrate provenance-preserving, low-fidelity SAM/interceptor surrogates" in markdown
-    assert "[Parametric interceptor developer guide](docs/architecture/parametric-interceptor-models.md)" in markdown
+    assert "[Parametric interceptor developer guide](packages/taoryx-parametric-interceptors/docs/model-architecture.md)" in markdown
     assert "[Profile quickstart and examples](packages/taoryx-parametric-interceptors/README.md)" in markdown
     assert "Add a new model from Python, flat YAML, or a provenance-bearing catalogue record" in markdown
     ####

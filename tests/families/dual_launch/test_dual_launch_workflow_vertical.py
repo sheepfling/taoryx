@@ -315,6 +315,7 @@ def test_dual_launch_source_tree_needs_neither_aggregate_nor_simple_aero() -> No
         str(root / path)
         for path in (
             "src",
+            "packages/taoryx-trajectory-contracts/src",
             "packages/taoryx-dual-launch/src",
             "packages/taoryx-reference-models/src",
             "packages/taoryx-simple-aero/src",
@@ -331,7 +332,13 @@ sys.path[:] = [
     for entry in sys.path
     if not any(
         part.startswith("taoryx-")
-        and part not in {"taoryx-dual-launch", "taoryx-reference-models", "taoryx-simple-aero"}
+        and part
+        not in {
+            "taoryx-trajectory-contracts",
+            "taoryx-dual-launch",
+            "taoryx-reference-models",
+            "taoryx-simple-aero",
+        }
         for part in Path(entry).parts
     )
 ]

@@ -407,6 +407,54 @@ class RegistryMissionCompositionProvider:
         return prepared
         ####
 
+    def build_model_default_configuration(
+        self,
+        model_id: str,
+        *,
+        configuration_id: str,
+    ) -> TrajectoryConfigurationInstance:
+        """Return one checked-in runnable default without inventing schema defaults.
+
+        Canonical vehicle families use their existing exact batch witnesses.
+        The two package-owned workflows retain their own configuration builders.
+        This keeps the user-facing default path traceable to the same evidence
+        that proves the advertised native binding, while leaving authoring
+        schemas free to require real mission choices.
+        """
+
+        self.model(model_id)
+        if model_id == "simple_aero":
+            from .simple_aero_mission_composition import build_simple_aero_example_configuration
+
+            configuration = build_simple_aero_example_configuration(schema=self.get_model_schema(model_id))
+        elif model_id == "dual_launch_glider":
+            from .dual_launch_mission_composition import build_dual_launch_example_configuration
+
+            configuration = build_dual_launch_example_configuration(schema=self.get_model_schema(model_id))
+        else:
+            from ..vehicle_catalog_resources import vehicle_catalog_resource
+            from ..vehicle_composition import load_vehicle_composition_request
+            from ..vehicle_execution_witnesses import load_vehicle_execution_witness_catalog
+            from .native_mission_composition import configuration_instance_from_vehicle_request
+
+            configuration = None
+            witnesses = load_vehicle_execution_witness_catalog(plugins=self._plugin_catalog).witnesses
+            for witness in witnesses:
+                if witness.operation != "batch":
+                    continue
+                request = load_vehicle_composition_request(
+                    vehicle_catalog_resource(witness.composition, plugins=self._plugin_catalog)
+                )
+                if request.vehicle == model_id:
+                    configuration = configuration_instance_from_vehicle_request(self, request)
+                    break
+            if configuration is None:
+                raise ValueError(
+                    f"model {model_id!r} has no checked-in batch execution witness for a runnable default"
+                )
+        return configuration.model_copy(update={"configuration_id": configuration_id})
+        ####
+
     def open_session_episode(
         self,
         prepared: PreparedTrajectoryConfiguration,

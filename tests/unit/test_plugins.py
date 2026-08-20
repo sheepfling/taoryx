@@ -1382,7 +1382,9 @@ def test_disabling_reachability_removes_only_reachability_owned_overlays() -> No
 def test_core_source_tree_imports_without_any_model_distribution() -> None:
     root = Path(__file__).resolve().parents[2]
     environment = os.environ.copy()
-    environment["PYTHONPATH"] = str(root / "src")
+    environment["PYTHONPATH"] = os.pathsep.join(
+        (str(root / "src"), str(root / "packages/taoryx-trajectory-contracts/src"))
+    )
     script = """
 import json
 import io
@@ -1396,7 +1398,10 @@ from pathlib import Path
 sys.path[:] = [
     entry
     for entry in sys.path
-    if not any(part.startswith("taoryx-") for part in Path(entry).parts)
+    if not any(
+        part.startswith("taoryx-") and part != "taoryx-trajectory-contracts"
+        for part in Path(entry).parts
+    )
 ]
 import taoryx
 import taoryx.plugins.discovery as plugin_discovery
@@ -1666,6 +1671,7 @@ def test_simple_aero_source_tree_imports_without_reference_models() -> None:
         str(root / path)
         for path in (
             "src",
+            "packages/taoryx-trajectory-contracts/src",
             "packages/taoryx-simple-aero/src",
             "packages/taoryx-reference-models/src",
         )
@@ -1681,7 +1687,7 @@ sys.path[:] = [
     for entry in sys.path
     if not any(
         part.startswith("taoryx-")
-        and part not in {"taoryx-simple-aero", "taoryx-reference-models"}
+        and part not in {"taoryx-trajectory-contracts", "taoryx-simple-aero", "taoryx-reference-models"}
         for part in Path(entry).parts
     )
 ]

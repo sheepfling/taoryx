@@ -83,7 +83,7 @@ separate source-table/direct-moment witness and does not inherit a physical
 surface-allocation claim from the X8.
 
 The complete, explicit run surface is documented in
-`docs/airbreathing-racetrack-fidelity-ladder.md` and exposed by
+`docs/verification/airbreathing-racetrack-fidelity-ladder.md` and exposed by
 `tools/build_airbreathing_racetrack_ladder.py`.
 
 The route phase index is:

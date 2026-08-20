@@ -7,7 +7,7 @@ common runtime, family-package, control, or evidence contracts.
 
 **Reprioritization:** The breadth work below follows the P1/P2 common
 compose-to-run airbreather slice in
-[authoring-runtime-composition-execution-roadmap.md](authoring-runtime-composition-execution-roadmap.md).
+[authoring-runtime-composition-roadmap.md](authoring-runtime-composition-roadmap.md).
 New-family work may maintain evidence and conformance witnesses in the
 meantime, but it must not create another bespoke scenario-to-run path.
 
@@ -161,7 +161,7 @@ may vary semantic parameters and segment/controller decisions, but it must not
 edit raw table cells or bypass variant qualification.
 
 The sensor work must use the [EOM timing and committed-truth
-contract](../architecture/eom-timing-contract.md). IMU, estimator, and
+contract](../api/eom-timing-contract.md). IMU, estimator, and
 multi-rate sensor development cannot begin by interpolating published vehicle
 states or exposing RK solver stages as truth.
 

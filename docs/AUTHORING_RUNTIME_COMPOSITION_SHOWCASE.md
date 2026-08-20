@@ -32,7 +32,7 @@ Simulation Runtime, and Mission Composition.
 This guide is a practical index to the checked-in examples and evidence. It
 does not promote a nominal run to a qualification claim. The words
 `declared`, `composable`, `adapter_bound`, `factory_bound`, `executable`, `evaluated`, and
-`qualified` remain distinct; see the [Authoring → Runtime → Composition roadmap](plan/authoring-runtime-composition-execution-roadmap.md).
+`qualified` remain distinct; see the [Authoring → Runtime → Composition roadmap](plan/authoring-runtime-composition-roadmap.md).
 
 ## The three layers in one view
 
@@ -120,7 +120,7 @@ The runtime records pre-step and post-step truth, force/load evaluation state,
 control activation time, segment and event transition pairs, and sensor
 captures only at committed truth boundaries.
 
-Read the [EOM timing contract](architecture/eom-timing-contract.md),
+Read the [EOM timing contract](api/eom-timing-contract.md),
 [interactive engine guide](architecture/interactive-engine.md), and
 [sensor orchestration plan](plan/sensor-measurement-orchestration.md) before
 adding a sensor, estimator, or RL observation.
@@ -200,7 +200,7 @@ controller settings. It also lists the exact selected batch/episode endpoints
 and emits only commands supported by that tier; a batch-only or planned tier is
 not handed a misleading interactive or run command.
 
-Read the [public value-space contract](architecture/public-value-spaces.md)
+Read the [public value-space contract](api/public-value-spaces.md)
 before building a UI, optimizer, policy, or controller against these fields.
 It distinguishes periodic values such as heading from their linear rates,
 quaternions from componentwise vectors, bounded controls from generic scalar
@@ -345,9 +345,9 @@ channel availability. It is a typed-envelope projection only—never a
 recalculation of trajectory physics, a synthetic terminal result, or a
 substitute for family telemetry.
 
-The [vehicle interface contract](architecture/vehicle-interface-contract.md)
+The [vehicle interface contract](api/vehicle-interface-contract.md)
 defines the common parameter, action, status, resource, and observation
-vocabulary. The [vehicle composition registry](architecture/vehicle-composition-registry.md)
+vocabulary. The [vehicle composition registry](api/vehicle-composition-registry.md)
 defines how a family publishes its capabilities and execution bindings.
 
 ## Showcase recipes by layer boundary

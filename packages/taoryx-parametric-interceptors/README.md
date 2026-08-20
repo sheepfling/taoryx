@@ -8,6 +8,12 @@ guidance/control kernel. Both tiers support selectable fixed-waypoint,
 constant-velocity target-track, and direct local-NEU lateral-acceleration
 missions in batch and through the standard Composition session API.
 
+Start with the [quickstart](docs/quickstart.md) for the shortest app-local or
+maintained-model path. The package-owned [model architecture guide](docs/model-architecture.md)
+documents evidence resolution, source-native channels, and the standard ECEF
+projection. Shared provider and control contracts live in the repository
+[API reference](../../docs/api/README.md).
+
 The shortest useful profile is plain Python and is also shaped like a YAML
 mapping:
 

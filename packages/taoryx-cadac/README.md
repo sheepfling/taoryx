@@ -14,6 +14,10 @@ API. A source case becomes executable only when an exact, caller-owned case
 binding is supplied to the corresponding CADAC runtime. There is no fallback to
 another vehicle or to a synthetic deck.
 
+Package-owned family, source, and control notes are collected in the
+[CADAC package documentation](docs/README.md). Shared host/provider contracts
+remain in the repository [API reference](../../docs/api/README.md).
+
 ## Install
 
 From this source checkout:
@@ -79,7 +83,7 @@ source checkout.
 
 For the source-backed variant contract, pseudo-6DoF boundary, and the focused
 authoring/test workflow for AIM5, ADS6 SRBM, ADS6 SAM, SRAAM6, and AGM6, see
-[CADAC missile tuning and reduced-order authoring](../../docs/cadac-missile-tuning.md).
+[CADAC missile tuning and reduced-order authoring](docs/cadac-missile-tuning.md).
 
 ### Vertical scope boundary
 

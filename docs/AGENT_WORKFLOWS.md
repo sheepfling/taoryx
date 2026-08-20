@@ -23,12 +23,12 @@ follow the [model integration workflow](plan/model-integration-workflow.md).
 Start with the integration record and source hashes; keep the immutable plant
 separate from Taoryx actuator, controller, mission, and RL overlays. This is
 the contributor-facing Tier 0–4 process for new model work.
-Use [Model-to-mission authoring and automation](architecture/model-authoring-automation.md)
+Use [Model-to-mission authoring and automation](developer/model-authoring-automation.md)
 to turn that advertisement into plain-value initialization, segments,
 waypoints, modes, and a registered no-manual-gain-search campaign.
 
 For sensors, estimators, seekers, or RL observations, also follow the
-[sensor plug-in architecture](architecture/sensor-plugin-api.md), the
+[sensor plug-in architecture](api/sensor-plugin-api.md), the
 [basic executable sensor examples](../examples/sensors/README.md), and the
 [sensor and measurement orchestration backlog](plan/sensor-measurement-orchestration.md).
 It defines the committed-truth boundary, measurement timing, multi-rate event
@@ -43,6 +43,12 @@ through the commands and artifacts used in this repository.
 
 For the consumer-facing entry point to provider discovery, typed setup, and
 variable-length mission sequences, read the [Mission Composition front door](MISSION_COMPOSITION.md).
+
+Before choosing an external provider/consumer integration or contributing a
+vehicle to the TAORYX host, read [Developer interface
+layers](developer/interface-layers.md). It separates the
+provider-neutral contract from the TAORYX-specific plug-in path and names the
+narrow validation loop for each.
 
 For the consumer or junior-engineer path through Simulation Runtime, read the
 [Simulation Runtime onboarding guide](SIMULATION_RUNTIME_ONBOARDING.md). It is the scenario
@@ -68,33 +74,36 @@ California–Hawaii variants, external time stepping, and the diagnostic ladder.
 
 | Task | Start here | Primary command/API |
 | --- | --- | --- |
+| Choose an external contract or internal plug-in path | [Developer interface layers](developer/interface-layers.md) | `python tools/dev.py interface-guide` |
+| Integrate a host or foreign trajectory provider | [Trajectory contracts](api/trajectory-contracts.md) | `BatchCompositionProvider`, optional `StreamingCompositionProvider`, `StandardEcefState` |
 | Validate grammar | [Grammar guide](grammar/README.md) | `taoryx-validate file.prb file.tbl` |
 | Add reusable segments | [Segmentation](architecture/declarative-segmentation.md) | `python tools/dev.py segment-lint` |
 | Apply typed scenario changes | [Scenario runtime](architecture/README.md) | `ScenarioCompiler`, `ScenarioRequest` |
 | Run a trajectory | [Runtime architecture](architecture/README.md) | `run_files(...)` or `LoadedProgram` |
 | Drive timesteps | [Interactive engine](architecture/interactive-engine.md) | `InteractiveSession.step(...)` |
 | Find and run Simulation Runtime scenarios | [Simulation Runtime onboarding](SIMULATION_RUNTIME_ONBOARDING.md) | `taoryx run ...` / `taoryx vehicle compose → preflight → lower → run` |
-| Build plots | [Telemetry](architecture/telemetry.md) | `RunArtifact`, `render_run_artifact_plots(...)` |
-| Add control above trim | [Controller stack](architecture/controller-stack.md), [Control contracts](architecture/control-contracts.md), and [LQR](extensions/lqr.md) | `TrimSpec`, `solve_trim`, controller/allocator |
-| Introduce data for a new model | [Model-to-mission automation](architecture/model-authoring-automation.md) and [Model integration workflow](plan/model-integration-workflow.md) | Mission Composition advertisement → `taoryx model plan` |
-| Assess all advertised model/control readiness | [Model-to-mission automation](architecture/model-authoring-automation.md) | `taoryx model assess --output build/model-assessment.json` |
-| Generate initialization, modes, and segments | [Model-to-mission automation](architecture/model-authoring-automation.md) | `taoryx model scaffold` → edit plain YAML → `taoryx model compile` |
+| Build plots | [Telemetry](api/telemetry.md) | `RunArtifact`, `render_run_artifact_plots(...)` |
+| Add control above trim | [Controller stack](architecture/controller-stack.md), [Control contracts](api/control-contracts.md), and [LQR](extensions/lqr.md) | `TrimSpec`, `solve_trim`, controller/allocator |
+| Introduce data for a new model | [Model-to-mission automation](developer/model-authoring-automation.md) and [Model integration workflow](plan/model-integration-workflow.md) | Mission Composition advertisement → `taoryx model plan` |
+| Assess all advertised model/control readiness | [Model-to-mission automation](developer/model-authoring-automation.md) | `taoryx model assess --output build/model-assessment.json` |
+| Generate initialization, modes, and segments | [Model-to-mission automation](developer/model-authoring-automation.md) | `taoryx model scaffold` → edit plain YAML → `taoryx model compile` |
 | Run automatic controller candidate tuning | [Generic controller tuning](architecture/generic-controller-tuning.md) | plug-in campaign registration → `taoryx model tune` |
-| Publish caller, provider, or common-tuned control for a new vehicle | [Vehicle plug-in authoring](architecture/vehicle-plugin-authoring.md) | authority profile → native lowering/readback; optional campaign registration |
-| Verify one mature vehicle endpoint vertically | [Model-to-mission automation](architecture/model-authoring-automation.md) | `taoryx vehicle endpoint-specs` → `taoryx vehicle verify <endpoint-id>` |
-| Validate an LQI candidate through native model controls | [Model-to-mission automation](architecture/model-authoring-automation.md) | `LocalNativeCoordinateLqiScreenConfig` → exact batch Composition screen for response-law/guidance coordinates; use physical wrench validation when allocation is declared |
+| Publish caller, provider, or common-tuned control for a new vehicle | [Vehicle plug-in authoring](developer/vehicle-plugin-authoring.md) | authority profile → native lowering/readback; optional campaign registration |
+| Verify one mature vehicle endpoint vertically | [Model-to-mission automation](developer/model-authoring-automation.md) | `taoryx vehicle endpoint-specs` → `taoryx vehicle verify <endpoint-id>` |
+| Validate an LQI candidate through native model controls | [Model-to-mission automation](developer/model-authoring-automation.md) | `LocalNativeCoordinateLqiScreenConfig` → exact batch Composition screen for response-law/guidance coordinates; use physical wrench validation when allocation is declared |
 | Add an airbreathing vehicle mission | [Mission-composition automation](plan/mission-composition-automation.md) | `compile_powered_fixed_wing_racetrack(...)` |
-| Add a vehicle or topology | [Vehicle plug-in authoring](architecture/vehicle-plugin-authoring.md) and [generic family integration playbook](plan/generic-family-integration-playbook.md) | `taoryx vehicle intake existing-family ...` or `taoryx vehicle intake new-topology ...` |
+| Add a vehicle or topology | [Vehicle plug-in authoring](developer/vehicle-plugin-authoring.md) and [generic family integration playbook](plan/generic-family-integration-playbook.md) | `taoryx vehicle intake existing-family ...` or `taoryx vehicle intake new-topology ...` |
 | Define or assess one vehicle fidelity tier | [Fidelity tiers and vehicle plug-in requirements](architecture/fidelity-data-requirements.md) | `python3 tools/validate_fidelity_readiness.py --vehicle <id> --tier all` |
 | Iterate on one runnable vehicle | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py test-vehicle <family>` |
 | Verify one physical vehicle plug-in | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py check-vehicle <family>` |
-| Check one TAORYX plug-in's universal Mission Composition contract | [Mission Composition Provider API](architecture/mission-composition-provider-api.md) | `python tools/dev.py check-plugin-contract <plugin>` |
+| Check one TAORYX plug-in's universal public trajectory contract | [Standalone trajectory contracts](api/trajectory-contracts.md) | `python tools/dev.py check-plugin-contract <plugin>` |
+| Discover the focused test/check commands for one plug-in | [Developer interface layers](developer/interface-layers.md) | `python tools/dev.py plugin-focus <plugin>` |
 | Validate catalogue declarations | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py vehicle-catalogue` |
-| Expose a parameter, control, status, or objective value | [Public value-space contract](architecture/public-value-spaces.md) | `taoryx vehicle topology-report` |
+| Expose a parameter, control, status, or objective value | [Public value-space contract](api/public-value-spaces.md) | `taoryx vehicle topology-report` |
 | Demonstrate the three layers | [Authoring → Runtime → Composition showcase guide](AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md) | `taoryx vehicle maturity-report` → `catalog` → `mission inspect`/`mission create`/`mission validate` → `preflight` → `run` |
-| Publish schema-driven Mission Composition | [Mission Composition Provider API](architecture/mission-composition-provider-api.md) | `list_models()` → `get_model_schema()` → `validate_configuration()` |
-| Execute a Mission Composition batch | [Mission Composition Provider API](architecture/mission-composition-provider-api.md) | `MissionCompositionRunRequest` → `MissionCompositionRunnerRegistry.run()` → trajectory or failure response |
-| Drive a Mission Composition episode | [Mission Composition Provider API](architecture/mission-composition-provider-api.md) | `MissionCompositionSessionManager.open()` → `inspect()` / `step()` / `reset()` → `close()` |
+| Publish schema-driven Mission Composition | [Mission Composition Provider API](api/mission-composition-provider-api.md) | `list_models()` → `get_model_schema()` → `validate_configuration()` |
+| Execute a Mission Composition batch | [Mission Composition Provider API](api/mission-composition-provider-api.md) | `MissionCompositionRunRequest` → `MissionCompositionRunnerRegistry.run()` → trajectory or failure response |
+| Drive a Mission Composition episode | [Mission Composition Provider API](api/mission-composition-provider-api.md) | `MissionCompositionSessionManager.open()` → `inspect()` / `step()` / `reset()` → `close()` |
 
 ### Mission Composition verification ladder
 
@@ -1034,9 +1043,9 @@ never individual rotor commands. Use
 `MissionCompositionSessionManager.switch_authority` only for profiles that
 advertise `explicit_bumpless`; inspect each observation's `control_authority`
 and each step's lowering evidence. See
-[Vehicle interface contract](architecture/vehicle-interface-contract.md#session-profile-negotiation-and-live-transfer)
+[Vehicle interface contract](api/vehicle-interface-contract.md#session-profile-negotiation-and-live-transfer)
 and
-[Model-to-mission automation](architecture/model-authoring-automation.md#select-a-streaming-control-profile).
+[Model-to-mission automation](developer/model-authoring-automation.md#select-a-streaming-control-profile).
 
 The low-fidelity conformance ladder uses that same route before promotion to
 the F-16: the ballistic fixture is explicit zero-action open loop; the

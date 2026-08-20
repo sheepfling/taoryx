@@ -82,6 +82,11 @@ def run_check(*, documentation: bool = False) -> list[Check]:
             required=distribution_name != "taoryx-reference-models",
         )
         for name, import_name, distribution_name in (
+            (
+                "Taoryx trajectory contracts",
+                "taoryx_trajectory_contracts",
+                "taoryx-trajectory-contracts",
+            ),
             ("Taoryx core", "taoryx", "taoryx"),
             ("Taoryx DAVE-ML plug-in", "taoryx_daveml", "taoryx-daveml"),
             ("Taoryx debug-model plug-in", "taoryx_debug_models", "taoryx-debug-models"),

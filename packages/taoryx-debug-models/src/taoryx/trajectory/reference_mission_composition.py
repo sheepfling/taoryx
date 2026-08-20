@@ -262,6 +262,48 @@ class ReferenceMissionCompositionProvider:
         return self._analytical.validate_configuration(configuration)
         ####
 
+    def build_model_default_configuration(
+        self,
+        model_id: str,
+        *,
+        configuration_id: str,
+    ) -> TrajectoryConfigurationInstance:
+        """Return a small deterministic example for either analytical fixture.
+
+        The values are onboarding inputs for exercising the interface.  They
+        do not represent a physical launch condition or a performance claim.
+        """
+
+        if model_id == _BALLISTIC_MODEL_ID:
+            return self.build_ballistic_configuration(
+                ReferenceBallisticLaunch(
+                    altitude_m=1_000.0,
+                    speed_m_s=150.0,
+                    heading_deg=45.0,
+                    flight_path_angle_deg=10.0,
+                ),
+                coast_durations_s=15.0,
+                configuration_id=configuration_id,
+            )
+        if model_id == _WAYPOINT_MODEL_ID:
+            return self.build_waypoint_course_configuration(
+                ReferenceWaypointCourseStart(
+                    altitude_m=1_000.0,
+                    speed_m_s=120.0,
+                    heading_deg=0.0,
+                ),
+                (
+                    ReferenceWaypoint(
+                        north_m=3_000.0,
+                        east_m=1_000.0,
+                        altitude_m=1_200.0,
+                    ),
+                ),
+                configuration_id=configuration_id,
+            )
+        raise KeyError(f"unknown analytical reference model {model_id!r}")
+        ####
+
     def open_session_episode(
         self,
         prepared: PreparedTrajectoryConfiguration,

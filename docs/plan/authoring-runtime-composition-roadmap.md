@@ -193,7 +193,7 @@ This is continuous work, not a feature tranche.
 truth, control, value-space, and artifact contracts. No layer-specific
 alternate result format is introduced. Public fields must declare their
 topology and operation rules as specified by the
-[public value-space contract](../architecture/public-value-spaces.md); a
+[public value-space contract](../api/public-value-spaces.md); a
 heading cannot silently be treated as a linear scalar merely because both are
 stored in degrees.
 
@@ -341,7 +341,7 @@ surface, telemetry consumer, or showcase has reliable hooks without claiming
 identical physics.
 
 Implement the resolved
-[vehicle interface contract](../architecture/vehicle-interface-contract.md):
+[vehicle interface contract](../api/vehicle-interface-contract.md):
 
 1. Declare bounded parameters by model, configuration, reset, segment, and
    step-action scope.

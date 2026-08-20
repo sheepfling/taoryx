@@ -673,6 +673,98 @@ def compile_model_authoring_draft(
     ####
 
 
+def model_default_configuration_id(model_id: str) -> str:
+    """Return the stable ID reserved for one provider-selected runnable default."""
+
+    if not model_id or model_id != model_id.strip():
+        raise ValueError("model_id must be non-empty and have no surrounding whitespace")
+    return f"{model_id}-default"
+    ####
+
+
+def build_model_default_configuration(
+    providers: ConfigurableTrajectoryProviderRegistry,
+    provider_id: str,
+    model_id: str,
+) -> TrajectoryConfigurationInstance:
+    """Build one deterministic, prepared-valid provider-selected default.
+
+    A runnable default is deliberately separate from schema defaults: an
+    authoring schema may correctly require a caller to choose a launch
+    condition or a mission endpoint. Providers with such choices implement
+    ``build_model_default_configuration(model_id, configuration_id=...)`` and
+    return a checked-in, representative configuration. Providers whose
+    scaffold has no unresolved inputs receive the equivalent generic path.
+
+    The returned configuration is safe for a host to prepare and execute, but
+    it is neither a physical operating-condition assertion nor a qualification
+    result. The common adapter advertises this exact helper as an optional
+    external default-configuration capability.
+    """
+
+    provider = providers.provider(provider_id)
+    providers.model(provider_id, model_id)
+    configuration_id = model_default_configuration_id(model_id)
+    native_builder = getattr(provider, "build_model_default_configuration", None)
+    if callable(native_builder):
+        try:
+            configuration = native_builder(model_id, configuration_id=configuration_id)
+        except Exception as error:  # Preserve a concise generic boundary for plug-in authors.
+            raise ModelAuthoringError(
+                "default-configuration-build-failed",
+                f"provider-selected default construction failed: {type(error).__name__}: {error}",
+                path="model_id",
+            ) from error
+    else:
+        try:
+            draft = scaffold_model_authoring_draft(
+                providers,
+                provider_id,
+                model_id,
+                draft_id=f"{configuration_id}-draft",
+                configuration_id=configuration_id,
+            )
+            configuration = compile_model_authoring_draft(providers, draft).configuration
+        except Exception as error:  # Explain how a plug-in supplies non-invented mission choices.
+            raise ModelAuthoringError(
+                "default-configuration-unavailable",
+                (
+                    "the generic scaffold has unresolved or invalid values; implement "
+                    "build_model_default_configuration(model_id, configuration_id=...) "
+                    "with a provider-selected checked-in runnable default"
+                ),
+                path="model_id",
+            ) from error
+    if not isinstance(configuration, TrajectoryConfigurationInstance):
+        raise ModelAuthoringError(
+            "invalid-default-configuration",
+            "provider-selected default construction must return TrajectoryConfigurationInstance",
+            path="model_id",
+        )
+    if configuration.configuration_id != configuration_id:
+        raise ModelAuthoringError(
+            "default-configuration-id-mismatch",
+            f"expected stable configuration ID {configuration_id!r}, received {configuration.configuration_id!r}",
+            path="configuration_id",
+        )
+    if configuration.model_id != model_id:
+        raise ModelAuthoringError(
+            "default-configuration-model-mismatch",
+            f"expected model {model_id!r}, received {configuration.model_id!r}",
+            path="model_id",
+        )
+    try:
+        providers.validate_configuration(provider_id, configuration)
+    except Exception as error:  # A published default is a normal configuration, never a bypass.
+        raise ModelAuthoringError(
+            "default-configuration-validation-failed",
+            f"provider-selected default does not validate: {type(error).__name__}: {error}",
+            path="configuration",
+        ) from error
+    return configuration
+    ####
+
+
 def run_prepared_mission_composition(
     providers: ConfigurableTrajectoryProviderRegistry,
     provider_id: str,

@@ -113,6 +113,7 @@ python -m tools.dev lint
 python -m tools.dev typecheck
 python -m tools.dev test
 python -m tools.dev test-views
+python -m tools.dev docs-layout
 python -m tools.dev manual
 python -m tools.dev check
 ```

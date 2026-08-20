@@ -161,6 +161,11 @@ if TYPE_CHECKING:
         contract_probe_configuration_schema,
         contract_probe_model_metadata,
     )
+    from .contracts_adapter import (
+        TaoryxTrajectoryContractsAdapter,
+        TaoryxTrajectoryContractsAdapterError,
+        composition_configuration_from_taoryx,
+    )
     from .native_mission_composition import (
         build_registry_mission_composition_runner,
         compile_prepared_vehicle_composition,
@@ -220,6 +225,14 @@ if TYPE_CHECKING:
 def __getattr__(name: str) -> object:
     """Load native adapters lazily to avoid runtime/family import cycles."""
 
+    if name in {
+        "TaoryxTrajectoryContractsAdapter",
+        "TaoryxTrajectoryContractsAdapterError",
+        "composition_configuration_from_taoryx",
+    }:
+        from . import contracts_adapter
+
+        return getattr(contracts_adapter, name)
     if name in {
         "CONTRACT_PROBE_MODEL_ID",
         "CONTRACT_PROBE_PROVIDER_ID",
@@ -452,6 +465,8 @@ __all__ = [
     "TrajectorySample",
     "TrajectorySegmentResult",
     "TrajectoryStateSnapshot",
+    "TaoryxTrajectoryContractsAdapter",
+    "TaoryxTrajectoryContractsAdapterError",
     "StandardEcefState",
     "audit_provider_advertisement",
     "build_trajectory_composition_advertisement",
@@ -461,6 +476,7 @@ __all__ = [
     "build_simple_aero_template_configuration",
     "build_registry_mission_composition_runner",
     "compile_prepared_vehicle_composition",
+    "composition_configuration_from_taoryx",
     "configuration_instance_from_vehicle_request",
     "build_contract_probe_configuration",
     "contract_probe_configuration_schema",

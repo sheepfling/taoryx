@@ -14,9 +14,11 @@ from taoryx.model_authoring import (
     build_model_authoring_plan,
     build_model_automation_assessment,
     build_model_automation_readiness_summary,
+    build_model_default_configuration,
     compile_model_authoring_draft,
     custom_sequence,
     load_model_authoring_draft,
+    model_default_configuration_id,
     resolve_model_authoring_selection,
     run_prepared_mission_composition,
     scaffold_model_authoring_draft,
@@ -79,6 +81,14 @@ def test_every_advertised_model_has_a_common_plan_and_plain_value_scaffold(
             assert draft.model_id == model.id
             assert draft.provider_id == provider.metadata.id
             assert isinstance(draft.values, dict)
+            runnable_default = build_model_default_configuration(
+                providers,
+                provider.metadata.id,
+                model.id,
+            )
+            default_prepared = providers.validate_configuration(provider.metadata.id, runnable_default)
+            assert runnable_default.configuration_id == model_default_configuration_id(model.id)
+            assert default_prepared.configuration == runnable_default
             if not draft.unresolved_inputs:
                 prepared = compile_model_authoring_draft(providers, draft)
                 assert prepared.configuration.model_id == model.id

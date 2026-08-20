@@ -135,7 +135,7 @@ class ContractProbeMissionCompositionProvider:
                     PresentationLinkMetadata(
                         relation="support",
                         label="Structured failure contract",
-                        uri="docs/architecture/mission-composition-provider-api.md",
+                        uri="docs/api/mission-composition-provider-api.md",
                         media_type="text/markdown",
                     ),
                 ),
@@ -186,6 +186,21 @@ class ContractProbeMissionCompositionProvider:
         prepared = validate_configuration_instance(self._schema, configuration)
         self._validate_advertised_selection(configuration, operation="validate")
         return prepared
+        ####
+
+    def build_model_default_configuration(
+        self,
+        model_id: str,
+        *,
+        configuration_id: str,
+    ) -> TrajectoryConfigurationInstance:
+        """Return the deterministic medium-fidelity probe onboarding case."""
+
+        if model_id != CONTRACT_PROBE_MODEL_ID:
+            raise KeyError(f"unknown contract-probe model {model_id!r}")
+        return build_contract_probe_configuration(self).model_copy(
+            update={"configuration_id": configuration_id}
+        )
         ####
 
     def open_session_episode(
@@ -715,7 +730,7 @@ def contract_probe_model_metadata(schema: TrajectoryConfigurationSchema | None =
         source_refs=(
             "src/taoryx/trajectory/configuration_contract.py",
             "src/taoryx/trajectory/execution_contract.py",
-            "docs/architecture/mission-composition-provider-api.md",
+            "docs/api/mission-composition-provider-api.md",
         ),
         provenance="synthetic successor-side full-contract witness",
         claim_boundary="Must never be presented as a physical vehicle, qualified model, or mission-analysis result.",

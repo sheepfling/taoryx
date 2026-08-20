@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 
 import pytest
+from taoryx_trajectory_contracts import StandardEcefState as PublicStandardEcefState
 
 from taoryx.contracts import Frame, FrameVector3, Vector3
 from taoryx.modes import DynamicsMode, Kinematic6DofState, Quaternion
@@ -18,7 +19,12 @@ from taoryx.trajectory.execution_contract import (
 )
 from taoryx.trajectory.providers import SessionState, TrajectoryResult
 from taoryx.trajectory.session_contract import MissionCompositionSessionObservation
-from taoryx.trajectory.standard_output import project_standard_ecef_samples
+from taoryx.trajectory.standard_output import StandardEcefState, project_standard_ecef_samples
+
+
+def test_standard_ecef_type_is_shared_with_the_standalone_contract_package() -> None:
+    assert StandardEcefState is PublicStandardEcefState
+    ####
 
 
 def test_geodetic_and_local_samples_project_to_explicit_wgs84_ecef() -> None:

@@ -26,6 +26,17 @@ control. The client consumes the provider's typed publication; it must not
 import a vehicle-specific dynamics class, guess a control from its spelling,
 or infer availability from a fidelity label.
 
+For a host or foreign trajectory provider that should not import the TAORYX
+runtime, use the separately installable
+[Trajectory contracts](api/trajectory-contracts.md) package instead.
+TAORYX exposes the same discovery, batch, streaming-control, and standard ECEF
+minimum through its adapter; this guide documents the richer TAORYX-native
+authoring and execution surface behind that boundary.
+
+For the role-first distinction between that external seam and the internal
+TAORYX vehicle-plug-in path, see [Developer interface
+layers](developer/interface-layers.md).
+
 ```text
 discover models and capabilities (no plant execution)
     -> choose model / realization / fidelity / operation
@@ -80,13 +91,13 @@ authentication, reconnect, and safety policy. In particular, a held action for
 `duration_s` is simulation semantics, not a transport-level deadman policy.
 
 For the complete schema reference, see the
-[Mission Composition Provider API](architecture/mission-composition-provider-api.md).
+[Mission Composition Provider API](api/mission-composition-provider-api.md).
 For the standalone capability contract that another trajectory backend can
 publish without using the Taoryx runtime, see the
-[Vehicle Composition Advertisement API](architecture/vehicle-composition-advertisement-api.md).
+[Vehicle Composition Advertisement API](api/vehicle-composition-advertisement-api.md).
 For the authority, lowering, status, and claim-boundary rules that every
 consumer must preserve, see the
-[Vehicle Interface Contract](architecture/vehicle-interface-contract.md).
+[Vehicle Interface Contract](api/vehicle-interface-contract.md).
 
 ## Start with discovery and configuration
 
@@ -123,7 +134,7 @@ authorities selected by the aggregate catalog. It advertises all nine resolved
 vehicle families, the `simple_aero` trajectory workflow, and the dual-launch
 glider family. New plug-ins should instead use a focused package-owned provider
 and the catalog-scoped host documented in
-[Vehicle plug-in authoring](architecture/vehicle-plugin-authoring.md). A model
+[Vehicle plug-in authoring](developer/vehicle-plugin-authoring.md). A model
 or realization may remain discoverable with explicit blockers; discovery is
 never a promise that every mission or fidelity is executable:
 
@@ -158,7 +169,7 @@ taoryx model compile mission.yaml --output prepared.json
 
 Controlled plug-ins may also register model-owned inputs for the common
 automatic-tuning runner exposed by `taoryx model tune`. See
-[Model-to-mission authoring and automation](architecture/model-authoring-automation.md)
+[Model-to-mission authoring and automation](developer/model-authoring-automation.md)
 for the host/plug-in boundary and the concise Python API.
 
 ## Common model metadata
@@ -369,7 +380,7 @@ operation from an existing native runtime binding, while
 dispatch a runtime merely because a model has some native runnable operation.
 
 The complete contract is in the
-[Mission Composition Provider API](architecture/mission-composition-provider-api.md).
+[Mission Composition Provider API](api/mission-composition-provider-api.md).
 
 ## Audit every advertisement
 
@@ -696,9 +707,9 @@ realization. A generic front end should therefore render the profile selected
 by the session descriptor, not promote rotor inputs because the family is a
 quadcopter.
 
-See [the Hummingbird profile reference](architecture/vehicle-interface-contract.md#hummingbird-quadcopter-streaming-profiles)
+See [the Hummingbird profile reference](api/vehicle-interface-contract.md#hummingbird-quadcopter-streaming-profiles)
 for exact channel units and bounds, and
-[select a streaming control profile](architecture/model-authoring-automation.md#select-a-streaming-control-profile)
+[select a streaming control profile](developer/model-authoring-automation.md#select-a-streaming-control-profile)
 for a Python session example.
 
 ## Run the checked-in example

@@ -154,6 +154,24 @@ class DualLaunchMissionCompositionProvider:
         return prepared
         ####
 
+    def build_model_default_configuration(
+        self,
+        model_id: str,
+        *,
+        configuration_id: str,
+    ) -> TrajectoryConfigurationInstance:
+        """Return the package-owned air-release onboarding configuration."""
+
+        self.model(model_id)
+        from taoryx.trajectory.dual_launch_mission_composition import (
+            build_dual_launch_example_configuration,
+        )
+
+        return build_dual_launch_example_configuration(schema=self._schema).model_copy(
+            update={"configuration_id": configuration_id}
+        )
+        ####
+
     def build_runner(self) -> MissionCompositionRunnerRegistry:
         """Register only the declared point-mass batch executor."""
 

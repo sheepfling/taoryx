@@ -15,7 +15,7 @@ The implementation-level sequence for resolving, composing, stepping,
 validating, and visualizing successor-side scenarios is maintained in
 [`composable-scenario-runtime.md`](composable-scenario-runtime.md).
 The active cross-layer priority and its compose-to-run delivery gates are
-maintained in [`authoring-runtime-composition-execution-roadmap.md`](authoring-runtime-composition-execution-roadmap.md).
+maintained in [`authoring-runtime-composition-roadmap.md`](authoring-runtime-composition-roadmap.md).
 Checkpoint/restart is a release-level product goal tracked in
 [`checkpoint-restart.md`](checkpoint-restart.md).
 

@@ -15,7 +15,11 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.12",
 ]
-dependencies = ["pydantic>=2.8", "PyYAML>=6.0"]
+dependencies = [
+  "pydantic>=2.8",
+  "PyYAML>=6.0",
+  "taoryx-trajectory-contracts>=0.1.0a0,<0.2",
+]
 
 [project.scripts]
 taoryx = "taoryx.runtime.cli:main"
@@ -57,6 +61,7 @@ taoryx = ["data/**/*.yaml"]
 [tool.pytest.ini_options]
 pythonpath = [
   "src",
+  "packages/taoryx-trajectory-contracts/src",
   "packages/taoryx-daveml/src",
   "packages/taoryx-cadac/src",
   "packages/taoryx-parametric-interceptors/src",
@@ -126,6 +131,7 @@ typeCheckingMode = "basic"
 python_version = "3.12"
 files = [
   "src/taoryx",
+  "packages/taoryx-trajectory-contracts/src",
   "packages/taoryx-daveml/src",
   "packages/taoryx-cadac/src",
   "packages/taoryx-parametric-interceptors/src",
@@ -150,6 +156,7 @@ namespace_packages = true
 explicit_package_bases = true
 mypy_path = [
   "src",
+  "packages/taoryx-trajectory-contracts/src",
   "packages/taoryx-daveml/src",
   "packages/taoryx-cadac/src",
   "packages/taoryx-parametric-interceptors/src",

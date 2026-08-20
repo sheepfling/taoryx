@@ -7,7 +7,7 @@ TAOS behavior.
 
 ## Current extensions
 
-- [Rigid-body 6-DOF](rigid-body-6dof.md): quaternion attitude, body rates,
+- [Rigid-body 6-DOF](../architecture/rigid-body-6dof.md): quaternion attitude, body rates,
   force/moment dynamics, mass, and thermal state.
 - [Thermal entry](thermal-entry.md): heat-rate and heat-load limits used by
   entry guidance.

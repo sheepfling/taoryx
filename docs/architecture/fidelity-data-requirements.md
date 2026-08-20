@@ -19,7 +19,7 @@ different claims and must remain different readiness results.
 
 Start here when adding a family to a plug-in. For package layout, discovery,
 factories, and control-profile authoring, use
-[Authoring a vehicle plug-in](vehicle-plugin-authoring.md). For the underlying
+[Authoring a vehicle plug-in](../developer/vehicle-plugin-authoring.md). For the underlying
 equations-of-motion ladder and the evidence/promotion sequence, use
 [Dynamics fidelity ladder](dynamics-fidelity-ladder.md) and the
 [fidelity-first integration program](../plan/fidelity-first-integration-program.md).

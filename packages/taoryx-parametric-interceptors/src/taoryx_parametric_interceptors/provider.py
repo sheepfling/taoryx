@@ -45,6 +45,7 @@ from taoryx.trajectory.configuration_contract import (
     TrajectoryReferenceFrameMetadata,
     TrajectoryTelemetryGroupMetadata,
     ValuePresentationMetadata,
+    build_trajectory_composition_advertisement,
     validate_configuration_instance,
 )
 from taoryx.trajectory.execution_contract import (
@@ -329,7 +330,7 @@ class ParametricInterceptorMissionCompositionProvider:
                     PresentationLinkMetadata(
                         relation="documentation",
                         label="Parametric interceptor developer guide",
-                        uri="docs/architecture/parametric-interceptor-models.md",
+                        uri="packages/taoryx-parametric-interceptors/docs/model-architecture.md",
                         media_type="text/markdown",
                     ),
                     PresentationLinkMetadata(
@@ -669,6 +670,17 @@ class ParametricInterceptorMissionCompositionProvider:
             startup_authority_profile_id=startup_authority_profile_id,
             root=ConfigurationGroupValue(values={name: ConfigurationParameterValue(value=value, unit=_parameter_unit(name)) for name, value in values.items()}),
         )
+        ####
+
+    def build_model_default_configuration(
+        self,
+        model_id: str,
+        *,
+        configuration_id: str,
+    ) -> TrajectoryConfigurationInstance:
+        """Return the resolved profile's deterministic waypoint-intercept example."""
+
+        return self.configuration(model_id, configuration_id=configuration_id)
         ####
 
     def configuration_from_mapping(
@@ -2177,6 +2189,49 @@ def _model_metadata(
         separators=(",", ":"),
     )
     display_identity = profile.variant_basis or f"{profile.interceptor_id} {profile.variant}"
+    capabilities = TrajectoryModelCapabilities(
+        initialization_modes=(
+            "local_ned_launch",
+            "local_ned_launch_and_target_track",
+            "local_ned_launch_and_direct_acceleration",
+        ),
+        segment_types=(
+            "boost",
+            "waypoint_guidance",
+            "target_track_guidance",
+            "target_track_unavailable",
+            "direct_lateral_acceleration_control",
+        ),
+        termination_modes=("duration", "waypoint_capture", "target_intercept", "ground_impact"),
+        operations=("discover", "validate", "batch", "step"),
+    )
+    fidelity_transitions = (
+        TrajectoryFidelityTransition(
+            from_fidelity=POINT_MASS_FIDELITY_ID,
+            to_fidelity=PSEUDO6_FIDELITY_ID,
+            direction="step_up",
+            status="available",
+            automatic=False,
+            selection_policy="explicit_upgrade_only",
+            requirements=("prepare a new batch configuration with the pseudo-6DOF fidelity",),
+            state_transfer="shared launch and waypoint configuration; a new run initializes attitude from launch velocity",
+            claim_boundary="No live in-run promotion or rigid-body state reconstruction is claimed.",
+        ),
+        TrajectoryFidelityTransition(
+            from_fidelity=PSEUDO6_FIDELITY_ID,
+            to_fidelity=POINT_MASS_FIDELITY_ID,
+            direction="step_down",
+            status="available",
+            automatic=False,
+            selection_policy="exact_only",
+            requirements=("prepare a new batch configuration with the point-mass fidelity",),
+            state_transfer=(
+                "shared launch and waypoint configuration; attitude and IMU state are dropped, and a new "
+                "translation-sensor history starts with the point-mass run"
+            ),
+            claim_boundary="No live in-run lowering or cross-fidelity estimator-state transfer is claimed.",
+        ),
+    )
     return TrajectoryModelMetadata(
         id=profile.model_id,
         name=f"{display_identity} Parametric Interceptor",
@@ -2681,21 +2736,14 @@ def _model_metadata(
         execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch", "step"),
         common_runner_operations=("batch", "step"),
-        capabilities=TrajectoryModelCapabilities(
-            initialization_modes=(
-                "local_ned_launch",
-                "local_ned_launch_and_target_track",
-                "local_ned_launch_and_direct_acceleration",
-            ),
-            segment_types=(
-                "boost",
-                "waypoint_guidance",
-                "target_track_guidance",
-                "target_track_unavailable",
-                "direct_lateral_acceleration_control",
-            ),
-            termination_modes=("duration", "waypoint_capture", "target_intercept", "ground_impact"),
-            operations=("discover", "validate", "batch", "step"),
+        capabilities=capabilities,
+        composition_advertisement=build_trajectory_composition_advertisement(
+            capabilities=capabilities,
+            realizations=(point_mass_realization, pseudo6_realization),
+            mission_templates=(mission, target_track_mission, direct_acceleration_mission),
+            deployments=(),
+            output_schema=output,
+            fidelity_transitions=fidelity_transitions,
         ),
         realizations=(point_mass_realization, pseudo6_realization),
         mission_templates=(mission, target_track_mission, direct_acceleration_mission),
@@ -2809,33 +2857,7 @@ def _model_metadata(
                 claim_boundary=("Reduced-order attitude and body-rate response with selected registered sensor projection; not rigid-body 6-DOF."),
             ),
         ),
-        fidelity_transitions=(
-            TrajectoryFidelityTransition(
-                from_fidelity=POINT_MASS_FIDELITY_ID,
-                to_fidelity=PSEUDO6_FIDELITY_ID,
-                direction="step_up",
-                status="available",
-                automatic=False,
-                selection_policy="explicit_upgrade_only",
-                requirements=("prepare a new batch configuration with the pseudo-6DOF fidelity",),
-                state_transfer="shared launch and waypoint configuration; a new run initializes attitude from launch velocity",
-                claim_boundary="No live in-run promotion or rigid-body state reconstruction is claimed.",
-            ),
-            TrajectoryFidelityTransition(
-                from_fidelity=PSEUDO6_FIDELITY_ID,
-                to_fidelity=POINT_MASS_FIDELITY_ID,
-                direction="step_down",
-                status="available",
-                automatic=False,
-                selection_policy="exact_only",
-                requirements=("prepare a new batch configuration with the point-mass fidelity",),
-                state_transfer=(
-                    "shared launch and waypoint configuration; attitude and IMU state are dropped, and a new "
-                    "translation-sensor history starts with the point-mass run"
-                ),
-                claim_boundary="No live in-run lowering or cross-fidelity estimator-state transfer is claimed.",
-            ),
-        ),
+        fidelity_transitions=fidelity_transitions,
         source_refs=profile.source_record_ids,
         provenance=f"resolved profile {profile.fingerprint}",
         claim_boundary=(
@@ -5005,6 +5027,7 @@ def _trajectory_result(
             time_s=run.samples[index].time_s,
             values={channel_id: _sample_value(run.samples[index], channel_id) for channel_id in selected_ids},
             segment_instance_id="intercept-01",
+            standard_ecef=run.samples[index].standard_ecef,
         )
         for index in indexes
     )
