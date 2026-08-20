@@ -28,7 +28,7 @@ def _provider(tmp_path: Path) -> CadacMagsixMissionCompositionProvider:
 def test_magsix_provider_exposes_t1_runtime_and_t2_validation(tmp_path: Path) -> None:
     model = _provider(tmp_path).list_models()[0]
     assert model.id == MAGSIX_MODEL_ID
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert tuple(item.id for item in model.fidelities) == (MAGSIX_TRAJECTORY_FIDELITY_ID, MAGSIX_ATTITUDE_FIDELITY_ID)
     assert model.realizations[0].status == "available"
     assert model.realizations[1].status == "blocked"

@@ -356,8 +356,8 @@ def test_hl20_lqi_screen_runs_through_the_public_composition_path(
     execution = cast(dict[str, object], plan["execution_advertisement"])
     assert [item["id"] for item in campaigns] == ["hl20-source-subsonic-direct-wrench-lqi-v1"]
     assert execution["status"] == "runnable"
-    assert execution["endpoint_maturity"] == "batch_ready"
-    assert execution["available_operations"] == ["validate", "batch"]
+    assert execution["endpoint_maturity"] == "batch_and_step_ready"
+    assert execution["available_operations"] == ["validate", "batch", "step"]
 
     batch = execute_vehicle_composition_batch(
         _direct_wrench_lqi_composition(),
@@ -466,8 +466,8 @@ def test_hl20_surface_authority_authoring_plan_advertises_actual_surfaces_and_co
     } <= {item["id"] for item in channels if item["channel_kind"] == "effector"}
     assert controller["campaigns"] == []
     assert execution["status"] == "runnable"
-    assert execution["endpoint_maturity"] == "batch_ready"
-    assert execution["available_operations"] == ["validate", "batch"]
+    assert execution["endpoint_maturity"] == "batch_and_step_ready"
+    assert execution["available_operations"] == ["validate", "batch", "step"]
     ####
 
 

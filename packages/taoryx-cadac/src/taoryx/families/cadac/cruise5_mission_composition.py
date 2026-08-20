@@ -587,6 +587,7 @@ def _build_model_metadata(
         model_kind="vehicle_plugin",
         status="development",
         tags=("cadac", "cruise_missile", "pseudo_6dof", "round_earth"),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch"),
         common_runner_operations=("batch",),
         capabilities=TrajectoryModelCapabilities(

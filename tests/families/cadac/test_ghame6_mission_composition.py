@@ -36,7 +36,7 @@ def test_ghame6_provider_advertises_t4_envelope_with_phase_reported_t3_rcs(tmp_p
 
     assert model.id == GHAME6_MODEL_ID
     assert model.model_kind == "mission_composition"
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert model.fidelities[0].id == GHAME6_FIDELITY_ID
     assert model.fidelities[0].dynamics_fidelity == "rigid_body_6dof"
     assert model.fidelities[0].input_realization == "actuator_allocated"

@@ -1031,6 +1031,7 @@ def _example_model_metadata(
         model_kind=vehicle.model_kind,
         status=vehicle.status,
         tags=("analytical-reference", vehicle.model_kind),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch", "step"),
         common_runner_operations=("batch", "step"),
         capabilities=TrajectoryModelCapabilities(

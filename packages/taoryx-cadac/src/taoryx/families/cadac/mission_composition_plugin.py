@@ -158,10 +158,12 @@ class CadacMissionCompositionProvider:
     """Discovery surface for all or a selected set of CADAC actor/package models.
 
     A source-bound host may select one exact model to avoid constructing
-    unrelated configuration and output schemas. The default remains the full
-    metadata catalog used by ordinary CADAC discovery.  Package models that
-    own multiple source actors, such as ADS6 engagement, are selectable even
-    though they do not correspond to a single actor manifest descriptor.
+    unrelated configuration and output schemas. The default retains the full
+    metadata catalog for source-authoring tools. A host-facing provider can
+    instead set ``publish_unbound_models=False`` so only exact installed
+    runtimes enter a trajectory list. Package models that own multiple source
+    actors, such as ADS6 engagement, are selectable even though they do not
+    correspond to a single actor manifest descriptor.
     """
 
     def __init__(
@@ -181,6 +183,7 @@ class CadacMissionCompositionProvider:
         rocket6g_plugin: Rocket6gVehiclePlugin | None = None,
         sraam6_plugin: Sraam6VehiclePlugin | None = None,
         selected_model_ids: tuple[str, ...] | None = None,
+        publish_unbound_models: bool = True,
     ) -> None:
         selected = _resolve_selected_model_ids(selected_model_ids)
         bound_model_ids = frozenset(
@@ -314,6 +317,8 @@ class CadacMissionCompositionProvider:
                 schema = self._sraam6.get_model_schema(SRAAM6_MODEL_ID)
                 output = self._sraam6.get_model_output_schema(SRAAM6_MODEL_ID)
             else:
+                if not publish_unbound_models:
+                    continue
                 schema = _build_planned_schema(descriptor)
                 output = _build_planned_output_schema(descriptor)
                 model = _build_planned_model_metadata(descriptor, schema, output)
@@ -348,8 +353,10 @@ class CadacMissionCompositionProvider:
                 organization="Taoryx integration layer",
                 categories=("aerospace", "vehicle-plugins", "reference-models"),
             ),
-            status="development",
-            tags=("cadac", "plugin-catalog", "phase-aware-fidelity"),
+            status="development" if publish_unbound_models or self._models else "catalog_only",
+            tags=("cadac", "plugin-catalog", "phase-aware-fidelity")
+            if publish_unbound_models
+            else ("cadac", "runtime-only", "source-bindings-required"),
             execution_contract="exact provider/model common-runner registration; no family fallback",
             model_count=len(self._models),
             provenance="missiondesignsolutions/CADAC actor classification and Taoryx plug-in projection",
@@ -357,6 +364,9 @@ class CadacMissionCompositionProvider:
                 "All dynamic source actors are discoverable. Only exact installed runtime bindings advertise batch execution; "
                 "planned actors remain non-executable and cannot fall back to neighboring models. Installed package "
                 "compositions are additional exact models rather than replacements for their actor plug-ins."
+                if publish_unbound_models
+                else "This host-facing provider publishes only exact installed runtime bindings. Source actor catalog "
+                "metadata remains available through CadacPluginCatalog, and no unbound actor is exposed as a trajectory model."
             ),
         )
 
@@ -524,9 +534,10 @@ class CadacMissionCompositionProvider:
     def open_session(self, request: MissionCompositionOpenSessionRequest) -> MissionCompositionSessionDescriptor:
         """Open an exact installed persistent CADAC model session.
 
-        Only models advertising the common ``step`` operation can enter this
-        path.  The catalog deliberately does not emulate stepping by replaying
-        a batch model from initial conditions.
+        This provider-native path is reserved for installed live CADAC episode
+        bindings. A common host uses :class:`MissionCompositionSessionManager`
+        for the universal ``step`` contract; it can derive an explicitly
+        read-only replay session from any exact registered CADAC batch result.
         """
 
         if request.model_id == AIM5_MODEL_ID and self._aim5 is not None:
@@ -549,10 +560,28 @@ class CadacMissionCompositionProvider:
             if request.provider_id != self.metadata.id or request.provider_version != self.metadata.version:
                 raise ValueError("CADAC session request names another catalog provider version")
             return self._sraam6.open_session(request, advertised_provider_version=self.metadata.version)
-        raise ValueError(f"CADAC model {request.model_id!r} has no installed persistent session binding")
+        raise ValueError(
+            f"CADAC model {request.model_id!r} has no installed native persistent session binding; "
+            "use MissionCompositionSessionManager for a registered core replay session"
+        )
         ####
 
     create_session = open_session
+
+    def build_runner(self) -> MissionCompositionRunnerRegistry:
+        """Build the common runner for exactly the CADAC runtimes installed here.
+
+        CADAC has always exposed :meth:`register_runnable_models`, but the
+        Mission Composition plug-in contribution is also required to expose
+        the provider-owned runner directly.  Building a fresh registry keeps
+        the selected catalog's provider/version boundary intact while leaving
+        planned or uninstalled CADAC actors unregistered.
+        """
+
+        registry = MissionCompositionRunnerRegistry()
+        self.register_runnable_models(registry)
+        return registry
+        ####
 
     def inspect_session(
         self,

@@ -176,8 +176,8 @@ def test_x8_lqi_screen_advertises_its_exact_controller_and_batch_endpoint(
         ("effector.throttle.position", 0.0, 1.0),
     ]
     assert execution["status"] == "runnable"
-    assert execution["endpoint_maturity"] == "batch_ready"
-    assert execution["available_operations"] == ["validate", "batch"]
+    assert execution["endpoint_maturity"] == "batch_and_step_ready"
+    assert execution["available_operations"] == ["validate", "batch", "step"]
     ####
 
 

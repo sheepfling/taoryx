@@ -34,6 +34,7 @@ from taoryx.trajectory.execution_contract import (
     audit_provider_advertisement,
 )
 from taoryx.trajectory.mission_composition import MissionCompositionOpenSessionRequest
+from taoryx.trajectory.session_contract import MissionCompositionSessionManager, MissionCompositionSessionStepRequest
 
 CADAC_PROVIDER_ID = "cadac"
 
@@ -93,7 +94,7 @@ def test_bound_falcon6_preserves_physical_control_readback_and_limit_feedback(tm
     audit = audit_provider_advertisement(provider, runner)
 
     assert runner.registrations() == ((CADAC_PROVIDER_ID, FALCON6_MODEL_ID),)
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert model.fidelities[0].id == FALCON6_FIDELITY_ID
     assert model.fidelities[0].input_realization == "actuator_allocated"
     assert model.realizations[0].id == FALCON6_REALIZATION_ID
@@ -168,9 +169,9 @@ def test_bound_falcon6_preserves_physical_control_readback_and_limit_feedback(tm
     assert len(final["body_rates_rad_s"]) == 3
 
     integration = provider.get_model_integration_contract(FALCON6_MODEL_ID)
-    assert integration.step.status == "blocked"
-    assert integration.step.state_semantics == "batch_only"
-    assert integration.step.action_semantics == "configuration_fixed"
+    assert integration.step.status == "available"
+    assert integration.step.state_semantics == "core_batch_replay"
+    assert integration.step.action_semantics == "read_only_replay"
     assert integration.sensor_integration.status == "not_applicable"
     assert integration.sensor_integration.sensor_bus_status == "not_applicable"
     assert integration.controller_analysis.ownership == "external_at_source_boundary"
@@ -182,7 +183,7 @@ def test_bound_falcon6_preserves_physical_control_readback_and_limit_feedback(tm
     assert integration.environment.atmosphere_owner == "cadac_compatibility_runtime"
     assert integration.environment.gravity_owner == "cadac_compatibility_runtime"
 
-    with pytest.raises(ValueError, match="no installed persistent session binding"):
+    with pytest.raises(ValueError, match="no installed native persistent session binding"):
         provider.open_session(
             MissionCompositionOpenSessionRequest(
                 session_id="cadac-falcon6-must-not-fabricate-session",
@@ -192,4 +193,26 @@ def test_bound_falcon6_preserves_physical_control_readback_and_limit_feedback(tm
                 integration_step_s=0.001,
             )
         )
+
+    manager = MissionCompositionSessionManager(provider)
+    descriptor = manager.open(
+        MissionCompositionOpenSessionRequest(
+            session_id="cadac-falcon6-core-replay-session",
+            provider_id=CADAC_PROVIDER_ID,
+            provider_version=provider.metadata.version,
+            prepared_configuration=prepared,
+            integration_step_s=0.1,
+        )
+    )
+    assert descriptor.action_schema == ()
+    assert descriptor.state_owner == "core_batch_replay_session"
+    assert descriptor.timestep_semantics == "caller_duration_advanced_to_next_replay_sample"
+    replay_step = manager.step(
+        MissionCompositionSessionStepRequest(
+            session_id=descriptor.session_id,
+            duration_s=0.1,
+        )
+    )
+    assert replay_step.time_end_s > replay_step.time_start_s
+    assert len(replay_step.observation.standard_ecef.ecef_from_body_wxyz) == 4
     ####

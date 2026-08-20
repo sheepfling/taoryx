@@ -11,10 +11,23 @@ from scripts.bootstrap import editable_install_command
 from taoryx.builtin_plugins import source_plugin_entry_points
 from taoryx.plugins import VehicleCatalogFragment, discover_plugins
 from taoryx.trajectory.catalog_mission_composition import CatalogMissionCompositionProvider
+from taoryx.trajectory.configuration_contract import (
+    TrajectoryModelMetadata,
+    TrajectoryOutputSchema,
+    TrajectoryProviderMetadata,
+    TrajectoryProviderPresentationMetadata,
+)
+from taoryx.trajectory.execution_contract import MissionCompositionRunnerRegistry
 from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.vehicle_composition_registry import load_vehicle_composition_registry
 from tools.dev import QUICK_TEST_PATHS, _changed_test_paths, tool_script
 from tools.solve_vehicle_trim_evidence import main as solve_trim_evidence_main
+from tools.validate_mission_composition_provider_contract import (
+    _provider_report,
+)
+from tools.validate_mission_composition_provider_contract import (
+    build_report as build_provider_contract_report,
+)
 from tools.validate_plugin_developer_route import validate as validate_plugin_developer_route
 from tools.verify_plugin_wheels import (
     _SMOKE_SCRIPT,
@@ -1290,6 +1303,179 @@ def test_direct_plugin_developer_route_is_self_contained() -> None:
     ####
 
 
+@pytest.mark.parametrize(
+    ("plugin_id", "provider_count", "model_count", "registered_batch_tuple_count"),
+    (
+        ("taoryx.a320", 1, 1, 5),
+        ("taoryx.cadac", 1, 0, 0),
+        ("taoryx.reachability", 0, 0, 0),
+    ),
+)
+def test_focused_taoryx_universal_contract_does_not_require_the_aggregate_catalog(
+    plugin_id: str,
+    provider_count: int,
+    model_count: int,
+    registered_batch_tuple_count: int,
+) -> None:
+    """A plug-in-local gate catches provider failures without loading peers."""
+
+    report = build_provider_contract_report(
+        plugin_ids=(plugin_id,),
+        contract_profile="taoryx_universal",
+    )
+
+    assert report["status"] == "pass", report["errors"]
+    assert report["contract_profile"] == "taoryx_universal"
+    assert report["plugin_ids"] == [plugin_id]
+    assert report["provider_count"] == provider_count
+    assert report["model_count"] == model_count
+    assert report["registered_batch_tuple_count"] == registered_batch_tuple_count
+    assert report["standard_ecef_contract"]["status"] == "pass"
+    assert [item["plugin_id"] for item in report["plugins"]] == [plugin_id]
+    ####
+
+
+def test_interoperable_profile_accepts_an_honest_batch_only_provider() -> None:
+    """The reusable interface must not force an external provider to emulate sessions."""
+
+    sentinel = object()
+
+    def remove_step_declarations(value: object) -> object:
+        if isinstance(value, dict):
+            if value.get("operation") == "step":
+                return sentinel
+            rewritten: dict[object, object] = {}
+            for key, item in value.items():
+                if (
+                    key == "operations"
+                    and isinstance(item, tuple | list)
+                    and "channel_kind" not in value
+                ):
+                    if "authority" in value:
+                        rewritten[key] = tuple("batch" if operation == "step" else operation for operation in item)
+                        continue
+                    rewritten_operations = tuple(remove_step_declarations(operation) for operation in item)
+                    rewritten[key] = tuple(
+                        operation
+                        for operation in rewritten_operations
+                        if operation is not sentinel and operation != "step"
+                    )
+                    continue
+                rewritten_item = remove_step_declarations(item)
+                if rewritten_item is not sentinel:
+                    rewritten[key] = rewritten_item
+            return rewritten
+        if isinstance(value, tuple | list):
+            rewritten_items = tuple(remove_step_declarations(item) for item in value)
+            return tuple(item for item in rewritten_items if item is not sentinel)
+        return value
+        ####
+
+    source_catalog = discover_plugins(include_external=False, selected=("taoryx.dual-launch",))
+    source_provider = source_catalog.build_mission_composition_provider_registry().provider(
+        "taoryx.dual-launch.mission-composition"
+    )
+    source_model = source_provider.list_models()[0]
+    payload = remove_step_declarations(source_model.model_dump(mode="python"))
+    assert isinstance(payload, dict)
+    payload["execution_capability_profile"] = "interoperable"
+    payload["common_runner_operations"] = ("batch",)
+    payload.pop("composition_advertisement", None)
+    payload.pop("control_scheme_support", None)
+    payload.pop("metadata_fingerprint", None)
+    output_schema = TrajectoryOutputSchema.model_validate(payload["output_schema"])
+    payload["output_schema_fingerprint"] = output_schema.fingerprint
+    batch_only_model = TrajectoryModelMetadata.model_validate(payload)
+    assert batch_only_model.execution_capability_profile == "interoperable"
+    assert batch_only_model.common_runner_operations == ("batch",)
+
+    class BatchOnlyProvider:
+        """Minimal external-style provider that does not implement a session seam."""
+
+        def __init__(self) -> None:
+            self._metadata = TrajectoryProviderMetadata(
+                id="example.batch-only",
+                name="Example Batch-Only Provider",
+                version="1.0.0",
+                description="Test-only external provider with an honest batch-only capability.",
+                presentation=TrajectoryProviderPresentationMetadata(
+                    display_name="Example Batch-Only Provider",
+                    short_name="Batch Only",
+                    summary="Exercises the reusable provider profile.",
+                    organization="Example",
+                ),
+                status="runnable_batch_only",
+                model_count=1,
+                claim_boundary="Test fixture only; it intentionally does not expose a session operation.",
+            )
+
+        @property
+        def metadata(self) -> TrajectoryProviderMetadata:
+            return self._metadata
+            ####
+
+        def list_models(self) -> tuple[TrajectoryModelMetadata, ...]:
+            return (batch_only_model,)
+            ####
+
+        def get_model_schema(self, model_id: str):
+            assert model_id == batch_only_model.id
+            return source_provider.get_model_schema(model_id)
+            ####
+
+        def get_model_output_schema(self, model_id: str) -> TrajectoryOutputSchema:
+            assert model_id == batch_only_model.id
+            return batch_only_model.output_schema
+            ####
+
+        def validate_configuration(self, configuration: object) -> object:
+            raise AssertionError("provider-contract advertisement audit must not execute configuration")
+            ####
+
+        def build_runner(self) -> MissionCompositionRunnerRegistry:
+            runner = MissionCompositionRunnerRegistry()
+
+            def unreachable_executor(request: object) -> object:
+                raise AssertionError(f"provider-contract advertisement audit must not execute {request!r}")
+                ####
+
+            runner.register(self.metadata.id, batch_only_model.id, unreachable_executor)
+            return runner
+            ####
+
+    provider = BatchOnlyProvider()
+    interoperable = _provider_report(
+        contribution_id=provider.metadata.id,
+        plugin_id="example.batch-only",
+        provider=provider,
+        contract_profile="interoperable",
+    )
+    assert interoperable["status"] == "pass", interoperable["errors"]
+    assert interoperable["capability_shape_counts"] == {
+        "batch_and_step": 0,
+        "batch_only": 1,
+        "step_only": 0,
+        "catalog_only": 0,
+    }
+
+    universal = _provider_report(
+        contribution_id=provider.metadata.id,
+        plugin_id="example.batch-only",
+        provider=provider,
+        contract_profile="taoryx_universal",
+    )
+    assert universal["status"] == "fail"
+    assert any("TAORYX-universal" in error for error in universal["errors"])
+    ####
+
+
+def test_plugin_developer_route_can_be_scoped_to_one_plugin() -> None:
+    """The fast package gate does not need the aggregate profile closure."""
+
+    validate_plugin_developer_route(plugin_ids=("taoryx.a320",))
+    ####
+
+
 def test_catalog_provider_is_the_canonical_direct_plugin_host_name() -> None:
     """Direct plug-ins have a catalog-scoped host name, not an aggregate one."""
 
@@ -1323,9 +1509,88 @@ def test_focused_plugin_gate_checks_metadata_then_one_fresh_wheel(
     dev.check_plugin_install("f16")
 
     assert commands == [
-        tool_script("validate_plugin_developer_route.py"),
+        tool_script("validate_plugin_developer_route.py", "--plugin", "taoryx.f16"),
+        tool_script(
+            "validate_mission_composition_provider_contract.py",
+            "--plugin",
+            "taoryx.f16",
+            "--contract-profile",
+            "taoryx-universal",
+            "--summary",
+        ),
         tool_script("verify_plugin_wheels.py", "--plugin", "f16", "--python", dev.project_python()),
     ]
+    ####
+
+
+def test_fast_focused_plugin_contract_gate_avoids_the_wheel_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[list[str]] = []
+    monkeypatch.setattr(dev, "run", commands.append)
+
+    dev.check_plugin_contract("f16")
+
+    assert commands == [
+        tool_script("validate_plugin_developer_route.py", "--plugin", "taoryx.f16"),
+        tool_script(
+            "validate_mission_composition_provider_contract.py",
+            "--plugin",
+            "taoryx.f16",
+            "--contract-profile",
+            "taoryx-universal",
+            "--summary",
+        ),
+    ]
+    ####
+
+
+def test_compatibility_aggregate_uses_its_declared_full_provider_scope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[list[str]] = []
+    monkeypatch.setattr(dev, "run", commands.append)
+
+    dev.check_plugin_contract("reference-models")
+
+    assert commands == [
+        tool_script("validate_plugin_developer_route.py", "--plugin", "taoryx.reference-models"),
+        tool_script(
+            "validate_mission_composition_provider_contract.py",
+            "--all",
+            "--contract-profile",
+            "taoryx-universal",
+            "--summary",
+        ),
+    ]
+    ####
+
+
+def test_release_universal_contract_gate_covers_all_source_tree_plugins(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[list[str]] = []
+    monkeypatch.setattr(dev, "run", commands.append)
+
+    dev.check_mission_composition_provider_contracts()
+
+    assert commands == [
+        tool_script(
+            "validate_mission_composition_provider_contract.py",
+            "--all",
+            "--contract-profile",
+            "taoryx-universal",
+            "--summary",
+        ),
+    ]
+    ####
+
+
+def test_every_wheel_boundary_derives_its_focused_provider_contract_owner() -> None:
+    assert {
+        spec.selector: dev._plugin_id_for_wheel_selector(spec.selector)
+        for spec in PLUGIN_WHEEL_SPECS
+    } == {spec.selector: spec.plugin_id for spec in PLUGIN_WHEEL_SPECS}
     ####
 
 

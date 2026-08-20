@@ -114,6 +114,7 @@ TrajectoryControlIntentResolution = Literal[
     "blocked",
     "unsupported",
 ]
+TrajectoryExecutionCapabilityProfile = Literal["interoperable", "taoryx_universal"]
 CompositionFeatureCategory = Literal[
     "authoring_mode",
     "execution_mode",
@@ -2405,6 +2406,230 @@ def build_trajectory_composition_advertisement(
     ####
 
 
+_CORE_BATCH_REPLAY_EXECUTION_MODE = "core_batch_replay"
+_CORE_BATCH_REPLAY_SESSION_EXECUTOR_ID = "taoryx.core.batch-replay-session.v1"
+_CORE_BATCH_REPLAY_CLAIM_BOUNDARY = (
+    "TAORYX core materializes this read-only session from the exact registered batch result. "
+    "Each call advances to a recorded truth boundary; it does not create a live native plant, "
+    "accept control actions, or establish physical control authority."
+)
+
+
+def _model_payload(value: object) -> dict[str, Any] | None:
+    """Return a mutable Pydantic-or-mapping payload without changing unknown values."""
+
+    if isinstance(value, BaseModel):
+        return value.model_dump(mode="python")
+    if isinstance(value, Mapping):
+        return dict(value)
+    return None
+    ####
+
+
+def _append_model_operations(values: object, *operations: Literal["batch", "step"]) -> tuple[str, ...]:
+    """Add common execution operations to a model/capability summary."""
+
+    existing = tuple(str(item) for item in values) if isinstance(values, Sequence) and not isinstance(values, str | bytes) else ()
+    known = {*existing, *operations}
+    return tuple(item for item in ("discover", "validate", "batch", "step") if item in known)
+    ####
+
+
+def _common_runner_batch_and_step_operations(values: object) -> tuple[str, ...]:
+    """Publish the complete common-execution pair in its stable public order."""
+
+    existing = tuple(str(item) for item in values) if isinstance(values, Sequence) and not isinstance(values, str | bytes) else ()
+    return tuple(item for item in ("batch", "step") if item in {*existing, "batch", "step"})
+    ####
+
+
+def _batch_replay_operation(batch: Mapping[str, Any]) -> dict[str, Any]:
+    """Project one registered batch tuple onto the core read-only session seam."""
+
+    return {
+        **dict(batch),
+        "operation": "step",
+        "status": "available",
+        "execution_mode": _CORE_BATCH_REPLAY_EXECUTION_MODE,
+        "availability_scope": "provider_interface",
+        "common_runner_status": "registered",
+        "executor_id": _CORE_BATCH_REPLAY_SESSION_EXECUTOR_ID,
+        "blockers": (),
+        "claim_boundary": _CORE_BATCH_REPLAY_CLAIM_BOUNDARY,
+    }
+    ####
+
+
+def _promote_registered_batch_to_replay_step(payload: dict[str, Any]) -> dict[str, Any]:
+    """Materialize the TAORYX universal profile's replay-session seam.
+
+    This adapter is intentionally *not* the generic provider contract. A
+    provider using the interoperable profile may honestly publish only batch
+    execution. TAORYX-owned models elect the universal profile: a native
+    interactive episode remains native, while a batch-native model gains an
+    explicit read-only replay session. That preserves one host-facing shape
+    without inventing live controls or physical control authority.
+    """
+
+    raw_templates = payload.get("mission_templates")
+    if not isinstance(raw_templates, Sequence) or isinstance(raw_templates, str | bytes):
+        return payload
+
+    executable: set[tuple[str, str | None]] = set()
+    rewritten_templates: list[object] = []
+    templates_changed = False
+    for raw_template in raw_templates:
+        template = _model_payload(raw_template)
+        if template is None:
+            rewritten_templates.append(raw_template)
+            continue
+        raw_operations = template.get("operations")
+        if not isinstance(raw_operations, Sequence) or isinstance(raw_operations, str | bytes):
+            rewritten_templates.append(raw_template)
+            continue
+        operation_pairs: list[tuple[object, dict[str, Any] | None]] = [
+            (item, _model_payload(item)) for item in raw_operations
+        ]
+        registered_batch: dict[tuple[str, str | None], dict[str, Any]] = {}
+        existing_step: dict[tuple[str, str | None], dict[str, Any]] = {}
+        for _, operation in operation_pairs:
+            if operation is None:
+                continue
+            fidelity = operation.get("fidelity")
+            realization_id = operation.get("realization_id")
+            if not isinstance(fidelity, str) or (realization_id is not None and not isinstance(realization_id, str)):
+                continue
+            key = (fidelity, realization_id)
+            if (
+                operation.get("operation") == "batch"
+                and operation.get("status") == "available"
+                and operation.get("common_runner_status") == "registered"
+            ):
+                registered_batch[key] = operation
+            elif operation.get("operation") == "step":
+                existing_step[key] = operation
+
+        executable.update(registered_batch)
+        rewritten_operations: list[object] = []
+        replaced_steps: set[tuple[str, str | None]] = set()
+        template_changed = False
+        for original, operation in operation_pairs:
+            if operation is None:
+                rewritten_operations.append(original)
+                continue
+            fidelity = operation.get("fidelity")
+            realization_id = operation.get("realization_id")
+            key = (fidelity, realization_id) if isinstance(fidelity, str) and (realization_id is None or isinstance(realization_id, str)) else None
+            batch = None if key is None else registered_batch.get(key)
+            is_registered_step = (
+                operation.get("operation") == "step"
+                and operation.get("status") == "available"
+                and operation.get("common_runner_status") == "registered"
+            )
+            if operation.get("operation") == "step" and batch is not None and not is_registered_step:
+                rewritten_operations.append(_batch_replay_operation(batch))
+                if key is not None:
+                    replaced_steps.add(key)
+                template_changed = True
+            else:
+                rewritten_operations.append(original)
+
+        for key, batch in registered_batch.items():
+            if key in replaced_steps:
+                continue
+            existing = existing_step.get(key)
+            if (
+                existing is not None
+                and existing.get("status") == "available"
+                and existing.get("common_runner_status") == "registered"
+            ):
+                continue
+            if not any(
+                operation is not None
+                and operation.get("operation") == "step"
+                and operation.get("fidelity") == key[0]
+                and operation.get("realization_id") == key[1]
+                and operation.get("status") == "available"
+                and operation.get("common_runner_status") == "registered"
+                for _, operation in operation_pairs
+            ):
+                rewritten_operations.append(_batch_replay_operation(batch))
+                template_changed = True
+
+        if template_changed and rewritten_operations != list(raw_operations):
+            template["operations"] = tuple(rewritten_operations)
+            rewritten_templates.append(template)
+            templates_changed = True
+        else:
+            rewritten_templates.append(raw_template)
+
+    # Leave an already complete native batch/step publication untouched. In
+    # particular, retain its serialized derived advertisement so normal model
+    # validation can still reject a caller-forged or stale matrix. Only a
+    # newly materialized replay step needs the dependent summary projections
+    # and composition matrix rebuilt below.
+    if not executable or not templates_changed:
+        return payload
+
+    values = dict(payload)
+    values["mission_templates"] = tuple(rewritten_templates)
+    values["operations"] = _append_model_operations(values.get("operations"), "batch", "step")
+    values["common_runner_operations"] = _common_runner_batch_and_step_operations(values.get("common_runner_operations"))
+
+    capabilities = _model_payload(values.get("capabilities"))
+    if capabilities is not None:
+        capabilities["operations"] = _append_model_operations(capabilities.get("operations"), "batch", "step")
+        values["capabilities"] = capabilities
+
+    executable_fidelities = {fidelity for fidelity, _ in executable}
+    executable_realizations = {realization_id for _, realization_id in executable if realization_id is not None}
+    executable_unscoped_fidelities = {fidelity for fidelity, realization_id in executable if realization_id is None}
+    raw_realizations = values.get("realizations")
+    if isinstance(raw_realizations, Sequence) and not isinstance(raw_realizations, str | bytes):
+        rewritten_realizations: list[object] = []
+        for raw_realization in raw_realizations:
+            realization = _model_payload(raw_realization)
+            if realization is None:
+                rewritten_realizations.append(raw_realization)
+                continue
+            realization_id = realization.get("id")
+            aliases = realization.get("fidelity_aliases")
+            matches = (
+                isinstance(realization_id, str)
+                and (
+                    realization_id in executable_realizations
+                    or (isinstance(aliases, Sequence)
+                        and not isinstance(aliases, str | bytes)
+                        and any(str(item) in executable_unscoped_fidelities for item in aliases))
+                )
+            )
+            if matches:
+                realization["operations"] = _append_model_operations(realization.get("operations"), "batch", "step")
+                rewritten_realizations.append(realization)
+            else:
+                rewritten_realizations.append(raw_realization)
+        values["realizations"] = tuple(rewritten_realizations)
+
+    raw_fidelities = values.get("fidelities")
+    if isinstance(raw_fidelities, Sequence) and not isinstance(raw_fidelities, str | bytes):
+        rewritten_fidelities: list[object] = []
+        for raw_fidelity in raw_fidelities:
+            fidelity = _model_payload(raw_fidelity)
+            if fidelity is not None and fidelity.get("id") in executable_fidelities:
+                fidelity["operations"] = _append_model_operations(fidelity.get("operations"), "batch", "step")
+                rewritten_fidelities.append(fidelity)
+            else:
+                rewritten_fidelities.append(raw_fidelity)
+        values["fidelities"] = tuple(rewritten_fidelities)
+
+    # A serialized model can carry a previously derived matrix.  Its exact
+    # operation rows have changed, so force the canonical projection to be
+    # rebuilt rather than retaining an optimistic or stale advertisement.
+    values.pop("composition_advertisement", None)
+    return values
+    ####
+
+
 class TrajectoryModelMetadata(BaseModel):
     """Common provider-independent model identity and capability metadata."""
 
@@ -2420,6 +2645,7 @@ class TrajectoryModelMetadata(BaseModel):
     model_kind: str = Field(min_length=1)
     status: str = Field(min_length=1)
     tags: tuple[str, ...] = ()
+    execution_capability_profile: TrajectoryExecutionCapabilityProfile = "interoperable"
     operations: tuple[Literal["discover", "validate", "batch", "step"], ...] = ("discover", "validate")
     common_runner_operations: tuple[Literal["batch", "step"], ...] = ()
     capabilities: TrajectoryModelCapabilities
@@ -2448,6 +2674,8 @@ class TrajectoryModelMetadata(BaseModel):
         if not isinstance(payload, Mapping):
             return payload
         values = dict(payload)
+        if values.get("execution_capability_profile", "interoperable") == "taoryx_universal":
+            values = _promote_registered_batch_to_replay_step(values)
         # ``metadata_fingerprint`` is a derived computed field.  Accepting a
         # serialized descriptor preserves the existing model-dump round-trip,
         # while callers cannot inject or override the derived revision.
@@ -2577,6 +2805,18 @@ class TrajectoryModelMetadata(BaseModel):
         unavailable_common = sorted({str(item) for item in self.common_runner_operations} - {str(item) for item in self.operations})
         if unavailable_common:
             raise ValueError(f"model {self.id!r} exposes unavailable common-runner operations {unavailable_common!r}")
+        if self.execution_capability_profile == "taoryx_universal":
+            registered_operations = {
+                operation.operation
+                for mission in self.mission_templates
+                for operation in mission.operations
+                if operation.status == "available" and operation.common_runner_status == "registered"
+            }
+            if self.common_runner_operations != ("batch", "step") or registered_operations != {"batch", "step"}:
+                raise ValueError(
+                    f"TAORYX-universal model {self.id!r} must register both batch and step execution; "
+                    f"got summary={self.common_runner_operations!r}, exact={sorted(registered_operations)!r}"
+                )
         for transition in self.fidelity_transitions:
             if transition.from_fidelity not in known or transition.to_fidelity not in known:
                 raise ValueError(f"model {self.id!r} fidelity transition references an unknown tier")
@@ -3377,6 +3617,7 @@ __all__ = [
     "TrajectoryActuatorType",
     "TrajectoryDynamicsFidelity",
     "TrajectoryEntityOutputMetadata",
+    "TrajectoryExecutionCapabilityProfile",
     "TrajectoryFidelityMetadata",
     "TrajectoryFidelityTransition",
     "TrajectoryMissionOperationMetadata",

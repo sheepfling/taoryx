@@ -136,3 +136,18 @@ def test_provider_audit_counts_the_complete_composition_partition() -> None:
             == model.composition_feature_count
         )
     ####
+
+
+def test_provider_audit_accepts_an_explicit_uncontrolled_zero_action_step() -> None:
+    """An open-loop session is interactive in time, not necessarily in controls."""
+
+    catalog = discover_plugins(include_external=False, selected=("taoryx.debug-models",))
+    provider = catalog.build_mission_composition_provider_registry().provider("taoryx.reference.mission-composition")
+
+    report = audit_provider_advertisement(provider, provider.build_runner())
+
+    assert report.status == "pass", report.diagnostics
+    ballistic = next(item for item in report.models if item.model_id == "reference_ballistic_3dof")
+    assert ballistic.action_control_channel_count == 0
+    assert ballistic.common_runner_operations == ("batch", "step")
+    ####

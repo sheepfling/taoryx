@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import argparse
 import ast
 import tomllib
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -188,22 +190,26 @@ def _validate_compatibility_resource_quarantine() -> None:
     ####
 
 
-def validate() -> None:
-    """Validate direct developer ownership and explicit compatibility isolation."""
+def _project_by_plugin_id(projects: tuple[PluginProject, ...]) -> dict[str, PluginProject]:
+    """Index package projects by their declared plug-in identity."""
 
-    _validate_compatibility_resource_quarantine()
-    projects = _projects()
-    by_distribution = {_normalized_distribution(project.distribution): project for project in projects}
-    if len(by_distribution) != len(projects):
-        raise ValueError("plug-in projects have duplicate distribution names")
-    expected_direct = {
-        distribution
-        for distribution in by_distribution
-        if distribution not in {
-            _normalized_distribution(COMPATIBILITY_DISTRIBUTION),
-            _normalized_distribution(OPTIONAL_SOURCE_BOUND_DISTRIBUTION),
-        }
-    }
+    indexed: dict[str, PluginProject] = {}
+    for project in projects:
+        for plugin_id, _target in project.entry_points:
+            existing = indexed.setdefault(plugin_id, project)
+            if existing != project:
+                raise ValueError(f"plug-in ID {plugin_id!r} is declared by multiple package projects")
+    return indexed
+    ####
+
+
+def _validate_install_profiles(
+    *,
+    by_distribution: dict[str, PluginProject],
+    expected_direct: set[str],
+) -> None:
+    """Validate aggregate profile membership for the catalog-wide route."""
+
     profile_distributions = {
         profile: tuple(_normalized_distribution(Path(path).name) for path in paths)
         for profile, paths in PROFILE_PROJECTS.items()
@@ -225,55 +231,118 @@ def validate() -> None:
         raise ValueError("compatibility profile must contain exactly the aggregate's declared plug-in dependencies")
     if full != developer | {compatibility_distribution}:
         raise ValueError("full profile must combine direct developer and compatibility packages")
-
-    for project in projects:
-        distribution = _normalized_distribution(project.distribution)
-        if not (project.path.parent / "README.md").is_file():
-            raise ValueError(f"plug-in project {project.distribution!r} has no package README")
-        if len(project.entry_points) != 1:
-            raise ValueError(f"plug-in project {project.distribution!r} must declare exactly one {PLUGIN_ENTRY_POINT_GROUP!r} entry point")
-        if not project.source_root.is_dir():
-            raise ValueError(f"plug-in project {project.distribution!r} has no source root")
-        if distribution not in expected_direct:
-            continue
-        dependency_names = {_dependency_distribution(item) for item in project.dependencies}
-        if compatibility_distribution in dependency_names:
-            raise ValueError(f"direct plug-in {project.distribution!r} depends on the compatibility aggregate")
-        compatibility_imports = {
-            source.relative_to(project.path.parent).as_posix(): _compatibility_imports(source)
-            for source in project.source_root.rglob("*.py")
-        }
-        leaks = {source: imports for source, imports in compatibility_imports.items() if imports}
-        if leaks:
-            raise ValueError(f"direct plug-in {project.distribution!r} imports the compatibility aggregate: {leaks!r}")
-        legacy_provider_imports = {
-            source.relative_to(project.path.parent).as_posix(): _imports_from_module(source, LEGACY_PROVIDER_MODULE)
-            for source in project.source_root.rglob("*.py")
-        }
-        legacy_provider_leaks = {source: imports for source, imports in legacy_provider_imports.items() if imports}
-        if legacy_provider_leaks:
-            raise ValueError(
-                f"direct plug-in {project.distribution!r} imports the legacy aggregate-provider module: "
-                f"{legacy_provider_leaks!r}"
-            )
-        trajectory_facade_imports = {
-            source.relative_to(project.path.parent).as_posix(): _trajectory_facade_imports(source)
-            for source in project.source_root.rglob("*.py")
-        }
-        trajectory_facade_leaks = {source: imports for source, imports in trajectory_facade_imports.items() if imports}
-        if trajectory_facade_leaks:
-            raise ValueError(
-                f"direct plug-in {project.distribution!r} imports the legacy taoryx.trajectory facade: "
-                f"{trajectory_facade_leaks!r}; import a narrow core contract instead"
-            )
     ####
 
 
-def main() -> int:
+def _validate_project_direct_route(
+    project: PluginProject,
+    *,
+    expected_direct: set[str],
+    compatibility_distribution: str,
+) -> None:
+    """Validate one project's direct ownership boundary."""
+
+    distribution = _normalized_distribution(project.distribution)
+    if not (project.path.parent / "README.md").is_file():
+        raise ValueError(f"plug-in project {project.distribution!r} has no package README")
+    if len(project.entry_points) != 1:
+        raise ValueError(f"plug-in project {project.distribution!r} must declare exactly one {PLUGIN_ENTRY_POINT_GROUP!r} entry point")
+    if not project.source_root.is_dir():
+        raise ValueError(f"plug-in project {project.distribution!r} has no source root")
+    if distribution not in expected_direct:
+        return
+    dependency_names = {_dependency_distribution(item) for item in project.dependencies}
+    if compatibility_distribution in dependency_names:
+        raise ValueError(f"direct plug-in {project.distribution!r} depends on the compatibility aggregate")
+    compatibility_imports = {
+        source.relative_to(project.path.parent).as_posix(): _compatibility_imports(source)
+        for source in project.source_root.rglob("*.py")
+    }
+    leaks = {source: imports for source, imports in compatibility_imports.items() if imports}
+    if leaks:
+        raise ValueError(f"direct plug-in {project.distribution!r} imports the compatibility aggregate: {leaks!r}")
+    legacy_provider_imports = {
+        source.relative_to(project.path.parent).as_posix(): _imports_from_module(source, LEGACY_PROVIDER_MODULE)
+        for source in project.source_root.rglob("*.py")
+    }
+    legacy_provider_leaks = {source: imports for source, imports in legacy_provider_imports.items() if imports}
+    if legacy_provider_leaks:
+        raise ValueError(
+            f"direct plug-in {project.distribution!r} imports the legacy aggregate-provider module: "
+            f"{legacy_provider_leaks!r}"
+        )
+    trajectory_facade_imports = {
+        source.relative_to(project.path.parent).as_posix(): _trajectory_facade_imports(source)
+        for source in project.source_root.rglob("*.py")
+    }
+    trajectory_facade_leaks = {source: imports for source, imports in trajectory_facade_imports.items() if imports}
+    if trajectory_facade_leaks:
+        raise ValueError(
+            f"direct plug-in {project.distribution!r} imports the legacy taoryx.trajectory facade: "
+            f"{trajectory_facade_leaks!r}; import a narrow core contract instead"
+        )
+    ####
+
+
+def validate(*, plugin_ids: Iterable[str] | None = None) -> None:
+    """Validate direct developer ownership and explicit compatibility isolation.
+
+    Omitting ``plugin_ids`` retains the complete release gate, including the
+    installation-profile closure.  Supplying one or more IDs intentionally
+    limits source inspection to those package boundaries, which makes it the
+    fast route used while a single plug-in is being developed.
+    """
+
+    _validate_compatibility_resource_quarantine()
+    projects = _projects()
+    by_distribution = {_normalized_distribution(project.distribution): project for project in projects}
+    if len(by_distribution) != len(projects):
+        raise ValueError("plug-in projects have duplicate distribution names")
+    expected_direct = {
+        distribution
+        for distribution in by_distribution
+        if distribution not in {
+            _normalized_distribution(COMPATIBILITY_DISTRIBUTION),
+            _normalized_distribution(OPTIONAL_SOURCE_BOUND_DISTRIBUTION),
+        }
+    }
+    compatibility_distribution = _normalized_distribution(COMPATIBILITY_DISTRIBUTION)
+    requested = None if plugin_ids is None else frozenset(item.strip() for item in plugin_ids if item.strip())
+    if requested == frozenset():
+        raise ValueError("plugin_ids must contain at least one non-empty plug-in ID")
+    if requested is None:
+        _validate_install_profiles(by_distribution=by_distribution, expected_direct=expected_direct)
+        projects_to_validate = projects
+    else:
+        by_plugin_id = _project_by_plugin_id(projects)
+        unknown = tuple(sorted(requested - set(by_plugin_id)))
+        if unknown:
+            raise ValueError(f"unknown Taoryx plug-in ID(s): {', '.join(unknown)}")
+        projects_to_validate = tuple(by_plugin_id[plugin_id] for plugin_id in sorted(requested))
+
+    for project in projects_to_validate:
+        _validate_project_direct_route(
+            project,
+            expected_direct=expected_direct,
+            compatibility_distribution=compatibility_distribution,
+        )
+    ####
+
+
+def main(argv: Sequence[str] | None = None) -> int:
     """Run the developer-route ownership check from the command line."""
 
-    validate()
-    print("validated direct plug-in developer route")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--plugin",
+        action="append",
+        metavar="PLUGIN_ID",
+        help="limit source-boundary validation to one named plug-in; repeat to select several",
+    )
+    args = parser.parse_args(argv)
+    validate(plugin_ids=args.plugin)
+    scope = "all direct plug-ins" if not args.plugin else ", ".join(sorted(args.plugin))
+    print(f"validated direct plug-in developer route: {scope}")
     return 0
     ####
 

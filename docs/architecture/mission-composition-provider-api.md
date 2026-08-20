@@ -339,6 +339,41 @@ or operation runnable. A realization is independently `available`, `blocked`,
 or `unsupported`, and a generic consumer must resolve the exact operation
 record before presenting a Run or Open Session action.
 
+### Execution capability profiles
+
+The reusable provider interface and TAORYX's own host guarantee are separate:
+
+- `execution_capability_profile: "interoperable"` is the default reusable
+  profile. It preserves the provider's exact operation matrix: a provider may
+  truthfully be batch-only, step-only, both, or catalog-only. A generic host
+  must inspect the exact tuple before offering Run or Open Session.
+- `execution_capability_profile: "taoryx_universal"` is the TAORYX-owned
+  host profile. Every published model has matching registered `batch` and
+  `step` tuples. A family with a native episode keeps that implementation and
+  action schema. A batch-native family receives the core
+  `core_batch_replay` session adapter instead: it executes the selected batch
+  once, advances only through returned truth boundaries, has an empty action
+  schema, and preserves the returned `standard_ecef` state.
+
+The replay adapter is a TAORYX host adaptation, not a requirement imposed on
+other trajectory providers. It removes a TAORYX host-integration branch
+without pretending that source-program or batch-configured controls are live
+caller authority. Regardless of operation profile, any returned trajectory
+sample or session observation uses the required standard ECFC/ECEF sidecar.
+
+For the fast plug-in-local gate, run `python tools/dev.py check-plugin-contract <wheel-selector>`.
+The underlying direct command is
+`python -m tools.validate_mission_composition_provider_contract --plugin taoryx.<plugin-id> --contract-profile taoryx-universal --summary`.
+It constructs and audits only the selected plug-in's Mission Composition
+providers, checks every exact registered `batch`↔`step` tuple, and verifies
+that the common result and session types still require `standard_ecef`. It is
+structural/provider-construction evidence; use `python tools/dev.py check-vehicle <family>`
+when a focused execution witness is also needed. An independently installed
+provider can instead use the reusable profile, for example
+`python -m tools.validate_mission_composition_provider_contract --plugin acme.provider --include-external --contract-profile interoperable --summary`.
+Adding or changing one plug-in therefore does not require discovery or
+execution of the aggregate catalog.
+
 Dynamics and controls are independent axes. The normalized dynamics values are
 `point_mass_3dof`, `pseudo_6dof`, and `rigid_body_6dof`. Input realization is
 published separately as uncontrolled, guidance-command, direct-wrench,
@@ -434,7 +469,8 @@ session executor; it never authorizes a stateless `MissionCompositionRunRequest`
 The common session lifecycle consists of:
 
 - `open`/`create`: validate the prepared configuration, exact mission,
-  realization and session operation; create provider-owned state;
+  realization and session operation; create provider-owned state or a
+  core-owned immutable replay cursor;
 - `inspect`: return the current committed observation without advancing time;
 - `step`: validate a typed action, hold it for an explicit caller duration,
   require an optional expected sequence, and return the committed observation;
@@ -443,7 +479,14 @@ The common session lifecycle consists of:
   and time, clear held references, and return the replacement action schema;
 - `reset`: deterministically reconstruct the prepared initial state using the
   declared seed semantics; and
-- `close`: release native state and retain a terminal acknowledgement.
+- `close`: release native state or the core replay cursor and retain a terminal
+  acknowledgement.
+
+For a `core_batch_replay` session, `step` has no action channels and advances
+to the first recorded truth boundary at or after the requested duration. Its
+descriptor names `state_owner="core_batch_replay_session"` and
+`caller_duration_advanced_to_next_replay_sample`; clients must not interpret
+it as a live physics or actuator integration claim.
 
 The immutable descriptor publishes session identity, state ownership,
 configuration fingerprint, seed, integration timestep semantics, action and

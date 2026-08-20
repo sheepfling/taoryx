@@ -391,8 +391,8 @@ def test_x15_lqi_screen_runs_through_the_public_composition_path(
         "moment_z_nm",
     ]
     assert execution["status"] == "runnable"
-    assert execution["endpoint_maturity"] == "batch_ready"
-    assert execution["available_operations"] == ["validate", "batch"]
+    assert execution["endpoint_maturity"] == "batch_and_step_ready"
+    assert execution["available_operations"] == ["validate", "batch", "step"]
 
     batch = execute_vehicle_composition_batch(
         _direct_wrench_lqi_composition(),

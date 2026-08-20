@@ -16,11 +16,11 @@ _PROVIDER_ID = "cadac"
 
 @lru_cache(maxsize=1)
 def _catalog_provider() -> CadacMissionCompositionProvider:
-    """Build the CADAC catalog only after a host selects the provider API."""
+    """Build only installed CADAC runtimes for the public trajectory host."""
 
     from taoryx.families.cadac.mission_composition_plugin import CadacMissionCompositionProvider
 
-    return CadacMissionCompositionProvider()
+    return CadacMissionCompositionProvider(publish_unbound_models=False)
     ####
 
 

@@ -1044,6 +1044,7 @@ def simple_aero_model_metadata(schema: TrajectoryConfigurationSchema | None = No
         model_kind="trajectory_workflow",
         status="common_runner_ready",
         tags=("simple-aero", "workflow", "point-mass", "fixed-ld", "synthetic"),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch", "step"),
         common_runner_operations=("batch", "step"),
         capabilities=TrajectoryModelCapabilities(

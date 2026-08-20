@@ -2678,6 +2678,7 @@ def _model_metadata(
             profile.assumption_case.value,
             profile.resolution_status.value,
         ),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch", "step"),
         common_runner_operations=("batch", "step"),
         capabilities=TrajectoryModelCapabilities(

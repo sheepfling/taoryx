@@ -9,7 +9,7 @@
   "family_count": 11,
   "realization_count": 45,
   "registered_batch_tuple_count": 66,
-  "registered_interactive_tuple_count": 23,
+  "registered_interactive_tuple_count": 66,
   "families": [
     {
       "model_id": "skywalker_x8",
@@ -198,8 +198,10 @@
           "batch_tuples": [
             "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -207,9 +209,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "skywalker_x8",
@@ -254,8 +254,12 @@
             "x8_local_physical_surface_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch",
             "x8_local_physical_surface_lqi_long_recovery_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "x8_local_physical_surface_lqr_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "x8_local_physical_surface_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "x8_local_physical_surface_lqi_long_recovery_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -277,11 +281,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "x8_local_physical_surface_lqr_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "x8_local_physical_surface_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "x8_local_physical_surface_lqi_long_recovery_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         }
       ]
     },
@@ -469,8 +469,10 @@
           "batch_tuples": [
             "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -478,9 +480,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "powered_fixed_wing_racetrack_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "b747",
@@ -524,8 +524,11 @@
             "b747_condition3_local_physical_surface_lqr_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch",
             "b747_condition3_local_physical_surface_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "b747_condition3_local_physical_surface_lqr_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "b747_condition3_local_physical_surface_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -550,10 +553,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "b747_condition3_local_physical_surface_lqr_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "b747_condition3_local_physical_surface_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         }
       ]
     },
@@ -707,6 +707,7 @@
           ],
           "interactive_status": "available",
           "interactive_tuples": [
+            "a320_local_native_coordinate_lqi_screen_v1/pseudo_6dof/pseudo_6dof/step",
             "powered_fixed_wing_racetrack_v1/pseudo_6dof/pseudo_6dof/step"
           ],
           "deployment_staging_capabilities": [
@@ -733,9 +734,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "a320_local_native_coordinate_lqi_screen_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "a320_openap_3dof",
@@ -877,6 +876,7 @@
           ],
           "interactive_status": "available",
           "interactive_tuples": [
+            "a320_local_native_coordinate_lqi_screen_v1/pseudo_6dof/jsbsim_surrogate_composite_pseudo6dof/step",
             "powered_fixed_wing_racetrack_v1/pseudo_6dof/jsbsim_surrogate_composite_pseudo6dof/step"
           ],
           "deployment_staging_capabilities": [
@@ -903,9 +903,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "a320_local_native_coordinate_lqi_screen_v1/pseudo_6dof/jsbsim_surrogate_composite_pseudo6dof/step: a320_jsbsim_surrogate_execution_binding"
-          ]
+          "blockers": []
         }
       ]
     },
@@ -1137,8 +1135,10 @@
           "batch_tuples": [
             "f16_local_physical_control_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "f16_local_physical_control_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -1162,9 +1162,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "f16_local_physical_control_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "f16_s119",
@@ -1219,8 +1217,14 @@
             "f16_local_physical_surface_lqi_schedule_interior_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch",
             "f16_local_physical_surface_lqr_schedule_transition_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "f16_local_physical_control_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "f16_local_physical_surface_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "f16_local_physical_surface_lqr_schedule_interior_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "f16_local_physical_surface_lqi_schedule_interior_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "f16_local_physical_surface_lqr_schedule_transition_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -1248,13 +1252,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "f16_local_physical_control_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "f16_local_physical_surface_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "f16_local_physical_surface_lqr_schedule_interior_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "f16_local_physical_surface_lqi_schedule_interior_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "f16_local_physical_surface_lqr_schedule_transition_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "f16_s119",
@@ -1413,8 +1411,10 @@
           "batch_tuples": [
             "x15_staged_booster_reachability_v1/point_mass_3dof/point_mass_3dof/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "x15_staged_booster_reachability_v1/point_mass_3dof/point_mass_3dof/step"
+          ],
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
@@ -1429,9 +1429,7 @@
           "spawned_child_behavior": [
             "available:spent_booster_release:independently_propagated:x15-spent-booster"
           ],
-          "blockers": [
-            "x15_staged_booster_reachability_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "x15",
@@ -1467,8 +1465,10 @@
           "batch_tuples": [
             "x15_staged_booster_reachability_v1/pseudo_6dof/pseudo_6dof/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "x15_staged_booster_reachability_v1/pseudo_6dof/pseudo_6dof/step"
+          ],
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
@@ -1483,9 +1483,7 @@
           "spawned_child_behavior": [
             "available:spent_booster_release:independently_propagated:x15-spent-booster"
           ],
-          "blockers": [
-            "x15_staged_booster_reachability_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "x15",
@@ -1527,7 +1525,8 @@
           ],
           "interactive_status": "available",
           "interactive_tuples": [
-            "x15_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step"
+            "x15_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step",
+            "x15_local_direct_wrench_lqi_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step"
           ],
           "deployment_staging_capabilities": [
             "deployment",
@@ -1562,9 +1561,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "x15_local_direct_wrench_lqi_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "x15",
@@ -1606,8 +1603,11 @@
             "x15_source_surface_authority_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch",
             "x15_source_surface_attitude_rate_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "x15_source_surface_authority_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "x15_source_surface_attitude_rate_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step"
+          ],
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
@@ -1639,10 +1639,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "x15_source_surface_authority_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "x15_source_surface_attitude_rate_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         }
       ]
     },
@@ -1845,8 +1842,10 @@
           "batch_tuples": [
             "hummingbird_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "hummingbird_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -1876,9 +1875,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "hummingbird_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "hummingbird",
@@ -1922,8 +1919,12 @@
             "hummingbird_local_horizontal_translation_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch",
             "hummingbird_local_vertical_translation_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "hummingbird_local_individual_rotor_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "hummingbird_local_horizontal_translation_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "hummingbird_local_vertical_translation_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -1961,11 +1962,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "hummingbird_local_individual_rotor_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "hummingbird_local_horizontal_translation_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "hummingbird_local_vertical_translation_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         }
       ]
     },
@@ -2060,8 +2057,10 @@
           "batch_tuples": [
             "hl20_source_booster_release_replay_v1/point_mass_3dof/point_mass_3dof/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "hl20_source_booster_release_replay_v1/point_mass_3dof/point_mass_3dof/step"
+          ],
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
@@ -2074,9 +2073,7 @@
           "spawned_child_behavior": [
             "available:synthetic_spent_booster_release:independently_propagated:hl20-synthetic-spent-booster"
           ],
-          "blockers": [
-            "hl20_source_booster_release_replay_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "hl20_mod_k",
@@ -2110,8 +2107,10 @@
           "batch_tuples": [
             "hl20_source_booster_release_replay_v1/pseudo_6dof/pseudo_6dof/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "hl20_source_booster_release_replay_v1/pseudo_6dof/pseudo_6dof/step"
+          ],
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
@@ -2124,9 +2123,7 @@
           "spawned_child_behavior": [
             "available:synthetic_spent_booster_release:independently_propagated:hl20-synthetic-spent-booster"
           ],
-          "blockers": [
-            "hl20_source_booster_release_replay_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "hl20_mod_k",
@@ -2166,7 +2163,8 @@
           ],
           "interactive_status": "available",
           "interactive_tuples": [
-            "hl20_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step"
+            "hl20_local_direct_wrench_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step",
+            "hl20_local_direct_wrench_lqi_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step"
           ],
           "deployment_staging_capabilities": [
             "deployment",
@@ -2201,9 +2199,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "hl20_local_direct_wrench_lqi_screen_v1/rigid_body_6dof_direct_wrench/rigid_body_6dof_direct_wrench/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "hl20_mod_k",
@@ -2255,8 +2251,11 @@
             "hl20_source_surface_pitch_authority_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch",
             "hl20_source_surface_attitude_rate_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "hl20_source_surface_pitch_authority_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step",
+            "hl20_source_surface_attitude_rate_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step"
+          ],
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
@@ -2284,10 +2283,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "hl20_source_surface_pitch_authority_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered",
-            "hl20_source_surface_attitude_rate_lqi_screen_v1/rigid_body_6dof_surface_allocated/rigid_body_6dof_surface_allocated/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "hl20_mod_k",
@@ -2408,8 +2404,10 @@
           "batch_tuples": [
             "staged_rocket_launch_target_state_v1/point_mass_3dof/point_mass_3dof/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "staged_rocket_launch_target_state_v1/point_mass_3dof/point_mass_3dof/step"
+          ],
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
@@ -2425,9 +2423,7 @@
           "spawned_child_behavior": [
             "available:stage_separation_lineage:independently_propagated:nesc-synthetic-cylinder"
           ],
-          "blockers": [
-            "staged_rocket_launch_target_state_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "reference_nesc_two_stage_rocket",
@@ -2462,8 +2458,10 @@
           "batch_tuples": [
             "staged_rocket_launch_target_state_v1/pseudo_6dof/pseudo_6dof/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "staged_rocket_launch_target_state_v1/pseudo_6dof/pseudo_6dof/step"
+          ],
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
@@ -2479,9 +2477,7 @@
           "spawned_child_behavior": [
             "available:stage_separation_lineage:independently_propagated:nesc-synthetic-cylinder"
           ],
-          "blockers": [
-            "staged_rocket_launch_target_state_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "reference_nesc_two_stage_rocket",
@@ -2630,8 +2626,10 @@
           "batch_tuples": [
             "tumbling_body_release_damping_impact_v1/point_mass_3dof/point_mass_3dof/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/point_mass_3dof/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -2644,9 +2642,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "tumbling_body_release_damping_impact_v1/point_mass_3dof/point_mass_3dof/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "tumbling_body",
@@ -2679,8 +2675,10 @@
           "batch_tuples": [
             "tumbling_body_release_damping_impact_v1/pseudo_6dof/pseudo_6dof/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/pseudo_6dof/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -2693,9 +2691,7 @@
           "spawned_child_behavior": [
             "none"
           ],
-          "blockers": [
-            "tumbling_body_release_damping_impact_v1/pseudo_6dof/pseudo_6dof/step: no exact episode execution binding is registered"
-          ]
+          "blockers": []
         },
         {
           "model_id": "tumbling_body",
@@ -2815,8 +2811,11 @@
             "tumbling_body_release_damping_impact_v1/point_mass_3dof/cylinder/batch",
             "tumbling_body_release_damping_impact_v1/pseudo_6dof/cylinder/batch"
           ],
-          "interactive_status": "unsupported",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/cylinder/step",
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/cylinder/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -2864,8 +2863,11 @@
             "tumbling_body_release_damping_impact_v1/point_mass_3dof/sphere/batch",
             "tumbling_body_release_damping_impact_v1/pseudo_6dof/sphere/batch"
           ],
-          "interactive_status": "unsupported",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/sphere/step",
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/sphere/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -2913,8 +2915,11 @@
             "tumbling_body_release_damping_impact_v1/point_mass_3dof/cone/batch",
             "tumbling_body_release_damping_impact_v1/pseudo_6dof/cone/batch"
           ],
-          "interactive_status": "unsupported",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/cone/step",
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/cone/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -2962,8 +2967,11 @@
             "tumbling_body_release_damping_impact_v1/point_mass_3dof/triaxial_ellipsoid/batch",
             "tumbling_body_release_damping_impact_v1/pseudo_6dof/triaxial_ellipsoid/batch"
           ],
-          "interactive_status": "unsupported",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "tumbling_body_release_damping_impact_v1/point_mass_3dof/triaxial_ellipsoid/step",
+            "tumbling_body_release_damping_impact_v1/pseudo_6dof/triaxial_ellipsoid/step"
+          ],
           "deployment_staging_capabilities": [
             "none"
           ],
@@ -3159,8 +3167,11 @@
             "air_release_waypoint/point_mass_3dof/generated_native_problem/batch",
             "attached_booster_waypoint/point_mass_3dof/generated_native_problem/batch"
           ],
-          "interactive_status": "blocked",
-          "interactive_tuples": [],
+          "interactive_status": "available",
+          "interactive_tuples": [
+            "air_release_waypoint/point_mass_3dof/generated_native_problem/step",
+            "attached_booster_waypoint/point_mass_3dof/generated_native_problem/step"
+          ],
           "deployment_staging_capabilities": [
             "deployment",
             "staging",
@@ -3179,8 +3190,6 @@
             "declared:booster_glider_separation:event_only:dual_launch_glider"
           ],
           "blockers": [
-            "air_release_waypoint/point_mass_3dof/generated_native_problem/step: no interactive dual-launch Mission Composition session binding is registered",
-            "attached_booster_waypoint/point_mass_3dof/generated_native_problem/step: no interactive dual-launch Mission Composition session binding is registered",
             "deployment/booster_glider_separation: independent_parent_and_child_trajectory_binding"
           ]
         }

@@ -120,7 +120,7 @@ def test_standalone_ads6_sam_advertises_exact_batch_controls_and_explicit_sessio
     with pytest.raises(KeyError, match="unknown CADAC trajectory plug-in"):
         provider.get_model_schema("cadac.aim5.missile")
     assert runner.registrations() == ((CADAC_PROVIDER_ID, ADS6_SAM_MODEL_ID),)
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert [(item.id, item.fidelity_aliases) for item in model.realizations] == [
         (ADS6_SAM_FIN_REALIZATION_ID, (ADS6_SAM_T4_FIDELITY_ID,)),
         (ADS6_SAM_TVC_REALIZATION_ID, (ADS6_SAM_T4_FIDELITY_ID,)),
@@ -146,9 +146,9 @@ def test_standalone_ads6_sam_advertises_exact_batch_controls_and_explicit_sessio
     assert audit.status == "pass", audit.model_dump(mode="json")
 
     integration = provider.get_model_integration_contract(ADS6_SAM_MODEL_ID)
-    assert integration.step.status == "blocked"
-    assert integration.step.state_semantics == "batch_only"
-    assert integration.step.action_semantics == "configuration_fixed"
+    assert integration.step.status == "available"
+    assert integration.step.state_semantics == "core_batch_replay"
+    assert integration.step.action_semantics == "read_only_replay"
     assert integration.sensor_integration.status == "available"
     assert integration.sensor_integration.sensor_bus_status == "blocked"
     assert any("standalone SAM surface owns only the physical plant" in blocker for blocker in integration.sensor_integration.blockers)
@@ -161,7 +161,7 @@ def test_standalone_ads6_sam_advertises_exact_batch_controls_and_explicit_sessio
 
     configuration = build_default_cadac_configuration(provider, ADS6_SAM_MODEL_ID)
     prepared = provider.validate_configuration(configuration)
-    with pytest.raises(ValueError, match="no installed persistent session binding"):
+    with pytest.raises(ValueError, match="no installed native persistent session binding"):
         provider.open_session(
             MissionCompositionOpenSessionRequest(
                 session_id="cadac-ads6-sam-must-not-fabricate-session",

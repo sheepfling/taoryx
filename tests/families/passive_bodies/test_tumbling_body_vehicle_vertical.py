@@ -18,6 +18,11 @@ from taoryx.trajectory.native_mission_composition import (
     build_registry_mission_composition_runner,
     configuration_instance_from_vehicle_request,
 )
+from taoryx.trajectory.session_contract import (
+    MissionCompositionOpenSessionRequest,
+    MissionCompositionSessionManager,
+    MissionCompositionSessionStepRequest,
+)
 from taoryx.vehicle_composition import (
     compile_vehicle_composition,
     load_vehicle_composition_request,
@@ -205,11 +210,11 @@ def test_passive_bodies_packaged_data_is_a_current_exact_extract(tmp_path) -> No
     ####
 
 
-def test_passive_provider_advertises_versioned_batch_only_release_contract(
+def test_passive_provider_advertises_versioned_read_only_replay_contract(
     plugins: PluginCatalog,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """The focused provider exposes no fabricated control or session seam."""
+    """The focused provider replays batch truth through the standard no-control session."""
 
     revision = plugins.plugin_revision(PACKAGE_ID)
     assert revision.package == "taoryx-passive-bodies"
@@ -229,7 +234,7 @@ def test_passive_provider_advertises_versioned_batch_only_release_contract(
     assert model.version == MODEL_VERSION
     assert schema.model_version == MODEL_VERSION
     assert model.output_schema.model_version == MODEL_VERSION
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert len(model.metadata_fingerprint) == 64
     assert len(model.configuration_schema_fingerprint) == 64
     assert len(model.output_schema_fingerprint) == 64
@@ -254,6 +259,28 @@ def test_passive_provider_advertises_versioned_batch_only_release_contract(
     assert controller["campaigns"] == []
     assert controller["default_authority_id"] is None
     assert cast(list[dict[str, object]], controller["authorities"])[0]["id"] == "no_external_action"
+
+    manager = MissionCompositionSessionManager(provider)
+    descriptor = manager.open(
+        MissionCompositionOpenSessionRequest(
+            session_id="passive-release-replay-session",
+            provider_id=provider.metadata.id,
+            provider_version=provider.metadata.version,
+            prepared_configuration=_prepared_configuration(provider),
+            integration_step_s=0.2,
+        )
+    )
+    assert descriptor.action_schema == ()
+    assert descriptor.state_owner == "core_batch_replay_session"
+    assert descriptor.timestep_semantics == "caller_duration_advanced_to_next_replay_sample"
+    stepped = manager.step(
+        MissionCompositionSessionStepRequest(
+            session_id=descriptor.session_id,
+            duration_s=0.2,
+        )
+    )
+    assert stepped.time_end_s > stepped.time_start_s
+    assert len(stepped.observation.standard_ecef.ecef_from_body_wxyz) == 4
 
     composition = compile_vehicle_composition(
         load_vehicle_composition_request(model_resource_root() / "examples/vehicle_composition/tumbling_body_direct_release_pseudo6dof_compose.yaml"),

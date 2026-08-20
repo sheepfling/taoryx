@@ -1566,6 +1566,7 @@ def _build_model_metadata(
         model_kind="vehicle_plugin",
         status="development",
         tags=("cadac", "agm6", "air-to-ground", "rigid-body", "physical-fins"),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch", "step"),
         common_runner_operations=("batch", "step"),
         capabilities=TrajectoryModelCapabilities(

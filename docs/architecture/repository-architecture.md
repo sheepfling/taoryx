@@ -130,17 +130,29 @@ The test pyramid is intentionally vertical and scoped:
 2. `python tools/dev.py test-vehicle <family>` runs one fast composition slice.
    `check-vehicle <family>` adds that family’s interface, witness, and relevant
    parity checks.
-3. `python tools/dev.py check-plugin <plugin>` validates the direct-route
-   dependency rules and then runs the focused installed-wheel proof. Its wheel
-   command, `python tools/verify_plugin_wheels.py --plugin <plugin> --python
-   .venv/bin/python`,
-   builds fresh source/wheels, installs only the selected boundary and declared
-   direct dependencies in a temporary target, removes source fallback, and
-   exercises the installed result. It is the package installation proof.
+3. `python tools/dev.py check-plugin-contract <plugin>` is the fast inner-loop
+   check: it validates only that plug-in’s direct-route dependency rules and
+   TAORYX-universal Mission Composition contract. `python tools/dev.py check-plugin <plugin>`
+   adds its focused installed-wheel proof. The universal check
+   constructs only that plug-in’s providers, audits their advertised schemas,
+   requires every host-facing TAORYX model to have matching registered common
+   `batch` and `step` tuples, and verifies the mandatory standard ECFC/ECEF
+   result/session types. The reusable provider protocol remains capability
+   based, so an external provider may honestly advertise batch-only execution.
+   It treats a plug-in with no trajectory provider as not applicable rather
+   than loading unrelated providers. Its wheel command,
+   `python tools/verify_plugin_wheels.py --plugin <plugin> --python
+   .venv/bin/python`, builds fresh source/wheels, installs only the selected
+   boundary and declared direct dependencies in a temporary target, removes
+   source fallback, and exercises the installed result. It is the package
+   installation proof.
+   The compatibility aggregate is intentionally different: because its
+   provider composes the direct package catalog, its `check-plugin-contract`
+   path validates that declared aggregate scope.
 4. Catalogue-wide tests and the full `pytest` suite are integration/release
    work, not the default evidence required to change a single plug-in.
 
-A family change should normally run levels 1–3 for that package, then broaden
+A family change should normally run levels 2–3 for that package, then broaden
 only when a typed shared contract or declared cross-package dependency changes.
 
 ## Migration state and rules of engagement

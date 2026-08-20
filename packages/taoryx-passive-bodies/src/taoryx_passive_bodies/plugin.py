@@ -192,7 +192,7 @@ def _registration() -> FamilyAdapterRegistration:
         "available",
         _passive_tumbling_adapter,
         supported_tiers=("point_mass_3dof", "pseudo_6dof"),
-        note="batch-only passive direct-release reductions; no controller, derivative, trim, allocator, or physical-effector path is implied",
+        note="batch-native passive direct-release reductions with read-only core replay; no controller, derivative, trim, allocator, or physical-effector path is implied",
     )
     ####
 

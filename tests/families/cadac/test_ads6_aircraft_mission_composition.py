@@ -38,7 +38,7 @@ def test_ads6_aircraft_provider_advertises_exact_t1_force_model(tmp_path: Path) 
 
     assert model.id == ADS6_AIRCRAFT_MODEL_ID
     assert model.version == ADS6_AIRCRAFT_MODEL_VERSION
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert [item.id for item in model.fidelities] == [ADS6_AIRCRAFT_FIDELITY_ID]
     assert model.fidelities[0].runtime_fidelity == "point_mass_3dof"
     assert model.fidelities[0].control_realization == "force_model"

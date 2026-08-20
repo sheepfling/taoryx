@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import math
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -14,7 +16,11 @@ from ..composition_episode import (
     ActionFrame,
     EpisodeChannel,
     EpisodeObservation,
+    EpisodeStatus,
+    EpisodeStep,
     MissionCompositionEpisode,
+    ObservationFrame,
+    StatusFrame,
     open_vehicle_composition_episode,
 )
 from ..control_schemes import (
@@ -32,13 +38,21 @@ from .configuration_contract import (
     ControlTemporalSemantics,
     PreparedTrajectoryConfiguration,
     TrajectoryControlSamplingSemantics,
+    TrajectoryMissionOperationMetadata,
     TrajectoryModelMetadata,
     TrajectoryOutputDataType,
     TrajectorySamplingSemantics,
 )
-from .execution_contract import MissionCompositionDiagnostic, MissionCompositionExecutionError
+from .execution_contract import (
+    MissionCompositionDiagnostic,
+    MissionCompositionExecutionError,
+    MissionCompositionOutputSelection,
+    MissionCompositionRunRequest,
+    MissionCompositionTrajectoryResult,
+)
 from .native_mission_composition import compile_prepared_vehicle_composition
 from .registry_mission_composition import RegistryMissionCompositionProvider
+from .session_interface import build_session_interface_contract
 from .standard_output import StandardEcefState, project_standard_ecef_samples, standard_ecef_state_from_values
 
 SessionLifecycle = Literal["ready", "active", "completed", "closed", "failed"]
@@ -474,11 +488,14 @@ class MissionCompositionSessionDescriptor(BaseModel):
     realization_id: str
     fidelity: str
     configuration_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
-    state_owner: Literal["provider_session"] = "provider_session"
+    state_owner: Literal["provider_session", "core_batch_replay_session"] = "provider_session"
     seed: int | None = None
     deterministic_reset: bool = True
     reset_semantics: Literal["reconstruct_prepared_initial_state"] = "reconstruct_prepared_initial_state"
-    timestep_semantics: Literal["caller_duration_held_across_native_substeps"] = "caller_duration_held_across_native_substeps"
+    timestep_semantics: Literal[
+        "caller_duration_held_across_native_substeps",
+        "caller_duration_advanced_to_next_replay_sample",
+    ] = "caller_duration_held_across_native_substeps"
     integration_step_s: float = Field(gt=0.0)
     supports_spawned_entities: bool = False
     action_schema: tuple[MissionCompositionSessionChannel, ...]
@@ -769,6 +786,257 @@ class _SessionRecord:
     closed: bool = False
 
 
+class BatchReplayCompositionEpisode:
+    """Read-only session projection of one exact common batch result.
+
+    This is deliberately not a substitute plant or a synthetic controller.
+    It gives batch-native models the same stateful transport lifecycle as native
+    episode models, preserving their returned truth samples and their exact
+    standard-ECEF sidecar while accepting no control actions.
+    """
+
+    auto_select_default_authority = False
+    checkpoint_schema = "taoryx.batch-replay-composition-episode-checkpoint/v1"
+    claim_boundary = (
+        "This session replays the exact selected common batch result at its recorded truth boundaries. "
+        "It accepts no controls and does not claim a live native integration or control response."
+    )
+
+    def __init__(
+        self,
+        *,
+        model: TrajectoryModelMetadata,
+        prepared: PreparedTrajectoryConfiguration,
+        result: MissionCompositionTrajectoryResult,
+        seed: int | None,
+    ) -> None:
+        primary = next((item for item in result.objects if item.object_id == result.primary_object_id), None)
+        if primary is None:
+            raise ValueError("batch replay result omitted its declared primary trajectory object")
+        if not primary.samples:
+            raise ValueError("batch replay result has no primary truth samples")
+        configuration = prepared.configuration
+        realization_id = configuration.realization_id or configuration.fidelity
+        interface_contract, advertised_channels = build_session_interface_contract(
+            model,
+            realization_id=realization_id,
+            fidelity=configuration.fidelity,
+            family_id=model.family_id or model.id,
+            physical_family=model.physical_family or "provider_defined",
+            claim_boundary=self.claim_boundary,
+            include_batch_replay_channels=True,
+        )
+        if interface_contract.action_channels or interface_contract.authority_profiles:
+            raise ValueError(
+                "core batch replay cannot expose model controls; register a native session episode for a controllable step path"
+            )
+        available_channel_ids = {item.id for item in primary.channels}
+        observation_channels = tuple(item for item in advertised_channels if item.name in available_channel_ids)
+        missing_core = tuple(
+            item.name for item in advertised_channels if item.name not in available_channel_ids
+        )
+        if missing_core:
+            raise ValueError(
+                "batch replay result omitted guaranteed step observation channels "
+                f"{list(missing_core)!r}"
+            )
+        if not observation_channels:
+            raise ValueError("batch replay result has no usable observation channels")
+        self.interface_contract = interface_contract
+        self._observation_schema = observation_channels
+        self._samples = primary.samples
+        self._events = result.events
+        self._result_request_id = result.request_id
+        self._seed = seed
+        self._index = 0
+        self._closed = False
+        ####
+
+    @property
+    def action_schema(self) -> tuple[EpisodeChannel, ...]:
+        """Replay sessions deliberately expose no externally applied action."""
+
+        return ()
+        ####
+
+    @property
+    def observation_schema(self) -> tuple[EpisodeChannel, ...]:
+        return self._observation_schema
+        ####
+
+    @property
+    def is_batch_replay(self) -> bool:
+        """Identify the explicit no-control core adapter for descriptor metadata."""
+
+        return True
+        ####
+
+    def reset(self, *, seed: int | None = None) -> EpisodeObservation:
+        """Rewind the immutable deterministic replay without altering its configuration."""
+
+        self._require_open()
+        if seed is not None and seed != self._seed:
+            raise ValueError("batch replay sessions cannot change the already-executed batch seed")
+        self._index = 0
+        return self.observe()
+        ####
+
+    def observe(self) -> EpisodeObservation:
+        """Return the selected recorded truth boundary without interpolation."""
+
+        self._require_open()
+        sample = self._samples[self._index]
+        return EpisodeObservation(
+            sample.time_s,
+            dict(sample.values),
+            self._status(),
+            sample.standard_ecef,
+        )
+        ####
+
+    def step(self, action: Mapping[str, object], duration_s: float) -> EpisodeStep:
+        """Advance to the first recorded boundary at or after the requested duration."""
+
+        self._require_open()
+        if action:
+            raise ValueError("batch replay sessions accept no control actions")
+        if not math.isfinite(duration_s) or duration_s <= 0.0:
+            raise ValueError("batch replay duration must be positive and finite")
+        if self._index >= len(self._samples) - 1:
+            raise RuntimeError("batch replay has reached its terminal recorded boundary")
+        time_start_s = self._samples[self._index].time_s
+        target_time_s = time_start_s + duration_s
+        next_index = next(
+            (
+                index
+                for index in range(self._index + 1, len(self._samples))
+                if self._samples[index].time_s >= target_time_s - 1.0e-12
+            ),
+            len(self._samples) - 1,
+        )
+        self._index = next_index
+        observation = self.observe()
+        events = tuple(
+            f"{item.category}:{item.kind}"
+            for item in self._events
+            if time_start_s < item.time_s <= observation.time_s + 1.0e-12
+        )
+        diagnostics = (
+            ()
+            if abs(observation.time_s - target_time_s) <= 1.0e-9
+            else ("batch replay advanced to the next recorded truth boundary",)
+        )
+        return EpisodeStep(
+            time_start_s,
+            observation.time_s,
+            {},
+            {},
+            observation,
+            events,
+            diagnostics,
+        )
+        ####
+
+    def step_frame(self, action: ActionFrame) -> EpisodeStep:
+        """Reject semantic action frames because this adapter has no authority profile."""
+
+        del action
+        raise ValueError("batch replay sessions have no semantic action authority")
+        ####
+
+    def status_frame(self) -> StatusFrame:
+        """Return replay provenance alongside the current recorded truth values."""
+
+        observation = self.observe()
+        return StatusFrame(
+            self.interface_contract.id,
+            self.interface_contract.fingerprint,
+            observation.time_s,
+            dict(observation.values),
+            {
+                "session_adapter": "core_batch_replay",
+                "batch_request_id": self._result_request_id,
+            },
+            observation.status,
+        )
+        ####
+
+    def observe_frame(self, observation_profile_id: str = "truth_debug") -> ObservationFrame:
+        """Project a declared replay observation view without interpolating it."""
+
+        profile = self.interface_contract.observation_profile(observation_profile_id)
+        observation = self.observe()
+        values = {
+            identifier: observation.values[identifier]
+            for identifier in profile.channel_ids
+            if identifier in observation.values
+        }
+        return ObservationFrame(
+            self.interface_contract.id,
+            self.interface_contract.fingerprint,
+            profile.id,
+            observation.time_s,
+            values,
+            {identifier: True for identifier in values},
+            observation.status,
+            observation.time_s,
+        )
+        ####
+
+    def save_checkpoint(self, path: str | Path) -> Path:
+        """Persist the replay cursor with the immutable interface identity."""
+
+        self._require_open()
+        target = Path(path)
+        payload = {
+            "schema": self.checkpoint_schema,
+            "interface_id": self.interface_contract.id,
+            "interface_fingerprint_sha256": self.interface_contract.fingerprint,
+            "sample_index": self._index,
+            "seed": self._seed,
+        }
+        target.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return target
+        ####
+
+    def load_checkpoint(self, path: str | Path) -> EpisodeObservation:
+        """Restore a saved replay cursor after validating its interface binding."""
+
+        self._require_open()
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        if not isinstance(payload, Mapping) or payload.get("schema") != self.checkpoint_schema:
+            raise ValueError("batch replay checkpoint schema is unsupported")
+        if payload.get("interface_id") != self.interface_contract.id:
+            raise ValueError("batch replay checkpoint names another interface")
+        if payload.get("interface_fingerprint_sha256") != self.interface_contract.fingerprint:
+            raise ValueError("batch replay checkpoint interface fingerprint is stale")
+        index = payload.get("sample_index")
+        if isinstance(index, bool) or not isinstance(index, int) or not 0 <= index < len(self._samples):
+            raise ValueError("batch replay checkpoint sample index is invalid")
+        self._index = index
+        return self.observe()
+        ####
+
+    def close(self) -> None:
+        self._closed = True
+        ####
+
+    def _status(self) -> EpisodeStatus:
+        if self._index == 0:
+            return "ready"
+        if self._index >= len(self._samples) - 1:
+            return "completed"
+        return "active"
+        ####
+
+    def _require_open(self) -> None:
+        if self._closed:
+            raise RuntimeError("batch replay episode is closed")
+        ####
+
+    ####
+
+
 class MissionCompositionSessionManager:
     """Own stateful native episodes behind one provider-neutral lifecycle API."""
 
@@ -808,9 +1076,16 @@ class MissionCompositionSessionManager:
         mission_template_id = prepared.configuration.mission_template_id or ""
         fidelity = prepared.configuration.fidelity
         realization_id = prepared.configuration.realization_id or fidelity
-        _require_session_operation(model, mission_template_id, fidelity, realization_id)
+        session_operation = _require_session_operation(model, mission_template_id, fidelity, realization_id)
         try:
-            if model.model_kind == "canonical_vehicle_family":
+            if session_operation.execution_mode == "core_batch_replay":
+                episode = _open_batch_replay_episode(
+                    self.provider,
+                    model,
+                    prepared,
+                    request,
+                )
+            elif model.model_kind == "canonical_vehicle_family":
                 resolver = getattr(self.provider, "resolve_provider", None)
                 native_provider = resolver() if callable(resolver) else self.provider
                 if not isinstance(native_provider, RegistryMissionCompositionProvider):
@@ -900,8 +1175,18 @@ class MissionCompositionSessionManager:
             realization_id=realization_id,
             fidelity=fidelity,
             configuration_fingerprint=prepared.fingerprint,
+            state_owner=(
+                "core_batch_replay_session"
+                if isinstance(episode, BatchReplayCompositionEpisode)
+                else "provider_session"
+            ),
             seed=request.seed,
             integration_step_s=request.integration_step_s,
+            timestep_semantics=(
+                "caller_duration_advanced_to_next_replay_sample"
+                if isinstance(episode, BatchReplayCompositionEpisode)
+                else "caller_duration_held_across_native_substeps"
+            ),
             supports_spawned_entities=supports_spawned,
             action_schema=action_schema,
             action_schema_projection=action_schema_projection,
@@ -1260,7 +1545,7 @@ class MissionCompositionSessionManager:
         self,
         request: MissionCompositionCloseSessionRequest | str,
     ) -> MissionCompositionClosedSession:
-        """Close native state ownership and retain a terminal acknowledgement."""
+        """Close provider or core replay state and retain a terminal acknowledgement."""
 
         session_id = request.session_id if isinstance(request, MissionCompositionCloseSessionRequest) else request
         record = self._record(session_id)
@@ -1895,7 +2180,11 @@ def _observation(
             values[item.id],
             path=f"session observation channel {item.id!r}",
         )
-    if previous is not None and abs(native.time_s - previous.time_s) <= 1.0e-12:
+    if isinstance(native.standard_ecef, StandardEcefState):
+        standard_ecef = native.standard_ecef
+    elif native.standard_ecef is not None:
+        standard_ecef = StandardEcefState.model_validate(native.standard_ecef)
+    elif previous is not None and abs(native.time_s - previous.time_s) <= 1.0e-12:
         standard_ecef = previous.standard_ecef
     elif previous is None:
         standard_ecef = standard_ecef_state_from_values(native.time_s, values)
@@ -2065,7 +2354,7 @@ def _require_session_operation(
     mission_id: str,
     fidelity: str,
     realization_id: str,
-) -> None:
+) -> TrajectoryMissionOperationMetadata:
     mission = next((item for item in model.mission_templates if item.id == mission_id), None)
     exact = (
         None
@@ -2082,6 +2371,51 @@ def _require_session_operation(
             model.id,
             details={"blockers": [] if exact is None else list(exact.blockers)},
         )
+    return exact
+    ####
+
+
+def _open_batch_replay_episode(
+    provider: ConfigurableTrajectoryProvider,
+    model: TrajectoryModelMetadata,
+    prepared: PreparedTrajectoryConfiguration,
+    request: MissionCompositionOpenSessionRequest,
+) -> BatchReplayCompositionEpisode:
+    """Execute one exact common batch request and retain it as a read-only session."""
+
+    build_runner = getattr(provider, "build_runner", None)
+    if not callable(build_runner):
+        raise TypeError(
+            f"provider {provider.metadata.id!r} advertises a core batch-replay session but has no common batch runner"
+        )
+    runner = build_runner()
+    if not runner.has_executor(provider.metadata.id, model.id):
+        raise ValueError(
+            f"provider {provider.metadata.id!r} has no registered batch executor for replay model {model.id!r}"
+        )
+    response = runner.run(
+        MissionCompositionRunRequest(
+            request_id=f"{request.session_id}:batch-replay",
+            provider_id=provider.metadata.id,
+            provider_version=provider.metadata.version,
+            prepared_configuration=prepared,
+            output=MissionCompositionOutputSelection(
+                mode="all",
+                cadence_s=request.integration_step_s,
+            ),
+        )
+    )
+    if response.kind != "trajectory":
+        messages = "; ".join(item.message for item in response.failure.diagnostics)
+        raise ValueError(
+            f"batch replay setup failed for {model.id!r}: {messages or response.failure.category}"
+        )
+    return BatchReplayCompositionEpisode(
+        model=model,
+        prepared=prepared,
+        result=response.result,
+        seed=request.seed,
+    )
     ####
 
 
@@ -2131,6 +2465,7 @@ def _session_error(
 
 
 __all__ = [
+    "BatchReplayCompositionEpisode",
     "MissionCompositionAgentActionChannel",
     "MissionCompositionAgentActionSpace",
     "MissionCompositionAuthorityTransition",

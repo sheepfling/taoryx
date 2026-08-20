@@ -6,11 +6,13 @@ source-problem lowering, normalized batch result projection, endpoint witness,
 and package-owned metadata.
 
 The focused provider is `taoryx.dual-launch.mission-composition`. It exposes
-only the executable source-generated point-mass batch route. Both air-release
-and attached-booster forms share a post-release waypoint mission; separation is
+the executable source-generated point-mass route through both the common batch
+request and the standard read-only replay session. Both air-release and
+attached-booster forms share a post-release waypoint mission; separation is
 reported as an event on the primary trajectory, not as an independently
-propagated child vehicle. Pseudo-6DOF, rigid-body, and interactive modes are
-advertised as unavailable rather than inferred.
+propagated child vehicle. The replay session accepts no caller actions.
+Pseudo-6DOF, rigid-body, native live-control, and independently propagated
+child modes are advertised as unavailable rather than inferred.
 
 The historical `taoryx.registry.mission-composition` aggregate can retain this
 model as a compatibility view when its full profile is installed. New UI,

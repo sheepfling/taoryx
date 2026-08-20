@@ -33,7 +33,7 @@ def test_rocket6g_provider_advertises_phase_aware_mixed_effector_6dof(tmp_path: 
     model = provider.list_models()[0]
 
     assert model.id == ROCKET6G_MODEL_ID
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert model.fidelities[0].id == ROCKET6G_FIDELITY_ID
     assert model.fidelities[0].dynamics_fidelity == "rigid_body_6dof"
     assert model.fidelities[0].input_realization == "actuator_allocated"

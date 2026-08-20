@@ -852,6 +852,7 @@ def _model_metadata(
         model_kind="canonical_vehicle_family",
         status="common_runner_ready" if common_runner_operations else "declared",
         tags=(vehicle.family.family.physical_family, "canonical-family"),
+        execution_capability_profile="taoryx_universal",
         operations=operations,
         common_runner_operations=common_runner_operations,
         capabilities=_model_capabilities(vehicle, operations, deployments),

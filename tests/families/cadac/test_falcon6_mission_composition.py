@@ -30,7 +30,7 @@ def test_falcon6_provider_advertises_physical_surface_6dof(tmp_path: Path) -> No
     provider = _provider(tmp_path)
     model = provider.list_models()[0]
     assert model.id == FALCON6_MODEL_ID
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert model.fidelities[0].id == FALCON6_FIDELITY_ID
     assert model.fidelities[0].dynamics_fidelity == "rigid_body_6dof"
     assert model.fidelities[0].input_realization == "actuator_allocated"

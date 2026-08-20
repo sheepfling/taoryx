@@ -25,7 +25,7 @@ def _provider(tmp_path: Path) -> CadacGhame3MissionCompositionProvider:
 def test_ghame3_provider_is_unambiguously_point_mass(tmp_path: Path) -> None:
     model = _provider(tmp_path).list_models()[0]
     assert model.id == GHAME3_MODEL_ID
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert len(model.fidelities) == 1
     assert model.fidelities[0].id == GHAME3_FIDELITY_ID
     assert model.fidelities[0].dynamics_fidelity == "point_mass_3dof"

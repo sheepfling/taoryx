@@ -483,6 +483,7 @@ def dual_launch_model_metadata(schema: TrajectoryConfigurationSchema | None = No
         model_kind="composition_proof_family",
         status="common_runner_ready",
         tags=("glider", "dual-launch", "deployment"),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch"),
         common_runner_operations=("batch",),
         capabilities=TrajectoryModelCapabilities(

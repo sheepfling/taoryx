@@ -1311,6 +1311,7 @@ def _build_model_metadata(
         model_kind="mission_composition",
         status="development",
         tags=("cadac", "ads6", "multi-actor", "radar", target_kind),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch", "step"),
         common_runner_operations=("batch", "step"),
         capabilities=TrajectoryModelCapabilities(

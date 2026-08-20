@@ -50,7 +50,7 @@ make an advertised endpoint real:
 The package must not depend on a compatibility aggregate merely to advertise
 or run itself. It loads packaged data through `importlib.resources`, not by
 walking from the source-checkout root. An endpoint can be discoverable while
-blocked or batch-only, but a runnable operation must name an exact registered
+blocked or batch-native, but a runnable operation must name an exact registered
 factory. Taoryx never substitutes a nearby vehicle or factory; a requested
 fidelity can resolve lower only through its explicitly declared, validated
 fallback policy.
@@ -63,15 +63,21 @@ combination:
 ```text
 family + model + mission + realization + fidelity + operation
     -> typed configuration and public interface
-    -> one registered batch factory and/or persistent episode factory
+    -> one registered batch factory and, when applicable, a native episode factory
     -> checked-in witness and focused verification
 ```
 
-An operation is `batch`, `episode`, or both. Batch is a bounded run that
-returns a standard artifact. An episode is a provider-owned, persistent model
-that can be opened, inspected, stepped, reset, and closed. Publishing `step`
-without an exact episode factory is invalid; publishing an action with no
-lowering or runtime behavior is equally invalid.
+Every TAORYX-owned executable model has the common `batch` and `step`
+surfaces. Batch is a bounded run that returns a standard artifact. A provider
+may additionally own a live, persistent episode that can be opened, inspected,
+stepped, reset, and closed with caller actions. Where a TAORYX provider has
+only a registered batch factory, core exposes that result through an explicitly
+read-only replay session: its `step` advances through committed truth
+boundaries and has no action schema. The reusable external-provider interface
+also admits an honestly batch-only provider; it must advertise that capability
+instead of claiming a step seam. Publishing live actions without lowering or
+runtime behavior is invalid; a replay session must not advertise actions at
+all.
 
 The [A320 plug-in](../../packages/taoryx-a320/src/taoryx_a320/plugin.py),
 [F-16 plug-in](../../packages/taoryx-f16/src/taoryx_f16/plugin.py), and
@@ -80,9 +86,11 @@ are the current reference vertical slices. Each owns an isolated Mission
 Composition provider, package data, exact batch and episode factories where
 the endpoint supports an episode, preflight callbacks, control campaigns, and
 batch/episode parity verifier where parity is claimed. A320 additionally
-shows the truthful batch-only case: its named-coordinate LQI screen owns an
+shows a native batch-screen boundary: its named-coordinate LQI screen owns an
 executable definition for core preflight/batch dispatch and an identical
-static local-screen advertisement for UI and agent plans. F-16 demonstrates a
+static local-screen advertisement for UI and agent plans; core still gives it
+the read-only standard session when no native live episode is registered.
+F-16 demonstrates a
 source-model dependency on DAVE-ML while retaining a reduced 3DOF/pseudo-6DOF
 control surface separate from its bounded local physical-controller screens.
 
@@ -226,7 +234,8 @@ PLUGIN = PluginDefinition(
 
 This is a shape, not a mandate to register every contribution. A package with
 only an analytical Mission Composition provider may register only that provider;
-a batch-only local screen needs no episode factory; a family with no tuning
+a batch-native local screen needs no native episode factory because core supplies
+its read-only replay session; a family with no tuning
 campaign should not invent one. The identifiers must match the corresponding
 family metadata, preflight records, execution bindings, and witnesses exactly.
 The typed registrar and its versioned contribution surface are defined in
@@ -545,8 +554,8 @@ Keep these boundaries separate:
 
 The interface/endpoint catalog joins these records so a developer can inspect
 one exact runnable claim rather than reconstructing a vehicle from separate
-registries. Keep blocked, batch-only, and no-control cases explicit; absence
-of a factory, adapter, sensor, or physical-effector model is meaningful.
+registries. Keep blocked, batch-native, and no-control cases explicit; absence
+of a native factory, adapter, sensor, or physical-effector model is meaningful.
 
 ## Verification checklist
 

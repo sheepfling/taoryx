@@ -698,8 +698,8 @@ def test_f16_physical_surface_lqi_screen_is_selectable_through_the_common_plan(
         ("effector.throttle.position", 0.0, 1.0),
     ]
     assert execution["status"] == "runnable"
-    assert execution["endpoint_maturity"] == "batch_ready"
-    assert execution["available_operations"] == ["validate", "batch"]
+    assert execution["endpoint_maturity"] == "batch_and_step_ready"
+    assert execution["available_operations"] == ["validate", "batch", "step"]
     ####
 
 
@@ -727,7 +727,7 @@ def test_f16_physical_schedule_interior_screen_is_selectable_through_the_common_
     assert [item["id"] for item in cast(list[dict[str, object]], controller["campaigns"])] == ["f16-source-surface-schedule-lqr-v1"]
     assert details["method"] == "lqr"
     assert details["selection"] == "discrete_source_node_held_for_each_recovery"
-    assert execution["available_operations"] == ["validate", "batch"]
+    assert execution["available_operations"] == ["validate", "batch", "step"]
     ####
 
 
@@ -756,7 +756,7 @@ def test_f16_physical_schedule_transition_screen_is_selectable_through_the_commo
     assert details["method"] == "lqr"
     assert details["selection"] == "linearly_interpolated_source_lqr_schedule_by_altitude_coordinate"
     assert details["screen_duration_s"] == 240.0
-    assert execution["available_operations"] == ["validate", "batch"]
+    assert execution["available_operations"] == ["validate", "batch", "step"]
     ####
 
 
@@ -785,7 +785,7 @@ def test_f16_physical_lqi_schedule_interior_screen_is_selectable_through_the_com
     assert details["method"] == "lqi"
     assert details["integral_output_names"] == ["u_m_s", "v_m_s", "w_m_s"]
     assert details["selection"] == "discrete_source_node_held_for_each_recovery"
-    assert execution["available_operations"] == ["validate", "batch"]
+    assert execution["available_operations"] == ["validate", "batch", "step"]
     ####
 
 

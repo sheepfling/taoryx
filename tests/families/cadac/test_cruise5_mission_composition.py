@@ -34,9 +34,9 @@ def test_cruise5_provider_advertises_pseudo_and_validate_only_translation_tiers(
     fidelity_by_id = {item.id: item for item in model.fidelities}
     realization_by_id = {item.id: item for item in model.realizations}
     assert model.id == CRUISE5_MODEL_ID
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert fidelity_by_id[CRUISE5_FIDELITY_ID].dynamics_fidelity == "pseudo_6dof"
-    assert fidelity_by_id[CRUISE5_FIDELITY_ID].operations == ("validate", "batch")
+    assert fidelity_by_id[CRUISE5_FIDELITY_ID].operations == ("validate", "batch", "step")
     assert fidelity_by_id[CRUISE5_TRANSLATION_FIDELITY_ID].operations == ("validate",)
     assert realization_by_id["cadac-source-compatibility"].status == "available"
     assert realization_by_id["cadac-source-phase.translation_only"].status == "blocked"

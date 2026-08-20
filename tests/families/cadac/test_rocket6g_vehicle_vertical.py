@@ -97,7 +97,7 @@ def test_bound_rocket6g_preserves_one_model_scope_and_control_analysis_boundary(
     audit = audit_provider_advertisement(provider, runner)
 
     assert model.version == ROCKET6G_MODEL_VERSION
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert tuple(item.id for item in model.fidelities) == (ROCKET6G_FIDELITY_ID,)
     assert model.fidelities[0].dynamics_fidelity == "rigid_body_6dof"
     assert model.fidelities[0].input_realization == "actuator_allocated"
@@ -116,9 +116,9 @@ def test_bound_rocket6g_preserves_one_model_scope_and_control_analysis_boundary(
     assert controls.authorities[0].command_owner == "caller"
     assert audit.status == "pass", audit.model_dump(mode="json")
 
-    assert integration.step.status == "blocked"
-    assert integration.step.state_semantics == "batch_only"
-    assert integration.step.action_semantics == "configuration_fixed"
+    assert integration.step.status == "available"
+    assert integration.step.state_semantics == "core_batch_replay"
+    assert integration.step.action_semantics == "read_only_replay"
     assert integration.controller_analysis.ownership == "external_at_source_boundary"
     assert integration.controller_analysis.command_output_channel_ids == (
         "requested_tvc_control_deg",
@@ -136,7 +136,7 @@ def test_bound_rocket6g_preserves_one_model_scope_and_control_analysis_boundary(
     assert integration.sensor_integration.sensor_bus_status == "not_applicable"
 
     prepared = provider.validate_configuration(_rocket6g_configuration(provider))
-    with pytest.raises(ValueError, match="no installed persistent session binding"):
+    with pytest.raises(ValueError, match="no installed native persistent session binding"):
         provider.open_session(
             MissionCompositionOpenSessionRequest(
                 session_id="cadac-rocket6g-must-not-fabricate-session",

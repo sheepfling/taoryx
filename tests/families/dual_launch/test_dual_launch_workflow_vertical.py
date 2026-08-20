@@ -16,13 +16,13 @@ import taoryx.mission_workflow_endpoint as workflow_endpoints
 from taoryx.model_authoring import build_model_authoring_plan
 from taoryx.plugins import MissionWorkflowEndpointCatalogFragment, PluginCatalog, discover_plugins
 from taoryx.trajectory.execution_contract import (
-    MissionCompositionExecutionError,
     MissionCompositionOutputSelection,
     MissionCompositionRunRequest,
 )
 from taoryx.trajectory.session_contract import (
     MissionCompositionOpenSessionRequest,
     MissionCompositionSessionManager,
+    MissionCompositionSessionStepRequest,
 )
 from tools.extract_dual_launch_plugin_assets import check as check_dual_launch_plugin_assets
 from tools.extract_dual_launch_plugin_assets import extract as extract_dual_launch_plugin_assets
@@ -144,7 +144,7 @@ def test_dual_launch_focused_provider_advertises_versioned_batch_only_controls(
     assert model.version == MODEL_VERSION
     assert schema.model_version == MODEL_VERSION
     assert model.output_schema.model_version == MODEL_VERSION
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert len(model.metadata_fingerprint) == 64
     assert len(model.configuration_schema_fingerprint) == 64
     assert len(model.output_schema_fingerprint) == 64
@@ -238,16 +238,17 @@ def test_each_launch_form_executes_through_the_selected_package_runner(
     ####
 
 
-def test_dual_launch_remains_batch_only_without_child_fabrication(plugins: PluginCatalog) -> None:
-    """Unavailable fidelity, stepping, and child routes remain explicit."""
+def test_dual_launch_uses_a_read_only_core_replay_session_without_child_fabrication(plugins: PluginCatalog) -> None:
+    """The common step lifecycle replays truth without inventing controls or children."""
 
     provider = _provider(plugins)
     model = provider.model(MODEL_ID)
     attached = next(item for item in model.mission_templates if item.id == "attached_booster_waypoint")
     point_step = next(item for item in attached.operations if item.fidelity == FIDELITY and item.operation == "step")
-    assert point_step.status == "blocked"
-    assert point_step.common_runner_status == "not_available"
-    assert point_step.blockers == ("no interactive dual-launch Mission Composition session binding is registered",)
+    assert point_step.status == "available"
+    assert point_step.common_runner_status == "registered"
+    assert point_step.execution_mode == "core_batch_replay"
+    assert point_step.blockers == ()
     assert attached.compatible_fidelities == (FIDELITY,)
     assert not [item for item in attached.operations if item.fidelity == "pseudo_6dof"]
     pseudo = next(item for item in model.fidelities if item.id == "pseudo_6dof")
@@ -258,19 +259,27 @@ def test_dual_launch_remains_batch_only_without_child_fabrication(plugins: Plugi
     assert deployment.lifecycle == "event_only"
     assert deployment.blockers == ("independent_parent_and_child_trajectory_binding",)
 
-    with pytest.raises(MissionCompositionExecutionError) as error:
-        MissionCompositionSessionManager(provider).open(
-            MissionCompositionOpenSessionRequest(
-                session_id="dual-launch-focused-workflow-boundary",
-                provider_id=provider.metadata.id,
-                provider_version=provider.metadata.version,
-                prepared_configuration=_prepared(provider, "attached_booster"),
-            )
+    manager = MissionCompositionSessionManager(provider)
+    descriptor = manager.open(
+        MissionCompositionOpenSessionRequest(
+            session_id="dual-launch-focused-workflow-boundary",
+            provider_id=provider.metadata.id,
+            provider_version=provider.metadata.version,
+            prepared_configuration=_prepared(provider, "attached_booster"),
+            integration_step_s=0.2,
         )
-
-    assert error.value.diagnostic.code == "interactive-operation-not-available"
-    assert error.value.diagnostic.phase == "preflight"
-    assert error.value.diagnostic.details["blockers"] == list(point_step.blockers)
+    )
+    assert descriptor.state_owner == "core_batch_replay_session"
+    assert descriptor.timestep_semantics == "caller_duration_advanced_to_next_replay_sample"
+    assert descriptor.action_schema == ()
+    stepped = manager.step(
+        MissionCompositionSessionStepRequest(
+            session_id=descriptor.session_id,
+            duration_s=0.2,
+        )
+    )
+    assert stepped.time_end_s > stepped.time_start_s
+    assert len(stepped.observation.standard_ecef.ecef_from_body_wxyz) == 4
     ####
 
 

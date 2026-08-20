@@ -1,4 +1,7 @@
 import pytest
+
+from taoryx.composition_episode import registered_episode_factory_ids
+from taoryx.trajectory.execution_contract import MissionCompositionExecutionError
 from taoryx.trajectory.native_mission_composition import configuration_instance_from_vehicle_request
 from taoryx.trajectory.registry_mission_composition import RegistryMissionCompositionProvider
 from taoryx.trajectory.session_contract import (
@@ -15,9 +18,6 @@ from taoryx.trajectory.session_contract import (
     MissionCompositionSessionStepResult,
     MissionCompositionSwitchAuthorityRequest,
 )
-
-from taoryx.composition_episode import registered_episode_factory_ids
-from taoryx.trajectory.execution_contract import MissionCompositionExecutionError
 from taoryx.vehicle_composition import load_vehicle_composition_request
 from taoryx.vehicle_execution_bindings import load_vehicle_execution_binding_catalog
 from taoryx.vehicle_execution_witnesses import load_vehicle_execution_witness_catalog
@@ -138,13 +138,15 @@ def test_every_native_episode_tuple_uses_common_stateful_session(witness: object
     ####
 
 
-def test_registered_interactive_matrix_exactly_matches_episode_witnesses() -> None:
-    advertised: set[tuple[str, str, str, str | None]] = set()
+def test_registered_step_matrix_is_covered_by_native_episodes_or_core_replay() -> None:
+    """Every standard step route is either a native episode or explicit replay."""
+
+    advertised: dict[tuple[str, str, str, str | None], str] = {}
     for model in PROVIDER.list_models():
         for mission in model.mission_templates:
             for operation in mission.operations:
                 if operation.operation == "step" and operation.common_runner_status == "registered":
-                    advertised.add((model.id, mission.id, operation.fidelity, operation.realization_id))
+                    advertised[(model.id, mission.id, operation.fidelity, operation.realization_id)] = operation.execution_mode
     witnessed: set[tuple[str, str, str, str | None]] = set()
     for witness in EPISODE_WITNESSES:
         prepared = _prepared(witness)
@@ -174,7 +176,9 @@ def test_registered_interactive_matrix_exactly_matches_episode_witnesses() -> No
         )
         for mission in PROVIDER.model("simple_aero").mission_templates
     )
-    assert advertised == witnessed
+    replayed = {identity for identity, execution_mode in advertised.items() if execution_mode == "core_batch_replay"}
+    assert set(advertised) == witnessed | replayed
+    assert replayed
     ####
 
 

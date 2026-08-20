@@ -37,6 +37,7 @@ from taoryx.plugins import (
 )
 from taoryx.runtime.cli import main
 from taoryx.trajectory.configuration_contract import ConfigurableTrajectoryProviderRegistry
+from taoryx.trajectory.execution_contract import MissionCompositionRunnerRegistry
 from taoryx.vehicle_batch_execution import registered_vehicle_batch_factory_ids
 from taoryx.vehicle_runtime_lowering import build_vehicle_runtime_adapter_registry
 
@@ -1096,6 +1097,7 @@ def test_minimal_compatibility_aggregate_excludes_the_optional_passive_body() ->
         "simple_aero",
         "dual_launch_glider",
     )
+    assert isinstance(provider.build_runner(), MissionCompositionRunnerRegistry)
     ####
 
 
@@ -1127,6 +1129,81 @@ def test_direct_catalog_provider_keeps_its_exact_selected_plugin_scope(
         deferred_provider = providers.provider(provider_id)
         concrete_provider = getattr(deferred_provider, "resolve_provider")()
         assert getattr(concrete_provider, "_plugin_catalog") is catalog
+    ####
+
+
+@pytest.mark.parametrize(
+    ("plugin_id", "provider_id"),
+    (
+        ("taoryx.a320", "taoryx.a320.mission-composition"),
+        ("taoryx.cadac", "cadac"),
+        ("taoryx.hl20", "taoryx.hl20.mission-composition"),
+        ("taoryx.x15", "taoryx.x15.mission-composition"),
+    ),
+)
+def test_focused_mission_composition_provider_builds_the_common_runner(
+    plugin_id: str,
+    provider_id: str,
+) -> None:
+    """A selected provider must expose the common runner without aggregation."""
+
+    catalog = discover_plugins(include_builtin=False, selected=(plugin_id,))
+    provider = catalog.build_mission_composition_provider_registry().provider(provider_id)
+    runner = provider.build_runner()
+
+    assert isinstance(runner, MissionCompositionRunnerRegistry)
+    for model in provider.list_models():
+        if "batch" in model.common_runner_operations:
+            assert runner.has_executor(provider.metadata.id, model.id)
+    ####
+
+
+def test_every_host_facing_taoryx_model_has_the_universal_batch_and_step_contract() -> None:
+    """TAORYX's public trajectory surface has no model-specific operation branch."""
+
+    registry = discover_plugins(include_external=False).build_mission_composition_provider_registry()
+    for provider in registry.providers:
+        runner = provider.build_runner()
+        for model in provider.list_models():
+            batches = tuple(
+                (mission, operation)
+                for mission in model.mission_templates
+                for operation in mission.operations
+                if operation.operation == "batch"
+                and operation.status == "available"
+                and operation.common_runner_status == "registered"
+            )
+            steps = tuple(
+                (mission, operation)
+                for mission in model.mission_templates
+                for operation in mission.operations
+                if operation.operation == "step"
+                and operation.status == "available"
+                and operation.common_runner_status == "registered"
+            )
+            assert model.execution_capability_profile == "taoryx_universal"
+            assert model.common_runner_operations == ("batch", "step")
+            assert batches
+            assert steps
+            assert runner.has_executor(provider.metadata.id, model.id)
+            for mission, batch in batches:
+                assert any(
+                    step.operation == "step"
+                    and step.status == "available"
+                    and step.common_runner_status == "registered"
+                    and step.fidelity == batch.fidelity
+                    and step.realization_id in {None, batch.realization_id}
+                    for step in mission.operations
+                ), (provider.metadata.id, model.id, mission.id, batch.fidelity, batch.realization_id)
+            for mission, step in steps:
+                assert any(
+                    batch.operation == "batch"
+                    and batch.status == "available"
+                    and batch.common_runner_status == "registered"
+                    and batch.fidelity == step.fidelity
+                    and batch.realization_id in {None, step.realization_id}
+                    for batch in mission.operations
+                ), (provider.metadata.id, model.id, mission.id, step.fidelity, step.realization_id)
     ####
 
 

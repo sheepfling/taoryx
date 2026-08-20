@@ -766,6 +766,7 @@ def _build_model_metadata(
             "radar",
             "native_relative_state",
         ),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch"),
         common_runner_operations=("batch",),
         capabilities=TrajectoryModelCapabilities(

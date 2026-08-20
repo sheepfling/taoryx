@@ -369,6 +369,19 @@ def test_catalog_provider_registers_only_installed_exact_runtimes(tmp_path: Path
 ####
 
 
+def test_catalog_provider_build_runner_registers_only_installed_exact_runtimes(tmp_path: Path) -> None:
+    provider = CadacMissionCompositionProvider(aim5_plugin=Aim5VehiclePlugin(_write_case(tmp_path)))
+
+    runner = provider.build_runner()
+
+    assert runner.has_executor("cadac", "cadac.aim5.missile")
+    assert not runner.has_executor("cadac", "cadac.falcon6.aircraft")
+    ####
+
+
+####
+
+
 def test_catalog_provider_can_discover_without_installing_any_runtime() -> None:
     provider = CadacMissionCompositionProvider()
     registry = MissionCompositionRunnerRegistry()
@@ -412,8 +425,9 @@ def test_installed_direct_plant_publishes_strict_integration_and_control_output_
     falcon = next(item for item in provider.list_models() if item.id == "cadac.falcon6.aircraft")
     contract = provider.get_model_integration_contract(falcon.id)
 
-    assert contract.step.status == "blocked"
-    assert contract.step.state_semantics == "batch_only"
+    assert contract.step.status == "available"
+    assert contract.step.state_semantics == "core_batch_replay"
+    assert contract.step.action_semantics == "read_only_replay"
     assert contract.environment.execution_profile == "cadac_compat"
     assert contract.environment.atmosphere_owner == "cadac_compatibility_runtime"
     assert contract.environment.host_environment_status == "blocked"
@@ -484,7 +498,7 @@ def test_catalog_provider_registers_both_installed_exact_runtimes(tmp_path: Path
     assert registry.has_executor("cadac", "cadac.aim5.missile")
     assert registry.has_executor("cadac", "cadac.falcon6.aircraft")
     falcon = next(item for item in provider.list_models() if item.id == "cadac.falcon6.aircraft")
-    assert falcon.common_runner_operations == ("batch",)
+    assert falcon.common_runner_operations == ("batch", "step")
     assert provider.has_installed_falcon6_runtime()
 
 
@@ -509,7 +523,7 @@ def test_catalog_provider_registers_cruise5_as_third_exact_runtime(tmp_path: Pat
     assert registry.has_executor("cadac", "cadac.cruise5.cruise_vehicle")
     assert registry.has_executor("cadac", "cadac.falcon6.aircraft")
     cruise = next(item for item in provider.list_models() if item.id == "cadac.cruise5.cruise_vehicle")
-    assert cruise.common_runner_operations == ("batch",)
+    assert cruise.common_runner_operations == ("batch", "step")
     assert provider.has_installed_cruise5_runtime()
 
 
@@ -556,7 +570,7 @@ def test_catalog_provider_registers_four_reference_runtimes(tmp_path: Path) -> N
     assert registry.has_executor("cadac", "cadac.falcon6.aircraft")
     assert registry.has_executor("cadac", "cadac.ghame3.hypersonic_vehicle")
     ghame = next(item for item in provider.list_models() if item.id == "cadac.ghame3.hypersonic_vehicle")
-    assert ghame.common_runner_operations == ("batch",)
+    assert ghame.common_runner_operations == ("batch", "step")
     assert ghame.fidelities[0].id == "point_mass_3dof"
     assert provider.has_installed_ghame3_runtime()
 
@@ -606,7 +620,7 @@ def test_catalog_provider_registers_five_reference_runtimes(tmp_path: Path) -> N
     assert registry.has_executor("cadac", "cadac.magsix.vehicle")
     assert provider.has_installed_magsix_runtime()
     magsix = next(item for item in provider.list_models() if item.id == "cadac.magsix.vehicle")
-    assert magsix.common_runner_operations == ("batch",)
+    assert magsix.common_runner_operations == ("batch", "step")
     assert tuple(item.id for item in magsix.fidelities) == ("point_mass_3dof", "pseudo_6dof")
 
 
@@ -657,7 +671,7 @@ def test_catalog_provider_registers_six_reference_runtimes_including_rocket6g(tm
     assert registry.has_executor("cadac", "cadac.rocket6g.launch_vehicle")
     assert provider.has_installed_rocket6g_runtime()
     rocket = next(item for item in provider.list_models() if item.id == "cadac.rocket6g.launch_vehicle")
-    assert rocket.common_runner_operations == ("batch",)
+    assert rocket.common_runner_operations == ("batch", "step")
     assert rocket.fidelities[0].actuator_types == ("mixed",)
     configuration = build_default_cadac_configuration(provider, rocket.id)
     prepared = provider.validate_configuration(configuration)
@@ -783,7 +797,7 @@ def test_catalog_provider_registers_ninth_reference_runtime_including_ghame6(tmp
     assert not registry.has_executor("cadac", "cadac.ghame6.ground_site")
     assert provider.has_installed_ghame6_runtime()
     model = next(item for item in provider.list_models() if item.id == "cadac.ghame6.hypersonic_vehicle")
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert model.fidelities[0].input_realization == "actuator_allocated"
     assert model.fidelities[0].actuator_types == ("mixed",)
     assert "no TVC" in model.fidelities[0].claim_boundary
@@ -806,7 +820,7 @@ def test_catalog_provider_registers_tenth_reference_runtime_as_ads6_sam_only(tmp
     assert not registry.has_executor("cadac", "cadac.ads6.aircraft")
     assert provider.has_installed_ads6_sam_runtime()
     model = next(item for item in provider.list_models() if item.id == "cadac.ads6.sam")
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert [item.id for item in model.fidelities] == [
         "rigid_body_6dof_surface_allocated",
         "rigid_body_6dof_direct_wrench",
@@ -856,7 +870,7 @@ def test_catalog_provider_registers_twelfth_reference_runtime_as_ads6_aircraft_e
     assert not registry.has_executor("cadac", "cadac.ads6.srbm")
     assert provider.has_installed_ads6_aircraft_runtime()
     model = next(item for item in provider.list_models() if item.id == "cadac.ads6.aircraft")
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert [item.id for item in model.fidelities] == ["point_mass_3dof"]
     assert model.fidelities[0].control_realization == "force_model"
     configuration = build_default_cadac_configuration(provider, model.id)

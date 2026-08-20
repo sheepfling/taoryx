@@ -32,15 +32,15 @@ class CadacStepIntegrationContract(CadacModel):
 
     status: CadacReadiness
     session_contract: str = "taoryx.mission-composition-session/v1"
-    state_semantics: Literal["persistent_native_state", "batch_only", "not_executable"]
-    action_semantics: Literal["held_step_action", "configuration_fixed", "provider_internal", "none"]
+    state_semantics: Literal["persistent_native_state", "core_batch_replay", "batch_only", "not_executable"]
+    action_semantics: Literal["held_step_action", "configuration_fixed", "provider_internal", "read_only_replay", "none"]
     blockers: tuple[str, ...] = ()
     claim_boundary: str = Field(min_length=1)
 
     @model_validator(mode="after")
     def validate_status(self) -> "CadacStepIntegrationContract":
-        if self.status == "available" and self.state_semantics != "persistent_native_state":
-            raise ValueError("available CADAC stepping requires persistent native state")
+        if self.status == "available" and self.state_semantics not in {"persistent_native_state", "core_batch_replay"}:
+            raise ValueError("available CADAC stepping requires native state or the core batch-replay adapter")
         if self.status == "blocked" and not self.blockers:
             raise ValueError("blocked CADAC stepping requires explicit blockers")
         return self
@@ -121,7 +121,22 @@ def build_cadac_model_integration_contract(
     """Build readiness facts from the exact installed/discovered model record."""
 
     has_batch = "batch" in model.common_runner_operations
-    has_step = "step" in model.common_runner_operations
+    has_native_step = any(
+        operation.operation == "step"
+        and operation.status == "available"
+        and operation.common_runner_status == "registered"
+        and operation.execution_mode != "core_batch_replay"
+        for mission in model.mission_templates
+        for operation in mission.operations
+    )
+    has_replay_step = any(
+        operation.operation == "step"
+        and operation.status == "available"
+        and operation.common_runner_status == "registered"
+        and operation.execution_mode == "core_batch_replay"
+        for mission in model.mission_templates
+        for operation in mission.operations
+    )
     external_controls = tuple(channel for realization in model.realizations for channel in realization.controls.channels if channel.operations)
     internal_control = any(realization.controls.status == "internally_generated" for realization in model.realizations)
     requested_ids, realized_ids = _external_control_output_ids(external_controls)
@@ -129,12 +144,22 @@ def build_cadac_model_integration_contract(
         requested_ids, realized_ids = _source_control_output_ids(model)
     ####
 
-    if has_step:
+    if has_native_step:
         step = CadacStepIntegrationContract(
             status="available",
             state_semantics="persistent_native_state",
             action_semantics="held_step_action" if external_controls else "provider_internal",
             claim_boundary="The model advertises an exact registered persistent session boundary.",
+        )
+    elif has_replay_step:
+        step = CadacStepIntegrationContract(
+            status="available",
+            state_semantics="core_batch_replay",
+            action_semantics="read_only_replay",
+            claim_boundary=(
+                "TAORYX core exposes the exact CADAC batch result through a read-only replay session. "
+                "It has no caller action authority and does not make the CADAC hidden integrator persistent."
+            ),
         )
     elif has_batch:
         step = CadacStepIntegrationContract(
@@ -224,7 +249,7 @@ def build_cadac_model_integration_contract(
         step=step,
         environment=environment,
         controller_analysis=controller,
-        sensor_integration=build_cadac_sensor_integration_contract(model.id, persistent_session=has_step),
+        sensor_integration=build_cadac_sensor_integration_contract(model.id, persistent_session=has_native_step),
         claim_boundary=(
             "This contract records integration readiness only and does not promote numerical parity, stability, robustness, or source equivalence."
         ),

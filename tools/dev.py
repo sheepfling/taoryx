@@ -102,6 +102,7 @@ PYRIGHT_QUALITY_PATHS = (
     "packages/taoryx-parametric-interceptors/src/taoryx_parametric_interceptors",
     "tools/dev.py",
     "tools/validate_plugin_developer_route.py",
+    "tools/validate_mission_composition_provider_contract.py",
     "tools/verify_plugin_wheels.py",
 )
 PLUGIN_ENTRY_POINT_PATHS = _declared_plugin_entry_point_paths()
@@ -418,17 +419,71 @@ def plugin_wheel_smoke() -> None:
     ####
 
 
-def check_plugin_install(plugin: str) -> None:
-    """Prove one plug-in's static ownership and fresh installed-wheel boundary.
+def _plugin_id_for_wheel_selector(selector: str) -> str:
+    """Resolve the provider owner from the canonical wheel-boundary registry.
 
-    This is intentionally narrower than ``plugin-wheel-smoke``: it validates
-    the direct developer-route rules, then builds and installs only the named
-    plug-in plus its declared direct wheel dependencies in a temporary target.
-    It is the normal package-isolation gate after a focused vehicle/workflow
-    test, not a reason to rerun unrelated family suites.
+    This is deliberately derived from ``PluginWheelSpec`` rather than a
+    second selector map. Adding a wheel boundary therefore automatically gives
+    ``check-plugin`` the correct focused universal-contract owner, including
+    selectors such as cross-package deployment proofs whose name differs from
+    their owning plug-in ID.
     """
 
-    run(tool_script("validate_plugin_developer_route.py"))
+    if __package__:
+        from tools.verify_plugin_wheels import PLUGIN_WHEEL_SPECS
+    else:
+        from verify_plugin_wheels import PLUGIN_WHEEL_SPECS
+
+    matches = tuple(item.plugin_id for item in PLUGIN_WHEEL_SPECS if item.selector == selector)
+    if len(matches) != 1:
+        available = ", ".join(sorted(item.selector for item in PLUGIN_WHEEL_SPECS))
+        raise ValueError(f"unknown plug-in wheel selector {selector!r}; available: {available}")
+    return matches[0]
+    ####
+
+
+def _universal_contract_arguments(plugin: str) -> tuple[str, ...]:
+    """Return the narrowest provider-contract scope for one wheel boundary.
+
+    The compatibility aggregate is intentionally the only exception. Its
+    provider composes the direct package catalog, so its own contract is
+    meaningful only with that full declared source scope. Every direct plug-in
+    keeps the one-package fast path.
+    """
+
+    plugin_id = _plugin_id_for_wheel_selector(plugin)
+    if plugin_id == "taoryx.reference-models":
+        return ("--all", "--contract-profile", "taoryx-universal", "--summary")
+    return ("--plugin", plugin_id, "--contract-profile", "taoryx-universal", "--summary")
+    ####
+
+
+def check_plugin_contract(plugin: str) -> None:
+    """Run the fast selected-plug-in ownership and universal-contract gate.
+
+    Unlike ``check-plugin``, this deliberately does not build an isolated
+    wheel. It is the normal inner-loop check after changing one model package;
+    add the wheel proof when preparing that package for handoff.
+    """
+
+    plugin_id = _plugin_id_for_wheel_selector(plugin)
+    run(tool_script("validate_plugin_developer_route.py", "--plugin", plugin_id))
+    run(tool_script("validate_mission_composition_provider_contract.py", *_universal_contract_arguments(plugin)))
+    ####
+
+
+def check_plugin_install(plugin: str) -> None:
+    """Prove one plug-in's universal contract and fresh installed-wheel boundary.
+
+    This is intentionally narrower than ``plugin-wheel-smoke``: it validates
+    that plug-in's direct developer-route rules and Mission Composition
+    provider contract, then builds and installs only the named plug-in plus
+    its declared direct wheel dependencies in a temporary target. It is the
+    normal package-isolation gate after a focused vehicle/workflow test, not
+    a reason to rerun unrelated family suites.
+    """
+
+    check_plugin_contract(plugin)
     run(tool_script("verify_plugin_wheels.py", "--plugin", plugin, "--python", project_python()))
     ####
 
@@ -929,7 +984,8 @@ def test_views() -> None:
     print("  test-reachability optional overlay discovery, package data, and lazy implementation slice")
     print("  check-reachability focused overlay slice plus isolated wheel smoke")
     print("  check-developer-plugins metadata and installed-profile compliance for the direct plug-in route")
-    print("  check-plugin <plugin> direct-route metadata plus one fresh installed-wheel boundary")
+    print("  check-plugin-contract <plugin> fast focused direct-route + universal provider contract")
+    print("  check-plugin <plugin> focused direct-route + universal provider contract + one fresh installed-wheel boundary")
     print("  test-cadac-discovery CADAC entry-point and deferred-provider slice")
     print("  check-vehicle <family> scoped interface + witnesses + parity + vertical slice")
     print("  test-cadac  CADAC AIM5, CRUISE5, MAGSIX, GHAME3, GHAME6, ROCKET6G, ADS6 SRBM/SAM/AIRCRAFT3, AGM6, FALCON6, engagement, and SRAAM6 vertical slices")
@@ -1310,6 +1366,21 @@ def check_mission_composition_completion() -> None:
     """Verify the production registry, common executors, and generated coverage matrix."""
 
     run(tool_script("build_mission_composition_completion.py", "--check"))
+    ####
+
+
+def check_mission_composition_provider_contracts() -> None:
+    """Validate the universal common-result and batch-to-step contract for all providers."""
+
+    run(
+        tool_script(
+            "validate_mission_composition_provider_contract.py",
+            "--all",
+            "--contract-profile",
+            "taoryx-universal",
+            "--summary",
+        )
+    )
     ####
 
 
@@ -2092,6 +2163,7 @@ def check() -> None:
     check_vehicle_interfaces()
     check_vehicle_execution_witnesses()
     check_mission_composition_completion()
+    check_mission_composition_provider_contracts()
     check_simulation_runtime_quality()
     onboard_vehicles()
     pseudo6dof_profiles()
@@ -2303,7 +2375,7 @@ TASKS: dict[str, Callable[[], None]] = {
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("task", choices=sorted((*TASKS, "check-plugin", "check-vehicle", "test-vehicle")))
+    parser.add_argument("task", choices=sorted((*TASKS, "check-plugin", "check-plugin-contract", "check-vehicle", "test-vehicle")))
     parser.add_argument("vehicle", nargs="?")
     args = parser.parse_args()
     if args.task in {"check-vehicle", "test-vehicle"}:
@@ -2314,10 +2386,13 @@ def main() -> int:
         else:
             test_vehicle_vertical(args.vehicle)
         return 0
-    if args.task == "check-plugin":
+    if args.task in {"check-plugin", "check-plugin-contract"}:
         if args.vehicle is None:
-            parser.error("check-plugin requires a wheel selector, for example: f16")
-        check_plugin_install(args.vehicle)
+            parser.error(f"{args.task} requires a wheel selector, for example: f16")
+        if args.task == "check-plugin":
+            check_plugin_install(args.vehicle)
+        else:
+            check_plugin_contract(args.vehicle)
         return 0
     if args.vehicle is not None:
         parser.error(f"{args.task} does not accept a vehicle family")

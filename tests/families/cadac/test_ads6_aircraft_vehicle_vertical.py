@@ -65,7 +65,7 @@ def test_bound_ads6_aircraft_preserves_source_control_and_point_mass_truth_bound
     with pytest.raises(KeyError, match="unknown CADAC trajectory plug-in"):
         provider.get_model_schema("cadac.aim5.missile")
     assert runner.registrations() == ((CADAC_PROVIDER_ID, ADS6_AIRCRAFT_MODEL_ID),)
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert model.fidelities[0].id == ADS6_AIRCRAFT_FIDELITY_ID
     assert model.fidelities[0].input_realization == "provider_defined"
     assert model.fidelities[0].control_realization == "force_model"
@@ -146,9 +146,9 @@ def test_bound_ads6_aircraft_preserves_source_control_and_point_mass_truth_bound
     ]
 
     integration = provider.get_model_integration_contract(ADS6_AIRCRAFT_MODEL_ID)
-    assert integration.step.status == "blocked"
-    assert integration.step.state_semantics == "batch_only"
-    assert integration.step.action_semantics == "provider_internal"
+    assert integration.step.status == "available"
+    assert integration.step.state_semantics == "core_batch_replay"
+    assert integration.step.action_semantics == "read_only_replay"
     assert integration.sensor_integration.status == "not_applicable"
     assert integration.sensor_integration.sensor_bus_status == "not_applicable"
     assert integration.controller_analysis.ownership == "source_owned"
@@ -168,7 +168,7 @@ def test_bound_ads6_aircraft_preserves_source_control_and_point_mass_truth_bound
     assert integration.environment.gravity_owner == "cadac_compatibility_runtime"
     assert integration.environment.host_environment_status == "blocked"
 
-    with pytest.raises(ValueError, match="no installed persistent session binding"):
+    with pytest.raises(ValueError, match="no installed native persistent session binding"):
         provider.open_session(
             MissionCompositionOpenSessionRequest(
                 session_id="cadac-ads6-aircraft-must-not-fabricate-session",

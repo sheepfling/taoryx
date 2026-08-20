@@ -59,7 +59,9 @@ controller requires the live target/radar package scheduler owned by the ADS6
 engagement composition. AIRCRAFT3 is also explicitly batch-only: its source
 program owns the configured steady/g-turn/escape behavior and publishes its
 commanded-versus-achieved bank/load response without promoting it to rigid-body
-truth or a native sensor. The ADS6 SRBM proof additionally checks the normal
+truth or a native sensor. At the TAORYX host boundary its batch result is
+available through the standard read-only replay session; it is not a native
+live-control claim. The ADS6 SRBM proof additionally checks the normal
 command/realized-acceleration output pairs used for source-controller
 time-domain analysis; AGM6 and SRAAM6 prove source command-to-physical-fin
 readback; FALCON6 proves caller-owned direct physical-surface commands plus

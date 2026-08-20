@@ -51,7 +51,9 @@ The normal consumer sequence is:
    for a catalogue: discovery must not construct or run a plant.
 2. Select an exact realization, fidelity, mission, and supported operation;
    then obtain the configuration schema. A discoverable model can still state
-   that a combination is blocked or batch-only.
+   that a combination is blocked or has no live caller action authority. Every
+   registered common batch tuple is also available through the standard
+   read-only replay session.
 3. Submit canonical values and validate them into a prepared, fingerprinted
    configuration. Display units and editor hints help render a client but do
    not change what the provider accepts.

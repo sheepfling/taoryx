@@ -715,6 +715,7 @@ _LAZY_EXPORTS: Final[dict[str, tuple[str, str]]] = {
     'TrajectoryDeploymentMetadata': ('.mission_composition', 'TrajectoryDeploymentMetadata'),
     'TrajectoryDynamicsFidelity': ('.mission_composition', 'TrajectoryDynamicsFidelity'),
     'TrajectoryEntityOutputMetadata': ('.mission_composition', 'TrajectoryEntityOutputMetadata'),
+    'TrajectoryExecutionCapabilityProfile': ('.mission_composition', 'TrajectoryExecutionCapabilityProfile'),
     'TrajectoryEntityRelationship': ('.mission_composition', 'TrajectoryEntityRelationship'),
     'TrajectoryEvaluation': ('.evaluation', 'TrajectoryEvaluation'),
     'TrajectoryEvent': ('.mission_composition', 'TrajectoryEvent'),

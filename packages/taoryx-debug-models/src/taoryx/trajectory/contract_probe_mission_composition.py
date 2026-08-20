@@ -669,6 +669,7 @@ def contract_probe_model_metadata(schema: TrajectoryConfigurationSchema | None =
         model_kind="contract_probe",
         status="runnable_debug_contract",
         tags=("debug", "synthetic", "contract-probe", "do-not-use-for-analysis"),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch", "step"),
         common_runner_operations=("batch", "step"),
         capabilities=TrajectoryModelCapabilities(

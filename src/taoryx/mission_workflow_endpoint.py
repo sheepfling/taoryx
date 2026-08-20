@@ -61,7 +61,7 @@ class MissionWorkflowEndpointSpec(BaseModel):
     mission_template_id: str = Field(min_length=1)
     draft: str = Field(min_length=1)
     batch_executor_id: str = Field(min_length=1)
-    blocked_operations: tuple[Literal["step"], ...] = ("step",)
+    blocked_operations: tuple[Literal["step"], ...] = ()
     required_core_output_ids: tuple[str, ...] = Field(min_length=1)
     required_telemetry_output_ids: tuple[str, ...] = ()
     required_events: tuple[MissionWorkflowEndpointEventSpec, ...] = ()

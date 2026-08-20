@@ -88,6 +88,7 @@ California–Hawaii variants, external time stepping, and the diagnostic ladder.
 | Define or assess one vehicle fidelity tier | [Fidelity tiers and vehicle plug-in requirements](architecture/fidelity-data-requirements.md) | `python3 tools/validate_fidelity_readiness.py --vehicle <id> --tier all` |
 | Iterate on one runnable vehicle | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py test-vehicle <family>` |
 | Verify one physical vehicle plug-in | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py check-vehicle <family>` |
+| Check one TAORYX plug-in's universal Mission Composition contract | [Mission Composition Provider API](architecture/mission-composition-provider-api.md) | `python tools/dev.py check-plugin-contract <plugin>` |
 | Validate catalogue declarations | [Building and testing](BUILDING_TESTS.md) | `python tools/dev.py vehicle-catalogue` |
 | Expose a parameter, control, status, or objective value | [Public value-space contract](architecture/public-value-spaces.md) | `taoryx vehicle topology-report` |
 | Demonstrate the three layers | [Authoring → Runtime → Composition showcase guide](AUTHORING_RUNTIME_COMPOSITION_SHOWCASE.md) | `taoryx vehicle maturity-report` → `catalog` → `mission inspect`/`mission create`/`mission validate` → `preflight` → `run` |
@@ -153,6 +154,11 @@ python tools/dev.py test-vehicle skywalker_x8
 # vehicle's interfaces, endpoint witnesses, parity replay, and vertical tests.
 python tools/dev.py check-vehicle hummingbird
 
+# Fast package-scoped TAORYX-universal gate. This constructs only the selected
+# plug-in's providers and checks standard ECEF state types plus every exact
+# registered batch-to-step seam; it does not build a wheel or execute a mission.
+python tools/dev.py check-plugin-contract hummingbird
+
 # Simple Aero is a non-physical fixed-L/D workflow with a common batch runner
 # and a persistent point-mass session. Its default provider-owned generated
 # schedule has an empty caller action schema; the selectable caller-owned
@@ -160,17 +166,18 @@ python tools/dev.py check-vehicle hummingbird
 # generated schedule telemetry and is not advertised as interactive steering.
 python tools/dev.py test-vehicle simple_aero
 
-# Dual launch is also batch-only: this executes both air-release and attached-
-# booster source forms, reports the primary trajectory, and preserves the
-# event-only/no-child-propagation boundary.
+# Dual launch executes both air-release and attached-booster source forms,
+# reports the primary trajectory, and preserves the event-only/no-child-
+# propagation boundary. Its common session is a read-only core replay: it has
+# no caller action schema and does not create an independently propagated child.
 python tools/dev.py test-vehicle dual_launch_glider
 
 # These two non-physical models have typed workflow endpoint witnesses rather
 # than physical Vehicle Composition endpoints. The verifier checks the exact
 # checked-in draft, installed provider advertisement, common batch
 # registration, and (with --execute) normalized result surface. Simple Aero's
-# persistent session is tested by its vehicle slice; dual launch remains
-# explicitly batch-only.
+# native persistent session is tested by its vehicle slice; dual launch uses
+# the same common session lifecycle through the read-only core replay adapter.
 taoryx model endpoint-specs
 taoryx model verify simple-aero-fixed-ld-batch --execute
 taoryx model verify dual-launch-attached-booster-batch --execute
@@ -293,8 +300,9 @@ taoryx vehicle verify a320-pseudo6dof-native-coordinate-lqi --execute
 # disposition instead of fabricating one.
 taoryx vehicle verify nesc-source-history-replay-pseudo6dof --execute
 
-# Passive tumbling has two batch-only, intentionally uncontrolled reductions.
-# This checks the exact point-mass and native-rigid-body-reuse release paths.
+# Passive tumbling has two intentionally uncontrolled reductions. Both expose
+# the standard read-only replay session with no caller actions; this checks the
+# exact point-mass and native-rigid-body-reuse release paths.
 python tools/validate_vehicle_execution_witnesses.py \
   --family tumbling_body --execute-batch
 taoryx vehicle verify tumbling-body-passive-release-pseudo6dof --execute

@@ -304,8 +304,14 @@ def test_common_model_metadata_keeps_fidelity_evidence_and_transitions_separate(
     assert any(item.status == "not_available" for item in tumbling.fidelity_transitions)
 
     nesc_mission = provider.model("reference_nesc_two_stage_rocket").mission_templates[0]
-    point_mass_operations = {item.operation: item.status for item in nesc_mission.operations if item.fidelity == "point_mass_3dof"}
-    assert point_mass_operations == {"validate": "available", "batch": "available", "step": "blocked"}
+    point_mass_operations = {item.operation: item for item in nesc_mission.operations if item.fidelity == "point_mass_3dof"}
+    assert {operation: item.status for operation, item in point_mass_operations.items()} == {
+        "validate": "available",
+        "batch": "available",
+        "step": "available",
+    }
+    assert point_mass_operations["step"].execution_mode == "core_batch_replay"
+    assert point_mass_operations["step"].executor_id == "taoryx.core.batch-replay-session.v1"
     ####
 
 
@@ -320,7 +326,24 @@ def test_every_realization_publishes_complete_generic_control_metadata() -> None
             assert type(controls).model_validate_json(controls.model_dump_json()) == controls
             if "step" in realization.operations:
                 step_actions = tuple(item for item in controls.channels if item.channel_kind == "action" and "step" in item.operations)
-                assert step_actions
+                replay_step = any(
+                    operation.operation == "step"
+                    and operation.realization_id == realization.id
+                    and operation.status == "available"
+                    and operation.common_runner_status == "registered"
+                    and operation.execution_mode == "core_batch_replay"
+                    for mission in model.mission_templates
+                    for operation in mission.operations
+                )
+                open_loop_zero_action = controls.status == "uncontrolled" and any(
+                    authority.authority == "open_loop"
+                    and authority.command_owner == "open_loop"
+                    and authority.availability == "available"
+                    and not authority.channel_ids
+                    and "step" in authority.operations
+                    for authority in controls.authorities
+                )
+                assert step_actions or replay_step or open_loop_zero_action
                 assert all(item.native_channel_id for item in step_actions)
 
     simple_aero = provider.model("simple_aero").realizations[0].controls

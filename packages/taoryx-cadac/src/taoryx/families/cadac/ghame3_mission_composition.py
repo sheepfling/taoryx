@@ -462,6 +462,7 @@ def _build_model_metadata(schema: TrajectoryConfigurationSchema, output_schema: 
         model_kind="vehicle_plugin",
         status="development",
         tags=("cadac", "hypersonic", "point_mass_3dof", "round_earth"),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch"),
         common_runner_operations=("batch",),
         capabilities=TrajectoryModelCapabilities(

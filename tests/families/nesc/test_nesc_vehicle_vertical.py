@@ -17,6 +17,11 @@ from taoryx.trajectory.native_mission_composition import (
     build_registry_mission_composition_runner,
     configuration_instance_from_vehicle_request,
 )
+from taoryx.trajectory.session_contract import (
+    MissionCompositionOpenSessionRequest,
+    MissionCompositionSessionManager,
+    MissionCompositionSessionStepRequest,
+)
 from taoryx.vehicle_composition import CompiledVehicleComposition, compile_vehicle_composition, load_vehicle_composition_request
 from taoryx.vehicle_execution_witnesses import validate_vehicle_execution_witnesses
 from tools.extract_nesc_plugin_assets import check as check_nesc_plugin_assets
@@ -267,22 +272,43 @@ def test_nesc_public_adapters_exercise_the_exact_source_replay(
     ####
 
 
-def test_nesc_provider_advertises_a_batch_only_source_replay_endpoint(
+def test_nesc_provider_advertises_a_read_only_source_replay_session(
     plugins: PluginCatalog,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """The NESC-only provider exposes no interactive controller or episode claim."""
+    """The source replay gains common stepping without fabricating a controller."""
 
     _forbid_catalog_rediscovery(monkeypatch)
     provider = _provider(plugins)
     model = provider.model(MODEL_ID)
 
     assert provider.metadata.version == PACKAGE_VERSION
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert "batch" in model.operations
-    assert "step" not in model.operations
+    assert "step" in model.operations
     assert all(not support.operations for support in model.control_scheme_support)
     assert {support.availability for support in model.control_scheme_support} <= {"not_available", "planned"}
+    manager = MissionCompositionSessionManager(provider)
+    descriptor = manager.open(
+        MissionCompositionOpenSessionRequest(
+            session_id="nesc-source-replay-session",
+            provider_id=provider.metadata.id,
+            provider_version=provider.metadata.version,
+            prepared_configuration=_prepared_configuration(provider),
+            integration_step_s=0.2,
+        )
+    )
+    assert descriptor.action_schema == ()
+    assert descriptor.state_owner == "core_batch_replay_session"
+    assert descriptor.timestep_semantics == "caller_duration_advanced_to_next_replay_sample"
+    stepped = manager.step(
+        MissionCompositionSessionStepRequest(
+            session_id=descriptor.session_id,
+            duration_s=0.2,
+        )
+    )
+    assert stepped.time_end_s > stepped.time_start_s
+    assert len(stepped.observation.standard_ecef.ecef_from_body_wxyz) == 4
     assert model.version
     assert len(model.metadata_fingerprint) == 64
     ####

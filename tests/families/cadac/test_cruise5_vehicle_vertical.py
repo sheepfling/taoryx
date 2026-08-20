@@ -150,14 +150,14 @@ def test_bound_cruise5_preserves_one_model_scope_and_source_managed_controls(
     assert len(model.metadata_fingerprint) == 64
     assert len(model.configuration_schema_fingerprint) == 64
     assert len(model.output_schema_fingerprint) == 64
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert model.fidelities[0].id == CRUISE5_FIDELITY_ID
     assert controls.status == "internally_generated"
     assert controls.default_authority_id == "source_program_control"
     assert controls.channels == ()
     assert audit.status == "pass", audit.model_dump(mode="json")
-    assert integration.step.status == "blocked"
-    assert integration.step.state_semantics == "batch_only"
+    assert integration.step.status == "available"
+    assert integration.step.state_semantics == "core_batch_replay"
     assert integration.controller_analysis.ownership == "source_owned"
     assert integration.controller_analysis.command_output_channel_ids == (
         "bank_command_deg",

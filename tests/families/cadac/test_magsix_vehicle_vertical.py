@@ -86,7 +86,7 @@ def test_bound_magsix_preserves_one_model_scope_and_fixed_source_control(
     audit = audit_provider_advertisement(provider)
 
     assert model.version == MAGSIX_MODEL_VERSION
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert tuple(item.id for item in model.fidelities) == (
         MAGSIX_TRAJECTORY_FIDELITY_ID,
         MAGSIX_ATTITUDE_FIDELITY_ID,
@@ -95,8 +95,8 @@ def test_bound_magsix_preserves_one_model_scope_and_fixed_source_control(
     assert controls.default_authority_id == "source_program_control"
     assert controls.channels == ()
     assert audit.status == "pass", audit.model_dump(mode="json")
-    assert integration.step.status == "blocked"
-    assert integration.step.state_semantics == "batch_only"
+    assert integration.step.status == "available"
+    assert integration.step.state_semantics == "core_batch_replay"
     assert integration.controller_analysis.ownership == "fixed_source_program"
     assert integration.controller_analysis.time_domain_analysis == "not_applicable"
     assert integration.controller_analysis.local_linear_stability == "blocked"

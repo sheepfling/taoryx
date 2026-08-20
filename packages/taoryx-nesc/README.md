@@ -28,12 +28,13 @@ not install or execute the child runtime; that remains the separate
 two-package wheel proof.
 
 The normal NESC gate selects only `taoryx.nesc`, validates the point-mass and
-pseudo-6DOF interfaces, executes its two batch-only replay witnesses, and
-runs its focused advertisement/compiler/common-batch proof. It deliberately
-does not open a session or replay batch/episode parity because the source
-replay advertises neither. The passive-child composition remains the separate
-two-package wheel test above, so a NESC-only change does not pull that child
-runtime or unrelated vehicle tests into its inner loop.
+pseudo-6DOF interfaces, executes its two batch-native replay witnesses, and
+runs its focused advertisement/compiler/common-batch/read-only-session proof.
+The source replay has no live caller actions or native episode parity; core
+therefore opens it through the standard read-only replay session. The
+passive-child composition remains the separate two-package wheel test above,
+so a NESC-only change does not pull that child runtime or unrelated vehicle
+tests into its inner loop.
 
 For UI, agent, or cache refresh, the standard discovery surfaces publish both
 the package-managed version and a scoped revision fingerprint; the NESC model

@@ -921,6 +921,7 @@ def _build_model_metadata(
         model_kind="vehicle_plugin",
         status="development",
         tags=("cadac", "ads6", "sam", "physical-effectors", "aggregate-rcs"),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch"),
         common_runner_operations=("batch",),
         capabilities=TrajectoryModelCapabilities(

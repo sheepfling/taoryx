@@ -37,7 +37,7 @@ def test_ads6_sam_provider_advertises_three_exact_realizations(tmp_path: Path) -
     model = provider.list_models()[0]
 
     assert model.id == ADS6_SAM_MODEL_ID
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert [item.id for item in model.fidelities] == [ADS6_SAM_T4_FIDELITY_ID, ADS6_SAM_T3_FIDELITY_ID]
     assert [(item.id, item.status) for item in model.realizations] == [
         (ADS6_SAM_FIN_REALIZATION_ID, "available"),

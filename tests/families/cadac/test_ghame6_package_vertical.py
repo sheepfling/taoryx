@@ -108,7 +108,7 @@ def test_bound_ghame6_preserves_one_package_scope_and_native_sensor_boundary(
 
     assert model.version == GHAME6_MODEL_VERSION
     assert model.model_kind == "mission_composition"
-    assert model.common_runner_operations == ("batch",)
+    assert model.common_runner_operations == ("batch", "step")
     assert tuple(item.id for item in model.fidelities) == (GHAME6_FIDELITY_ID,)
     assert model.fidelities[0].dynamics_fidelity == "rigid_body_6dof"
     assert model.output_schema.entity_output.supports_multiple_entities
@@ -133,9 +133,9 @@ def test_bound_ghame6_preserves_one_package_scope_and_native_sensor_boundary(
     assert controls.authorities[0].command_owner == "caller"
     assert audit.status == "pass", audit.model_dump(mode="json")
 
-    assert integration.step.status == "blocked"
-    assert integration.step.state_semantics == "batch_only"
-    assert integration.step.action_semantics == "configuration_fixed"
+    assert integration.step.status == "available"
+    assert integration.step.state_semantics == "core_batch_replay"
+    assert integration.step.action_semantics == "read_only_replay"
     assert integration.environment.execution_profile == "cadac_compat"
     assert integration.controller_analysis.ownership == "external_at_source_boundary"
     assert integration.controller_analysis.command_output_channel_ids == (
@@ -162,7 +162,7 @@ def test_bound_ghame6_preserves_one_package_scope_and_native_sensor_boundary(
     assert any("RADAR0" in item for item in integration.sensor_integration.source_specialised_state)
 
     prepared = provider.validate_configuration(_ghame6_configuration(provider))
-    with pytest.raises(ValueError, match="no installed persistent session binding"):
+    with pytest.raises(ValueError, match="no installed native persistent session binding"):
         provider.open_session(
             MissionCompositionOpenSessionRequest(
                 session_id="cadac-ghame6-must-not-fabricate-session",

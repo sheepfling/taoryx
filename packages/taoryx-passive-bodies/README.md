@@ -23,11 +23,12 @@ vehicles.
 
 The focused provider retains the exact catalog that created it through normal
 batch execution, preflight, lowering, and witness validation. The two public
-tiers are deliberately batch-only and advertise `no_external_action`: there
-is no controller, control surface, thrust, wrench, session, or batch/episode
-parity claim. Their package-owned interface exposes only committed
+tiers advertise `no_external_action`: there is no controller, control surface,
+thrust, wrench, native live plant, or batch/episode parity claim. Each exact
+registered batch path is nevertheless available through the standard
+read-only core replay session, with an empty action schema and committed
 direct-release truth—position, velocity, drag, projected area, angular rate,
-phase, and fixed mass—with explicit `available_in_batch` availability.
+phase, and fixed mass.
 
 Use the focused provider to inspect or execute a direct-release model:
 
@@ -68,8 +69,8 @@ extract:
 python tools/extract_passive_bodies_plugin_assets.py --check
 ```
 
-The first command checks only the two batch-only direct-release interfaces,
-their two endpoint witnesses, and the short focused provider/batch test. It
-does not run an irrelevant session or parity replay. The last command installs
+The first command checks the two no-action direct-release interfaces, their
+two endpoint witnesses, and the short focused provider/batch/replay-session
+test. It does not claim native control parity. The last command installs
 only the selected NESC, DAVE-ML, and passive-body wheels and proves the
 explicit parent/child binding from release state through child telemetry.

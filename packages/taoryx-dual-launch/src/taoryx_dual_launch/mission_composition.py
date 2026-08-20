@@ -84,13 +84,14 @@ class DualLaunchMissionCompositionProvider:
                 categories=("Trajectory Workflow", "Low Fidelity", "Synthetic"),
             ),
             status="runnable_workflow",
-            tags=("dual-launch", "workflow", "point-mass", "batch-only", "synthetic"),
+            tags=("dual-launch", "workflow", "point-mass", "core-replay-session", "synthetic"),
             execution_contract="taoryx.dual-launch.common-batch/v1",
             model_count=1,
             provenance=("packages/taoryx-dual-launch; verification/dual_launch_family_catalog.yaml; src/taoryx/trajectory/dual_launch.py"),
             claim_boundary=(
-                "This provider owns a synthetic source-generated point-mass workflow. It does not qualify a glider, "
-                "booster, controller, higher-fidelity dynamics, stateful stepping, or independently propagated child."
+                "This provider owns a synthetic source-generated point-mass workflow. Core exposes its exact batch "
+                "result through a read-only session, but it does not qualify a glider, booster, controller, "
+                "higher-fidelity dynamics, live state-responsive stepping, or independently propagated child."
             ),
         )
         ####

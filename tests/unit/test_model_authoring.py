@@ -840,9 +840,9 @@ def test_model_plan_exposes_exact_selected_endpoint_maturity(
     )
     nesc_execution = nesc["execution_advertisement"]
     assert nesc_execution["status"] == "runnable"
-    assert nesc_execution["endpoint_maturity"] == "batch_ready"
-    assert nesc_execution["available_operations"] == ["validate", "batch"]
-    assert [item["operation"] for item in nesc_execution["blocked_operations"]] == ["step"]
+    assert nesc_execution["endpoint_maturity"] == "batch_and_step_ready"
+    assert nesc_execution["available_operations"] == ["validate", "batch", "step"]
+    assert nesc_execution["blocked_operations"] == []
     assert nesc["maturity_advertisement"]["maturity"] == "M4"
     assert nesc["focused_endpoint_verification"]["selected_endpoint_status"] == "matching_endpoint_available"
     assert nesc["focused_endpoint_verification"]["selected_endpoint_ids"] == [
@@ -867,9 +867,9 @@ def test_model_plan_exposes_exact_selected_endpoint_maturity(
         execution = plan["execution_advertisement"]
 
         assert execution["status"] == "runnable"
-        assert execution["endpoint_maturity"] == "batch_ready"
-        assert execution["available_operations"] == ["validate", "batch"]
-        assert [item["operation"] for item in execution["blocked_operations"]] == ["step"]
+        assert execution["endpoint_maturity"] == "batch_and_step_ready"
+        assert execution["available_operations"] == ["validate", "batch", "step"]
+        assert execution["blocked_operations"] == []
     ####
 
 

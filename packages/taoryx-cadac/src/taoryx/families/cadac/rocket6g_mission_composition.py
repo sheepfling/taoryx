@@ -675,6 +675,7 @@ def _build_model_metadata(
         model_kind="phase_aware_rigid_body_launch_vehicle",
         status="development",
         tags=("cadac", "rocket6g", "launch-vehicle", "wgs84", "tvc", "rcs"),
+        execution_capability_profile="taoryx_universal",
         operations=("discover", "validate", "batch"),
         common_runner_operations=("batch",),
         capabilities=TrajectoryModelCapabilities(

@@ -4,7 +4,7 @@ Batch execution artifacts must not force consumers to parse a native state
 layout just because an interactive episode happens to have a semantic status
 frame.  This module projects the exact resolved vehicle-interface contract
 over source-owned committed batch samples.  It does not interpolate, invent
-unavailable values, or turn a batch-only channel into an episode observation.
+unavailable values, or turn a batch-only control into a live episode action.
 """
 
 from __future__ import annotations
@@ -78,8 +78,8 @@ def build_committed_status_trace(
         "samples": trace_samples,
         "claim_boundary": (
             "This is a portable projection of source-owned committed batch truth. It does not provide a sensor "
-            "model, interpolate between steps, manufacture unavailable channels, or make batch-only data visible "
-            "to an episode policy."
+            "model, interpolate between steps, manufacture unavailable channels, or make a batch-only control "
+            "available to an episode policy."
         ),
     }
     ####

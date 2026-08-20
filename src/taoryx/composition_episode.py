@@ -31,6 +31,8 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Literal, Protocol, cast
 
+from pydantic import BaseModel
+
 from .committed_boundary_sensor import CommittedBoundarySensor
 from .direct_wrench import DIRECT_WRENCH_NAMES, DirectWrenchProjection
 from .episode_channel_value_space import episode_channel_value_space
@@ -264,11 +266,17 @@ class EpisodeObservation:
     time_s: float
     values: Mapping[str, object]
     status: EpisodeStatus
+    standard_ecef: object | None = None
 
     def as_dict(self) -> dict[str, object]:
         """Return the normalized observation payload."""
 
-        return {"time_s": self.time_s, "values": _json_safe(self.values), "status": self.status}
+        return {
+            "time_s": self.time_s,
+            "values": _json_safe(self.values),
+            "status": self.status,
+            "standard_ecef": None if self.standard_ecef is None else _json_safe(self.standard_ecef),
+        }
         ####
 
     ####
@@ -2112,6 +2120,8 @@ def _moment_vector(wrench: Mapping[str, float]) -> list[float]:
 
 
 def _json_safe(value: object) -> object:
+    if isinstance(value, BaseModel):
+        return _json_safe(value.model_dump(mode="json", by_alias=True))
     if isinstance(value, Mapping):
         return {str(key): _json_safe(item) for key, item in value.items()}
     if isinstance(value, tuple | list):

@@ -36,8 +36,14 @@ def build_session_interface_contract(
     physical_family: str,
     claim_boundary: str,
     default_authority_profile_id: str | None = None,
+    include_batch_replay_channels: bool = False,
 ) -> tuple[VehicleInterfaceContract, tuple[EpisodeChannel, ...]]:
-    """Build one exact step-capable interface from published model metadata."""
+    """Build one exact step-capable interface from published model metadata.
+
+    ``include_batch_replay_channels`` is used only by the core read-only replay
+    adapter. It projects the selected batch channels into a session observation
+    without changing their native batch-control or live-episode claims.
+    """
 
     realization = next(item for item in model.realizations if item.id == realization_id)
     action_channels = tuple(
@@ -72,7 +78,11 @@ def build_session_interface_contract(
         item
         for item in model.output_schema.channels
         if item.availability == "guaranteed"
-        and (not item.operations or "step" in item.operations)
+        and (
+            not item.operations
+            or "step" in item.operations
+            or (include_batch_replay_channels and "batch" in item.operations)
+        )
         and (not item.compatible_fidelities or fidelity in item.compatible_fidelities)
         and (not item.compatible_realizations or realization_id in item.compatible_realizations)
     )
@@ -236,7 +246,10 @@ def _status_channel(channel: TrajectoryOutputChannelMetadata) -> InterfaceChanne
         event=channel.sampling_semantics == "event" and channel.data_type == "string",
     )
     canonical_unit = channel.canonical_unit
-    if canonical_unit is None and value_type in {"vector3", "vector4"}:
+    if canonical_unit is None and (
+        value_type in {"vector3", "vector4"}
+        or (value_type == "scalar" and channel.data_type == "float64")
+    ):
         canonical_unit = "dimensionless"
     return InterfaceChannel(
         id=channel.id,

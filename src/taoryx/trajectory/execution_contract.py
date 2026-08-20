@@ -107,7 +107,7 @@ class MissionCompositionExecutionError(RuntimeError):
         if diagnostic.severity != "error":
             raise ValueError("MissionCompositionExecutionError requires an error diagnostic")
         self.diagnostic = diagnostic
-        self.category = category
+        self.category: FailureCategory = category
         super().__init__(f"{diagnostic.code}: {diagnostic.message}")
         ####
 
@@ -1010,7 +1010,23 @@ def audit_provider_advertisement(
                 source_program_owns_step = realization.controls.status == "internally_generated" and any(
                     authority.command_owner == "source_program" and "step" in authority.operations for authority in active_authorities
                 )
-                if not step_actions and not source_program_owns_step:
+                uncontrolled_zero_action_step = realization.controls.status == "uncontrolled" and any(
+                    authority.authority == "open_loop"
+                    and authority.command_owner == "open_loop"
+                    and authority.availability == "available"
+                    and not authority.channel_ids
+                    and "step" in authority.operations
+                    for authority in active_authorities
+                )
+                core_batch_replay_step = any(
+                    item.operation == "step"
+                    and item.realization_id == realization.id
+                    and item.execution_mode == "core_batch_replay"
+                    and item.common_runner_status == "registered"
+                    for mission in model.mission_templates
+                    for item in mission.operations
+                )
+                if not step_actions and not source_program_owns_step and not uncontrolled_zero_action_step and not core_batch_replay_step:
                     model_diagnostics.append(
                         _audit_diagnostic(
                             "interactive-control-schema-missing",

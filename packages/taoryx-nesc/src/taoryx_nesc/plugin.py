@@ -137,7 +137,7 @@ def _provider() -> CatalogMissionCompositionProvider:
 
 
 def _execute_nesc_source_replay(request: VehicleBatchExecutionRequest) -> Any:
-    """Run the batch-only source replay through its family-owned runtime."""
+    """Run the batch-native source replay through its family-owned runtime."""
 
     if request.max_steps is not None:
         raise ValueError("--max-steps is not available for the NESC source-replay factory")
